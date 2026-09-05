@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tiếng Trung Dương Hữu
 
-## Getting Started
+Nền tảng học tiếng Trung theo cấp độ HSK: khóa học → bài học → lý thuyết → bài tập → kiểm tra,
+với 3 vai trò admin / giáo viên / học viên.
 
-First, run the development server:
+Ứng dụng nằm trong [remix-app/](remix-app/) (React Router 7 framework mode + Prisma + PostgreSQL).
+Thư mục gốc chỉ chứa tài liệu và cấu hình chung.
+
+## Bắt đầu
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd remix-app
+npm install
+cp .env.example .env      # điền DATABASE_URL, DIRECT_URL, SESSION_SECRET
+npx prisma db push        # dự án chưa có migration history — dùng db push
+npm run seed
+npm run dev               # http://localhost:5173
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Tài khoản sau khi seed:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Vai trò | Email | Mật khẩu |
+|---|---|---|
+| Admin | `admin@example.com` | `admin` |
+| Giáo viên | `teacher@example.com` | `123456` |
+| Học viên | `student@example.com` | `123456` |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+Chạy trong `remix-app/`:
 
-To learn more about Next.js, take a look at the following resources:
+| Lệnh | Việc |
+|---|---|
+| `npm run dev` | Dev server (Vite + HMR) |
+| `npm run build` | Build production |
+| `npm start` | Chạy bản build |
+| `npm run typecheck` | `tsc` — phải sạch trước khi commit |
+| `npm run seed` | Nạp dữ liệu mẫu (idempotent) |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Cấu trúc
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+remix-app/
+├── app/
+│   ├── routes/            # file-based routes, khai báo trong app/routes.ts
+│   ├── components/
+│   │   ├── ui/            # primitive (shadcn-style)
+│   │   ├── common/        # EmptyState, Overlay, StatCard...
+│   │   ├── layout/        # AppShell, sidebar theo vai trò
+│   │   └── lessons/blocks/# renderer cho từng dạng bài học lý thuyết
+│   ├── lib/
+│   │   ├── db.server.ts       # mọi truy vấn Prisma + logic tiến độ
+│   │   ├── session.server.ts  # cookie session, requireRole
+│   │   ├── learning-blocks.ts # zod schema + metadata các dạng bài học
+│   │   ├── word-types.ts      # từ loại (danh từ, động từ...)
+│   │   └── speech.ts          # TTS tiếng Trung (Web Speech API)
+│   └── types/
+└── prisma/                # schema.prisma + seed.ts
+```
 
-## Deploy on Vercel
+## Ghi chú
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Dạng bài học lý thuyết**: mỗi bài gồm nhiều `LearningBlock`, cấu hình riêng lưu ở cột `config Json`
+  và validate bằng zod. Hiện chỉ **Flashcard** hoạt động; Nghe câu / Từ vựng / Ngữ pháp đang là mục
+  disable "Sắp có" ở trang admin.
+- **Migration**: dự án không có migration history, dùng `prisma db push`. `migrate dev` sẽ yêu cầu reset DB.
+  Trên Windows, nếu `db push` báo `EPERM` khi ghi `query_engine-windows.dll.node` thì tắt dev server trước,
+  hoặc chạy `npx prisma db push --skip-generate` rồi `npx prisma generate` sau.
+- **Loader data**: React Router 7 serialize bằng turbo-stream, nên `Date` đi qua loader nguyên vẹn —
+  không cần `.toISOString()` và không được khai báo type là `string`.
+- Xem thêm [AGENTS.md](AGENTS.md).

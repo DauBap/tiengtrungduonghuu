@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String
+  password  String
+  role      Role      @default(student)
+  isActive  Boolean   @default(true)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  enrollments      Enrollment[]
+  progresses       LessonProgress[]
+  blockProgresses  BlockProgress[]
+}
+
+enum Role {
+  admin
+  teacher
+  student
+}
+
+// ─── Courses ─────────────────────────────────────────────────────────────────
+
+model Course {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  title       String
+  description String
+  thumbnail   String?
+  hskLevel    Int
+  status      CourseStatus @default(DRAFT)
+  order       Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  lessons     Lesson[]
+  enrollments Enrollment[]
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ─── Lessons ─────────────────────────────────────────────────────────────────
+
+model Lesson {
+  id       String @id @default(cuid())
+  courseId String
+  order    Int
+  title    String
+  subtitle String
+
+  course         Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  content        VocabItem[]
+  learningBlocks LearningBlock[]
+  exercise       Exercise?
+  test           Test?
+  progresses     LessonProgress[]
+}
+
+model VocabItem {
+  id          String  @id @default(cuid())
+  lessonId    String
+  chinese     String
+  pinyin      String
+  translation String
+  // từ loại: danh từ, động từ, tính từ... (tùy chọn)
+  wordType    WordType?
+  audioUrl    String?
+  note        String?
+  order       Int     @default(0)
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+enum WordType {
+  NOUN
+  VERB
+  ADJECTIVE
+  ADVERB
+  PRONOUN
+  NUMERAL
+  MEASURE
+  PREPOSITION
+  CONJUNCTION
+  PARTICLE
+  INTERJECTION
+  PHRASE
+}
+
+// ─── Learning blocks (phần lý thuyết) ────────────────────────────────────────
+
+enum LearningBlockType {
+  FLASHCARD
+  LISTENING
+  VOCABULARY
+  GRAMMAR
+}
+
+model LearningBlock {
+  id          String            @id @default(cuid())
+  lessonId    String
+  type        LearningBlockType
+  title       String
+  description String?
+  order       Int
+  // false = block tham khảo, không tính vào tiến độ bắt buộc
+  required    Boolean           @default(true)
+  // payload riêng cho từng type, validate bằng zod ở app layer (~/lib/learning-blocks)
+  config      Json
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  lesson     Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  progresses BlockProgress[]
+
+  @@index([lessonId, order])
+}
+
+model Exercise {
+  id       String @id @default(cuid())
+  lessonId String @unique
+  title    String
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model Test {
+  id       String @id @default(cuid())
+  lessonId String @unique
+  title    String
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+// ─── Progress ────────────────────────────────────────────────────────────────
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model LessonProgress {
+  id                  String   @id @default(cuid())
+  userId              String
+  lessonId            String
+  learningCompleted   Boolean  @default(false)
+  exerciseCompleted   Boolean  @default(false)
+  testCompleted       Boolean  @default(false)
+  updatedAt           DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+model BlockProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  blockId   String
+  completed Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  block LearningBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blockId])
+}

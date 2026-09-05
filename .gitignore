@@ -1,8 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
+node_modules/
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -13,12 +13,13 @@
 # testing
 /coverage
 
-# next.js
-/.next/
+# build output
+build/
 /out/
 
-# production
-/build
+# react-router / vite (typegen + dev cache, sinh lại được)
+.react-router/
+.vite/
 
 # misc
 .DS_Store
@@ -30,12 +31,18 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files — chỉ commit file mẫu
 .env*
+!.env.example
 
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+
+# agent config: .claude/skills được commit, còn lại là bản sao do tool sinh ra
+.claude/settings.local.json
+.agents/
+.cursor/
+.devin/
