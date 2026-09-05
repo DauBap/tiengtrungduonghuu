@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
+    "vercel-build": "node scripts/sync-db.mjs && react-router build",
+    "db:push:test": "node scripts/push-test.mjs",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "tsc",
