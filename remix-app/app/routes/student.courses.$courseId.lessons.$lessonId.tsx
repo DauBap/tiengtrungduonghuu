@@ -223,6 +223,7 @@ export default function LessonDetail() {
               activeTab={activeTab}
               onTabChange={setActiveTab}
               availableTypes={availableTypes}
+              hasTest={(lesson.test?._count.questions ?? 0) > 0}
               lessonId={lesson.id}
               courseId={lesson.courseId}
             />

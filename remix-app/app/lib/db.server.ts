@@ -48,7 +48,9 @@ export async function getLessonById(id: string) {
       },
       learningBlocks: { orderBy: { order: "asc" } },
       exercise: true,
-      test: true,
+      // Chỉ đếm câu hỏi, KHÔNG kèm `questions` — `answer`/`hint` không được
+      // xuống client trước khi học viên nộp bài kiểm tra.
+      test: { include: { _count: { select: { questions: true } } } },
       course: true,
     },
   });
@@ -119,6 +121,8 @@ export async function getLessonForAdmin(id: string) {
         include: { questions: { orderBy: { order: "asc" } } },
       },
       learningBlocks: { orderBy: { order: "asc" } },
+      // Bài kiểm tra cuối bài — hệ riêng, không phải model Exam
+      test: { include: { questions: { orderBy: { order: "asc" } } } },
       course: true,
     },
   });

@@ -211,12 +211,44 @@ model Exercise {
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 }
 
+/// Bài kiểm tra cuối bài học. Hệ RIÊNG, không liên quan model Exam — Exam là đề
+/// thi chính thức có version/snapshot và dùng kho câu hỏi chung, còn bài kiểm
+/// tra chỉ thuộc về một bài học và admin soạn ngay trong trang bài học đó.
 model Test {
   id       String @id @default(cuid())
   lessonId String @unique
   title    String
+  /// % tối thiểu để coi là đạt và đánh dấu hoàn thành bài học
+  passScore Int   @default(50)
 
-  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lesson    Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions TestQuestion[]
+}
+
+/// Câu hỏi của bài kiểm tra cuối bài. Tự chứa, không liên quan kho câu hỏi của
+/// hệ Bài thi (model Question) — bài kiểm tra không có version nên không cần
+/// snapshot; sửa câu hỏi là đổi luôn cho lượt làm sau.
+///
+/// `options` mang nghĩa khác nhau theo `type`, giống GrammarQuestion:
+///  - SINGLE_CHOICE: các lựa chọn, `answer` là nội dung lựa chọn đúng
+///  - ARRANGE: các từ theo ĐÚNG thứ tự (học viên thấy bản đã trộn), `answer` là options nối lại
+///  - FILL: rỗng, `answer` là đáp án học viên phải nhập
+model TestQuestion {
+  id      String              @id @default(cuid())
+  testId  String
+  type    GrammarQuestionType
+  prompt  String
+  options String[]            @default([])
+  answer  String
+  /// Giải thích, CHỈ hiện sau khi học viên đã nộp bài
+  hint    String?
+  /// Điểm của câu, để admin đánh trọng số câu khó
+  points  Float               @default(1)
+  order   Int                 @default(0)
+
+  test Test @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@index([testId, order])
 }
 
 // ─── Progress ────────────────────────────────────────────────────────────────
