@@ -111,7 +111,7 @@ function BlockEmpty() {
           <Inbox className="h-6 w-6" />
         </div>
       </div>
-      <p className="text-sm font-medium">Phần học này đang trống</p>
+      <p className="text-sm font-medium">Chưa có từ vựng nào</p>
       <p className="text-sm text-muted-foreground mt-1">Nội dung sẽ được bổ sung trong thời gian tới.</p>
     </div>
   );

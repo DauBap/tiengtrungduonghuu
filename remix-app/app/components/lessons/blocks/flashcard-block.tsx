@@ -122,7 +122,10 @@ export function FlashcardBlock({ config, items, isCompleted, onComplete }: Flash
       {/* Thẻ lật — bấm vào thẻ để lật */}
       <button
         type="button"
-        onClick={() => setFlipped((f) => !f)}
+        onClick={() => {
+          setFlipped((f) => !f);
+          if (config.autoSpeak && card) speak(card);
+        }}
         className="group relative block w-full [perspective:1200px]"
         aria-label={flipped ? "Xem mặt trước" : "Xem mặt sau"}
       >
