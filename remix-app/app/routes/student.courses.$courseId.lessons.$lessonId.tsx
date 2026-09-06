@@ -18,6 +18,7 @@ import { EmptyState } from "~/components/common/empty-state";
 import { BlockRenderer, isBlockLearnable, type ResolvedBlock } from "~/components/lessons/blocks/block-renderer";
 import { isLearningBlockType } from "~/lib/learning-blocks";
 import { LessonTabs } from "~/components/lessons/lesson-tabs";
+import { VocabularyTable } from "~/components/lessons/vocabulary-table";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -150,15 +151,19 @@ export default function LessonDetail() {
 
   const renderTabContent = () => {
     if (activeTab === "TEST") {
-      // Test link is handled by LessonTabs, but if somehow rendered here
       return null;
     }
 
     const blockType = activeTab as BlockType;
+
+    // Tab Từ vựng: hiển thị bảng toàn bộ từ
+    if (blockType === "VOCABULARY") {
+      return <VocabularyTable items={lesson.content} />;
+    }
+
     const blockIndex = blocks.findIndex((b) => b.type === blockType);
 
     if (blockIndex === -1) {
-      // No block of this type
       return <BlockPlaceholder />;
     }
 
