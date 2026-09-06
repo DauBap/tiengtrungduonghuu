@@ -67,6 +67,7 @@ model Lesson {
 
   course         Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   content        VocabItem[]
+  sentences      SentenceItem[]
   learningBlocks LearningBlock[]
   exercise       Exercise?
   test           Test?
@@ -101,6 +102,23 @@ enum WordType {
   PARTICLE
   INTERJECTION
   PHRASE
+}
+
+/// Câu mẫu của bài, admin soạn riêng. Dùng làm nguồn cho block Nghe câu —
+/// tách khỏi VocabItem vì câu không có từ loại và không lên thẻ flashcard.
+model SentenceItem {
+  id          String  @id @default(cuid())
+  lessonId    String
+  chinese     String
+  pinyin      String
+  translation String
+  audioUrl    String?
+  note        String?
+  order       Int     @default(0)
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId, order])
 }
 
 // ─── Learning blocks (phần lý thuyết) ────────────────────────────────────────

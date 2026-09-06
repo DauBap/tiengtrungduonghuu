@@ -3,10 +3,11 @@ import { useLoaderData, useActionData, Link, redirect } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { getLessonForAdmin } from "~/lib/db.server";
 import { prisma } from "~/lib/prisma.server";
-import { parseBlockForm } from "~/lib/block-form.server";
-import { BLOCK_META, parseFlashcardConfig, isLearningBlockType, type LearningBlockType } from "~/lib/learning-blocks";
+import { parseBlockForm, keepOwnedIds } from "~/lib/block-form.server";
+import { BLOCK_META, parseFlashcardConfig, parseListeningConfig, isLearningBlockType, type LearningBlockType } from "~/lib/learning-blocks";
 import { AppShell } from "~/components/layout/app-shell";
 import { FlashcardForm } from "~/components/admin/flashcard-form";
+import { ListeningForm } from "~/components/admin/listening-form";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
@@ -36,17 +37,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const parsed = parseBlockForm(form);
   if (!parsed.ok) return { error: parsed.error, field: parsed.field };
 
-  const config = parsed.data.config as { vocabItemIds?: string[] };
-  if (config.vocabItemIds) {
-    const valid = await prisma.vocabItem.findMany({
-      where: { lessonId, id: { in: config.vocabItemIds } },
-      select: { id: true },
-    });
-    const validIds = new Set(valid.map((v) => v.id));
-    const filtered = config.vocabItemIds.filter((id) => validIds.has(id));
-    if (filtered.length === 0) return { error: "Chọn ít nhất 1 từ vựng cho thẻ" };
-    config.vocabItemIds = filtered;
-  }
+  const guarded = await keepOwnedIds(lessonId, parsed.data.type, parsed.data.config);
+  if (!guarded.ok) return { error: guarded.error };
 
   await prisma.learningBlock.update({
     where: { id: blockId },
@@ -69,6 +61,9 @@ export default function EditLearningBlock() {
   const type = isLearningBlockType(block.type) ? (block.type as LearningBlockType) : null;
   const vocabOptions = lesson.content.map((v) => ({
     id: v.id, chinese: v.chinese, pinyin: v.pinyin, translation: v.translation, wordType: v.wordType, audioUrl: v.audioUrl,
+  }));
+  const sentenceOptions = lesson.sentences.map((s) => ({
+    id: s.id, chinese: s.chinese, pinyin: s.pinyin, translation: s.translation, audioUrl: s.audioUrl,
   }));
 
   const header = (
@@ -114,6 +109,38 @@ export default function EditLearningBlock() {
     );
   }
 
+  if (type === "LISTENING") {
+    const parsedConfig = parseListeningConfig(block.config);
+    return (
+      <AppShell user={user}>
+        <div className="space-y-6 max-w-3xl">
+          {header}
+          {parsedConfig.ok ? (
+            <ListeningForm
+              vocabOptions={vocabOptions}
+              sentenceOptions={sentenceOptions}
+              initial={{
+                title: block.title,
+                description: block.description,
+                required: block.required,
+                config: parsedConfig.data,
+              }}
+              error={actionData?.error}
+              field={actionData?.field}
+              cancelTo={backTo}
+            />
+          ) : (
+            <>
+              <ConfigWarning message={parsedConfig.error} />
+              <ListeningForm vocabOptions={vocabOptions} sentenceOptions={sentenceOptions}
+                error={actionData?.error} field={actionData?.field} cancelTo={backTo} />
+            </>
+          )}
+        </div>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell user={user}>
       <div className="space-y-6 max-w-3xl">
@@ -136,7 +163,7 @@ function ConfigWarning({ message }: { message: string }) {
   return (
     <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm text-warning flex items-start gap-2">
       <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-      <span>Cấu hình cũ không hợp lệ ({message}). Vui lòng chọn lại từ vựng và lưu.</span>
+      <span>Cấu hình cũ không hợp lệ ({message}). Vui lòng chọn lại nội dung và lưu.</span>
     </div>
   );
 }

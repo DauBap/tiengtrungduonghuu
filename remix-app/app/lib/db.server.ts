@@ -41,6 +41,7 @@ export async function getLessonById(id: string) {
     where: { id },
     include: {
       content: { orderBy: { order: "asc" } },
+      sentences: { orderBy: { order: "asc" } },
       learningBlocks: { orderBy: { order: "asc" } },
       exercise: true,
       test: true,
@@ -108,6 +109,7 @@ export async function getLessonForAdmin(id: string) {
     where: { id },
     include: {
       content: { orderBy: { order: "asc" } },
+      sentences: { orderBy: { order: "asc" } },
       learningBlocks: { orderBy: { order: "asc" } },
       course: true,
     },

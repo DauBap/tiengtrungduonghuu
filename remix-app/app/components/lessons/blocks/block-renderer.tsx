@@ -1,7 +1,8 @@
 import { useFetcher } from "react-router";
 import { BlockShell } from "./block-shell";
 import { FlashcardBlock, type FlashcardVocab } from "./flashcard-block";
-import { parseFlashcardConfig, BLOCK_META, type LearningBlockType } from "~/lib/learning-blocks";
+import { ListeningBlock, type ListeningQuestion } from "./listening-block";
+import { parseFlashcardConfig, parseListeningConfig, BLOCK_META, type LearningBlockType } from "~/lib/learning-blocks";
 import type { ProgressStatus } from "~/types/progress";
 import { Construction, Lock, Inbox } from "lucide-react";
 
@@ -15,6 +16,8 @@ export interface ResolvedBlock {
   order: number;
   config: unknown;
   vocabItems: FlashcardVocab[];
+  /** Câu mẫu của bài, chỉ block Nghe câu dùng tới */
+  sentenceItems: ListeningQuestion[];
 }
 
 /**
@@ -23,10 +26,37 @@ export interface ResolvedBlock {
  * quyết định hiện thẻ hay hiện trạng thái trống. Hai nơi phải dùng chung một
  * hàm, nếu lệch nhau học viên sẽ thấy block "bắt buộc" mà không thể hoàn thành.
  */
-export function isBlockLearnable(block: Pick<ResolvedBlock, "type" | "config" | "vocabItems">): boolean {
-  if (block.type !== "FLASHCARD") return false; // các dạng khác chưa làm
-  const parsed = parseFlashcardConfig(block.config);
-  return parsed.ok && block.vocabItems.length > 0;
+export function isBlockLearnable(
+  block: Pick<ResolvedBlock, "type" | "config" | "vocabItems" | "sentenceItems">
+): boolean {
+  if (block.type === "FLASHCARD") {
+    const parsed = parseFlashcardConfig(block.config);
+    return parsed.ok && block.vocabItems.length > 0;
+  }
+  if (block.type === "LISTENING") {
+    const parsed = parseListeningConfig(block.config);
+    if (!parsed.ok) return false;
+    return listeningQuestions(block, parsed.data.source).length > 0;
+  }
+  return false; // các dạng còn lại chưa làm
+}
+
+/**
+ * Câu hỏi cho block Nghe câu, theo nguồn admin đã chọn.
+ * Từ vựng và câu mẫu ở hai bảng khác nhau nên phải chọn theo `source`.
+ */
+function listeningQuestions(
+  block: Pick<ResolvedBlock, "vocabItems" | "sentenceItems">,
+  source: "vocab" | "sentence"
+): ListeningQuestion[] {
+  if (source === "sentence") return block.sentenceItems;
+  return block.vocabItems.map((v) => ({
+    id: v.id,
+    chinese: v.chinese,
+    pinyin: v.pinyin,
+    translation: v.translation,
+    audioUrl: v.audioUrl,
+  }));
 }
 
 export function BlockRenderer({ block, status }: { block: ResolvedBlock; status: ProgressStatus }) {
@@ -82,6 +112,38 @@ export function BlockRenderer({ block, status }: { block: ResolvedBlock; status:
     return (
       <BlockShell {...shellProps}>
         <FlashcardBlock config={parsed.data} items={items} isCompleted={isCompleted} onComplete={markComplete} />
+      </BlockShell>
+    );
+  }
+
+  if (block.type === "LISTENING") {
+    const parsed = parseListeningConfig(block.config);
+    if (!parsed.ok) {
+      return (
+        <BlockShell {...shellProps}>
+          <BlockEmpty />
+        </BlockShell>
+      );
+    }
+
+    // Sắp câu theo đúng thứ tự admin đã chọn trong config
+    const chosenIds = parsed.data.source === "sentence" ? parsed.data.sentenceItemIds : parsed.data.vocabItemIds;
+    const order = new Map(chosenIds.map((id, i) => [id, i]));
+    const items = listeningQuestions(block, parsed.data.source)
+      .filter((q) => order.has(q.id))
+      .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+
+    if (items.length === 0) {
+      return (
+        <BlockShell {...shellProps}>
+          <BlockEmpty />
+        </BlockShell>
+      );
+    }
+
+    return (
+      <BlockShell {...shellProps}>
+        <ListeningBlock config={parsed.data} questions={items} isCompleted={isCompleted} onComplete={markComplete} />
       </BlockShell>
     );
   }

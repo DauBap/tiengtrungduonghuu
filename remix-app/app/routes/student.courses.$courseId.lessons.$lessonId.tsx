@@ -43,12 +43,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const progress = await getLessonProgress(user.id, lesson.id);
   const lessonStatus = computeLessonStatus(progress);
 
+  // Resolve nội dung cho từng block ngay ở loader — component không tự query.
+  // Nghe câu có thể lấy nguồn từ kho câu nên phải kèm cả sentences.
   const vocabById = new Map(lesson.content.map((v) => [v.id, v]));
+  const sentenceById = new Map(lesson.sentences.map((s) => [s.id, s]));
   const allBlocks: ResolvedBlock[] = lesson.learningBlocks
     .filter((b) => isLearningBlockType(b.type))
     .map((b) => {
-      const config = b.config as { vocabItemIds?: unknown };
-      const ids = Array.isArray(config?.vocabItemIds) ? (config.vocabItemIds as string[]) : [];
+      const config = b.config as { vocabItemIds?: unknown; sentenceItemIds?: unknown };
+      const vocabIds = Array.isArray(config?.vocabItemIds) ? (config.vocabItemIds as string[]) : [];
+      const sentenceIds = Array.isArray(config?.sentenceItemIds) ? (config.sentenceItemIds as string[]) : [];
       return {
         id: b.id,
         type: b.type as ResolvedBlock["type"],
@@ -57,7 +61,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         required: b.required,
         order: b.order,
         config: b.config,
-        vocabItems: ids
+        vocabItems: vocabIds
           .map((id) => vocabById.get(id))
           .filter((v): v is NonNullable<typeof v> => Boolean(v))
           .map((v) => ({
@@ -68,6 +72,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
             wordType: v.wordType,
             audioUrl: v.audioUrl,
             note: v.note,
+          })),
+        sentenceItems: sentenceIds
+          .map((id) => sentenceById.get(id))
+          .filter((s): s is NonNullable<typeof s> => Boolean(s))
+          .map((s) => ({
+            id: s.id,
+            chinese: s.chinese,
+            pinyin: s.pinyin,
+            translation: s.translation,
+            audioUrl: s.audioUrl,
           })),
       };
     });

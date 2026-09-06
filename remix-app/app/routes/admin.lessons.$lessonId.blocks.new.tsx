@@ -4,10 +4,11 @@ import { useLoaderData, useActionData, Link, redirect } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { getLessonForAdmin } from "~/lib/db.server";
 import { prisma } from "~/lib/prisma.server";
-import { parseBlockForm } from "~/lib/block-form.server";
+import { parseBlockForm, keepOwnedIds } from "~/lib/block-form.server";
 import { BLOCK_META, BLOCK_TYPES, type LearningBlockType } from "~/lib/learning-blocks";
 import { AppShell } from "~/components/layout/app-shell";
 import { FlashcardForm } from "~/components/admin/flashcard-form";
+import { ListeningForm } from "~/components/admin/listening-form";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -18,8 +19,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
   const lesson = await getLessonForAdmin(params.lessonId!);
   if (!lesson) throw new Response("Không tìm thấy bài học", { status: 404 });
-  if (lesson.content.length === 0) {
-    // Không cho tạo block khi kho từ vựng trống
+  if (lesson.content.length === 0 && lesson.sentences.length === 0) {
+    // Chưa có từ vựng lẫn câu mẫu thì không dạng nào soạn được
     throw redirect(`/admin/lessons/${lesson.id}`);
   }
   return { user, lesson };
@@ -33,18 +34,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const parsed = parseBlockForm(form);
   if (!parsed.ok) return { error: parsed.error, field: parsed.field };
 
-  // Chỉ nhận từ vựng thuộc đúng bài học này
-  const config = parsed.data.config as { vocabItemIds?: string[] };
-  if (config.vocabItemIds) {
-    const valid = await prisma.vocabItem.findMany({
-      where: { lessonId, id: { in: config.vocabItemIds } },
-      select: { id: true },
-    });
-    const validIds = new Set(valid.map((v) => v.id));
-    const filtered = config.vocabItemIds.filter((id) => validIds.has(id));
-    if (filtered.length === 0) return { error: "Chọn ít nhất 1 từ vựng cho thẻ" };
-    config.vocabItemIds = filtered;
-  }
+  // Chỉ nhận nội dung thuộc đúng bài học này
+  const guarded = await keepOwnedIds(lessonId, parsed.data.type, parsed.data.config);
+  if (!guarded.ok) return { error: guarded.error };
 
   const last = await prisma.learningBlock.findFirst({
     where: { lessonId }, orderBy: { order: "desc" }, select: { order: true },
@@ -73,6 +65,9 @@ export default function NewLearningBlock() {
 
   const vocabOptions = lesson.content.map((v) => ({
     id: v.id, chinese: v.chinese, pinyin: v.pinyin, translation: v.translation, wordType: v.wordType, audioUrl: v.audioUrl,
+  }));
+  const sentenceOptions = lesson.sentences.map((s) => ({
+    id: s.id, chinese: s.chinese, pinyin: s.pinyin, translation: s.translation, audioUrl: s.audioUrl,
   }));
 
   return (
@@ -126,6 +121,10 @@ export default function NewLearningBlock() {
             </div>
             {type === "FLASHCARD" && (
               <FlashcardForm vocabOptions={vocabOptions} error={actionData?.error} field={actionData?.field} cancelTo={backTo} />
+            )}
+            {type === "LISTENING" && (
+              <ListeningForm vocabOptions={vocabOptions} sentenceOptions={sentenceOptions}
+                error={actionData?.error} field={actionData?.field} cancelTo={backTo} />
             )}
           </>
         )}

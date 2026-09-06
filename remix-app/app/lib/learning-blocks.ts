@@ -25,10 +25,27 @@ export const flashcardConfigSchema = z.object({
   autoSpeak: z.boolean().default(false),
 });
 
-/** Placeholder — sẽ hoàn thiện ở đợt sau */
-export const listeningConfigSchema = z.object({
-  vocabItemIds: z.array(z.string()).min(1, "Chọn ít nhất 1 từ vựng"),
-});
+/**
+ * Nghe câu: phát audio, học viên nhập lại nội dung vừa nghe.
+ *
+ * Nguồn câu hỏi lấy từ kho từ vựng (`vocab`) hoặc kho câu mẫu (`sentence`) của
+ * bài — hai kho khác bảng nên không gộp id chung một mảng được.
+ * `answerMode` quyết định học viên nhập chữ Hán hay pinyin.
+ */
+export const listeningConfigSchema = z
+  .object({
+    source: z.enum(["vocab", "sentence"]).default("vocab"),
+    vocabItemIds: z.array(z.string()).default([]),
+    sentenceItemIds: z.array(z.string()).default([]),
+    answerMode: z.enum(["chinese", "pinyin"]).default("chinese"),
+    /** Cho nghe lại bao nhiêu lần mỗi câu; 0 = không giới hạn */
+    maxReplays: z.number().int().min(0).default(0),
+    shuffle: z.boolean().default(false),
+  })
+  .refine(
+    (c) => (c.source === "vocab" ? c.vocabItemIds.length > 0 : c.sentenceItemIds.length > 0),
+    { message: "Chọn ít nhất 1 câu hỏi cho phần nghe" }
+  );
 
 /** Placeholder — sẽ hoàn thiện ở đợt sau */
 export const vocabularyConfigSchema = z.object({
@@ -81,9 +98,9 @@ export const BLOCK_META: Record<LearningBlockType, BlockMeta> = {
   },
   LISTENING: {
     label: "Nghe câu",
-    description: "Nghe phát âm và kiểm tra khả năng nhận biết.",
+    description: "Nghe phát âm rồi nhập lại nội dung để kiểm tra.",
     icon: Headphones,
-    implemented: false,
+    implemented: true,
     defaultTitle: "Luyện nghe",
   },
   VOCABULARY: {
@@ -123,6 +140,12 @@ export function parseBlockConfig(type: LearningBlockType, config: unknown): Pars
 
 export function parseFlashcardConfig(config: unknown): ParseResult<FlashcardConfig> {
   const result = flashcardConfigSchema.safeParse(config);
+  if (result.success) return { ok: true, data: result.data };
+  return { ok: false, error: result.error.issues[0]?.message ?? "Cấu hình không hợp lệ" };
+}
+
+export function parseListeningConfig(config: unknown): ParseResult<ListeningConfig> {
+  const result = listeningConfigSchema.safeParse(config);
   if (result.success) return { ok: true, data: result.data };
   return { ok: false, error: result.error.issues[0]?.message ?? "Cấu hình không hợp lệ" };
 }
