@@ -1,5 +1,8 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Volume2 } from "lucide-react";
+import { speakChinese } from "~/lib/speech";
 import { WORD_TYPE_META, type WordType } from "~/lib/word-types";
 
 interface VocabularyItem {
@@ -8,6 +11,7 @@ interface VocabularyItem {
   pinyin: string;
   translation: string;
   wordType: WordType | null;
+  audioUrl: string | null;
 }
 
 interface VocabularyTableProps {
@@ -37,7 +41,22 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
         <TableBody>
           {items.map((item) => (
             <TableRow key={item.id}>
-              <TableCell className="font-semibold text-lg">{item.chinese}</TableCell>
+              <TableCell className="font-semibold text-lg">
+                <div className="flex items-center gap-2">
+                  <span>{item.chinese}</span>
+                  {item.audioUrl && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => speakChinese(item.chinese, item.audioUrl)}
+                      title="Nghe phát âm"
+                    >
+                      <Volume2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </TableCell>
               <TableCell className="font-mono text-sm text-primary">{item.pinyin}</TableCell>
               <TableCell>
                 {item.wordType ? (
