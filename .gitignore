@@ -41,6 +41,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# script kiểm tra tay bằng Playwright — hardcode ID/localhost, chỉ dùng cục bộ
+check.mjs
+
 # agent config: .claude/skills được commit, còn lại là bản sao do tool sinh ra
 .claude/settings.local.json
 .agents/

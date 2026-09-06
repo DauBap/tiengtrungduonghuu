@@ -8,6 +8,10 @@
     "lib": ["es2022", "DOM", "DOM.Iterable"],
     "types": ["node", "@types/node"],
     "isolatedModules": true,
+    // Vite lo phần biên dịch; `tsc` ở đây chỉ để kiểm tra kiểu. Không có
+    // noEmit thì nó rải file .js cạnh từng .tsx, và Vite resolve .js trước
+    // .tsx nên dev server chạy bản cũ rồi lỗi module không tìm thấy.
+    "noEmit": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
     "module": "ESNext",
