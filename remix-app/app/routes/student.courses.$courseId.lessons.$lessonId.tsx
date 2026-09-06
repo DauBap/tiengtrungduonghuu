@@ -147,6 +147,10 @@ export default function LessonDetail() {
   });
 
   const blockTypes = new Set(blocksByType.keys());
+  // Tab Từ vựng luôn enable nếu bài có vocab
+  if (lesson.content.length > 0) {
+    blockTypes.add("VOCABULARY");
+  }
   const isEmptyLesson = lesson.content.length === 0 && !blocks.some(isBlockLearnable);
 
   const renderTabContent = () => {
