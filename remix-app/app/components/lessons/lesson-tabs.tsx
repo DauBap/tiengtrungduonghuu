@@ -53,7 +53,7 @@ export function LessonTabs({ activeTab, onTabChange, availableTypes, lessonId, c
           className={cn(baseTab, "border-transparent text-muted-foreground hover:text-foreground hover:border-border")}
         >
           <ClipboardCheck className="h-4 w-4" />
-          Bài thi
+          Kiểm tra
         </Link>
       </div>
     </div>

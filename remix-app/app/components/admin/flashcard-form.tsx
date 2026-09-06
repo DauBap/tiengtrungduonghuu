@@ -211,8 +211,8 @@ export function FlashcardForm({ vocabOptions, initial, error, field, cancelTo }:
             <ToggleRow name="shuffle" label="Trộn thứ tự thẻ"
               description="Mỗi lượt học thẻ xuất hiện theo thứ tự khác nhau."
               checked={shuffle} onChange={setShuffle} controlled />
-            <ToggleRow name="autoSpeak" label="Tự động đọc khi mở thẻ"
-              description="Phát âm ngay khi chuyển sang thẻ mới."
+            <ToggleRow name="autoSpeak" label="Tự động đọc khi chuyển thẻ"
+              description="Phát âm khi học viên chuyển sang thẻ khác. Thẻ đầu tiên không tự đọc — bấm vào thẻ hoặc nút loa mới phát."
               checked={autoSpeak} onChange={setAutoSpeak} controlled />
           </div>
         </CardContent>

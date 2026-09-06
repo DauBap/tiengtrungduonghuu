@@ -42,6 +42,10 @@ export async function getLessonById(id: string) {
     include: {
       content: { orderBy: { order: "asc" } },
       sentences: { orderBy: { order: "asc" } },
+      grammarSections: {
+        orderBy: { order: "asc" },
+        include: { questions: { orderBy: { order: "asc" } } },
+      },
       learningBlocks: { orderBy: { order: "asc" } },
       exercise: true,
       test: true,
@@ -110,6 +114,10 @@ export async function getLessonForAdmin(id: string) {
     include: {
       content: { orderBy: { order: "asc" } },
       sentences: { orderBy: { order: "asc" } },
+      grammarSections: {
+        orderBy: { order: "asc" },
+        include: { questions: { orderBy: { order: "asc" } } },
+      },
       learningBlocks: { orderBy: { order: "asc" } },
       course: true,
     },

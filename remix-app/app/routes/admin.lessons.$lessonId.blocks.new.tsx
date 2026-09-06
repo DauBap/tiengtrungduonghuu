@@ -87,7 +87,8 @@ export default function NewLearningBlock() {
               <CardTitle className="text-base">Chọn dạng bài học</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-2">
-              {BLOCK_TYPES.map((t) => {
+              {/* Từ vựng và Ngữ pháp soạn thẳng ở trang bài học, không qua block */}
+              {BLOCK_TYPES.filter((t) => BLOCK_META[t].source === "block").map((t) => {
                 const meta = BLOCK_META[t];
                 const Icon = meta.icon;
                 return (

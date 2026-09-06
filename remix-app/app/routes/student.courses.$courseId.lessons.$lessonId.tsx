@@ -19,6 +19,7 @@ import { BlockRenderer, isBlockLearnable, type ResolvedBlock } from "~/component
 import { isLearningBlockType, BLOCK_META, type LearningBlockType } from "~/lib/learning-blocks";
 import { LessonTabs } from "~/components/lessons/lesson-tabs";
 import { VocabularyTable } from "~/components/lessons/vocabulary-table";
+import { GrammarSection } from "~/components/lessons/grammar-section";
 import { Button } from "~/components/ui/button";
 import { ArrowLeft, BookOpen, Construction } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
@@ -159,13 +160,30 @@ export default function LessonDetail() {
   const availableTypes = new Set(blocks.map((b) => b.type));
   // Tab Từ vựng dựa vào kho từ của bài chứ không cần admin tạo block riêng.
   if (lesson.content.length > 0) availableTypes.add("VOCABULARY");
+  // Ngữ pháp cũng vậy — đọc thẳng các section của bài.
+  if (lesson.grammarSections.length > 0) availableTypes.add("GRAMMAR");
 
-  const isEmptyLesson = lesson.content.length === 0 && !blocks.some(isBlockLearnable);
+  const isEmptyLesson =
+    lesson.content.length === 0 &&
+    lesson.grammarSections.length === 0 &&
+    !blocks.some(isBlockLearnable);
 
   const renderTabContent = () => {
     // Từ vựng đọc trực tiếp kho từ của bài, không qua block.
     if (activeTab === "VOCABULARY") {
       return <VocabularyTable items={lesson.content} />;
+    }
+
+    // Ngữ pháp cũng đọc trực tiếp từ bài, mỗi section một card.
+    if (activeTab === "GRAMMAR") {
+      if (lesson.grammarSections.length === 0) return <BlockPlaceholder type="GRAMMAR" />;
+      return (
+        <div className="space-y-4 max-w-3xl mx-auto">
+          {lesson.grammarSections.map((section) => (
+            <GrammarSection key={section.id} section={section} />
+          ))}
+        </div>
+      );
     }
 
     const blockIndex = blocks.findIndex((b) => b.type === activeTab);

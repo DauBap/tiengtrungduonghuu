@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Overlay } from "~/components/common/overlay";
 import {
   ArrowLeft, Plus, Pencil, Trash2, X, Loader2, ChevronUp, ChevronDown,
-  Volume2, BookOpen, Layers, AlertTriangle, Headphones,
+  Volume2, BookOpen, Layers, AlertTriangle, Headphones, GraduationCap,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { speakChinese } from "~/lib/speech";
@@ -599,6 +599,51 @@ export default function AdminLessonDetail() {
                         </Button>
                       </div>
                     </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Ngữ pháp */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base">
+                    Ngữ pháp <span className="text-sm font-normal text-muted-foreground">({lesson.grammarSections.length})</span>
+                  </CardTitle>
+                  <CardDescription>Học viên xem ở tab Ngữ pháp, không cần tạo dạng bài học.</CardDescription>
+                </div>
+                <Button size="sm" variant="outline" asChild>
+                  <Link to={`/admin/lessons/${lesson.id}/grammar`}>
+                    <GraduationCap className="h-4 w-4 mr-1.5" />Quản lý ngữ pháp
+                  </Link>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {lesson.grammarSections.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-8 text-center">
+                  <GraduationCap className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm font-medium">Chưa có phần ngữ pháp nào</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Mỗi phần gồm giải thích, công thức, ví dụ và câu hỏi luyện tập.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {lesson.grammarSections.map((s, i) => (
+                    <Link key={s.id} to={`/admin/lessons/${lesson.id}/grammar/${s.id}`}
+                      className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+                      <span className="font-mono text-xs text-muted-foreground tabular-nums w-5 text-center">{i + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{s.title}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {s.questions.length > 0 ? `${s.questions.length} câu luyện tập` : "Chưa có câu luyện tập"}
+                        </p>
+                      </div>
+                    </Link>
                   ))}
                 </div>
               )}

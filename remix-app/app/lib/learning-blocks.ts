@@ -47,12 +47,15 @@ export const listeningConfigSchema = z
     { message: "Chọn ít nhất 1 câu hỏi cho phần nghe" }
   );
 
-/** Placeholder — sẽ hoàn thiện ở đợt sau */
+/**
+ * Từ vựng và Ngữ pháp lấy nội dung thẳng từ bài học (`BlockMeta.source: "lesson"`)
+ * nên không có block nào mang config hai dạng này. Hai schema dưới đây chỉ tồn
+ * tại để `BLOCK_CONFIG_SCHEMAS` phủ đủ mọi LearningBlockType.
+ */
 export const vocabularyConfigSchema = z.object({
   vocabItemIds: z.array(z.string()).min(1, "Chọn ít nhất 1 từ vựng"),
 });
 
-/** Placeholder — sẽ hoàn thiện ở đợt sau */
 export const grammarConfigSchema = z.object({
   points: z
     .array(
@@ -85,6 +88,13 @@ export interface BlockMeta {
   icon: React.ComponentType<{ className?: string }>;
   /** false = admin thấy nhưng chưa chọn được ("Sắp có") */
   implemented: boolean;
+  /**
+   * Nội dung dạng này đến từ đâu:
+   *  - "block": admin tạo LearningBlock rồi chọn nội dung trong `config`
+   *  - "lesson": đọc thẳng từ bài học (kho từ vựng, các section ngữ pháp),
+   *    không cần tạo block — nên cũng không hiện trong picker "Thêm dạng bài học"
+   */
+  source: "block" | "lesson";
   defaultTitle: string;
 }
 
@@ -94,6 +104,7 @@ export const BLOCK_META: Record<LearningBlockType, BlockMeta> = {
     description: "Thẻ lật hai mặt để ghi nhớ từ vựng.",
     icon: Layers,
     implemented: true,
+    source: "block",
     defaultTitle: "Flashcard từ vựng",
   },
   LISTENING: {
@@ -101,20 +112,23 @@ export const BLOCK_META: Record<LearningBlockType, BlockMeta> = {
     description: "Nghe phát âm rồi nhập lại nội dung để kiểm tra.",
     icon: Headphones,
     implemented: true,
+    source: "block",
     defaultTitle: "Luyện nghe",
   },
   VOCABULARY: {
     label: "Từ vựng",
     description: "Danh sách từ vựng kèm pinyin và nghĩa.",
     icon: BookOpen,
-    implemented: false,
+    implemented: true,
+    source: "lesson",
     defaultTitle: "Danh sách từ vựng",
   },
   GRAMMAR: {
     label: "Ngữ pháp",
-    description: "Giải thích cấu trúc ngữ pháp kèm ví dụ.",
+    description: "Giải thích cấu trúc ngữ pháp kèm ví dụ và luyện tập.",
     icon: GraduationCap,
-    implemented: false,
+    implemented: true,
+    source: "lesson",
     defaultTitle: "Điểm ngữ pháp",
   },
 };

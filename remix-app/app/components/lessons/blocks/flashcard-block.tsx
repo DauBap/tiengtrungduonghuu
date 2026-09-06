@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
@@ -58,14 +58,25 @@ export function FlashcardBlock({ config, items, isCompleted, onComplete }: Flash
     []
   );
 
-  // Tự đọc khi mở thẻ mới nếu admin bật autoSpeak
+  // Chỉ phát tiếng sau khi học viên đã bấm gì đó. Vào tab là đọc ngay thì vừa
+  // làm học viên giật mình, vừa hay bị trình duyệt chặn vì chưa có user gesture.
+  const interacted = useRef(false);
+  // Thẻ đã đọc lần gần nhất. Chốt theo id vì `cards` được tính lại mỗi lần
+  // loader revalidate — khi đó `card` là object mới nhưng vẫn là thẻ cũ, không
+  // được đọc lại.
+  const lastSpokenId = useRef<string | null>(null);
+
+  // Tự đọc khi CHUYỂN sang thẻ mới nếu admin bật autoSpeak — không đọc thẻ đầu
   useEffect(() => {
-    if (config.autoSpeak && card) speak(card);
+    if (!card || lastSpokenId.current === card.id) return;
+    lastSpokenId.current = card.id;
+    if (config.autoSpeak && interacted.current) speak(card);
   }, [card, config.autoSpeak, speak]);
 
   const goTo = useCallback(
     (next: number) => {
       if (next < 0 || next >= cards.length) return;
+      interacted.current = true;
       setIndex(next);
       setFlipped(false);
     },
@@ -77,6 +88,16 @@ export function FlashcardBlock({ config, items, isCompleted, onComplete }: Flash
     goTo(randomIndex);
   }, [cards.length, goTo]);
 
+  /**
+   * Lật thẻ. Đây là hành động chủ động của học viên nên luôn phát tiếng, không
+   * phụ thuộc `autoSpeak` — toggle đó chỉ nói về việc tự đọc khi chuyển thẻ.
+   */
+  const flip = useCallback(() => {
+    interacted.current = true;
+    setFlipped((f) => !f);
+    if (card) speak(card);
+  }, [card, speak]);
+
   const markKnown = useCallback(() => {
     if (!card) return;
     setKnown((prev) => new Set(prev).add(card.id));
@@ -84,6 +105,7 @@ export function FlashcardBlock({ config, items, isCompleted, onComplete }: Flash
   }, [card, isLast, index, goTo]);
 
   const restart = () => {
+    interacted.current = true;
     setKnown(new Set());
     setIndex(0);
     setFlipped(false);
@@ -97,11 +119,11 @@ export function FlashcardBlock({ config, items, isCompleted, onComplete }: Flash
       if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
       if (e.key === "ArrowLeft") { e.preventDefault(); goTo(index - 1); }
       else if (e.key === "ArrowRight") { e.preventDefault(); goTo(index + 1); }
-      else if (e.key === " " || e.key === "Enter") { e.preventDefault(); setFlipped((f) => !f); }
+      else if (e.key === " " || e.key === "Enter") { e.preventDefault(); flip(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [index, goTo]);
+  }, [index, goTo, flip]);
 
   if (!card) {
     return (
@@ -124,13 +146,10 @@ export function FlashcardBlock({ config, items, isCompleted, onComplete }: Flash
         </span>
       </div>
 
-      {/* Thẻ lật — bấm vào thẻ để lật */}
+      {/* Thẻ lật — bấm vào thẻ để lật, đồng thời phát âm */}
       <button
         type="button"
-        onClick={() => {
-          setFlipped((f) => !f);
-          if (config.autoSpeak && card) speak(card);
-        }}
+        onClick={flip}
         className="group relative block w-full [perspective:1200px]"
         aria-label={flipped ? "Xem mặt trước" : "Xem mặt sau"}
       >
@@ -170,14 +189,16 @@ export function FlashcardBlock({ config, items, isCompleted, onComplete }: Flash
 
         <div className="flex gap-2">
           {speechReady && (
-            <Button variant="ghost" size="sm" onClick={() => speak(card)} title="Nghe phát âm">
+            <Button variant="ghost" size="sm" title="Nghe phát âm"
+              className="text-primary hover:bg-primary/10 hover:text-primary"
+              onClick={() => { interacted.current = true; speak(card); }}>
               <Volume2 className="h-4 w-4" />
             </Button>
           )}
           <Button variant="ghost" size="sm" onClick={goToRandom} title="Nhảy tới thẻ ngẫu nhiên">
             <Shuffle className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setFlipped((f) => !f)} title="Lật thẻ">
+          <Button variant="ghost" size="sm" onClick={flip} title="Lật thẻ">
             <RotateCcw className="h-4 w-4" />
           </Button>
           <Button
