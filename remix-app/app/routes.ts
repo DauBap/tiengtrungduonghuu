@@ -17,6 +17,20 @@ export default [
     route("lessons/:lessonId/blocks/:blockId/edit", "routes/admin.lessons.$lessonId.blocks.$blockId.edit.tsx"),
     route("accounts", "routes/admin.accounts.tsx"),
 
+    // Bài thi
+    route("question-bank", "routes/admin.question-bank._index.tsx"),
+    route("exams", "routes/admin.exams._index.tsx"),
+    route("exams/new", "routes/admin.exams.new.tsx"),
+    // Layout 6 tab: route con render trong <Outlet/> của admin.exams.$examId.tsx
+    route("exams/:examId", "routes/admin.exams.$examId.tsx", [
+      index("routes/admin.exams.$examId._index.tsx"),
+      route("structure", "routes/admin.exams.$examId.structure.tsx"),
+      route("questions", "routes/admin.exams.$examId.questions.tsx"),
+      route("settings", "routes/admin.exams.$examId.settings.tsx"),
+      route("results", "routes/admin.exams.$examId.results.tsx"),
+      route("preview", "routes/admin.exams.$examId.preview.tsx"),
+    ]),
+
     // Các mục đã có menu, nội dung chi tiết bổ sung sau
     route("staff", "routes/admin.staff.tsx"),
     route("teachers", "routes/admin.teachers.tsx"),

@@ -24,6 +24,9 @@ model User {
   enrollments      Enrollment[]
   progresses       LessonProgress[]
   blockProgresses  BlockProgress[]
+  examAttempts     ExamAttempt[]
+  authoredExams     Exam[]     @relation("ExamAuthor")
+  authoredQuestions Question[] @relation("QuestionAuthor")
 }
 
 enum Role {
@@ -48,6 +51,8 @@ model Course {
 
   lessons     Lesson[]
   enrollments Enrollment[]
+  exams            Exam[]
+  examAccessRules  ExamAccessRule[]
 }
 
 enum CourseStatus {
@@ -65,15 +70,16 @@ model Lesson {
   title    String
   subtitle String
 
-  course         Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  content        VocabItem[]
-  sentences      SentenceItem[]
-  learningBlocks LearningBlock[]
+  course          Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  content         VocabItem[]
+  sentences       SentenceItem[]
+  grammarSections GrammarSection[]
+  learningBlocks  LearningBlock[]
   exercise       Exercise?
   test           Test?
   progresses     LessonProgress[]
+  exams          Exam[]
 }
-
 model VocabItem {
   id          String  @id @default(cuid())
   lessonId    String
@@ -119,6 +125,53 @@ model SentenceItem {
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@index([lessonId, order])
+}
+
+// ─── Ngữ pháp ────────────────────────────────────────────────────────────────
+
+enum GrammarQuestionType {
+  SINGLE_CHOICE
+  ARRANGE
+  FILL
+}
+
+/// Một điểm ngữ pháp của bài. Bốn field nội dung đều tùy chọn — field trống
+/// thì phía học viên ẩn luôn, không hiện nhãn suông.
+model GrammarSection {
+  id          String  @id @default(cuid())
+  lessonId    String
+  title       String
+  explanation String?
+  formula     String?
+  examples    String?
+  note        String?
+  order       Int     @default(0)
+
+  lesson    Lesson            @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions GrammarQuestion[]
+
+  @@index([lessonId, order])
+}
+
+/// Câu hỏi luyện tập của một section.
+/// `options` mang nghĩa khác nhau theo `type`:
+///  - SINGLE_CHOICE: các lựa chọn, `answer` là nội dung lựa chọn đúng
+///  - ARRANGE: các từ theo ĐÚNG thứ tự (học viên thấy bản đã trộn), `answer` là options nối lại
+///  - FILL: rỗng, `answer` là đáp án học viên phải nhập
+model GrammarQuestion {
+  id        String              @id @default(cuid())
+  sectionId String
+  type      GrammarQuestionType
+  prompt    String
+  options   String[]            @default([])
+  answer    String
+  /// Giải thích hiện ra sau khi bấm "Xem đáp án"
+  hint      String?
+  order     Int                 @default(0)
+
+  section GrammarSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId, order])
 }
 
 // ─── Learning blocks (phần lý thuyết) ────────────────────────────────────────
@@ -206,4 +259,265 @@ model BlockProgress {
   block LearningBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
 
   @@unique([userId, blockId])
+}
+
+// ─── Bài thi ─────────────────────────────────────────────────────────────────
+//
+// Toàn bộ cấu hình do admin đặt từ UI, không hard-code theo tên đề hay tên phần.
+//
+// Ba điểm thiết kế cần giữ khi sửa về sau:
+//
+//  1. `ExamAttempt` trỏ tới `ExamVersion`, KHÔNG trỏ tới `Exam`. Sửa đề đã
+//     publish thì tạo version mới, lượt thi cũ vẫn trỏ version cũ.
+//  2. `ExamQuestion.snapshot` đóng băng nội dung câu hỏi lúc publish. Chỉ
+//     `examVersionId` là chưa đủ: câu hỏi nằm trong kho dùng chung, admin sửa
+//     trong kho là lượt thi cũ đổi nghĩa. Đề đã publish render và chấm CHỈ từ
+//     snapshot.
+//  3. Setting nằm ở cột Json validate bằng zod (~/lib/exams), theo đúng lối
+//     `LearningBlock.config`. Ba tầng exam → section → question, tầng dưới
+//     override tầng trên, merge ở `resolveSettings()`.
+
+/// Trạng thái vòng đời của đề và của từng version. Cùng bộ giá trị với
+/// CourseStatus nhưng để enum riêng — hai vòng đời không liên quan nhau.
+enum ExamStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+/// Dạng câu hỏi. Thêm dạng mới = thêm giá trị ở đây + entry trong
+/// QUESTION_TYPE_META + grader + renderer. Không cần đổi cấu trúc bảng:
+/// FILL_BLANK / ORDERING / MATCHING / SPEAKING / WRITING đều biểu diễn được
+/// bằng QuestionOption[] cộng Question.payload.
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  LISTENING
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  GRADED
+  EXPIRED
+}
+
+enum ExamAccessType {
+  PUBLIC
+  AUTHENTICATED
+  ENROLLED
+  COURSE
+  CLASS
+  USERS
+}
+
+/// Đề thi — phần vỏ ổn định, không chứa nội dung. Nội dung nằm ở ExamVersion.
+model Exam {
+  id          String     @id @default(cuid())
+  code        String     @unique
+  title       String
+  description String?
+  status      ExamStatus @default(DRAFT)
+  /// Gắn tùy chọn: có lessonId thì tab "Bài thi" của bài đó chạy đề này
+  lessonId    String?
+  courseId    String?
+  createdById String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  lesson      Lesson?          @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  course      Course?          @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  createdBy   User?            @relation("ExamAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+  versions    ExamVersion[]
+  accessRules ExamAccessRule[]
+
+  @@index([status])
+  @@index([lessonId])
+}
+
+/// Một bản của đề. Publish = đóng băng. Sửa đề đã publish → tạo version mới.
+model ExamVersion {
+  id          String     @id @default(cuid())
+  examId      String
+  version     Int
+  status      ExamStatus @default(DRAFT)
+  /// Toàn bộ setting cấp đề, validate bằng examSettingsSchema (~/lib/exams)
+  settings    Json
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  exam     Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  sections ExamSection[]
+  items    ExamQuestion[]
+  attempts ExamAttempt[]
+
+  @@unique([examId, version])
+  @@index([examId, status])
+}
+
+/// Phần thi (Nghe / Đọc / Viết…). Tên và thứ tự do admin đặt — không chỗ nào
+/// trong code được phân nhánh theo tên phần.
+model ExamSection {
+  id            String  @id @default(cuid())
+  examVersionId String
+  title         String
+  description   String?
+  order         Int     @default(0)
+  /// Override setting cấp phần; field nào không đặt thì lấy của đề
+  settings      Json    @default("{}")
+
+  version ExamVersion    @relation(fields: [examVersionId], references: [id], onDelete: Cascade)
+  items   ExamQuestion[]
+
+  @@index([examVersionId, order])
+}
+
+/// Câu hỏi trong kho — độc lập với mọi đề, dùng lại được ở nhiều đề.
+model Question {
+  id          String       @id @default(cuid())
+  type        QuestionType
+  prompt      String
+  /// Dữ liệu riêng theo type (audioUrl, transcript, answerMode…), validate zod
+  payload     Json         @default("{}")
+  /// Giải thích, chỉ hiện cho học viên sau khi kết quả được công bố
+  explanation String?
+  /// 1..5, dùng để lọc trong kho
+  difficulty  Int?
+  tags        String[]     @default([])
+  createdById String?
+  /// Soft delete: câu đã dùng trong đề đã publish không được xóa cứng
+  deletedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  createdBy User?            @relation("QuestionAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+  options   QuestionOption[]
+  usages    ExamQuestion[]
+
+  @@index([type, deletedAt])
+  @@index([deletedAt, createdAt])
+}
+
+/// Lựa chọn của một câu hỏi.
+/// `isCorrect` KHÔNG BAO GIỜ được select ra client của học viên trước khi nộp.
+model QuestionOption {
+  id         String  @id @default(cuid())
+  questionId String
+  content    String
+  isCorrect  Boolean @default(false)
+  order      Int     @default(0)
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId, order])
+}
+
+/// Câu hỏi được đưa vào một version của đề. Bảng nối, mang điểm và snapshot.
+model ExamQuestion {
+  id            String  @id @default(cuid())
+  examVersionId String
+  sectionId     String
+  questionId    String
+  order         Int     @default(0)
+  points        Float   @default(1)
+  required      Boolean @default(true)
+  /// Override setting cấp câu
+  settings      Json    @default("{}")
+  /// Bản đóng băng nội dung câu hỏi lúc publish. null = version còn DRAFT.
+  /// Đề đã publish render và chấm CHỈ đọc từ đây, không đọc bảng Question.
+  snapshot      Json?
+
+  version  ExamVersion  @relation(fields: [examVersionId], references: [id], onDelete: Cascade)
+  section  ExamSection  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  question Question     @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  answers  ExamAnswer[]
+
+  @@unique([examVersionId, questionId])
+  @@index([sectionId, order])
+}
+
+/// Một lượt thi của một học viên.
+model ExamAttempt {
+  id            String        @id @default(cuid())
+  examVersionId String
+  userId        String
+  attemptNumber Int           @default(1)
+  status        AttemptStatus @default(IN_PROGRESS)
+  startedAt     DateTime      @default(now())
+  /// Server tính từ settings.timing lúc tạo lượt. null = không giới hạn.
+  /// Client chỉ đếm ngược tới mốc này nên F5 không reset đồng hồ.
+  expiresAt     DateTime?
+  submittedAt   DateTime?
+  /// ExamQuestion.id theo ĐÚNG thứ tự học viên sẽ thấy. Chốt một lần lúc tạo
+  /// lượt → refresh không trộn lại.
+  questionOrder String[]      @default([])
+  /// { [examQuestionId]: optionId[] } — thứ tự lựa chọn đã trộn, chốt cùng lúc.
+  /// Mapping đáp án luôn theo optionId, không theo index, nên trộn không thể
+  /// làm sai đáp án.
+  optionOrder   Json          @default("{}")
+  lastSavedAt   DateTime      @updatedAt
+
+  version ExamVersion  @relation(fields: [examVersionId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers ExamAnswer[]
+  result  ExamResult?
+
+  @@unique([examVersionId, userId, attemptNumber])
+  @@index([userId, status])
+}
+
+model ExamAnswer {
+  id                String   @id @default(cuid())
+  attemptId         String
+  examQuestionId    String
+  /// Các dạng chọn; MULTIPLE_CHOICE có nhiều phần tử
+  selectedOptionIds String[] @default([])
+  /// Các dạng nhập tự do
+  textAnswer        String?
+  /// Kết quả chấm — chỉ server ghi, ghi lúc nộp. null = chưa chấm.
+  isCorrect         Boolean?
+  pointsAwarded     Float?
+  updatedAt         DateTime @updatedAt
+
+  attempt      ExamAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  examQuestion ExamQuestion @relation(fields: [examQuestionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, examQuestionId])
+}
+
+model ExamResult {
+  id           String    @id @default(cuid())
+  attemptId    String    @unique
+  totalPoints  Float
+  earnedPoints Float
+  percentage   Float
+  passed       Boolean
+  /// [{ sectionId, title, totalPoints, earnedPoints, correct, total }]
+  breakdown    Json      @default("[]")
+  gradedAt     DateTime  @default(now())
+  /// null = chưa được phép xem điểm (mode AFTER_EXAM_CLOSE / MANUAL_RELEASE)
+  releasedAt   DateTime?
+
+  attempt ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+}
+
+/// Ai được thi. Nhiều rule = HỢP: thỏa một rule là vào được.
+/// Đề không có rule nào → chỉ admin vào được (mặc định đóng, không phải mở).
+model ExamAccessRule {
+  id       String         @id @default(cuid())
+  examId   String
+  type     ExamAccessType
+  courseId String?
+  /// Chừa sẵn cho model Class chưa tồn tại; type = CLASS hiện bị server từ chối
+  classId  String?
+  userIds  String[]       @default([])
+  startAt  DateTime?
+  endAt    DateTime?
+
+  exam   Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  course Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([examId])
 }
