@@ -83,7 +83,7 @@ export default function LoginPage() {
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-foreground/20 backdrop-blur-sm">
               <Languages className="h-6 w-6" />
             </div>
-            <span className="text-xl font-bold">Tiếng Trung Dương Hữu</span>
+            <span className="text-xl font-bold">TIẾNG TRUNG DƯƠNG HỮU</span>
           </div>
           <div className="space-y-6">
             <h1 className="text-4xl font-bold leading-tight">Học tiếng Trung<br />từng bước một.</h1>
@@ -107,7 +107,7 @@ export default function LoginPage() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground mb-3">
               <Languages className="h-6 w-6" />
             </div>
-            <h1 className="text-xl font-bold">HSK Academy</h1>
+            <h1 className="text-xl font-bold">TIẾNG TRUNG DƯƠNG HỮU</h1>
           </div>
 
           <Card>

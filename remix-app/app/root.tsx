@@ -27,7 +27,7 @@ export const links: LinksFunction = () => [
 
 export function meta() {
   return [
-    { title: "HSK Academy - Học tiếng Trung" },
+    { title: "TIẾNG TRUNG DƯƠNG HỮU - Học tiếng Trung" },
     { name: "description", content: "Nền tảng học tiếng Trung theo hệ thống HSK." },
   ];
 }

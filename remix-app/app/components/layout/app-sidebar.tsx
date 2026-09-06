@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useFetcher } from "react-router";
 import { cn } from "~/lib/utils";
-import { LayoutDashboard, BookOpen, Users, Settings, TrendingUp, User, LogOut, Menu, X, Languages } from "lucide-react";
+import { LayoutDashboard, BookOpen, Users, Settings, TrendingUp, User, LogOut, Menu, X, Languages, Briefcase, GraduationCap, School, CalendarDays, Wallet, ClipboardCheck, ChartColumn, Bell } from "lucide-react";
 import type { UserRole, SessionUser } from "~/lib/session.server";
 import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -11,8 +11,17 @@ interface NavItem { label: string; href: string; icon: React.ComponentType<{ cla
 const ROLE_NAV: Record<UserRole, NavItem[]> = {
   admin: [
     { label: "Bảng điều khiển", href: "/admin", icon: LayoutDashboard },
+    { label: "Nhân viên", href: "/admin/staff", icon: Briefcase },
+    { label: "Giáo viên", href: "/admin/teachers", icon: GraduationCap },
+    { label: "Học viên", href: "/admin/students", icon: Users },
+    { label: "Lớp học", href: "/admin/classes", icon: School },
     { label: "Khóa học", href: "/admin/courses", icon: BookOpen },
-    { label: "Tài khoản", href: "/admin/accounts", icon: Users },
+    { label: "Thời khóa biểu", href: "/admin/schedule", icon: CalendarDays },
+    { label: "Học phí", href: "/admin/tuition", icon: Wallet },
+    { label: "Điểm danh", href: "/admin/attendance", icon: ClipboardCheck },
+    { label: "Báo cáo", href: "/admin/reports", icon: ChartColumn },
+    { label: "Thông báo", href: "/admin/notifications", icon: Bell },
+    { label: "Tài khoản", href: "/admin/accounts", icon: User },
     { label: "Cài đặt", href: "/admin/settings", icon: Settings },
   ],
   teacher: [
@@ -46,12 +55,13 @@ export function AppSidebar({ user }: { user: SessionUser }) {
           <Languages className="h-5 w-5" />
         </div>
         <div>
-          <p className="text-sm font-bold tracking-tight">HSK Academy</p>
+          <p className="text-sm font-bold tracking-tight">TIẾNG TRUNG DƯƠNG HỮU</p>
           <p className="text-xs text-sidebar-muted-foreground">{ROLE_LABEL[user.role]}</p>
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      {/* overflow-y-auto: menu admin dài, cần cuộn được trên màn hình thấp */}
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {navItems.map((item) => {
           const isActive = item.href === `/${user.role}` ? location.pathname === item.href : location.pathname.startsWith(item.href);
           const Icon = item.icon;

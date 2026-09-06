@@ -16,6 +16,18 @@ export default [
     route("lessons/:lessonId/blocks/new", "routes/admin.lessons.$lessonId.blocks.new.tsx"),
     route("lessons/:lessonId/blocks/:blockId/edit", "routes/admin.lessons.$lessonId.blocks.$blockId.edit.tsx"),
     route("accounts", "routes/admin.accounts.tsx"),
+
+    // Các mục đã có menu, nội dung chi tiết bổ sung sau
+    route("staff", "routes/admin.staff.tsx"),
+    route("teachers", "routes/admin.teachers.tsx"),
+    route("students", "routes/admin.students.tsx"),
+    route("classes", "routes/admin.classes.tsx"),
+    route("schedule", "routes/admin.schedule.tsx"),
+    route("tuition", "routes/admin.tuition.tsx"),
+    route("attendance", "routes/admin.attendance.tsx"),
+    route("reports", "routes/admin.reports.tsx"),
+    route("notifications", "routes/admin.notifications.tsx"),
+    route("settings", "routes/admin.settings.tsx"),
   ]),
 
   // Teacher
