@@ -41,7 +41,7 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
               <TableCell className="font-mono text-sm text-primary">{item.pinyin}</TableCell>
               <TableCell>
                 {item.wordType ? (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs whitespace-nowrap">
                     {WORD_TYPE_META[item.wordType].label}
                   </Badge>
                 ) : (
