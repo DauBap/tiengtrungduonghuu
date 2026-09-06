@@ -16,7 +16,7 @@ import { AppShell } from "~/components/layout/app-shell";
 import { LockedContent } from "~/components/lessons/locked-content";
 import { EmptyState } from "~/components/common/empty-state";
 import { BlockRenderer, isBlockLearnable, type ResolvedBlock } from "~/components/lessons/blocks/block-renderer";
-import { isLearningBlockType, type LearningBlockType } from "~/lib/learning-blocks";
+import { isLearningBlockType, BLOCK_META, type LearningBlockType } from "~/lib/learning-blocks";
 import { LessonTabs } from "~/components/lessons/lesson-tabs";
 import { VocabularyTable } from "~/components/lessons/vocabulary-table";
 import { Button } from "~/components/ui/button";
@@ -115,7 +115,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
   return redirect(`/student/courses/${params.courseId}/lessons/${params.lessonId}/exercise`);
 }
 
-function BlockPlaceholder() {
+/** Bài học chưa có block dạng này. Dạng đã làm nhưng bài chưa soạn thì nói
+ *  "chưa có", còn dạng chưa hỗ trợ thì nói "đang phát triển". */
+function BlockPlaceholder({ type }: { type: LearningBlockType }) {
+  const meta = BLOCK_META[type];
   return (
     <div className="rounded-lg border-2 border-dashed border-primary/20 bg-primary/5 p-8 text-center">
       <div className="flex justify-center mb-3">
@@ -123,7 +126,11 @@ function BlockPlaceholder() {
           <Construction className="h-6 w-6" />
         </div>
       </div>
-      <p className="text-sm font-medium">Dạng bài này đang được phát triển</p>
+      <p className="text-sm font-medium">
+        {meta.implemented
+          ? `Bài này chưa có phần ${meta.label}`
+          : `Dạng "${meta.label}" đang được phát triển`}
+      </p>
       <p className="text-sm text-muted-foreground mt-1">Nội dung sẽ được bổ sung trong thời gian tới.</p>
     </div>
   );
@@ -146,9 +153,11 @@ export default function LessonDetail() {
     );
   }
 
-  // Dạng bài có nội dung để học trong bài này. Tab Từ vựng dựa vào kho từ của
-  // bài chứ không cần admin tạo block riêng.
-  const availableTypes = new Set(blocks.filter(isBlockLearnable).map((b) => b.type));
+  // Dạng bài có mặt trong bài này. Dùng để làm mờ tab của dạng bài chưa soạn —
+  // block đã tạo nhưng chưa chọn nội dung vẫn tính là có, để học viên bấm vào
+  // và thấy lời nhắn cụ thể thay vì tưởng dạng đó không tồn tại.
+  const availableTypes = new Set(blocks.map((b) => b.type));
+  // Tab Từ vựng dựa vào kho từ của bài chứ không cần admin tạo block riêng.
   if (lesson.content.length > 0) availableTypes.add("VOCABULARY");
 
   const isEmptyLesson = lesson.content.length === 0 && !blocks.some(isBlockLearnable);
@@ -160,12 +169,11 @@ export default function LessonDetail() {
     }
 
     const blockIndex = blocks.findIndex((b) => b.type === activeTab);
-    if (blockIndex === -1) return <BlockPlaceholder />;
+    // Bài chưa có block dạng này — khác với block đã có nhưng chưa chọn nội
+    // dung, trường hợp đó BlockRenderer hiện "chưa có nội dung" của riêng nó.
+    if (blockIndex === -1) return <BlockPlaceholder type={activeTab} />;
 
-    const block = blocks[blockIndex];
-    if (!isBlockLearnable(block)) return <BlockPlaceholder />;
-
-    return <BlockRenderer block={block} status={blockStatuses[blockIndex]} />;
+    return <BlockRenderer block={blocks[blockIndex]} status={blockStatuses[blockIndex]} />;
   };
 
   return (

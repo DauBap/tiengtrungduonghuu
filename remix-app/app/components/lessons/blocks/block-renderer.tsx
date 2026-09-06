@@ -93,7 +93,7 @@ export function BlockRenderer({ block, status }: { block: ResolvedBlock; status:
     if (!parsed.ok) {
       return (
         <BlockShell {...shellProps}>
-          <BlockEmpty />
+          <BlockEmpty unit="từ vựng" />
         </BlockShell>
       );
     }
@@ -104,7 +104,7 @@ export function BlockRenderer({ block, status }: { block: ResolvedBlock; status:
     if (items.length === 0) {
       return (
         <BlockShell {...shellProps}>
-          <BlockEmpty />
+          <BlockEmpty unit="từ vựng" />
         </BlockShell>
       );
     }
@@ -121,7 +121,7 @@ export function BlockRenderer({ block, status }: { block: ResolvedBlock; status:
     if (!parsed.ok) {
       return (
         <BlockShell {...shellProps}>
-          <BlockEmpty />
+          <BlockEmpty unit="câu hỏi" />
         </BlockShell>
       );
     }
@@ -136,7 +136,7 @@ export function BlockRenderer({ block, status }: { block: ResolvedBlock; status:
     if (items.length === 0) {
       return (
         <BlockShell {...shellProps}>
-          <BlockEmpty />
+          <BlockEmpty unit="câu hỏi" />
         </BlockShell>
       );
     }
@@ -164,8 +164,11 @@ export function BlockRenderer({ block, status }: { block: ResolvedBlock; status:
   );
 }
 
-/** Phần học chưa có nội dung — dùng cho cả config lỗi và config rỗng. */
-function BlockEmpty() {
+/**
+ * Phần học chưa có nội dung — dùng cho cả config lỗi và config rỗng.
+ * `unit` nói rõ đang thiếu gì: flashcard thiếu từ vựng, nghe câu thiếu câu.
+ */
+function BlockEmpty({ unit }: { unit: string }) {
   return (
     <div className="rounded-lg border border-dashed p-8 text-center">
       <div className="flex justify-center mb-3">
@@ -173,7 +176,7 @@ function BlockEmpty() {
           <Inbox className="h-6 w-6" />
         </div>
       </div>
-      <p className="text-sm font-medium">Chưa có từ vựng nào</p>
+      <p className="text-sm font-medium">Chưa có {unit} nào</p>
       <p className="text-sm text-muted-foreground mt-1">Nội dung sẽ được bổ sung trong thời gian tới.</p>
     </div>
   );
