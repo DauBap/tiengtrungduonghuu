@@ -128,7 +128,7 @@ export function FlashcardBlock({ config, items, isCompleted, onComplete }: Flash
       >
         <div
           className={cn(
-            "relative h-56 w-full transition-transform duration-500 [transform-style:preserve-3d]",
+            "relative h-72 w-full transition-transform duration-500 [transform-style:preserve-3d]",
             flipped && "[transform:rotateY(180deg)]"
           )}
         >
