@@ -149,8 +149,8 @@ export function FlashcardBlock({ config, items, isCompleted, onComplete }: Flash
             <p className="absolute bottom-4 text-xs text-muted-foreground">Bấm để lật thẻ</p>
           </div>
 
-          {/* Mặt sau */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-success/30 bg-success/5 p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+          {/* Mặt sau — tông thương hiệu; xanh lá để dành riêng cho "đúng/hoàn thành" */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/30 bg-primary/10 p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]">
             <p className={cn("font-semibold text-center", frontIsChinese ? "text-2xl" : "text-5xl")}>{backMain}</p>
             <p className="text-base text-primary font-mono">{card.pinyin}</p>
             {card.wordType && (

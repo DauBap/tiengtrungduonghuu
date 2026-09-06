@@ -4,65 +4,114 @@
 
 @layer base {
   :root {
-    --background: 210 40% 99%;
-    --foreground: 222 47% 11%;
+    /* Nền & chữ: stone ấm, hợp với tông đỏ thương hiệu */
+    --background: 60 9% 98%;
+    --foreground: 20 14% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 20 14% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 221 83% 53%;
+    --popover-foreground: 20 14% 12%;
+
+    /* Đỏ Trung Hoa #C2272D — màu thương hiệu chủ đạo */
+    --primary: 358 66% 46%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 32 95% 44%;
+
+    --secondary: 60 5% 96%;
+    --secondary-foreground: 20 14% 12%;
+    --muted: 60 5% 96%;
+    --muted-foreground: 25 6% 45%;
+
+    /* Vàng kim — cặp màu truyền thống đi với đỏ.
+       Giữ hue amber, hạ lightness để đạt AA khi dùng làm màu chữ. */
+    --accent: 38 92% 29%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --success: 142 71% 45%;
+
+    /* Semantic giữ nguyên hue (xanh lá / hổ phách / đỏ cảnh báo) theo yêu cầu;
+       chỉ hạ lightness vì bản cũ dùng làm text trên nền trắng chỉ đạt ~2.9:1. */
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 71% 27%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
+    --warning: 38 92% 29%;
     --warning-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+
+    --border: 20 6% 90%;
+    --input: 20 6% 90%;
+    --ring: 358 66% 46%;
     --radius: 0.625rem;
-    --sidebar: 222 47% 11%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-muted: 215 28% 17%;
-    --sidebar-muted-foreground: 215 20% 65%;
-    --sidebar-border: 215 28% 20%;
+
+    /* Dải sắc thái khóa học: HSK1 -> HSK3 -> Giao tiếp (nhạt tới đậm).
+       Dùng làm MÀU CHỮ/icon nên mọi bậc đều đạt AA cả trên card trắng lẫn trên
+       nền tint /15 của chính nó. Phân biệt bằng lightness + hue trôi nhẹ về cam. */
+    --brand-1: 358 70% 45%;
+    --brand-2: 0 74% 39%;
+    --brand-3: 4 72% 32%;
+    --brand-4: 12 68% 26%;
+
+    /* Gradient banner tách riêng khỏi brand-*: banner luôn cần nền ĐẬM để chữ
+       trắng đọc được, còn brand-* phải sáng lên ở dark mode để làm màu chữ. */
+    --banner-from: 0 74% 42%;
+    --banner-to: 0 63% 31%;
+
+    /* Sidebar: gradient đỏ đậm dần từ trên xuống */
+    --sidebar: 358 66% 46%;
+    --sidebar-to: 357 66% 34%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-muted: 357 60% 30%;
+    --sidebar-muted-foreground: 355 45% 93%;
+    --sidebar-border: 357 55% 30%;
   }
+
   .dark {
-    --background: 222 47% 7%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 10%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 10%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 221 83% 60%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 215 28% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 215 28% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 32 95% 50%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
-    --success: 142 63% 41%;
-    --success-foreground: 210 40% 98%;
-    --warning: 38 92% 55%;
-    --warning-foreground: 222 47% 11%;
-    --border: 215 28% 20%;
-    --input: 215 28% 20%;
-    --ring: 221 83% 60%;
-    --sidebar: 222 47% 5%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-muted: 215 28% 12%;
-    --sidebar-muted-foreground: 215 20% 55%;
-    --sidebar-border: 215 28% 15%;
+    /* Charcoal ấm trung tính — sang và không xanh lạnh */
+    --background: 20 14% 7%;
+    --foreground: 60 9% 96%;
+    --card: 20 12% 10%;
+    --card-foreground: 60 9% 96%;
+    --popover: 20 12% 10%;
+    --popover-foreground: 60 9% 96%;
+
+    /* L=64 là mức thấp nhất vẫn đạt AA khi làm chữ trên nền primary/10 */
+    --primary: 358 75% 64%;
+    --primary-foreground: 20 14% 10%;
+
+    --secondary: 20 10% 16%;
+    --secondary-foreground: 60 9% 96%;
+    --muted: 20 10% 16%;
+    --muted-foreground: 24 6% 64%;
+
+    --accent: 38 92% 55%;
+    --accent-foreground: 20 14% 10%;
+
+    --destructive: 0 80% 67%;
+    --destructive-foreground: 20 14% 10%;
+    --success: 142 63% 45%;
+    --success-foreground: 20 14% 10%;
+    --warning: 38 92% 58%;
+    --warning-foreground: 20 14% 10%;
+
+    --border: 20 8% 20%;
+    --input: 20 8% 20%;
+    --ring: 358 75% 64%;
+
+    /* Sáng dần ở dark mode để vẫn đạt AA khi làm màu chữ trên nền tối.
+       Không thể hạ lightness để phân biệt bậc (sẽ tụt dưới AA) nên dùng
+       giảm saturation + hue trôi về cam. */
+    --brand-1: 352 88% 80%;
+    --brand-2: 358 80% 74%;
+    --brand-3: 4 72% 70%;
+    --brand-4: 12 62% 67%;
+
+    /* Banner vẫn giữ nền đậm cho chữ trắng */
+    --banner-from: 358 60% 34%;
+    --banner-to: 357 64% 22%;
+
+    --sidebar: 358 55% 30%;
+    --sidebar-to: 357 62% 17%;
+    --sidebar-foreground: 60 9% 96%;
+    --sidebar-muted: 357 45% 24%;
+    --sidebar-muted-foreground: 355 30% 80%;
+    --sidebar-border: 357 40% 26%;
   }
 }
 
@@ -75,6 +124,15 @@
 }
 
 @layer utilities {
+  /* Gradient sidebar — thay cho linear-gradient(180deg, #C2272D, #8E1D22) */
+  .bg-sidebar-gradient {
+    background-image: linear-gradient(180deg, hsl(var(--sidebar)) 0%, hsl(var(--sidebar-to)) 100%);
+  }
+  /* Gradient banner đăng nhập — thay cho linear-gradient(160deg, #B91C1C, #7F1D1D) */
+  .bg-brand-gradient {
+    background-image: linear-gradient(160deg, hsl(var(--banner-from)) 0%, hsl(var(--banner-to)) 100%);
+  }
+
   .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: hsl(var(--muted-foreground) / 0.3);

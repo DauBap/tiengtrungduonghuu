@@ -22,8 +22,16 @@ export default {
         destructive: { DEFAULT: "hsl(var(--destructive))", foreground: "hsl(var(--destructive-foreground))" },
         success: { DEFAULT: "hsl(var(--success))", foreground: "hsl(var(--success-foreground))" },
         warning: { DEFAULT: "hsl(var(--warning))", foreground: "hsl(var(--warning-foreground))" },
+        // Dải sắc thái thương hiệu cho thẻ khóa học / stat card (HSK1..Giao tiếp)
+        brand: {
+          1: "hsl(var(--brand-1))",
+          2: "hsl(var(--brand-2))",
+          3: "hsl(var(--brand-3))",
+          4: "hsl(var(--brand-4))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar))",
+          to: "hsl(var(--sidebar-to))",
           foreground: "hsl(var(--sidebar-foreground))",
           muted: "hsl(var(--sidebar-muted))",
           "muted-foreground": "hsl(var(--sidebar-muted-foreground))",

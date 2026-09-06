@@ -49,9 +49,9 @@ export function AppSidebar({ user }: { user: SessionUser }) {
   const initials = user.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) ?? "U";
 
   const SidebarContent = () => (
-    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+    <div className="flex h-full flex-col bg-sidebar-gradient text-sidebar-foreground">
       <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-foreground/15 text-sidebar-foreground backdrop-blur-sm">
           <Languages className="h-5 w-5" />
         </div>
         <div>
@@ -68,7 +68,11 @@ export function AppSidebar({ user }: { user: SessionUser }) {
           return (
             <Link key={item.href} to={item.href} onClick={() => setMobileOpen(false)}
               className={cn("flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive ? "bg-primary text-primary-foreground" : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground"
+                // Sidebar đã là nền đỏ nên item active phải nổi bằng lớp sáng,
+                // không dùng bg-primary (cùng tông đỏ → chìm hẳn vào nền).
+                // Chữ dùng text-sidebar (không phải text-primary): ở dark mode
+                // primary bị sáng lên nên trên viên pill trắng chỉ còn 3.5:1.
+                isActive ? "bg-sidebar-foreground text-sidebar shadow-sm" : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground"
               )}>
               <Icon className="h-4 w-4 shrink-0" />
               {item.label}
@@ -80,7 +84,7 @@ export function AppSidebar({ user }: { user: SessionUser }) {
       <div className="border-t border-sidebar-border p-3">
         <div className="flex items-center gap-3 rounded-lg px-3 py-2">
           <Avatar className="h-9 w-9 border border-sidebar-border">
-            <AvatarFallback className="bg-sidebar-muted text-sidebar-foreground text-xs font-semibold">{initials}</AvatarFallback>
+            <AvatarFallback className="bg-sidebar-foreground/15 text-sidebar-foreground text-xs font-semibold">{initials}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{user.name}</p>

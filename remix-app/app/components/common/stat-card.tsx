@@ -5,7 +5,7 @@ interface StatCardProps {
   label: string;
   value: string | number;
   icon: React.ComponentType<{ className?: string }>;
-  accent?: "primary" | "success" | "warning" | "accent";
+  accent?: "primary" | "success" | "warning" | "accent" | "brand1" | "brand2" | "brand3" | "brand4";
 }
 
 const ACCENT: Record<string, string> = {
@@ -13,6 +13,11 @@ const ACCENT: Record<string, string> = {
   success: "bg-success/15 text-success",
   warning: "bg-warning/15 text-warning",
   accent: "bg-accent/15 text-accent",
+  // Dải sắc thái đỏ, dùng khi cần phân biệt nhiều thẻ cùng tông thương hiệu
+  brand1: "bg-brand-1/10 text-brand-1",
+  brand2: "bg-brand-2/10 text-brand-2",
+  brand3: "bg-brand-3/10 text-brand-3",
+  brand4: "bg-brand-4/10 text-brand-4",
 };
 
 export function StatCard({ label, value, icon: Icon, accent = "primary" }: StatCardProps) {

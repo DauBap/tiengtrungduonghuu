@@ -47,7 +47,7 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 w-6 p-0"
+                    className="h-6 w-6 p-0 text-primary hover:bg-primary/10 hover:text-primary"
                     onClick={() => speakChinese(item.chinese, item.audioUrl)}
                     title="Nghe phát âm"
                   >
