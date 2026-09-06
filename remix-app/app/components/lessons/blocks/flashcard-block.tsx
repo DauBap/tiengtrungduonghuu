@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
-import { ChevronLeft, ChevronRight, Volume2, RotateCcw, Check, CheckCircle2, RefreshCw } from "lucide-react";
+import { ChevronLeft, ChevronRight, Volume2, RotateCcw, Check, CheckCircle2, RefreshCw, Shuffle } from "lucide-react";
 import { speakChinese, isSpeechSupported } from "~/lib/speech";
 import type { FlashcardConfig } from "~/lib/learning-blocks";
 import { WORD_TYPE_META, type WordType } from "~/lib/word-types";
@@ -71,6 +71,11 @@ export function FlashcardBlock({ config, items, isCompleted, onComplete }: Flash
     },
     [cards.length]
   );
+
+  const goToRandom = useCallback(() => {
+    const randomIndex = Math.floor(Math.random() * cards.length);
+    goTo(randomIndex);
+  }, [cards.length, goTo]);
 
   const markKnown = useCallback(() => {
     if (!card) return;
@@ -169,6 +174,9 @@ export function FlashcardBlock({ config, items, isCompleted, onComplete }: Flash
               <Volume2 className="h-4 w-4" />
             </Button>
           )}
+          <Button variant="ghost" size="sm" onClick={goToRandom} title="Nhảy tới thẻ ngẫu nhiên">
+            <Shuffle className="h-4 w-4" />
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => setFlipped((f) => !f)} title="Lật thẻ">
             <RotateCcw className="h-4 w-4" />
           </Button>
