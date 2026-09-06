@@ -13,6 +13,8 @@ export default [
     route("courses/:courseId/edit", "routes/admin.courses.$courseId.edit.tsx"),
     route("courses/:courseId/lessons", "routes/admin.courses.$courseId.lessons._index.tsx"),
     route("lessons/:lessonId", "routes/admin.lessons.$lessonId.tsx"),
+    route("lessons/:lessonId/grammar", "routes/admin.lessons.$lessonId.grammar.tsx"),
+    route("lessons/:lessonId/grammar/:sectionId", "routes/admin.lessons.$lessonId.grammar.$sectionId.tsx"),
     route("lessons/:lessonId/blocks/new", "routes/admin.lessons.$lessonId.blocks.new.tsx"),
     route("lessons/:lessonId/blocks/:blockId/edit", "routes/admin.lessons.$lessonId.blocks.$blockId.edit.tsx"),
     route("accounts", "routes/admin.accounts.tsx"),
