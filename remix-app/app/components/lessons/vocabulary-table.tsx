@@ -44,17 +44,15 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
               <TableCell className="font-semibold text-lg">
                 <div className="flex items-center gap-2">
                   <span>{item.chinese}</span>
-                  {item.audioUrl && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                      onClick={() => speakChinese(item.chinese, item.audioUrl)}
-                      title="Nghe phát âm"
-                    >
-                      <Volume2 className="h-4 w-4" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => speakChinese(item.chinese, item.audioUrl)}
+                    title="Nghe phát âm"
+                  >
+                    <Volume2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </TableCell>
               <TableCell className="font-mono text-sm text-primary">{item.pinyin}</TableCell>
