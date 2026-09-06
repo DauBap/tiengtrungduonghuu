@@ -1,82 +1,60 @@
-import { cn } from "~/lib/utils";
 import { Link } from "react-router";
-import { Layers, Headphones, BookOpen, GraduationCap, ClipboardCheck } from "lucide-react";
+import { cn } from "~/lib/utils";
+import { ClipboardCheck } from "lucide-react";
+import { BLOCK_TYPES, BLOCK_META, type LearningBlockType } from "~/lib/learning-blocks";
 
-type BlockType = "FLASHCARD" | "LISTENING" | "VOCABULARY" | "GRAMMAR";
+/** Tab bài kiểm tra không phải một dạng block — nó là route riêng. */
+export type LessonTab = LearningBlockType | "TEST";
 
 interface LessonTabsProps {
-  activeTab: BlockType | "TEST";
-  onTabChange: (tab: BlockType | "TEST") => void;
-  blockTypes: Set<BlockType>;
+  activeTab: LessonTab;
+  onTabChange: (tab: LearningBlockType) => void;
+  /** Dạng bài có nội dung học được trong bài này; dạng khác vẫn hiện nhưng mờ đi. */
+  availableTypes: Set<LearningBlockType>;
   lessonId: string;
   courseId: string;
 }
 
-const TAB_ICONS: Record<BlockType | "TEST", React.ComponentType<{ className?: string }>> = {
-  FLASHCARD: Layers,
-  LISTENING: Headphones,
-  VOCABULARY: BookOpen,
-  GRAMMAR: GraduationCap,
-  TEST: ClipboardCheck,
-};
-
-const TAB_LABELS: Record<BlockType | "TEST", string> = {
-  FLASHCARD: "Flashcard",
-  LISTENING: "Nghe câu",
-  VOCABULARY: "Từ vựng",
-  GRAMMAR: "Ngữ pháp",
-  TEST: "Bài thi",
-};
-
-export function LessonTabs({ activeTab, onTabChange, blockTypes, lessonId, courseId }: LessonTabsProps) {
-  const tabs: (BlockType | "TEST")[] = ["FLASHCARD", "LISTENING", "VOCABULARY", "GRAMMAR", "TEST"];
+export function LessonTabs({ activeTab, onTabChange, availableTypes, lessonId, courseId }: LessonTabsProps) {
+  const baseTab = "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap";
 
   return (
     <div className="border-b border-border">
-      <div className="flex gap-0">
-        {tabs.map((tab) => {
-          const Icon = TAB_ICONS[tab];
-          const label = TAB_LABELS[tab];
-          const isActive = activeTab === tab;
-          const hasContent = tab === "TEST" || blockTypes.has(tab as BlockType);
-
-          if (tab === "TEST") {
-            return (
-              <Link
-                key={tab}
-                to={`/student/courses/${courseId}/lessons/${lessonId}/test`}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors",
-                  isActive
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </Link>
-            );
-          }
+      {/* overflow-x-auto: 5 tab dễ tràn trên màn hình hẹp */}
+      <div className="flex overflow-x-auto">
+        {BLOCK_TYPES.map((type) => {
+          const Icon = BLOCK_META[type].icon;
+          const isActive = activeTab === type;
+          const hasContent = availableTypes.has(type);
 
           return (
             <button
-              key={tab}
-              onClick={() => onTabChange(tab)}
+              key={type}
+              type="button"
+              onClick={() => onTabChange(type)}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                baseTab,
                 isActive
                   ? "border-primary text-primary"
                   : hasContent
                     ? "border-transparent text-foreground hover:text-primary hover:border-border"
-                    : "border-transparent text-muted-foreground opacity-60"
+                    : "border-transparent text-muted-foreground"
               )}
-              disabled={!hasContent}
             >
               <Icon className="h-4 w-4" />
-              {label}
+              {BLOCK_META[type].label}
             </button>
           );
         })}
+
+        <Link
+          to={`/student/courses/${courseId}/lessons/${lessonId}/test`}
+          className={cn(baseTab, "border-transparent text-muted-foreground hover:text-foreground hover:border-border")}
+        >
+          <ClipboardCheck className="h-4 w-4" />
+          Bài thi
+        </Link>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
-import { useLoaderData, Link, Form, redirect } from "react-router";
+import { useLoaderData, Link, redirect } from "react-router";
 import { useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import {
@@ -16,17 +16,12 @@ import { AppShell } from "~/components/layout/app-shell";
 import { LockedContent } from "~/components/lessons/locked-content";
 import { EmptyState } from "~/components/common/empty-state";
 import { BlockRenderer, isBlockLearnable, type ResolvedBlock } from "~/components/lessons/blocks/block-renderer";
-import { isLearningBlockType } from "~/lib/learning-blocks";
+import { isLearningBlockType, type LearningBlockType } from "~/lib/learning-blocks";
 import { LessonTabs } from "~/components/lessons/lesson-tabs";
 import { VocabularyTable } from "~/components/lessons/vocabulary-table";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
-import { ArrowLeft, BookOpen, Construction, Inbox } from "lucide-react";
-import { cn } from "~/lib/utils";
+import { ArrowLeft, BookOpen, Construction } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
-
-type BlockType = "FLASHCARD" | "LISTENING" | "VOCABULARY" | "GRAMMAR";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
@@ -122,7 +117,7 @@ function BlockPlaceholder() {
 
 export default function LessonDetail() {
   const { user, lesson, isUnlocked, blocks, blockStatuses } = useLoaderData<typeof loader>();
-  const [activeTab, setActiveTab] = useState<BlockType | "TEST">("FLASHCARD");
+  const [activeTab, setActiveTab] = useState<LearningBlockType>("FLASHCARD");
 
   if (!isUnlocked) {
     return (
@@ -137,48 +132,26 @@ export default function LessonDetail() {
     );
   }
 
-  // Map blocks by type
-  const blocksByType = new Map<BlockType, ResolvedBlock>();
-  blocks.forEach((block, index) => {
-    const type = block.type as BlockType;
-    if (!blocksByType.has(type)) {
-      blocksByType.set(type, block);
-    }
-  });
+  // Dạng bài có nội dung để học trong bài này. Tab Từ vựng dựa vào kho từ của
+  // bài chứ không cần admin tạo block riêng.
+  const availableTypes = new Set(blocks.filter(isBlockLearnable).map((b) => b.type));
+  if (lesson.content.length > 0) availableTypes.add("VOCABULARY");
 
-  const blockTypes = new Set(blocksByType.keys());
-  // Tab Từ vựng luôn enable nếu bài có vocab
-  if (lesson.content.length > 0) {
-    blockTypes.add("VOCABULARY");
-  }
   const isEmptyLesson = lesson.content.length === 0 && !blocks.some(isBlockLearnable);
 
   const renderTabContent = () => {
-    if (activeTab === "TEST") {
-      return null;
-    }
-
-    const blockType = activeTab as BlockType;
-
-    // Tab Từ vựng: hiển thị bảng toàn bộ từ
-    if (blockType === "VOCABULARY") {
+    // Từ vựng đọc trực tiếp kho từ của bài, không qua block.
+    if (activeTab === "VOCABULARY") {
       return <VocabularyTable items={lesson.content} />;
     }
 
-    const blockIndex = blocks.findIndex((b) => b.type === blockType);
-
-    if (blockIndex === -1) {
-      return <BlockPlaceholder />;
-    }
+    const blockIndex = blocks.findIndex((b) => b.type === activeTab);
+    if (blockIndex === -1) return <BlockPlaceholder />;
 
     const block = blocks[blockIndex];
-    const status = blockStatuses[blockIndex];
+    if (!isBlockLearnable(block)) return <BlockPlaceholder />;
 
-    if (!isBlockLearnable(block)) {
-      return <BlockPlaceholder />;
-    }
-
-    return <BlockRenderer block={block} status={status} />;
+    return <BlockRenderer block={block} status={blockStatuses[blockIndex]} />;
   };
 
   return (
@@ -209,7 +182,7 @@ export default function LessonDetail() {
             <LessonTabs
               activeTab={activeTab}
               onTabChange={setActiveTab}
-              blockTypes={blockTypes}
+              availableTypes={availableTypes}
               lessonId={lesson.id}
               courseId={lesson.courseId}
             />
