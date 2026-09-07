@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData } from "react-router";
 import { requireRole } from "~/lib/session.server";
-import { getEnrolledCourses } from "~/lib/db.server";
+import { getTeacherCourses } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { CourseCard } from "~/components/courses/course-card";
 import { EmptyState } from "~/components/common/empty-state";
@@ -9,7 +9,7 @@ import { BookOpen } from "lucide-react";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
-  const myCourses = await getEnrolledCourses(user.id);
+  const myCourses = await getTeacherCourses(user.id);
   return { user, myCourses };
 }
 

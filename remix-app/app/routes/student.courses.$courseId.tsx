@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
-import { getCourseById, getLessonsByCourse, getAllProgressForCourse, computeCourseProgress, computeLessonStatus } from "~/lib/db.server";
+import { getCourseById, getLessonsByCourse, getAllProgressForCourse, computeCourseProgress, computeLessonStatus, isEnrolled } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { LessonCard } from "~/components/lessons/lesson-card";
 import { ProgressBar } from "~/components/progress/progress-bar";
@@ -15,6 +15,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
   const course = await getCourseById(params.courseId!);
   if (!course) throw new Response("Không tìm thấy", { status: 404 });
+
+  const enrolled = await isEnrolled(user.id, course.id);
+  if (!enrolled) throw new Response("Không có quyền truy cập", { status: 403 });
 
   const lessons = await getLessonsByCourse(course.id);
   const progressList = await getAllProgressForCourse(user.id, course.id);

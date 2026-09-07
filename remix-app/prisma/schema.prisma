@@ -27,6 +27,7 @@ model User {
   examAttempts     ExamAttempt[]
   authoredExams     Exam[]     @relation("ExamAuthor")
   authoredQuestions Question[] @relation("QuestionAuthor")
+  taughtClasses    Class[]    @relation("ClassTeacher")
 }
 
 enum Role {
@@ -51,6 +52,7 @@ model Course {
 
   lessons     Lesson[]
   enrollments Enrollment[]
+  classes     Class[]
   exams            Exam[]
   examAccessRules  ExamAccessRule[]
 }
@@ -181,6 +183,7 @@ enum LearningBlockType {
   LISTENING
   VOCABULARY
   GRAMMAR
+  WORKBOOK
 }
 
 model LearningBlock {
@@ -200,6 +203,7 @@ model LearningBlock {
   lesson     Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   progresses BlockProgress[]
 
+  @@unique([lessonId, type])
   @@index([lessonId, order])
 }
 
@@ -251,16 +255,42 @@ model TestQuestion {
   @@index([testId, order])
 }
 
+// ─── Classes ─────────────────────────────────────────────────────────────────
+
+/// Lớp học: gắn một khóa học với một giáo viên và nhiều học sinh.
+/// Teacher/student chỉ thấy courses mà họ có lớp trong đó.
+model Class {
+  id          String   @id @default(cuid())
+  name        String
+  courseId    String
+  teacherId   String?
+  maxStudents Int      @default(6)
+  /// Lịch học dạng JSON: [{ days: [1,3,5], startTime: "20:00", endTime: "22:00" }]
+  /// days: 0=CN, 1=T2, 2=T3, 3=T4, 4=T5, 5=T6, 6=T7
+  schedule    Json     @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher     User?        @relation("ClassTeacher", fields: [teacherId], references: [id], onDelete: SetNull)
+  enrollments Enrollment[]
+
+  @@index([courseId])
+  @@index([teacherId])
+}
+
 // ─── Progress ────────────────────────────────────────────────────────────────
 
 model Enrollment {
   id        String   @id @default(cuid())
   userId    String
   courseId  String
+  classId   String?
   createdAt DateTime @default(now())
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  class  Class?  @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
 }

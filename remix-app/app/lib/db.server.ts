@@ -16,10 +16,102 @@ export async function getCourseById(id: string) {
 export async function getEnrolledCourses(userId: string) {
   const enrollments = await prisma.enrollment.findMany({
     where: { userId },
-    include: { course: true },
+    include: {
+      course: true,
+      class: { select: { id: true, name: true, schedule: true } }
+    },
     orderBy: { course: { order: "asc" } },
   });
   return enrollments.map((e) => e.course);
+}
+
+/** Lấy enrollment với thông tin lớp học cho student */
+export async function getEnrolledCoursesWithClass(userId: string) {
+  const enrollments = await prisma.enrollment.findMany({
+    where: { userId },
+    include: {
+      course: true,
+      class: { select: { id: true, name: true, schedule: true, maxStudents: true } }
+    },
+    orderBy: { course: { order: "asc" } },
+  });
+  return enrollments;
+}
+
+/** Lấy danh sách course mà teacher phụ trách (qua Class). */
+export async function getTeacherCourses(teacherId: string) {
+  const classes = await prisma.class.findMany({
+    where: { teacherId },
+    include: { course: true },
+    orderBy: { course: { order: "asc" } },
+  });
+  // Dedup: teacher có thể phụ trách nhiều lớp cùng một course
+  const seen = new Set<string>();
+  return classes.flatMap((c) => {
+    if (seen.has(c.course.id)) return [];
+    seen.add(c.course.id);
+    return [c.course];
+  });
+}
+
+/** Lấy danh sách lớp học mà teacher phụ trách */
+export async function getTeacherClasses(teacherId: string) {
+  return prisma.class.findMany({
+    where: { teacherId },
+    include: {
+      course: { select: { id: true, code: true, title: true, hskLevel: true } },
+      _count: { select: { enrollments: true } }
+    },
+    orderBy: [{ course: { order: "asc" } }, { name: "asc" }],
+  });
+}
+
+/** Kiểm tra student có được enroll vào course này không. */
+export async function isEnrolled(userId: string, courseId: string) {
+  const row = await prisma.enrollment.findUnique({
+    where: { userId_courseId: { userId, courseId } },
+    select: { id: true },
+  });
+  return Boolean(row);
+}
+
+/** Kiểm tra teacher có phụ trách course này không (qua ít nhất một lớp). */
+export async function isTeacherOfCourse(teacherId: string, courseId: string) {
+  const row = await prisma.class.findFirst({
+    where: { teacherId, courseId },
+    select: { id: true },
+  });
+  return Boolean(row);
+}
+
+// ─── Classes ─────────────────────────────────────────────────────────────────
+
+export async function getAllClasses() {
+  return prisma.class.findMany({
+    include: {
+      course: { select: { id: true, code: true, title: true, hskLevel: true } },
+      teacher: { select: { id: true, name: true, email: true } },
+      enrollments: {
+        include: { user: { select: { id: true, name: true, email: true } } },
+        orderBy: { user: { name: "asc" } },
+      },
+    },
+    orderBy: [{ course: { order: "asc" } }, { name: "asc" }],
+  });
+}
+
+export async function getClassById(id: string) {
+  return prisma.class.findUnique({
+    where: { id },
+    include: {
+      course: { select: { id: true, code: true, title: true, hskLevel: true } },
+      teacher: { select: { id: true, name: true, email: true } },
+      enrollments: {
+        include: { user: { select: { id: true, name: true, email: true } } },
+        orderBy: { user: { name: "asc" } },
+      },
+    },
+  });
 }
 
 // ─── Lessons ─────────────────────────────────────────────────────────────────

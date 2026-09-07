@@ -1,17 +1,19 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
-import { getEnrolledCourses, getAllProgressForCourse, getLessonsByCourse, computeCourseProgress } from "~/lib/db.server";
+import { getEnrolledCoursesWithClass, getAllProgressForCourse, getLessonsByCourse, computeCourseProgress } from "~/lib/db.server";
+import { formatSchedule, formatNextClass } from "~/lib/schedule-utils";
 import { AppShell } from "~/components/layout/app-shell";
 import { StatCard } from "~/components/common/stat-card";
 import { CourseCard } from "~/components/courses/course-card";
 import { Card, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
-import { BookOpen, TrendingUp, CheckCircle2, PlayCircle } from "lucide-react";
+import { BookOpen, TrendingUp, CheckCircle2, PlayCircle, Clock, Calendar } from "lucide-react";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
-  const myCourses = await getEnrolledCourses(user.id);
+  const enrollments = await getEnrolledCoursesWithClass(user.id);
+  const myCourses = enrollments.map((e) => e.course);
 
   // overall stats
   let totalLessons = 0;
@@ -39,11 +41,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
     courseProgress[course.id] = computeCourseProgress(lessons, progressList);
   }
 
-  return { user, myCourses, overallProgress, totalCompleted, currentLesson, courseProgress };
+  return { user, myCourses, enrollments, overallProgress, totalCompleted, currentLesson, courseProgress };
 }
 
 export default function StudentIndex() {
-  const { user, myCourses, overallProgress, totalCompleted, currentLesson, courseProgress } =
+  const { user, myCourses, enrollments, overallProgress, totalCompleted, currentLesson, courseProgress } =
     useLoaderData<typeof loader>();
 
   return (
@@ -73,6 +75,38 @@ export default function StudentIndex() {
               <Button asChild>
                 <Link to={`/student/courses/${currentLesson.courseId}/lessons/${currentLesson.id}`}>Tiếp tục</Link>
               </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Class Schedule Info */}
+        {enrollments.length > 0 && enrollments.some(e => e.class) && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <h3 className="font-semibold">Lịch học của tôi</h3>
+              </div>
+              <div className="space-y-3">
+                {enrollments.filter(e => e.class).map((enrollment) => (
+                  <div key={enrollment.id} className="flex items-start gap-3 rounded-lg border p-3">
+                    <Clock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-medium text-sm">{enrollment.class?.name}</p>
+                        <span className="text-xs text-muted-foreground">•</span>
+                        <span className="text-xs font-mono text-primary">{enrollment.course.code}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {formatSchedule(enrollment.class?.schedule)}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Buổi học tiếp theo: {formatNextClass(enrollment.class?.schedule)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         )}

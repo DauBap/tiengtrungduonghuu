@@ -155,24 +155,52 @@ async function main() {
 
   console.log("✅ Lessons + vocab + flashcards + exercises + tests seeded");
 
-  // ─── Enrollments ──────────────────────────────────────────────────────────
-  for (const code of ["HSK-1", "HSK-2"]) {
-    const courseId = courses[code].id;
-    await prisma.enrollment.upsert({
-      where: { userId_courseId: { userId: student.id, courseId } },
-      update: {},
-      create: { userId: student.id, courseId },
-    });
-  }
+  // ─── Classes ──────────────────────────────────────────────────────────────
+  const class1 = await prisma.class.upsert({
+    where: { id: "seed-class-hsk1" },
+    update: {},
+    create: {
+      id: "seed-class-hsk1",
+      name: "Lớp HSK1 Sáng thứ 2",
+      courseId: courses["HSK-1"].id,
+      teacherId: teacher.id,
+      schedule: [
+        { days: [1, 3, 5], startTime: "08:00", endTime: "10:00" }
+      ],
+      maxStudents: 15,
+    },
+  });
 
-  for (const code of ["HSK-1", "HSK-2", "HSK-3"]) {
-    const courseId = courses[code].id;
-    await prisma.enrollment.upsert({
-      where: { userId_courseId: { userId: teacher.id, courseId } },
-      update: {},
-      create: { userId: teacher.id, courseId },
-    });
-  }
+  const class2 = await prisma.class.upsert({
+    where: { id: "seed-class-hsk2" },
+    update: {},
+    create: {
+      id: "seed-class-hsk2",
+      name: "Lớp HSK2 Chiều thứ 4",
+      courseId: courses["HSK-2"].id,
+      teacherId: teacher.id,
+      schedule: [
+        { days: [3, 5], startTime: "18:00", endTime: "20:00" }
+      ],
+      maxStudents: 12,
+    },
+  });
+
+  console.log("✅ Classes seeded");
+
+  // ─── Enrollments ──────────────────────────────────────────────────────────
+  // Student được add vào lớp HSK1 và HSK2
+  await prisma.enrollment.upsert({
+    where: { userId_courseId: { userId: student.id, courseId: courses["HSK-1"].id } },
+    update: { classId: class1.id },
+    create: { userId: student.id, courseId: courses["HSK-1"].id, classId: class1.id },
+  });
+
+  await prisma.enrollment.upsert({
+    where: { userId_courseId: { userId: student.id, courseId: courses["HSK-2"].id } },
+    update: { classId: class2.id },
+    create: { userId: student.id, courseId: courses["HSK-2"].id, classId: class2.id },
+  });
 
   console.log("✅ Enrollments seeded");
   console.log("\n📋 Tài khoản:");

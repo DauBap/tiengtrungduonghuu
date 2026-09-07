@@ -43,6 +43,13 @@ yarn-error.log*
 
 # script kiểm tra tay bằng Playwright — hardcode ID/localhost, chỉ dùng cục bộ
 check.mjs
+smoke.mjs
+
+# bản backup trước khi rollback, chỉ dùng cục bộ
+.backup-rollback-*/
+
+# cấu hình editor cá nhân
+.vscode/
 
 # agent config: .claude/skills được commit, còn lại là bản sao do tool sinh ra
 .claude/settings.local.json

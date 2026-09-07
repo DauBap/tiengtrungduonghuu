@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
-import { getCourseById, getLessonsByCourse } from "~/lib/db.server";
+import { getCourseById, getLessonsByCourse, isTeacherOfCourse } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -13,6 +13,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
   const course = await getCourseById(params.courseId!);
   if (!course) throw new Response("Không tìm thấy", { status: 404 });
+
+  const allowed = await isTeacherOfCourse(user.id, course.id);
+  if (!allowed) throw new Response("Không có quyền truy cập", { status: 403 });
+
   const lessons = await getLessonsByCourse(course.id);
   return { user, course, lessons };
 }
