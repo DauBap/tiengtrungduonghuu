@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
-import { useLoaderData, Link, redirect } from "react-router";
+import { useLoaderData, useFetcher, Link, redirect } from "react-router";
 import { useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import {
@@ -16,13 +16,22 @@ import { AppShell } from "~/components/layout/app-shell";
 import { LockedContent } from "~/components/lessons/locked-content";
 import { EmptyState } from "~/components/common/empty-state";
 import { BlockRenderer, isBlockLearnable, type ResolvedBlock } from "~/components/lessons/blocks/block-renderer";
-import { isLearningBlockType, BLOCK_META, type LearningBlockType } from "~/lib/learning-blocks";
-import { LessonTabs } from "~/components/lessons/lesson-tabs";
+import { isLearningBlockType, parseWorkbookConfig } from "~/lib/learning-blocks";
+import { LessonTabs, type LessonTab } from "~/components/lessons/lesson-tabs";
+import { LessonTabEmpty } from "~/components/lessons/lesson-tab-empty";
 import { VocabularyTable } from "~/components/lessons/vocabulary-table";
 import { GrammarSection } from "~/components/lessons/grammar-section";
+import { WorkbookListeningTest } from "~/components/lessons/workbook-listening-test";
+import { LessonTest, type LessonTestQuestion } from "~/components/lessons/lesson-test";
 import { Button } from "~/components/ui/button";
-import { ArrowLeft, BookOpen, Construction } from "lucide-react";
+import { Badge } from "~/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Progress } from "~/components/ui/progress";
+import { ArrowLeft, BookOpen, PartyPopper, XCircle, RefreshCw, CheckCircle2, Lightbulb } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
+import { gradeLessonTest, parseTestResponses } from "~/lib/lesson-test";
+import { GRAMMAR_QUESTION_META, grammarAnswerText, shuffledTokens } from "~/lib/grammar";
+import { cn } from "~/lib/utils";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
@@ -91,7 +100,22 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const blockProgressMap = await getBlockProgressMap(user.id, blocks.map((b) => b.id));
   const blockStatuses = computeBlockStatuses(blocks, blockProgressMap);
 
-  return { user, lesson, isUnlocked, lessonStatus, blocks, blockStatuses };
+  // Câu hỏi kiểm tra — KHÔNG có `answer` và `hint`, giữ bảo mật như route test cũ.
+  // Trộn ở server: thứ tự gốc của ARRANGE chính là đáp án.
+  const testRows = lesson.test
+    ? await prisma.testQuestion.findMany({
+        where: { testId: lesson.test.id },
+        orderBy: { order: "asc" },
+        select: { id: true, type: true, prompt: true, options: true, points: true },
+      })
+    : [];
+  const testQuestions: LessonTestQuestion[] = testRows.map((q) => ({
+    ...q,
+    options: q.type === "ARRANGE" ? shuffledTokens(q.options) : q.options,
+  }));
+  const passScore = lesson.test?.passScore ?? 50;
+
+  return { user, lesson, isUnlocked, lessonStatus, blocks, blockStatuses, testQuestions, passScore };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -112,34 +136,74 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return { success: true };
   }
 
+  if (intent === "submit-test") {
+    const lessonId = params.lessonId!;
+    const test = await prisma.test.findUnique({
+      where: { lessonId },
+      select: { id: true, passScore: true },
+    });
+    if (!test) return { testError: "Không tìm thấy bài kiểm tra" as const };
+
+    const questions = await prisma.testQuestion.findMany({
+      where: { testId: test.id },
+      orderBy: { order: "asc" },
+      select: { id: true, type: true, prompt: true, options: true, answer: true, hint: true, points: true },
+    });
+    if (questions.length === 0) {
+      return { testError: "Bài kiểm tra này chưa có câu hỏi nào." as const };
+    }
+
+    const responses = parseTestResponses(form, questions.map((q) => q.id));
+    const grade = gradeLessonTest(questions, responses, test.passScore);
+
+    if (grade.passed) {
+      await upsertLessonProgress(user.id, lessonId, { testCompleted: true });
+    }
+
+    /** Kết quả một câu, chỉ dựng SAU khi nộp — lúc này mới được tiết lộ đáp án. */
+    const results = questions.map((q) => {
+      const response = responses.get(q.id);
+      const given = Array.isArray(response) ? response.join("") : (response ?? "");
+      return {
+        id: q.id,
+        prompt: q.prompt,
+        typeLabel: GRAMMAR_QUESTION_META[q.type].label,
+        points: q.points,
+        correct: grade.perQuestion.get(q.id) ?? false,
+        given: given.trim(),
+        correctAnswer: grammarAnswerText(q),
+        hint: q.hint,
+      };
+    });
+
+    return {
+      testResult: {
+        percentage: grade.percentage,
+        earnedPoints: grade.earnedPoints,
+        totalPoints: grade.totalPoints,
+        correctCount: grade.correctCount,
+        blankCount: grade.blankCount,
+        passed: grade.passed,
+        passScore: test.passScore,
+        questionCount: questions.length,
+        results,
+      },
+    };
+  }
+
   await upsertLessonProgress(user.id, params.lessonId!, { learningCompleted: true });
   return redirect(`/student/courses/${params.courseId}/lessons/${params.lessonId}/exercise`);
 }
 
-/** Bài học chưa có block dạng này. Dạng đã làm nhưng bài chưa soạn thì nói
- *  "chưa có", còn dạng chưa hỗ trợ thì nói "đang phát triển". */
-function BlockPlaceholder({ type }: { type: LearningBlockType }) {
-  const meta = BLOCK_META[type];
-  return (
-    <div className="rounded-lg border-2 border-dashed border-primary/20 bg-primary/5 p-8 text-center">
-      <div className="flex justify-center mb-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <Construction className="h-6 w-6" />
-        </div>
-      </div>
-      <p className="text-sm font-medium">
-        {meta.implemented
-          ? `Bài này chưa có phần ${meta.label}`
-          : `Dạng "${meta.label}" đang được phát triển`}
-      </p>
-      <p className="text-sm text-muted-foreground mt-1">Nội dung sẽ được bổ sung trong thời gian tới.</p>
-    </div>
-  );
-}
-
 export default function LessonDetail() {
-  const { user, lesson, isUnlocked, blocks, blockStatuses } = useLoaderData<typeof loader>();
-  const [activeTab, setActiveTab] = useState<LearningBlockType>("FLASHCARD");
+  const { user, lesson, isUnlocked, blocks, blockStatuses, testQuestions, passScore, lessonStatus } = useLoaderData<typeof loader>();
+  const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string }>();
+  const [activeTab, setActiveTab] = useState<LessonTab>("FLASHCARD");
+
+  // Khi nộp bài xong, tự giữ kết quả trong fetcher.data
+  const testResult = testFetcher.data && "testResult" in testFetcher.data ? testFetcher.data.testResult : null;
+  const testError = testFetcher.data && "testError" in testFetcher.data ? testFetcher.data.testError : null;
+  const isSubmittingTest = testFetcher.state !== "idle";
 
   if (!isUnlocked) {
     return (
@@ -158,9 +222,9 @@ export default function LessonDetail() {
   // block đã tạo nhưng chưa chọn nội dung vẫn tính là có, để học viên bấm vào
   // và thấy lời nhắn cụ thể thay vì tưởng dạng đó không tồn tại.
   const availableTypes = new Set(blocks.map((b) => b.type));
-  // Tab Từ vựng dựa vào kho từ của bài chứ không cần admin tạo block riêng.
+  // Từ vựng/Ngữ pháp hiện tab theo nội dung có sẵn, không qua LearningBlock —
+  // khác với Flashcard/Nghe câu, admin cấu hình xong mới có block.
   if (lesson.content.length > 0) availableTypes.add("VOCABULARY");
-  // Ngữ pháp cũng vậy — đọc thẳng các section của bài.
   if (lesson.grammarSections.length > 0) availableTypes.add("GRAMMAR");
 
   const isEmptyLesson =
@@ -176,7 +240,7 @@ export default function LessonDetail() {
 
     // Ngữ pháp cũng đọc trực tiếp từ bài, mỗi section một card.
     if (activeTab === "GRAMMAR") {
-      if (lesson.grammarSections.length === 0) return <BlockPlaceholder type="GRAMMAR" />;
+      if (lesson.grammarSections.length === 0) return <LessonTabEmpty tab="GRAMMAR" />;
       return (
         <div className="space-y-4 max-w-3xl mx-auto">
           {lesson.grammarSections.map((section) => (
@@ -186,10 +250,156 @@ export default function LessonDetail() {
       );
     }
 
+    // Sách bài tập — đọc từ block config thật
+    if (activeTab === "WORKBOOK") {
+      const workbookBlock = blocks.find((b) => b.type === "WORKBOOK");
+      if (!workbookBlock) return <LessonTabEmpty tab="WORKBOOK" />;
+      const parsed = parseWorkbookConfig(workbookBlock.config);
+      if (!parsed.ok) return <LessonTabEmpty tab="WORKBOOK" />;
+      return <WorkbookListeningTest config={parsed.data} />;
+    }
+
+    // Tab Kiểm tra — inline, dùng fetcher để không rời trang
+    if (activeTab === "TEST") {
+      // Kết quả sau khi nộp
+      if (testResult) {
+        return (
+          <div className="space-y-4 max-w-3xl mx-auto">
+            <Card className={cn(testResult.passed ? "border-success/40" : "border-destructive/40")}>
+              <CardContent className="pt-6 space-y-4">
+                <div className="flex flex-col items-center text-center gap-2">
+                  {testResult.passed ? (
+                    <>
+                      <PartyPopper className="h-10 w-10 text-success" />
+                      <p className="text-lg font-bold text-success">Đạt — bài học hoàn tất!</p>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-10 w-10 text-destructive" />
+                      <p className="text-lg font-bold text-destructive">Chưa đạt</p>
+                      <p className="text-sm text-muted-foreground">
+                        Cần từ {testResult.passScore}% trở lên. Bạn làm lại được bao nhiêu lần cũng không sao.
+                      </p>
+                    </>
+                  )}
+                  <p className="text-4xl font-bold tabular-nums mt-1">{testResult.percentage}%</p>
+                  <p className="text-sm text-muted-foreground tabular-nums">
+                    {testResult.earnedPoints}/{testResult.totalPoints} điểm · đúng {testResult.correctCount}/{testResult.questionCount} câu
+                    {testResult.blankCount > 0 && ` · bỏ trống ${testResult.blankCount} câu`}
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <Progress value={testResult.percentage} className="h-2" />
+                  <p className="text-xs text-muted-foreground text-right">Điểm đạt: {testResult.passScore}%</p>
+                </div>
+                <div className="flex flex-wrap gap-2 justify-center pt-1">
+                  {testResult.passed ? (
+                    <Button asChild>
+                      <Link to={`/student/courses/${lesson.courseId}`}>Quay lại khóa học</Link>
+                    </Button>
+                  ) : (
+                    // Xóa kết quả cũ bằng cách reload loader (trộn lại câu ARRANGE)
+                    <Button onClick={() => window.location.reload()}>
+                      <RefreshCw className="h-4 w-4 mr-1.5" />Làm lại
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Chi tiết từng câu</CardTitle>
+                <CardDescription>Đối chiếu đáp án đúng để lần sau làm tốt hơn.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {testResult.results.map((q, i) => (
+                  <div key={q.id}
+                    className={cn("rounded-lg border p-3 space-y-1.5",
+                      q.correct ? "border-success/30 bg-success/5" : "border-destructive/30 bg-destructive/5")}>
+                    <div className="flex items-start gap-2">
+                      {q.correct
+                        ? <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                        : <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />}
+                      <div className="flex-1 min-w-0 space-y-1.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono text-xs text-muted-foreground tabular-nums">{i + 1}.</span>
+                          <p className="font-medium">{q.prompt}</p>
+                          <Badge variant="outline" className="bg-background/60 text-muted-foreground text-[10px]">
+                            {q.typeLabel}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground tabular-nums">
+                            {q.correct ? q.points : 0}/{q.points} điểm
+                          </span>
+                        </div>
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">Bạn trả lời: </span>
+                          {q.given
+                            ? <span className={q.correct ? "text-success" : "text-destructive"}>{q.given}</span>
+                            : <span className="italic text-muted-foreground">bỏ trống</span>}
+                        </p>
+                        {!q.correct && (
+                          <p className="text-sm">
+                            <span className="text-muted-foreground">Đáp án đúng: </span>
+                            <span className="font-medium">{q.correctAnswer}</span>
+                          </p>
+                        )}
+                        {q.hint && (
+                          <p className="flex items-start gap-1.5 text-sm text-muted-foreground whitespace-pre-line">
+                            <Lightbulb className="h-3.5 w-3.5 shrink-0 mt-0.5" />{q.hint}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        );
+      }
+
+      // Chưa có câu hỏi
+      if (testQuestions.length === 0) return <LessonTabEmpty tab="TEST" />;
+
+      // Form làm bài
+      return (
+        <div className="max-w-3xl mx-auto space-y-4">
+          {lessonStatus.testStatus === "COMPLETED" && (
+            <div className="flex items-center gap-2 rounded-lg border border-success/30 bg-success/5 p-3 text-sm text-success">
+              <PartyPopper className="h-4 w-4 shrink-0" />
+              <span className="font-medium">Bạn đã đạt bài kiểm tra này. Làm lại để ôn cũng được.</span>
+            </div>
+          )}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">
+                {testQuestions.length} câu · cần {passScore}% để đạt
+              </CardTitle>
+              <CardDescription>
+                Trả lời hết rồi bấm Nộp bài, hệ thống sẽ chấm và cho biết điểm.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {testError && (
+                <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                  {testError}
+                </div>
+              )}
+              <testFetcher.Form method="post">
+                <input type="hidden" name="intent" value="submit-test" />
+                <LessonTest questions={testQuestions} isSubmitting={isSubmittingTest} />
+              </testFetcher.Form>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     const blockIndex = blocks.findIndex((b) => b.type === activeTab);
     // Bài chưa có block dạng này — khác với block đã có nhưng chưa chọn nội
     // dung, trường hợp đó BlockRenderer hiện "chưa có nội dung" của riêng nó.
-    if (blockIndex === -1) return <BlockPlaceholder type={activeTab} />;
+    if (blockIndex === -1) return <LessonTabEmpty tab={activeTab} />;
 
     return <BlockRenderer block={blocks[blockIndex]} status={blockStatuses[blockIndex]} />;
   };
@@ -224,9 +434,8 @@ export default function LessonDetail() {
               onTabChange={setActiveTab}
               availableTypes={availableTypes}
               hasTest={(lesson.test?._count.questions ?? 0) > 0}
-              lessonId={lesson.id}
-              courseId={lesson.courseId}
             />
+
 
             <div className="max-w-6xl mx-auto px-4">
               {renderTabContent()}

@@ -44,9 +44,9 @@ function hasAnswer(question: LessonTestQuestion, answer: Answer): boolean {
   return question.type === "ARRANGE" ? answer.picked.length > 0 : answer.text.trim().length > 0;
 }
 
-export function LessonTest({ questions }: { questions: LessonTestQuestion[] }) {
+export function LessonTest({ questions, isSubmitting = false }: { questions: LessonTestQuestion[]; isSubmitting?: boolean }) {
   const navigation = useNavigation();
-  const isSubmitting = navigation.state !== "idle";
+  const submitting = isSubmitting || navigation.state !== "idle";
 
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
@@ -242,8 +242,8 @@ export function LessonTest({ questions }: { questions: LessonTestQuestion[] }) {
             </div>
           </div>
         )}
-        <Button type="submit" name="intent" value="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting
+        <Button type="submit" name="intent" value="submit" className="w-full" disabled={submitting}>
+          {submitting
             ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" />Đang chấm bài…</>
             : <><Send className="h-4 w-4 mr-1.5" />Nộp bài</>}
         </Button>

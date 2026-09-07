@@ -2,9 +2,10 @@ import { useFetcher } from "react-router";
 import { BlockShell } from "./block-shell";
 import { FlashcardBlock, type FlashcardVocab } from "./flashcard-block";
 import { ListeningBlock, type ListeningQuestion } from "./listening-block";
-import { parseFlashcardConfig, parseListeningConfig, BLOCK_META, type LearningBlockType } from "~/lib/learning-blocks";
+import { parseFlashcardConfig, parseListeningConfig, type LearningBlockType } from "~/lib/learning-blocks";
+import { LessonTabEmpty } from "../lesson-tab-empty";
 import type { ProgressStatus } from "~/types/progress";
-import { Construction, Lock, Inbox } from "lucide-react";
+import { Lock } from "lucide-react";
 
 /** Block đã được loader resolve sẵn từ vựng — component không tự query */
 export interface ResolvedBlock {
@@ -90,24 +91,15 @@ export function BlockRenderer({ block, status }: { block: ResolvedBlock; status:
     const parsed = parseFlashcardConfig(block.config);
     // Config lỗi hoặc chưa có từ nào → với học viên đều chỉ là "chưa có nội dung".
     // Không hiện message validate của zod: đó là thông tin dành cho admin.
-    if (!parsed.ok) {
-      return (
-        <BlockShell {...shellProps}>
-          <BlockEmpty unit="từ vựng" />
-        </BlockShell>
-      );
-    }
+    // Không bọc BlockShell: block rỗng thì header (tiêu đề, badge "bắt buộc")
+    // chẳng có gì để dẫn vào, và bọc Card sẽ lệch với 5 tab còn lại.
+    if (!parsed.ok) return <LessonTabEmpty tab="FLASHCARD" />;
+
     // Sắp thẻ theo đúng thứ tự admin đã chọn trong config
     const order = new Map(parsed.data.vocabItemIds.map((id, i) => [id, i]));
     const items = [...block.vocabItems].sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
 
-    if (items.length === 0) {
-      return (
-        <BlockShell {...shellProps}>
-          <BlockEmpty unit="từ vựng" />
-        </BlockShell>
-      );
-    }
+    if (items.length === 0) return <LessonTabEmpty tab="FLASHCARD" />;
 
     return (
       <BlockShell {...shellProps}>
@@ -118,13 +110,7 @@ export function BlockRenderer({ block, status }: { block: ResolvedBlock; status:
 
   if (block.type === "LISTENING") {
     const parsed = parseListeningConfig(block.config);
-    if (!parsed.ok) {
-      return (
-        <BlockShell {...shellProps}>
-          <BlockEmpty unit="câu hỏi" />
-        </BlockShell>
-      );
-    }
+    if (!parsed.ok) return <LessonTabEmpty tab="LISTENING" />;
 
     // Sắp câu theo đúng thứ tự admin đã chọn trong config
     const chosenIds = parsed.data.source === "sentence" ? parsed.data.sentenceItemIds : parsed.data.vocabItemIds;
@@ -133,13 +119,7 @@ export function BlockRenderer({ block, status }: { block: ResolvedBlock; status:
       .filter((q) => order.has(q.id))
       .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
 
-    if (items.length === 0) {
-      return (
-        <BlockShell {...shellProps}>
-          <BlockEmpty unit="câu hỏi" />
-        </BlockShell>
-      );
-    }
+    if (items.length === 0) return <LessonTabEmpty tab="LISTENING" />;
 
     return (
       <BlockShell {...shellProps}>
@@ -149,35 +129,5 @@ export function BlockRenderer({ block, status }: { block: ResolvedBlock; status:
   }
 
   // Các dạng chưa hoàn thiện
-  return (
-    <BlockShell {...shellProps}>
-      <div className="rounded-lg border-2 border-dashed border-primary/20 bg-primary/5 p-8 text-center">
-        <div className="flex justify-center mb-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Construction className="h-6 w-6" />
-          </div>
-        </div>
-        <p className="text-sm font-medium">Dạng &quot;{BLOCK_META[block.type].label}&quot; đang được phát triển</p>
-        <p className="text-sm text-muted-foreground mt-1">Nội dung sẽ được bổ sung trong thời gian tới.</p>
-      </div>
-    </BlockShell>
-  );
-}
-
-/**
- * Phần học chưa có nội dung — dùng cho cả config lỗi và config rỗng.
- * `unit` nói rõ đang thiếu gì: flashcard thiếu từ vựng, nghe câu thiếu câu.
- */
-function BlockEmpty({ unit }: { unit: string }) {
-  return (
-    <div className="rounded-lg border border-dashed p-8 text-center">
-      <div className="flex justify-center mb-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <Inbox className="h-6 w-6" />
-        </div>
-      </div>
-      <p className="text-sm font-medium">Chưa có {unit} nào</p>
-      <p className="text-sm text-muted-foreground mt-1">Nội dung sẽ được bổ sung trong thời gian tới.</p>
-    </div>
-  );
+  return <LessonTabEmpty tab={block.type} />;
 }

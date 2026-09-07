@@ -4,6 +4,7 @@ import { Button } from "~/components/ui/button";
 import { Volume2 } from "lucide-react";
 import { speakChinese } from "~/lib/speech";
 import { WORD_TYPE_META, type WordType } from "~/lib/word-types";
+import { LessonTabEmpty } from "./lesson-tab-empty";
 
 interface VocabularyItem {
   id: string;
@@ -19,13 +20,7 @@ interface VocabularyTableProps {
 }
 
 export function VocabularyTable({ items }: VocabularyTableProps) {
-  if (items.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        Chưa có từ vựng nào
-      </div>
-    );
-  }
+  if (items.length === 0) return <LessonTabEmpty tab="VOCABULARY" />;
 
   return (
     <div className="border rounded-lg overflow-hidden">
