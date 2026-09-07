@@ -4,7 +4,7 @@ import { useLoaderData, useFetcher, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { getLessonForAdmin } from "~/lib/db.server";
 import { prisma } from "~/lib/prisma.server";
-import { BLOCK_META, isLearningBlockType, type LearningBlockType } from "~/lib/learning-blocks";
+import { parseFlashcardConfig, parseListeningConfig } from "~/lib/learning-blocks";
 import { WORD_TYPES, WORD_TYPE_META, parseWordType, type WordType } from "~/lib/word-types";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
@@ -15,9 +15,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Overlay } from "~/components/common/overlay";
 import {
   ArrowLeft, Plus, Pencil, Trash2, X, Loader2, ChevronUp, ChevronDown,
-  Volume2, BookOpen, Layers, AlertTriangle, Headphones, GraduationCap, ClipboardCheck,
+  Volume2, BookOpen, Layers, Headphones, GraduationCap, ClipboardCheck,
+  Eye, Settings, BookMarked,
 } from "lucide-react";
-import { cn } from "~/lib/utils";
 import { speakChinese } from "~/lib/speech";
 
 type VocabRow = { id: string; chinese: string; pinyin: string; translation: string; wordType: WordType | null; audioUrl: string | null; note: string | null; order: number };
@@ -161,31 +161,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
       prisma.sentenceItem.update({ where: { id: current.id }, data: { order: -1 } }),
       prisma.sentenceItem.update({ where: { id: neighbour.id }, data: { order: current.order } }),
       prisma.sentenceItem.update({ where: { id: current.id }, data: { order: neighbour.order } }),
-    ]);
-    return { success: true };
-  }
-
-  // ── Block ──
-  if (intent === "block-delete") {
-    await prisma.learningBlock.delete({ where: { id: String(form.get("blockId")) } });
-    return { success: true };
-  }
-
-  if (intent === "block-move") {
-    const blockId = String(form.get("blockId"));
-    const direction = String(form.get("direction"));
-    const current = await prisma.learningBlock.findUnique({ where: { id: blockId }, select: { id: true, order: true } });
-    if (!current) return { error: "Không tìm thấy phần học" };
-    const neighbour = await prisma.learningBlock.findFirst({
-      where: { lessonId, order: direction === "up" ? { lt: current.order } : { gt: current.order } },
-      orderBy: { order: direction === "up" ? "desc" : "asc" },
-      select: { id: true, order: true },
-    });
-    if (!neighbour) return { success: true };
-    await prisma.$transaction([
-      prisma.learningBlock.update({ where: { id: current.id }, data: { order: -1 } }),
-      prisma.learningBlock.update({ where: { id: neighbour.id }, data: { order: current.order } }),
-      prisma.learningBlock.update({ where: { id: current.id }, data: { order: neighbour.order } }),
     ]);
     return { success: true };
   }
@@ -392,38 +367,53 @@ function SentenceModal({ mode, sentence, onClose }: { mode: VocabModalMode; sent
   );
 }
 
-function BlockDeleteModal({ block, onClose }: { block: { id: string; title: string } | null; onClose: () => void }) {
-  const fetcher = useFetcher<{ success?: boolean }>();
-  const isLoading = fetcher.state !== "idle";
+// ─── Preview cấu hình block ──────────────────────────────────────────────────
 
-  useEffect(() => {
-    if (fetcher.state === "idle" && fetcher.data?.success) onClose();
-  }, [fetcher.state, fetcher.data, onClose]);
-
-  if (!block) return null;
-
+function FlashcardBlockPreview({ block, vocabCount }: { block: { config: unknown }; vocabCount: number }) {
+  const parsed = parseFlashcardConfig(block.config);
+  if (!parsed.ok) {
+    return <p className="text-sm text-warning">Cấu hình không hợp lệ ({parsed.error}). Bấm Cài đặt để soạn lại.</p>;
+  }
+  const { vocabItemIds, frontSide, showPinyinOnFront, shuffle, autoSpeak } = parsed.data;
   return (
-    <Overlay onClose={onClose}>
-      <div className="space-y-4">
-        <div className="flex items-start justify-between">
-          <h2 className="text-lg font-bold">Xóa dạng bài học</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
-        </div>
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-          <p>Xóa phần <strong>{block.title}</strong>? Tiến độ học viên đã đạt ở phần này sẽ bị xóa. Từ vựng của bài vẫn được giữ.</p>
-        </div>
-        <fetcher.Form method="post">
-          <input type="hidden" name="intent" value="block-delete" />
-          <input type="hidden" name="blockId" value={block.id} />
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Hủy</Button>
-            <Button type="submit" variant="destructive" disabled={isLoading}>
-              {isLoading && <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />}Xóa phần này
-            </Button>
-          </div>
-        </fetcher.Form>
+    <div className="flex items-center gap-3 rounded-lg border p-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <Layers className="h-4 w-4" />
       </div>
-    </Overlay>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium">
+          {vocabItemIds.length}/{vocabCount} từ vựng · mặt trước {frontSide === "chinese" ? "chữ Hán" : "nghĩa"}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {[showPinyinOnFront && "hiện pinyin", shuffle && "xáo trộn", autoSpeak && "tự đọc"].filter(Boolean).join(" · ") || "Không có tùy chọn thêm"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ListeningBlockPreview({ block, vocabCount, sentenceCount }: { block: { config: unknown }; vocabCount: number; sentenceCount: number }) {
+  const parsed = parseListeningConfig(block.config);
+  if (!parsed.ok) {
+    return <p className="text-sm text-warning">Cấu hình không hợp lệ ({parsed.error}). Bấm Cài đặt để soạn lại.</p>;
+  }
+  const { source, vocabItemIds, sentenceItemIds, answerMode, maxReplays } = parsed.data;
+  const count = source === "sentence" ? sentenceItemIds.length : vocabItemIds.length;
+  const total = source === "sentence" ? sentenceCount : vocabCount;
+  return (
+    <div className="flex items-center gap-3 rounded-lg border p-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <Headphones className="h-4 w-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium">
+          {count}/{total} {source === "sentence" ? "câu" : "từ vựng"} · nhập {answerMode === "chinese" ? "chữ Hán" : "pinyin"}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {maxReplays > 0 ? `Tối đa ${maxReplays} lần nghe lại` : "Nghe lại không giới hạn"}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -436,28 +426,30 @@ export default function AdminLessonDetail() {
   const [selectedVocab, setSelectedVocab] = useState<VocabRow | null>(null);
   const [sentenceMode, setSentenceMode] = useState<VocabModalMode>(null);
   const [selectedSentence, setSelectedSentence] = useState<SentenceRow | null>(null);
-  const [blockToDelete, setBlockToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [showAllVocab, setShowAllVocab] = useState(false);
+  const [showAllSentences, setShowAllSentences] = useState(false);
 
   const openVocab = (mode: VocabModalMode, v: VocabRow | null = null) => { setSelectedVocab(v); setVocabMode(mode); };
   const closeVocab = useCallback(() => { setVocabMode(null); setSelectedVocab(null); }, []);
   const openSentence = (mode: VocabModalMode, s: SentenceRow | null = null) => { setSelectedSentence(s); setSentenceMode(mode); };
   const closeSentence = useCallback(() => { setSentenceMode(null); setSelectedSentence(null); }, []);
-  const closeBlockDelete = useCallback(() => setBlockToDelete(null), []);
 
   const moveVocab = (vocabId: string, direction: "up" | "down") =>
     moveFetcher.submit({ intent: "vocab-move", vocabId, direction }, { method: "post" });
   const moveSentence = (sentenceId: string, direction: "up" | "down") =>
     moveFetcher.submit({ intent: "sentence-move", sentenceId, direction }, { method: "post" });
-  const moveBlock = (blockId: string, direction: "up" | "down") =>
-    moveFetcher.submit({ intent: "block-move", blockId, direction }, { method: "post" });
 
   const hasVocab = lesson.content.length > 0;
   const hasSentences = lesson.sentences.length > 0;
-  // Nghe câu soạn được từ kho câu, nên chỉ cần một trong hai kho có nội dung
-  const canAddBlock = hasVocab || hasSentences;
+  const hasGrammar = lesson.grammarSections.length > 0;
   // Bài kiểm tra được tạo lười ở trang quản lý, nên bài chưa mở trang đó thì
   // `lesson.test` còn null — không phải là đã có bài mà rỗng câu hỏi.
   const testQuestionCount = lesson.test?.questions.length ?? 0;
+
+  // Track các blocks hiện có theo type (unique constraint đảm bảo tối đa 1 block/type)
+  const flashcardBlock = lesson.learningBlocks.find((b) => b.type === "FLASHCARD");
+  const listeningBlock = lesson.learningBlocks.find((b) => b.type === "LISTENING");
+  const workbookBlock = lesson.learningBlocks.find((b) => b.type === "WORKBOOK");
 
   return (
     <>
@@ -477,18 +469,23 @@ export default function AdminLessonDetail() {
             <p className="text-xl text-muted-foreground font-mono mt-1">{lesson.subtitle}</p>
           </div>
 
-          {/* Kho từ vựng */}
+          {/* Từ vựng */}
           <Card>
             <CardHeader className="pb-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <CardTitle className="text-base">
-                    Kho từ vựng <span className="text-sm font-normal text-muted-foreground">({lesson.content.length})</span>
-                  </CardTitle>
-                  <CardDescription>Các dạng bài học bên dưới sẽ chọn từ trong kho này.</CardDescription>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-base">
+                      Từ vựng <span className="text-sm font-normal text-muted-foreground">({lesson.content.length})</span>
+                    </CardTitle>
+                  </div>
+                  <CardDescription>
+                    Học viên xem ở tab Từ vựng.
+                  </CardDescription>
                 </div>
-                <Button size="sm" onClick={() => openVocab("create")}>
-                  <Plus className="h-4 w-4 mr-1.5" />Thêm từ vựng
+                <Button size="sm" variant="outline" onClick={() => openVocab("create")}>
+                  <Plus className="h-4 w-4 mr-1.5" />Thêm từ
                 </Button>
               </div>
             </CardHeader>
@@ -497,11 +494,16 @@ export default function AdminLessonDetail() {
                 <div className="rounded-lg border border-dashed p-8 text-center">
                   <BookOpen className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
                   <p className="text-sm font-medium">Chưa có từ vựng</p>
-                  <p className="text-sm text-muted-foreground mt-1">Thêm từ vựng trước khi tạo dạng bài học.</p>
+                  <p className="text-sm text-muted-foreground mt-1 mb-4">
+                    Thêm từ vựng trước để bật tab cho học viên.
+                  </p>
+                  <Button size="sm" onClick={() => openVocab("create")}>
+                    <Plus className="h-4 w-4 mr-1.5" />Thêm từ vựng đầu tiên
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {lesson.content.map((v, i) => (
+                  {(showAllVocab ? lesson.content : lesson.content.slice(0, 5)).map((v, i) => (
                     <div key={v.id} className="flex items-center gap-3 rounded-lg border p-3">
                       <div className="flex flex-col">
                         <button onClick={() => moveVocab(v.id, "up")} disabled={i === 0}
@@ -541,70 +543,163 @@ export default function AdminLessonDetail() {
                       </div>
                     </div>
                   ))}
+                  {lesson.content.length > 5 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => setShowAllVocab(!showAllVocab)}
+                    >
+                      {showAllVocab ? "Thu gọn" : `Xem tất cả ${lesson.content.length} từ`}
+                    </Button>
+                  )}
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Kho câu mẫu */}
+          {/* Flashcard */}
           <Card>
             <CardHeader className="pb-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <CardTitle className="text-base">
-                    Kho câu <span className="text-sm font-normal text-muted-foreground">({lesson.sentences.length})</span>
-                  </CardTitle>
-                  <CardDescription>Câu mẫu dùng cho dạng Nghe câu.</CardDescription>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Layers className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-base">Flashcard</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Học viên xem ở tab Flashcard. {hasVocab ? "Bấm nút bên phải để bật/cài đặt." : "Cần có từ vựng để bật Flashcard."}
+                  </CardDescription>
                 </div>
-                <Button size="sm" variant="outline" onClick={() => openSentence("create")}>
-                  <Plus className="h-4 w-4 mr-1.5" />Thêm câu
+                <Button size="sm" variant="outline" disabled={!hasVocab} asChild={hasVocab}>
+                  {hasVocab ? (
+                    <Link to={flashcardBlock
+                      ? `/admin/lessons/${lesson.id}/blocks/${flashcardBlock.id}/edit`
+                      : `/admin/lessons/${lesson.id}/blocks/new?type=FLASHCARD`}>
+                      <Settings className="h-4 w-4 mr-1.5" />Cài đặt
+                    </Link>
+                  ) : (
+                    <><Settings className="h-4 w-4 mr-1.5" />Cài đặt</>
+                  )}
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              {!hasSentences ? (
+              {!hasVocab ? (
                 <div className="rounded-lg border border-dashed p-8 text-center">
-                  <Headphones className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm font-medium">Chưa có câu nào</p>
-                  <p className="text-sm text-muted-foreground mt-1">Không bắt buộc — dạng Nghe câu có thể dùng từ vựng.</p>
+                  <Layers className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm font-medium">Cần có từ vựng để bật Flashcard</p>
+                  <p className="text-sm text-muted-foreground mt-1">Thêm từ vựng ở card bên trên trước.</p>
+                </div>
+              ) : !flashcardBlock ? (
+                <div className="rounded-lg border border-dashed p-8 text-center">
+                  <Layers className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm font-medium">Tab Flashcard chưa bật</p>
+                  <p className="text-sm text-muted-foreground mt-1">Bấm &quot;Bật tab Flashcard&quot; để chọn từ vựng và cấu hình.</p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {lesson.sentences.map((s, i) => (
-                    <div key={s.id} className="flex items-center gap-3 rounded-lg border p-3">
-                      <div className="flex flex-col">
-                        <button onClick={() => moveSentence(s.id, "up")} disabled={i === 0}
-                          className="text-muted-foreground hover:text-foreground disabled:opacity-30" title="Lên trên">
-                          <ChevronUp className="h-3.5 w-3.5" />
-                        </button>
-                        <button onClick={() => moveSentence(s.id, "down")} disabled={i === lesson.sentences.length - 1}
-                          className="text-muted-foreground hover:text-foreground disabled:opacity-30" title="Xuống dưới">
-                          <ChevronDown className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-lg font-medium">{s.chinese}</p>
-                        <p className="text-sm text-primary font-mono">{s.pinyin}</p>
-                        <p className="text-sm text-muted-foreground">{s.translation}</p>
-                        {s.note && <p className="text-xs text-muted-foreground italic mt-0.5">{s.note}</p>}
-                      </div>
-                      <div className="flex gap-1 shrink-0">
-                        <Button variant="ghost" size="icon" title="Nghe thử"
-                          onClick={() => speakChinese(s.chinese, s.audioUrl)}>
-                          <Volume2 className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" title="Sửa" onClick={() => openSentence("edit", s as SentenceRow)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" title="Xóa" onClick={() => openSentence("delete", s as SentenceRow)}
-                          className="hover:text-destructive hover:bg-destructive/10">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <FlashcardBlockPreview block={flashcardBlock} vocabCount={lesson.content.length} />
               )}
+            </CardContent>
+          </Card>
+
+          {/* Nghe câu */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Headphones className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-base">Nghe câu</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Học viên xem ở tab Nghe câu. {hasVocab || hasSentences ? "Bấm nút bên phải để bật/cài đặt." : "Cần có từ vựng hoặc câu mẫu để bật."}
+                  </CardDescription>
+                </div>
+                <Button size="sm" variant="outline" disabled={!hasVocab && !hasSentences} asChild={hasVocab || hasSentences}>
+                  {hasVocab || hasSentences ? (
+                    <Link to={listeningBlock
+                      ? `/admin/lessons/${lesson.id}/blocks/${listeningBlock.id}/edit`
+                      : `/admin/lessons/${lesson.id}/blocks/new?type=LISTENING`}>
+                      <Settings className="h-4 w-4 mr-1.5" />Cài đặt
+                    </Link>
+                  ) : (
+                    <><Settings className="h-4 w-4 mr-1.5" />Cài đặt</>
+                  )}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!hasVocab && !hasSentences ? (
+                <div className="rounded-lg border border-dashed p-8 text-center">
+                  <Headphones className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm font-medium">Cần có từ vựng hoặc câu mẫu để bật Nghe câu</p>
+                </div>
+              ) : !listeningBlock ? (
+                <div className="rounded-lg border border-dashed p-8 text-center">
+                  <Headphones className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm font-medium">Tab Nghe câu chưa bật</p>
+                  <p className="text-sm text-muted-foreground mt-1">Bấm &quot;Bật tab Nghe câu&quot; để chọn nguồn và cấu hình.</p>
+                </div>
+              ) : (
+                <ListeningBlockPreview block={listeningBlock} vocabCount={lesson.content.length} sentenceCount={lesson.sentences.length} />
+              )}
+
+              {/* Kho câu mẫu — nguồn dữ liệu cho Nghe câu, ngoài kho từ vựng đã có ở trên */}
+              <div className="rounded-lg border p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">
+                    Kho câu mẫu <span className="text-muted-foreground font-normal">({lesson.sentences.length})</span>
+                  </p>
+                  <Button size="sm" variant="outline" onClick={() => openSentence("create")}>
+                    <Plus className="h-4 w-4 mr-1.5" />Thêm câu
+                  </Button>
+                </div>
+                {!hasSentences ? (
+                  <p className="text-sm text-muted-foreground">Không bắt buộc — Nghe câu có thể dùng từ vựng thay thế.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {(showAllSentences ? lesson.sentences : lesson.sentences.slice(0, 5)).map((s, i) => (
+                      <div key={s.id} className="flex items-center gap-3 rounded-lg border p-3">
+                        <div className="flex flex-col">
+                          <button onClick={() => moveSentence(s.id, "up")} disabled={i === 0}
+                            className="text-muted-foreground hover:text-foreground disabled:opacity-30" title="Lên trên">
+                            <ChevronUp className="h-3.5 w-3.5" />
+                          </button>
+                          <button onClick={() => moveSentence(s.id, "down")} disabled={i === lesson.sentences.length - 1}
+                            className="text-muted-foreground hover:text-foreground disabled:opacity-30" title="Xuống dưới">
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-lg font-medium">{s.chinese}</p>
+                          <p className="text-sm text-primary font-mono">{s.pinyin}</p>
+                          <p className="text-sm text-muted-foreground">{s.translation}</p>
+                          {s.note && <p className="text-xs text-muted-foreground italic mt-0.5">{s.note}</p>}
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <Button variant="ghost" size="icon" title="Nghe thử"
+                            onClick={() => speakChinese(s.chinese, s.audioUrl)}>
+                            <Volume2 className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" title="Sửa" onClick={() => openSentence("edit", s as SentenceRow)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" title="Xóa" onClick={() => openSentence("delete", s as SentenceRow)}
+                            className="hover:text-destructive hover:bg-destructive/10">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {lesson.sentences.length > 5 && (
+                      <Button variant="ghost" size="sm" className="w-full" onClick={() => setShowAllSentences(!showAllSentences)}>
+                        {showAllSentences ? "Thu gọn" : `Xem tất cả ${lesson.sentences.length} câu`}
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
@@ -612,11 +707,17 @@ export default function AdminLessonDetail() {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <CardTitle className="text-base">
-                    Ngữ pháp <span className="text-sm font-normal text-muted-foreground">({lesson.grammarSections.length})</span>
-                  </CardTitle>
-                  <CardDescription>Học viên xem ở tab Ngữ pháp, không cần tạo dạng bài học.</CardDescription>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-base">
+                      Ngữ pháp <span className="text-sm font-normal text-muted-foreground">({lesson.grammarSections.length})</span>
+                    </CardTitle>
+
+                  </div>
+                  <CardDescription>
+                    Học viên xem ở tab Ngữ pháp.
+                  </CardDescription>
                 </div>
                 <Button size="sm" variant="outline" asChild>
                   <Link to={`/admin/lessons/${lesson.id}/grammar`}>
@@ -648,6 +749,57 @@ export default function AdminLessonDetail() {
                       </div>
                     </Link>
                   ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Sách bài tập */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <BookMarked className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-base">Sách bài tập</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Học viên xem ở tab Sách bài tập. Bấm nút bên phải để bật/soạn nội dung.
+                  </CardDescription>
+                </div>
+                <Button size="sm" variant="outline" asChild>
+                  <Link to={workbookBlock
+                    ? `/admin/lessons/${lesson.id}/blocks/${workbookBlock.id}/edit`
+                    : `/admin/lessons/${lesson.id}/blocks/new?type=WORKBOOK`}>
+                    <Settings className="h-4 w-4 mr-1.5" />Cài đặt
+                  </Link>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {!workbookBlock ? (
+                <div className="rounded-lg border border-dashed p-8 text-center">
+                  <BookMarked className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm font-medium">Tab Sách bài tập chưa bật</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Bấm &quot;Bật tab Sách bài tập&quot; để soạn các phần và câu hỏi bài tập.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 rounded-lg border p-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <BookMarked className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{workbookBlock.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {(() => {
+                        const cfg = workbookBlock.config as { sections?: unknown[] };
+                        const count = Array.isArray(cfg?.sections) ? cfg.sections.length : 0;
+                        return count > 0 ? `${count} phần bài tập` : "Chưa có phần nào — bấm Chỉnh sửa để thêm";
+                      })()}
+                    </p>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -696,103 +848,6 @@ export default function AdminLessonDetail() {
               )}
             </CardContent>
           </Card>
-
-          {/* Dạng bài học */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <CardTitle className="text-base">
-                    Dạng bài học <span className="text-sm font-normal text-muted-foreground">({lesson.learningBlocks.length})</span>
-                  </CardTitle>
-                  <CardDescription>Học viên học lần lượt theo thứ tự bên dưới.</CardDescription>
-                </div>
-                <Button size="sm" asChild disabled={!canAddBlock}>
-                  <Link to={`/admin/lessons/${lesson.id}/blocks/new`}>
-                    <Plus className="h-4 w-4 mr-1.5" />Thêm dạng bài học
-                  </Link>
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {!canAddBlock ? (
-                <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm text-warning flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-                  <span>Cần có ít nhất 1 từ vựng hoặc 1 câu trước khi thêm dạng bài học.</span>
-                </div>
-              ) : lesson.learningBlocks.length === 0 ? (
-                <div className="rounded-lg border border-dashed p-8 text-center">
-                  <Layers className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm font-medium">Chưa có dạng bài học nào</p>
-                  <p className="text-sm text-muted-foreground mt-1 mb-4">Thêm Flashcard, luyện nghe, ngữ pháp...</p>
-                  <Button size="sm" asChild>
-                    <Link to={`/admin/lessons/${lesson.id}/blocks/new`}>
-                      <Plus className="h-4 w-4 mr-1.5" />Thêm dạng bài học
-                    </Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {lesson.learningBlocks.map((b, i) => {
-                    const type = isLearningBlockType(b.type) ? (b.type as LearningBlockType) : null;
-                    const meta = type ? BLOCK_META[type] : null;
-                    const Icon = meta?.icon ?? Layers;
-                    const config = b.config as { source?: string; vocabItemIds?: unknown; sentenceItemIds?: unknown };
-                    // Nghe câu có thể lấy nguồn từ kho câu, đếm theo đúng nguồn đang dùng
-                    const usesSentences = config?.source === "sentence";
-                    const ids = usesSentences ? config?.sentenceItemIds : config?.vocabItemIds;
-                    const count = Array.isArray(ids) ? ids.length : 0;
-                    const unit = usesSentences ? "câu" : "từ vựng";
-
-                    return (
-                      <div key={b.id} className="flex items-center gap-3 rounded-lg border p-3">
-                        <div className="flex flex-col">
-                          <button onClick={() => moveBlock(b.id, "up")} disabled={i === 0}
-                            className="text-muted-foreground hover:text-foreground disabled:opacity-30" title="Lên trên">
-                            <ChevronUp className="h-3.5 w-3.5" />
-                          </button>
-                          <button onClick={() => moveBlock(b.id, "down")} disabled={i === lesson.learningBlocks.length - 1}
-                            className="text-muted-foreground hover:text-foreground disabled:opacity-30" title="Xuống dưới">
-                            <ChevronDown className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                        <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary")}>
-                          <Icon className="h-4.5 w-4.5" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-medium truncate">{b.title}</p>
-                            <Badge variant="outline" className="bg-muted/50 text-muted-foreground text-[10px]">
-                              {meta?.label ?? b.type}
-                            </Badge>
-                            {!b.required && (
-                              <Badge variant="outline" className="text-[10px] text-muted-foreground">Tùy chọn</Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {count > 0 ? `${count} ${unit}` : `Chưa chọn ${unit}`}
-                            {b.description ? ` · ${b.description}` : ""}
-                          </p>
-                        </div>
-                        <div className="flex gap-1 shrink-0">
-                          <Button variant="ghost" size="icon" title="Sửa" asChild>
-                            <Link to={`/admin/lessons/${lesson.id}/blocks/${b.id}/edit`}>
-                              <Pencil className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                          <Button variant="ghost" size="icon" title="Xóa"
-                            onClick={() => setBlockToDelete({ id: b.id, title: b.title })}
-                            className="hover:text-destructive hover:bg-destructive/10">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </AppShell>
       {/* `key` ép remount mỗi lần mở modal → fetcher mới, không giữ data lần trước */}
@@ -807,11 +862,6 @@ export default function AdminLessonDetail() {
         mode={sentenceMode}
         sentence={selectedSentence}
         onClose={closeSentence}
-      />
-      <BlockDeleteModal
-        key={blockToDelete ? `block-${blockToDelete.id}` : "block-closed"}
-        block={blockToDelete}
-        onClose={closeBlockDelete}
       />
     </>
   );

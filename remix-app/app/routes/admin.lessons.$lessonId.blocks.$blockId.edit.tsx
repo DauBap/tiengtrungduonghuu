@@ -4,10 +4,11 @@ import { requireRole } from "~/lib/session.server";
 import { getLessonForAdmin } from "~/lib/db.server";
 import { prisma } from "~/lib/prisma.server";
 import { parseBlockForm, keepOwnedIds } from "~/lib/block-form.server";
-import { BLOCK_META, parseFlashcardConfig, parseListeningConfig, isLearningBlockType, type LearningBlockType } from "~/lib/learning-blocks";
+import { BLOCK_META, parseFlashcardConfig, parseListeningConfig, parseWorkbookConfig, isLearningBlockType, type LearningBlockType } from "~/lib/learning-blocks";
 import { AppShell } from "~/components/layout/app-shell";
 import { FlashcardForm } from "~/components/admin/flashcard-form";
 import { ListeningForm } from "~/components/admin/listening-form";
+import { WorkbookForm } from "~/components/admin/workbook-form";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
@@ -134,6 +135,34 @@ export default function EditLearningBlock() {
               <ConfigWarning message={parsedConfig.error} />
               <ListeningForm vocabOptions={vocabOptions} sentenceOptions={sentenceOptions}
                 error={actionData?.error} field={actionData?.field} cancelTo={backTo} />
+            </>
+          )}
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (type === "WORKBOOK") {
+    const parsedConfig = parseWorkbookConfig(block.config);
+    return (
+      <AppShell user={user}>
+        <div className="space-y-6 max-w-3xl">
+          {header}
+          {parsedConfig.ok ? (
+            <WorkbookForm
+              initial={{
+                title: block.title,
+                description: block.description,
+                required: block.required,
+                config: parsedConfig.data,
+              }}
+              error={actionData?.error}
+              cancelTo={backTo}
+            />
+          ) : (
+            <>
+              <ConfigWarning message={parsedConfig.error} />
+              <WorkbookForm error={actionData?.error} cancelTo={backTo} />
             </>
           )}
         </div>

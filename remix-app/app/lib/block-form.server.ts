@@ -55,6 +55,14 @@ export function parseBlockForm(form: FormData): BlockFormParse {
       maxReplays: Number(form.get("maxReplays") ?? 0) || 0,
       shuffle: bool(form, "shuffle"),
     };
+  } else if (rawType === "WORKBOOK") {
+    // Config gửi lên dưới dạng JSON string trong field "workbookConfig"
+    const raw = String(form.get("workbookConfig") ?? "{}");
+    try {
+      rawConfig = JSON.parse(raw);
+    } catch {
+      return { ok: false, error: "Cấu hình sách bài tập không hợp lệ" };
+    }
   } else {
     // Các dạng còn lại chưa có form riêng
     return { ok: false, error: "Dạng bài học này đang được phát triển" };

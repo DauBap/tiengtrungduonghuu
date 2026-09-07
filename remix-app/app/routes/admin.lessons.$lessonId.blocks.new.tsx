@@ -1,14 +1,15 @@
 import { useState } from "react";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
-import { useLoaderData, useActionData, Link, redirect } from "react-router";
+import { useLoaderData, useActionData, useSearchParams, Link, redirect } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { getLessonForAdmin } from "~/lib/db.server";
 import { prisma } from "~/lib/prisma.server";
 import { parseBlockForm, keepOwnedIds } from "~/lib/block-form.server";
-import { BLOCK_META, BLOCK_TYPES, type LearningBlockType } from "~/lib/learning-blocks";
+import { BLOCK_META, BLOCK_TYPES, isLearningBlockType, type LearningBlockType } from "~/lib/learning-blocks";
 import { AppShell } from "~/components/layout/app-shell";
 import { FlashcardForm } from "~/components/admin/flashcard-form";
 import { ListeningForm } from "~/components/admin/listening-form";
+import { WorkbookForm } from "~/components/admin/workbook-form";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -60,8 +61,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
 export default function NewLearningBlock() {
   const { user, lesson } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  const [type, setType] = useState<LearningBlockType | null>(null);
+  const [searchParams] = useSearchParams();
+  // Card trên trang bài học trỏ thẳng ?type=FLASHCARD|LISTENING, bỏ qua bước chọn dạng
+  const requestedType = searchParams.get("type");
+  const initialType = isLearningBlockType(requestedType) && !lesson.learningBlocks.some((b) => b.type === requestedType)
+    ? (requestedType as LearningBlockType)
+    : null;
+  const [type, setType] = useState<LearningBlockType | null>(initialType);
   const backTo = `/admin/lessons/${lesson.id}`;
+  // Tối đa 1 block/type (unique constraint) — ẩn dạng đã có block khỏi picker
+  const existingTypes = new Set(lesson.learningBlocks.map((b) => b.type));
 
   const vocabOptions = lesson.content.map((v) => ({
     id: v.id, chinese: v.chinese, pinyin: v.pinyin, translation: v.translation, wordType: v.wordType, audioUrl: v.audioUrl,
@@ -87,8 +96,9 @@ export default function NewLearningBlock() {
               <CardTitle className="text-base">Chọn dạng bài học</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-2">
-              {/* Từ vựng và Ngữ pháp soạn thẳng ở trang bài học, không qua block */}
-              {BLOCK_TYPES.filter((t) => BLOCK_META[t].source === "block").map((t) => {
+              {/* Từ vựng và Ngữ pháp soạn thẳng ở trang bài học, không qua block.
+                  Dạng đã có block cũng bị ẩn — unique constraint chỉ cho 1 block/type. */}
+              {BLOCK_TYPES.filter((t) => BLOCK_META[t].source === "block" && !existingTypes.has(t)).map((t) => {
                 const meta = BLOCK_META[t];
                 const Icon = meta.icon;
                 return (
@@ -126,6 +136,9 @@ export default function NewLearningBlock() {
             {type === "LISTENING" && (
               <ListeningForm vocabOptions={vocabOptions} sentenceOptions={sentenceOptions}
                 error={actionData?.error} field={actionData?.field} cancelTo={backTo} />
+            )}
+            {type === "WORKBOOK" && (
+              <WorkbookForm error={actionData?.error} cancelTo={backTo} />
             )}
           </>
         )}

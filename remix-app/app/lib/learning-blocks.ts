@@ -9,9 +9,9 @@
  * Không cần migration.
  */
 import { z } from "zod";
-import { Layers, Headphones, BookOpen, GraduationCap } from "lucide-react";
+import { Layers, Headphones, BookOpen, GraduationCap, BookMarked } from "lucide-react";
 
-export const BLOCK_TYPES = ["FLASHCARD", "LISTENING", "VOCABULARY", "GRAMMAR"] as const;
+export const BLOCK_TYPES = ["FLASHCARD", "LISTENING", "VOCABULARY", "GRAMMAR", "WORKBOOK"] as const;
 export type LearningBlockType = (typeof BLOCK_TYPES)[number];
 
 // ─── Config schemas ──────────────────────────────────────────────────────────
@@ -68,17 +68,82 @@ export const grammarConfigSchema = z.object({
     .min(1, "Thêm ít nhất 1 điểm ngữ pháp"),
 });
 
+/** Sách bài tập: bài thi mô phỏng HSK với nhiều phần và câu hỏi */
+export const workbookConfigSchema = z.object({
+  audioUrl: z.string().url("URL audio không hợp lệ").optional().or(z.literal("")),
+  /** Giới hạn thời gian làm bài (phút); 0 = không giới hạn */
+  timeLimit: z.number().int().min(0).default(0),
+  /** Số lần được phát lại audio; 0 = không giới hạn */
+  maxReplays: z.number().int().min(0).default(0),
+  /** Xáo trộn thứ tự câu hỏi */
+  shuffleQuestions: z.boolean().default(false),
+  /** Hiển thị kết quả ngay sau khi chọn đáp án */
+  showResultsImmediately: z.boolean().default(false),
+  /** Hiển thị phần dịch trong câu hỏi */
+  showTranslation: z.boolean().default(true),
+  /** Hiển thị pinyin */
+  showPinyin: z.boolean().default(true),
+  sections: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string().min(1, "Tên phần không được trống"),
+      titleChinese: z.string().default(""),
+      description: z.string().default(""),
+      descriptionVietnamese: z.string().default(""),
+      /** Câu ví dụ minh họa cách làm, không tính điểm */
+      example: z.object({
+        chinese: z.string().default(""),
+        pinyin: z.string().default(""),
+        translation: z.string().default(""),
+        options: z.array(z.object({
+          id: z.string(),
+          label: z.enum(["A", "B", "C", "D"]),
+          text: z.string().default(""),
+        })).default([]),
+        correctAnswer: z.string().default(""),
+      }).optional(),
+      questions: z.array(
+        z.object({
+          id: z.string(),
+          number: z.number().int().min(1),
+          /** URL ảnh đơn (Section 1 style) */
+          imageUrl: z.string().optional().or(z.literal("")),
+          /** URL ảnh lưới A/B/C/D (Section 2 style) */
+          images: z.array(z.object({
+            label: z.enum(["A", "B", "C", "D"]),
+            url: z.string(),
+          })).optional(),
+          /** Hội thoại kèm theo câu */
+          dialogue: z.object({
+            chinese: z.string().default(""),
+            pinyin: z.string().default(""),
+            translation: z.string().default(""),
+          }).optional(),
+          options: z.array(z.object({
+            id: z.string(),
+            label: z.enum(["A", "B", "C", "D"]),
+            text: z.string().default(""),
+          })).min(1),
+          correctAnswer: z.string().min(1, "Phải chọn đáp án đúng"),
+        })
+      ).default([]),
+    })
+  ).default([]),
+});
+
 export const BLOCK_CONFIG_SCHEMAS = {
   FLASHCARD: flashcardConfigSchema,
   LISTENING: listeningConfigSchema,
   VOCABULARY: vocabularyConfigSchema,
   GRAMMAR: grammarConfigSchema,
+  WORKBOOK: workbookConfigSchema,
 } satisfies Record<LearningBlockType, z.ZodTypeAny>;
 
 export type FlashcardConfig = z.infer<typeof flashcardConfigSchema>;
 export type ListeningConfig = z.infer<typeof listeningConfigSchema>;
 export type VocabularyConfig = z.infer<typeof vocabularyConfigSchema>;
 export type GrammarConfig = z.infer<typeof grammarConfigSchema>;
+export type WorkbookConfig = z.infer<typeof workbookConfigSchema>;
 
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
@@ -131,6 +196,14 @@ export const BLOCK_META: Record<LearningBlockType, BlockMeta> = {
     source: "lesson",
     defaultTitle: "Điểm ngữ pháp",
   },
+  WORKBOOK: {
+    label: "Sách bài tập",
+    description: "Bài thi mô phỏng HSK với nhiều phần và câu hỏi.",
+    icon: BookMarked,
+    implemented: true,
+    source: "block",
+    defaultTitle: "Sách bài tập",
+  },
 };
 
 export function isLearningBlockType(value: unknown): value is LearningBlockType {
@@ -160,6 +233,12 @@ export function parseFlashcardConfig(config: unknown): ParseResult<FlashcardConf
 
 export function parseListeningConfig(config: unknown): ParseResult<ListeningConfig> {
   const result = listeningConfigSchema.safeParse(config);
+  if (result.success) return { ok: true, data: result.data };
+  return { ok: false, error: result.error.issues[0]?.message ?? "Cấu hình không hợp lệ" };
+}
+
+export function parseWorkbookConfig(config: unknown): ParseResult<WorkbookConfig> {
+  const result = workbookConfigSchema.safeParse(config);
   if (result.success) return { ok: true, data: result.data };
   return { ok: false, error: result.error.issues[0]?.message ?? "Cấu hình không hợp lệ" };
 }
