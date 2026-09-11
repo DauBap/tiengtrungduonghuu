@@ -28,7 +28,7 @@ export async function action({ request }: ActionFunctionArgs) {
     data: {
       code,
       title: String(form.get("title")).trim(),
-      description: String(form.get("description")).trim(),
+      description: String(form.get("description") ?? "").trim() || null,
       hskLevel: Number(form.get("hskLevel")),
       status: String(form.get("status")) as "DRAFT" | "PUBLISHED" | "ARCHIVED",
       order: Number(form.get("order")),
@@ -74,7 +74,7 @@ export default function NewCourse() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Mô tả</Label>
-                <Textarea id="description" name="description" placeholder="Mô tả khóa học..." rows={4} required />
+                <Textarea id="description" name="description" placeholder="Mô tả khóa học..." rows={4} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">

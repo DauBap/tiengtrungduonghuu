@@ -42,7 +42,7 @@ model Course {
   id          String       @id @default(cuid())
   code        String       @unique
   title       String
-  description String
+  description String?
   thumbnail   String?
   hskLevel    Int
   status      CourseStatus @default(DRAFT)

@@ -29,7 +29,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     data: {
       code: String(form.get("code")).trim(),
       title: String(form.get("title")).trim(),
-      description: String(form.get("description")).trim(),
+      description: String(form.get("description") ?? "").trim() || null,
       hskLevel: Number(form.get("hskLevel")),
       status: String(form.get("status")) as "DRAFT" | "PUBLISHED" | "ARCHIVED",
       order: Number(form.get("order")),
@@ -78,7 +78,7 @@ export default function EditCourse() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Mô tả</Label>
-                <Textarea id="description" name="description" defaultValue={course.description} rows={4} required />
+                <Textarea id="description" name="description" defaultValue={course.description ?? ""} rows={4} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
