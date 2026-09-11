@@ -326,21 +326,21 @@ function VocabModal({ mode, vocab, onClose }: { mode: VocabModalMode; vocab: Voc
             aria-invalid={fetcher.data?.field === "translation" || undefined} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="wordTypes">Từ loại <span className="text-muted-foreground font-normal text-xs">(tùy chọn, có thể chọn nhiều)</span></Label>
-          <select
-            id="wordTypes"
-            name="wordTypes"
-            defaultValue={vocab?.wordTypes ?? []}
-            multiple
-            size={Math.min(WORD_TYPES.length, 8)}
-            className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <Label>Từ loại <span className="text-muted-foreground font-normal text-xs">(tùy chọn, có thể chọn nhiều)</span></Label>
+          <div className="grid grid-cols-2 gap-2 rounded-md border border-input bg-background p-2">
             {WORD_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {WORD_TYPE_META[t].label} ({WORD_TYPE_META[t].chinese})
-              </option>
+              <label key={t} className="flex items-center gap-2 rounded-md px-2 py-1 text-sm hover:bg-muted/50">
+                <input
+                  type="checkbox"
+                  name="wordTypes"
+                  value={t}
+                  defaultChecked={vocab?.wordTypes?.includes(t) ?? false}
+                  className="h-4 w-4"
+                />
+                <span>{WORD_TYPE_META[t].label} ({WORD_TYPE_META[t].chinese})</span>
+              </label>
             ))}
-          </select>
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="note">Ghi chú <span className="text-muted-foreground font-normal text-xs">(tùy chọn)</span></Label>
