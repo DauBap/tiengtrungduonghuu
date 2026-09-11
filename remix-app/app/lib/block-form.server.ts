@@ -4,6 +4,7 @@
  */
 import { parseBlockConfig, isLearningBlockType, type LearningBlockType } from "~/lib/learning-blocks";
 import { prisma } from "~/lib/prisma.server";
+import { saveUploadedAsset } from "~/lib/storage.server";
 
 export interface BlockFormResult {
   type: LearningBlockType;
@@ -27,7 +28,7 @@ function idList(form: FormData, name: string): string[] {
     .filter(Boolean);
 }
 
-export function parseBlockForm(form: FormData): BlockFormParse {
+export async function parseBlockForm(form: FormData, lessonId?: string): Promise<BlockFormParse> {
   const rawType = String(form.get("type") ?? "");
   if (!isLearningBlockType(rawType)) return { ok: false, error: "Dạng bài học không hợp lệ" };
 
@@ -62,6 +63,31 @@ export function parseBlockForm(form: FormData): BlockFormParse {
       rawConfig = JSON.parse(raw);
     } catch {
       return { ok: false, error: "Cấu hình sách bài tập không hợp lệ" };
+    }
+
+    // Đọc file upload đồ họa của từng câu hỏi trong workbook.
+    const config = rawConfig as { sections?: Array<{ questions?: Array<{ id?: string; imageUrl?: string }> }> };
+    const sections = config.sections ?? [];
+    for (const field of form.entries()) {
+      const [name, value] = field;
+      if (!(value instanceof File) || !name.startsWith("questionImageFile-")) continue;
+      const questionId = name.replace("questionImageFile-", "").trim();
+      if (!questionId) continue;
+
+      const uploadedUrl = await saveUploadedAsset(value, {
+        kind: "workbook-image",
+        lessonId,
+        questionId,
+      });
+      if (!uploadedUrl) continue;
+
+      for (const section of sections) {
+        for (const question of section.questions ?? []) {
+          if (question.id === questionId) {
+            question.imageUrl = uploadedUrl;
+          }
+        }
+      }
     }
   } else {
     // Các dạng còn lại chưa có form riêng

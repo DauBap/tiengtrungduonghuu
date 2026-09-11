@@ -1,4 +1,4 @@
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, BookOpen } from "lucide-react";
 import { EmptyState } from "~/components/common/empty-state";
 import { BLOCK_META, type LearningBlockType } from "~/lib/learning-blocks";
 import type { LessonTab } from "./lesson-tabs";
@@ -11,6 +11,9 @@ import type { LessonTab } from "./lesson-tabs";
 function tabMeta(tab: LessonTab) {
   if (tab === "TEST") {
     return { icon: ClipboardCheck, label: "Kiểm tra", implemented: true };
+  }
+  if (tab === "LESSON") {
+    return { icon: BookOpen, label: "Bài khóa", implemented: true };
   }
   const meta = BLOCK_META[tab as LearningBlockType];
   return { icon: meta.icon, label: meta.label, implemented: meta.implemented };

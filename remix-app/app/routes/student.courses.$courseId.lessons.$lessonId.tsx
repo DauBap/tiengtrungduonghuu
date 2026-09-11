@@ -123,6 +123,31 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const form = await request.formData();
   const intent = String(form.get("intent") ?? "complete-learning");
 
+  if (intent === "save-pronunciation-score") {
+    const scriptId = String(form.get("lessonAudioScriptId") ?? "");
+    const rawScore = Number(String(form.get("score") ?? "0"));
+    const score = Number.isFinite(rawScore) ? Math.max(0, Math.min(100, Math.round(rawScore))) : 0;
+    const transcript = String(form.get("transcript") ?? "").trim();
+
+    if (!scriptId) return { error: "Thiếu đoạn nghe để lưu điểm." };
+
+    const script = await prisma.lessonAudioScript.findUnique({
+      where: { id: scriptId },
+      select: { id: true, lessonId: true },
+    });
+    if (!script || script.lessonId !== params.lessonId) {
+      return { error: "Không tìm thấy đoạn nghe trong bài học này." };
+    }
+
+    await prisma.pronunciationAssessment.upsert({
+      where: { userId_lessonAudioScriptId: { userId: user.id, lessonAudioScriptId: script.id } },
+      update: { score, transcript: transcript || null },
+      create: { userId: user.id, lessonAudioScriptId: script.id, score, transcript: transcript || null },
+    });
+
+    return { success: true };
+  }
+
   if (intent === "complete-block") {
     const blockId = String(form.get("blockId"));
     const block = await prisma.learningBlock.findFirst({
@@ -198,7 +223,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
 export default function LessonDetail() {
   const { user, lesson, isUnlocked, blocks, blockStatuses, testQuestions, passScore, lessonStatus } = useLoaderData<typeof loader>();
   const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string }>();
-  const [activeTab, setActiveTab] = useState<LessonTab>("FLASHCARD");
+  const [activeTab, setActiveTab] = useState<LessonTab>("VOCABULARY");
+  const [showScript, setShowScript] = useState(true);
+  const [isRecording, setIsRecording] = useState(false);
+  const [phoneticScore, setPhoneticScore] = useState(96);
 
   // Khi nộp bài xong, tự giữ kết quả trong fetcher.data
   const testResult = testFetcher.data && "testResult" in testFetcher.data ? testFetcher.data.testResult : null;
@@ -392,6 +420,133 @@ export default function LessonDetail() {
               </testFetcher.Form>
             </CardContent>
           </Card>
+        </div>
+      );
+    }
+
+    if (activeTab === "LESSON") {
+      const audioScript = lesson.audioScripts?.[0] ?? null;
+      const showScript = audioScript?.showScript ?? true;
+      const scriptSpeakers = audioScript?.speakers ?? [];
+
+      return (
+        <div className="max-w-5xl mx-auto rounded-xl border bg-card shadow-sm">
+          <div className="border-b px-6 py-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary" />
+                <span className="font-bold text-lg">{audioScript?.title ?? "Bài khóa 1"}</span>
+              </div>
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">HSK {lesson.course.hskLevel}</span>
+            </div>
+          </div>
+
+          <div className="space-y-5 p-6">
+            <div className="grid gap-4 lg:grid-cols-[minmax(280px,0.95fr)_minmax(420px,1.05fr)]">
+              <section className="rounded-xl border bg-muted/20 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-sm font-bold uppercase tracking-wide text-primary">File nghe</span>
+                  <span className="rounded-full bg-success/10 px-2 py-1 text-[11px] font-bold text-success">Audio</span>
+                </div>
+                <div className="rounded-xl border bg-background p-4">
+                  <div className="flex items-center justify-center">
+                    <audio controls className="w-full" src={audioScript?.audioUrl ?? ""}>
+                      <source src={audioScript?.audioUrl ?? ""} />
+                    </audio>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between text-sm">
+                    <span className="font-medium text-muted-foreground">Bản nghe · {audioScript?.audioUrl ? "01:28" : "Chưa có file"}</span>
+                    <Button type="button" variant="outline" size="sm" onClick={() => setShowScript(!showScript)}>
+                      {showScript ? "Ẩn script" : "Hiện script"}
+                    </Button>
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-xl border bg-background p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-sm font-bold uppercase tracking-wide text-primary">Script</span>
+                  <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary">
+                    {showScript ? "Hiển thị" : "Đã ẩn"}
+                  </span>
+                </div>
+
+                {showScript && scriptSpeakers.length > 0 ? (
+                  <div className="space-y-3">
+                    {scriptSpeakers.map((speaker, idx) => (
+                      <div key={speaker.id} className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                        <div className="flex items-center gap-2">
+                          <span className="h-2 w-2 rounded-full bg-primary" />
+                          <span className="text-sm font-bold">{speaker.speakerName || `Người ${idx + 1}`}</span>
+                        </div>
+                        <div className="mt-2 text-sm">
+                          <p className="font-medium text-foreground">{speaker.chinese}</p>
+                          <p className="text-xs font-mono text-muted-foreground mt-1">{speaker.pinyin}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{speaker.translation}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex min-h-[180px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+                    {showScript ? "Chưa có script" : "Script đã được ẩn theo cài đặt của giáo viên."}
+                  </div>
+                )}
+              </section>
+            </div>
+
+            <section className="rounded-xl border bg-muted/20 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Đọc theo script</div>
+                  <div className="text-sm text-muted-foreground mt-1">{lesson.title}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button type="button" variant={isRecording ? "destructive" : "default"} onClick={() => {
+                    if (isRecording && audioScript?.id) {
+                      testFetcher.submit(
+                        { intent: "save-pronunciation-score", lessonAudioScriptId: audioScript.id, score: String(phoneticScore), transcript: lesson.title },
+                        { method: "post" }
+                      );
+                    }
+                    setIsRecording(!isRecording);
+                  }}>
+                    {isRecording ? "Dừng đọc" : "Bắt đầu đọc"}
+                  </Button>
+                  <Button type="button" variant="outline">
+                    Chấm lại
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-lg border p-3">
+                  <div className="text-xs font-bold uppercase text-muted-foreground">Phát âm</div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-2xl font-bold text-primary tabular-nums">{phoneticScore}</span>
+                    <span className="text-xs text-muted-foreground">/ 100</span>
+                  </div>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <div className="text-xs font-bold uppercase text-muted-foreground">Trạng thái</div>
+                  <div className="mt-2 font-medium">
+                    {isRecording ? "Đang ghi âm" : "Sẵn sàng đọc"}
+                  </div>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <div className="text-xs font-bold uppercase text-muted-foreground">Mức độ</div>
+                  <div className="mt-2 font-medium">Bản mẫu</div>
+                </div>
+              </div>
+
+              {isRecording && (
+                <div className="mt-4 rounded-lg border border-success/30 bg-success/5 p-3 text-sm text-success">
+                  <span className="font-bold">Đang ghi âm...</span>
+                  <span className="ml-2 text-success/80">Hệ thống sẽ chấm phát âm sau khi dừng đọc.</span>
+                </div>
+              )}
+            </section>
+          </div>
         </div>
       );
     }

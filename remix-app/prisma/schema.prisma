@@ -21,13 +21,14 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  enrollments      Enrollment[]
-  progresses       LessonProgress[]
-  blockProgresses  BlockProgress[]
-  examAttempts     ExamAttempt[]
-  authoredExams     Exam[]     @relation("ExamAuthor")
-  authoredQuestions Question[] @relation("QuestionAuthor")
-  taughtClasses    Class[]    @relation("ClassTeacher")
+  enrollments            Enrollment[]
+  progresses             LessonProgress[]
+  blockProgresses        BlockProgress[]
+  examAttempts           ExamAttempt[]
+  authoredExams          Exam[]     @relation("ExamAuthor")
+  authoredQuestions      Question[] @relation("QuestionAuthor")
+  taughtClasses          Class[]    @relation("ClassTeacher")
+  pronunciationAssessments PronunciationAssessment[]
 }
 
 enum Role {
@@ -81,6 +82,55 @@ model Lesson {
   test           Test?
   progresses     LessonProgress[]
   exams          Exam[]
+  audioScripts    LessonAudioScript[]
+}
+
+model LessonAudioScript {
+  id          String  @id @default(cuid())
+  lessonId    String
+  title       String
+  audioUrl    String?
+  showScript  Boolean @default(true)
+  order       Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lesson      Lesson                    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  speakers    LessonAudioSpeaker[]
+  assessments PronunciationAssessment[]
+
+  @@index([lessonId, order])
+}
+
+model LessonAudioSpeaker {
+  id                  String  @id @default(cuid())
+  lessonAudioScriptId String
+  speakerName         String
+  chinese             String
+  pinyin              String
+  translation         String
+  order               Int     @default(0)
+
+  lessonAudioScript LessonAudioScript @relation(fields: [lessonAudioScriptId], references: [id], onDelete: Cascade)
+
+  @@index([lessonAudioScriptId, order])
+}
+
+model PronunciationAssessment {
+  id                  String   @id @default(cuid())
+  userId              String
+  lessonAudioScriptId String
+  score               Int      @default(0)
+  transcript          String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonAudioScript LessonAudioScript @relation(fields: [lessonAudioScriptId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonAudioScriptId])
+  @@index([userId])
+  @@index([lessonAudioScriptId])
 }
 model VocabItem {
   id          String  @id @default(cuid())

@@ -32,7 +32,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const lessonId = params.lessonId!;
   const form = await request.formData();
 
-  const parsed = parseBlockForm(form);
+  const parsed = await parseBlockForm(form, lessonId);
   if (!parsed.ok) return { error: parsed.error, field: parsed.field };
 
   // Chỉ nhận nội dung thuộc đúng bài học này

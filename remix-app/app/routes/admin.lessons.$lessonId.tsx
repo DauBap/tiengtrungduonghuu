@@ -4,6 +4,7 @@ import { useLoaderData, useFetcher, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { getLessonForAdmin } from "~/lib/db.server";
 import { prisma } from "~/lib/prisma.server";
+import { saveUploadedAsset } from "~/lib/storage.server";
 import { parseFlashcardConfig, parseListeningConfig } from "~/lib/learning-blocks";
 import { WORD_TYPES, WORD_TYPE_META, parseWordType, type WordType } from "~/lib/word-types";
 import { AppShell } from "~/components/layout/app-shell";
@@ -37,6 +38,91 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const lessonId = params.lessonId!;
   const form = await request.formData();
   const intent = String(form.get("intent"));
+
+  // ── Bài khóa (audio script) ──
+  if (intent === "lesson-script-create" || intent === "lesson-script-edit") {
+    const title = String(form.get("title") ?? "").trim();
+    const audioUrl = String(form.get("audioUrl") ?? "").trim();
+    const uploadedFile = form.get("audioFile");
+    const uploadedAudioUrl = await saveUploadedAsset(uploadedFile instanceof File ? uploadedFile : null, {
+      kind: "lesson-audio",
+      lessonId,
+    });
+    const showScript = form.get("showScript") === "on" || form.get("showScript") === "true";
+    const scriptId = String(form.get("lessonAudioScriptId") ?? "");
+
+    if (!title) return { error: "Vui lòng nhập tiêu đề bài khóa", field: "title" };
+    if (uploadedAudioUrl && !/^https?:\/\/.+/i.test(uploadedAudioUrl) && !uploadedAudioUrl.startsWith("/audio/")) {
+      return { error: "Link audio phải bắt đầu bằng http:// hoặc https://", field: "audioUrl" };
+    }
+    if (audioUrl && !/^https?:\/\/.+/i.test(audioUrl)) {
+      return { error: "Link audio phải bắt đầu bằng http:// hoặc https://", field: "audioUrl" };
+    }
+
+    const names = form.getAll("speakerName").map((v) => String(v ?? "").trim());
+    const chineses = form.getAll("speakerChinese").map((v) => String(v ?? "").trim());
+    const pinyins = form.getAll("speakerPinyin").map((v) => String(v ?? "").trim());
+    const translations = form.getAll("speakerTranslation").map((v) => String(v ?? "").trim());
+    const speakers = names.map((name, i) => ({
+      speakerName: name || `Người ${i + 1}`,
+      chinese: chineses[i] ?? "",
+      pinyin: pinyins[i] ?? "",
+      translation: translations[i] ?? "",
+      order: i,
+    }));
+
+    if (speakers.length === 0 || speakers.some((s) => !s.chinese || !s.pinyin || !s.translation)) {
+      return { error: "Vui lòng nhập đầy đủ từng dòng người nói: chữ Hán, pinyin và nghĩa tiếng Việt.", field: "speaker" };
+    }
+
+    if (intent === "lesson-script-edit") {
+      await prisma.lessonAudioScript.update({
+        where: { id: scriptId },
+        data: {
+          title,
+          audioUrl: uploadedAudioUrl || audioUrl || null,
+          showScript,
+          speakers: {
+            deleteMany: {},
+            create: speakers.map((s) => ({
+              speakerName: s.speakerName,
+              chinese: s.chinese,
+              pinyin: s.pinyin,
+              translation: s.translation,
+              order: s.order,
+            })),
+          },
+        },
+      });
+    } else {
+      const last = await prisma.lessonAudioScript.findFirst({ where: { lessonId }, orderBy: { order: "desc" }, select: { order: true } });
+      await prisma.lessonAudioScript.create({
+        data: {
+          lessonId,
+          title,
+          audioUrl: uploadedAudioUrl || audioUrl || null,
+          showScript,
+          order: (last?.order ?? 0) + 1,
+          speakers: {
+            create: speakers.map((s) => ({
+              speakerName: s.speakerName,
+              chinese: s.chinese,
+              pinyin: s.pinyin,
+              translation: s.translation,
+              order: s.order,
+            })),
+          },
+        },
+      });
+    }
+    return { success: true };
+  }
+
+  if (intent === "lesson-script-delete") {
+    const scriptId = String(form.get("lessonAudioScriptId") ?? "");
+    await prisma.lessonAudioScript.delete({ where: { id: scriptId } });
+    return { success: true };
+  }
 
   // ── Từ vựng ──
   if (intent === "vocab-create" || intent === "vocab-edit") {
@@ -417,6 +503,151 @@ function ListeningBlockPreview({ block, vocabCount, sentenceCount }: { block: { 
   );
 }
 
+function LessonAudioScriptModal({ mode, script, lessonId, onClose }: { mode: VocabModalMode; script: any | null; lessonId: string; onClose: () => void }) {
+  const fetcher = useFetcher<{ error?: string; field?: string; success?: boolean }>();
+  const isLoading = fetcher.state !== "idle";
+  const isEdit = mode === "edit";
+  const isDelete = mode === "delete";
+  const initialSpeakers = isEdit ? (script?.speakers ?? []) : [
+    { speakerName: "Người 1", chinese: "", pinyin: "", translation: "" },
+    { speakerName: "Người 2", chinese: "", pinyin: "", translation: "" },
+  ];
+  const [speakers, setSpeakers] = useState<any[]>(initialSpeakers);
+
+  useEffect(() => {
+    if (fetcher.state === "idle" && fetcher.data?.success) onClose();
+  }, [fetcher.state, fetcher.data, onClose]);
+
+  const addSpeaker = () => {
+    const nextIndex = speakers.length + 1;
+    setSpeakers([
+      ...speakers,
+      { speakerName: `Người ${nextIndex}`, chinese: "", pinyin: "", translation: "" },
+    ]);
+  };
+
+  const removeSpeaker = (index: number) => {
+    if (speakers.length <= 1) return;
+    setSpeakers(speakers.filter((_, i) => i !== index));
+  };
+
+  if (!mode) return null;
+
+  if (isDelete) {
+    return (
+      <Overlay onClose={onClose}>
+        <div className="space-y-4">
+          <div className="flex items-start justify-between">
+            <h2 className="text-lg font-bold">Xóa bài khóa</h2>
+            <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+          </div>
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+            <p>Xóa đoạn nghe <strong>{script?.title}</strong>? Học viên sẽ mất phần script và file nghe liên kết.</p>
+          </div>
+          <fetcher.Form method="post">
+            <input type="hidden" name="intent" value="lesson-script-delete" />
+            <input type="hidden" name="lessonAudioScriptId" value={script?.id} />
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Hủy</Button>
+              <Button type="submit" variant="destructive" disabled={isLoading}>
+                {isLoading && <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />}Xóa bài khóa
+              </Button>
+            </div>
+          </fetcher.Form>
+        </div>
+      </Overlay>
+    );
+  }
+
+  return (
+    <Overlay onClose={onClose}>
+      <fetcher.Form method="post" encType="multipart/form-data" noValidate className="space-y-4 max-w-2xl">
+        <div className="flex items-start justify-between">
+          <h2 className="text-lg font-bold">{isEdit ? "Chỉnh sửa Bài khóa" : "Thêm Bài khóa"}</h2>
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+        </div>
+        {fetcher.data?.error && (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+            {fetcher.data.error}
+          </div>
+        )}
+        <input type="hidden" name="intent" value={isEdit ? "lesson-script-edit" : "lesson-script-create"} />
+        <input type="hidden" name="lessonAudioScriptId" value={script?.id ?? ""} />
+        <input type="hidden" name="lessonId" value={lessonId} />
+
+        <div className="space-y-2">
+          <Label htmlFor="lesson-script-title">Tiêu đề bài khóa <span className="text-destructive">*</span></Label>
+          <Input id="lesson-script-title" name="title" defaultValue={script?.title ?? ""} placeholder="Bài khóa 1" className="text-lg"
+            aria-invalid={fetcher.data?.field === "title" || undefined} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="lesson-script-audioUrl">Link audio <span className="text-muted-foreground font-normal text-xs">(tùy chọn)</span></Label>
+          <Input id="lesson-script-audioUrl" name="audioUrl" defaultValue={script?.audioUrl ?? ""} placeholder="https://..."
+            aria-invalid={fetcher.data?.field === "audioUrl" || undefined} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="lesson-script-audioFile">Upload file audio <span className="text-muted-foreground font-normal text-xs">(tùy chọn)</span></Label>
+          <Input id="lesson-script-audioFile" name="audioFile" type="file" accept="audio/*"
+            aria-invalid={fetcher.data?.field === "audioUrl" || undefined} />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <input id="lesson-script-showScript" name="showScript" type="checkbox" defaultChecked={isEdit ? script?.showScript ?? true : true} className="h-4 w-4" />
+            <Label htmlFor="lesson-script-showScript">Hiển thị script cho học viên</Label>
+          </div>
+        </div>
+
+        <div className="rounded-lg border p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold uppercase tracking-wide text-primary">Người nói</span>
+            <Button type="button" variant="outline" size="sm" onClick={addSpeaker}>+ Thêm người</Button>
+          </div>
+          {speakers.map((sp: any, i: number) => (
+            <div key={`${sp.id ?? "new"}-${i}`} className="grid gap-3 rounded-lg border bg-muted/20 p-3">
+              <div className="flex justify-end">
+                <Button type="button" variant="ghost" size="sm" onClick={() => removeSpeaker(i)} className="text-destructive hover:bg-destructive/10">
+                  <Trash2 className="h-4 w-4 mr-1" />Xóa người
+                </Button>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Tên người {i + 1} <span className="text-muted-foreground font-normal text-xs">(tùy chọn)</span></Label>
+                  <Input name="speakerName" defaultValue={sp.speakerName ?? `Người ${i + 1}`} placeholder="Người 1" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Chữ Hán <span className="text-destructive">*</span></Label>
+                  <Input name="speakerChinese" defaultValue={sp.chinese ?? ""} placeholder="你好" />
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Pinyin <span className="text-destructive">*</span></Label>
+                  <Input name="speakerPinyin" defaultValue={sp.pinyin ?? ""} placeholder="nǐ hǎo" className="font-mono" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Nghĩa tiếng Việt <span className="text-destructive">*</span></Label>
+                  <Input name="speakerTranslation" defaultValue={sp.translation ?? ""} placeholder="Xin chào" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-end gap-2 pt-2">
+          <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Hủy</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading && <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />}
+            {isEdit ? "Lưu thay đổi" : "Thêm bài khóa"}
+          </Button>
+        </div>
+      </fetcher.Form>
+    </Overlay>
+  );
+}
+
 // ─── Trang ───────────────────────────────────────────────────────────────────
 
 export default function AdminLessonDetail() {
@@ -426,6 +657,8 @@ export default function AdminLessonDetail() {
   const [selectedVocab, setSelectedVocab] = useState<VocabRow | null>(null);
   const [sentenceMode, setSentenceMode] = useState<VocabModalMode>(null);
   const [selectedSentence, setSelectedSentence] = useState<SentenceRow | null>(null);
+  const [scriptMode, setScriptMode] = useState<VocabModalMode>(null);
+  const [selectedScript, setSelectedScript] = useState<any | null>(null);
   const [showAllVocab, setShowAllVocab] = useState(false);
   const [showAllSentences, setShowAllSentences] = useState(false);
 
@@ -433,6 +666,8 @@ export default function AdminLessonDetail() {
   const closeVocab = useCallback(() => { setVocabMode(null); setSelectedVocab(null); }, []);
   const openSentence = (mode: VocabModalMode, s: SentenceRow | null = null) => { setSelectedSentence(s); setSentenceMode(mode); };
   const closeSentence = useCallback(() => { setSentenceMode(null); setSelectedSentence(null); }, []);
+  const openLessonScript = (mode: VocabModalMode, s: any | null = null) => { setSelectedScript(s); setScriptMode(mode); };
+  const closeLessonScript = useCallback(() => { setScriptMode(null); setSelectedScript(null); }, []);
 
   const moveVocab = (vocabId: string, direction: "up" | "down") =>
     moveFetcher.submit({ intent: "vocab-move", vocabId, direction }, { method: "post" });
@@ -703,6 +938,66 @@ export default function AdminLessonDetail() {
             </CardContent>
           </Card>
 
+          {/* Bài khóa */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-base">Bài khóa</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Quản lý file nghe, script, học viên có thể ẩn/hiện script và chấm phát âm.
+                  </CardDescription>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => openLessonScript("create") }>
+                  <Plus className="h-4 w-4 mr-1.5" />Thêm bài khóa
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {lesson.audioScripts.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-8 text-center">
+                  <BookOpen className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm font-medium">Chưa có Bài khóa nào</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Thêm đoạn nghe + script để học viên nghe, đọc và chấm phát âm.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {lesson.audioScripts.map((script) => (
+                    <div key={script.id} className="rounded-lg border p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-base">{script.title}</p>
+                          <p className="text-xs text-muted-foreground font-mono mt-1">{script.audioUrl ?? "Chưa có file audio"}</p>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary">
+                              {script.showScript ? "Script hiện" : "Script ẩn"}
+                            </span>
+                            <span className="rounded-full bg-muted px-2 py-1 text-[11px] font-bold text-muted-foreground">
+                              {script.speakers.length} người nói
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <Button variant="ghost" size="icon" title="Sửa" onClick={() => openLessonScript("edit", script)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" title="Xóa" onClick={() => openLessonScript("delete", script)} className="hover:text-destructive hover:bg-destructive/10">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Ngữ pháp */}
           <Card>
             <CardHeader className="pb-3">
@@ -862,6 +1157,13 @@ export default function AdminLessonDetail() {
         mode={sentenceMode}
         sentence={selectedSentence}
         onClose={closeSentence}
+      />
+      <LessonAudioScriptModal
+        key={scriptMode ? `lesson-script-${scriptMode}-${selectedScript?.id ?? "new"}` : "lesson-script-closed"}
+        mode={scriptMode}
+        script={selectedScript}
+        lessonId={lesson.id}
+        onClose={closeLessonScript}
       />
     </>
   );

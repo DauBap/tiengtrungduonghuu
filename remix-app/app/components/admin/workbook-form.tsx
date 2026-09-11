@@ -138,6 +138,15 @@ function QuestionEditor({
           className="h-8 text-sm"
         />
       </div>
+      <div className="space-y-1">
+        <Label className="text-xs">Upload ảnh câu hỏi <span className="text-muted-foreground font-normal">(tùy chọn)</span></Label>
+        <Input
+          name={`questionImageFile-${question.id}`}
+          type="file"
+          accept="image/*"
+          className="h-8 text-sm file:mr-2 file:rounded file:border-0 file:bg-muted file:px-2 file:py-1"
+        />
+      </div>
 
       {/* Đáp án A/B/C/D */}
       <div className="space-y-1.5">
@@ -359,7 +368,7 @@ export function WorkbookForm({ initial, error, cancelTo }: WorkbookFormProps) {
   };
 
   return (
-    <Form method="post" noValidate className="space-y-6">
+    <Form method="post" encType="multipart/form-data" noValidate className="space-y-6">
       <input type="hidden" name="type" value="WORKBOOK" />
       <input type="hidden" name="title" value={title} />
       <input type="hidden" name="description" value={description} />

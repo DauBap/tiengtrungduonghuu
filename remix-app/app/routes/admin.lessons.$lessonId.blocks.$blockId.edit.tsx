@@ -35,7 +35,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   });
   if (!existing) throw new Response("Không tìm thấy dạng bài học", { status: 404 });
 
-  const parsed = parseBlockForm(form);
+  const parsed = await parseBlockForm(form, lessonId);
   if (!parsed.ok) return { error: parsed.error, field: parsed.field };
 
   const guarded = await keepOwnedIds(lessonId, parsed.data.type, parsed.data.config);

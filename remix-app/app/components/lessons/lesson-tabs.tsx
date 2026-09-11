@@ -1,9 +1,9 @@
 import { cn } from "~/lib/utils";
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, BookOpen } from "lucide-react";
 import { BLOCK_TYPES, BLOCK_META, type LearningBlockType } from "~/lib/learning-blocks";
 
 /** Tab bài kiểm tra là tab inline, không phải route riêng nữa. */
-export type LessonTab = LearningBlockType | "TEST";
+export type LessonTab = LearningBlockType | "TEST" | "LESSON";
 
 interface LessonTabsProps {
   activeTab: LessonTab;
@@ -16,21 +16,42 @@ interface LessonTabsProps {
 
 export function LessonTabs({ activeTab, onTabChange, availableTypes, hasTest }: LessonTabsProps) {
   const baseTab = "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap";
+  const ordered = ["FLASHCARD", "LISTENING", "VOCABULARY", "LESSON", "GRAMMAR", "WORKBOOK"] as const;
 
   return (
     <div className="border-b border-border">
-      {/* overflow-x-auto: 5 tab dễ tràn trên màn hình hẹp */}
       <div className="flex overflow-x-auto">
-        {BLOCK_TYPES.map((type) => {
-          const Icon = BLOCK_META[type].icon;
-          const isActive = activeTab === type;
-          const hasContent = availableTypes.has(type);
+        {ordered.map((type) => {
+          if (type === "LESSON") {
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => onTabChange("LESSON")}
+                aria-current={activeTab === "LESSON" ? "page" : undefined}
+                className={cn(
+                  baseTab,
+                  activeTab === "LESSON"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-foreground hover:text-primary hover:border-border"
+                )}
+              >
+                <BookOpen className="h-4 w-4" />
+                Bài khóa
+              </button>
+            );
+          }
+
+          const blockType = type as LearningBlockType;
+          const Icon = BLOCK_META[blockType].icon;
+          const isActive = activeTab === blockType;
+          const hasContent = availableTypes.has(blockType);
 
           return (
             <button
-              key={type}
+              key={blockType}
               type="button"
-              onClick={() => onTabChange(type)}
+              onClick={() => onTabChange(blockType)}
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 baseTab,
@@ -42,12 +63,11 @@ export function LessonTabs({ activeTab, onTabChange, availableTypes, hasTest }: 
               )}
             >
               <Icon className="h-4 w-4" />
-              {BLOCK_META[type].label}
+              {BLOCK_META[blockType].label}
             </button>
           );
         })}
 
-        {/* Tab Kiểm tra — inline như các tab khác */}
         <button
           type="button"
           onClick={() => onTabChange("TEST")}

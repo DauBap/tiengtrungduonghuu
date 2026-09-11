@@ -144,6 +144,10 @@ export async function getLessonById(id: string) {
       // xuống client trước khi học viên nộp bài kiểm tra.
       test: { include: { _count: { select: { questions: true } } } },
       course: true,
+      audioScripts: {
+        orderBy: { order: "asc" },
+        include: { speakers: { orderBy: { order: "asc" } } },
+      },
     },
   });
 }
@@ -216,6 +220,10 @@ export async function getLessonForAdmin(id: string) {
       // Bài kiểm tra cuối bài — hệ riêng, không phải model Exam
       test: { include: { questions: { orderBy: { order: "asc" } } } },
       course: true,
+      audioScripts: {
+        orderBy: { order: "asc" },
+        include: { speakers: { orderBy: { order: "asc" } } },
+      },
     },
   });
 }
