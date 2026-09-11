@@ -42,7 +42,9 @@ console.log(`[sync-db] preview/${branch} — đang push schema lên Neon branch 
 
 try {
   // --skip-generate: postinstall đã chạy `prisma generate`.
-  execFileSync("prisma", ["db", "push", "--skip-generate"], {
+  // Cột legacy `wordType` đang bị drop trong schema VocabItem; đồng bộ test
+  // branch phải chấp nhận mất dữ liệu cũ của cột scalar để hoàn tất migration.
+  execFileSync("prisma", ["db", "push", "--skip-generate", "--accept-data-loss"], {
     stdio: "inherit",
     shell: true,
   });
