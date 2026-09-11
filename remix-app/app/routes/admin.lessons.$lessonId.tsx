@@ -6,7 +6,7 @@ import { getLessonForAdmin } from "~/lib/db.server";
 import { prisma } from "~/lib/prisma.server";
 import { saveUploadedAsset } from "~/lib/storage.server";
 import { parseFlashcardConfig, parseListeningConfig } from "~/lib/learning-blocks";
-import { WORD_TYPES, WORD_TYPE_META, parseWordType, type WordType } from "~/lib/word-types";
+import { WORD_TYPES, WORD_TYPE_META, parseWordTypes, type WordType } from "~/lib/word-types";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { speakChinese } from "~/lib/speech";
 
-type VocabRow = { id: string; chinese: string; pinyin: string; translation: string; wordType: WordType | null; audioUrl: string | null; note: string | null; order: number };
+type VocabRow = { id: string; chinese: string; pinyin: string; translation: string; wordTypes: WordType[]; audioUrl: string | null; note: string | null; order: number };
 type SentenceRow = { id: string; chinese: string; pinyin: string; translation: string; audioUrl: string | null; note: string | null; order: number };
 /** Ba chế độ modal dùng chung cho cả từ vựng và câu */
 type VocabModalMode = "create" | "edit" | "delete" | null;
@@ -131,7 +131,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const translation = String(form.get("translation") ?? "").trim();
     const audioUrl = String(form.get("audioUrl") ?? "").trim();
     const note = String(form.get("note") ?? "").trim();
-    const wordType = parseWordType(form.get("wordType"));
+    const wordTypes = parseWordTypes(form.getAll("wordTypes"));
 
     if (!chinese) return { error: "Vui lòng nhập chữ Hán", field: "chinese" };
     if (!pinyin) return { error: "Vui lòng nhập pinyin", field: "pinyin" };
@@ -140,7 +140,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       return { error: "Link audio phải bắt đầu bằng http:// hoặc https://", field: "audioUrl" };
     }
 
-    const data = { chinese, pinyin, translation, wordType, audioUrl: audioUrl || null, note: note || null };
+    const data = { chinese, pinyin, translation, wordTypes, audioUrl: audioUrl || null, note: note || null };
 
     if (intent === "vocab-edit") {
       await prisma.vocabItem.update({ where: { id: String(form.get("vocabId")) }, data });
@@ -326,14 +326,15 @@ function VocabModal({ mode, vocab, onClose }: { mode: VocabModalMode; vocab: Voc
             aria-invalid={fetcher.data?.field === "translation" || undefined} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="wordType">Từ loại <span className="text-muted-foreground font-normal text-xs">(tùy chọn)</span></Label>
+          <Label htmlFor="wordTypes">Từ loại <span className="text-muted-foreground font-normal text-xs">(tùy chọn, có thể chọn nhiều)</span></Label>
           <select
-            id="wordType"
-            name="wordType"
-            defaultValue={vocab?.wordType ?? ""}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            id="wordTypes"
+            name="wordTypes"
+            defaultValue={vocab?.wordTypes ?? []}
+            multiple
+            size={Math.min(WORD_TYPES.length, 8)}
+            className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value="">— Chưa xác định —</option>
             {WORD_TYPES.map((t) => (
               <option key={t} value={t}>
                 {WORD_TYPE_META[t].label} ({WORD_TYPE_META[t].chinese})
@@ -754,11 +755,11 @@ export default function AdminLessonDetail() {
                         <div className="flex items-baseline gap-2 flex-wrap">
                           <p className="text-xl font-medium">{v.chinese}</p>
                           <p className="text-sm text-primary font-mono">{v.pinyin}</p>
-                          {v.wordType && (
-                            <Badge variant="outline" className="text-xs font-normal">
-                              {WORD_TYPE_META[v.wordType].label}
+                          {((v as any).wordTypes ?? ((v as any).wordType ? [(v as any).wordType] : [])).map((type: WordType) => (
+                            <Badge key={type} variant="outline" className="text-xs font-normal">
+                              {WORD_TYPE_META[type].label}
                             </Badge>
-                          )}
+                          ))}
                         </div>
                         <p className="text-sm text-muted-foreground">{v.translation}</p>
                         {v.note && <p className="text-xs text-muted-foreground italic mt-0.5">{v.note}</p>}

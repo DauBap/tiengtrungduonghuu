@@ -16,7 +16,7 @@ export interface VocabOption {
   chinese: string;
   pinyin: string;
   translation: string;
-  wordType: WordType | null;
+  wordTypes?: WordType[];
   audioUrl: string | null;
 }
 
@@ -128,11 +128,11 @@ export function FlashcardForm({ vocabOptions, initial, error, field, cancelTo }:
                     <div className="flex items-baseline gap-2 flex-wrap">
                       <span className="text-lg font-medium">{v.chinese}</span>
                       <span className="text-sm text-primary font-mono">{v.pinyin}</span>
-                      {v.wordType && (
-                        <Badge variant="outline" className="text-[10px] font-normal px-1.5 py-0">
-                          {WORD_TYPE_META[v.wordType].label}
+                      {(v.wordTypes ?? []).map((type) => (
+                        <Badge key={type} variant="outline" className="text-[10px] font-normal px-1.5 py-0">
+                          {WORD_TYPE_META[type].label}
                         </Badge>
-                      )}
+                      ))}
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{v.translation}</p>
                   </div>
@@ -159,11 +159,11 @@ export function FlashcardForm({ vocabOptions, initial, error, field, cancelTo }:
                     <div className="flex items-baseline gap-2 flex-wrap">
                       <span className="text-lg font-medium">{v.chinese}</span>
                       <span className="text-sm text-primary font-mono">{v.pinyin}</span>
-                      {v.wordType && (
-                        <Badge variant="outline" className="text-[10px] font-normal px-1.5 py-0">
-                          {WORD_TYPE_META[v.wordType].label}
+                      {(v.wordTypes ?? []).map((type) => (
+                        <Badge key={type} variant="outline" className="text-[10px] font-normal px-1.5 py-0">
+                          {WORD_TYPE_META[type].label}
                         </Badge>
-                      )}
+                      ))}
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{v.translation}</p>
                   </div>

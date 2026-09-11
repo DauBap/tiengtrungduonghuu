@@ -61,7 +61,12 @@ export default function EditLearningBlock() {
 
   const type = isLearningBlockType(block.type) ? (block.type as LearningBlockType) : null;
   const vocabOptions = lesson.content.map((v) => ({
-    id: v.id, chinese: v.chinese, pinyin: v.pinyin, translation: v.translation, wordType: v.wordType, audioUrl: v.audioUrl,
+    id: v.id,
+    chinese: v.chinese,
+    pinyin: v.pinyin,
+    translation: v.translation,
+    wordTypes: v.wordTypes ?? [],
+    audioUrl: v.audioUrl,
   }));
   const sentenceOptions = lesson.sentences.map((s) => ({
     id: s.id, chinese: s.chinese, pinyin: s.pinyin, translation: s.translation, audioUrl: s.audioUrl,

@@ -12,7 +12,7 @@ export interface FlashcardVocab {
   chinese: string;
   pinyin: string;
   translation: string;
-  wordType: WordType | null;
+  wordTypes: WordType[];
   audioUrl: string | null;
   note: string | null;
 }
@@ -172,11 +172,15 @@ export function FlashcardBlock({ config, items, isCompleted, onComplete }: Flash
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/30 bg-primary/10 p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]">
             <p className={cn("font-semibold text-center", frontIsChinese ? "text-2xl" : "text-5xl")}>{backMain}</p>
             <p className="text-base text-primary font-mono">{card.pinyin}</p>
-            {card.wordType && (
-              <span className="rounded-full border border-border bg-background/60 px-2.5 py-0.5 text-xs text-muted-foreground">
-                {WORD_TYPE_META[card.wordType].label}
-              </span>
-            )}
+            {card.wordTypes?.length ? (
+              <div className="flex flex-wrap justify-center gap-1">
+                {card.wordTypes.map((type) => (
+                  <span key={type} className="rounded-full border border-border bg-background/60 px-2.5 py-0.5 text-xs text-muted-foreground">
+                    {WORD_TYPE_META[type].label}
+                  </span>
+                ))}
+              </div>
+            ) : null}
             {card.note && <p className="text-sm text-muted-foreground text-center mt-1 max-w-xs">{card.note}</p>}
           </div>
         </div>

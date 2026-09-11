@@ -79,7 +79,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
             chinese: v.chinese,
             pinyin: v.pinyin,
             translation: v.translation,
-            wordType: v.wordType,
+            wordTypes: v.wordTypes ?? [],
             audioUrl: v.audioUrl,
             note: v.note,
           })),

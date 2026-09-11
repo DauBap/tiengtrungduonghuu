@@ -11,7 +11,7 @@ interface VocabularyItem {
   chinese: string;
   pinyin: string;
   translation: string;
-  wordType: WordType | null;
+  wordTypes: WordType[];
   audioUrl: string | null;
 }
 
@@ -52,10 +52,14 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
               </TableCell>
               <TableCell className="font-mono text-sm text-primary">{item.pinyin}</TableCell>
               <TableCell>
-                {item.wordType ? (
-                  <Badge variant="outline" className="text-xs whitespace-nowrap">
-                    {WORD_TYPE_META[item.wordType].label}
-                  </Badge>
+                {item.wordTypes?.length ? (
+                  <div className="flex flex-wrap gap-1">
+                    {item.wordTypes.map((type) => (
+                      <Badge key={type} variant="outline" className="text-xs whitespace-nowrap">
+                        {WORD_TYPE_META[type].label}
+                      </Badge>
+                    ))}
+                  </div>
                 ) : (
                   <span className="text-muted-foreground text-xs">—</span>
                 )}

@@ -139,7 +139,8 @@ model VocabItem {
   pinyin      String
   translation String
   // từ loại: danh từ, động từ, tính từ... (tùy chọn)
-  wordType    WordType?
+  // Cho phép nhiều từ loại cho cùng một từ, vì một từ có thể dính nhiều lớp từ vựng.
+  wordTypes   WordType[] @default([])
   audioUrl    String?
   note        String?
   order       Int     @default(0)
