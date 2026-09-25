@@ -26,11 +26,12 @@ import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
-import { ArrowLeft, BookOpen, PartyPopper, XCircle, RefreshCw, CheckCircle2, Lightbulb } from "lucide-react";
+import { ArrowLeft, BookOpen, PartyPopper, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2 } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
 import { gradeLessonTest, parseTestResponses } from "~/lib/lesson-test";
 import { GRAMMAR_QUESTION_META, grammarAnswerText, shuffledTokens } from "~/lib/grammar";
 import { cn } from "~/lib/utils";
+import { speakChinese } from "~/lib/speech";
 
 declare global {
   interface Window {
@@ -745,8 +746,20 @@ export default function LessonDetail() {
                       <source src={selectedAudioScript.audioUrl ?? ""} />
                     </audio>
                   </div>
-                  <div className="mt-4 flex items-center justify-between text-sm">
-
+                  <div className="mt-4 border-t pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      disabled={scriptSpeakers.length === 0}
+                      onClick={() => speakChinese(scriptSpeakers.map((speaker) => speaker.chinese).filter(Boolean).join("。"))}
+                    >
+                      <Volume2 className="mr-2 h-4 w-4" />
+                      Đọc bằng giọng máy
+                    </Button>
+                    <p className="mt-2 text-center text-xs text-muted-foreground">
+                      Dùng khi file nghe không phát được.
+                    </p>
                   </div>
                 </div>
               </section>
