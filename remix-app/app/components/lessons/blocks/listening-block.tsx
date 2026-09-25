@@ -5,7 +5,7 @@ import { Input } from "~/components/ui/input";
 import { Progress } from "~/components/ui/progress";
 import { Volume2, CheckCircle2, XCircle, ArrowRight, RefreshCw, Loader2 } from "lucide-react";
 import { speakChinese, isSpeechSupported } from "~/lib/speech";
-import { isAnswerCorrect } from "~/lib/listening-answer";
+import { compareAnswerHighlights, isAnswerCorrect } from "~/lib/listening-answer";
 import type { ListeningConfig } from "~/lib/learning-blocks";
 
 /** Một câu hỏi nghe — đã được loader phẳng hoá từ VocabItem hoặc SentenceItem. */
@@ -108,6 +108,7 @@ export function ListeningBlock({ config, questions, isCompleted, onComplete }: L
   }
 
   const expected = config.answerMode === "pinyin" ? question.pinyin : question.chinese;
+  const comparisonResult = verdict !== null && answer.trim() ? compareAnswerHighlights(answer, expected, config.answerMode) : null;
 
   return (
     <div className="space-y-5">
@@ -161,20 +162,26 @@ export function ListeningBlock({ config, questions, isCompleted, onComplete }: L
         }}
         className="space-y-3"
       >
-        <Input
-          ref={inputRef}
-          value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-          readOnly={answered}
-          placeholder={config.answerMode === "pinyin" ? "Nhập pinyin vừa nghe…" : "Nhập câu tiếng Trung vừa nghe…"}
-          aria-label={config.answerMode === "pinyin" ? "Đáp án pinyin" : "Đáp án tiếng Trung"}
-          aria-invalid={verdict === "wrong" || undefined}
-          className={cn(
-            "text-lg h-12 text-center",
-            verdict === "correct" && "border-success bg-success/5",
-            verdict === "wrong" && "border-destructive bg-destructive/5"
-          )}
-        />
+        <div className={cn(
+          "rounded-lg border bg-background",
+          verdict === "correct" && "border-success bg-success/5",
+          verdict === "wrong" && "border-destructive bg-destructive/5"
+        )}>
+          <Input
+            ref={inputRef}
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            readOnly={answered}
+            placeholder={config.answerMode === "pinyin" ? "Nhập pinyin vừa nghe…" : "Nhập câu tiếng Trung vừa nghe…"}
+            aria-label={config.answerMode === "pinyin" ? "Đáp án pinyin" : "Đáp án tiếng Trung"}
+            aria-invalid={verdict === "wrong" || undefined}
+            className={cn(
+              "text-lg h-12 text-center border-0 shadow-none focus-visible:ring-0 bg-transparent",
+              verdict === "correct" && "text-success",
+              verdict === "wrong" && "text-destructive"
+            )}
+          />
+        </div>
 
         {verdict === null ? (
           <Button type="submit" size="lg" className="w-full" disabled={!answer.trim()}>
@@ -196,6 +203,26 @@ export function ListeningBlock({ config, questions, isCompleted, onComplete }: L
               {verdict === "correct" ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
               {verdict === "correct" ? "Chính xác!" : "Chưa đúng"}
             </div>
+
+            {comparisonResult && (
+              <div className="mt-3 space-y-2 border-t border-current/10 pt-3">
+                <p className="text-xs text-muted-foreground">So sánh đáp án</p>
+                <div className="flex flex-wrap items-center gap-1 text-lg leading-relaxed break-words">
+                  {comparisonResult.map((part, idx) => (
+                    <span
+                      key={`${part.text}-${idx}`}
+                      className={cn(
+                        "rounded-sm px-0.5",
+                        part.status === "match" && "bg-success/20 text-success",
+                        part.status === "mismatch" && "bg-destructive/20 text-destructive"
+                      )}
+                    >
+                      {part.text}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Sai thì hiện đáp án để học viên đối chiếu */}
             {verdict === "wrong" && (

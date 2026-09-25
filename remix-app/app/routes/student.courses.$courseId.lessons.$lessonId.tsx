@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useFetcher, Link, redirect } from "react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import {
   getLessonById,
@@ -13,7 +13,6 @@ import {
   syncLearningCompleted,
 } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
-import { LockedContent } from "~/components/lessons/locked-content";
 import { EmptyState } from "~/components/common/empty-state";
 import { BlockRenderer, isBlockLearnable, type ResolvedBlock } from "~/components/lessons/blocks/block-renderer";
 import { isLearningBlockType, parseWorkbookConfig } from "~/lib/learning-blocks";
@@ -33,22 +32,17 @@ import { gradeLessonTest, parseTestResponses } from "~/lib/lesson-test";
 import { GRAMMAR_QUESTION_META, grammarAnswerText, shuffledTokens } from "~/lib/grammar";
 import { cn } from "~/lib/utils";
 
+declare global {
+  interface Window {
+    SpeechRecognition?: new () => any;
+    webkitSpeechRecognition?: new () => any;
+  }
+}
+
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
   const lesson = await getLessonById(params.lessonId!);
   if (!lesson) throw new Response("Không tìm thấy", { status: 404 });
-
-  const allLessons = await prisma.lesson.findMany({
-    where: { courseId: lesson.courseId },
-    orderBy: { order: "asc" },
-    select: { id: true, order: true },
-  });
-  const idx = allLessons.findIndex((l) => l.id === lesson.id);
-  let isUnlocked = idx === 0;
-  if (!isUnlocked && idx > 0) {
-    const prevProgress = await getLessonProgress(user.id, allLessons[idx - 1].id);
-    isUnlocked = prevProgress?.testCompleted === true;
-  }
 
   const progress = await getLessonProgress(user.id, lesson.id);
   const lessonStatus = computeLessonStatus(progress);
@@ -115,7 +109,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   }));
   const passScore = lesson.test?.passScore ?? 50;
 
-  return { user, lesson, isUnlocked, lessonStatus, blocks, blockStatuses, testQuestions, passScore };
+  return { user, lesson, lessonStatus, blocks, blockStatuses, testQuestions, passScore };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -221,30 +215,132 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function LessonDetail() {
-  const { user, lesson, isUnlocked, blocks, blockStatuses, testQuestions, passScore, lessonStatus } = useLoaderData<typeof loader>();
+  const { user, lesson, blocks, blockStatuses, testQuestions, passScore, lessonStatus } = useLoaderData<typeof loader>();
   const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string }>();
   const [activeTab, setActiveTab] = useState<LessonTab>("VOCABULARY");
   const [showScript, setShowScript] = useState(true);
+  const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [phoneticScore, setPhoneticScore] = useState(96);
+  const [phoneticScore, setPhoneticScore] = useState(0);
+  const [recordingError, setRecordingError] = useState<string | null>(null);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [recognizedTranscript, setRecognizedTranscript] = useState("");
+  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
+  const [isPlayingReplay, setIsPlayingReplay] = useState(false);
+  const [pronunciationFeedback, setPronunciationFeedback] = useState<React.ReactNode | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const replayAudioRef = useRef<HTMLAudioElement | null>(null);
+  const recordedAudioChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<number | null>(null);
+  const recordingStartedAtRef = useRef<number | null>(null);
+  const recognitionRef = useRef<any>(null);
+  const manualStopRequestedRef = useRef(false);
+
+  const normalizePronunciationText = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/\p{P}/gu, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const computePronunciationScore = (scriptText: string, spokenText: string) => {
+    const scriptWords = normalizePronunciationText(scriptText)
+      .split(" ")
+      .filter(Boolean);
+    const spokenWords = normalizePronunciationText(spokenText)
+      .split(" ")
+      .filter(Boolean);
+
+    if (scriptWords.length === 0) return 0;
+    if (spokenWords.length === 0) return 0;
+
+    const scriptWordCounts = new Map<string, number>();
+    for (const word of scriptWords) {
+      scriptWordCounts.set(word, (scriptWordCounts.get(word) ?? 0) + 1);
+    }
+
+    let matched = 0;
+    for (const word of spokenWords) {
+      const remaining = scriptWordCounts.get(word) ?? 0;
+      if (remaining > 0) {
+        scriptWordCounts.set(word, remaining - 1);
+        matched += 1;
+      }
+    }
+
+    return Math.min(100, Math.max(0, Math.round((matched / scriptWords.length) * 100)));
+  };
+
+  const buildPronunciationFeedback = (score: number) => {
+    if (score >= 90) {
+      return (
+        <div className="text-sm">
+          <p className="mt-1">Nội dung đọc khớp tốt với bài khóa.<br />Tiếp tục giữ độ chính xác này.</p>
+        </div>
+      );
+    }
+
+    if (score >= 75) {
+      return (
+        <div className="text-sm">
+          <p className="mt-1">Bạn đọc đúng phần lớn nội dung,<br />nhưng vẫn còn một số chỗ chưa khớp.</p>
+          <p className="mt-1">Hãy xem lại phần được đánh dấu và đọc lại.</p>
+        </div>
+      );
+    }
+
+    if (score >= 60) {
+      return (
+        <div className="text-sm">
+          <p className="mt-1">Còn khá nhiều nội dung chưa được nhận diện đúng.</p>
+          <p className="mt-1">Nghe lại bài khóa,<br />xem phần chưa khớp và thử lại.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="text-sm">
+        <p className="mt-1">Nội dung đọc còn khác nhiều so với bài khóa.</p>
+        <p className="mt-1">Hãy nghe lại từng câu<br />và luyện lại chậm hơn.</p>
+      </div>
+    );
+  };
+
+  const lessonAudioScripts = [...(lesson.audioScripts ?? [])].sort((a, b) => a.order - b.order);
+
+  useEffect(() => {
+    return () => {
+      if (recordingTimerRef.current) {
+        window.clearInterval(recordingTimerRef.current);
+      }
+      mediaRecorderRef.current?.stop();
+      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!lessonAudioScripts.length) {
+      setSelectedScriptId(null);
+      return;
+    }
+
+    if (!selectedScriptId || !lessonAudioScripts.some((script) => script.id === selectedScriptId)) {
+      setSelectedScriptId(lessonAudioScripts[0].id);
+    }
+  }, [lessonAudioScripts, selectedScriptId]);
+
+  useEffect(() => {
+    const selected = lessonAudioScripts.find((script) => script.id === selectedScriptId) ?? lessonAudioScripts[0];
+    if (selected) {
+      setShowScript(selected.showScript ?? true);
+    }
+  }, [lessonAudioScripts, selectedScriptId]);
 
   // Khi nộp bài xong, tự giữ kết quả trong fetcher.data
   const testResult = testFetcher.data && "testResult" in testFetcher.data ? testFetcher.data.testResult : null;
   const testError = testFetcher.data && "testError" in testFetcher.data ? testFetcher.data.testError : null;
   const isSubmittingTest = testFetcher.state !== "idle";
-
-  if (!isUnlocked) {
-    return (
-      <AppShell user={user}>
-        <div className="space-y-6 max-w-3xl">
-          <Button asChild variant="ghost" size="sm">
-            <Link to={`/student/courses/${lesson.courseId}`}><ArrowLeft className="h-4 w-4 mr-1.5" />Quay lại khóa học</Link>
-          </Button>
-          <LockedContent title="Bài học chưa mở khóa" message="Hãy hoàn thành kiểm tra của bài học trước để mở khóa bài này." />
-        </div>
-      </AppShell>
-    );
-  }
 
   // Dạng bài có mặt trong bài này. Dùng để làm mờ tab của dạng bài chưa soạn —
   // block đã tạo nhưng chưa chọn nội dung vẫn tính là có, để học viên bấm vào
@@ -425,19 +521,214 @@ export default function LessonDetail() {
     }
 
     if (activeTab === "LESSON") {
-      const audioScript = lesson.audioScripts?.[0] ?? null;
-      const showScript = audioScript?.showScript ?? true;
-      const scriptSpeakers = audioScript?.speakers ?? [];
+      const selectedAudioScript = lessonAudioScripts.find((script) => script.id === selectedScriptId) ?? lessonAudioScripts[0] ?? null;
+      const scriptSpeakers = selectedAudioScript?.speakers ?? [];
+
+      const startRecording = async () => {
+        if (!selectedAudioScript) return;
+
+        const SpeechRecognitionCtor = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (!SpeechRecognitionCtor) {
+          setRecordingError("Trình duyệt của bạn chưa hỗ trợ nhận dạng giọng nói. Hãy thử trên Chrome hoặc Edge.");
+          return;
+        }
+
+        if (!navigator.mediaDevices?.getUserMedia) {
+          setRecordingError("Trình duyệt của bạn chưa cho phép ghi âm giọng nói.");
+          return;
+        }
+
+        manualStopRequestedRef.current = false;
+
+        if (recognitionRef.current) {
+          recognitionRef.current.stop();
+        }
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaStreamRef.current = stream;
+          recordedAudioChunksRef.current = [];
+
+          const mediaRecorder = new MediaRecorder(stream, MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? { mimeType: "audio/webm;codecs=opus" } : undefined);
+          mediaRecorderRef.current = mediaRecorder;
+
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              recordedAudioChunksRef.current.push(event.data);
+            }
+          };
+
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(recordedAudioChunksRef.current, {
+              type: mediaRecorder.mimeType || "audio/webm",
+            });
+
+            if (recordedAudioUrl) {
+              URL.revokeObjectURL(recordedAudioUrl);
+            }
+
+            setRecordedAudioUrl(URL.createObjectURL(audioBlob));
+            mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+            mediaStreamRef.current = null;
+          };
+
+          mediaRecorder.start();
+        } catch {
+          setRecordingError("Không thể truy cập micrôphone. Hãy cấp quyền ghi âm để luyện nói.");
+          return;
+        }
+
+        const recognition = new SpeechRecognitionCtor();
+        recognitionRef.current = recognition;
+        recognition.lang = "zh-CN";
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        let spokenText = "";
+        recognition.onresult = (event: any) => {
+          let transcript = "";
+          for (let i = event.resultIndex; i < event.results.length; i += 1) {
+            transcript += event.results[i][0].transcript;
+          }
+          spokenText = transcript.trim();
+          setRecognizedTranscript(spokenText);
+        };
+
+        recognition.onend = () => {
+          if (!manualStopRequestedRef.current && isRecording) {
+            try {
+              recognition.start();
+            } catch {
+              // Ignore restart race conditions.
+            }
+            return;
+          }
+
+          const scriptText = selectedAudioScript.speakers.map((speaker) => speaker.chinese).join(" ");
+          const finalTranscript = spokenText || recognizedTranscript;
+          const score = computePronunciationScore(scriptText, finalTranscript);
+          const finalScore = Number.isFinite(score) ? Math.min(100, Math.max(0, score)) : 0;
+          setPhoneticScore(finalScore);
+          setPronunciationFeedback(buildPronunciationFeedback(finalScore));
+          setRecordingSeconds(0);
+          setIsRecording(false);
+
+          if (recordingTimerRef.current) {
+            window.clearInterval(recordingTimerRef.current);
+            recordingTimerRef.current = null;
+          }
+          recordingStartedAtRef.current = null;
+          mediaRecorderRef.current?.stop();
+
+          if (selectedAudioScript.id) {
+            testFetcher.submit(
+              {
+                intent: "save-pronunciation-score",
+                lessonAudioScriptId: selectedAudioScript.id,
+                score: String(finalScore),
+                transcript: finalTranscript || lesson.title,
+              },
+              { method: "post" }
+            );
+          }
+        };
+
+        recognition.onerror = (event: any) => {
+          if (event?.error === "no-speech") {
+            return;
+          }
+          setRecordingError("Không nhận dạng được giọng nói. Hãy thử lại sau vài giây.");
+          setIsRecording(false);
+        };
+
+        setRecordingError(null);
+        setRecognizedTranscript("");
+        setPronunciationFeedback(null);
+        setRecordingSeconds(0);
+        setIsRecording(true);
+        recordingStartedAtRef.current = Date.now();
+        recognition.start();
+
+        recordingTimerRef.current = window.setInterval(() => {
+          if (recordingStartedAtRef.current) {
+            const elapsed = Math.max(0, Math.floor((Date.now() - recordingStartedAtRef.current) / 1000));
+            setRecordingSeconds(elapsed);
+          }
+        }, 250);
+      };
+
+      const stopRecording = () => {
+        manualStopRequestedRef.current = true;
+
+        if (recognitionRef.current) {
+          recognitionRef.current.stop();
+        }
+        setIsRecording(false);
+      };
+
+      const replayLastRecording = () => {
+        if (!recordedAudioUrl) {
+          setRecordingError("Bạn chưa có bản ghi âm nào để nghe lại.");
+          return;
+        }
+
+        if (replayAudioRef.current) {
+          replayAudioRef.current.pause();
+          replayAudioRef.current.currentTime = 0;
+          replayAudioRef.current = null;
+          setIsPlayingReplay(false);
+          return;
+        }
+
+        const audio = new Audio(recordedAudioUrl);
+        replayAudioRef.current = audio;
+        audio.onended = () => {
+          setIsPlayingReplay(false);
+          replayAudioRef.current = null;
+        };
+        audio.onerror = () => {
+          setRecordingError("Không thể phát lại âm thanh của bạn ngay lúc này.");
+          setIsPlayingReplay(false);
+          replayAudioRef.current = null;
+        };
+        setIsPlayingReplay(true);
+        audio.play().catch(() => {
+          setRecordingError("Không thể phát lại âm thanh của bạn ngay lúc này.");
+          setIsPlayingReplay(false);
+          replayAudioRef.current = null;
+        });
+      };
+
+      if (!selectedAudioScript) {
+        return <LessonTabEmpty tab="LESSON" />;
+      }
 
       return (
         <div className="max-w-5xl mx-auto rounded-xl border bg-card shadow-sm">
           <div className="border-b px-6 py-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-primary" />
-                <span className="font-bold text-lg">{audioScript?.title ?? "Bài khóa 1"}</span>
+                <span className="font-bold text-lg">{selectedAudioScript.title}</span>
               </div>
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">HSK {lesson.course.hskLevel}</span>
+              <div className="flex flex-wrap gap-2">
+                {lessonAudioScripts.map((script) => (
+                  <button
+                    key={script.id}
+                    type="button"
+                    onClick={() => setSelectedScriptId(script.id)}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                      script.id === selectedAudioScript.id
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-primary"
+                    )}
+                  >
+                    {script.title}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -450,15 +741,12 @@ export default function LessonDetail() {
                 </div>
                 <div className="rounded-xl border bg-background p-4">
                   <div className="flex items-center justify-center">
-                    <audio controls className="w-full" src={audioScript?.audioUrl ?? ""}>
-                      <source src={audioScript?.audioUrl ?? ""} />
+                    <audio controls className="w-full" src={selectedAudioScript.audioUrl ?? ""}>
+                      <source src={selectedAudioScript.audioUrl ?? ""} />
                     </audio>
                   </div>
                   <div className="mt-4 flex items-center justify-between text-sm">
-                    <span className="font-medium text-muted-foreground">Bản nghe · {audioScript?.audioUrl ? "01:28" : "Chưa có file"}</span>
-                    <Button type="button" variant="outline" size="sm" onClick={() => setShowScript(!showScript)}>
-                      {showScript ? "Ẩn script" : "Hiện script"}
-                    </Button>
+
                   </div>
                 </div>
               </section>
@@ -499,50 +787,73 @@ export default function LessonDetail() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Đọc theo script</div>
-                  <div className="text-sm text-muted-foreground mt-1">{lesson.title}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button type="button" variant={isRecording ? "destructive" : "default"} onClick={() => {
-                    if (isRecording && audioScript?.id) {
-                      testFetcher.submit(
-                        { intent: "save-pronunciation-score", lessonAudioScriptId: audioScript.id, score: String(phoneticScore), transcript: lesson.title },
-                        { method: "post" }
-                      );
+                  <Button type="button" variant={isRecording ? "destructive" : "default"} onClick={async () => {
+                    if (isRecording) {
+                      stopRecording();
+                    } else {
+                      await startRecording();
                     }
-                    setIsRecording(!isRecording);
                   }}>
                     {isRecording ? "Dừng đọc" : "Bắt đầu đọc"}
                   </Button>
-                  <Button type="button" variant="outline">
-                    Chấm lại
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={replayLastRecording}
+                    disabled={!recordedAudioUrl}
+                  >
+                    {isPlayingReplay ? "Dừng lại" : "Nghe lại bài đọc của tôi"}
                   </Button>
                 </div>
               </div>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border p-3">
-                  <div className="text-xs font-bold uppercase text-muted-foreground">Phát âm</div>
+                  <div className="text-xs font-bold uppercase text-muted-foreground">Điểm luyện nói</div>
                   <div className="mt-2 flex items-center gap-2">
                     <span className="text-2xl font-bold text-primary tabular-nums">{phoneticScore}</span>
                     <span className="text-xs text-muted-foreground">/ 100</span>
                   </div>
                 </div>
                 <div className="rounded-lg border p-3">
-                  <div className="text-xs font-bold uppercase text-muted-foreground">Trạng thái</div>
+                  <div className="text-xs font-bold uppercase text-muted-foreground">Đánh giá</div>
                   <div className="mt-2 font-medium">
-                    {isRecording ? "Đang ghi âm" : "Sẵn sàng đọc"}
+                    {phoneticScore >= 90
+                      ? "TỐT"
+                      : phoneticScore >= 75
+                        ? "KHÁ"
+                        : phoneticScore >= 60
+                          ? "CẦN CẢI THIỆN"
+                          : "CHƯA ĐẠT"}
                   </div>
-                </div>
-                <div className="rounded-lg border p-3">
-                  <div className="text-xs font-bold uppercase text-muted-foreground">Mức độ</div>
-                  <div className="mt-2 font-medium">Bản mẫu</div>
                 </div>
               </div>
 
+              {recordingError ? (
+                <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                  {recordingError}
+                </div>
+              ) : null}
+
+              {pronunciationFeedback && (
+                <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-4 text-foreground">
+                  {pronunciationFeedback}
+                </div>
+              )}
+
+              {recognizedTranscript && !isRecording && (
+                <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
+                  <div className="font-medium text-foreground">Bạn đã đọc:</div>
+                  <p className="mt-1 text-muted-foreground">{recognizedTranscript}</p>
+                </div>
+              )}
+
               {isRecording && (
                 <div className="mt-4 rounded-lg border border-success/30 bg-success/5 p-3 text-sm text-success">
-                  <span className="font-bold">Đang ghi âm...</span>
-                  <span className="ml-2 text-success/80">Hệ thống sẽ chấm phát âm sau khi dừng đọc.</span>
+                  <span className="font-bold">Đang lắng nghe...</span>
+                  <span className="ml-2 text-success/80">Đã nghe {recordingSeconds}s · đang so sánh với bài khóa.</span>
                 </div>
               )}
             </section>
@@ -572,7 +883,7 @@ export default function LessonDetail() {
           </div>
           <div className="text-center">
             <h1 className="text-3xl font-bold tracking-tight">{lesson.title}</h1>
-            <p className="text-xl text-muted-foreground font-mono mt-2">{lesson.subtitle}</p>
+            <p className="text-xl text-muted-foreground mt-2">{lesson.subtitle}</p>
           </div>
         </div>
 

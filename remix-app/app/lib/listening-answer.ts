@@ -38,3 +38,50 @@ export function isAnswerCorrect(input: string, expected: string, mode: AnswerMod
   if (!a) return false;
   return a === normalizeAnswer(expected, mode);
 }
+
+export type ComparisonPartStatus = "match" | "mismatch" | "neutral";
+
+export interface ComparisonPart {
+  text: string;
+  status: ComparisonPartStatus;
+}
+
+/** So sánh từng ký tự / token để highlight đúng/sai theo chuỗi đang nhập. */
+export function compareAnswerHighlights(input: string, expected: string, mode: AnswerMode): ComparisonPart[] {
+  const normalizedInput = normalizeAnswer(input, mode);
+  const normalizedExpected = normalizeAnswer(expected, mode);
+
+  if (!normalizedInput && !normalizedExpected) {
+    return [{ text: "", status: "neutral" }];
+  }
+
+  if (!normalizedInput || !normalizedExpected) {
+    return [{ text: normalizedInput || normalizedExpected || "", status: "neutral" }];
+  }
+
+  const maxLength = Math.max(normalizedInput.length, normalizedExpected.length);
+  const parts: ComparisonPart[] = [];
+
+  for (let i = 0; i < maxLength; i++) {
+    const left = normalizedInput[i] ?? "";
+    const right = normalizedExpected[i] ?? "";
+
+    if (left === right) {
+      parts.push({ text: left || right, status: "match" });
+      continue;
+    }
+
+    if (left && right) {
+      parts.push({ text: left || right, status: "mismatch" });
+      continue;
+    }
+
+    if (left) {
+      parts.push({ text: left, status: "mismatch" });
+    } else {
+      parts.push({ text: right, status: "neutral" });
+    }
+  }
+
+  return parts.length > 0 ? parts : [{ text: "", status: "neutral" }];
+}

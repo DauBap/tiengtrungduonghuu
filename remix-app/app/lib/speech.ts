@@ -24,13 +24,19 @@ function pickChineseVoice(): SpeechSynthesisVoice | null {
  * Đọc `text` bằng tiếng Trung. Có `audioUrl` thì phát file đó thay vì TTS.
  * Trả về true nếu đã phát được, false nếu trình duyệt không hỗ trợ.
  */
+let activeAudio: HTMLAudioElement | null = null;
+
 export function speakChinese(text: string, audioUrl?: string | null): boolean {
   if (typeof window === "undefined") return false;
 
   if (audioUrl) {
+    stopSpeaking();
     const audio = new Audio(audioUrl);
+    activeAudio = audio;
+    audio.currentTime = 0;
     void audio.play().catch(() => {
       // File lỗi hoặc bị chặn autoplay → fallback sang TTS
+      activeAudio = null;
       speakWithTts(text);
     });
     return true;
@@ -53,5 +59,11 @@ function speakWithTts(text: string): boolean {
 }
 
 export function stopSpeaking() {
+  if (activeAudio) {
+    activeAudio.pause();
+    activeAudio.currentTime = 0;
+    activeAudio = null;
+  }
+
   if (isSpeechSupported()) window.speechSynthesis.cancel();
 }

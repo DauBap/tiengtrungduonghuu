@@ -41,7 +41,7 @@ try {
   const host = vars.DATABASE_URL.match(/@([^/]+)\//)?.[1] ?? "(?)";
   console.log(`\n[push-test] Target: ${host}`);
 
-  execFileSync("prisma", ["db", "push", "--skip-generate", ...passthrough], {
+  execFileSync("npx", ["prisma", "db", "push", "--skip-generate", ...passthrough], {
     stdio: "inherit",
     shell: true,
     env: {

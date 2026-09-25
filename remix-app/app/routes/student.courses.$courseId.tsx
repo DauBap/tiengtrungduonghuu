@@ -24,25 +24,18 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const progressMap = new Map(progressList.map((p) => [p.lessonId, p]));
   const courseProgress = computeCourseProgress(lessons, progressList);
 
-  // Compute per-lesson status and unlock
-  const lessonsWithStatus = lessons.map((lesson, index) => {
-    // A lesson is unlocked if it's first, or if prev lesson test is completed
-    const isUnlocked = index === 0
-      ? true
-      : progressMap.get(lessons[index - 1].id)?.testCompleted === true;
+  // Mọi bài học đều mở — không còn khóa theo tiến độ bài trước.
+  // Status chỉ còn phản ánh học viên đã học tới đâu, không dùng để chặn truy cập.
+  const lessonsWithStatus = lessons.map((lesson) => {
+    const p = progressMap.get(lesson.id) ?? null;
+    const s = computeLessonStatus(p);
 
     let status: ProgressStatus;
-    if (!isUnlocked) {
-      status = "LOCKED";
-    } else {
-      const p = progressMap.get(lesson.id) ?? null;
-      const s = computeLessonStatus(p);
-      if (s.testStatus === "COMPLETED") status = "COMPLETED";
-      else if (s.learningStatus === "COMPLETED" || s.exerciseStatus !== "LOCKED") status = "IN_PROGRESS";
-      else status = "AVAILABLE";
-    }
+    if (s.testStatus === "COMPLETED") status = "COMPLETED";
+    else if (s.learningStatus === "COMPLETED" || s.exerciseStatus !== "LOCKED") status = "IN_PROGRESS";
+    else status = "AVAILABLE";
 
-    return { ...lesson, status, isUnlocked };
+    return { ...lesson, status };
   });
 
   return {
@@ -93,7 +86,7 @@ export default function StudentCourseDetail() {
                     lesson={{ id: lesson.id, courseId: lesson.courseId, order: lesson.order, title: lesson.title, subtitle: lesson.subtitle, content: lesson.content }}
                     status={lesson.status}
                     index={index}
-                    href={lesson.status !== "LOCKED" ? `/student/courses/${course.id}/lessons/${lesson.id}` : undefined}
+                    href={`/student/courses/${course.id}/lessons/${lesson.id}`}
                   />
                 ))}
               </div>}

@@ -975,9 +975,6 @@ export default function AdminLessonDetail() {
                           <p className="font-medium text-base">{script.title}</p>
                           <p className="text-xs text-muted-foreground font-mono mt-1">{script.audioUrl ?? "Chưa có file audio"}</p>
                           <div className="mt-2 flex flex-wrap gap-2">
-                            <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary">
-                              {script.showScript ? "Script hiện" : "Script ẩn"}
-                            </span>
                             <span className="rounded-full bg-muted px-2 py-1 text-[11px] font-bold text-muted-foreground">
                               {script.speakers.length} người nói
                             </span>

@@ -305,13 +305,8 @@ export function computeBlockStatuses(
   blocks: { id: string; required?: boolean }[],
   progressMap: Map<string, boolean>
 ): ("LOCKED" | "AVAILABLE" | "COMPLETED")[] {
-  let previousDone = true;
   return blocks.map((block) => {
     const done = progressMap.get(block.id) === true;
-    const status = done ? "COMPLETED" : previousDone ? "AVAILABLE" : "LOCKED";
-    // Block không bắt buộc (kể cả block rỗng đã bị hạ required ở loader) không
-    // được chặn các block phía sau, nếu không học viên sẽ bị khóa vĩnh viễn.
-    previousDone = done || block.required === false;
-    return status;
+    return done ? "COMPLETED" : "AVAILABLE";
   });
 }

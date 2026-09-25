@@ -62,7 +62,8 @@ function listeningQuestions(
 
 export function BlockRenderer({ block, status }: { block: ResolvedBlock; status: ProgressStatus }) {
   const fetcher = useFetcher();
-  const isCompleted = status === "COMPLETED";
+  const effectiveStatus = status === "LOCKED" ? "AVAILABLE" : status;
+  const isCompleted = effectiveStatus === "COMPLETED";
 
   const markComplete = () => {
     fetcher.submit({ intent: "complete-block", blockId: block.id }, { method: "post" });
@@ -72,20 +73,9 @@ export function BlockRenderer({ block, status }: { block: ResolvedBlock; status:
     type: block.type,
     title: block.title,
     description: block.description,
-    status,
+    status: effectiveStatus,
     required: block.required,
   };
-
-  if (status === "LOCKED") {
-    return (
-      <BlockShell {...shellProps}>
-        <div className="flex items-center gap-2 justify-center py-8 text-sm text-muted-foreground">
-          <Lock className="h-4 w-4" />
-          Hoàn thành phần trước để mở khóa
-        </div>
-      </BlockShell>
-    );
-  }
 
   if (block.type === "FLASHCARD") {
     const parsed = parseFlashcardConfig(block.config);
