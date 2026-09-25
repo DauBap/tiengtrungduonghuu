@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useFetcher } from "react-router";
 import { cn } from "~/lib/utils";
-import { LayoutDashboard, BookOpen, Users, Settings, TrendingUp, User, LogOut, Menu, X, Languages, Briefcase, GraduationCap, School, CalendarDays, ClipboardCheck, ChartColumn, Bell, ListChecks, FileCheck2 } from "lucide-react";
+import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, Languages, School, ListChecks, FileCheck2 } from "lucide-react";
 import type { UserRole, SessionUser } from "~/lib/session.server";
 import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -11,19 +11,11 @@ interface NavItem { label: string; href: string; icon: React.ComponentType<{ cla
 const ROLE_NAV: Record<UserRole, NavItem[]> = {
   admin: [
     { label: "Bảng điều khiển", href: "/admin", icon: LayoutDashboard },
-    { label: "Nhân viên", href: "/admin/staff", icon: Briefcase },
-    { label: "Giáo viên", href: "/admin/teachers", icon: GraduationCap },
-    { label: "Học viên", href: "/admin/students", icon: Users },
     { label: "Lớp học", href: "/admin/classes", icon: School },
     { label: "Khóa học", href: "/admin/courses", icon: BookOpen },
     { label: "Bài thi", href: "/admin/exams", icon: FileCheck2 },
     { label: "Kho câu hỏi", href: "/admin/question-bank", icon: ListChecks },
-    { label: "Thời khóa biểu", href: "/admin/schedule", icon: CalendarDays },
-    { label: "Điểm danh", href: "/admin/attendance", icon: ClipboardCheck },
-    { label: "Báo cáo", href: "/admin/reports", icon: ChartColumn },
-    { label: "Thông báo", href: "/admin/notifications", icon: Bell },
     { label: "Tài khoản", href: "/admin/accounts", icon: User },
-    { label: "Cài đặt", href: "/admin/settings", icon: Settings },
   ],
   teacher: [
     { label: "Bảng điều khiển", href: "/teacher", icon: LayoutDashboard },
