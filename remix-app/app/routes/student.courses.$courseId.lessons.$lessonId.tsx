@@ -271,8 +271,8 @@ export default function LessonDetail() {
       if (lesson.grammarSections.length === 0) return <LessonTabEmpty tab="GRAMMAR" />;
       return (
         <div className="space-y-4 max-w-3xl mx-auto">
-          {lesson.grammarSections.map((section) => (
-            <GrammarSection key={section.id} section={section} />
+          {lesson.grammarSections.map((section, index) => (
+            <GrammarSection key={section.id} section={section} number={index + 1} />
           ))}
         </div>
       );
