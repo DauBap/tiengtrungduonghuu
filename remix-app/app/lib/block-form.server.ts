@@ -66,11 +66,35 @@ export async function parseBlockForm(form: FormData, lessonId?: string): Promise
     }
 
     // Đọc file upload đồ họa của từng câu hỏi trong workbook.
-    const config = rawConfig as { sections?: Array<{ questions?: Array<{ id?: string; imageUrl?: string }> }> };
+    const config = rawConfig as {
+      sections?: Array<{
+        id?: string;
+        imageUrl?: string;
+        questions?: Array<{ id?: string; imageUrl?: string }>;
+      }>;
+    };
     const sections = config.sections ?? [];
     for (const field of form.entries()) {
       const [name, value] = field;
-      if (!(value instanceof File) || !name.startsWith("questionImageFile-")) continue;
+      if (!(value instanceof File)) continue;
+
+      if (name.startsWith("sectionImageFile-")) {
+        const sectionId = name.replace("sectionImageFile-", "").trim();
+        if (!sectionId) continue;
+
+        const uploadedUrl = await saveUploadedAsset(value, {
+          kind: "workbook-image",
+          lessonId,
+          sectionId,
+        });
+        if (!uploadedUrl) continue;
+
+        const section = sections.find((item) => item.id === sectionId);
+        if (section) section.imageUrl = uploadedUrl;
+        continue;
+      }
+
+      if (!name.startsWith("questionImageFile-")) continue;
       const questionId = name.replace("questionImageFile-", "").trim();
       if (!questionId) continue;
 

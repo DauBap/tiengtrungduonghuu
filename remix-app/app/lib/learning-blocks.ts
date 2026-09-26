@@ -70,7 +70,7 @@ export const grammarConfigSchema = z.object({
 
 /** Sách bài tập: bài thi mô phỏng HSK với nhiều phần và câu hỏi */
 export const workbookConfigSchema = z.object({
-  audioUrl: z.string().url("URL audio không hợp lệ").optional().or(z.literal("")),
+  audioUrl: z.string().url("URL audio không hợp lệ").or(z.string().startsWith("/")).optional().or(z.literal("")),
   /** Giới hạn thời gian làm bài (phút); 0 = không giới hạn */
   timeLimit: z.number().int().min(0).default(0),
   /** Số lần được phát lại audio; 0 = không giới hạn */
@@ -90,6 +90,8 @@ export const workbookConfigSchema = z.object({
       titleChinese: z.string().default(""),
       description: z.string().default(""),
       descriptionVietnamese: z.string().default(""),
+      /** Shared illustration displayed before the section questions */
+      imageUrl: z.string().optional().or(z.literal("")),
       /** Câu ví dụ minh họa cách làm, không tính điểm */
       example: z.object({
         chinese: z.string().default(""),
@@ -97,8 +99,9 @@ export const workbookConfigSchema = z.object({
         translation: z.string().default(""),
         options: z.array(z.object({
           id: z.string(),
-          label: z.enum(["A", "B", "C", "D"]),
+          label: z.enum(["A", "B", "C", "D", "E", "F"]),
           text: z.string().default(""),
+          pinyin: z.string().default(""),
         })).default([]),
         correctAnswer: z.string().default(""),
       }).optional(),
@@ -106,11 +109,16 @@ export const workbookConfigSchema = z.object({
         z.object({
           id: z.string(),
           number: z.number().int().min(1),
+          kind: z.enum(["choice", "input"]).default("choice"),
+          prompt: z.string().default(""),
+          pinyin: z.string().default(""),
+          translation: z.string().default(""),
+          passage: z.string().default(""),
           /** URL ảnh đơn (Section 1 style) */
           imageUrl: z.string().optional().or(z.literal("")),
-          /** URL ảnh lưới A/B/C/D (Section 2 style) */
+          /** URL ảnh lưới A/B/C/D/E (Section 2 style) */
           images: z.array(z.object({
-            label: z.enum(["A", "B", "C", "D"]),
+            label: z.enum(["A", "B", "C", "D", "E", "F"]),
             url: z.string(),
           })).optional(),
           /** Hội thoại kèm theo câu */
@@ -121,10 +129,16 @@ export const workbookConfigSchema = z.object({
           }).optional(),
           options: z.array(z.object({
             id: z.string(),
-            label: z.enum(["A", "B", "C", "D"]),
+            label: z.enum(["A", "B", "C", "D", "E", "F"]),
             text: z.string().default(""),
-          })).min(1),
-          correctAnswer: z.string().min(1, "Phải chọn đáp án đúng"),
+            pinyin: z.string().default(""),
+          })).default([]),
+          gradable: z.boolean().default(true),
+          correctAnswer: z.string().default(""),
+        }).refine((question) => question.kind === "input" || question.options.length > 0, {
+          message: "Câu trắc nghiệm cần có ít nhất một đáp án",
+        }).refine((question) => !question.gradable || Boolean(question.correctAnswer.trim()), {
+          message: "Câu có chấm điểm phải có đáp án đúng",
         })
       ).default([]),
     })

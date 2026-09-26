@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
-import { getCourseById, getLessonsByCourse, getAllProgressForCourse, computeCourseProgress, computeLessonStatus, isEnrolled } from "~/lib/db.server";
+import { getCourseById, getLessonsByCourse, getCourseReviewSets, getAllProgressForCourse, computeCourseProgress, computeLessonStatus, isEnrolled } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { LessonCard } from "~/components/lessons/lesson-card";
 import { ProgressBar } from "~/components/progress/progress-bar";
@@ -20,6 +20,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   if (!enrolled) throw new Response("Không có quyền truy cập", { status: 403 });
 
   const lessons = await getLessonsByCourse(course.id);
+  const reviewSets = await getCourseReviewSets(course.id);
   const progressList = await getAllProgressForCourse(user.id, course.id);
   const progressMap = new Map(progressList.map((p) => [p.lessonId, p]));
   const courseProgress = computeCourseProgress(lessons, progressList);
@@ -42,12 +43,28 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     user,
     course: { ...course, createdAt: course.createdAt.toISOString(), updatedAt: course.updatedAt.toISOString() },
     lessonsWithStatus,
+    reviewSets,
     courseProgress,
   };
 }
 
 export default function StudentCourseDetail() {
-  const { user, course, lessonsWithStatus, courseProgress } = useLoaderData<typeof loader>();
+  const { user, course, lessonsWithStatus, reviewSets, courseProgress } = useLoaderData<typeof loader>();
+
+  const orderedCourseItems = [
+    ...lessonsWithStatus.map((lesson) => ({
+      kind: "lesson" as const,
+      order: lesson.order,
+      item: lesson,
+    })),
+    ...reviewSets.map((set) => ({
+      kind: "review" as const,
+      order: set.order,
+      item: set,
+    })),
+  ].sort((a, b) => a.order - b.order);
+  const lessonNumbers = new Map(lessonsWithStatus.map((lesson, index) => [lesson.id, index + 1]));
+
   return (
     <AppShell user={user}>
       <div className="space-y-6">
@@ -77,18 +94,36 @@ export default function StudentCourseDetail() {
 
         <div>
           <h2 className="text-lg font-semibold mb-4">Bài học</h2>
-          {lessonsWithStatus.length === 0
+          {orderedCourseItems.length === 0
             ? <EmptyState title="Chưa có bài học" message="Khóa học này chưa có bài học nào." />
             : <div className="space-y-3">
-                {lessonsWithStatus.map((lesson, index) => (
-                  <LessonCard
-                    key={lesson.id}
-                    lesson={{ id: lesson.id, courseId: lesson.courseId, order: lesson.order, title: lesson.title, subtitle: lesson.subtitle, content: lesson.content }}
-                    status={lesson.status}
-                    index={index}
-                    href={`/student/courses/${course.id}/lessons/${lesson.id}`}
-                  />
-                ))}
+                {orderedCourseItems.map((entry) => {
+                  if (entry.kind === "lesson") {
+                    const lesson = entry.item as (typeof lessonsWithStatus)[number];
+                    return (
+                      <LessonCard
+                        key={lesson.id}
+                        lesson={{ id: lesson.id, courseId: lesson.courseId, order: lesson.order, title: lesson.title, subtitle: lesson.subtitle, content: lesson.content }}
+                        status={lesson.status}
+                        index={(lessonNumbers.get(lesson.id) ?? 1) - 1}
+                        href={`/student/courses/${course.id}/lessons/${lesson.id}`}
+                      />
+                    );
+                  }
+
+                  const review = entry.item as (typeof reviewSets)[number];
+                  return (
+                    <LessonCard
+                      key={review.id}
+                      lesson={{ id: review.id, courseId: course.id, order: review.order, title: review.title, subtitle: review.subtitle, content: [] }}
+                      status="AVAILABLE"
+                      index={review.order}
+                      badgeText="Ôn tập"
+                      variant="review"
+                      href={`/student/courses/${course.id}/reviews/${review.id}`}
+                    />
+                  );
+                })}
               </div>}
         </div>
       </div>

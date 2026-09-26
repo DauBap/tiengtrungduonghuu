@@ -205,8 +205,8 @@ async function main() {
   console.log("✅ Enrollments seeded");
   console.log("\n📋 Tài khoản:");
   console.log("   admin:   admin@example.com / admin");
-  console.log("   teacher: teacher@example.com / 123456");
-  console.log("   student: student@example.com / 123456");
+  console.log("   teacher: teacher@example.com / 1234");
+  console.log("   student: student@example.com / 1234");
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect());

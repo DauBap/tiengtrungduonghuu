@@ -1,8 +1,13 @@
 {
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "app/**/*.ts",
+    "app/**/*.tsx",
     ".react-router/types/**/*"
+  ],
+  "exclude": [
+    "prisma/**",
+    "build/**",
+    "node_modules/**"
   ],
   "compilerOptions": {
     "lib": ["es2022", "DOM", "DOM.Iterable"],

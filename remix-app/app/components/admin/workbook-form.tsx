@@ -15,11 +15,11 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Option = { id: string; label: "A" | "B" | "C" | "D"; text: string };
+type Option = { id: string; label: "A" | "B" | "C" | "D" | "E" | "F"; text: string; pinyin: string };
 type Question = WorkbookConfig["sections"][number]["questions"][number];
 type Section = WorkbookConfig["sections"][number];
 
-const OPTION_LABELS = ["A", "B", "C", "D"] as const;
+const OPTION_LABELS = ["A", "B", "C", "D", "E", "F"] as const;
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -41,13 +41,19 @@ function emptyQuestion(number: number): Question {
   return {
     id: uid(),
     number,
+    kind: "choice",
+    prompt: "",
+    pinyin: "",
+    translation: "",
+    passage: "",
+    gradable: true,
     imageUrl: "",
     images: undefined,
     dialogue: undefined,
     options: [
-      { id: uid(), label: "A", text: "" },
-      { id: uid(), label: "B", text: "" },
-      { id: uid(), label: "C", text: "" },
+      { id: uid(), label: "A", text: "", pinyin: "" },
+      { id: uid(), label: "B", text: "", pinyin: "" },
+      { id: uid(), label: "C", text: "", pinyin: "" },
     ],
     correctAnswer: "",
   };
@@ -83,18 +89,18 @@ function QuestionEditor({
   onDelete: () => void;
   onMove: (dir: -1 | 1) => void;
 }) {
-  const updateOption = (optId: string, text: string) =>
+  const updateOption = (optId: string, field: "text" | "pinyin", value: string) =>
     onChange({
       ...question,
-      options: question.options.map((o) => (o.id === optId ? { ...o, text } : o)),
+      options: question.options.map((o) => (o.id === optId ? { ...o, [field]: value } : o)),
     });
 
   const addOption = () => {
-    if (question.options.length >= 4) return;
+    if (question.options.length >= 6) return;
     const nextLabel = OPTION_LABELS[question.options.length];
     onChange({
       ...question,
-      options: [...question.options, { id: uid(), label: nextLabel, text: "" }],
+      options: [...question.options, { id: uid(), label: nextLabel, text: "", pinyin: "" }],
     });
   };
 
@@ -128,6 +134,34 @@ function QuestionEditor({
         </button>
       </div>
 
+      <div className="flex gap-2" role="group" aria-label="Loại câu hỏi">
+        <Button type="button" size="sm" variant={question.kind === "choice" ? "default" : "outline"}
+          onClick={() => onChange({
+            ...question,
+            kind: "choice",
+            options: question.options.length ? question.options : OPTION_LABELS.slice(0, 3).map((label) => ({ id: uid(), label, text: "", pinyin: "" })),
+            gradable: question.kind === "choice" ? question.gradable : false,
+            correctAnswer: question.kind === "choice" ? question.correctAnswer : "",
+          })}>
+          Trắc nghiệm
+        </Button>
+        <Button type="button" size="sm" variant={question.kind === "input" ? "default" : "outline"}
+          onClick={() => onChange({ ...question, kind: "input", gradable: false, options: [], correctAnswer: "" })}>
+          Điền chữ
+        </Button>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Input value={question.prompt} onChange={(e) => onChange({ ...question, prompt: e.target.value })}
+          placeholder="Câu hỏi / câu cần điền" className="h-8 text-sm" />
+        <Input value={question.pinyin} onChange={(e) => onChange({ ...question, pinyin: e.target.value })}
+          placeholder="Pinyin" className="h-8 text-sm" />
+        <Input value={question.translation} onChange={(e) => onChange({ ...question, translation: e.target.value })}
+          placeholder="Bản dịch (tùy chọn)" className="h-8 text-sm sm:col-span-2" />
+        <Input value={question.passage} onChange={(e) => onChange({ ...question, passage: e.target.value })}
+          placeholder="Đoạn văn / ngữ cảnh (tùy chọn)" className="h-8 text-sm sm:col-span-2" />
+      </div>
+
       {/* URL ảnh đơn */}
       <div className="space-y-1">
         <Label className="text-xs">URL ảnh <span className="text-muted-foreground font-normal">(tùy chọn)</span></Label>
@@ -148,14 +182,20 @@ function QuestionEditor({
         />
       </div>
 
-      {/* Đáp án A/B/C/D */}
-      <div className="space-y-1.5">
+      {question.kind === "input" ? (
+        <div className="space-y-1.5">
+          <Label className="text-xs">Đáp án đúng</Label>
+          <Input value={question.correctAnswer}
+            onChange={(e) => onChange({ ...question, correctAnswer: e.target.value, gradable: Boolean(e.target.value.trim()) })}
+            placeholder="Nhập đáp án chính xác" className="h-8 text-sm" />
+        </div>
+      ) : <div className="space-y-1.5">
         <Label className="text-xs">Đáp án</Label>
         {question.options.map((opt) => (
           <div key={opt.id} className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => onChange({ ...question, correctAnswer: opt.id })}
+              onClick={() => onChange({ ...question, gradable: true, correctAnswer: opt.id })}
               className={cn(
                 "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold transition-colors",
                 question.correctAnswer === opt.id
@@ -166,12 +206,20 @@ function QuestionEditor({
             >
               {opt.label}
             </button>
-            <Input
-              value={opt.text}
-              onChange={(e) => updateOption(opt.id, e.target.value)}
-              placeholder={`Đáp án ${opt.label}`}
-              className="h-8 text-sm flex-1"
-            />
+            <div className="min-w-0 flex-1 space-y-1">
+              <Input
+                value={opt.text}
+                onChange={(e) => updateOption(opt.id, "text", e.target.value)}
+                placeholder={`Đáp án ${opt.label}`}
+                className="h-8 text-sm"
+              />
+              <Input
+                value={opt.pinyin}
+                onChange={(e) => updateOption(opt.id, "pinyin", e.target.value)}
+                placeholder={`Pinyin ${opt.label} (tùy chọn)`}
+                className="h-8 text-sm"
+              />
+            </div>
             {question.options.length > 2 && (
               <button type="button" onClick={() => removeOption(opt.id)}
                 className="text-muted-foreground hover:text-destructive shrink-0">
@@ -180,7 +228,7 @@ function QuestionEditor({
             )}
           </div>
         ))}
-        {question.options.length < 4 && (
+        {question.options.length < 6 && (
           <Button type="button" variant="ghost" size="sm" onClick={addOption}>
             <Plus className="h-3.5 w-3.5 mr-1" />Thêm đáp án
           </Button>
@@ -188,7 +236,7 @@ function QuestionEditor({
         {!question.correctAnswer && (
           <p className="text-xs text-warning">Bấm vào nút chữ cái để chọn đáp án đúng.</p>
         )}
-      </div>
+      </div>}
     </div>
   );
 }
@@ -295,6 +343,27 @@ function SectionEditor({
                 onChange={(e) => onChange({ ...section, descriptionVietnamese: e.target.value })}
                 placeholder="VD: Câu 1-5: Chọn đáp án đúng."
                 className="h-8 text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label className="text-xs">Ảnh dùng chung cho phần (URL)</Label>
+              <Input
+                value={section.imageUrl ?? ""}
+                onChange={(e) => onChange({ ...section, imageUrl: e.target.value })}
+                placeholder="https://... hoặc /images/..."
+                className="h-8 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Upload ảnh dùng chung</Label>
+              <Input
+                name={`sectionImageFile-${section.id}`}
+                type="file"
+                accept="image/*"
+                className="h-8 text-sm file:mr-2 file:rounded file:border-0 file:bg-muted file:px-2 file:py-1"
               />
             </div>
           </div>

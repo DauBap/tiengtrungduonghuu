@@ -10,11 +10,11 @@ interface LessonTabsProps {
   onTabChange: (tab: LessonTab) => void;
   /** Dạng bài có nội dung học được trong bài này; dạng khác vẫn hiện nhưng mờ đi. */
   availableTypes: Set<LearningBlockType>;
-  /** Bài đã có câu hỏi kiểm tra chưa — chưa có thì tab Kiểm tra mờ như các tab trống. */
-  hasTest: boolean;
+  /** Bài có từ vựng để tạo quiz hay chưa. */
+  hasQuiz: boolean;
 }
 
-export function LessonTabs({ activeTab, onTabChange, availableTypes, hasTest }: LessonTabsProps) {
+export function LessonTabs({ activeTab, onTabChange, availableTypes, hasQuiz }: LessonTabsProps) {
   const baseTab = "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap";
   const ordered = ["FLASHCARD", "LISTENING", "VOCABULARY", "LESSON", "GRAMMAR", "WORKBOOK"] as const;
 
@@ -76,7 +76,7 @@ export function LessonTabs({ activeTab, onTabChange, availableTypes, hasTest }: 
             baseTab,
             activeTab === "TEST"
               ? "border-primary text-primary"
-              : hasTest
+              : hasQuiz
                 ? "border-transparent text-foreground hover:text-primary hover:border-border"
                 : "border-transparent text-muted-foreground"
           )}

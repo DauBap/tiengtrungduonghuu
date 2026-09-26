@@ -21,15 +21,14 @@ import { LessonTabEmpty } from "~/components/lessons/lesson-tab-empty";
 import { VocabularyTable } from "~/components/lessons/vocabulary-table";
 import { GrammarSection } from "~/components/lessons/grammar-section";
 import { WorkbookListeningTest } from "~/components/lessons/workbook-listening-test";
-import { LessonTest, type LessonTestQuestion } from "~/components/lessons/lesson-test";
+import { VocabularyTest } from "~/components/lessons/vocabulary-test";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
 import { ArrowLeft, BookOpen, PartyPopper, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2 } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
-import { gradeLessonTest, parseTestResponses } from "~/lib/lesson-test";
-import { GRAMMAR_QUESTION_META, grammarAnswerText, shuffledTokens } from "~/lib/grammar";
+import { createVocabularyTest, gradeVocabularyTest } from "~/lib/vocabulary-test";
 import { cn } from "~/lib/utils";
 import { speakChinese } from "~/lib/speech";
 
@@ -95,22 +94,15 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const blockProgressMap = await getBlockProgressMap(user.id, blocks.map((b) => b.id));
   const blockStatuses = computeBlockStatuses(blocks, blockProgressMap);
 
-  // Câu hỏi kiểm tra — KHÔNG có `answer` và `hint`, giữ bảo mật như route test cũ.
-  // Trộn ở server: thứ tự gốc của ARRANGE chính là đáp án.
-  const testRows = lesson.test
-    ? await prisma.testQuestion.findMany({
-        where: { testId: lesson.test.id },
-        orderBy: { order: "asc" },
-        select: { id: true, type: true, prompt: true, options: true, points: true },
-      })
-    : [];
-  const testQuestions: LessonTestQuestion[] = testRows.map((q) => ({
-    ...q,
-    options: q.type === "ARRANGE" ? shuffledTokens(q.options) : q.options,
-  }));
+  const courseWords = await prisma.vocabItem.findMany({
+    where: { lesson: { courseId: lesson.courseId } },
+    select: { id: true, chinese: true, pinyin: true, translation: true, wordTypes: true },
+  });
+  const vocabularyQuestions = createVocabularyTest(lesson.content, courseWords);
   const passScore = lesson.test?.passScore ?? 50;
+  const timeLimitMinutes = lesson.test ? lesson.test.timeLimitMinutes : 30;
 
-  return { user, lesson, lessonStatus, blocks, blockStatuses, testQuestions, passScore };
+  return { user, lesson, lessonStatus, blocks, blockStatuses, vocabularyQuestions, passScore, timeLimitMinutes };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -139,7 +131,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
       update: { score, transcript: transcript || null },
       create: { userId: user.id, lessonAudioScriptId: script.id, score, transcript: transcript || null },
     });
-
     return { success: true };
   }
 
@@ -158,57 +149,26 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   if (intent === "submit-test") {
     const lessonId = params.lessonId!;
-    const test = await prisma.test.findUnique({
-      where: { lessonId },
-      select: { id: true, passScore: true },
+    const lesson = await prisma.lesson.findFirst({
+      where: { id: lessonId, courseId: params.courseId },
+      select: {
+        content: {
+          orderBy: { order: "asc" },
+          select: { id: true, chinese: true, pinyin: true, translation: true, wordTypes: true },
+        },
+        test: { select: { passScore: true } },
+      },
     });
-    if (!test) return { testError: "Không tìm thấy bài kiểm tra" as const };
-
-    const questions = await prisma.testQuestion.findMany({
-      where: { testId: test.id },
-      orderBy: { order: "asc" },
-      select: { id: true, type: true, prompt: true, options: true, answer: true, hint: true, points: true },
-    });
-    if (questions.length === 0) {
-      return { testError: "Bài kiểm tra này chưa có câu hỏi nào." as const };
+    if (!lesson) throw new Response("Không tìm thấy bài học", { status: 404 });
+    if (lesson.content.length === 0) {
+      return { testError: "Bài học này chưa có từ vựng để kiểm tra." as const };
     }
 
-    const responses = parseTestResponses(form, questions.map((q) => q.id));
-    const grade = gradeLessonTest(questions, responses, test.passScore);
-
-    if (grade.passed) {
+    const testResult = gradeVocabularyTest(lesson.content, form, lesson.test?.passScore ?? 50);
+    if (testResult.passed) {
       await upsertLessonProgress(user.id, lessonId, { testCompleted: true });
     }
-
-    /** Kết quả một câu, chỉ dựng SAU khi nộp — lúc này mới được tiết lộ đáp án. */
-    const results = questions.map((q) => {
-      const response = responses.get(q.id);
-      const given = Array.isArray(response) ? response.join("") : (response ?? "");
-      return {
-        id: q.id,
-        prompt: q.prompt,
-        typeLabel: GRAMMAR_QUESTION_META[q.type].label,
-        points: q.points,
-        correct: grade.perQuestion.get(q.id) ?? false,
-        given: given.trim(),
-        correctAnswer: grammarAnswerText(q),
-        hint: q.hint,
-      };
-    });
-
-    return {
-      testResult: {
-        percentage: grade.percentage,
-        earnedPoints: grade.earnedPoints,
-        totalPoints: grade.totalPoints,
-        correctCount: grade.correctCount,
-        blankCount: grade.blankCount,
-        passed: grade.passed,
-        passScore: test.passScore,
-        questionCount: questions.length,
-        results,
-      },
-    };
+    return { testResult };
   }
 
   await upsertLessonProgress(user.id, params.lessonId!, { learningCompleted: true });
@@ -216,7 +176,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function LessonDetail() {
-  const { user, lesson, blocks, blockStatuses, testQuestions, passScore, lessonStatus } = useLoaderData<typeof loader>();
+  const { user, lesson, blocks, blockStatuses, vocabularyQuestions, passScore, timeLimitMinutes, lessonStatus } = useLoaderData<typeof loader>();
   const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string }>();
   const [activeTab, setActiveTab] = useState<LessonTab>("VOCABULARY");
   const [showScript, setShowScript] = useState(true);
@@ -485,7 +445,7 @@ export default function LessonDetail() {
       }
 
       // Chưa có câu hỏi
-      if (testQuestions.length === 0) return <LessonTabEmpty tab="TEST" />;
+      if (vocabularyQuestions.length === 0) return <LessonTabEmpty tab="TEST" />;
 
       // Form làm bài
       return (
@@ -499,10 +459,10 @@ export default function LessonDetail() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">
-                {testQuestions.length} câu · cần {passScore}% để đạt
+                {vocabularyQuestions.length} từ · cần {passScore}% để đạt
               </CardTitle>
               <CardDescription>
-                Trả lời hết rồi bấm Nộp bài, hệ thống sẽ chấm và cho biết điểm.
+                Chọn nghĩa tiếng Việt phù hợp cho từng từ. Đề được trộn lại mỗi lần tải trang.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -513,7 +473,11 @@ export default function LessonDetail() {
               )}
               <testFetcher.Form method="post">
                 <input type="hidden" name="intent" value="submit-test" />
-                <LessonTest questions={testQuestions} isSubmitting={isSubmittingTest} />
+                <VocabularyTest
+                  questions={vocabularyQuestions}
+                  timeLimitMinutes={timeLimitMinutes}
+                  isSubmitting={isSubmittingTest}
+                />
               </testFetcher.Form>
             </CardContent>
           </Card>
@@ -912,7 +876,7 @@ export default function LessonDetail() {
               activeTab={activeTab}
               onTabChange={setActiveTab}
               availableTypes={availableTypes}
-              hasTest={(lesson.test?._count.questions ?? 0) > 0}
+              hasQuiz={lesson.content.length > 0}
             />
 
 

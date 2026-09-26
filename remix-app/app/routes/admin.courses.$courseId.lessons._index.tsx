@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { Overlay } from "~/components/common/overlay";
-import { ArrowLeft, Plus, Pencil, Trash2, X, BookOpen, Loader2, ChevronUp, ChevronDown, Settings2 } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, X, BookOpen, Loader2, Settings2, ClipboardCheck, GripVertical } from "lucide-react";
 
 type LessonRow = {
   id: string;
@@ -21,6 +21,16 @@ type LessonRow = {
   subtitle: string;
   _count: { content: number; learningBlocks: number };
 };
+type ReviewRow = {
+  id: string;
+  order: number;
+  title: string;
+  subtitle: string;
+  _count: { questions: number };
+};
+type CourseItem =
+  | { kind: "lesson"; data: LessonRow }
+  | { kind: "review"; data: ReviewRow };
 type ModalMode = "create" | "edit" | "delete" | null;
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -28,7 +38,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const course = await getCourseById(params.courseId!);
   if (!course) throw new Response("Không tìm thấy khóa học", { status: 404 });
   const lessons = await getLessonsForAdmin(course.id);
-  return { user, course, lessons };
+  const reviewSets = await prisma.courseReviewSet.findMany({
+    where: { courseId: course.id },
+    include: { _count: { select: { questions: true } } },
+    orderBy: { order: "asc" },
+  });
+  return { user, course, lessons, reviewSets };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -68,28 +83,80 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return { success: true };
   }
 
+  if (intent === "delete-review") {
+    const reviewId = String(form.get("reviewId") ?? "");
+    const reviewSet = await prisma.courseReviewSet.findFirst({ where: { id: reviewId, courseId }, select: { id: true } });
+    if (!reviewSet) return { error: "Không tìm thấy bộ ôn tập" };
+    await prisma.courseReviewSet.delete({ where: { id: reviewSet.id } });
+    return { success: true };
+  }
+
   if (intent === "move") {
-    const lessonId = String(form.get("lessonId"));
+    const itemId = String(form.get("itemId"));
+    const itemType = String(form.get("itemType"));
     const direction = String(form.get("direction"));
-    const current = await prisma.lesson.findUnique({ where: { id: lessonId }, select: { id: true, order: true } });
+    const current = itemType === "review"
+      ? await prisma.courseReviewSet.findFirst({ where: { id: itemId, courseId }, select: { id: true, order: true } })
+      : await prisma.lesson.findFirst({ where: { id: itemId, courseId }, select: { id: true, order: true } });
     if (!current) return { error: "Không tìm thấy bài học" };
 
-    const neighbour = await prisma.lesson.findFirst({
-      where: {
-        courseId,
-        order: direction === "up" ? { lt: current.order } : { gt: current.order },
-      },
-      orderBy: { order: direction === "up" ? "desc" : "asc" },
-      select: { id: true, order: true },
-    });
+    const [lessons, reviewSets] = await Promise.all([
+      prisma.lesson.findMany({ where: { courseId }, select: { id: true, order: true } }),
+      prisma.courseReviewSet.findMany({ where: { courseId }, select: { id: true, order: true } }),
+    ]);
+    const items = [
+      ...lessons.map((item) => ({ ...item, itemType: "lesson" as const })),
+      ...reviewSets.map((item) => ({ ...item, itemType: "review" as const })),
+    ].sort((a, b) => a.order - b.order);
+    const currentIndex = items.findIndex((item) => item.itemType === itemType && item.id === itemId);
+    const neighbour = items[currentIndex + (direction === "up" ? -1 : 1)];
     if (!neighbour) return { success: true };
 
-    // Đổi chỗ qua giá trị tạm để không vướng thứ tự trùng
-    await prisma.$transaction([
-      prisma.lesson.update({ where: { id: current.id }, data: { order: -1 } }),
-      prisma.lesson.update({ where: { id: neighbour.id }, data: { order: current.order } }),
-      prisma.lesson.update({ where: { id: current.id }, data: { order: neighbour.order } }),
+    // Đánh lại toàn bộ thứ tự sau khi đổi vị trí để lesson và review không trùng số.
+    const updateOrder = (type: "lesson" | "review", id: string, order: number) =>
+      type === "review"
+        ? prisma.courseReviewSet.update({ where: { id }, data: { order } })
+        : prisma.lesson.update({ where: { id }, data: { order } });
+    const reordered = [...items];
+    const neighbourIndex = reordered.findIndex((item) => item.id === neighbour.id && item.itemType === neighbour.itemType);
+    [reordered[currentIndex], reordered[neighbourIndex]] = [reordered[neighbourIndex], reordered[currentIndex]];
+    await prisma.$transaction(
+      reordered.map((item, index) => updateOrder(item.itemType, item.id, index + 1))
+    );
+    return { success: true };
+  }
+
+  if (intent === "reorder") {
+    let orderedItems: { id: string; itemType: "lesson" | "review" }[];
+    try {
+      orderedItems = JSON.parse(String(form.get("items") ?? "[]"));
+    } catch {
+      return { error: "Thứ tự không hợp lệ" };
+    }
+
+    if (!Array.isArray(orderedItems) || orderedItems.some((item) =>
+      !item || typeof item.id !== "string" || !["lesson", "review"].includes(item.itemType)
+    )) return { error: "Thứ tự không hợp lệ" };
+
+    const existingIds = new Set<string>();
+    const [lessons, reviewSets] = await Promise.all([
+      prisma.lesson.findMany({ where: { courseId }, select: { id: true } }),
+      prisma.courseReviewSet.findMany({ where: { courseId }, select: { id: true } }),
     ]);
+    lessons.forEach((item) => existingIds.add(`lesson:${item.id}`));
+    reviewSets.forEach((item) => existingIds.add(`review:${item.id}`));
+
+    const submittedKeys = orderedItems.map((item) => `${item.itemType}:${item.id}`);
+    if (submittedKeys.length !== existingIds.size || new Set(submittedKeys).size !== submittedKeys.length
+      || submittedKeys.some((key) => !existingIds.has(key))) {
+      return { error: "Danh sách sắp xếp không hợp lệ" };
+    }
+
+    const updateOrder = (type: "lesson" | "review", id: string, order: number) =>
+      type === "review"
+        ? prisma.courseReviewSet.update({ where: { id }, data: { order } })
+        : prisma.lesson.update({ where: { id }, data: { order } });
+    await prisma.$transaction(orderedItems.map((item, index) => updateOrder(item.itemType, item.id, index + 1)));
     return { success: true };
   }
 
@@ -178,17 +245,38 @@ function LessonModal({
 }
 
 export default function AdminCourseLessons() {
-  const { user, course, lessons } = useLoaderData<typeof loader>();
+  const { user, course, lessons, reviewSets } = useLoaderData<typeof loader>();
   const moveFetcher = useFetcher();
+  const reviewDeleteFetcher = useFetcher();
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [selected, setSelected] = useState<LessonRow | null>(null);
+  const [draggingKey, setDraggingKey] = useState<string | null>(null);
 
   const open = (mode: ModalMode, l: LessonRow | null = null) => { setSelected(l); setModalMode(mode); };
   const close = useCallback(() => { setModalMode(null); setSelected(null); }, []);
   const nextOrder = lessons.length > 0 ? Math.max(...lessons.map((l) => l.order)) + 1 : 1;
+  const items: CourseItem[] = [
+    ...lessons.map((data) => ({ kind: "lesson" as const, data })),
+    ...reviewSets.map((data) => ({ kind: "review" as const, data })),
+  ].sort((a, b) => a.data.order - b.data.order);
+  const lessonNumbers = new Map(lessons.map((lesson, index) => [lesson.id, index + 1]));
 
-  const move = (lessonId: string, direction: "up" | "down") =>
-    moveFetcher.submit({ intent: "move", lessonId, direction }, { method: "post" });
+  const itemKey = (item: CourseItem) => `${item.kind}:${item.data.id}`;
+  const reorder = (targetKey: string) => {
+    if (!draggingKey || draggingKey === targetKey) return;
+    const fromIndex = items.findIndex((item) => itemKey(item) === draggingKey);
+    const toIndex = items.findIndex((item) => itemKey(item) === targetKey);
+    if (fromIndex < 0 || toIndex < 0) return;
+
+    const reordered = [...items];
+    const [dragged] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, dragged);
+    moveFetcher.submit({
+      intent: "reorder",
+      items: JSON.stringify(reordered.map((item) => ({ id: item.data.id, itemType: item.kind }))),
+    }, { method: "post" });
+    setDraggingKey(null);
+  };
 
   return (
     <>
@@ -207,7 +295,7 @@ export default function AdminCourseLessons() {
             </div>
           </div>
 
-          {lessons.length === 0 ? (
+          {items.length === 0 ? (
             <EmptyState icon={<BookOpen className="h-10 w-10" />} title="Chưa có bài học"
               message="Thêm bài học đầu tiên cho khóa học này."
               action={<Button onClick={() => open("create")}><Plus className="h-4 w-4 mr-1.5" />Thêm bài học</Button>} />
@@ -215,7 +303,7 @@ export default function AdminCourseLessons() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">
-                  Danh sách bài học <span className="text-sm font-normal text-muted-foreground">({lessons.length})</span>
+                  Danh sách bài học <span className="text-sm font-normal text-muted-foreground">({items.length})</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
@@ -230,46 +318,83 @@ export default function AdminCourseLessons() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {lessons.map((l, i) => (
-                      <TableRow key={l.id}>
+                    {items.map((item, i) => (
+                      <TableRow
+                        key={`${item.kind}-${item.data.id}`}
+                        draggable
+                        onDragStart={() => setDraggingKey(itemKey(item))}
+                        onDragOver={(event) => event.preventDefault()}
+                        onDrop={() => reorder(itemKey(item))}
+                        onDragEnd={() => setDraggingKey(null)}
+                        className={draggingKey === itemKey(item) ? "opacity-50" : undefined}
+                      >
                         <TableCell>
                           <div className="flex items-center gap-1">
-                            <span className="font-mono text-sm font-medium tabular-nums w-5">{l.order}</span>
-                            <div className="flex flex-col">
-                              <button onClick={() => move(l.id, "up")} disabled={i === 0}
-                                className="text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground"
-                                title="Lên trên">
-                                <ChevronUp className="h-3.5 w-3.5" />
-                              </button>
-                              <button onClick={() => move(l.id, "down")} disabled={i === lessons.length - 1}
-                                className="text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground"
-                                title="Xuống dưới">
-                                <ChevronDown className="h-3.5 w-3.5" />
-                              </button>
+                            <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground" aria-label="Kéo để sắp xếp" />
+                            <span className="font-mono text-sm font-medium tabular-nums w-5">{i + 1}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-start gap-2">
+                            {item.kind === "review" && <ClipboardCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />}
+                            <div>
+                              <p className="font-medium">
+                                {item.kind === "review" ? `Ôn tập: ${item.data.title}` : `Bài ${lessonNumbers.get(item.data.id)}: ${item.data.title}`}
+                              </p>
+                              <p className="text-sm text-muted-foreground font-mono">{item.data.subtitle}</p>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <p className="font-medium">{l.title}</p>
-                          <p className="text-sm text-muted-foreground font-mono">{l.subtitle}</p>
+                        <TableCell className="text-sm text-muted-foreground tabular-nums">
+                          {item.kind === "review" ? `${item.data._count.questions} câu` : `${item.data._count.content} từ`}
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground tabular-nums">{l._count.content} từ</TableCell>
-                        <TableCell className="text-sm text-muted-foreground tabular-nums">{l._count.learningBlocks} phần</TableCell>
+                        <TableCell className="text-sm text-muted-foreground tabular-nums">
+                          {item.kind === "review" ? "Bộ ôn tập" : `${item.data._count.learningBlocks} phần`}
+                        </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button asChild variant="outline" size="sm">
-                              <Link to={`/admin/lessons/${l.id}`}>
-                                <Settings2 className="h-4 w-4 mr-1.5" />Soạn nội dung
-                              </Link>
-                            </Button>
-                            <Button variant="ghost" size="icon" title="Sửa thông tin" onClick={() => open("edit", l as LessonRow)}>
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" title="Xóa" onClick={() => open("delete", l as LessonRow)}
-                              className="hover:text-destructive hover:bg-destructive/10">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          {item.kind === "lesson" ? (
+                            <div className="flex justify-end gap-1">
+                              <Button asChild variant="outline" size="sm">
+                                <Link to={`/admin/lessons/${item.data.id}`}>
+                                  <Settings2 className="h-4 w-4 mr-1.5" />Soạn nội dung
+                                </Link>
+                              </Button>
+                              <Button variant="ghost" size="icon" title="Sửa thông tin" onClick={() => open("edit", item.data)}>
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" title="Xóa" onClick={() => open("delete", item.data)}
+                                className="hover:text-destructive hover:bg-destructive/10">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex justify-end gap-1">
+                              <Button asChild variant="outline" size="sm">
+                                <Link to={`/admin/courses/${course.id}/reviews/${item.data.id}`}>
+                                  <Settings2 className="mr-1.5 h-4 w-4" />Soạn nội dung
+                                </Link>
+                              </Button>
+                              <Button asChild variant="ghost" size="icon" title="Sửa thông tin">
+                                <Link to={`/admin/courses/${course.id}/reviews/${item.data.id}`}><Pencil className="h-4 w-4" /></Link>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title="Xóa bộ ôn tập"
+                                className="hover:bg-destructive/10 hover:text-destructive"
+                                onClick={() => {
+                                  if (window.confirm(`Xóa bộ ôn tập "${item.data.title}"?`)) {
+                                    reviewDeleteFetcher.submit(
+                                      { intent: "delete-review", reviewId: item.data.id },
+                                      { method: "post" }
+                                    );
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

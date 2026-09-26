@@ -51,11 +51,55 @@ model Course {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  lessons     Lesson[]
-  enrollments Enrollment[]
-  classes     Class[]
-  exams            Exam[]
-  examAccessRules  ExamAccessRule[]
+  lessons         Lesson[]
+  enrollments     Enrollment[]
+  classes         Class[]
+  exams           Exam[]
+  examAccessRules ExamAccessRule[]
+  reviewSets      CourseReviewSet[]
+}
+
+enum ReviewDirection {
+  VI2ZH
+  ZH2VI
+}
+
+enum ReviewQuestionType {
+  TRANSLATION
+  REORDER
+}
+
+model CourseReviewSet {
+  id        String   @id @default(cuid())
+  courseId  String
+  title     String
+  subtitle  String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course   Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions CourseReviewQuestion[]
+
+  @@index([courseId, order])
+}
+
+model CourseReviewQuestion {
+  id              String            @id @default(cuid())
+  setId           String
+  direction       ReviewDirection
+  type            ReviewQuestionType @default(TRANSLATION)
+  prompt          String
+  answer          String
+  acceptedAnswers String[]          @default([])
+  explanation     String?
+  tokens          String[]          @default([])
+  lesson          Int?
+  order           Int               @default(0)
+
+  reviewSet CourseReviewSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@index([setId, order])
 }
 
 enum CourseStatus {
@@ -275,6 +319,8 @@ model Test {
   title    String
   /// % tối thiểu để coi là đạt và đánh dấu hoàn thành bài học
   passScore Int   @default(50)
+  /// Số phút làm bài; null = không giới hạn
+  timeLimitMinutes Int? @default(30)
 
   lesson    Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   questions TestQuestion[]

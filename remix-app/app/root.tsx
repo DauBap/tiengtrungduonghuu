@@ -12,6 +12,7 @@ import { Toaster } from "~/components/ui/sonner";
 import stylesheet from "~/globals.css?url";
 
 export const links: LinksFunction = () => [
+  { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",

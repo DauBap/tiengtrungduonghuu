@@ -159,7 +159,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
       return { error: "Điểm đạt phải là số nguyên từ 0 đến 100", field: "passScore" };
     }
 
-    await prisma.test.update({ where: { id: testId }, data: { title, passScore } });
+    const rawTimeLimit = String(form.get("timeLimitMinutes") ?? "").trim();
+    const timeLimitMinutes = rawTimeLimit ? Number(rawTimeLimit) : null;
+    if (timeLimitMinutes !== null && (!Number.isInteger(timeLimitMinutes) || timeLimitMinutes < 1 || timeLimitMinutes > 240)) {
+      return { error: "Thời gian làm bài phải từ 1 đến 240 phút, hoặc để trống để không giới hạn", field: "timeLimitMinutes" };
+    }
+
+    await prisma.test.update({ where: { id: testId }, data: { title, passScore, timeLimitMinutes } });
     return { success: true, message: "Đã lưu cài đặt bài kiểm tra" };
   }
 
@@ -567,7 +573,7 @@ export default function AdminLessonTest() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Cài đặt</CardTitle>
               <CardDescription>
-                Học viên phải đạt điểm sàn mới được tính là hoàn thành bài học.
+                Cấu hình điểm đạt và thời gian làm bài cho học viên.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -585,7 +591,7 @@ export default function AdminLessonTest() {
                   </div>
                 )}
 
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-4">
                   <div className="space-y-2 sm:col-span-2">
                     <Label htmlFor="title">Tên bài kiểm tra <span className="text-destructive">*</span></Label>
                     <Input id="title" name="title" defaultValue={test.title}
@@ -596,6 +602,13 @@ export default function AdminLessonTest() {
                     <Input id="passScore" name="passScore" type="number" min="0" max="100" step="1"
                       defaultValue={test.passScore}
                       aria-invalid={settingsFetcher.data?.field === "passScore" || undefined} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="timeLimitMinutes">Thời gian (phút)</Label>
+                    <Input id="timeLimitMinutes" name="timeLimitMinutes" type="number" min="1" max="240" step="1"
+                      defaultValue={test.timeLimitMinutes ?? ""} placeholder="Không giới hạn"
+                      aria-invalid={settingsFetcher.data?.field === "timeLimitMinutes" || undefined} />
+                    <p className="text-xs text-muted-foreground">Để trống nếu không giới hạn.</p>
                   </div>
                 </div>
 

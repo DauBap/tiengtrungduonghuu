@@ -12,6 +12,7 @@ export default [
     route("courses/new", "routes/admin.courses.new.tsx"),
     route("courses/:courseId/edit", "routes/admin.courses.$courseId.edit.tsx"),
     route("courses/:courseId/lessons", "routes/admin.courses.$courseId.lessons._index.tsx"),
+    route("courses/:courseId/reviews/:reviewId", "routes/admin.courses.$courseId.reviews.$reviewId.tsx"),
     route("lessons/:lessonId", "routes/admin.lessons.$lessonId.tsx"),
     route("lessons/:lessonId/grammar", "routes/admin.lessons.$lessonId.grammar.tsx"),
     route("lessons/:lessonId/grammar/:sectionId", "routes/admin.lessons.$lessonId.grammar.$sectionId.tsx"),
@@ -56,6 +57,7 @@ export default [
   route("student", "routes/student._index.tsx"),
   route("student/courses", "routes/student.courses._index.tsx"),
   route("student/courses/:courseId", "routes/student.courses.$courseId.tsx"),
+  route("student/courses/:courseId/reviews/:reviewId", "routes/student.courses.$courseId.reviews.$reviewId.tsx"),
   route(
     "student/courses/:courseId/lessons/:lessonId",
     "routes/student.courses.$courseId.lessons.$lessonId.tsx"

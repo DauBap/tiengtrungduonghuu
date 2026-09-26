@@ -22,8 +22,8 @@ Tài khoản sau khi seed:
 | Vai trò | Email | Mật khẩu |
 |---|---|---|
 | Admin | `admin@example.com` | `admin` |
-| Giáo viên | `teacher@example.com` | `123456` |
-| Học viên | `student@example.com` | `123456` |
+| Giáo viên | `teacher@example.com` | `1234` |
+| Học viên | `student@example.com` | `1234` |
 
 ## Scripts
 

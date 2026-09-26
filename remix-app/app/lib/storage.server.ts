@@ -6,6 +6,7 @@ export type AssetKind = "workbook-image" | "lesson-audio";
 export interface SaveAssetOptions {
   kind: AssetKind;
   lessonId?: string;
+  sectionId?: string;
   questionId?: string;
   speakerId?: string;
 }
@@ -28,7 +29,7 @@ export async function saveUploadedAsset(file: File | null, options: SaveAssetOpt
 
   const safeLesson = sanitizeSegment(options.lessonId ?? "lesson", "lesson");
   const uniqueStem = kind === "workbook-image"
-    ? sanitizeSegment(options.questionId ?? "question", "question")
+    ? sanitizeSegment(options.sectionId ?? options.questionId ?? "question", "question")
     : sanitizeSegment(options.speakerId ?? "speaker", "speaker");
 
   const fileExt = extFromName(file.name);

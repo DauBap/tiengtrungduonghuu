@@ -128,6 +128,21 @@ export async function getLessonsByCourse(courseId: string) {
   });
 }
 
+export async function getCourseReviewSets(courseId: string) {
+  return prisma.courseReviewSet.findMany({
+    where: { courseId },
+    include: { questions: { orderBy: { order: "asc" } } },
+    orderBy: { order: "asc" },
+  });
+}
+
+export async function getCourseReviewSetById(courseId: string, reviewId: string) {
+  return prisma.courseReviewSet.findFirst({
+    where: { id: reviewId, courseId },
+    include: { questions: { orderBy: { order: "asc" } } },
+  });
+}
+
 export async function getLessonById(id: string) {
   return prisma.lesson.findUnique({
     where: { id },

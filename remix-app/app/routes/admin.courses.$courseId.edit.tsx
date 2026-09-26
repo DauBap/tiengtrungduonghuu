@@ -18,12 +18,19 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
   const course = await getCourseById(params.courseId!);
   if (!course) throw new Response("Không tìm thấy khóa học", { status: 404 });
-  return { user, course };
+
+  const reviewSets = await prisma.courseReviewSet.findMany({
+    where: { courseId: course.id },
+    orderBy: { order: "asc" },
+  });
+
+  return { user, course, reviewSets };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
   await requireRole(request, ["admin"]);
   const form = await request.formData();
+
   await prisma.course.update({
     where: { id: params.courseId! },
     data: {
@@ -36,11 +43,29 @@ export async function action({ request, params }: ActionFunctionArgs) {
       thumbnail: String(form.get("thumbnail") || "") || null,
     },
   });
+
+  const reviewUpdates = Array.from(form.entries())
+    .filter(([key]) => String(key).startsWith("reviewOrder-"))
+    .map(([key, value]) => ({
+      id: String(key).replace("reviewOrder-", ""),
+      order: Number(value),
+    }))
+    .filter((item) => item.id && Number.isFinite(item.order));
+
+  await Promise.all(
+    reviewUpdates.map(({ id, order }) =>
+      prisma.courseReviewSet.update({
+        where: { id },
+        data: { order },
+      })
+    )
+  );
+
   return redirect("/admin/courses");
 }
 
 export default function EditCourse() {
-  const { user, course } = useLoaderData<typeof loader>();
+  const { user, course, reviewSets } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
   const [status, setStatus] = useState(course.status);
@@ -115,6 +140,40 @@ export default function EditCourse() {
                 </Button>
               </div>
             </Form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Sắp xếp ôn tập trong khóa học</CardTitle>
+            <CardDescription>Điền số thứ tự để đặt mỗi bộ ôn tập ở vị trí mong muốn trong danh sách khóa học.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {reviewSets.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Khóa học này chưa có bộ ôn tập nào.</p>
+            ) : (
+              <div className="space-y-3">
+                {reviewSets.map((set) => (
+                  <div key={set.id} className="flex items-center gap-3 rounded-lg border p-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate text-sm font-medium">{set.title}</p>
+                      <p className="text-xs text-muted-foreground">{set.subtitle || "Bộ ôn tập"}</p>
+                    </div>
+                    <div className="w-24 space-y-1">
+                      <Label htmlFor={`reviewOrder-${set.id}`} className="text-xs">Vị trí</Label>
+                      <Input
+                        id={`reviewOrder-${set.id}`}
+                        name={`reviewOrder-${set.id}`}
+                        type="number"
+                        min={1}
+                        defaultValue={set.order || 1}
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 

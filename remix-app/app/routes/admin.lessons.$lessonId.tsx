@@ -678,9 +678,9 @@ export default function AdminLessonDetail() {
   const hasVocab = lesson.content.length > 0;
   const hasSentences = lesson.sentences.length > 0;
   const hasGrammar = lesson.grammarSections.length > 0;
-  // Bài kiểm tra được tạo lười ở trang quản lý, nên bài chưa mở trang đó thì
-  // `lesson.test` còn null — không phải là đã có bài mà rỗng câu hỏi.
-  const testQuestionCount = lesson.test?.questions.length ?? 0;
+  const testTimeLabel = lesson.test?.timeLimitMinutes === null
+    ? "Không giới hạn thời gian"
+    : `${lesson.test?.timeLimitMinutes ?? 30} phút`;
 
   // Track các blocks hiện có theo type (unique constraint đảm bảo tối đa 1 block/type)
   const flashcardBlock = lesson.learningBlocks.find((b) => b.type === "FLASHCARD");
@@ -1098,32 +1098,32 @@ export default function AdminLessonDetail() {
             </CardContent>
           </Card>
 
-          {/* Bài kiểm tra cuối bài — hệ riêng, không dùng kho câu hỏi của Bài thi */}
+          {/* Quiz sinh trực tiếp từ từ vựng của bài */}
           <Card>
             <CardHeader className="pb-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <CardTitle className="text-base">
-                    Bài kiểm tra <span className="text-sm font-normal text-muted-foreground">({testQuestionCount})</span>
+                      Kiểm tra từ vựng <span className="text-sm font-normal text-muted-foreground">({lesson.content.length} từ)</span>
                   </CardTitle>
                   <CardDescription>
-                    Học viên làm ở tab Kiểm tra, nộp một lần và phải đạt điểm sàn mới hoàn thành bài học.
+                    Mỗi từ tạo một câu trắc nghiệm. Cài đặt điểm đạt và thời gian làm bài cho học viên.
                   </CardDescription>
                 </div>
                 <Button size="sm" variant="outline" asChild>
                   <Link to={`/admin/lessons/${lesson.id}/test`}>
-                    <ClipboardCheck className="h-4 w-4 mr-1.5" />Quản lý bài kiểm tra
+                    <ClipboardCheck className="h-4 w-4 mr-1.5" />Cài đặt
                   </Link>
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              {testQuestionCount === 0 ? (
+              {lesson.content.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-8 text-center">
                   <ClipboardCheck className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm font-medium">Chưa có câu hỏi kiểm tra nào</p>
+                  <p className="text-sm font-medium">Chưa có từ vựng để kiểm tra</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Chưa có câu hỏi thì tab Kiểm tra của học viên hiện mờ và không làm được.
+                    Thêm từ vựng cho bài học để tạo câu hỏi trong tab Kiểm tra.
                   </p>
                 </div>
               ) : (
@@ -1132,9 +1132,9 @@ export default function AdminLessonDetail() {
                     <ClipboardCheck className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{lesson.test?.title}</p>
+                    <p className="font-medium truncate">{lesson.test?.title ?? "Kiểm tra từ vựng"}</p>
                     <p className="text-sm text-muted-foreground">
-                      {testQuestionCount} câu · điểm đạt {lesson.test?.passScore}%
+                      {lesson.content.length} câu · đạt {lesson.test?.passScore ?? 50}% · {testTimeLabel}
                     </p>
                   </div>
                 </div>
