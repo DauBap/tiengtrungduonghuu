@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
-import { getCourseById, getLessonsByCourse, getCourseReviewSets, getAllProgressForCourse, computeCourseProgress, computeLessonStatus, isEnrolled } from "~/lib/db.server";
+import { getCourseById, getLessonsByCourse, getCourseReviewSetSummaries, getAllProgressForCourse, computeCourseProgress, computeLessonStatus, isEnrolled } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { LessonCard } from "~/components/lessons/lesson-card";
 import { ProgressBar } from "~/components/progress/progress-bar";
@@ -19,9 +19,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const enrolled = await isEnrolled(user.id, course.id);
   if (!enrolled) throw new Response("Không có quyền truy cập", { status: 403 });
 
-  const lessons = await getLessonsByCourse(course.id);
-  const reviewSets = await getCourseReviewSets(course.id);
-  const progressList = await getAllProgressForCourse(user.id, course.id);
+  const [lessons, reviewSets, progressList] = await Promise.all([
+    getLessonsByCourse(course.id),
+    getCourseReviewSetSummaries(course.id),
+    getAllProgressForCourse(user.id, course.id),
+  ]);
   const progressMap = new Map(progressList.map((p) => [p.lessonId, p]));
   const courseProgress = computeCourseProgress(lessons, progressList);
 

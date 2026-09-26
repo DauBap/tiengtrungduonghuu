@@ -136,6 +136,15 @@ export async function getCourseReviewSets(courseId: string) {
   });
 }
 
+/** Tóm tắt review cho danh sách khóa học; không tải toàn bộ nội dung câu hỏi. */
+export async function getCourseReviewSetSummaries(courseId: string) {
+  return prisma.courseReviewSet.findMany({
+    where: { courseId },
+    include: { _count: { select: { questions: true } } },
+    orderBy: { order: "asc" },
+  });
+}
+
 export async function getCourseReviewSetById(courseId: string, reviewId: string) {
   return prisma.courseReviewSet.findFirst({
     where: { id: reviewId, courseId },
@@ -233,7 +242,7 @@ export async function getLessonForAdmin(id: string) {
       },
       learningBlocks: { orderBy: { order: "asc" } },
       // Bài kiểm tra cuối bài — hệ riêng, không phải model Exam
-      test: { include: { questions: { orderBy: { order: "asc" } } } },
+      test: { select: { id: true, title: true, passScore: true, timeLimitMinutes: true } },
       course: true,
       audioScripts: {
         orderBy: { order: "asc" },

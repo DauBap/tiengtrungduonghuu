@@ -5,9 +5,11 @@ import {
   Scripts,
   ScrollRestoration,
   isRouteErrorResponse,
+  useNavigation,
   useRouteError,
 } from "react-router";
 import type { LinksFunction } from "react-router";
+import { Loader2 } from "lucide-react";
 import { Toaster } from "~/components/ui/sonner";
 import stylesheet from "~/globals.css?url";
 
@@ -34,6 +36,9 @@ export function meta() {
 }
 
 export default function App() {
+  const navigation = useNavigation();
+  const isLoading = navigation.state !== "idle";
+
   return (
     <html lang="vi">
       <head>
@@ -43,6 +48,17 @@ export default function App() {
         <Links />
       </head>
       <body style={{ fontFamily: "Inter, sans-serif" }}>
+        {isLoading && (
+          <div className="pointer-events-none fixed inset-x-0 top-0 z-[100]" role="status" aria-live="polite">
+            <div className="h-1 w-full overflow-hidden bg-primary/15">
+              <div className="h-full w-1/3 animate-loading-bar rounded-full bg-primary" />
+            </div>
+            <div className="fixed right-5 top-5 flex items-center gap-2 rounded-full border bg-background/95 px-3 py-2 text-xs font-medium text-muted-foreground shadow-lg backdrop-blur">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+              Đang tải...
+            </div>
+          </div>
+        )}
         <Outlet />
         <Toaster />
         <ScrollRestoration />

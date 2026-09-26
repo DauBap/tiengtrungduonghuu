@@ -44,7 +44,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const lesson = await getLessonById(params.lessonId!);
   if (!lesson) throw new Response("Không tìm thấy", { status: 404 });
 
-  const progress = await getLessonProgress(user.id, lesson.id);
+  const [progress, courseWords] = await Promise.all([
+    getLessonProgress(user.id, lesson.id),
+    prisma.vocabItem.findMany({
+      where: { lesson: { courseId: lesson.courseId } },
+      select: { id: true, chinese: true, pinyin: true, translation: true, wordTypes: true },
+    }),
+  ]);
   const lessonStatus = computeLessonStatus(progress);
 
   // Resolve nội dung cho từng block ngay ở loader — component không tự query.
@@ -94,10 +100,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const blockProgressMap = await getBlockProgressMap(user.id, blocks.map((b) => b.id));
   const blockStatuses = computeBlockStatuses(blocks, blockProgressMap);
 
-  const courseWords = await prisma.vocabItem.findMany({
-    where: { lesson: { courseId: lesson.courseId } },
-    select: { id: true, chinese: true, pinyin: true, translation: true, wordTypes: true },
-  });
   const vocabularyQuestions = createVocabularyTest(lesson.content, courseWords);
   const passScore = lesson.test?.passScore ?? 50;
   const timeLimitMinutes = lesson.test ? lesson.test.timeLimitMinutes : 30;

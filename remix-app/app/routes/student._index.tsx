@@ -20,25 +20,33 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let totalCompleted = 0;
   let currentLesson = null;
 
-  for (const course of myCourses) {
-    const lessons = await getLessonsByCourse(course.id);
-    const progressList = await getAllProgressForCourse(user.id, course.id);
+  const courseStats = await Promise.all(myCourses.map(async (course) => {
+    const [lessons, progressList] = await Promise.all([
+      getLessonsByCourse(course.id),
+      getAllProgressForCourse(user.id, course.id),
+    ]);
     const progressMap = new Map(progressList.map((p) => [p.lessonId, p]));
-    totalLessons += lessons.length;
-    totalCompleted += lessons.filter((l) => progressMap.get(l.id)?.testCompleted).length;
-    if (!currentLesson) {
-      currentLesson = lessons.find((l) => !progressMap.get(l.id)?.testCompleted) ?? null;
-    }
+    return {
+      lessons,
+      progressList,
+      totalLessons: lessons.length,
+      totalCompleted: lessons.filter((l) => progressMap.get(l.id)?.testCompleted).length,
+      currentLesson: lessons.find((l) => !progressMap.get(l.id)?.testCompleted) ?? null,
+    };
+  }));
+
+  for (const stats of courseStats) {
+    totalLessons += stats.totalLessons;
+    totalCompleted += stats.totalCompleted;
+    if (!currentLesson) currentLesson = stats.currentLesson;
   }
 
   const overallProgress = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
 
   // progress per course
   const courseProgress: Record<string, number> = {};
-  for (const course of myCourses) {
-    const lessons = await getLessonsByCourse(course.id);
-    const progressList = await getAllProgressForCourse(user.id, course.id);
-    courseProgress[course.id] = computeCourseProgress(lessons, progressList);
+  for (const [index, course] of myCourses.entries()) {
+    courseProgress[course.id] = computeCourseProgress(courseStats[index].lessons, courseStats[index].progressList);
   }
 
   return { user, myCourses, enrollments, overallProgress, totalCompleted, currentLesson, courseProgress };
