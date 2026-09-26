@@ -1,0 +1,261 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 26,
+  "label": "Bài 26",
+  "title": " 你属于哪一种\"忙\"？",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "忙碌",
+      "pinyin": "mánglù",
+      "adj": 6,
+      "vi": "bận rộn"
+    },
+    {
+      "pos": 2,
+      "hanzi": "被动",
+      "pinyin": "bèidòng",
+      "adj": 6,
+      "vi": "bị động"
+    },
+    {
+      "pos": 3,
+      "hanzi": "奴隶",
+      "pinyin": "núlì",
+      "adj": 2,
+      "vi": "nô lệ"
+    },
+    {
+      "pos": 4,
+      "hanzi": "虚伪",
+      "pinyin": "xūwěi",
+      "adj": 6,
+      "vi": "giả dối, không thật"
+    },
+    {
+      "pos": 5,
+      "hanzi": "思想",
+      "pinyin": "sīxiǎng",
+      "adj": 2,
+      "vi": "ý nghĩ, tư tưởng"
+    },
+    {
+      "pos": 6,
+      "hanzi": "反省",
+      "pinyin": "fǎnxǐng",
+      "adj": 4,
+      "vi": "tự kiểm điểm"
+    },
+    {
+      "pos": 7,
+      "hanzi": "据说",
+      "pinyin": "jùshuō",
+      "adj": 4,
+      "vi": "nghe nói, nghe đồn"
+    },
+    {
+      "pos": 8,
+      "hanzi": "个性",
+      "pinyin": "gèxìng",
+      "adj": 2,
+      "vi": "cá tính"
+    },
+    {
+      "pos": 9,
+      "hanzi": "冒险",
+      "pinyin": "mào xiǎn",
+      "adj": 4,
+      "vi": "mạo hiểm"
+    },
+    {
+      "pos": 10,
+      "hanzi": "丛林",
+      "pinyin": "cónglín",
+      "adj": 2,
+      "vi": "rừng cây"
+    },
+    {
+      "pos": 11,
+      "hanzi": "文明",
+      "pinyin": "wénmíng",
+      "adj": 2,
+      "vi": "nền văn minh"
+    },
+    {
+      "pos": 12,
+      "hanzi": "纪录",
+      "pinyin": "jìlù",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "tài liệu ghi tại chỗ; ghi lại, ghi chép"
+    },
+    {
+      "pos": 13,
+      "hanzi": "雇",
+      "pinyin": "gù",
+      "adj": 4,
+      "vi": "thuê, mướn"
+    },
+    {
+      "pos": 14,
+      "hanzi": "来",
+      "pinyin": "lái",
+      "adj": 11,
+      "vi": "khoảng"
+    },
+    {
+      "pos": 15,
+      "hanzi": "批",
+      "pinyin": "pī",
+      "adj": 8,
+      "vi": "tốp, nhóm, đợt"
+    },
+    {
+      "pos": 16,
+      "hanzi": "出色",
+      "pinyin": "chūsè",
+      "adj": 6,
+      "vi": "xuất sắc"
+    },
+    {
+      "pos": 17,
+      "hanzi": "健步如飞",
+      "pinyin": "jiànbù-rúfēi",
+      "adj": [
+        null,
+        4
+      ],
+      "vi": "bước đi mạnh mẽ, thoăn thoắt"
+    },
+    {
+      "pos": 18,
+      "hanzi": "一连",
+      "pinyin": "yīlián",
+      "adj": 7,
+      "vi": "liên tiếp"
+    },
+    {
+      "pos": 19,
+      "hanzi": "耽误",
+      "pinyin": "dānwù",
+      "adj": 4,
+      "vi": "làm chậm trễ, để lỡ"
+    },
+    {
+      "pos": 20,
+      "hanzi": "至于",
+      "pinyin": "zhìyú",
+      "adj": 13,
+      "vi": "còn"
+    },
+    {
+      "pos": 21,
+      "hanzi": "投资",
+      "pinyin": "tóu zī",
+      "adj": 4,
+      "vi": "đầu tư"
+    },
+    {
+      "pos": 22,
+      "hanzi": "人物",
+      "pinyin": "rénwù",
+      "adj": 2,
+      "vi": "nhân vật, người có vai vế"
+    },
+    {
+      "pos": 23,
+      "hanzi": "得罪",
+      "pinyin": "dézuì",
+      "adj": 4,
+      "vi": "làm phật lòng, xúc phạm"
+    },
+    {
+      "pos": 24,
+      "hanzi": "总算",
+      "pinyin": "zǒngsuàn",
+      "adj": 7,
+      "vi": "cuối cùng, nói chung"
+    },
+    {
+      "pos": 25,
+      "hanzi": "搞",
+      "pinyin": "gǎo",
+      "adj": 4,
+      "vi": "làm, tạo ra"
+    },
+    {
+      "pos": 26,
+      "hanzi": "习俗",
+      "pinyin": "xísú",
+      "adj": 2,
+      "vi": "tập tục"
+    },
+    {
+      "pos": 27,
+      "hanzi": "灵魂",
+      "pinyin": "línghún",
+      "adj": 2,
+      "vi": "linh hồn, tâm hồn"
+    },
+    {
+      "pos": 28,
+      "hanzi": "疲劳",
+      "pinyin": "píláo",
+      "adj": 6,
+      "vi": "mệt mỏi, mệt nhọc"
+    },
+    {
+      "pos": 29,
+      "hanzi": "哲理",
+      "pinyin": "zhélǐ",
+      "adj": 2,
+      "vi": "triết lý"
+    },
+    {
+      "pos": 30,
+      "hanzi": "提倡",
+      "pinyin": "tíchàng",
+      "adj": 4,
+      "vi": "đề xướng, chủ trương"
+    },
+    {
+      "pos": 31,
+      "hanzi": "步骤",
+      "pinyin": "bùzhòu",
+      "adj": 2,
+      "vi": "bước"
+    },
+    {
+      "pos": 32,
+      "hanzi": "闭关",
+      "pinyin": "bìguān",
+      "adj": 4,
+      "vi": "bế quan, tịnh cư"
+    },
+    {
+      "pos": 33,
+      "hanzi": "一律",
+      "pinyin": "yílǜ",
+      "adj": 7,
+      "vi": "nhất loạt, hết thảy"
+    },
+    {
+      "pos": 34,
+      "hanzi": "寂寞",
+      "pinyin": "jìmò",
+      "adj": 6,
+      "vi": "cô đơn, cô độc"
+    },
+    {
+      "pos": 35,
+      "hanzi": "效率",
+      "pinyin": "xiàolǜ",
+      "adj": 2,
+      "vi": "năng suất, hiệu suất"
+    }
+  ]
+}

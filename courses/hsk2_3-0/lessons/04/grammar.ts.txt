@@ -1,0 +1,511 @@
+import type { GrammarExercise, GrammarLesson, GrammarQuestion } from "./types";
+
+type ChoiceRow = [string, string, string, [string, string, string], string, string];
+type TextRow = [string, string, string, string, string];
+type ArrangeRow = [string, string, string, string[], string, string];
+
+const choiceQuestions = (rows: ChoiceRow[]): GrammarQuestion[] =>
+	rows.map(([id, prompt, answer, options, meaning, explanation]) => ({
+		id,
+		prompt,
+		answer,
+		options,
+		completedSentence: answer,
+		meaning,
+		explanation,
+		optionExplanations: Object.fromEntries(
+			options.map((option) => [
+				option,
+				option === answer
+					? "Đúng: đáp án phù hợp cả cấu trúc và nghĩa của đề bài."
+					: "Sai: cấu trúc hoặc trật tự từ không phù hợp với yêu cầu."
+			])
+		)
+	}));
+
+const inputQuestions = (rows: TextRow[]): GrammarQuestion[] =>
+	rows.map(([id, prompt, answer, meaning, explanation]) => ({
+		id,
+		prompt,
+		answer,
+		completedSentence: answer,
+		meaning,
+		explanation
+	}));
+
+const arrangeQuestions = (rows: ArrangeRow[]): GrammarQuestion[] =>
+	rows.map(([id, prompt, answer, tokens, meaning, explanation]) => ({
+		id,
+		prompt,
+		answer,
+		tokens,
+		completedSentence: answer,
+		meaning,
+		explanation
+	}));
+
+const exercises = (
+	prefix: string,
+	choices: ChoiceRow[],
+	arranges: ArrangeRow[],
+	inputs: TextRow[]
+): GrammarExercise[] => [
+	{
+		id: `${prefix}-choice`,
+		title: "1. Chọn đáp án đúng",
+		type: "choice",
+		questions: choiceQuestions(choices)
+	},
+	{
+		id: `${prefix}-arrange`,
+		title: "2. Sắp xếp từ thành câu",
+		type: "arrange",
+		questions: arrangeQuestions(arranges)
+	},
+	{
+		id: `${prefix}-translate`,
+		title: "3. Dịch Việt sang Trung",
+		type: "input",
+		questions: inputQuestions(inputs)
+	}
+];
+
+export const hsk2Lesson4Grammar: GrammarLesson = {
+	title: "BÀI 4: 你穿红色的很好看",
+	points: [
+		{
+			id: "experiential-guo",
+			title: "Trợ từ động thái “过” – Kinh nghiệm trong quá khứ",
+			explanation:
+				"“过” đứng ngay sau động từ để biểu thị đã từng có một trải nghiệm trong quá khứ. Trải nghiệm đó đã kết thúc và không còn tiếp diễn ở hiện tại. Phủ định dùng “没(有) + động từ + 过”.",
+			formulas: ["Chủ ngữ + động từ + 过 + tân ngữ", "Chủ ngữ + 没(有) + động từ + 过 + tân ngữ"],
+			examples: [
+				{ chinese: "我去过中国。", vietnamese: "Tôi từng đi Trung Quốc." },
+				{ chinese: "我没穿过红色的裤子。", vietnamese: "Tôi chưa từng mặc quần màu đỏ." },
+				{ chinese: "你去过那个商场吗？", vietnamese: "Bạn từng đến trung tâm thương mại đó chưa?" }
+			],
+			notes: [
+				"“过” chỉ kinh nghiệm từng có; không dùng “不” để phủ định kinh nghiệm trong quá khứ."
+			],
+			exercises: exercises(
+				"h2l4-guo",
+				[
+					[
+						"g-c1",
+						"Chọn câu đúng: “Tôi từng đi Trung Quốc.”",
+						"我去过中国。",
+						["我过中国去。", "我去中国过。", "我去过中国。"],
+						"Tôi từng đi Trung Quốc.",
+						"“过” đứng ngay sau động từ “去”."
+					],
+					[
+						"g-c2",
+						"Chọn câu đúng: “Tôi chưa từng mặc quần màu đỏ.”",
+						"我没穿过红色的裤子。",
+						["我没穿过红色的裤子。", "我不穿过红色的裤子。", "我没过穿红色的裤子。"],
+						"Tôi chưa từng mặc quần màu đỏ.",
+						"Phủ định kinh nghiệm dùng 没 + 穿过."
+					],
+					[
+						"g-c3",
+						"Điền từ đúng: 你去___那个商场吗？",
+						"过",
+						["的", "过", "所以"],
+						"Bạn từng đến trung tâm thương mại đó chưa?",
+						"去过 biểu thị kinh nghiệm từng đi."
+					],
+					[
+						"g-c4",
+						"Chọn câu đúng: “Cô ấy từng thử chiếc quần màu trắng này.”",
+						"她试过这条白色的裤子。",
+						["她过试这条白色的裤子。", "她试这条过白色的裤子。", "她试过这条白色的裤子。"],
+						"Cô ấy từng thử chiếc quần màu trắng này.",
+						"试过 là đã từng thử."
+					],
+					[
+						"g-c5",
+						"Chọn câu hỏi đúng: “Bạn từng mua cặp màu xanh chưa?”",
+						"你买过绿色的书包吗？",
+						["你买绿色的过书包吗？", "你买过绿色的书包吗？", "你过买绿色的书包吗？"],
+						"Bạn từng mua cặp màu xanh chưa?",
+						"过 theo sau 买; 吗 đứng cuối câu."
+					]
+				],
+				[
+					[
+						"g-a1",
+						"Tôi từng đi Trung Quốc.",
+						"我去过中国",
+						["中国", "我", "过", "去"],
+						"Tôi từng đi Trung Quốc.",
+						"去 + 过 + 中国."
+					],
+					[
+						"g-a2",
+						"Tôi chưa từng mặc quần màu đỏ.",
+						"我没穿过红色的裤子",
+						["裤子", "没", "红色", "我", "过", "的", "穿"],
+						"Tôi chưa từng mặc quần màu đỏ.",
+						"没 + 穿过 + tân ngữ."
+					],
+					[
+						"g-a3",
+						"Bạn từng đến trung tâm thương mại đó chưa?",
+						"你去过那个商场吗",
+						["商场", "过", "你", "吗", "去", "那个"],
+						"Bạn từng đến trung tâm thương mại đó chưa?",
+						"去过 đặt trước địa điểm."
+					],
+					[
+						"g-a4",
+						"Cô ấy từng thử chiếc quần trắng này.",
+						"她试过这条白色的裤子",
+						["试", "裤子", "过", "她", "这条", "的", "白色"],
+						"Cô ấy từng thử chiếc quần trắng này.",
+						"试过 + 这条白色的裤子."
+					],
+					[
+						"g-a5",
+						"Bạn từng mua cặp màu xanh chưa?",
+						"你买过绿色的书包吗",
+						["绿色", "吗", "过", "书包", "你", "买", "的"],
+						"Bạn từng mua cặp màu xanh chưa?",
+						"买过 + tân ngữ + 吗."
+					]
+				],
+				[
+					[
+						"g-t1",
+						"Tôi từng đi Trung Quốc.",
+						"我去过中国",
+						"Tôi từng đi Trung Quốc.",
+						"Dùng 去过."
+					],
+					[
+						"g-t2",
+						"Tôi chưa từng mặc quần màu đỏ.",
+						"我没穿过红色的裤子",
+						"Tôi chưa từng mặc quần màu đỏ.",
+						"Dùng 没穿过."
+					],
+					[
+						"g-t3",
+						"Bạn từng đến trung tâm thương mại đó chưa?",
+						"你去过那个商场吗",
+						"Bạn từng đến trung tâm thương mại đó chưa?",
+						"Dùng 去过…吗."
+					],
+					[
+						"g-t4",
+						"Cô ấy từng thử chiếc quần trắng này.",
+						"她试过这条白色的裤子",
+						"Cô ấy từng thử chiếc quần trắng này.",
+						"Dùng 试过."
+					],
+					[
+						"g-t5",
+						"Bạn từng mua cặp màu xanh chưa?",
+						"你买过绿色的书包吗",
+						"Bạn từng mua cặp màu xanh chưa?",
+						"Dùng 买过…吗."
+					]
+				]
+			)
+		},
+		{
+			id: "cause-effect",
+			title: "Câu ghép “因为……，所以……” – Nguyên nhân và kết quả",
+			explanation:
+				"“因为” dẫn ra nguyên nhân, còn “所以” dẫn ra kết quả. Hai vế có thể có chủ ngữ riêng. Trong khẩu ngữ đôi khi lược một liên từ, nhưng ở bài này luyện cấu trúc đầy đủ.",
+			formulas: [
+				"因为 + nguyên nhân，所以 + kết quả",
+				"Chủ ngữ + 因为 + nguyên nhân，所以 + kết quả"
+			],
+			examples: [
+				{ chinese: "因为没穿过，所以要试试啊！", vietnamese: "Vì chưa từng mặc nên phải thử xem!" },
+				{
+					chinese: "因为商场很远，所以我们打车去。",
+					vietnamese: "Vì trung tâm thương mại xa nên chúng tôi bắt taxi đi."
+				},
+				{
+					chinese: "因为红色的更好看，所以我买红色的。",
+					vietnamese: "Vì cái màu đỏ đẹp hơn nên tôi mua cái màu đỏ."
+				}
+			],
+			notes: ["Không đảo “所以” sang vế nguyên nhân hoặc “因为” sang vế kết quả."],
+			exercises: exercises(
+				"h2l4-cause",
+				[
+					[
+						"cs-c1",
+						"Chọn câu đúng: “Vì chưa từng mặc nên phải thử xem.”",
+						"因为没穿过，所以要试试。",
+						["所以没穿过，因为要试试。", "因为没穿过，所以要试试。", "因为所以没穿过要试试。"],
+						"Vì chưa từng mặc nên phải thử xem.",
+						"因为 dẫn nguyên nhân; 所以 dẫn kết quả."
+					],
+					[
+						"cs-c2",
+						"Trung tâm thương mại xa. Chọn câu nhân quả đúng.",
+						"因为商场很远，所以我们打车去。",
+						[
+							"因为商场很远，所以我们打车去。",
+							"所以商场很远，因为我们打车去。",
+							"商场因为所以很远我们打车去。"
+						],
+						"Vì trung tâm thương mại xa nên chúng tôi bắt taxi đi.",
+						"“商场很远” là nguyên nhân."
+					],
+					[
+						"cs-c3",
+						"Điền từ đúng: 因为红色的更好看，___我买红色的。",
+						"所以",
+						["过", "的", "所以"],
+						"Vì cái màu đỏ đẹp hơn nên tôi mua cái màu đỏ.",
+						"Vế kết quả bắt đầu bằng 所以."
+					],
+					[
+						"cs-c4",
+						"Chọn câu đúng: “Vì tôi chưa từng đến nên tôi muốn đi xem.”",
+						"因为我没去过，所以我想去看看。",
+						[
+							"因为我没去过，所以我想去看看。",
+							"所以我没去过，因为我想去看看。",
+							"因为所以我没去过我想去看看。"
+						],
+						"Vì tôi chưa từng đến nên tôi muốn đi xem.",
+						"Hai vế giữ đúng quan hệ nguyên nhân–kết quả."
+					],
+					[
+						"cs-c5",
+						"Chọn câu đúng: “Vì cái cặp đen rất đẹp nên cô ấy mua nó.”",
+						"因为黑色的书包很好看，所以她买了。",
+						[
+							"所以黑色的书包很好看，因为她买了。",
+							"因为黑色的书包很好看，所以她买了。",
+							"因为黑色的所以书包很好看她买了。"
+						],
+						"Vì cái cặp đen rất đẹp nên cô ấy mua nó.",
+						"Vẻ đẹp của cặp là nguyên nhân dẫn đến việc mua."
+					]
+				],
+				[
+					[
+						"cs-a1",
+						"Vì chưa từng mặc nên phải thử xem.",
+						"因为没穿过所以要试试",
+						["要", "因为", "所以", "试试", "没", "穿过"],
+						"Vì chưa từng mặc nên phải thử xem.",
+						"因为 + nguyên nhân + 所以 + kết quả."
+					],
+					[
+						"cs-a2",
+						"Vì trung tâm thương mại xa nên chúng tôi bắt taxi đi.",
+						"因为商场很远所以我们打车去",
+						["打车", "所以", "很远", "因为", "去", "我们", "商场"],
+						"Vì trung tâm thương mại xa nên chúng tôi bắt taxi đi.",
+						"Đặt nguyên nhân trước kết quả."
+					],
+					[
+						"cs-a3",
+						"Vì cái màu đỏ đẹp hơn nên tôi mua cái màu đỏ.",
+						"因为红色的更好看所以我买红色的",
+						["买", "所以", "更好看", "红色的", "我", "因为", "红色的"],
+						"Vì cái màu đỏ đẹp hơn nên tôi mua cái màu đỏ.",
+						"Hai thẻ 红色的 thuộc hai vế khác nhau."
+					],
+					[
+						"cs-a4",
+						"Vì tôi chưa từng đến nên tôi muốn đi xem.",
+						"因为我没去过所以我想去看看",
+						["去过", "想", "所以", "因为", "我", "看看", "没", "我", "去"],
+						"Vì tôi chưa từng đến nên tôi muốn đi xem.",
+						"Hai chủ ngữ 我 đứng ở hai vế."
+					],
+					[
+						"cs-a5",
+						"Vì hôm nay mệt nên tôi không đi trung tâm thương mại.",
+						"因为今天很累所以我不去商场",
+						["商场", "我", "因为", "很累", "不去", "所以", "今天"],
+						"Vì hôm nay mệt nên tôi không đi trung tâm thương mại.",
+						"Vế mệt là nguyên nhân."
+					]
+				],
+				[
+					[
+						"cs-t1",
+						"Vì chưa từng mặc nên phải thử xem.",
+						"因为没穿过所以要试试",
+						"Vì chưa từng mặc nên phải thử xem.",
+						"Dùng 因为…所以…."
+					],
+					[
+						"cs-t2",
+						"Vì trung tâm thương mại xa nên chúng tôi bắt taxi đi.",
+						"因为商场很远所以我们打车去",
+						"Vì trung tâm thương mại xa nên chúng tôi bắt taxi đi.",
+						"Nguyên nhân đứng sau 因为."
+					],
+					[
+						"cs-t3",
+						"Vì cái màu đỏ đẹp hơn nên tôi mua cái màu đỏ.",
+						"因为红色的更好看所以我买红色的",
+						"Vì cái màu đỏ đẹp hơn nên tôi mua cái màu đỏ.",
+						"Kết quả đứng sau 所以."
+					],
+					[
+						"cs-t4",
+						"Vì tôi chưa từng đến nên tôi muốn đi xem.",
+						"因为我没去过所以我想去看看",
+						"Vì tôi chưa từng đến nên tôi muốn đi xem.",
+						"Kết hợp 没去过 với 因为…所以…."
+					],
+					[
+						"cs-t5",
+						"Vì hôm nay mệt nên tôi không đi trung tâm thương mại.",
+						"因为今天很累所以我不去商场",
+						"Vì hôm nay mệt nên tôi không đi trung tâm thương mại.",
+						"Dùng cấu trúc nhân quả đầy đủ."
+					]
+				]
+			)
+		},
+		{
+			id: "de-nominalization",
+			title: "Cụm từ chữ “的” – Lược danh từ trung tâm",
+			explanation:
+				"Khi danh từ trung tâm đã rõ trong ngữ cảnh, có thể lược bỏ và giữ lại “的”. Phần đứng trước “的” có thể là danh từ, đại từ, động từ hoặc tính từ; cả cụm hoạt động như một danh từ.",
+			formulas: ["Danh từ/đại từ/động từ/tính từ + 的", "Cụm chữ 的 + vị ngữ"],
+			examples: [
+				{ chinese: "红色的好看。", vietnamese: "Cái màu đỏ đẹp." },
+				{ chinese: "这个面包是爸爸买的。", vietnamese: "Cái bánh mì này là cái bố mua." },
+				{ chinese: "我的在这里。", vietnamese: "Cái của tôi ở đây." }
+			],
+			notes: ["Chỉ lược danh từ khi người nghe có thể xác định nó từ ngữ cảnh."],
+			exercises: exercises(
+				"h2l4-de",
+				[
+					[
+						"d-c1",
+						"Đang chọn quần. Chọn câu đúng: “Cái màu đỏ đẹp.”",
+						"红色的好看。",
+						["红色好看的。", "的红色好看。", "红色的好看。"],
+						"Cái màu đỏ đẹp.",
+						"红色的 thay cho 红色的裤子."
+					],
+					[
+						"d-c2",
+						"Chọn câu đúng: “Cái cặp này là cái bố mua.”",
+						"这个书包是爸爸买的。",
+						["这个书包是爸爸买的。", "这个书包是买的爸爸。", "这个书包爸爸的是买。"],
+						"Cái cặp này là cái bố mua.",
+						"爸爸买的 là cụm chữ 的 chỉ vật bố mua."
+					],
+					[
+						"d-c3",
+						"Điền từ đúng: 黑色___更好看。",
+						"的",
+						["过", "所以", "的"],
+						"Cái màu đen đẹp hơn.",
+						"黑色的 thay cho đồ vật màu đen đã biết."
+					],
+					[
+						"d-c4",
+						"Hai chiếc cặp đã rõ. Chọn câu: “Cái của tôi màu xanh.”",
+						"我的是绿色的。",
+						["我的是绿色的。", "我是的绿色。", "的我是绿色的。"],
+						"Cái của tôi là cái màu xanh.",
+						"我的 và 绿色的 đều là cụm chữ 的."
+					],
+					[
+						"d-c5",
+						"Chọn câu đúng: “Tôi thích cái cô ấy mua.”",
+						"我喜欢她买的。",
+						["我喜欢买的她。", "我她的喜欢买。", "我喜欢她买的。"],
+						"Tôi thích cái cô ấy mua.",
+						"她买的 là cụm danh từ chỉ vật cô ấy mua."
+					]
+				],
+				[
+					[
+						"d-a1",
+						"Cái màu đỏ đẹp.",
+						"红色的好看",
+						["好看", "红色", "的"],
+						"Cái màu đỏ đẹp.",
+						"红色 + 的 tạo cụm danh từ."
+					],
+					[
+						"d-a2",
+						"Cái cặp này là cái bố mua.",
+						"这个书包是爸爸买的",
+						["买", "书包", "的", "这个", "爸爸", "是"],
+						"Cái cặp này là cái bố mua.",
+						"爸爸买的 đứng sau 是."
+					],
+					[
+						"d-a3",
+						"Cái màu đen đẹp hơn.",
+						"黑色的更好看",
+						["更", "的", "黑色", "好看"],
+						"Cái màu đen đẹp hơn.",
+						"黑色的 làm chủ ngữ."
+					],
+					[
+						"d-a4",
+						"Cái của tôi là cái màu xanh.",
+						"我的是绿色的",
+						["绿色", "的", "是", "我", "的"],
+						"Cái của tôi là cái màu xanh.",
+						"我的 + 是 + 绿色的."
+					],
+					[
+						"d-a5",
+						"Tôi thích cái cô ấy mua.",
+						"我喜欢她买的",
+						["买", "我", "的", "喜欢", "她"],
+						"Tôi thích cái cô ấy mua.",
+						"她买的 làm tân ngữ của 喜欢."
+					]
+				],
+				[
+					[
+						"d-t1",
+						"Cái màu đỏ đẹp.",
+						"红色的好看",
+						"Cái màu đỏ đẹp.",
+						"红色的 thay cho đồ vật màu đỏ."
+					],
+					[
+						"d-t2",
+						"Cái cặp này là cái bố mua.",
+						"这个书包是爸爸买的",
+						"Cái cặp này là cái bố mua.",
+						"爸爸买的 là cụm chữ 的."
+					],
+					[
+						"d-t3",
+						"Cái màu đen đẹp hơn.",
+						"黑色的更好看",
+						"Cái màu đen đẹp hơn.",
+						"黑色的 làm chủ ngữ."
+					],
+					[
+						"d-t4",
+						"Cái của tôi là cái màu xanh.",
+						"我的是绿色的",
+						"Cái của tôi là cái màu xanh.",
+						"我的 và 绿色的 thay danh từ đã biết."
+					],
+					[
+						"d-t5",
+						"Tôi thích cái cô ấy mua.",
+						"我喜欢她买的",
+						"Tôi thích cái cô ấy mua.",
+						"她买的 làm tân ngữ."
+					]
+				]
+			)
+		}
+	]
+};

@@ -1,0 +1,170 @@
+{
+  "lesson": 18,
+  "title": "我学会了包饺子",
+  "title_pinyin": "Wǒ xuéhuì le bāo jiǎozi",
+  "title_vi": "Tôi đã học được cách gói sủi cảo",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "我要在中国过年, 真开心。",
+          "pinyin": "Wǒ yào zài Zhōngguó guò nián, zhēn kāixīn.",
+          "vi": "Tôi được đón Tết ở Trung Quốc, thật vui."
+        },
+        {
+          "speaker": "李文",
+          "zh": "第一次请外国朋友来家里过春节, 我也很高兴。",
+          "pinyin": "Dì-yī cì qǐng wàiguó péngyou lái jiā lǐ guò Chūnjié, wǒ yě hěn gāoxìng.",
+          "vi": "Lần đầu mời bạn nước ngoài đến nhà đón Tết Nguyên Đán, tôi cũng rất vui."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "你们怎样过节?",
+          "pinyin": "Nǐmen zěnyàng guò jié?",
+          "vi": "Các cậu đón lễ thế nào?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "春节是中国最重要的节日, 我们一般会回家, 跟家人一起过。",
+          "pinyin": "Chūnjié shì Zhōngguó zuì zhòngyào de jiérì, wǒmen yībān huì huí jiā, gēn jiārén yīqǐ guò.",
+          "vi": "Tết Nguyên Đán là ngày lễ quan trọng nhất của Trung Quốc, chúng tôi thường về nhà, đón cùng gia đình."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "那你跟家人会一起做什么?",
+          "pinyin": "Nà nǐ gēn jiārén huì yīqǐ zuò shénme?",
+          "vi": "Vậy cậu và gia đình sẽ cùng làm gì?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "我们家会一边包饺子, 一边看春节联欢晚会, 一直到十二点以后才睡觉。",
+          "pinyin": "Wǒmen jiā huì yībiān bāo jiǎozi, yībiān kàn Chūnjié Liánhuān Wǎnhuì, yīzhí dào shí'èr diǎn yǐhòu cái shuìjiào.",
+          "vi": "Nhà tớ sẽ vừa gói sủi cảo vừa xem Gala Tết Nguyên Đán, mãi đến sau 12 giờ mới đi ngủ."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "听起来很有意思。春节放几天假?",
+          "pinyin": "Tīng qǐlái hěn yǒu yìsi. Chūnjié fàng jǐ tiān jià?",
+          "vi": "Nghe rất thú vị. Tết được nghỉ mấy ngày?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "大概七八天。",
+          "pinyin": "Dàgài qī bā tiān.",
+          "vi": "Khoảng bảy tám ngày."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "张阿姨, 李叔叔。过年好! 这是我准备的礼物, 请收下。",
+          "pinyin": "Zhāng āyí, Lǐ shūshu. Guònián hǎo! Zhè shì wǒ zhǔnbèi de lǐwù, qǐng shōuxià.",
+          "vi": "Cô Trương, chú Lý. Chúc mừng năm mới! Đây là quà con chuẩn bị, mời cô chú nhận ạ."
+        },
+        {
+          "speaker": "张阿姨",
+          "zh": "来就来吧, 还带什么礼物! 快请进, 快请进!",
+          "pinyin": "Lái jiù lái ba, hái dài shénme lǐwù! Kuài qǐng jìn, kuài qǐng jìn!",
+          "vi": "Đến thì đến thôi, còn mang quà gì nữa! Mau mời vào, mau mời vào!"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好漂亮啊, 到处都是红色!",
+          "pinyin": "Hǎo piàoliang a, dàochù dōu shì hóngsè!",
+          "vi": "Đẹp quá, khắp nơi đều là màu đỏ!"
+        },
+        {
+          "speaker": "张阿姨",
+          "zh": "过春节了, 要挂上红灯笼, 贴上红对联。",
+          "pinyin": "Guò Chūnjié le, yào guà shàng hóng dēnglong, tiē shàng hóng duìlián.",
+          "vi": "Đón Tết Nguyên Đán rồi, phải treo đèn lồng đỏ, dán câu đối đỏ."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我可以跟你们一起包饺子吗?",
+          "pinyin": "Wǒ kěyǐ gēn nǐmen yīqǐ bāo jiǎozi ma?",
+          "vi": "Con có thể cùng gói sủi cảo với cô chú không ạ?"
+        },
+        {
+          "speaker": "张阿姨",
+          "zh": "当然可以, 我们刚刚看了视频, 学会了包饺子。",
+          "pinyin": "Dāngrán kěyǐ, wǒmen gānggāng kànle shìpín, xuéhuì le bāo jiǎozi.",
+          "vi": "Tất nhiên là được, chúng tôi vừa xem video, đã học được cách gói sủi cảo."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "太好了, 我也想学包饺子。",
+          "pinyin": "Tài hǎo le, wǒ yě xiǎng xué bāo jiǎozi.",
+          "vi": "Tuyệt quá, con cũng muốn học gói sủi cảo."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "张阿姨",
+          "zh": "这张照片是李文出国前照的吗?",
+          "pinyin": "Zhè zhāng zhàopiàn shì Lǐ Wén chūguó qián zhào de ma?",
+          "vi": "Bức ảnh này là chụp trước khi Lý Văn ra nước ngoài phải không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "对, 这是他从北京出发时, 我们全家在机场照的。",
+          "pinyin": "Duì, zhè shì tā cóng Běijīng chūfā shí, wǒmen quánjiā zài jīchǎng zhào de.",
+          "vi": "Vâng ạ, đây là lúc cháu ấy xuất phát từ Bắc Kinh, cả nhà chúng con chụp ở sân bay."
+        },
+        {
+          "speaker": "张阿姨",
+          "zh": "那是三四年前吧?",
+          "pinyin": "Nà shì sān sì nián qián ba?",
+          "vi": "Đó là khoảng ba bốn năm trước nhỉ?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "是啊, 时间过得真快, 好像是不久前发生的一样。",
+          "pinyin": "Shì a, shíjiān guò de zhēn kuài, hǎoxiàng shì bùjiǔ qián fāshēng de yīyàng.",
+          "vi": "Vâng ạ, thời gian trôi thật nhanh, cứ như mới xảy ra không lâu vậy."
+        },
+        {
+          "speaker": "张阿姨",
+          "zh": "您一定特别想李文吧?",
+          "pinyin": "Nín yīdìng tèbié xiǎng Lǐ Wén ba?",
+          "vi": "Chị nhất định rất nhớ Lý Văn phải không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "他刚离开家时, 我很不习惯, 只要几天不跟他视频, 就很想他。",
+          "pinyin": "Tā gāng líkāi jiā shí, wǒ hěn bù xíguàn, zhǐyào jǐ tiān bù gēn tā shìpín, jiù hěn xiǎng tā.",
+          "vi": "Lúc cháu ấy mới rời nhà, tôi rất không quen, chỉ cần vài ngày không video với cháu ấy, là rất nhớ."
+        },
+        {
+          "speaker": "张阿姨",
+          "zh": "还有最后一个学期就要毕业了, 他很快就会回来了。",
+          "pinyin": "Hái yǒu zuìhòu yī gè xuéqī jiù yào bìyè le, tā hěn kuài jiù huì huílái le.",
+          "vi": "Còn học kỳ cuối cùng nữa là sắp tốt nghiệp rồi, cháu ấy sẽ sớm về thôi."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "这次来中国, 我最高兴的是认识了李文的父母。他们给我看了李文出生时的照片, 还给我讲了很多他过去的故事。李文高中的时候想学医, 从那时起就努力学习。高三的时候, 因为成绩特别好, 他得到了出国留学的机会。在他身上, 我懂得了, 只要一直坚持, 就能完成自己的目标。我相信, 他以后一定会发展得更好。",
+          "pinyin": "Zhè cì lái Zhōngguó, wǒ zuì gāoxìng de shì rènshi le Lǐ Wén de fùmǔ. Tāmen gěi wǒ kànle Lǐ Wén chūshēng shí de zhàopiàn, hái gěi wǒ jiǎngle hěnduō tā guòqu de gùshi. Lǐ Wén gāozhōng de shíhou xiǎng xué yī, cóng nà shí qǐ jiù nǔlì xuéxí. Gāosān de shíhou, yīnwèi chéngjì tèbié hǎo, tā dédào le chūguó liúxué de jīhuì. Zài tā shēnshang, wǒ dǒng dé le, zhǐyào yīzhí jiānchí, jiù néng wánchéng zìjǐ de mùbiāo. Wǒ xiāngxìn, tā yǐhòu yīdìng huì fāzhǎn de gèng hǎo.",
+          "vi": "Lần này đến Trung Quốc, điều tôi vui nhất là được làm quen với bố mẹ của Lý Văn. Họ cho tôi xem những bức ảnh chụp lúc Lý Văn mới sinh, và kể cho tôi nghe nhiều câu chuyện về quá khứ của cậu ấy. Hồi cấp ba Lý Văn muốn học y, từ đó đã cố gắng học tập. Lớp 12, vì thành tích đặc biệt tốt, cậu ấy đã có cơ hội đi du học. Từ cậu ấy, tôi đã hiểu được rằng, chỉ cần kiên trì thì có thể hoàn thành mục tiêu của mình. Tôi tin rằng, sau này cậu ấy nhất định sẽ phát triển tốt hơn."
+        }
+      ]
+    }
+  ]
+}

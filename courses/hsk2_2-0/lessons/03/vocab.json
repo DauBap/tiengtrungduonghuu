@@ -1,0 +1,118 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 3,
+  "label": "Bài 3",
+  "title": "左边那个红色的是我的",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "手表",
+      "pinyin": "shǒubiǎo",
+      "adj": 2,
+      "vi": "đồng hồ đeo tay"
+    },
+    {
+      "pos": 2,
+      "hanzi": "千",
+      "pinyin": "qiān",
+      "adj": 21,
+      "vi": "nghìn"
+    },
+    {
+      "pos": 3,
+      "hanzi": "报纸",
+      "pinyin": "bàozhǐ",
+      "adj": 2,
+      "vi": "báo"
+    },
+    {
+      "pos": 4,
+      "hanzi": "送",
+      "pinyin": "sòng",
+      "adj": 4,
+      "vi": "giao, đưa"
+    },
+    {
+      "pos": 5,
+      "hanzi": "一下",
+      "pinyin": "yīxià",
+      "adj": [
+        null,
+        7
+      ],
+      "vi": "được dùng sau động từ để diễn tả rằng người nào đó thực hiện việc gì trong thời gian ngắn/thử làm việc gì"
+    },
+    {
+      "pos": 6,
+      "hanzi": "牛奶",
+      "pinyin": "niúnǎi",
+      "adj": 2,
+      "vi": "sữa bò"
+    },
+    {
+      "pos": 7,
+      "hanzi": "房间",
+      "pinyin": "fángjiān",
+      "adj": 2,
+      "vi": "phòng"
+    },
+    {
+      "pos": 8,
+      "hanzi": "丈夫",
+      "pinyin": "zhàngfu",
+      "adj": 2,
+      "vi": "chồng"
+    },
+    {
+      "pos": 9,
+      "hanzi": "旁边",
+      "pinyin": "pángbiān",
+      "adj": 2,
+      "vi": "bên cạnh"
+    },
+    {
+      "pos": 10,
+      "hanzi": "真",
+      "pinyin": "zhēn",
+      "adj": 7,
+      "vi": "thật, quả là"
+    },
+    {
+      "pos": 11,
+      "hanzi": "粉色",
+      "pinyin": "fěnsè",
+      "adj": 2,
+      "vi": "màu hồng"
+    },
+    {
+      "pos": 12,
+      "hanzi": "粉",
+      "pinyin": "fěn",
+      "adj": 6,
+      "vi": "có màu hồng"
+    },
+    {
+      "pos": 13,
+      "hanzi": "颜色",
+      "pinyin": "yánsè",
+      "adj": 2,
+      "vi": "màu, màu sắc"
+    },
+    {
+      "pos": 14,
+      "hanzi": "左边",
+      "pinyin": "zuǒbian",
+      "adj": 2,
+      "vi": "bên trái"
+    },
+    {
+      "pos": 15,
+      "hanzi": "红色",
+      "pinyin": "hóngsè",
+      "adj": 2,
+      "vi": "màu đỏ"
+    }
+  ]
+}

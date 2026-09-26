@@ -1,0 +1,164 @@
+{
+  "lesson": 5,
+  "title": "第一次去中国朋友家",
+  "title_pinyin": "Dì-yī cì qù Zhōngguó péngyou jiā",
+  "title_vi": "Lần đầu tiên đến nhà bạn Trung Quốc",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "安妮",
+          "zh": "家月，快下来吧，第一次去中国朋友家，别晚了。",
+          "pinyin": "Jiāyuè, kuài xiàlái ba, dì-yī cì qù Zhōngguó péngyou jiā, bié wǎn le.",
+          "vi": "Gia Nguyệt, nhanh xuống đi, lần đầu tiên đến nhà bạn Trung Quốc, đừng đến muộn."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "还有时间，你上来吧。",
+          "pinyin": "Hái yǒu shíjiān, nǐ shànglái ba.",
+          "vi": "Còn thời gian mà, cậu lên đây đi."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "我不上去了，就在下面等你。",
+          "pinyin": "Wǒ bú shàngqu le, jiù zài xiàmiàn děng nǐ.",
+          "vi": "Mình không lên đâu, ở dưới này đợi cậu."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "那我一会儿就下去。",
+          "pinyin": "Nà wǒ yīhuìr jiù xiàqu.",
+          "vi": "Vậy tớ một lát nữa sẽ xuống."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "你快点儿吧。",
+          "pinyin": "Nǐ kuài diǎnr ba.",
+          "vi": "Cậu nhanh lên đi."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "没事，一雪姐说11点前到就可以。",
+          "pinyin": "Méishì, Yīxuě jiě shuō shíyī diǎn qián dào jiù kěyǐ.",
+          "vi": "Không sao, chị Nhất Tuyết nói trước 11 giờ đến là được."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "家月、安妮，快进来！我给你们介绍一下，这是孩子们的爷爷、奶奶。",
+          "pinyin": "Jiāyuè, Ānnī, kuài jìnlái! Wǒ gěi nǐmen jièshào yíxià, zhè shì háizimen de yéye, nǎinai.",
+          "vi": "Gia Nguyệt, Annie, mau vào đi! Chị giới thiệu với các em một chút, đây là ông bà của bọn trẻ."
+        },
+        {
+          "speaker": "白家月、安妮",
+          "zh": "你们好！",
+          "pinyin": "Nǐmen hǎo!",
+          "vi": "Chào ông bà ạ!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "爸，妈，这是白家月，这是安妮。她们都是一飞的学生。",
+          "pinyin": "Bà, mā, zhè shì Bái Jiāyuè, zhè shì Ānnī. Tāmen dōu shì Yīfēi de xuéshēng.",
+          "vi": "Bố, mẹ, đây là Bạch Gia Nguyệt, đây là Annie. Cả hai đều là học sinh của Nhất Phi."
+        },
+        {
+          "speaker": "刘爷爷",
+          "zh": "家月、安妮，你们好！",
+          "pinyin": "Jiāyuè, Ānnī, nǐmen hǎo!",
+          "vi": "Gia Nguyệt, Annie, chào các cháu!"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "这是送你们的礼物。",
+          "pinyin": "Zhè shì sòng nǐmen de lǐwù.",
+          "vi": "Đây là quà tặng ông bà ạ."
+        },
+        {
+          "speaker": "刘爷爷",
+          "zh": "你们太客气了，还拿这么多礼物来！",
+          "pinyin": "Nǐmen tài kèqi le, hái ná zhème duō lǐwù lái!",
+          "vi": "Các cháu khách sáo quá, còn mang nhiều quà đến thế này!"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "一雪姐，这是给孩子们准备的礼物。",
+          "pinyin": "Yīxuě jiě, zhè shì gěi háizimen zhǔnbèi de lǐwù.",
+          "vi": "Chị Nhất Tuyết, đây là quà chuẩn bị cho các cháu ạ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "谢谢！你们别客气，快坐吧！",
+          "pinyin": "Xièxie! Nǐmen bié kèqi, kuài zuò ba!",
+          "vi": "Cảm ơn các em! Đừng khách sáo, mau ngồi đi!"
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "都12点了，我们吃饭吧。",
+          "pinyin": "Dōu shí'èr diǎn le, wǒmen chīfàn ba.",
+          "vi": "Đã 12 giờ rồi, chúng ta ăn cơm đi."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "这么多好吃的，您太客气了！",
+          "pinyin": "Zhème duō hǎochī de, nín tài kèqi le!",
+          "vi": "Nhiều món ngon quá, chị khách sáo quá!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "都是我自己做的，你们多吃点儿。",
+          "pinyin": "Dōu shì wǒ zìjǐ zuò de, nǐmen duō chī diǎnr.",
+          "vi": "Đều là chị tự làm đấy, các em ăn nhiều một chút."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "奶茶也很好喝，是您自己做的吗？",
+          "pinyin": "Nǎichá yě hěn hǎohē, shì nín zìjǐ zuò de ma?",
+          "vi": "Trà sữa cũng rất ngon, là chị tự làm phải không ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "不是，奶茶是爷爷买的。",
+          "pinyin": "Bú shì, nǎichá shì yéye mǎi de.",
+          "vi": "Không phải, trà sữa là ông mua đấy."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "在哪儿买的？我还没喝过这么好喝的奶茶。",
+          "pinyin": "Zài nǎr mǎi de? Wǒ hái méi hē guo zhème hǎohē de nǎichá.",
+          "vi": "Mua ở đâu vậy ạ? Em chưa uống trà sữa nào ngon như thế này bao giờ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "就在前边的商场，吃完饭你们可以跟我去看看。",
+          "pinyin": "Jiù zài qiánbian de shāngchǎng, chī wán fàn nǐmen kěyǐ gēn wǒ qù kànkan.",
+          "vi": "Ở ngay trung tâm thương mại phía trước, ăn cơm xong các em có thể đi cùng chị xem."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "回国前一天，我们去一雪姐家了。到她家的时候，饭菜都做好了。刘爷爷还准备了奶茶。因为吃了太多东西，我们吃完饭后是走回酒店的。",
+          "pinyin": "Huí guó qián yī tiān, wǒmen qù Yīxuě jiě jiā le. Dào tā jiā de shíhou, fàncài dōu zuò hǎo le. Liú yéye hái zhǔnbèi le nǎichá. Yīnwèi chīle tài duō dōngxi, wǒmen chī wán fàn hòu shì zǒu huí jiǔdiàn de.",
+          "vi": "Ngày trước khi về nước, chúng tôi đến nhà chị Nhất Tuyết. Lúc đến nhà chị ấy, cơm canh đều đã làm xong. Ông Lưu còn chuẩn bị trà sữa. Vì ăn quá nhiều nên sau bữa ăn chúng tôi đã đi bộ về khách sạn."
+        }
+      ]
+    }
+  ]
+}

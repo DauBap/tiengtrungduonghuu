@@ -1,0 +1,247 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 3,
+  "label": "Bài 3",
+  "title": "人生有选择，一切可改变",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "人生",
+      "pinyin": "rénshēng",
+      "adj": 2,
+      "vi": "đời người"
+    },
+    {
+      "pos": 2,
+      "hanzi": "工人",
+      "pinyin": "gōngrén",
+      "adj": 2,
+      "vi": "công nhân"
+    },
+    {
+      "pos": 3,
+      "hanzi": "稳定",
+      "pinyin": "wěndìng",
+      "adj": 6,
+      "vi": "ổn định"
+    },
+    {
+      "pos": 4,
+      "hanzi": "待遇",
+      "pinyin": "dàiyù",
+      "adj": 2,
+      "vi": "sự đãi ngộ"
+    },
+    {
+      "pos": 5,
+      "hanzi": "发愁",
+      "pinyin": "fā chóu",
+      "adj": 4,
+      "vi": "lo âu, buồn rầu"
+    },
+    {
+      "pos": 6,
+      "hanzi": "平静",
+      "pinyin": "píngjìng",
+      "adj": 6,
+      "vi": "yên ổn, yên ả"
+    },
+    {
+      "pos": 7,
+      "hanzi": "帆船",
+      "pinyin": "fānchuán",
+      "adj": 2,
+      "vi": "thuyền buồm"
+    },
+    {
+      "pos": 8,
+      "hanzi": "撞",
+      "pinyin": "zhuàng",
+      "adj": 4,
+      "vi": "đụng, đâm vào"
+    },
+    {
+      "pos": 9,
+      "hanzi": "艘",
+      "pinyin": "sōu",
+      "adj": 8,
+      "vi": "(được dùng cho tàu/thuyền) chiếc, con"
+    },
+    {
+      "pos": 10,
+      "hanzi": "航行",
+      "pinyin": "hángxíng",
+      "adj": 4,
+      "vi": "đi tàu thủy, đi thuyền buồm, giong thuyền"
+    },
+    {
+      "pos": 11,
+      "hanzi": "积蓄",
+      "pinyin": "jīxù",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "tiền để dành; dành dụm"
+    },
+    {
+      "pos": 12,
+      "hanzi": "二手",
+      "pinyin": "èrshǒu",
+      "adj": 6,
+      "vi": "đã qua sử dụng, second-hand"
+    },
+    {
+      "pos": 13,
+      "hanzi": "彩虹",
+      "pinyin": "cǎihóng",
+      "adj": 2,
+      "vi": "cầu vồng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "包括",
+      "pinyin": "bāokuò",
+      "adj": 4,
+      "vi": "bao gồm"
+    },
+    {
+      "pos": 15,
+      "hanzi": "疯",
+      "pinyin": "fēng",
+      "adj": 4,
+      "vi": "phát điên, hóa điên"
+    },
+    {
+      "pos": 16,
+      "hanzi": "辞职",
+      "pinyin": "cí zhí",
+      "adj": 4,
+      "vi": "từ chức"
+    },
+    {
+      "pos": 17,
+      "hanzi": "驾驶",
+      "pinyin": "jiàshǐ",
+      "adj": 4,
+      "vi": "điều khiển"
+    },
+    {
+      "pos": 18,
+      "hanzi": "轮流",
+      "pinyin": "lúnliú",
+      "adj": 4,
+      "vi": "luân phiên"
+    },
+    {
+      "pos": 19,
+      "hanzi": "钓",
+      "pinyin": "diào",
+      "adj": 4,
+      "vi": "câu (cá)"
+    },
+    {
+      "pos": 20,
+      "hanzi": "顿",
+      "pinyin": "dùn",
+      "adj": 8,
+      "vi": "bữa"
+    },
+    {
+      "pos": 21,
+      "hanzi": "海鲜",
+      "pinyin": "hǎixiān",
+      "adj": 2,
+      "vi": "hải sản"
+    },
+    {
+      "pos": 22,
+      "hanzi": "傍晚",
+      "pinyin": "bàngwǎn",
+      "adj": 2,
+      "vi": "hoàng hôn, lúc chạng vạng"
+    },
+    {
+      "pos": 23,
+      "hanzi": "舒适",
+      "pinyin": "shūshì",
+      "adj": 6,
+      "vi": "dễ chịu, thoải mái"
+    },
+    {
+      "pos": 24,
+      "hanzi": "干活儿",
+      "pinyin": "gàn huór",
+      "adj": 4,
+      "vi": "làm việc"
+    },
+    {
+      "pos": 25,
+      "hanzi": "盼望",
+      "pinyin": "pànwàng",
+      "adj": 4,
+      "vi": "trông mong, mong mỏi"
+    },
+    {
+      "pos": 26,
+      "hanzi": "陆地",
+      "pinyin": "lùdì",
+      "adj": 2,
+      "vi": "đất liền"
+    },
+    {
+      "pos": 27,
+      "hanzi": "各自",
+      "pinyin": "gèzì",
+      "adj": 1,
+      "vi": "từng người, riêng mình, mỗi"
+    },
+    {
+      "pos": 28,
+      "hanzi": "勿",
+      "pinyin": "wù",
+      "adj": 7,
+      "vi": "(được dùng trong câu mệnh lệnh) chớ, đừng"
+    },
+    {
+      "pos": 29,
+      "hanzi": "时刻",
+      "pinyin": "shíkè",
+      "adj": 2,
+      "vi": "thời khắc, thời gian"
+    },
+    {
+      "pos": 30,
+      "hanzi": "着火",
+      "pinyin": "zháo huǒ",
+      "adj": 4,
+      "vi": "bốc cháy, cháy"
+    },
+    {
+      "pos": 31,
+      "hanzi": "漏",
+      "pinyin": "lòu",
+      "adj": 4,
+      "vi": "chảy, rỉ"
+    },
+    {
+      "pos": 32,
+      "hanzi": "突然",
+      "pinyin": "tūrán",
+      "adj": [
+        6,
+        7
+      ],
+      "vi": "bất ngờ, đột ngột"
+    },
+    {
+      "pos": 33,
+      "hanzi": "忽然",
+      "pinyin": "hūrán",
+      "adj": 7,
+      "vi": "thình lình, bỗng nhiên"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "course_id": "hsk1_3-0",
+  "course_name": "HSK 1 (3.0)",
+  "id": 1,
+  "label": "Bài 1 ",
+  "title": "AI 小语，你好 ",
+  "short_vi": "Giới thiệu ",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "你好",
+      "pinyin": "nǐ hǎo",
+      "adj": [],
+      "vi": "Xin Chào"
+    },
+    {
+      "pos": 2,
+      "hanzi": "你",
+      "pinyin": "nǐ",
+      "adj": 2,
+      "vi": "Anh, chị, bạn…"
+    },
+    {
+      "pos": 3,
+      "hanzi": "好",
+      "pinyin": "hǎo",
+      "adj": 6,
+      "vi": "Khoẻ, tốt …"
+    },
+    {
+      "pos": 4,
+      "hanzi": "王老师",
+      "pinyin": "wáng lǎoshī",
+      "adj": [],
+      "vi": "Cô Vương"
+    },
+    {
+      "pos": 5,
+      "hanzi": "大家",
+      "pinyin": "dàjiā",
+      "adj": 1,
+      "vi": "mọi người"
+    },
+    {
+      "pos": 6,
+      "hanzi": "好",
+      "pinyin": "hǎo",
+      "adj": 6,
+      "vi": "tốt, đẹp, khỏe"
+    },
+    {
+      "pos": 7,
+      "hanzi": "学生",
+      "pinyin": "xuésheng",
+      "adj": 2,
+      "vi": "học sinh"
+    },
+    {
+      "pos": 8,
+      "hanzi": "们",
+      "pinyin": "men",
+      "adj": 20,
+      "vi": "Chúng, các, bọn (dùng sau đại từ, chỉ nhiều người)"
+    },
+    {
+      "pos": 9,
+      "hanzi": "老师",
+      "pinyin": "lǎoshī",
+      "adj": 2,
+      "vi": "thầy/cô giáo"
+    },
+    {
+      "pos": 10,
+      "hanzi": "您",
+      "pinyin": "nín",
+      "adj": 1,
+      "vi": "ông/ bà, ngài (dùng cho người lớn tuổi/ vai vế tôn kính)"
+    },
+    {
+      "pos": 11,
+      "hanzi": "你们",
+      "pinyin": "nǐmen",
+      "adj": 1,
+      "vi": "Các bạn"
+    },
+    {
+      "pos": 12,
+      "hanzi": "谢谢",
+      "pinyin": "xièxie",
+      "adj": 4,
+      "vi": "Cảm ơn"
+    },
+    {
+      "pos": 13,
+      "hanzi": "不客气",
+      "pinyin": "bú kèqi",
+      "adj": [],
+      "vi": "Đừng khách sáo"
+    },
+    {
+      "pos": 14,
+      "hanzi": "同学",
+      "pinyin": "tóngxué",
+      "adj": 2,
+      "vi": "Bạn học"
+    },
+    {
+      "pos": 15,
+      "hanzi": "再见",
+      "pinyin": "zàijiàn",
+      "adj": 4,
+      "vi": "Tạm biệt"
+    }
+  ]
+}

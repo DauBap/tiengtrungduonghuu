@@ -1,0 +1,579 @@
+import type { ReviewDirection, ReviewQuestion, ReviewSet } from "./hsk1_3-0";
+
+type TranslationRow = [ReviewDirection, string, string, number, string[]?];
+type ReorderRow = [string, string[], number, string[]?];
+
+const translations = (prefix: string, rows: TranslationRow[]): ReviewQuestion[] =>
+	rows.map(([direction, prompt, answer, lesson, acceptedAnswers], index) => ({
+		id: `${prefix}-${index + 1}`,
+		direction,
+		prompt,
+		answer,
+		lesson,
+		explanation: `Ôn tập từ vựng và ngữ pháp HSK2 Bài ${lesson}.`,
+		acceptedAnswers
+	}));
+
+const reorders = (prefix: string, rows: ReorderRow[]): ReviewQuestion[] =>
+	rows.map(([answer, tokens, lesson, acceptedAnswers], index) => ({
+		id: `${prefix}-${index + 1}`,
+		direction: "vi2zh",
+		type: "reorder",
+		prompt: "Sắp xếp các từ thành câu đúng:",
+		answer,
+		tokens,
+		lesson,
+		explanation: `Ôn tập trật tự câu HSK2 Bài ${lesson}.`,
+		acceptedAnswers
+	}));
+
+export const courseReviewTemplates: Record<string, Record<string, ReviewSet>> = {
+	"hsk2_3.0": {
+		"1": {
+			id: "1",
+			courseId: "hsk2_3.0",
+			title: "ÔN TẬP 1 – HSK2 3.0",
+			subtitle: "Luyện dịch Bài 1 đến Bài 5 (30 câu)",
+			sections: [
+				{
+					id: "1",
+					title: "Phần 1: Việt → Trung — Cơ bản",
+					questions: translations("r1-basic-vi", [
+						["vi2zh", "Cô Vương bảo tôi đến đón các bạn.", "王老师让我来接你们。", 1],
+						["vi2zh", "Đây là lần đầu tiên tôi đến Bắc Kinh.", "这是我第一次来北京。", 1],
+						["vi2zh", "Bạn có hiểu ý của giáo viên không?", "你懂老师的意思吗？", 1],
+						["vi2zh", "Chúng ta vẫn nên đi taxi nhé.", "我们还是打车去吧。", 2],
+						["vi2zh", "Trạm xe buýt cách trường rất xa.", "车站离学校很远。", 2],
+						["vi2zh", "Tôi vẫn chưa làm xong bài tập.", "我还没做完作业。", 3],
+						[
+							"vi2zh",
+							"Bạn hãy cầm ít trái cây về nhé.",
+							"你拿一些水果回去吧。",
+							3,
+							["你拿些水果回去吧。"]
+						],
+						[
+							"vi2zh",
+							"Tôi muốn thử chiếc quần màu đen này.",
+							"我想试试这条黑色的裤子。",
+							4,
+							["我想试一下这条黑色的裤子。"]
+						]
+					])
+				},
+				{
+					id: "2",
+					title: "Phần 2: Việt → Trung — Tổng hợp",
+					questions: translations("r1-mixed-vi", [
+						["vi2zh", "Bạn gọi điện hỏi giáo viên thử xem.", "你给老师打电话问一下吧。", 1],
+						["vi2zh", "Trong trường có hơn hai vạn sinh viên.", "学校里有两万多名学生。", 2],
+						["vi2zh", "Tôi đã xem phần giới thiệu trên mạng rồi.", "我已经看了网上的介绍。", 2],
+						[
+							"vi2zh",
+							"Sau khi rửa tay xong, chúng ta cùng ăn cơm.",
+							"洗完手以后，我们一起吃饭。",
+							3
+						],
+						[
+							"vi2zh",
+							"Chiếc quần màu xanh đẹp hơn chiếc màu trắng.",
+							"绿色的裤子比白色的好看。",
+							4
+						],
+						[
+							"vi2zh",
+							"Vì trời lạnh nên tôi muốn mặc thêm quần áo.",
+							"因为天气冷，所以我想多穿衣服。",
+							4
+						],
+						["vi2zh", "Bạn lên trên giúp tôi lấy quà xuống nhé.", "你上去帮我把礼物拿下来吧。", 5]
+					])
+				},
+				{
+					id: "3",
+					title: "Phần 3: Trung → Việt — Cơ bản",
+					questions: translations("r1-basic-zh", [
+						[
+							"zh2vi",
+							"朋友请我们吃了北京烤鸭。",
+							"Bạn tôi đã mời chúng tôi ăn vịt quay Bắc Kinh.",
+							1
+						],
+						["zh2vi", "有时我听不懂他说的话。", "Đôi khi tôi nghe không hiểu lời anh ấy nói.", 1],
+						[
+							"zh2vi",
+							"这儿有到北京大学的公交车吗？",
+							"Ở đây có xe buýt đến Đại học Bắc Kinh không?",
+							2
+						],
+						[
+							"zh2vi",
+							"电影票是在网上买的。",
+							"Vé xem phim được mua trên mạng.",
+							2,
+							["Vé xem phim là mua trên mạng."]
+						],
+						[
+							"zh2vi",
+							"这些水果不错，你拿一些回去吧。",
+							"Những trái cây này khá ngon, bạn cầm một ít về nhé.",
+							3
+						],
+						[
+							"zh2vi",
+							"我的手不太舒服，不能写字。",
+							"Tay tôi không được khỏe nên không thể viết chữ.",
+							3
+						],
+						["zh2vi", "我没有穿过这种颜色的裤子。", "Tôi chưa từng mặc loại quần có màu này.", 4],
+						["zh2vi", "爷爷正在楼下面等我们呢。", "Ông đang đợi chúng tôi ở dưới lầu.", 5]
+					])
+				},
+				{
+					id: "4",
+					title: "Phần 4: Trung → Việt — Tổng hợp",
+					questions: translations("r1-mixed-zh", [
+						[
+							"zh2vi",
+							"你有事就给王老师打电话吧。",
+							"Nếu có việc thì bạn gọi điện cho cô Vương nhé.",
+							1
+						],
+						[
+							"zh2vi",
+							"公交车还没过来，你再等一会儿。",
+							"Xe buýt vẫn chưa tới, bạn đợi thêm một lát nữa nhé.",
+							2
+						],
+						[
+							"zh2vi",
+							"你回来以后，我们一起吃饭吧。",
+							"Sau khi bạn về, chúng ta cùng ăn cơm nhé.",
+							3
+						],
+						[
+							"zh2vi",
+							"我过去的时候，她正在试衣服。",
+							"Khi tôi đi qua đó, cô ấy đang thử quần áo.",
+							4
+						],
+						[
+							"zh2vi",
+							"因为这个商场很大，所以人很多。",
+							"Vì trung tâm thương mại này rất lớn nên có rất đông người.",
+							4
+						],
+						[
+							"zh2vi",
+							"老师进来以后，我们就开始上课。",
+							"Sau khi giáo viên đi vào, chúng tôi liền bắt đầu học.",
+							5
+						],
+						["zh2vi", "爷爷奶奶高兴地走进来了。", "Ông bà vui vẻ bước vào.", 5]
+					])
+				}
+			]
+		},
+		"2": {
+			id: "2",
+			courseId: "hsk2_3.0",
+			title: "ÔN TẬP 2 – HSK2 3.0",
+			subtitle: "Luyện dịch Bài 6 đến Bài 10 (40 câu)",
+			sections: [
+				{
+					id: "1",
+					title: "Phần 1: Việt → Trung — Bài 6–8",
+					questions: translations("r2-vi-68", [
+						[
+							"vi2zh",
+							"Ngày mai là sinh nhật mẹ, bạn đừng quên nhé.",
+							"明天是妈妈的生日，你别忘了。",
+							6
+						],
+						["vi2zh", "Bố mua cho tôi một hộp bút vẽ màu.", "爸爸给我买了一盒彩色画笔。", 6],
+						["vi2zh", "Em gái mở quà ra rồi vui vẻ cười.", "妹妹打开礼物，高兴地笑了。", 6],
+						["vi2zh", "Anh trai chạy nhanh hơn tôi nhiều.", "哥哥比我跑得快多了。", 7],
+						["vi2zh", "Tôi bắt đầu học chơi bóng rổ từ năm ngoái.", "我从去年开始学习打篮球。", 7],
+						["vi2zh", "Hễ có thời gian là tôi đi bơi.", "我一有时间就去游泳。", 7],
+						[
+							"vi2zh",
+							"Chiếc đồng hồ bên trái đẹp hơn chiếc bên phải.",
+							"左边的手表比右边的好看。",
+							8
+						],
+						[
+							"vi2zh",
+							"Tuy hôm nay mưa nhưng tôi vẫn muốn đi.",
+							"虽然今天下雨，但是我还是想去。",
+							8
+						],
+						[
+							"vi2zh",
+							"Tôi không nhớ chiếc đồng hồ này bao nhiêu tiền.",
+							"我不记得这块手表多少钱了。",
+							8
+						],
+						["vi2zh", "Chồng và vợ cùng đến nhà hàng ăn cơm.", "丈夫和妻子一起去饭馆吃饭。", 8]
+					])
+				},
+				{
+					id: "2",
+					title: "Phần 2: Việt → Trung — Bài 8–10",
+					questions: translations("r2-vi-810", [
+						[
+							"vi2zh",
+							"Máy tính của tôi hỏng rồi, hôm nay không thể làm việc.",
+							"我的电脑坏了，今天不能工作。",
+							9
+						],
+						["vi2zh", "Cậu bé đứng ở cửa có vóc dáng rất cao.", "站在门口的男孩儿个子很高。", 9],
+						["vi2zh", "Trung tâm thương mại ở ngay cạnh trường.", "商场就在学校旁边。", 9],
+						["vi2zh", "Nhà tôi cách trường chỉ hai ki-lô-mét.", "我家离学校只有两公里。", 9],
+						[
+							"vi2zh",
+							"Sắp thi rồi, mọi người đều đang chăm chỉ học.",
+							"快要考试了，大家都在认真学习。",
+							10
+						],
+						[
+							"vi2zh",
+							"Bạn hãy xem lại những câu đã làm sai.",
+							"请把做错的题再看一看。",
+							10,
+							["请把做错的题再看一下。"]
+						],
+						[
+							"vi2zh",
+							"Trước khi khai giảng, tôi đã mua bút và vở mới.",
+							"开学以前，我买了新笔和本子。",
+							10
+						],
+						[
+							"vi2zh",
+							"Tôi viết sai từ này rồi, bạn nói lại một lần nhé.",
+							"这个词我写错了，你再说一次吧。",
+							10
+						],
+						["vi2zh", "Còn ba ngày nữa là thi rồi.", "还有三天就要考试了。", 10],
+						[
+							"vi2zh",
+							"Giáo viên bảo chúng tôi không nói chuyện khi thi.",
+							"老师让我们考试的时候别说话。",
+							10
+						]
+					])
+				},
+				{
+					id: "3",
+					title: "Phần 3: Trung → Việt — Bài 6–8",
+					questions: translations("r2-zh-68", [
+						["zh2vi", "这个生日蛋糕是妈妈自己做的。", "Chiếc bánh sinh nhật này do mẹ tự làm.", 6],
+						["zh2vi", "我忘了把画笔放在书包里。", "Tôi quên bỏ bút vẽ vào trong cặp rồi.", 6],
+						[
+							"zh2vi",
+							"你身体不舒服，就在床上休息吧。",
+							"Nếu bạn không khỏe thì nghỉ trên giường nhé.",
+							6
+						],
+						["zh2vi", "我跑步跑得没有哥哥快。", "Tôi chạy không nhanh bằng anh trai.", 7],
+						["zh2vi", "妹妹游泳游得比我好。", "Em gái bơi giỏi hơn tôi.", 7],
+						[
+							"zh2vi",
+							"运动以后要多喝水，好好休息。",
+							"Sau khi vận động cần uống nhiều nước và nghỉ ngơi cho tốt.",
+							7
+						],
+						[
+							"zh2vi",
+							"丈夫送给妻子一块漂亮的手表。",
+							"Người chồng tặng vợ một chiếc đồng hồ đẹp.",
+							8
+						],
+						["zh2vi", "这部电影虽然很长，但是有意思。", "Bộ phim này tuy dài nhưng thú vị.", 8],
+						[
+							"zh2vi",
+							"饭馆左边有一家很大的商场。",
+							"Bên trái nhà hàng có một trung tâm thương mại rất lớn.",
+							8
+						],
+						[
+							"zh2vi",
+							"妻子给丈夫买了一件白色衣服。",
+							"Người vợ mua cho chồng một bộ quần áo màu trắng.",
+							8
+						]
+					])
+				},
+				{
+					id: "4",
+					title: "Phần 4: Trung → Việt — Bài 8–10",
+					questions: translations("r2-zh-810", [
+						["zh2vi", "那个男孩儿没有哥哥那么高。", "Cậu bé đó không cao bằng anh trai.", 9],
+						[
+							"zh2vi",
+							"商场就在学校旁边，离这儿很近。",
+							"Trung tâm thương mại ở ngay cạnh trường, cách đây rất gần.",
+							9
+						],
+						[
+							"zh2vi",
+							"我的手机坏了，不能给你打电话。",
+							"Điện thoại của tôi hỏng rồi nên không thể gọi cho bạn.",
+							9
+						],
+						[
+							"zh2vi",
+							"你这样每天喝咖啡，身体好吗？",
+							"Ngày nào bạn cũng uống cà phê như vậy, sức khỏe có ổn không?",
+							9
+						],
+						["zh2vi", "这次考试我做错了两个题。", "Kỳ thi lần này tôi làm sai hai câu.", 10],
+						[
+							"zh2vi",
+							"请你帮我看看这个词写得对不对。",
+							"Bạn giúp tôi xem từ này viết đúng hay không nhé.",
+							10
+						],
+						[
+							"zh2vi",
+							"弟弟快要上小学了，他很高兴。",
+							"Em trai sắp học tiểu học rồi, em ấy rất vui.",
+							10
+						],
+						[
+							"zh2vi",
+							"我的笔在书包里，本子在桌上。",
+							"Bút của tôi ở trong cặp, còn vở ở trên bàn.",
+							10
+						],
+						[
+							"zh2vi",
+							"老师看了我的题，高兴地笑了。",
+							"Giáo viên xem bài của tôi rồi vui vẻ cười.",
+							10
+						],
+						[
+							"zh2vi",
+							"她这次考得不错，高兴地笑了。",
+							"Lần này cô ấy thi khá tốt nên vui vẻ cười.",
+							10
+						]
+					])
+				}
+			]
+		},
+		"3": {
+			id: "3",
+			courseId: "hsk2_3.0",
+			title: "ÔN TẬP 3 – HSK2 3.0",
+			subtitle: "Sắp xếp câu và luyện dịch Bài 1 đến Bài 15 (40 câu)",
+			sections: [
+				{
+					id: "1",
+					title: "Phần 1: Sắp xếp câu — Tổng hợp 1",
+					questions: reorders("r3-order-a", [
+						[
+							"王老师让我明天早点儿来学校。",
+							["王老师", "让", "我", "明天", "早点儿", "来", "学校"],
+							1,
+							["明天王老师让我早点儿来学校。"]
+						],
+						["我已经把这些水果洗好了。", ["我", "已经", "把", "这些水果", "洗", "好", "了"], 3],
+						["妹妹游泳游得比我快多了。", ["妹妹", "游泳", "游", "得", "比", "我", "快多了"], 7],
+						[
+							"虽然这块手表贵，但是我很喜欢。",
+							["虽然", "这块手表", "贵", "但是", "我", "很", "喜欢"],
+							8
+						],
+						[
+							"老师让我们考试的时候别说话。",
+							["老师", "让", "我们", "考试", "的", "时候", "别", "说话"],
+							10
+						],
+						[
+							"我吃完药以后头就不疼了。",
+							["我", "吃", "完", "药", "以后", "头", "就", "不疼", "了"],
+							11
+						],
+						["地铁站就在那座楼的下面。", ["地铁站", "就", "在", "那座楼", "的", "下面"], 12],
+						[
+							"老师希望我们每天都学习中文。",
+							["老师", "希望", "我们", "每天", "都", "学习", "中文"],
+							13
+						],
+						[
+							"房子前面站着一位高个子先生。",
+							["房子", "前面", "站", "着", "一位", "高个子", "先生"],
+							14
+						],
+						[
+							"我在网上买好了颐和园的门票。",
+							["我", "在", "网上", "买", "好", "了", "颐和园", "的", "门票"],
+							15
+						]
+					])
+				},
+				{
+					id: "2",
+					title: "Phần 2: Sắp xếp câu — Tổng hợp 2",
+					questions: reorders("r3-order-b", [
+						[
+							"公交车还没过来，你再等一会儿。",
+							["公交车", "还", "没", "过来", "你", "再", "等", "一会儿"],
+							2
+						],
+						[
+							"请把做错的题再认真看一遍。",
+							["请", "把", "做错", "的", "题", "再", "认真", "看", "一遍"],
+							10
+						],
+						[
+							"路上有很多车，你慢一点儿开。",
+							["路上", "有", "很多", "车", "你", "慢", "一点儿", "开"],
+							11
+						],
+						[
+							"从地铁站到学校要一个小时。",
+							["从", "地铁站", "到", "学校", "要", "一个", "小时"],
+							12
+						],
+						[
+							"他小时候住过的那座楼还在。",
+							["他", "小时候", "住过", "的", "那座楼", "还", "在"],
+							12
+						],
+						[
+							"妈妈告诉我要好好学习中文。",
+							["妈妈", "告诉", "我", "要", "好好", "学习", "中文"],
+							13
+						],
+						[
+							"那个女孩儿跳舞跳得非常好。",
+							["那个", "女孩儿", "跳舞", "跳", "得", "非常", "好"],
+							14
+						],
+						[
+							"小孩儿手里拿着一个红色的包。",
+							["小孩儿", "手里", "拿", "着", "一个", "红色", "的", "包"],
+							14
+						],
+						[
+							"出国以前我给家里打了电话。",
+							["出国", "以前", "我", "给", "家里", "打", "了", "电话"],
+							15
+						],
+						[
+							"飞机快要飞了，你到机场了吗？",
+							["飞机", "快要", "飞", "了", "你", "到", "机场", "了", "吗"],
+							15
+						]
+					])
+				},
+				{
+					id: "3",
+					title: "Phần 3: Việt → Trung — Trọng tâm Bài 10–15",
+					questions: translations("r3-vi", [
+						[
+							"vi2zh",
+							"Sau khi uống thuốc, đầu tôi không còn đau như vậy nữa.",
+							"吃完药以后，我的头不那么疼了。",
+							11
+						],
+						["vi2zh", "Khi không khỏe cần uống nhiều nước ấm.", "身体不舒服的时候要多喝热水。", 11],
+						[
+							"vi2zh",
+							"Từ ga tàu điện ngầm đến trường mất một giờ.",
+							"从地铁站到学校要一个小时。",
+							12
+						],
+						[
+							"vi2zh",
+							"Khi còn nhỏ, tôi thường chơi cùng anh trai.",
+							"小时候，我经常和哥哥一起玩。",
+							12
+						],
+						[
+							"vi2zh",
+							"Giáo viên hy vọng chúng tôi mỗi ngày đều học tiếng Trung.",
+							"老师希望我们每天都学习中文。",
+							13
+						],
+						[
+							"vi2zh",
+							"Xin hãy nói cho tôi biết nhà vệ sinh ở đâu.",
+							"请告诉我洗手间在什么地方。",
+							13,
+							["请告诉我洗手间在哪儿。"]
+						],
+						[
+							"vi2zh",
+							"Cô bé có đôi mắt to là bạn học của tôi.",
+							"眼睛很大的女孩儿是我的同学。",
+							14
+						],
+						[
+							"vi2zh",
+							"Một mình đón năm mới ở nước ngoài thật buồn chán.",
+							"一个人在外国过年多没意思啊。",
+							14
+						],
+						[
+							"vi2zh",
+							"Trước khi ra nước ngoài, tôi đã gọi điện về nhà.",
+							"出国以前，我给家里打了电话。",
+							15
+						],
+						[
+							"vi2zh",
+							"Tôi đã mua vé vào Di Hòa Viên trên mạng.",
+							"我在网上买好了颐和园的门票。",
+							15
+						]
+					])
+				},
+				{
+					id: "4",
+					title: "Phần 4: Trung → Việt — Trọng tâm Bài 10–15",
+					questions: translations("r3-zh", [
+						["zh2vi", "奶奶正在房间里吃药呢。", "Bà đang uống thuốc trong phòng.", 11],
+						["zh2vi", "这是离学校最近的一家药店。", "Đây là hiệu thuốc gần trường nhất.", 11],
+						[
+							"zh2vi",
+							"我从小就喜欢坐地铁出去玩。",
+							"Từ nhỏ tôi đã thích đi tàu điện ngầm ra ngoài chơi.",
+							12
+						],
+						["zh2vi", "小时候住过的那座楼还在。", "Tòa nhà từng ở hồi nhỏ vẫn còn đó.", 12],
+						[
+							"zh2vi",
+							"他可能已经回到班里上课了。",
+							"Có lẽ anh ấy đã quay lại lớp học rồi.",
+							13,
+							["Anh ấy có thể đã quay lại lớp học rồi."]
+						],
+						[
+							"zh2vi",
+							"新年到了，希望大家天天快乐。",
+							"Năm mới đến rồi, chúc mọi người mỗi ngày đều vui vẻ.",
+							13
+						],
+						["zh2vi", "请问，站在门口的女孩儿姓什么？", "Xin hỏi, cô bé đứng ở cửa họ gì?", 14],
+						[
+							"zh2vi",
+							"小孩儿手里拿着一个红色的包。",
+							"Đứa trẻ đang cầm một chiếc túi màu đỏ trên tay.",
+							14
+						],
+						[
+							"zh2vi",
+							"飞机快要飞了，你到机场了吗？",
+							"Máy bay sắp cất cánh rồi, bạn đến sân bay chưa?",
+							15
+						],
+						["zh2vi", "我好像在哪里见过这个人。", "Hình như tôi đã gặp người này ở đâu đó.", 15]
+					])
+				}
+			]
+		}
+	}
+};

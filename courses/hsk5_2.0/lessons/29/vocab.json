@@ -1,0 +1,262 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 29,
+  "label": "Bài 29",
+  "title": "培养对手",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "培养",
+      "pinyin": "péiyǎng",
+      "adj": 4,
+      "vi": "bồi dưỡng, đào tạo"
+    },
+    {
+      "pos": 2,
+      "hanzi": "对手",
+      "pinyin": "duìshǒu",
+      "adj": 2,
+      "vi": "đối thủ, địch thủ"
+    },
+    {
+      "pos": 3,
+      "hanzi": "公寓",
+      "pinyin": "gōngyù",
+      "adj": 2,
+      "vi": "khu nhà ở"
+    },
+    {
+      "pos": 4,
+      "hanzi": "文具",
+      "pinyin": "wénjù",
+      "adj": 2,
+      "vi": "đồ dùng văn phòng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "电池",
+      "pinyin": "diànchí",
+      "adj": 2,
+      "vi": "pin"
+    },
+    {
+      "pos": 6,
+      "hanzi": "日用品",
+      "pinyin": "rìyòngpǐn",
+      "adj": 2,
+      "vi": "vật dụng hằng ngày"
+    },
+    {
+      "pos": 7,
+      "hanzi": "利润",
+      "pinyin": "lìrùn",
+      "adj": 2,
+      "vi": "lợi nhuận, lãi"
+    },
+    {
+      "pos": 8,
+      "hanzi": "诚信",
+      "pinyin": "chéngxìn",
+      "adj": 6,
+      "vi": "trung thực"
+    },
+    {
+      "pos": 9,
+      "hanzi": "媒体",
+      "pinyin": "méitǐ",
+      "adj": 2,
+      "vi": "phương tiện truyền thông đại chúng"
+    },
+    {
+      "pos": 10,
+      "hanzi": "对象",
+      "pinyin": "duìxiàng",
+      "adj": 2,
+      "vi": "đối tượng, mục tiêu"
+    },
+    {
+      "pos": 11,
+      "hanzi": "营业",
+      "pinyin": "yíngyè",
+      "adj": 4,
+      "vi": "kinh doanh, buôn bán"
+    },
+    {
+      "pos": 12,
+      "hanzi": "额",
+      "pinyin": "é",
+      "adj": 2,
+      "vi": "số, ngạch, mức"
+    },
+    {
+      "pos": 13,
+      "hanzi": "不如",
+      "pinyin": "bùrú",
+      "adj": 4,
+      "vi": "không bằng, thua kém hơn"
+    },
+    {
+      "pos": 14,
+      "hanzi": "干脆",
+      "pinyin": "gāncuì",
+      "adj": 7,
+      "vi": "dứt khoát, cú"
+    },
+    {
+      "pos": 15,
+      "hanzi": "挤",
+      "pinyin": "jǐ",
+      "adj": 4,
+      "vi": "ép, bóp, chen lấn"
+    },
+    {
+      "pos": 16,
+      "hanzi": "垮",
+      "pinyin": "kuǎ",
+      "adj": 4,
+      "vi": "sáp, sụp đổ"
+    },
+    {
+      "pos": 17,
+      "hanzi": "垄断",
+      "pinyin": "lǒngduàn",
+      "adj": 4,
+      "vi": "giữ độc quyền"
+    },
+    {
+      "pos": 18,
+      "hanzi": "倒闭",
+      "pinyin": "dǎobì",
+      "adj": 4,
+      "vi": "đóng cửa hẳn, sập tiệm"
+    },
+    {
+      "pos": 19,
+      "hanzi": "热心",
+      "pinyin": "rèxīn",
+      "adj": 6,
+      "vi": "nhiệt tình, sôi sắng"
+    },
+    {
+      "pos": 20,
+      "hanzi": "资金",
+      "pinyin": "zījīn",
+      "adj": 2,
+      "vi": "tiền vốn"
+    },
+    {
+      "pos": 21,
+      "hanzi": "傻",
+      "pinyin": "shǎ",
+      "adj": 6,
+      "vi": "dại dột, đần độn"
+    },
+    {
+      "pos": 22,
+      "hanzi": "倒霉",
+      "pinyin": "dǎo méi",
+      "adj": 6,
+      "vi": "xui xẻo, bất hạnh"
+    },
+    {
+      "pos": 23,
+      "hanzi": "生态",
+      "pinyin": "shēngtài",
+      "adj": 2,
+      "vi": "sinh thái học"
+    },
+    {
+      "pos": 24,
+      "hanzi": "商业",
+      "pinyin": "shāngyè",
+      "adj": 2,
+      "vi": "thương mại, thương nghiệp"
+    },
+    {
+      "pos": 25,
+      "hanzi": "领域",
+      "pinyin": "lǐngyù",
+      "adj": 2,
+      "vi": "lĩnh vực, phạm vi"
+    },
+    {
+      "pos": 26,
+      "hanzi": "适当",
+      "pinyin": "shìdàng",
+      "adj": 6,
+      "vi": "thích hợp, thỏa đáng"
+    },
+    {
+      "pos": 27,
+      "hanzi": "促使",
+      "pinyin": "cùshǐ",
+      "adj": 4,
+      "vi": "thúc đẩy, thúc giục"
+    },
+    {
+      "pos": 28,
+      "hanzi": "生长",
+      "pinyin": "shēngzhǎng",
+      "adj": 4,
+      "vi": "sinh trưởng"
+    },
+    {
+      "pos": 29,
+      "hanzi": "妨碍",
+      "pinyin": "fáng'ài",
+      "adj": 4,
+      "vi": "gây trở ngại, cản trở"
+    },
+    {
+      "pos": 30,
+      "hanzi": "促进",
+      "pinyin": "cùjìn",
+      "adj": 4,
+      "vi": "đẩy mạnh, xúc tiến"
+    },
+    {
+      "pos": 31,
+      "hanzi": "利益",
+      "pinyin": "lìyì",
+      "adj": 2,
+      "vi": "lợi ích"
+    },
+    {
+      "pos": 32,
+      "hanzi": "合理",
+      "pinyin": "hélǐ",
+      "adj": 6,
+      "vi": "hợp lý"
+    },
+    {
+      "pos": 33,
+      "hanzi": "万一",
+      "pinyin": "wànyī",
+      "adj": 10,
+      "vi": "ngộ nhỡ"
+    },
+    {
+      "pos": 34,
+      "hanzi": "维持",
+      "pinyin": "wéichí",
+      "adj": 4,
+      "vi": "duy trì, giữ lại"
+    },
+    {
+      "pos": 35,
+      "hanzi": "饱和",
+      "pinyin": "bǎohé",
+      "adj": 4,
+      "vi": "làm bão hòa"
+    },
+    {
+      "pos": 36,
+      "hanzi": "不见得",
+      "pinyin": "bújiànde",
+      "adj": 7,
+      "vi": "chưa chắc, không nhất thiết"
+    }
+  ]
+}

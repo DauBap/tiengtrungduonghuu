@@ -1,0 +1,170 @@
+{
+  "lesson": 6,
+  "title": "高铁上还可以点外卖",
+  "title_pinyin": "Gāotiě shàng hái kěyǐ diǎn wàimài",
+  "title_vi": "Trên tàu cao tốc còn có thể gọi đồ ăn mang đi",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "家月, 咱们该买去上海的票了。你打算怎么去上海?",
+          "pinyin": "Jiāyuè, zánmen gāi mǎi qù Shànghǎi de piào le. Nǐ dǎsuàn zěnme qù Shànghǎi?",
+          "vi": "Gia Nguyệt, chúng ta nên mua vé đi Thượng Hải rồi. Cậu định đi Thượng Hải bằng cách nào?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我还没坐过高铁, 咱们坐高铁去, 怎么样?",
+          "pinyin": "Wǒ hái méi zuò guo gāotiě, zánmen zuò gāotiě qù, zěnmeyàng?",
+          "vi": "Tôi chưa đi tàu cao tốc bao giờ, chúng ta đi tàu cao tốc nhé, thế nào?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "没问题, 从北京到上海的高铁很多, 非常方便。",
+          "pinyin": "Méi wèntí, cóng Běijīng dào Shànghǎi de gāotiě hěnduō, fēicháng fāngbiàn.",
+          "vi": "Không vấn đề, từ Bắc Kinh đến Thượng Hải có rất nhiều tàu cao tốc, rất tiện."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "行! 怎么买高铁票?",
+          "pinyin": "Xíng! Zěnme mǎi gāotiě piào?",
+          "vi": "Được! Mua vé tàu cao tốc như thế nào?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "用手机App就能买。给我你的护照, 我帮你买。",
+          "pinyin": "Yòng shǒujī App jiù néng mǎi. Gěi wǒ nǐ de hùzhào, wǒ bāng nǐ mǎi.",
+          "vi": "Dùng App trên điện thoại là mua được. Đưa hộ chiếu cho tớ, tớ mua giúp cậu."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "早就听说过高铁, 终于可以坐上了。",
+          "pinyin": "Zǎo jiù tīngshuō guo gāotiě, zhōngyú kěyǐ zuò shàng le.",
+          "vi": "Từ lâu đã nghe nói về tàu cao tốc, cuối cùng cũng được đi rồi."
+        },
+        {
+          "speaker": "李文",
+          "zh": "高铁又快又舒服, 你一定会喜欢的。",
+          "pinyin": "Gāotiě yòu kuài yòu shūfu, nǐ yīdìng huì xǐhuan de.",
+          "vi": "Tàu cao tốc vừa nhanh vừa thoải mái, cậu nhất định sẽ thích."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "过了前面的路口就到高铁站了。",
+          "pinyin": "Guò le qiánmian de lùkǒu jiù dào gāotiě zhàn le.",
+          "vi": "Qua ngã tư phía trước là đến ga tàu cao tốc rồi."
+        },
+        {
+          "speaker": "李文",
+          "zh": "我看见了。马上就到了, 这条路车很多, 您小心点儿。",
+          "pinyin": "Wǒ kànjiàn le. Mǎshàng jiù dào le, zhè tiáo lù chē hěnduō, nín xiǎoxīn diǎnr.",
+          "vi": "Cháu nhìn thấy rồi. Sắp đến rồi, đường này nhiều xe, chú cẩn thận nhé."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好, 你们还有一个小时, 应该不会迟到的。",
+          "pinyin": "Hǎo, nǐmen hái yǒu yī gè xiǎoshí, yīnggāi bú huì chídào de.",
+          "vi": "Được, các con còn một tiếng, chắc sẽ không bị muộn đâu."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我发现这条路车多, 红绿灯也多。",
+          "pinyin": "Wǒ fāxiàn zhè tiáo lù chē duō, hónglǜdēng yě duō.",
+          "vi": "Cháu thấy đường này nhiều xe, đèn giao thông cũng nhiều."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "是啊, 这条路我走过一次, 后来再也不走了。",
+          "pinyin": "Shì a, zhè tiáo lù wǒ zǒu guo yī cì, hòulái zài yě bù zǒu le.",
+          "vi": "Đúng vậy, đường này chú đi qua một lần, sau đó không đi nữa."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "那您今天为什么走了这条路?",
+          "pinyin": "Nà nín jīntiān wèishénme zǒu le zhè tiáo lù?",
+          "vi": "Vậy sao hôm nay chú lại đi đường này?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我一急就走错了。如果没走错, 二十分钟以前就到了。",
+          "pinyin": "Wǒ yī jí jiù zǒu cuò le. Rúguǒ méi zǒu cuò, èrshí fēnzhōng yǐqián jiù dào le.",
+          "vi": "Chú vội quá nên đi nhầm. Nếu không đi nhầm, thì đã đến từ 20 phút trước rồi."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "李文, 我的耳机没电了, 你有充电宝吗?",
+          "pinyin": "Lǐ Wén, wǒ de ěrjī méi diàn le, nǐ yǒu chōngdiànbǎo ma?",
+          "vi": "Lý Văn, tai nghe của tôi hết pin rồi, cậu có sạc dự phòng không?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "有, 这些常用的东西我都放在包里了, 我给你拿。",
+          "pinyin": "Yǒu, zhèxiē chángyòng de dōngxi wǒ dōu fàng zài bāo lǐ le, wǒ gěi nǐ ná.",
+          "vi": "Có, những đồ dùng thường ngày này tôi đều để trong túi, tôi lấy cho cậu."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "前面的人越来越多。",
+          "pinyin": "Qiánmian de rén yuè lái yuè duō.",
+          "vi": "Người phía trước càng lúc càng đông."
+        },
+        {
+          "speaker": "李文",
+          "zh": "对, 马上就进高铁站了。咱们一起走, 别分开。",
+          "pinyin": "Duì, mǎshàng jiù jìn gāotiě zhàn le. Zánmen yīqǐ zǒu, bié fēnkāi.",
+          "vi": "Đúng, sắp vào ga tàu cao tốc rồi. Chúng ta đi cùng nhau, đừng tách ra."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好, 你检查一下, 高铁票都拿好了吗?",
+          "pinyin": "Hǎo, nǐ jiǎnchá yíxià, gāotiě piào dōu ná hǎo le ma?",
+          "vi": "Được, cậu kiểm tra xem, vé tàu cao tốc đã cầm đầy đủ chưa?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "不用拿票, 刷护照就能检票进站。",
+          "pinyin": "Bú yòng ná piào, shuā hùzhào jiù néng jiǎnpiào jìn zhàn.",
+          "vi": "Không cần cầm vé, quẹt hộ chiếu là có thể soát vé vào ga."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "去哪里检票?",
+          "pinyin": "Qù nǎlǐ jiǎnpiào?",
+          "vi": "Đi đâu để soát vé?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "检票口在二层, 我们一会儿坐电梯上去。",
+          "pinyin": "Jiǎnpiàokǒu zài èr céng, wǒmen yīhuìr zuò diàntī shàngqu.",
+          "vi": "Cửa soát vé ở tầng hai, một lát chúng ta đi thang máy lên."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "这次放假, 我去了北京, 还去了上海。我是从北京南站坐高铁去的上海。我觉得坐在高铁上跟坐在家里的沙发上一样, 又安静又舒服。坐累了就站一会儿, 饿了就点外卖。对, 你没听错, 高铁上可以点外卖, 只需要选择好车站和想吃的东西, 到站时不用下车, 服务员就会给你拿过来。现在喜欢坐高铁的人越来越多。我爸妈来中国旅游的时候, 必须带他们也坐一次高铁。",
+          "pinyin": "Zhè cì fàngjià, wǒ qùle Běijīng, hái qùle Shànghǎi. Wǒ shì cóng Běijīng Nán Zhàn zuò gāotiě qù de Shànghǎi. Wǒ juéde zuò zài gāotiě shàng gēn zuò zài jiā lǐ de shāfā shàng yīyàng, yòu ānjìng yòu shūfu. Zuò lèi le jiù zhàn yīhuìr, è le jiù diǎn wàimài. Duì, nǐ méi tīng cuò, gāotiě shàng kěyǐ diǎn wàimài, zhǐ xūyào xuǎnzé hǎo chēzhàn hé xiǎng chī de dōngxi, dào zhàn shí bú yòng xià chē, fúwùyuán jiù huì gěi nǐ ná guòlái. Xiànzài xǐhuan zuò gāotiě de rén yuè lái yuè duō. Wǒ bà mā lái Zhōngguó lǚyóu de shíhou, bìxū dài tāmen yě zuò yī cì gāotiě.",
+          "vi": "Kỳ nghỉ này, tôi đã đến Bắc Kinh, và cũng đến Thượng Hải. Tôi đi tàu cao tốc từ ga Bắc Kinh Nam đến Thượng Hải. Tôi thấy ngồi trên tàu cao tốc giống như ngồi trên ghế sofa ở nhà, vừa yên tĩnh vừa thoải mái. Ngồi mệt thì đứng một lúc, đói thì gọi đồ ăn mang đi. Đúng, bạn không nghe nhầm đâu, trên tàu cao tốc có thể gọi đồ ăn, chỉ cần chọn ga và món mình muốn ăn, đến ga không cần xuống tàu, nhân viên phục vụ sẽ mang đến cho bạn. Bây giờ càng ngày càng nhiều người thích đi tàu cao tốc. Khi bố mẹ tôi đến Trung Quốc du lịch, nhất định phải đưa họ đi tàu cao tốc một lần."
+        }
+      ]
+    }
+  ]
+}

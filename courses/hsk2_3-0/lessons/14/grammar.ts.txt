@@ -1,0 +1,243 @@
+import type { GrammarExercise, GrammarLesson } from "./types";
+
+type Row = {
+	id: string;
+	zh: string;
+	vi: string;
+	tokens: string[];
+	wrong: [string, string];
+	note: string;
+};
+const exercises = (prefix: string, rows: Row[]): GrammarExercise[] => [
+	{
+		id: `${prefix}-choice`,
+		title: "1. Chọn đáp án đúng",
+		type: "choice",
+		questions: rows.map((r, i) => {
+			const options: [string, string, string] =
+				i % 3 === 0
+					? [r.zh, ...r.wrong]
+					: i % 3 === 1
+						? [r.wrong[0], r.zh, r.wrong[1]]
+						: [...r.wrong, r.zh];
+			return {
+				id: `${r.id}c`,
+				prompt: `Chọn câu đúng: “${r.vi}”`,
+				answer: r.zh,
+				options,
+				completedSentence: r.zh,
+				meaning: r.vi,
+				explanation: r.note,
+				optionExplanations: Object.fromEntries(
+					options.map((o) => [
+						o,
+						o === r.zh ? `Đúng: ${r.note}` : "Sai: cấu trúc, hướng hoặc trật tự từ không phù hợp."
+					])
+				)
+			};
+		})
+	},
+	{
+		id: `${prefix}-arrange`,
+		title: "2. Sắp xếp từ thành câu",
+		type: "arrange",
+		questions: rows.map((r) => ({
+			id: `${r.id}a`,
+			prompt: r.vi,
+			answer: r.zh,
+			tokens: r.tokens,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	},
+	{
+		id: `${prefix}-translate`,
+		title: "3. Dịch Việt sang Trung",
+		type: "input",
+		questions: rows.map((r) => ({
+			id: `${r.id}t`,
+			prompt: r.vi,
+			answer: r.zh,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	}
+];
+
+export const hsk2Lesson14Grammar: GrammarLesson = {
+	title: "BÀI 14: 一个人过年多没意思啊",
+	points: [
+		{
+			id: "existential-zhe",
+			title: "Câu tồn hiện (2) – Nơi chốn + động từ + 着 + người/sự vật",
+			explanation:
+				"Câu tồn hiện nêu nơi chốn trước, sau đó dùng “động từ + 着” và một danh từ chưa xác định để giới thiệu người hoặc sự vật đang tồn tại ở nơi đó.",
+			formulas: [
+				"Nơi chốn + động từ + 着 + người/sự vật",
+				"Nơi chốn + 没 + động từ + 着 + người/sự vật"
+			],
+			examples: [
+				{ chinese: "你家楼下站着一个人。", vietnamese: "Dưới nhà bạn có một người đang đứng." },
+				{ chinese: "桌子上放着一束花。", vietnamese: "Trên bàn có đặt một bó hoa." }
+			],
+			notes: [
+				"Người hoặc vật mới được giới thiệu thường đứng cuối câu, không đưa lên đầu làm chủ ngữ."
+			],
+			exercises: exercises("h2l14-exist", [
+				{
+					id: "e1",
+					zh: "你家楼下站着一个人",
+					vi: "Dưới nhà bạn có một người đang đứng.",
+					tokens: ["一个人", "站", "你家楼下", "着"],
+					wrong: ["一个人你家楼下站着", "你家楼下着站一个人"],
+					note: "Nơi chốn đứng đầu; 站着一个人 giới thiệu người tồn tại."
+				},
+				{
+					id: "e2",
+					zh: "桌子上放着一束花",
+					vi: "Trên bàn có đặt một bó hoa.",
+					tokens: ["一束花", "桌子上", "着", "放"],
+					wrong: ["一束花桌子上放着", "桌子上着放一束花"],
+					note: "桌子上 + 放着 + 一束花."
+				},
+				{
+					id: "e3",
+					zh: "教室里坐着很多学生",
+					vi: "Trong lớp có nhiều học sinh đang ngồi.",
+					tokens: ["很多学生", "教室里", "坐", "着"],
+					wrong: ["很多学生教室里坐着", "教室里着坐很多学生"],
+					note: "坐着很多学生 là phần tồn hiện."
+				},
+				{
+					id: "e4",
+					zh: "门上写着一个字",
+					vi: "Trên cửa có viết một chữ.",
+					tokens: ["一个字", "写", "门上", "着"],
+					wrong: ["一个字门上写着", "门上着写一个字"],
+					note: "门上 + 写着 + 一个字."
+				},
+				{
+					id: "e5",
+					zh: "楼上住着一位老师",
+					vi: "Trên lầu có một giáo viên đang sống.",
+					tokens: ["一位老师", "住", "楼上", "着"],
+					wrong: ["一位老师楼上住着", "楼上着住一位老师"],
+					note: "Nơi chốn 楼上 đứng trước 住着."
+				}
+			])
+		},
+		{
+			id: "exclamatory-duo",
+			title: "Phó từ chỉ mức độ “多” – Câu cảm thán",
+			explanation:
+				"Trong câu cảm thán, “多” đặt trước tính từ hoặc cụm vị ngữ để nhấn mạnh mức độ rất cao, tương đương “thật… biết bao/làm sao”. Cuối câu thường có 啊、呀.",
+			formulas: ["Chủ ngữ + 多 + tính từ + 啊！", "多 + tính từ/cụm vị ngữ + 啊！"],
+			examples: [
+				{
+					chinese: "你一个人在这儿多没意思啊！",
+					vietnamese: "Một mình bạn ở đây thật vô vị làm sao!"
+				},
+				{ chinese: "新年多热闹啊！", vietnamese: "Năm mới thật náo nhiệt biết bao!" }
+			],
+			notes: ["“多” trong mẫu này không mang nghĩa số lượng “nhiều” mà là phó từ cảm thán."],
+			exercises: exercises("h2l14-duo", [
+				{
+					id: "d1",
+					zh: "你一个人在这儿多没意思啊",
+					vi: "Một mình bạn ở đây thật vô vị làm sao!",
+					tokens: ["多没意思", "在这儿", "你一个人", "啊"],
+					wrong: ["你一个人在这儿没意思多啊", "多你一个人在这儿没意思啊"],
+					note: "多 đứng ngay trước cụm tính từ 没意思."
+				},
+				{
+					id: "d2",
+					zh: "新年多热闹啊",
+					vi: "Năm mới thật náo nhiệt biết bao!",
+					tokens: ["多热闹", "新年", "啊"],
+					wrong: ["新年热闹多啊", "多新年热闹啊"],
+					note: "多 + 热闹 + 啊 tạo câu cảm thán."
+				},
+				{
+					id: "d3",
+					zh: "这束花多漂亮啊",
+					vi: "Bó hoa này đẹp làm sao!",
+					tokens: ["多漂亮", "这束花", "啊"],
+					wrong: ["这束花漂亮多啊", "多这束花漂亮啊"],
+					note: "多 đứng trước 漂亮."
+				},
+				{
+					id: "d4",
+					zh: "一个人过年多冷清啊",
+					vi: "Đón năm mới một mình thật vắng vẻ làm sao!",
+					tokens: ["多冷清", "一个人过年", "啊"],
+					wrong: ["一个人过年冷清多啊", "多一个人过年冷清啊"],
+					note: "Chủ đề đứng trước, 多冷清 nêu mức độ cảm thán."
+				},
+				{
+					id: "d5",
+					zh: "大家一起玩多高兴啊",
+					vi: "Mọi người cùng chơi vui biết bao!",
+					tokens: ["多高兴", "大家一起玩", "啊"],
+					wrong: ["大家一起玩高兴多啊", "多大家一起玩高兴啊"],
+					note: "多 + 高兴 nhấn mạnh cảm xúc."
+				}
+			])
+		},
+		{
+			id: "compound-direction",
+			title: "Bổ ngữ xu hướng kép – Hướng di chuyển phức hợp",
+			explanation:
+				"Bổ ngữ xu hướng kép kết hợp động từ với 上、下、进、出、回、过 rồi thêm 来 hoặc 去 để biểu thị cả hướng di chuyển và hướng so với người nói. “起来” cũng biểu thị hướng từ thấp lên cao hoặc bắt đầu hình thành trạng thái.",
+			formulas: ["Động từ + 上/下/进/出/回/过 + 来/去", "Động từ + 起来"],
+			examples: [
+				{ chinese: "她经常跑上来找我玩。", vietnamese: "Cô ấy thường chạy lên đây tìm tôi chơi." },
+				{ chinese: "请把花拿出来。", vietnamese: "Hãy lấy hoa ra đây." }
+			],
+			notes: ["来 là hướng về phía người nói; 去 là hướng rời xa người nói."],
+			exercises: exercises("h2l14-direction", [
+				{
+					id: "c1",
+					zh: "她经常跑上来找我玩",
+					vi: "Cô ấy thường chạy lên đây tìm tôi chơi.",
+					tokens: ["找我玩", "她", "跑上来", "经常"],
+					wrong: ["她经常跑来上找我玩", "她经常上跑来找我玩"],
+					note: "跑 + 上 + 来 tạo 跑上来."
+				},
+				{
+					id: "c2",
+					zh: "请把花拿出来",
+					vi: "Hãy lấy hoa ra đây.",
+					tokens: ["拿出来", "请", "花", "把"],
+					wrong: ["请把花拿来出", "请把花出拿来"],
+					note: "拿 + 出 + 来 tạo 拿出来."
+				},
+				{
+					id: "c3",
+					zh: "他走进教室去了",
+					vi: "Anh ấy đi vào lớp rồi.",
+					tokens: ["去了", "走进教室", "他"],
+					wrong: ["他走去进教室了", "他进走教室去了"],
+					note: "Với địa điểm: 走进 + 教室 + 去."
+				},
+				{
+					id: "c4",
+					zh: "老师从楼下走上来了",
+					vi: "Giáo viên từ dưới lầu đi lên đây rồi.",
+					tokens: ["走上来了", "老师", "从楼下"],
+					wrong: ["老师从楼下走来上了", "老师从楼下上走来了"],
+					note: "走 + 上 + 来 + 了."
+				},
+				{
+					id: "c5",
+					zh: "大家都站起来了",
+					vi: "Mọi người đều đứng dậy rồi.",
+					tokens: ["站起来了", "大家", "都"],
+					wrong: ["大家都站来起了", "大家都起站来了"],
+					note: "站起来 biểu thị chuyển từ ngồi sang đứng."
+				}
+			])
+		}
+	]
+};

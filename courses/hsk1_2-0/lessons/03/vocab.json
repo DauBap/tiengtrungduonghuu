@@ -1,0 +1,87 @@
+{
+	"course_id": "hsk1_2",
+	"course_name": "HSK 1 (2.0)",
+
+	"id": 3,
+	"title": "你叫什么名字？",
+	"short_vi": "Hỏi tên, quốc tịch và nghề nghiệp.",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "叫",
+			"pinyin": "jiào",
+			"vi": "gọi là",
+			"adj": 4
+		},
+		{
+			"pos": 2,
+			"hanzi": "什么",
+			"pinyin": "shénme",
+			"vi": "cái gì",
+			"adj": 1
+		},
+		{
+			"pos": 3,
+			"hanzi": "名字",
+			"pinyin": "míngzi",
+			"vi": "tên",
+			"adj": 2
+		},
+		{
+			"pos": 4,
+			"hanzi": "我",
+			"pinyin": "wǒ",
+			"vi": "tôi",
+			"adj": 1
+		},
+		{
+			"pos": 5,
+			"hanzi": "是",
+			"pinyin": "shì",
+			"vi": "là",
+			"adj": 4
+		},
+		{
+			"pos": 6,
+			"hanzi": "老师",
+			"pinyin": "lǎoshī",
+			"vi": "giáo viên",
+			"adj": 2
+		},
+		{
+			"pos": 7,
+			"hanzi": "吗",
+			"pinyin": "ma",
+			"vi": "phải không, hả, à",
+			"adj": 11
+		},
+		{
+			"pos": 8,
+			"hanzi": "学生",
+			"pinyin": "xuésheng",
+			"vi": "học sinh",
+			"adj": 2
+		},
+		{
+			"pos": 9,
+			"hanzi": "人",
+			"pinyin": "rén",
+			"vi": "người",
+			"adj": 2
+		},
+		{
+			"pos": 10,
+			"hanzi": "中国",
+			"pinyin": "Zhōngguó",
+			"vi": "Trung Quốc",
+			"adj": 2
+		},
+		{
+			"pos": 11,
+			"hanzi": "美国",
+			"pinyin": "Měiguó",
+			"vi": "Mỹ",
+			"adj": 2
+		}
+	]
+}

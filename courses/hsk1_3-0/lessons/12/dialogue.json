@@ -1,0 +1,110 @@
+{
+  "lesson": 12,
+  "title": "昨天下雪了",
+  "title_pinyin": "Zuótiān xià xuě le",
+  "title_vi": "Hôm qua tuyết rơi",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "今天天气怎么样？",
+          "pinyin": "Jīntiān tiānqì zěnmeyàng?",
+          "vi": "Hôm nay thời tiết thế nào?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "这里的天不太好，下雨了。",
+          "pinyin": "Zhèli de tiān bú tài hǎo, xià yǔ le.",
+          "vi": "Thời tiết ở đây không được tốt lắm, mưa rồi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "雨大吗？",
+          "pinyin": "Yǔ dà ma?",
+          "vi": "Mưa to không?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "有点儿大，我觉得很冷。",
+          "pinyin": "Yǒudiǎnr dà, wǒ juéde hěn lěng.",
+          "vi": "Hơi to, em thấy rất lạnh."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "昨天下雪了。",
+          "pinyin": "Zuótiān xià xuě le.",
+          "vi": "Hôm qua tuyết rơi rồi."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "是的，太冷了。",
+          "pinyin": "Shì de, tài lěng le.",
+          "vi": "Vâng, lạnh quá."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你昨天没来公司，生病了？",
+          "pinyin": "Nǐ zuótiān méi lái gōngsī, shēngbìng le?",
+          "vi": "Hôm qua bạn không đến công ty, bị ốm à?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "对，我昨天去医院看病了。",
+          "pinyin": "Duì, wǒ zuótiān qù yīyuàn kànbìng le.",
+          "vi": "Vâng, hôm qua tôi đi bệnh viện khám bệnh rồi."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "杨同乐",
+          "zh": "医生，我病了。",
+          "pinyin": "Yīshēng, wǒ bìng le.",
+          "vi": "Bác sĩ, tôi bị ốm rồi."
+        },
+        {
+          "speaker": "胡医生",
+          "zh": "我看看。你觉得怎么样？",
+          "pinyin": "Wǒ kànkan. Nǐ juéde zěnmeyàng?",
+          "vi": "Tôi xem nào. Cậu thấy thế nào?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "我很冷。",
+          "pinyin": "Wǒ hěn lěng.",
+          "vi": "Tôi rất lạnh."
+        },
+        {
+          "speaker": "胡医生",
+          "zh": "好的，吃一点儿药，今天休息半天吧。",
+          "pinyin": "Hǎo de, chī yìdiǎnr yào, jīntiān xiūxi bàntiān ba.",
+          "vi": "Được rồi, uống một chút thuốc, hôm nay nghỉ nửa ngày nhé."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "好的。",
+          "pinyin": "Hǎo de.",
+          "vi": "Vâng ạ."
+        },
+        {
+          "speaker": "胡医生",
+          "zh": "回家后再喝些热水。",
+          "pinyin": "Huí jiā hòu zài hē xiē rè shuǐ.",
+          "vi": "Về nhà rồi uống thêm chút nước ấm nhé."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "lesson": 15,
+  "title": "大兴机场见",
+  "title_pinyin": "Dàxīng Jīchǎng jiàn",
+  "title_vi": "Hẹn gặp ở sân bay Đại Hưng",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "你们爱吃哪个菜？",
+          "pinyin": "Nǐmen ài chī nǎge cài?",
+          "vi": "Các bạn thích ăn món nào?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我喜欢这个，也喜欢那个。",
+          "pinyin": "Wǒ xǐhuan zhège, yě xǐhuan nàge.",
+          "vi": "Tôi thích món này, cũng thích món kia."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "这些菜都好吃，还很好看。",
+          "pinyin": "Zhèxiē cài dōu hǎochī, hái hěn hǎokàn.",
+          "vi": "Những món này đều ngon, lại rất đẹp mắt."
+        },
+        {
+          "speaker": "李文",
+          "zh": "我爱吃中国菜，也喜欢做。大家多吃点儿。",
+          "pinyin": "Wǒ ài chī Zhōngguó cài, yě xǐhuan zuò. Dàjiā duō chī diǎnr.",
+          "vi": "Tôi thích ăn đồ Trung Quốc, cũng thích nấu. Mọi người ăn nhiều một chút nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "你们都想去哪儿？",
+          "pinyin": "Nǐmen dōu xiǎng qù nǎr?",
+          "vi": "Các bạn đều muốn đi đâu?"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "去年我和男朋友去了西安，今年我想去北京。",
+          "pinyin": "Qùnián wǒ hé nánpéngyou qùle Xī'ān, jīnnián wǒ xiǎng qù Běijīng.",
+          "vi": "Năm ngoái tôi và bạn trai đi Tây An, năm nay tôi muốn đi Bắc Kinh."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "前几年我去了西安，非常好玩儿。今年我也想去北京。",
+          "pinyin": "Qián jǐ nián wǒ qùle Xī'ān, fēicháng hǎowánr. Jīnnián wǒ yě xiǎng qù Běijīng.",
+          "vi": "Mấy năm trước tôi đã đi Tây An, rất thú vị. Năm nay tôi cũng muốn đi Bắc Kinh."
+        },
+        {
+          "speaker": "李文",
+          "zh": "我和王老师都是北京人，北京非常漂亮。",
+          "pinyin": "Wǒ hé Wáng lǎoshī dōu shì Běijīng rén, Běijīng fēicháng piàoliang.",
+          "vi": "Tôi và cô Vương đều là người Bắc Kinh, Bắc Kinh rất đẹp."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一飞",
+          "zh": "你们的飞机到北京要几个小时？",
+          "pinyin": "Nǐmen de fēijī dào Běijīng yào jǐ gè xiǎoshí?",
+          "vi": "Máy bay của các em đến Bắc Kinh mất mấy tiếng?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "九个小时。",
+          "pinyin": "Jiǔ gè xiǎoshí.",
+          "vi": "Chín tiếng ạ."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "我家人都在北京，星期天我姐姐也有时间，她可以去机场接你们，你们也可以住我家。",
+          "pinyin": "Wǒ jiārén dōu zài Běijīng, xīngqītiān wǒ jiějie yě yǒu shíjiān, tā kěyǐ qù jīchǎng jiē nǐmen, nǐmen yě kěyǐ zhù wǒ jiā.",
+          "vi": "Người nhà cô đều ở Bắc Kinh, Chủ nhật chị gái cô cũng có thời gian, cô ấy có thể ra sân bay đón các em, các em cũng có thể ở nhà cô."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "我们星期日早上八点到大兴机场，早不早？",
+          "pinyin": "Wǒmen xīngqīrì zǎoshang bā diǎn dào Dàxīng Jīchǎng, zǎo bu zǎo?",
+          "vi": "Bọn em 8 giờ sáng Chủ nhật đến sân bay Đại Hưng, có sớm không ạ?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "不早。",
+          "pinyin": "Bù zǎo.",
+          "vi": "Không sớm đâu."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "谢谢老师！那我们和您姐姐在大兴机场见！",
+          "pinyin": "Xièxie lǎoshī! Nà wǒmen hé nín jiějie zài Dàxīng Jīchǎng jiàn!",
+          "vi": "Cảm ơn cô ạ! Vậy tụi em hẹn gặp chị của cô ở sân bay Đại Hưng nhé!"
+        }
+      ]
+    }
+  ]
+}

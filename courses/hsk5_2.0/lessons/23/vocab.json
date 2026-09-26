@@ -1,0 +1,290 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 23,
+  "label": "Bài 23",
+  "title": " 放手",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "乖",
+      "pinyin": "guāi",
+      "adj": 6,
+      "vi": "ngoan ngoãn"
+    },
+    {
+      "pos": 2,
+      "hanzi": "刻苦",
+      "pinyin": "kèkǔ",
+      "adj": 6,
+      "vi": "siêng năng, chịu khó"
+    },
+    {
+      "pos": 3,
+      "hanzi": "遵守",
+      "pinyin": "zūnshǒu",
+      "adj": 4,
+      "vi": "tuân thủ, tôn trọng"
+    },
+    {
+      "pos": 4,
+      "hanzi": "纪律",
+      "pinyin": "jìlǜ",
+      "adj": 2,
+      "vi": "kỷ luật"
+    },
+    {
+      "pos": 5,
+      "hanzi": "征求",
+      "pinyin": "zhēngqiú",
+      "adj": 4,
+      "vi": "trưng cầu, xin"
+    },
+    {
+      "pos": 6,
+      "hanzi": "念",
+      "pinyin": "niàn",
+      "adj": 4,
+      "vi": "học"
+    },
+    {
+      "pos": 7,
+      "hanzi": "基本",
+      "pinyin": "jīběn",
+      "adj": 7,
+      "vi": "về cơ bản"
+    },
+    {
+      "pos": 8,
+      "hanzi": "阶段",
+      "pinyin": "jiēduàn",
+      "adj": 2,
+      "vi": "giai đoạn"
+    },
+    {
+      "pos": 9,
+      "hanzi": "亲爱",
+      "pinyin": "qīn'ài",
+      "adj": 6,
+      "vi": "(được) yêu quý"
+    },
+    {
+      "pos": 10,
+      "hanzi": "违反",
+      "pinyin": "wéifǎn",
+      "adj": 4,
+      "vi": "làm trái"
+    },
+    {
+      "pos": 11,
+      "hanzi": "规矩",
+      "pinyin": "guīju",
+      "adj": 2,
+      "vi": "quy củ, khuôn phép"
+    },
+    {
+      "pos": 12,
+      "hanzi": "能干",
+      "pinyin": "nénggàn",
+      "adj": 6,
+      "vi": "giỏi giang"
+    },
+    {
+      "pos": 13,
+      "hanzi": "讲座",
+      "pinyin": "jiǎngzuò",
+      "adj": 2,
+      "vi": "bài thuyết trình"
+    },
+    {
+      "pos": 14,
+      "hanzi": "出席",
+      "pinyin": "chūxí",
+      "adj": 4,
+      "vi": "có mặt, hiện diện"
+    },
+    {
+      "pos": 15,
+      "hanzi": "酒吧",
+      "pinyin": "jiǔbā",
+      "adj": 2,
+      "vi": "quán bar"
+    },
+    {
+      "pos": 16,
+      "hanzi": "担任",
+      "pinyin": "dānrèn",
+      "adj": 4,
+      "vi": "đảm nhiệm, giữ chức"
+    },
+    {
+      "pos": 17,
+      "hanzi": "主席",
+      "pinyin": "zhǔxí",
+      "adj": 2,
+      "vi": "chủ tịch"
+    },
+    {
+      "pos": 18,
+      "hanzi": "组织",
+      "pinyin": "zǔzhī",
+      "adj": 4,
+      "vi": "tổ chức"
+    },
+    {
+      "pos": 19,
+      "hanzi": "外交",
+      "pinyin": "wàijiāo",
+      "adj": 2,
+      "vi": "ngoại giao"
+    },
+    {
+      "pos": 20,
+      "hanzi": "经商",
+      "pinyin": "jīng shāng",
+      "adj": 4,
+      "vi": "kinh doanh"
+    },
+    {
+      "pos": 21,
+      "hanzi": "目标",
+      "pinyin": "mùbiāo",
+      "adj": 2,
+      "vi": "mục tiêu"
+    },
+    {
+      "pos": 22,
+      "hanzi": "系",
+      "pinyin": "xì",
+      "adj": 2,
+      "vi": "khoa (của trường đại học)"
+    },
+    {
+      "pos": 23,
+      "hanzi": "名牌",
+      "pinyin": "míngpái",
+      "adj": 2,
+      "vi": "nhãn hiệu nổi tiếng"
+    },
+    {
+      "pos": 24,
+      "hanzi": "录取",
+      "pinyin": "lùqǔ",
+      "adj": 4,
+      "vi": "tuyển chọn, nhận vào"
+    },
+    {
+      "pos": 25,
+      "hanzi": "面临",
+      "pinyin": "miànlín",
+      "adj": 4,
+      "vi": "đối mặt, đứng trước"
+    },
+    {
+      "pos": 26,
+      "hanzi": "一致",
+      "pinyin": "yízhì",
+      "adj": 6,
+      "vi": "nhất trí, giống nhau"
+    },
+    {
+      "pos": 27,
+      "hanzi": "让步",
+      "pinyin": "ràng bù",
+      "adj": 4,
+      "vi": "nhượng bộ, nhường bước"
+    },
+    {
+      "pos": 28,
+      "hanzi": "隐约",
+      "pinyin": "yǐnyuē",
+      "adj": 6,
+      "vi": "mơ hồ, lờ mờ"
+    },
+    {
+      "pos": 29,
+      "hanzi": "陌生",
+      "pinyin": "mòshēng",
+      "adj": 6,
+      "vi": "xa lạ"
+    },
+    {
+      "pos": 30,
+      "hanzi": "某",
+      "pinyin": "mǒu",
+      "adj": 1,
+      "vi": "nào đó"
+    },
+    {
+      "pos": 31,
+      "hanzi": "建立",
+      "pinyin": "jiànlì",
+      "adj": 4,
+      "vi": "xây dựng, thiết lập"
+    },
+    {
+      "pos": 32,
+      "hanzi": "单独",
+      "pinyin": "dāndú",
+      "adj": 7,
+      "vi": "một mình"
+    },
+    {
+      "pos": 33,
+      "hanzi": "沟通",
+      "pinyin": "gōutōng",
+      "adj": 4,
+      "vi": "giao tiếp, liên lạc"
+    },
+    {
+      "pos": 34,
+      "hanzi": "横",
+      "pinyin": "héng",
+      "adj": 6,
+      "vi": "ngang, đi ngang qua"
+    },
+    {
+      "pos": 35,
+      "hanzi": "沙滩",
+      "pinyin": "shātān",
+      "adj": 2,
+      "vi": "bãi cát"
+    },
+    {
+      "pos": 36,
+      "hanzi": "沉默",
+      "pinyin": "chénmò",
+      "adj": 4,
+      "vi": "lặng im"
+    },
+    {
+      "pos": 37,
+      "hanzi": "吻",
+      "pinyin": "wěn",
+      "adj": 4,
+      "vi": "hôn"
+    },
+    {
+      "pos": 38,
+      "hanzi": "忍不住",
+      "pinyin": "rěnbuzhù",
+      "adj": 4,
+      "vi": "không nhịn được, không thể không"
+    },
+    {
+      "pos": 39,
+      "hanzi": "幸亏",
+      "pinyin": "xìngkuī",
+      "adj": 7,
+      "vi": "may mà"
+    },
+    {
+      "pos": 40,
+      "hanzi": "暗",
+      "pinyin": "àn",
+      "adj": 6,
+      "vi": "tối, u ám"
+    }
+  ]
+}

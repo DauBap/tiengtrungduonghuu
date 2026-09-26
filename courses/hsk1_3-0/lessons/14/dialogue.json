@@ -1,0 +1,116 @@
+{
+  "lesson": 14,
+  "title": "我看了一个电影",
+  "title_pinyin": "Wǒ kànle yí gè diànyǐng",
+  "title_vi": "Tôi đã xem một bộ phim",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "你们上火车后看见王老师了吗？",
+          "pinyin": "Nǐmen shàng huǒchē hòu kànjiàn Wáng lǎoshī le ma?",
+          "vi": "Lúc lên tàu rồi các bạn có nhìn thấy cô Vương không?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "没看见。中午车开后，有些人在看书，有些人睡觉了。",
+          "pinyin": "Méi kànjiàn. Zhōngwǔ chē kāi hòu, yǒuxiē rén zài kàn shū, yǒuxiē rén shuìjiào le.",
+          "vi": "Không thấy. Trưa, khi tàu chạy rồi, có một số người đọc sách, một số người đã ngủ."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "你呢？",
+          "pinyin": "Nǐ ne?",
+          "vi": "Còn bạn thì sao?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我看了一个电影。",
+          "pinyin": "Wǒ kànle yí gè diànyǐng.",
+          "vi": "Tôi đã xem một bộ phim."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一飞",
+          "zh": "你们会说汉语了，也会写汉字了吗？",
+          "pinyin": "Nǐmen huì shuō Hànyǔ le, yě huì xiě Hànzì le ma?",
+          "vi": "Các em đã biết nói tiếng Trung rồi, cũng biết viết chữ Hán rồi phải không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我们都会写了。",
+          "pinyin": "Wǒmen dōu huì xiě le.",
+          "vi": "Chúng em đều biết viết rồi ạ."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "老师，我听不见。",
+          "pinyin": "Lǎoshī, wǒ tīng bú jiàn.",
+          "vi": "Thưa cô, em không nghe thấy ạ."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "请大家不要说话！请听老师的问题：你们都会写哪些汉字了？",
+          "pinyin": "Qǐng dàjiā búyào shuōhuà! Qǐng tīng lǎoshī de wèntí: nǐmen dōu huì xiě nǎxiē Hànzì le?",
+          "vi": "Xin mời mọi người đừng nói chuyện! Hãy nghe câu hỏi của cô: Các em đều biết viết những chữ Hán nào rồi?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我会写这些字了，您看！",
+          "pinyin": "Wǒ huì xiě zhèxiē zì le, nín kàn!",
+          "vi": "Em biết viết những chữ này rồi, cô xem!"
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "明年女儿上中学。",
+          "pinyin": "Míngnián nǚ'ér shàng zhōngxué.",
+          "vi": "Năm sau con gái lên cấp 2."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "对。儿子也上小学了。",
+          "pinyin": "Duì. Érzi yě shàng xiǎoxué le.",
+          "vi": "Đúng vậy. Con trai cũng lên tiểu học rồi."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我们家有了一个中学生。",
+          "pinyin": "Wǒmen jiā yǒule yí gè zhōngxuéshēng.",
+          "vi": "Nhà mình có một học sinh cấp 2 rồi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "还有了一个小学生。",
+          "pinyin": "Hái yǒule yí gè xiǎoxuéshēng.",
+          "vi": "Còn có thêm một học sinh tiểu học nữa."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "上学后，他们都忙了。",
+          "pinyin": "Shàngxué hòu, tāmen dōu máng le.",
+          "vi": "Đi học rồi, chúng nó đều bận rồi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "是的。太晚了，睡觉吧。",
+          "pinyin": "Shì de. Tài wǎn le, shuìjiào ba.",
+          "vi": "Đúng vậy. Khuya rồi, đi ngủ thôi."
+        }
+      ]
+    }
+  ]
+}

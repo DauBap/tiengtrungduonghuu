@@ -1,0 +1,176 @@
+{
+  "lesson": 8,
+  "title": "今天我出院了",
+  "title_pinyin": "Jīntiān wǒ chūyuàn le",
+  "title_vi": "Hôm nay tôi xuất viện",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "天中, 最近常看见你来体育馆。",
+          "pinyin": "Tiānzhōng, zuìjìn cháng kànjiàn nǐ lái tǐyùguǎn.",
+          "vi": "Thiên Trung, gần đây thường thấy cậu đến nhà thi đấu."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我每天下午都来跑一个小时步。",
+          "pinyin": "Wǒ měitiān xiàwǔ dōu lái pǎo yī gè xiǎoshí bù.",
+          "vi": "Tôi mỗi chiều đều đến chạy bộ một tiếng."
+        },
+        {
+          "speaker": "李文",
+          "zh": "你的运动习惯真不错。",
+          "pinyin": "Nǐ de yùndòng xíguàn zhēn búcuò.",
+          "vi": "Thói quen tập thể thao của cậu thật không tệ."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "因为我今年胖了十多斤, 不能再胖下去了, 有点儿不健康。",
+          "pinyin": "Yīnwèi wǒ jīnnián pàngle shí duō jīn, bù néng zài pàng xiàqu le, yǒudiǎnr bú jiànkāng.",
+          "vi": "Vì năm nay tôi béo lên hơn mười cân, không thể tiếp tục béo thêm nữa, hơi không khỏe mạnh."
+        },
+        {
+          "speaker": "李文",
+          "zh": "我下课以后常去打羽毛球, 你也来玩吧。",
+          "pinyin": "Wǒ xiàkè yǐhòu cháng qù dǎ yǔmáoqiú, nǐ yě lái wán ba.",
+          "vi": "Tôi sau giờ học thường đi đánh cầu lông, cậu cũng đến chơi đi."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我知道, 但是你们的水平太高了, 我打得不怎么样。",
+          "pinyin": "Wǒ zhīdào, dànshì nǐmen de shuǐpíng tài gāo le, wǒ dǎ de bù zěnmeyàng.",
+          "vi": "Tôi biết, nhưng trình độ của các cậu quá cao, tôi chơi không được tốt lắm."
+        },
+        {
+          "speaker": "李文",
+          "zh": "没关系, 我可以教你。",
+          "pinyin": "Méi guānxi, wǒ kěyǐ jiāo nǐ.",
+          "vi": "Không sao, tôi có thể dạy cậu."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "安妮",
+          "zh": "你怎么了? 看上去有点儿不舒服。",
+          "pinyin": "Nǐ zěnme le? Kàn shàngqu yǒudiǎnr bù shūfu.",
+          "vi": "Bạn làm sao thế? Trông có vẻ hơi không khỏe."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "昨天游完泳以后, 耳朵一直有点儿疼。",
+          "pinyin": "Zuótiān yóu wán yǒng yǐhòu, ěrduo yīzhí yǒudiǎnr téng.",
+          "vi": "Hôm qua sau khi bơi xong, tai cứ hơi đau."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "是不是感冒了? 发烧吗?",
+          "pinyin": "Shì bú shì gǎnmào le? Fāshāo ma?",
+          "vi": "Có phải bị cảm không? Có sốt không?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "好像发低烧了。",
+          "pinyin": "Hǎoxiàng fā dīshāo le.",
+          "vi": "Hình như bị sốt nhẹ rồi."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "我送你去医院, 让医生检查一下吧。",
+          "pinyin": "Wǒ sòng nǐ qù yīyuàn, ràng yīshēng jiǎnchá yíxià ba.",
+          "vi": "Mình đưa cậu đến bệnh viện, để bác sĩ kiểm tra một chút nhé."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我先回去睡一觉, 可能休息休息就好了。",
+          "pinyin": "Wǒ xiān huíqu shuì yī jiào, kěnéng xiūxi xiūxi jiù hǎo le.",
+          "vi": "Tôi về ngủ một giấc trước đã, có thể nghỉ ngơi một chút là khỏi."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "好吧, 如果下午还发烧, 就一定要去看医生。",
+          "pinyin": "Hǎo ba, rúguǒ xiàwǔ hái fāshāo, jiù yīdìng yào qù kàn yīshēng.",
+          "vi": "Được thôi, nếu chiều còn sốt thì nhất định phải đi khám bác sĩ đấy."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "谢谢关心, 我会注意的。",
+          "pinyin": "Xièxie guānxīn, wǒ huì zhùyì de.",
+          "vi": "Cảm ơn bạn đã quan tâm, tôi sẽ chú ý."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "安妮",
+          "zh": "你怎么突然住院了? 大家都很担心你。",
+          "pinyin": "Nǐ zěnme tūrán zhùyuàn le? Dàjiā dōu hěn dānxīn nǐ.",
+          "vi": "Sao cậu đột nhiên nhập viện thế? Mọi người đều rất lo lắng cho cậu."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我的腿疼了几个星期了, 医生说需要住院做检查。",
+          "pinyin": "Wǒ de tuǐ téngle jǐ gè xīngqī le, yīshēng shuō xūyào zhùyuàn zuò jiǎnchá.",
+          "vi": "Chân tôi đau mấy tuần rồi, bác sĩ nói cần nhập viện kiểm tra."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "你看起来一点儿也不像病人。",
+          "pinyin": "Nǐ kàn qǐlái yīdiǎnr yě bù xiàng bìngrén.",
+          "vi": "Cậu trông chẳng giống bệnh nhân chút nào."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "是啊, 我很少生病。我上次来医院已经过去差不多两年了。",
+          "pinyin": "Shì a, wǒ hěn shǎo shēngbìng. Wǒ shàng cì lái yīyuàn yǐjīng guòqu chàbuduō liǎng nián le.",
+          "vi": "Đúng vậy, tôi rất ít khi ốm. Lần trước tôi đến bệnh viện đã gần hai năm rồi."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "你每天跑步, 有时候还去游泳, 是不是运动太多了?",
+          "pinyin": "Nǐ měitiān pǎobù, yǒu shíhou hái qù yóuyǒng, shì bú shì yùndòng tài duō le?",
+          "vi": "Cậu ngày nào cũng chạy bộ, có khi còn đi bơi, có phải tập thể thao nhiều quá không?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "医生也这么说, 但是还得做完检查才能知道。",
+          "pinyin": "Yīshēng yě zhème shuō, dànshì hái děi zuò wán jiǎnchá cáinéng zhīdào.",
+          "vi": "Bác sĩ cũng nói vậy, nhưng vẫn phải làm xong kiểm tra mới biết được."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "别担心! 听医生的话, 好好休息, 你的腿一定能好。",
+          "pinyin": "Bié dānxīn! Tīng yīshēng de huà, hǎohǎo xiūxi, nǐ de tuǐ yīdìng néng hǎo.",
+          "vi": "Đừng lo! Nghe lời bác sĩ, nghỉ ngơi thật tốt, chân cậu nhất định sẽ khỏi."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "谢谢。有人来看我, 我就开心多了。",
+          "pinyin": "Xièxie. Yǒu rén lái kàn wǒ, wǒ jiù kāixīn duō le.",
+          "vi": "Cảm ơn. Có người đến thăm tôi, tôi vui hơn nhiều rồi."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "今天我出院了。出院前, 医生给我开了几种药, 而且告诉了我吃药的方法。有一种药需要每天睡前吃一次, 其他几种每天吃三次, 饭后吃。除了吃药, 医生说最重要的是多休息。我都记在心里了, 回家以后一定会多注意。希望我的腿能快一点儿好。",
+          "pinyin": "Jīntiān wǒ chūyuàn le. Chūyuàn qián, yīshēng gěi wǒ kāile jǐ zhǒng yào, érqiě gàosu le wǒ chī yào de fāngfǎ. Yǒu yī zhǒng yào xūyào měitiān shuì qián chī yī cì, qítā jǐ zhǒng měitiān chī sān cì, fàn hòu chī. Chúle chī yào, yīshēng shuō zuì zhòngyào de shì duō xiūxi. Wǒ dōu jì zài xīn lǐ le, huí jiā yǐhòu yīdìng huì duō zhùyì. Xīwàng wǒ de tuǐ néng kuài yīdiǎnr hǎo.",
+          "vi": "Hôm nay tôi xuất viện rồi. Trước khi xuất viện, bác sĩ đã kê cho tôi mấy loại thuốc và nói cách uống. Có một loại cần uống mỗi ngày một lần trước khi ngủ, mấy loại khác mỗi ngày ba lần, sau bữa ăn. Ngoài việc uống thuốc, bác sĩ nói quan trọng nhất là nghỉ ngơi nhiều. Tôi đều ghi nhớ trong lòng, về nhà nhất định sẽ chú ý nhiều hơn. Hy vọng chân tôi có thể mau khỏi."
+        }
+      ]
+    }
+  ]
+}

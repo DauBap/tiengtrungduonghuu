@@ -1,0 +1,288 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 15,
+  "label": "Bài 15",
+  "title": " 纸上谈兵",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "纸上谈兵",
+      "pinyin": "zhǐshàng tánbīng",
+      "adj": [
+        null,
+        12
+      ],
+      "vi": "bàn chuyện đánh giặc trên giấy (lý luận suông)"
+    },
+    {
+      "pos": 2,
+      "hanzi": "军事",
+      "pinyin": "jūnshì",
+      "adj": 2,
+      "vi": "việc quân"
+    },
+    {
+      "pos": 3,
+      "hanzi": "敌（人）",
+      "pinyin": "dí(rén)",
+      "adj": 2,
+      "vi": "quân địch"
+    },
+    {
+      "pos": 4,
+      "hanzi": "理论",
+      "pinyin": "lǐlùn",
+      "adj": 2,
+      "vi": "lý luận, lý thuyết"
+    },
+    {
+      "pos": 5,
+      "hanzi": "作战",
+      "pinyin": "zuòzhàn",
+      "adj": 4,
+      "vi": "đánh trận, chiến đấu"
+    },
+    {
+      "pos": 6,
+      "hanzi": "毛病",
+      "pinyin": "móbing",
+      "adj": 2,
+      "vi": "khuyết điểm, tật xấu"
+    },
+    {
+      "pos": 7,
+      "hanzi": "道理",
+      "pinyin": "dàolǐ",
+      "adj": 2,
+      "vi": "lý lẽ, lý thuyết"
+    },
+    {
+      "pos": 8,
+      "hanzi": "迟早",
+      "pinyin": "chízǎo",
+      "adj": 7,
+      "vi": "sớm muộn"
+    },
+    {
+      "pos": 9,
+      "hanzi": "军队",
+      "pinyin": "jūnduì",
+      "adj": 2,
+      "vi": "quân đội"
+    },
+    {
+      "pos": 10,
+      "hanzi": "派",
+      "pinyin": "pài",
+      "adj": 4,
+      "vi": "phái đi, cử đi"
+    },
+    {
+      "pos": 11,
+      "hanzi": "弱",
+      "pinyin": "ruò",
+      "adj": 6,
+      "vi": "yếu, kém"
+    },
+    {
+      "pos": 12,
+      "hanzi": "形势",
+      "pinyin": "xíngshì",
+      "adj": 2,
+      "vi": "tình hình"
+    },
+    {
+      "pos": 13,
+      "hanzi": "命令",
+      "pinyin": "mìnglìng",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "ra lệnh; mệnh lệnh"
+    },
+    {
+      "pos": 14,
+      "hanzi": "守",
+      "pinyin": "shǒu",
+      "adj": 4,
+      "vi": "phòng thủ, trấn giữ"
+    },
+    {
+      "pos": 15,
+      "hanzi": "阵地",
+      "pinyin": "zhèndì",
+      "adj": 2,
+      "vi": "trận địa, mặt trận"
+    },
+    {
+      "pos": 16,
+      "hanzi": "绝对",
+      "pinyin": "juéduì",
+      "adj": [
+        6,
+        7
+      ],
+      "vi": "tuyệt đối; nhất định"
+    },
+    {
+      "pos": 17,
+      "hanzi": "主动",
+      "pinyin": "zhǔdòng",
+      "adj": 6,
+      "vi": "chủ động"
+    },
+    {
+      "pos": 18,
+      "hanzi": "挑战",
+      "pinyin": "tiǎozhàn",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "khiêu chiến, thách thức; sự thách thức"
+    },
+    {
+      "pos": 19,
+      "hanzi": "骂",
+      "pinyin": "mà",
+      "adj": 4,
+      "vi": "chửi, mắng"
+    },
+    {
+      "pos": 20,
+      "hanzi": "胆小鬼",
+      "pinyin": "dǎnxiǎoguǐ",
+      "adj": 2,
+      "vi": "kẻ hèn nhát"
+    },
+    {
+      "pos": 21,
+      "hanzi": "胜利",
+      "pinyin": "shènglì",
+      "adj": 4,
+      "vi": "thắng lợi"
+    },
+    {
+      "pos": 22,
+      "hanzi": "调（动）",
+      "pinyin": "diào(dòng)",
+      "adj": 4,
+      "vi": "điều động, thuyên chuyển"
+    },
+    {
+      "pos": 23,
+      "hanzi": "散布",
+      "pinyin": "sànbù",
+      "adj": 4,
+      "vi": "gieo rắc, truyền"
+    },
+    {
+      "pos": 24,
+      "hanzi": "谣言",
+      "pinyin": "yáoyán",
+      "adj": 2,
+      "vi": "tin đồn"
+    },
+    {
+      "pos": 25,
+      "hanzi": "上当",
+      "pinyin": "shàng dàng",
+      "adj": 4,
+      "vi": "bị lừa, mắc lừa"
+    },
+    {
+      "pos": 26,
+      "hanzi": "再三",
+      "pinyin": "zàisān",
+      "adj": 7,
+      "vi": "nhiều lần, hết lần này đến lần khác"
+    },
+    {
+      "pos": 27,
+      "hanzi": "任命",
+      "pinyin": "rènmìng",
+      "adj": 4,
+      "vi": "bổ nhiệm"
+    },
+    {
+      "pos": 28,
+      "hanzi": "独立",
+      "pinyin": "dúlì",
+      "adj": 4,
+      "vi": "có một mình, không lệ thuộc"
+    },
+    {
+      "pos": 29,
+      "hanzi": "资格",
+      "pinyin": "zīgé",
+      "adj": 2,
+      "vi": "tư cách"
+    },
+    {
+      "pos": 30,
+      "hanzi": "糊涂",
+      "pinyin": "hútu",
+      "adj": 6,
+      "vi": "đần độn, hồ đồ"
+    },
+    {
+      "pos": 31,
+      "hanzi": "公元",
+      "pinyin": "gōngyuán",
+      "adj": 2,
+      "vi": "công nguyên"
+    },
+    {
+      "pos": 32,
+      "hanzi": "盲目",
+      "pinyin": "mángmù",
+      "adj": 6,
+      "vi": "mù quáng"
+    },
+    {
+      "pos": 33,
+      "hanzi": "轻视",
+      "pinyin": "qīngshì",
+      "adj": 4,
+      "vi": "khinh thường, xem thường"
+    },
+    {
+      "pos": 34,
+      "hanzi": "方案",
+      "pinyin": "fāng'àn",
+      "adj": 2,
+      "vi": "kế hoạch, phương án"
+    },
+    {
+      "pos": 35,
+      "hanzi": "进攻",
+      "pinyin": "jìngōng",
+      "adj": 4,
+      "vi": "tấn công, công kích"
+    },
+    {
+      "pos": 36,
+      "hanzi": "宝贵",
+      "pinyin": "bǎoguì",
+      "adj": 6,
+      "vi": "quý báu, quý giá"
+    },
+    {
+      "pos": 37,
+      "hanzi": "讽刺",
+      "pinyin": "fěngcì",
+      "adj": 4,
+      "vi": "châm biếm, mỉa mai"
+    },
+    {
+      "pos": 38,
+      "hanzi": "灵活",
+      "pinyin": "línghuó",
+      "adj": 6,
+      "vi": "linh hoạt, nhạy bén"
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "lesson": 13,
+  "title": "请给我一杯茶",
+  "title_pinyin": "Qǐng gěi wǒ yī bēi chá",
+  "title_vi": "Làm ơn cho tôi một cốc trà",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "王老师，我可以再问您一个问题吗？",
+          "pinyin": "Wáng lǎoshī, wǒ kěyǐ zài wèn nín yí gè wèntí ma?",
+          "vi": "Cô Vương, em có thể hỏi cô thêm một câu nữa không ạ?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "可以。你有什么问题？",
+          "pinyin": "Kěyǐ. Nǐ yǒu shénme wèntí?",
+          "vi": "Được chứ. Em có câu hỏi gì?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "那个小店卖不卖手机？",
+          "pinyin": "Nàge xiǎo diàn mài bu mài shǒujī?",
+          "vi": "Cửa hàng nhỏ kia có bán điện thoại không ạ?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "我不知道。你可以打电话问一下。",
+          "pinyin": "Wǒ bù zhīdào. Nǐ kěyǐ dǎ diànhuà wèn yíxià.",
+          "vi": "Cô không biết. Em có thể gọi điện thoại hỏi thử xem."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "服务员",
+          "zh": "女士，请坐！您喝什么？",
+          "pinyin": "Nǚshì, qǐng zuò! Nín hē shénme?",
+          "vi": "Thưa quý cô, mời ngồi! Chị uống gì ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我看一下。请给我一杯牛奶。",
+          "pinyin": "Wǒ kàn yíxià. Qǐng gěi wǒ yī bēi niúnǎi.",
+          "vi": "Tôi xem đã. Làm ơn cho tôi một cốc sữa."
+        },
+        {
+          "speaker": "服务员",
+          "zh": "好的。您还要什么？",
+          "pinyin": "Hǎo de. Nín hái yào shénme?",
+          "vi": "Vâng ạ. Chị còn muốn thêm gì không ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我还没吃早饭，再要这个面包和鸡蛋吧。",
+          "pinyin": "Wǒ hái méi chī zǎofàn, zài yào zhège miànbāo hé jīdàn ba.",
+          "vi": "Tôi vẫn chưa ăn sáng, thêm bánh mì và trứng này nữa nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "服务员",
+          "zh": "先生，请坐！您要什么？",
+          "pinyin": "Xiānsheng, qǐng zuò! Nín yào shénme?",
+          "vi": "Thưa ngài, mời ngồi! Ngài dùng gì ạ?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我要一斤饺子。",
+          "pinyin": "Wǒ yào yī jīn jiǎozi.",
+          "vi": "Tôi muốn một cân sủi cảo."
+        },
+        {
+          "speaker": "服务员",
+          "zh": "好的。一斤饺子40个。",
+          "pinyin": "Hǎo de. Yī jīn jiǎozi sìshí gè.",
+          "vi": "Vâng ạ. Một cân sủi cảo 40 cái ạ."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "40个太多了，我要一半吧。",
+          "pinyin": "Sìshí gè tài duō le, wǒ yào yíbàn ba.",
+          "vi": "40 cái nhiều quá, tôi lấy một nửa thôi."
+        },
+        {
+          "speaker": "服务员",
+          "zh": "半斤20个。您想喝什么？",
+          "pinyin": "Bàn jīn èrshí gè. Nín xiǎng hē shénme?",
+          "vi": "Nửa cân 20 cái. Ngài muốn uống gì ạ?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "请给我一杯茶吧。",
+          "pinyin": "Qǐng gěi wǒ yī bēi chá ba.",
+          "vi": "Làm ơn cho tôi một cốc trà nhé."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "course_id": "hsk1_2",
+  "course_name": "HSK 1(2.0)",
+  "id": 11,
+  "label": "Bài 11",
+  "title": "现在几点？",
+  "short_vi": "Hỏi và trả lời giờ giấc. Hỏi kế hoạch đi đâu và ở mấy ngày.",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "现在",
+      "pinyin": "xiànzài",
+      "adj": 2,
+      "vi": "bây giờ"
+    },
+    {
+      "pos": 2,
+      "hanzi": "点",
+      "pinyin": "diǎn",
+      "adj": 2,
+      "vi": "giờ"
+    },
+    {
+      "pos": 3,
+      "hanzi": "分",
+      "pinyin": "fēn",
+      "adj": 2,
+      "vi": "phút"
+    },
+    {
+      "pos": 4,
+      "hanzi": "中午",
+      "pinyin": "zhōngwǔ",
+      "adj": 2,
+      "vi": "buổi trưa"
+    },
+    {
+      "pos": 5,
+      "hanzi": "吃饭",
+      "pinyin": "chīfàn",
+      "adj": 4,
+      "vi": "ăn cơm"
+    },
+    {
+      "pos": 6,
+      "hanzi": "时候",
+      "pinyin": "shíhou",
+      "adj": 2,
+      "vi": "lúc"
+    },
+    {
+      "pos": 7,
+      "hanzi": "回",
+      "pinyin": "huí",
+      "adj": 4,
+      "vi": "về"
+    },
+    {
+      "pos": 8,
+      "hanzi": "我们",
+      "pinyin": "wǒmen",
+      "adj": 1,
+      "vi": "chúng tôi"
+    },
+    {
+      "pos": 9,
+      "hanzi": "电影",
+      "pinyin": "diànyǐng",
+      "adj": 2,
+      "vi": "phim"
+    },
+    {
+      "pos": 10,
+      "hanzi": "住",
+      "pinyin": "zhù",
+      "adj": 4,
+      "vi": "ở"
+    },
+    {
+      "pos": 11,
+      "hanzi": "前",
+      "pinyin": "qián",
+      "adj": [
+        2,
+        9
+      ],
+      "vi": "trước"
+    },
+    {
+      "pos": 12,
+      "hanzi": "北京",
+      "pinyin": "Běijīng",
+      "adj": 3,
+      "vi": "Bắc Kinh"
+    }
+  ]
+}

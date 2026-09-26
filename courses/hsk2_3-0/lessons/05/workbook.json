@@ -1,0 +1,335 @@
+{
+	"title": "HSK2 - Sách bài tập",
+	"lesson": 5,
+	"lesson_title": "第一次去中国朋友家",
+	"lesson_pinyin": "Dì-yī cì qù Zhōngguó péngyou jiā",
+	"lesson_meaning": "Lần đầu đến thăm nhà bạn người Trung Quốc",
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听一句话，选择正确图片。每题听两次。\nCâu 1–3: Nghe và chọn hình ảnh phù hợp với câu nghe được. Mỗi câu nghe hai lần.",
+					"example": {
+						"sentence": "我每天坐公交车去上班。",
+						"pinyin": "Wǒ měitiān zuò gōngjiāochē qù shàngbān.",
+						"meaning": "Tôi đi xe buýt đi làm hằng ngày.",
+						"correct_label": "A",
+						"options": ["A", "B", "C"]
+					},
+					"questions": [
+						{ "number": 1, "answer": "C", "options": ["A", "B", "C"] },
+						{ "number": 2, "answer": "C", "options": ["A", "B", "C"] },
+						{ "number": 3, "answer": "B", "options": ["A", "B", "C"] }
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择最匹配的图片。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn hình ảnh phù hợp nhất. Mỗi câu nghe hai lần.",
+					"questions": [
+						{ "number": 4, "answer": "B", "options": ["A", "B", "C", "D"] },
+						{ "number": 5, "answer": "C", "options": ["A", "B", "C", "D"] },
+						{ "number": 6, "answer": "A", "options": ["A", "B", "C", "D"] }
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听对话，选择正确答案。每题听两次。\nCâu 7–10: Nghe hội thoại và chọn đáp án đúng. Mỗi câu nghe hai lần.",
+					"example": {
+						"sentence": "男：给您笔，请在这儿写一下您的姓名。\n女：好的，是这儿吗？",
+						"pinyin": "Nán: Gěi nín bǐ, qǐng zài zhèr xiě yíxià nín de xìngmíng.\nNǚ: Hǎo de, shì zhèr ma?",
+						"meaning": "Nam: Gửi cô bút, vui lòng viết tên của cô ở đây.\nNữ: Vâng, ở chỗ này đúng không?",
+						"question": "女的要写什么？",
+						"question_pinyin": "Nǚ de yào xiě shénme?",
+						"question_meaning": "Người nữ phải viết cái gì?",
+						"correct_label": "A",
+						"options": [
+							{ "label": "A", "text": "姓名", "pinyin": "xìngmíng", "meaning": "họ tên" },
+							{ "label": "B", "text": "时间", "pinyin": "shíjiān", "meaning": "thời gian" },
+							{ "label": "C", "text": "问题", "pinyin": "wèntí", "meaning": "câu hỏi" }
+						]
+					},
+					"questions": [
+						{
+							"number": 7,
+							"answer": "A",
+							"options": [
+								{ "label": "A", "text": "看书", "pinyin": "kàn shū" },
+								{ "label": "B", "text": "睡觉", "pinyin": "shuìjiào" },
+								{ "label": "C", "text": "玩手机", "pinyin": "wán shǒujī" }
+							]
+						},
+						{
+							"number": 8,
+							"answer": "C",
+							"options": [
+								{ "label": "A", "text": "奶茶店", "pinyin": "nǎichádiàn" },
+								{ "label": "B", "text": "火车站", "pinyin": "huǒchēzhàn" },
+								{ "label": "C", "text": "公交站", "pinyin": "gōngjiāozhàn" }
+							]
+						},
+						{
+							"number": 9,
+							"answer": "C",
+							"options": [
+								{ "label": "A", "text": "茶", "pinyin": "chá" },
+								{ "label": "B", "text": "牛奶", "pinyin": "niúnǎi" },
+								{ "label": "C", "text": "水果", "pinyin": "shuǐguǒ" }
+							]
+						},
+						{
+							"number": 10,
+							"answer": "A",
+							"options": [
+								{ "label": "A", "text": "天气不好", "pinyin": "tiānqì bù hǎo" },
+								{ "label": "B", "text": "家里有吃的", "pinyin": "jiā li yǒu chī de" },
+								{ "label": "C", "text": "孩子要来看她", "pinyin": "háizi yào lái kàn tā" }
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—13题：选择与句子最匹配的图片。\nCâu 11–13: Chọn hình ảnh phù hợp nhất với câu.",
+					"embedded_example_image": true,
+					"example": {
+						"sentence": "每个星期六，我都去打篮球。",
+						"pinyin": "Měi ge Xīngqīliù, wǒ dōu qù dǎ lánqiú.",
+						"meaning": "Thứ Bảy nào tôi cũng đi chơi bóng rổ.",
+						"correct_label": "D",
+						"options": ["A", "B", "C", "D"]
+					},
+					"questions": [
+						{
+							"number": 11,
+							"answer": "B",
+							"sentence": "儿子给我拿来一个苹果。",
+							"pinyin": "Érzi gěi wǒ nálái yí ge píngguǒ.",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 12,
+							"answer": "C",
+							"sentence": "孩子跟妈妈一起走出了酒店。",
+							"pinyin": "Háizi gēn māma yìqǐ zǒuchū le jiǔdiàn.",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 13,
+							"answer": "A",
+							"sentence": "她拿出一本书，问我这是谁的书。",
+							"pinyin": "Tā náchū yì běn shū, wèn wǒ zhè shì shéi de shū.",
+							"options": ["A", "B", "C", "D"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第14—17题：选词填空。\nCâu 14–17: Chọn từ thích hợp điền vào chỗ trống.",
+					"hide_images": true,
+					"options_pool": [
+						{ "label": "A", "text": "等", "pinyin": "děng" },
+						{ "label": "B", "text": "跟", "pinyin": "gēn" },
+						{ "label": "C", "text": "下去", "pinyin": "xiàqù" },
+						{ "label": "D", "text": "进来", "pinyin": "jìnlái" },
+						{ "label": "E", "text": "完", "pinyin": "wán" }
+					],
+					"example": {
+						"sentence": "题太多了，所以我没做（ ）。",
+						"pinyin": "Tí tài duō le, suǒyǐ wǒ méi zuò ( ).",
+						"meaning": "Bài tập nhiều quá, nên tôi chưa làm xong.",
+						"correct_label": "E"
+					},
+					"questions": [
+						{
+							"number": 14,
+							"answer": "A",
+							"sentence": "同学们在教室里（ ）老师来上课。",
+							"pinyin": "Tóngxuémen zài jiàoshì li ( ) lǎoshī lái shàngkè."
+						},
+						{
+							"number": 15,
+							"answer": "D",
+							"sentence": "外边太冷了，你（ ）喝杯热茶吧。",
+							"pinyin": "Wàibian tài lěng le, nǐ ( ) hē bēi rè chá ba."
+						},
+						{
+							"number": 16,
+							"answer": "C",
+							"sentence": "女：下面怎么有那么多人？\n男：我们（ ）看看吧。",
+							"pinyin": "Nǚ: Xiàmian zěnme yǒu nàme duō rén?\nNán: Wǒmen ( ) kànkan ba."
+						},
+						{
+							"number": 17,
+							"answer": "B",
+							"sentence": "男：你快吃，吃完饭（ ）我去超市买点儿东西。\n女：好，你等我一下。",
+							"pinyin": "Nán: Nǐ kuài chī, chī wán fàn ( ) wǒ qù chāoshì mǎi diǎnr dōngxi.\nNǚ: Hǎo, nǐ děng wǒ yíxià."
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第18—21题：匹配句子。\nCâu 18–21: Nối câu.",
+					"hide_images": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "我跟他说过，他不来。",
+							"pinyin": "Wǒ gēn tā shuō guo, tā bù lái."
+						},
+						{
+							"label": "B",
+							"text": "不是我买的，是小王送来的。",
+							"pinyin": "Bú shì wǒ mǎi de, shì Xiǎo Wáng sònglái de."
+						},
+						{
+							"label": "C",
+							"text": "他打电话了，说还在公司。",
+							"pinyin": "Tā dǎ diànhuà le, shuō hái zài gōngsī."
+						},
+						{
+							"label": "D",
+							"text": "今天星期天，你能不能别叫我起床？",
+							"pinyin": "Jīntiān Xīngqītiān, nǐ néng bu néng bié jiào wǒ qǐchuáng?"
+						},
+						{
+							"label": "E",
+							"text": "他出去了，一会儿就回来。",
+							"pinyin": "Tā chūqù le, yíhuìr jiù huílái."
+						}
+					],
+					"example": {
+						"question": "请问李老师在吗？",
+						"pinyin": "Qǐngwèn Lǐ lǎoshī zài ma?",
+						"meaning": "Xin hỏi, thầy Lý có ở đây không?",
+						"correct_label": "E"
+					},
+					"questions": [
+						{
+							"number": 18,
+							"answer": "B",
+							"question": "你怎么买这么多水果？",
+							"pinyin": "Nǐ zěnme mǎi zhème duō shuǐguǒ?"
+						},
+						{
+							"number": 19,
+							"answer": "D",
+							"question": "都十点了，快起来吧！",
+							"pinyin": "Dōu shí diǎn le, kuài qǐlái ba!"
+						},
+						{
+							"number": 20,
+							"answer": "A",
+							"question": "让爷爷过来跟我们一起住吧。",
+							"pinyin": "Ràng yéye guòlái gēn wǒmen yìqǐ zhù ba."
+						},
+						{
+							"number": 21,
+							"answer": "C",
+							"question": "都八点了，爸爸还没回家。",
+							"pinyin": "Dōu bā diǎn le, bàba hái méi huí jiā."
+						}
+					]
+				},
+				{
+					"part": "第四部分 - Phần 4",
+					"description": "第22—24题：选择正确答案。\nCâu 22–24: Đọc đoạn ngắn và chọn đáp án đúng.",
+					"hide_images": true,
+					"questions": [
+						{
+							"number": 22,
+							"answer": "B",
+							"sentence": "我的小猫生病了，但我要去上班。爷爷跟我说，小猫可以送他那儿去，下班后，我再接小猫回来。",
+							"pinyin": "Wǒ de xiǎomāo shēngbìng le, dàn wǒ yào qù shàngbān. Yéye gēn wǒ shuō, xiǎomāo kěyǐ sòng tā nàr qù, xiàbān hòu, wǒ zài jiē xiǎomāo huílái.",
+							"question": "他为什么送小猫去爷爷那儿？",
+							"question_pinyin": "Tā wèishénme sòng xiǎomāo qù yéye nàr?",
+							"options": [
+								{ "label": "A", "text": "有好吃的", "pinyin": "yǒu hǎochī de" },
+								{ "label": "B", "text": "小猫生病了", "pinyin": "xiǎomāo shēngbìng le" },
+								{ "label": "C", "text": "爷爷想小猫了", "pinyin": "yéye xiǎng xiǎomāo le" }
+							]
+						},
+						{
+							"number": 23,
+							"answer": "A",
+							"sentence": "今天中午李文打来电话，让我晚上去他家吃饭。晚上，天中也过来了。李文做菜，我洗水果，天中出去买奶茶。",
+							"pinyin": "Jīntiān zhōngwǔ Lǐ Wén dǎlái diànhuà, ràng wǒ wǎnshang qù tā jiā chīfàn. Wǎnshang, Tiānzhōng yě guòlái le. Lǐ Wén zuò cài, wǒ xǐ shuǐguǒ, Tiānzhōng chūqù mǎi nǎichá.",
+							"question": "李文做什么了？",
+							"question_pinyin": "Lǐ Wén zuò shénme le?",
+							"options": [
+								{ "label": "A", "text": "做菜", "pinyin": "zuò cài" },
+								{ "label": "B", "text": "买奶茶", "pinyin": "mǎi nǎichá" },
+								{ "label": "C", "text": "洗水果", "pinyin": "xǐ shuǐguǒ" }
+							]
+						},
+						{
+							"number": 24,
+							"answer": "C",
+							"sentence": "我第一次去男朋友家，他们一家人都下来接我，让我觉得很不好意思。他的家人都很好，还送了我礼物。",
+							"pinyin": "Wǒ dì-yī cì qù nánpéngyou jiā, tāmen yì jiā rén dōu xiàlái jiē wǒ, ràng wǒ juéde hěn bù hǎoyìsi. Tā de jiārén dōu hěn hǎo, hái sòng le wǒ lǐwù.",
+							"question": "她为什么觉得不好意思？",
+							"question_pinyin": "Tā wèishénme juéde bù hǎoyìsi?",
+							"options": [
+								{ "label": "A", "text": "来晚了", "pinyin": "lái wǎn le" },
+								{ "label": "B", "text": "没准备礼物", "pinyin": "méi zhǔnbèi lǐwù" },
+								{ "label": "C", "text": "很多人来接她", "pinyin": "hěn duō rén lái jiē tā" }
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据部件组字。\nCâu 25–27: Ghép các bộ phận tạo thành chữ Hán hoàn chỉnh.",
+					"questions": [
+						{ "number": 25, "answer": "A", "options": ["A", "B", "C", "D"] },
+						{ "number": 26, "answer": "C", "options": ["A", "B", "C", "D"] },
+						{ "number": 27, "answer": "B", "options": ["A", "B", "C", "D"] }
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：根据拼音写汉字。\nCâu 28–30: Viết chữ Hán dựa vào phiên âm.",
+					"example": {
+						"sentence": "你想喝茶还（是）喝咖啡？",
+						"pinyin": "Nǐ xiǎng hē chá hái (shì) hē kāfēi?",
+						"meaning": "Bạn muốn uống trà hay là uống cà phê?"
+					},
+					"questions": [
+						{
+							"number": 28,
+							"type": "writing_input",
+							"sentence": "你（ ）来吧，我已经到了。",
+							"prompt_pinyin": "xià",
+							"answer": "下"
+						},
+						{
+							"number": 29,
+							"type": "writing_input",
+							"sentence": "你今天（ ）我一起去爷爷家吗？",
+							"prompt_pinyin": "gēn",
+							"answer": "跟"
+						},
+						{
+							"number": 30,
+							"type": "writing_input",
+							"sentence": "我一（ ）儿就下去，你等一下。",
+							"prompt_pinyin": "huì",
+							"answer": "会"
+						}
+					]
+				}
+			]
+		}
+	]
+}

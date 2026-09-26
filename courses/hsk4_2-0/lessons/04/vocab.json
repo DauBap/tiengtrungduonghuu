@@ -1,0 +1,230 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 4,
+  "label": "Bài 4",
+  "title": "不要太着急赚钱",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "提",
+      "pinyin": "tí",
+      "adj": 4,
+      "vi": "nhắc đến"
+    },
+    {
+      "pos": 2,
+      "hanzi": "以为",
+      "pinyin": "yǐwéi",
+      "adj": 4,
+      "vi": "cho rằng, tưởng là"
+    },
+    {
+      "pos": 3,
+      "hanzi": "份",
+      "pinyin": "fèn",
+      "adj": 8,
+      "vi": "(dùng cho công việc, báo chí...) tờ, bản"
+    },
+    {
+      "pos": 4,
+      "hanzi": "完全",
+      "pinyin": "wánquán",
+      "adj": 7,
+      "vi": "hoàn toàn"
+    },
+    {
+      "pos": 5,
+      "hanzi": "赚",
+      "pinyin": "zhuàn",
+      "adj": 4,
+      "vi": "kiếm (tiền)"
+    },
+    {
+      "pos": 6,
+      "hanzi": "调查",
+      "pinyin": "diàochá",
+      "adj": 4,
+      "vi": "điều tra, khảo sát"
+    },
+    {
+      "pos": 7,
+      "hanzi": "原来",
+      "pinyin": "yuánlái",
+      "adj": 6,
+      "vi": "ban đầu"
+    },
+    {
+      "pos": 8,
+      "hanzi": "计划",
+      "pinyin": "jìhuà",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "kế hoạch; vạch kế hoạch"
+    },
+    {
+      "pos": 9,
+      "hanzi": "提前",
+      "pinyin": "tíqián",
+      "adj": 4,
+      "vi": "làm việc gì đó sớm hơn quy định / trước thời hạn"
+    },
+    {
+      "pos": 10,
+      "hanzi": "保证",
+      "pinyin": "bǎozhèng",
+      "adj": 4,
+      "vi": "cam đoan, bảo đảm"
+    },
+    {
+      "pos": 11,
+      "hanzi": "提醒",
+      "pinyin": "tí xǐng",
+      "adj": 4,
+      "vi": "nhắc nhở"
+    },
+    {
+      "pos": 12,
+      "hanzi": "乱",
+      "pinyin": "luàn",
+      "adj": 6,
+      "vi": "lộn xộn, lúng túng"
+    },
+    {
+      "pos": 13,
+      "hanzi": "生意",
+      "pinyin": "shēngyi",
+      "adj": 2,
+      "vi": "việc kinh doanh / buôn bán"
+    },
+    {
+      "pos": 14,
+      "hanzi": "谈",
+      "pinyin": "tán",
+      "adj": 4,
+      "vi": "nói chuyện, thảo luận"
+    },
+    {
+      "pos": 15,
+      "hanzi": "并",
+      "pinyin": "bìng",
+      "adj": 7,
+      "vi": "dùng trước từ phủ định để nhấn mạnh"
+    },
+    {
+      "pos": 16,
+      "hanzi": "积累",
+      "pinyin": "jīlěi",
+      "adj": 4,
+      "vi": "tích lũy"
+    },
+    {
+      "pos": 17,
+      "hanzi": "经验",
+      "pinyin": "jīngyàn",
+      "adj": 2,
+      "vi": "kinh nghiệm"
+    },
+    {
+      "pos": 18,
+      "hanzi": "一切",
+      "pinyin": "yíqiè",
+      "adj": 2,
+      "vi": "tất cả"
+    },
+    {
+      "pos": 19,
+      "hanzi": "按照",
+      "pinyin": "ànzhào",
+      "adj": 13,
+      "vi": "theo"
+    },
+    {
+      "pos": 20,
+      "hanzi": "成功",
+      "pinyin": "chénggōng",
+      "adj": 6,
+      "vi": "thành công"
+    },
+    {
+      "pos": 21,
+      "hanzi": "顺利",
+      "pinyin": "shùnlì",
+      "adj": 6,
+      "vi": "thuận lợi, suôn sẻ"
+    },
+    {
+      "pos": 22,
+      "hanzi": "感谢",
+      "pinyin": "gǎnxiè",
+      "adj": 4,
+      "vi": "cảm ơn"
+    },
+    {
+      "pos": 23,
+      "hanzi": "消息",
+      "pinyin": "xiāoxi",
+      "adj": 2,
+      "vi": "tin tức"
+    },
+    {
+      "pos": 24,
+      "hanzi": "按时",
+      "pinyin": "ànshí",
+      "adj": 7,
+      "vi": "đúng hạn"
+    },
+    {
+      "pos": 25,
+      "hanzi": "奖金",
+      "pinyin": "jiǎngjīn",
+      "adj": 2,
+      "vi": "tiền thưởng"
+    },
+    {
+      "pos": 26,
+      "hanzi": "工资",
+      "pinyin": "gōngzī",
+      "adj": 2,
+      "vi": "tiền lương"
+    },
+    {
+      "pos": 27,
+      "hanzi": "方法",
+      "pinyin": "fāngfǎ",
+      "adj": 2,
+      "vi": "phương pháp, cách thức"
+    },
+    {
+      "pos": 28,
+      "hanzi": "知识",
+      "pinyin": "zhīshi",
+      "adj": 2,
+      "vi": "kiến thức"
+    },
+    {
+      "pos": 29,
+      "hanzi": "不得不",
+      "pinyin": "bù dé bù",
+      "adj": 7,
+      "vi": "phải, không thể không"
+    },
+    {
+      "pos": 30,
+      "hanzi": "甚至",
+      "pinyin": "shènzhì",
+      "adj": 10,
+      "vi": "thậm chí"
+    },
+    {
+      "pos": 31,
+      "hanzi": "责任",
+      "pinyin": "zérèn",
+      "adj": 2,
+      "vi": "trách nhiệm"
+    }
+  ]
+}

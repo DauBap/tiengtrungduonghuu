@@ -1,0 +1,182 @@
+{
+  "lesson": 16,
+  "title": "我听说有的熊猫出国了",
+  "title_pinyin": "Wǒ tīngshuō yǒu de xióngmāo chūguó le",
+  "title_vi": "Tôi nghe nói có những chú gấu trúc đã ra nước ngoài",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "服务员",
+          "zh": "这只小猫你们养了多久了?",
+          "pinyin": "Zhè zhī xiǎo māo nǐmen yǎngle duō jiǔ le?",
+          "vi": "Các bạn đã nuôi chú mèo nhỏ này bao lâu rồi?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "已经一年多了。第一天看见它的时候, 它又脏又小。",
+          "pinyin": "Yǐjīng yī nián duō le. Dì-yī tiān kànjiàn tā de shíhou, tā yòu zāng yòu xiǎo.",
+          "vi": "Đã hơn một năm rồi. Ngày đầu tiên nhìn thấy nó, nó vừa bẩn vừa nhỏ."
+        },
+        {
+          "speaker": "服务员",
+          "zh": "现在它变得又干净又漂亮了。",
+          "pinyin": "Xiànzài tā biàn de yòu gānjìng yòu piàoliang le.",
+          "vi": "Bây giờ nó trở nên vừa sạch sẽ vừa đẹp."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "是啊。它还特别可爱, 一会儿在你脚边睡觉, 一会儿在你身上爬。",
+          "pinyin": "Shì a. Tā hái tèbié kě'ài, yīhuìr zài nǐ jiǎo biān shuìjiào, yīhuìr zài nǐ shēnshang pá.",
+          "vi": "Đúng vậy. Nó còn rất dễ thương, lúc thì nằm ngủ bên chân bạn, lúc thì trèo lên người bạn."
+        },
+        {
+          "speaker": "服务员",
+          "zh": "你们把它照顾得真好。",
+          "pinyin": "Nǐmen bǎ tā zhàogù de zhēn hǎo.",
+          "vi": "Các bạn chăm sóc nó thật tốt."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "它就好像我们的孩子, 我们照顾它, 它也认得我们了。",
+          "pinyin": "Tā jiù hǎoxiàng wǒmen de háizi, wǒmen zhàogù tā, tā yě rèn de wǒmen le.",
+          "vi": "Nó cũng như con của chúng tôi vậy, chúng tôi chăm sóc nó, nó cũng nhận ra chúng tôi rồi."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "妈妈, 我们家也养一只小猫吧。",
+          "pinyin": "Māma, wǒmen jiā yě yǎng yī zhī xiǎo māo ba.",
+          "vi": "Mẹ ơi, nhà mình cũng nuôi một con mèo nhỏ đi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "咱们没时间照顾, 还是别养了, 我周末带你们去北京动物园看动物吧。",
+          "pinyin": "Zánmen méi shíjiān zhàogù, háishì bié yǎng le, wǒ zhōumò dài nǐmen qù Běijīng Dòngwùyuán kàn dòngwù ba.",
+          "vi": "Chúng ta không có thời gian chăm sóc, thôi đừng nuôi nữa, cuối tuần mẹ đưa các con đến Vườn bách thú Bắc Kinh xem động vật nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "刘小雪",
+          "zh": "妈妈, 大熊猫这个名字很奇怪, 它们跟猫有什么关系?",
+          "pinyin": "Māma, dà xióngmāo zhège míngzi hěn qíguài, tāmen gēn māo yǒu shénme guānxi?",
+          "vi": "Mẹ ơi, tên gọi gấu trúc lớn rất kỳ lạ, chúng có liên quan gì với mèo không ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "这个问题问得好, 它们跟猫没关系, 其实应该叫大熊猫。",
+          "pinyin": "Zhège wèntí wèn de hǎo, tāmen gēn māo méi guānxi, qíshí yīnggāi jiào dà xióngmāo.",
+          "vi": "Câu hỏi này hay đấy, chúng không liên quan gì đến mèo, thực ra nên gọi là gấu trúc lớn."
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "大熊猫为什么只吃竹子不吃肉?",
+          "pinyin": "Dà xióngmāo wèishénme zhǐ chī zhúzi bù chī ròu?",
+          "vi": "Tại sao gấu trúc lớn chỉ ăn tre mà không ăn thịt ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "它们跟人一样, 也可以吃肉, 但是对肉不感兴趣。",
+          "pinyin": "Tāmen gēn rén yīyàng, yě kěyǐ chī ròu, dànshì duì ròu bù gǎn xìngqù.",
+          "vi": "Chúng cũng giống người, cũng có thể ăn thịt, nhưng không hứng thú với thịt."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "大熊猫为什么是中国的国宝?",
+          "pinyin": "Dà xióngmāo wèishénme shì Zhōngguó de guóbǎo?",
+          "vi": "Tại sao gấu trúc lớn là bảo vật quốc gia của Trung Quốc ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "全世界只有中国有野生大熊猫, 中国是大熊猫的家。",
+          "pinyin": "Quán shìjiè zhǐyǒu Zhōngguó yǒu yěshēng dà xióngmāo, Zhōngguó shì dà xióngmāo de jiā.",
+          "vi": "Cả thế giới chỉ có Trung Quốc có gấu trúc lớn hoang dã, Trung Quốc là nhà của gấu trúc lớn."
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "我听说有的熊猫出国了, 他们去哪儿了?",
+          "pinyin": "Wǒ tīngshuō yǒu de xióngmāo chūguó le, tāmen qù nǎr le?",
+          "vi": "Con nghe nói có những chú gấu trúc đã ra nước ngoài, chúng đi đâu rồi ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "关于这个问题, 我得慢慢给你讲。",
+          "pinyin": "Guānyú zhège wèntí, wǒ děi mànmàn gěi nǐ jiǎng.",
+          "vi": "Về vấn đề này, mẹ phải kể cho con từ từ."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "弟弟, 你真是'十万个为什么'。",
+          "pinyin": "Dìdi, nǐ zhēn shì 'shí wàn gè wèishénme'.",
+          "vi": "Em trai, em đúng là 'trăm nghìn câu hỏi vì sao'."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "刘小雪",
+          "zh": "这只大熊猫一会儿爬上去, 一会儿跳下来, 可爱极了!",
+          "pinyin": "Zhè zhī dà xióngmāo yīhuìr pá shàngqu, yīhuìr tiào xiàlái, kě'ài jí le!",
+          "vi": "Chú gấu trúc này lúc thì trèo lên, lúc thì nhảy xuống, dễ thương vô cùng!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "它好像还没吃饱, 站起来张着嘴找吃的呢。",
+          "pinyin": "Tā hǎoxiàng hái méi chī bǎo, zhàn qǐlái zhāngzhe zuǐ zhǎo chī de ne.",
+          "vi": "Nó hình như chưa ăn no, đứng lên há mồm tìm đồ ăn kìa."
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "它身边那只熊猫半天没动, 是不是在睡觉呢?",
+          "pinyin": "Tā shēnbiān nà zhī xióngmāo bàntiān méi dòng, shì bú shì zài shuìjiào ne?",
+          "vi": "Chú gấu trúc bên cạnh nó lâu rồi không nhúc nhích, có phải đang ngủ không ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我看不见它的脸, 可能是吧。一般来说, 熊猫每天要睡很多次觉。",
+          "pinyin": "Wǒ kàn bú jiàn tā de liǎn, kěnéng shì ba. Yībān lái shuō, xióngmāo měitiān yào shuì hěnduō cì jiào.",
+          "vi": "Mẹ không nhìn thấy mặt nó, có lẽ vậy. Nói chung, gấu trúc mỗi ngày phải ngủ nhiều lần."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "对, 除了睡觉以外, 很多时间都在吃东西。",
+          "pinyin": "Duì, chúle shuìjiào yǐwài, hěnduō shíjiān dōu zài chī dōngxi.",
+          "vi": "Đúng ạ, ngoài ngủ ra, nhiều thời gian đều đang ăn."
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "大熊猫的生活真舒服啊!",
+          "pinyin": "Dà xióngmāo de shēnghuó zhēn shūfu a!",
+          "vi": "Cuộc sống của gấu trúc lớn thật thoải mái!"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "妈妈, 您帮我和这两只大熊猫照一张照片吧。",
+          "pinyin": "Māma, nín bāng wǒ hé zhè liǎng zhī dà xióngmāo zhào yī zhāng zhàopiàn ba.",
+          "vi": "Mẹ ơi, mẹ chụp cho con với hai chú gấu trúc này một tấm ảnh đi."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "今天我带小雪和小明去动物园玩了。北京动物园是中国很有名的动物园, 里面有非常多的动物, 当然, 大人和孩子最喜爱的还是大熊猫。每天有很多游客去熊猫馆, 他们带着相机去给可爱的大熊猫拍照。动物园早上七点半开门, 晚上七点关门, 冬天比夏天游客少, 所以也比平时早关门一个小时。如果第一次来北京旅游, 跟家人一起去北京动物园是个不错的选择。",
+          "pinyin": "Jīntiān wǒ dài Xiǎoxuě hé Xiǎomíng qù dòngwùyuán wán le. Běijīng Dòngwùyuán shì Zhōngguó hěn yǒumíng de dòngwùyuán, lǐmian yǒu fēicháng duō de dòngwù, dāngrán, dàrén hé háizi zuì xǐ'ài de háishì dà xióngmāo. Měitiān yǒu hěnduō yóukè qù xióngmāo guǎn, tāmen dàizhe xiàngjī qù gěi kě'ài de dà xióngmāo pāizhào. Dòngwùyuán zǎoshang qī diǎn bàn kāimén, wǎnshang qī diǎn guānmén, dōngtiān bǐ xiàtiān yóukè shǎo, suǒyǐ yě bǐ píngshí zǎo guānmén yī gè xiǎoshí. Rúguǒ dì-yī cì lái Běijīng lǚyóu, gēn jiārén yīqǐ qù Běijīng Dòngwùyuán shì gè búcuò de xuǎnzé.",
+          "vi": "Hôm nay tôi đưa Tiểu Tuyết và Tiểu Minh đến Vườn bách thú chơi. Vườn bách thú Bắc Kinh là vườn bách thú rất nổi tiếng ở Trung Quốc, bên trong có rất nhiều loài động vật, tất nhiên, người lớn và trẻ em yêu thích nhất vẫn là gấu trúc lớn. Mỗi ngày có nhiều du khách đến khu gấu trúc, họ mang máy ảnh đến chụp ảnh những chú gấu trúc dễ thương. Vườn bách thú mở cửa 7:30 sáng, đóng cửa 7 giờ tối, mùa đông du khách ít hơn mùa hè, nên đóng cửa sớm hơn bình thường một tiếng. Nếu lần đầu đến Bắc Kinh du lịch, đi Vườn bách thú Bắc Kinh cùng gia đình là một lựa chọn không tệ."
+        }
+      ]
+    }
+  ]
+}

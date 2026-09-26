@@ -1,0 +1,211 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 6,
+  "label": "Bài 6",
+  "title": "高铁上还可以点外卖",
+  "short_vi": "Bàn về phương tiện di chuyển; mua vé tàu cao tốc qua App; trải nghiệm đi tàu cao tốc; cách đặt đồ ăn trên tàu; so sánh tàu cao tốc với các phương tiện khác",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "该",
+      "pinyin": "gāi",
+      "adj": 4,
+      "vi": "Nên, phải"
+    },
+    {
+      "pos": 2,
+      "hanzi": "打算",
+      "pinyin": "dǎsuàn",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "dự định, định làm gì"
+    },
+    {
+      "pos": 3,
+      "hanzi": "高铁",
+      "pinyin": "gāotiě",
+      "adj": 2,
+      "vi": "tàu cao tốc"
+    },
+    {
+      "pos": 4,
+      "hanzi": "行",
+      "pinyin": "xíng",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "được, ổn, khả thi, có thể"
+    },
+    {
+      "pos": 5,
+      "hanzi": "路口",
+      "pinyin": "lùkǒu",
+      "adj": 2,
+      "vi": "Giao lộ, ngã tư"
+    },
+    {
+      "pos": 6,
+      "hanzi": "小心",
+      "pinyin": "xiǎoxīn",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "Cẩn thận"
+    },
+    {
+      "pos": 7,
+      "hanzi": "迟到",
+      "pinyin": "chídào",
+      "adj": 4,
+      "vi": "Đến muộn, trễ"
+    },
+    {
+      "pos": 8,
+      "hanzi": "红绿灯",
+      "pinyin": "hónglǜdēng",
+      "adj": 2,
+      "vi": "Đèn giao thông"
+    },
+    {
+      "pos": 9,
+      "hanzi": "后来",
+      "pinyin": "hòulái",
+      "adj": 2,
+      "vi": "Sau đó, về sau"
+    },
+    {
+      "pos": 10,
+      "hanzi": "急",
+      "pinyin": "jí",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "Vội vàng, lo lắng, gấp"
+    },
+    {
+      "pos": 11,
+      "hanzi": "如果",
+      "pinyin": "rúguǒ",
+      "adj": 10,
+      "vi": "Nếu, nếu như"
+    },
+    {
+      "pos": 12,
+      "hanzi": "以前",
+      "pinyin": "yǐqián",
+      "adj": 2,
+      "vi": "Trước đây, trước kia"
+    },
+    {
+      "pos": 13,
+      "hanzi": "耳机",
+      "pinyin": "ěrjī",
+      "adj": 2,
+      "vi": "Tai nghe"
+    },
+    {
+      "pos": 14,
+      "hanzi": "充电宝",
+      "pinyin": "chōngdiànbǎo",
+      "adj": 2,
+      "vi": "Sạc dự phòng"
+    },
+    {
+      "pos": 15,
+      "hanzi": "常用",
+      "pinyin": "chángyòng",
+      "adj": 6,
+      "vi": "Thường dùng"
+    },
+    {
+      "pos": 16,
+      "hanzi": "越",
+      "pinyin": "yuè",
+      "adj": 7,
+      "vi": "Càng... ( càng... càng...)"
+    },
+    {
+      "pos": 17,
+      "hanzi": "分开",
+      "pinyin": "fēnkāi",
+      "adj": 4,
+      "vi": "Tách ra, phân chia"
+    },
+    {
+      "pos": 18,
+      "hanzi": "检查",
+      "pinyin": "jiǎnchá",
+      "adj": 4,
+      "vi": "Kiểm tra"
+    },
+    {
+      "pos": 19,
+      "hanzi": "刷",
+      "pinyin": "shuā",
+      "adj": 4,
+      "vi": "Quét (mã, thẻ)"
+    },
+    {
+      "pos": 20,
+      "hanzi": "检票",
+      "pinyin": "jiǎnpiào",
+      "adj": 4,
+      "vi": "Soát vé"
+    },
+    {
+      "pos": 21,
+      "hanzi": "电梯",
+      "pinyin": "diàntī",
+      "adj": 2,
+      "vi": "Thang máy, thang cuốn"
+    },
+    {
+      "pos": 22,
+      "hanzi": "放假",
+      "pinyin": "fàngjià",
+      "adj": 4,
+      "vi": "Nghỉ lễ, nghỉ phép"
+    },
+    {
+      "pos": 23,
+      "hanzi": "沙发",
+      "pinyin": "shāfā",
+      "adj": 2,
+      "vi": "Ghế sô pha"
+    },
+    {
+      "pos": 24,
+      "hanzi": "安静",
+      "pinyin": "ānjìng",
+      "adj": 6,
+      "vi": "Yên tĩnh"
+    },
+    {
+      "pos": 25,
+      "hanzi": "选择",
+      "pinyin": "xuǎnzé",
+      "adj": 4,
+      "vi": "Lựa chọn"
+    },
+    {
+      "pos": 26,
+      "hanzi": "必须",
+      "pinyin": "bìxū",
+      "adj": 18,
+      "vi": "Phải, nhất thiết phải"
+    },
+    {
+      "pos": 27,
+      "hanzi": "北京南站",
+      "pinyin": "Běijīng    nán zhàn",
+      "adj": 12,
+      "vi": "Ga Nam Bắc Kinh"
+    }
+  ]
+}

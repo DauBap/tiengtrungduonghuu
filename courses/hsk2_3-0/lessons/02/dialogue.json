@@ -1,0 +1,146 @@
+{
+  "lesson": 2,
+  "title": "还是打车去北大吧",
+  "title_pinyin": "Háishì dǎchē qù Běidà ba",
+  "title_vi": "Vẫn là đi taxi đến Đại học Bắc Kinh đi",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "请问，这儿有到北京大学的公交车吗？",
+          "pinyin": "Qǐngwèn, zhèr yǒu dào Běijīng Dàxué de gōngjiāochē ma?",
+          "vi": "Xin hỏi, ở đây có xe buýt đến Đại học Bắc Kinh không ạ?"
+        },
+        {
+          "speaker": "服务员",
+          "zh": "有，但车站有点儿远。",
+          "pinyin": "Yǒu, dàn chēzhàn yǒudiǎnr yuǎn.",
+          "vi": "Có, nhưng trạm xe hơi xa."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "这儿好打车吗？",
+          "pinyin": "Zhèr hǎo dǎchē ma?",
+          "vi": "Ở đây có dễ gọi taxi không?"
+        },
+        {
+          "speaker": "服务员",
+          "zh": "好打车。",
+          "pinyin": "Hǎo dǎchē.",
+          "vi": "Dễ gọi."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "谢谢。安妮，我们还是打车去吧。",
+          "pinyin": "Xièxie. Ānnī, wǒmen háishì dǎchē qù ba.",
+          "vi": "Cảm ơn. Annie, chúng ta vẫn là đi taxi nhé."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "好，没问题。",
+          "pinyin": "Hǎo, méi wèntí.",
+          "vi": "Ừ, không vấn đề gì."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "学校里人真多啊！",
+          "pinyin": "Xuéxiào lǐ rén zhēn duō a!",
+          "vi": "Trong trường đông người thật đấy!"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "是啊，北京大学有四万多名学生呢！",
+          "pinyin": "Shì a, Běijīng Dàxué yǒu sì wàn duō míng xuéshēng ne!",
+          "vi": "Đúng vậy, Đại học Bắc Kinh có hơn bốn vạn sinh viên đấy!"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "你是怎么知道的？",
+          "pinyin": "Nǐ shì zěnme zhīdào de?",
+          "vi": "Bạn biết điều đó bằng cách nào?"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "是网上说的，网上还说北京大学有三千多名外国学生。",
+          "pinyin": "Shì wǎngshàng shuō de, wǎngshàng hái shuō Běijīng Dàxué yǒu sānqiān duō míng wàiguó xuéshēng.",
+          "vi": "Trên mạng nói vậy, mạng còn nói Đại học Bắc Kinh có hơn ba nghìn sinh viên nước ngoài."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我也想来这儿学习。",
+          "pinyin": "Wǒ yě xiǎng lái zhèr xuéxí.",
+          "vi": "Tôi cũng muốn đến đây học."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "那边就有一间教室，我们去看一下吧。",
+          "pinyin": "Nàbiān jiù yǒu yī jiān jiàoshì, wǒmen qù kàn yíxià ba.",
+          "vi": "Đằng kia có một phòng học, chúng ta qua xem thử đi."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "安妮",
+          "zh": "家月，你看，学校里有家电影院！",
+          "pinyin": "Jiāyuè, nǐ kàn, xuéxiào lǐ yǒu jiā diànyǐngyuàn!",
+          "vi": "Gia Nguyệt, cậu xem, trong trường có một rạp chiếu phim kìa!"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "是啊，电影院还不小。",
+          "pinyin": "Shì a, diànyǐngyuàn hái bù xiǎo.",
+          "vi": "Đúng vậy, rạp chiếu phim còn không nhỏ."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "他们卖的电影票也很便宜。",
+          "pinyin": "Tāmen mài de diànyǐng piào yě hěn piányi.",
+          "vi": "Vé phim họ bán cũng rất rẻ."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "天啊！有的还不到二十块钱。",
+          "pinyin": "Tiān a! Yǒude hái bú dào èrshí kuài qián.",
+          "vi": "Trời ơi! Có loại còn chưa đến hai mươi đồng."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "那你想不想去看个电影？",
+          "pinyin": "Nà nǐ xiǎng bù xiǎng qù kàn ge diànyǐng?",
+          "vi": "Vậy cậu có muốn đi xem một bộ phim không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "还是别看电影了，北京大学就很好看！",
+          "pinyin": "Háishì bié kàn diànyǐng le, Běijīng Dàxué jiù hěn hǎokàn!",
+          "vi": "Thôi đừng xem phim nữa, Đại học Bắc Kinh đã rất đẹp rồi!"
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "北京大学很大，有四万多名学生。学校很漂亮，里边还有家电影院，电影票也不贵，我们有时间还想再过来看个电影。",
+          "pinyin": "Běijīng Dàxué hěn dà, yǒu sì wàn duō míng xuéshēng. Xuéxiào hěn piàoliang, lǐbiān hái yǒu jiā diànyǐngyuàn, diànyǐng piào yě bú guì, wǒmen yǒu shíjiān hái xiǎng zài guòlái kàn ge diànyǐng.",
+          "vi": "Đại học Bắc Kinh rất lớn, có hơn bốn vạn sinh viên. Trường rất đẹp, bên trong còn có một rạp chiếu phim, vé phim cũng không đắt, bọn tớ có thời gian còn muốn quay lại đây xem một bộ phim nữa."
+        }
+      ]
+    }
+  ]
+}

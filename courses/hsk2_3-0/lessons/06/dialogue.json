@@ -1,0 +1,164 @@
+{
+  "lesson": 6,
+  "title": "小雪，生日快乐！",
+  "title_pinyin": "Xiǎoxuě, shēngrì kuàilè!",
+  "title_vi": "Tiểu Tuyết, sinh nhật vui vẻ!",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "明天就是女儿的生日了。",
+          "pinyin": "Míngtiān jiù shì nǚ'ér de shēngrì le.",
+          "vi": "Ngày mai là sinh nhật của con gái rồi."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "你不说，我还真忘了。我们给她准备个什么礼物呢？",
+          "pinyin": "Nǐ bù shuō, wǒ hái zhēn wàng le. Wǒmen gěi tā zhǔnbèi ge shénme lǐwù ne?",
+          "vi": "Em không nói thì anh thực sự còn quên đấy. Chúng ta chuẩn bị quà gì cho nó đây?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "她喜欢画画，你觉得画笔怎么样？",
+          "pinyin": "Tā xǐhuan huàhuà, nǐ juéde huàbǐ zěnmeyàng?",
+          "vi": "Nó thích vẽ, anh thấy bút vẽ thế nào?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "就送画笔吧！",
+          "pinyin": "Jiù sòng huàbǐ ba!",
+          "vi": "Thì tặng bút vẽ đi!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "那我明天上午就去买。",
+          "pinyin": "Nà wǒ míngtiān shàngwǔ jiù qù mǎi.",
+          "vi": "Vậy sáng mai em đi mua."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好的！我再给她买个大大的生日蛋糕。",
+          "pinyin": "Hǎo de! Wǒ zài gěi tā mǎi ge dàdà de shēngrì dàngāo.",
+          "vi": "Được! Anh lại mua cho nó một cái bánh ga-tô sinh nhật thật to."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "小雪，生日快乐！",
+          "pinyin": "Xiǎoxuě, shēngrì kuàilè!",
+          "vi": "Tiểu Tuyết, sinh nhật vui vẻ!"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "姐姐，生日快乐！",
+          "pinyin": "Jiějie, shēngrì kuàilè!",
+          "vi": "Chị Tiểu Minh, sinh nhật vui vẻ ạ!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "小雪，这是爸爸、妈妈送你的礼物。",
+          "pinyin": "Xiǎoxuě, zhè shì bàba, māma sòng nǐ de lǐwù.",
+          "vi": "Tiểu Tuyết, đây là quà bố mẹ tặng con."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "你打开看看喜欢不喜欢。",
+          "pinyin": "Nǐ dǎkāi kànkan xǐhuan bù xǐhuan.",
+          "vi": "Con mở ra xem thích không."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "哇！我很喜欢！",
+          "pinyin": "Wa! Wǒ hěn xǐhuan!",
+          "vi": "Ôi! Con rất thích ạ!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "那你想画点儿什么？",
+          "pinyin": "Nà nǐ xiǎng huà diǎnr shénme?",
+          "vi": "Vậy con muốn vẽ gì nào?"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "画我们的家！有爸爸、妈妈、弟弟，还有黑色的狗，白色的猫什么的。",
+          "pinyin": "Huà wǒmen de jiā! Yǒu bàba, māma, dìdi, hái yǒu hēisè de gǒu, báisè de māo shénme de.",
+          "vi": "Vẽ nhà của chúng ta ạ! Có bố, mẹ, em trai, còn có con chó màu đen, con mèo màu trắng gì đó ạ."
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "那我要画一个穿白色衣服的姐姐。",
+          "pinyin": "Nà wǒ yào huà yī ge chuān báisè yīfu de jiějie.",
+          "vi": "Vậy con sẽ vẽ chị gái mặc quần áo màu trắng."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "小雪，看看今天有什么好吃的。",
+          "pinyin": "Xiǎoxuě, kànkan jīntiān yǒu shénme hǎochī de.",
+          "vi": "Tiểu Tuyết, xem hôm nay có gì ngon nào."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "长长的面条儿，大大的蛋糕。",
+          "pinyin": "Chángcháng de miàntiáor, dàdà de dàngāo.",
+          "vi": "Mì sợi dài dài, bánh ga-tô to."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "你看，还有鱼啊肉啊什么的，都是你喜欢吃的。",
+          "pinyin": "Nǐ kàn, hái yǒu yú a ròu a shénme de, dōu shì nǐ xǐhuan chī de.",
+          "vi": "Con xem, còn có cá, thịt gì nữa, đều là những món con thích ăn đấy."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "谢谢爸爸、妈妈！",
+          "pinyin": "Xièxie bàba, māma!",
+          "vi": "Con cảm ơn bố mẹ!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "快去叫弟弟过来吃饭吧，吃完饭我们还要出去玩呢。",
+          "pinyin": "Kuài qù jiào dìdi guòlái chīfàn ba, chī wán fàn wǒmen hái yào chūqù wán ne.",
+          "vi": "Nhanh đi gọi em trai qua ăn cơm đi, ăn xong chúng ta còn đi chơi nữa."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "过生日真好啊！",
+          "pinyin": "Guò shēngrì zhēn hǎo a!",
+          "vi": "Sinh nhật thật tuyệt!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "是的，过生日就要吃好吃的，还要高高兴兴地玩。",
+          "pinyin": "Shì de, guò shēngrì jiù yào chī hǎochī de, hái yào gāogāoxìngxìng de wán.",
+          "vi": "Đúng vậy, sinh nhật thì phải ăn ngon, và còn phải chơi vui vẻ."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "今天是女儿的生日。我们买了蛋糕，做了面条儿，还做了鱼啊肉啊什么的。吃完晚饭，一家人去快活地看了个电影。回家后，孩子们早早地就上床了。明天不上学，他们说要舒舒服服地睡一觉，让我们晚点儿叫他们起床。这是很忙、很累，但很快乐的一天。",
+          "pinyin": "Jīntiān shì nǚ'ér de shēngrì. Wǒmen mǎile dàngāo, zuòle miàntiáor, hái zuòle yú a ròu a shénme de. Chī wán wǎnfàn, yī jiā rén qù kuàihuo de kànle ge diànyǐng. Huí jiā hòu, háizimen zǎozǎo de jiù shàng chuáng le. Míngtiān bú shàngxué, tāmen shuō yào shūshūfúfú de shuì yī jiào, ràng wǒmen wǎn diǎnr jiào tāmen qǐchuáng. Zhè shì hěn máng, hěn lèi, dàn hěn kuàilè de yī tiān.",
+          "vi": "Hôm nay là sinh nhật của con gái. Chúng tôi đã mua bánh ga-tô, làm mì sợi, còn làm cá, thịt gì đó. Ăn tối xong, cả nhà đi xem một bộ phim vui vẻ. Về nhà, bọn trẻ lên giường từ sớm. Ngày mai không đi học, chúng nói muốn được ngủ một giấc thoải mái, bảo chúng tôi gọi dậy muộn một chút. Đây là một ngày rất bận, rất mệt, nhưng rất vui vẻ."
+        }
+      ]
+    }
+  ]
+}

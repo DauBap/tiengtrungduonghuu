@@ -1,0 +1,1117 @@
+import type { GrammarLesson, GrammarPoint, GrammarQuestion } from "./types";
+
+type Example = [chinese: string, vietnamese: string];
+type Practice = {
+	choicePrompt: string;
+	answer: string;
+	wrong: [string, string];
+	arrange: [segmentedAnswer: string, vietnamese: string];
+	input?: [prompt: string, answer: string, acceptedAnswers?: string[]];
+};
+
+const clean = (value: string) => value.replace(/[。.!！?？，,\s]+/g, "");
+const question = (
+	id: string,
+	prompt: string,
+	answer: string,
+	extra: Partial<GrammarQuestion> = {}
+): GrammarQuestion => ({ id, prompt, answer, completedSentence: answer, ...extra });
+
+function point(
+	id: string,
+	title: string,
+	explanation: string,
+	formulas: string[],
+	examples: Example[],
+	practice: Practice,
+	notes?: string[]
+): GrammarPoint {
+	const [segmentedAnswer, arrangeMeaning] = practice.arrange;
+	const arrangedAnswer = clean(segmentedAnswer.replaceAll("|", ""));
+	let tokens = segmentedAnswer.split("|").filter(Boolean);
+	if (tokens.length > 1 && clean(tokens.join("")) === arrangedAnswer) {
+		tokens = [...tokens.slice(1), tokens[0]];
+	}
+	const [inputPrompt, inputAnswer, acceptedAnswers] = practice.input ?? [
+		examples[0][1],
+		clean(examples[0][0]),
+		undefined
+	];
+	return {
+		id,
+		title,
+		explanation,
+		formulas,
+		examples: examples.map(([chinese, vietnamese]) => ({ chinese, vietnamese })),
+		notes,
+		exercises: [
+			{
+				id: `${id}-choice`,
+				title: "1. Chọn đáp án đúng",
+				type: "choice",
+				questions: [
+					question(`${id}-c1`, practice.choicePrompt, practice.answer, {
+						options: [practice.answer, ...practice.wrong],
+						meaning: examples[0][1],
+						explanation,
+						formula: formulas[0],
+						optionExplanations: {
+							[practice.answer]: "Đúng nghĩa, đúng trật tự và đúng điểm ngữ pháp đang luyện.",
+							[practice.wrong[0]]: "Phương án này sai cấu trúc hoặc không phù hợp ngữ cảnh.",
+							[practice.wrong[1]]:
+								"Phương án này làm thay đổi nghĩa hoặc đặt thành phần ngữ pháp sai vị trí."
+						}
+					})
+				]
+			},
+			{
+				id: `${id}-arrange`,
+				title: "2. Sắp xếp từ thành câu",
+				type: "arrange",
+				questions: [
+					question(`${id}-a1`, arrangeMeaning, arrangedAnswer, {
+						translation: arrangeMeaning,
+						tokens,
+						meaning: arrangeMeaning,
+						explanation: "Ghép các từ theo đúng trật tự của cấu trúc đang học.",
+						formula: formulas[0]
+					})
+				]
+			},
+			{
+				id: `${id}-input`,
+				title: "3. Dịch hoặc biến đổi câu",
+				type: "input",
+				questions: [
+					question(`${id}-i1`, inputPrompt, inputAnswer, {
+						acceptedAnswers,
+						meaning: inputPrompt,
+						explanation: "Dấu câu và khoảng trắng không ảnh hưởng đến kết quả chấm.",
+						formula: formulas[0]
+					})
+				]
+			}
+		]
+	};
+}
+
+const lessons: Record<number, GrammarLesson> = {
+	1: {
+		title: "BÀI 1: 你好！",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l1-greeting",
+				"问候语 – Mẫu câu chào hỏi",
+				"Dùng để chào hỏi và tạm biệt trong giao tiếp cơ bản.",
+				["你好！ / 您好！ / 你们好！ / 再见！"],
+				[
+					["你好！", "Xin chào!"],
+					["您好！", "Xin chào! (kính trọng)"],
+					["你们好！", "Chào các bạn!"],
+					["再见！", "Tạm biệt!"]
+				],
+				{
+					choicePrompt: "Chào nhiều người, chọn câu phù hợp.",
+					answer: "你们好！",
+					wrong: ["你好！", "再见！"],
+					arrange: ["你们|好", "Chào các bạn!"],
+					input: ["Viết lời chào một người.", "你好"]
+				}
+			),
+			point(
+				"h12-l1-tones",
+				"四声 – Bốn thanh điệu",
+				"Tiếng Trung phổ thông có bốn thanh điệu cơ bản; thanh điệu khác nhau có thể làm thay đổi nghĩa của từ.",
+				["Thanh 1: ˉ", "Thanh 2: ˊ", "Thanh 3: ˇ", "Thanh 4: ˋ"],
+				[
+					["第一声：ˉ", "Thanh 1"],
+					["第二声：ˊ", "Thanh 2"],
+					["第三声：ˇ", "Thanh 3"],
+					["第四声：ˋ", "Thanh 4"]
+				],
+				{
+					choicePrompt: "Ký hiệu nào là thanh 3?",
+					answer: "ˇ",
+					wrong: ["ˊ", "ˋ"],
+					arrange: ["第|三|声", "Thanh thứ ba"],
+					input: ["Có bao nhiêu thanh điệu cơ bản? Hãy nhập số bằng chữ Hán.", "四"]
+				}
+			),
+			point(
+				"h12-l1-third-tone",
+				"第三声变调 – Biến điệu của thanh 3",
+				"Khi hai âm tiết thanh 3 đứng cạnh nhau, âm tiết thứ nhất thường được đọc thành thanh 2.",
+				["Thanh 3 + Thanh 3 → Thanh 2 + Thanh 3"],
+				[["你好：nǐ hǎo → ní hǎo", "你好 được đọc gần như ní hǎo."]],
+				{
+					choicePrompt: "Cách đọc biến điệu đúng của 你好 là gì?",
+					answer: "ní hǎo",
+					wrong: ["nǐ hǎo", "nì hào"],
+					arrange: ["你|好", "Xin chào!"],
+					input: ["Chọn bằng cách gõ lại cách đọc đã cho: ní hǎo", "níhǎo"]
+				},
+				["Không yêu cầu gõ ký hiệu thanh điệu khó; bài nhận biết dùng lựa chọn."]
+			)
+		]
+	},
+	2: {
+		title: "BÀI 2: 谢谢你！",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l2-thanks",
+				"感谢语 – Mẫu câu cảm ơn",
+				"Dùng 谢谢 để cảm ơn; đáp lại bằng 不谢 hoặc 不客气.",
+				["谢谢（你）！", "不谢！ / 不客气！"],
+				[
+					["谢谢你！", "Cảm ơn bạn!"],
+					["不客气！", "Đừng khách sáo!"],
+					["不谢！", "Không có gì!"]
+				],
+				{
+					choicePrompt: "Nghe người khác nói 谢谢你, bạn đáp thế nào?",
+					answer: "不客气！",
+					wrong: ["谢谢你！", "再见！"],
+					arrange: ["谢谢|你", "Cảm ơn bạn!"],
+					input: ["Dịch: Không có gì!", "不谢"]
+				}
+			),
+			point(
+				"h12-l2-neutral",
+				"轻声 – Thanh nhẹ",
+				"Một số âm tiết được đọc nhẹ và ngắn, không mang thanh điệu đầy đủ.",
+				["Âm tiết thanh nhẹ thường không ghi dấu thanh."],
+				[
+					["谢谢 xièxie", "Âm tiết xie thứ hai đọc nhẹ."],
+					["客气 kèqi", "Âm tiết qi đọc nhẹ."],
+					["名字 míngzi", "Âm tiết zi đọc nhẹ."]
+				],
+				{
+					choicePrompt: "Từ nào có âm tiết thứ hai đọc thanh nhẹ?",
+					answer: "谢谢 xièxie",
+					wrong: ["你好 nǐhǎo", "再见 zàijiàn"],
+					arrange: ["客|气", "Khách sáo"],
+					input: ["Chọn và gõ lại pinyin đúng của 谢谢.", "xièxie"]
+				}
+			),
+			point(
+				"h12-l2-tone-mark",
+				"声调标记规则 – Quy tắc đánh dấu thanh điệu",
+				"Dấu thanh đặt trên nguyên âm chính: ưu tiên a, rồi o, e; với iu và ui, dấu đặt trên nguyên âm cuối.",
+				["a > o > e; iu → iú; ui → uǐ"],
+				[
+					["hǎo", "Dấu thanh đặt trên a."],
+					["xiè", "Dấu thanh đặt trên e."],
+					["shuǐ", "Trong ui, dấu đặt trên i."]
+				],
+				{
+					choicePrompt: "Pinyin nào được đánh dấu đúng?",
+					answer: "hǎo",
+					wrong: ["haǒ", "hāo"],
+					arrange: ["h|ǎ|o", "Pinyin của 好"],
+					input: ["Gõ pinyin đúng của 好.", "hǎo"]
+				}
+			),
+			point(
+				"h12-l2-abbrev",
+				"韵母缩写 – Quy tắc viết tắt",
+				"Ba vần iou, uei, uen được viết tắt khi đứng sau phụ âm đầu.",
+				["iou → iu", "uei → ui", "uen → un"],
+				[
+					["liù", "iou viết tắt thành iu."],
+					["shuǐ", "uei viết tắt thành ui."],
+					["lùn", "uen viết tắt thành un."]
+				],
+				{
+					choicePrompt: "Dạng viết tắt đúng của iou là gì?",
+					answer: "iu",
+					wrong: ["ui", "un"],
+					arrange: ["i|u", "Dạng viết tắt của iou"],
+					input: ["Dạng viết tắt của uei là gì?", "ui"]
+				}
+			)
+		]
+	},
+	3: {
+		title: "BÀI 3: 你叫什么名字？",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l3-shenme",
+				"疑问代词“什么” – Đại từ nghi vấn 什么",
+				"什么 dùng để hỏi “gì/cái gì”, có thể làm tân ngữ hoặc đứng trước danh từ.",
+				["Chủ ngữ + động từ + 什么？", "什么 + danh từ"],
+				[
+					["你叫什么名字？", "Bạn tên là gì?"],
+					["这是什么？", "Đây là gì?"]
+				],
+				{
+					choicePrompt: "Muốn hỏi tên, chọn câu đúng.",
+					answer: "你叫什么名字？",
+					wrong: ["你叫谁名字？", "你名字什么叫？"],
+					arrange: ["这|是|什么", "Đây là gì?"],
+					input: ["Dịch: Bạn tên là gì?", "你叫什么名字"]
+				}
+			),
+			point(
+				"h12-l3-shi",
+				"“是”字句 – Câu chữ 是",
+				"是 nối chủ ngữ với danh từ hoặc cụm danh từ để xác định, giới thiệu.",
+				["S + 是 + N", "S + 不是 + N", "S + 是 + N + 吗？"],
+				[
+					["我是学生。", "Tôi là học sinh."],
+					["我不是老师。", "Tôi không phải giáo viên."],
+					["你是中国人吗？", "Bạn là người Trung Quốc phải không?"]
+				],
+				{
+					choicePrompt: "Chọn câu phủ định đúng.",
+					answer: "我不是老师。",
+					wrong: ["我不老师。", "我老师不是。"],
+					arrange: ["我|是|学生", "Tôi là học sinh."],
+					input: ["Đổi sang phủ định: 我是老师。", "我不是老师"]
+				}
+			),
+			point(
+				"h12-l3-ma",
+				"用“吗”的疑问句 – Câu hỏi với 吗",
+				"Thêm 吗 vào cuối câu trần thuật để tạo câu hỏi có/không.",
+				["Câu trần thuật + 吗？"],
+				[
+					["你是老师吗？", "Bạn là giáo viên phải không?"],
+					["你是中国人吗？", "Bạn là người Trung Quốc phải không?"]
+				],
+				{
+					choicePrompt: "Câu hỏi với 吗 nào đúng?",
+					answer: "你是老师吗？",
+					wrong: ["你吗是老师？", "你是什么吗？"],
+					arrange: ["你|是|中国人|吗", "Bạn là người Trung Quốc phải không?"],
+					input: ["Đổi thành câu hỏi với 吗: 你是学生。", "你是学生吗"]
+				},
+				["Không dùng đồng thời 吗 với 谁 hoặc 什么 trong câu hỏi thông thường."]
+			)
+		]
+	},
+	4: {
+		title: "BÀI 4: 她是我的汉语老师",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l4-shei-na",
+				"疑问代词“谁、哪” – Đại từ nghi vấn 谁、哪",
+				"谁 hỏi người; 哪 hỏi “nào”, thường đứng trước lượng từ hoặc danh từ.",
+				["谁？", "哪 + danh từ？"],
+				[
+					["她是谁？", "Cô ấy là ai?"],
+					["你是哪国人？", "Bạn là người nước nào?"]
+				],
+				{
+					choicePrompt: "Muốn hỏi về người, dùng từ nào?",
+					answer: "谁",
+					wrong: ["什么", "哪儿"],
+					arrange: ["她|是|谁", "Cô ấy là ai?"],
+					input: ["Dịch: Bạn là người nước nào?", "你是哪国人"]
+				}
+			),
+			point(
+				"h12-l4-de",
+				"结构助词“的” – Trợ từ kết cấu 的",
+				"的 nối danh từ/đại từ làm định ngữ với danh từ trung tâm, thường biểu thị sở hữu.",
+				["Danh từ/đại từ + 的 + danh từ"],
+				[
+					["我的老师", "Giáo viên của tôi."],
+					["她是我的朋友。", "Cô ấy là bạn của tôi."]
+				],
+				{
+					choicePrompt: "Chọn cụm “giáo viên của tôi”.",
+					answer: "我的老师",
+					wrong: ["我老师的", "我是老师"],
+					arrange: ["她|是|我的|朋友", "Cô ấy là bạn của tôi."],
+					input: ["Dịch: Giáo viên của tôi.", "我的老师"]
+				},
+				["Có thể lược bỏ 的 trong một số quan hệ gần gũi: 我妈妈, 我朋友."]
+			),
+			point(
+				"h12-l4-ne",
+				"疑问助词“呢”（1）– Trợ từ nghi vấn 呢",
+				"呢 dùng để hỏi tiếp về một người hay sự việc đã được nhắc tới.",
+				["A……，B呢？"],
+				[
+					["我是学生，你呢？", "Tôi là học sinh, còn bạn?"],
+					["我是中国人，他呢？", "Tôi là người Trung Quốc, còn anh ấy?"]
+				],
+				{
+					choicePrompt: "Chọn cách hỏi tiếp tự nhiên.",
+					answer: "我是学生，你呢？",
+					wrong: ["我是学生，你吗？", "我是学生，呢你？"],
+					arrange: ["我是中国人|他|呢", "Tôi là người Trung Quốc, còn anh ấy?"],
+					input: ["Điền trợ từ thích hợp: 我是学生，你___？", "呢"]
+				}
+			)
+		]
+	},
+	5: {
+		title: "BÀI 5: 她女儿今年二十岁",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l5-ji",
+				"疑问代词“几” – Đại từ nghi vấn 几",
+				"几 thường hỏi số lượng nhỏ, thường dưới 10.",
+				["几 + lượng từ + danh từ？", "几岁？"],
+				[
+					["你家有几口人？", "Nhà bạn có mấy người?"],
+					["你几岁了？", "Bạn mấy tuổi rồi?"]
+				],
+				{
+					choicePrompt: "Hỏi nhà có mấy người, chọn câu đúng.",
+					answer: "你家有几口人？",
+					wrong: ["你家有多少岁？", "你几家口人？"],
+					arrange: ["你|几|岁|了", "Bạn mấy tuổi rồi?"],
+					input: ["Dịch: Nhà bạn có mấy người?", "你家有几口人"]
+				}
+			),
+			point(
+				"h12-l5-numbers",
+				"百以内的数字 – Số trong phạm vi 100",
+				"Số 10–19 dùng 十 + số; số chục dùng số + 十; thêm hàng đơn vị ở cuối.",
+				["10–19: 十 + số", "Số chục: số + 十", "Số lẻ: số + 十 + số"],
+				[
+					["十二", "Mười hai."],
+					["二十", "Hai mươi."],
+					["二十一", "Hai mươi mốt."]
+				],
+				{
+					choicePrompt: "Số 21 viết thế nào?",
+					answer: "二十一",
+					wrong: ["十二一", "二一十"],
+					arrange: ["二|十|一", "Hai mươi mốt"],
+					input: ["Viết số 12 bằng chữ Hán.", "十二"]
+				}
+			),
+			point(
+				"h12-l5-le-change",
+				"“了”表变化 – 了 biểu thị sự thay đổi",
+				"了 đặt cuối câu để cho biết tình huống mới hoặc sự thay đổi.",
+				["Câu biểu thị tình huống mới + 了"],
+				[
+					["她四岁了。", "Cô bé đã bốn tuổi rồi."],
+					["他是学生了。", "Bây giờ anh ấy đã là học sinh rồi."]
+				],
+				{
+					choicePrompt: "Câu nào biểu thị tình huống mới?",
+					answer: "她四岁了。",
+					wrong: ["她了四岁。", "她四了岁。"],
+					arrange: ["他|是|学生|了", "Bây giờ anh ấy đã là học sinh rồi."],
+					input: ["Thêm 了 đúng vị trí: 她四岁。", "她四岁了"]
+				}
+			),
+			point(
+				"h12-l5-duoda",
+				"“多大”表示疑问 – 多大 dùng để hỏi tuổi",
+				"多大 dùng để hỏi tuổi và có thể dùng cho nhiều độ tuổi.",
+				["Chủ ngữ + 多大（了）？"],
+				[
+					["李老师多大了？", "Thầy/cô Lý bao nhiêu tuổi rồi?"],
+					["你女儿多大？", "Con gái bạn bao nhiêu tuổi?"]
+				],
+				{
+					choicePrompt: "Hỏi tuổi giáo viên, chọn câu phù hợp.",
+					answer: "李老师多大了？",
+					wrong: ["李老师几口人？", "李老师什么大？"],
+					arrange: ["你女儿|多大", "Con gái bạn bao nhiêu tuổi?"],
+					input: ["Dịch: Con gái bạn bao nhiêu tuổi?", "你女儿多大"]
+				}
+			)
+		]
+	},
+	6: {
+		title: "BÀI 6: 我会说汉语",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l6-hui",
+				"能愿动词“会”（1）– Động từ năng nguyện 会",
+				"会 biểu thị khả năng có được thông qua học tập.",
+				["会 + động từ", "不会 + động từ"],
+				[
+					["我会写汉字。", "Tôi biết viết chữ Hán."],
+					["他不会说汉语。", "Anh ấy không biết nói tiếng Trung."]
+				],
+				{
+					choicePrompt: "Chọn câu phủ định đúng.",
+					answer: "他不会说汉语。",
+					wrong: ["他会不说汉语。", "他不说会汉语。"],
+					arrange: ["我|会|写|汉字", "Tôi biết viết chữ Hán."],
+					input: ["Dịch: Anh ấy không biết nói tiếng Trung.", "他不会说汉语"]
+				}
+			),
+			point(
+				"h12-l6-adjective",
+				"形容词谓语句 – Câu vị ngữ tính từ",
+				"Tính từ có thể trực tiếp làm vị ngữ; câu khẳng định thường có 很 đứng trước tính từ.",
+				["S + 很 + tính từ", "S + 不 + tính từ"],
+				[
+					["中国菜很好吃。", "Món Trung Quốc rất ngon."],
+					["天气不好。", "Thời tiết không tốt."]
+				],
+				{
+					choicePrompt: "Chọn câu vị ngữ tính từ đúng.",
+					answer: "中国菜很好吃。",
+					wrong: ["中国菜是很好吃。", "中国菜很是好吃。"],
+					arrange: ["天气|不|好", "Thời tiết không tốt."],
+					input: ["Dịch: Món Trung Quốc rất ngon.", "中国菜很好吃"]
+				}
+			),
+			point(
+				"h12-l6-zenme",
+				"疑问代词“怎么”（1）– Đại từ nghi vấn 怎么",
+				"怎么 đứng trước động từ để hỏi cách thức.",
+				["怎么 + động từ？"],
+				[
+					["这个字怎么写？", "Chữ này viết thế nào?"],
+					["这个汉字怎么读？", "Chữ Hán này đọc thế nào?"]
+				],
+				{
+					choicePrompt: "Muốn hỏi cách viết chữ này, chọn câu đúng.",
+					answer: "这个字怎么写？",
+					wrong: ["这个字写怎么？", "这个怎么字写？"],
+					arrange: ["这个汉字|怎么|读", "Chữ Hán này đọc thế nào?"],
+					input: ["Dịch: Chữ này viết thế nào?", "这个字怎么写"]
+				}
+			)
+		]
+	},
+	7: {
+		title: "BÀI 7: 今天几号？",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l7-date",
+				"日期的表达（1）– Cách nói ngày tháng",
+				"Khi nói ngày tháng và thứ, dùng trật tự tháng → ngày → thứ.",
+				["……月 + ……号 + 星期……"],
+				[
+					["九月一号，星期三。", "Ngày 1 tháng 9, thứ Tư."],
+					["今天九月一号。", "Hôm nay là ngày 1 tháng 9."]
+				],
+				{
+					choicePrompt: "Chọn trật tự ngày tháng đúng.",
+					answer: "九月一号",
+					wrong: ["一号九月", "九号一月"],
+					arrange: ["今天|九月|一号", "Hôm nay là ngày 1 tháng 9."],
+					input: ["Dịch: Ngày 1 tháng 9, thứ Tư.", "九月一号星期三"]
+				}
+			),
+			point(
+				"h12-l7-noun-predicate",
+				"名词谓语句 – Câu vị ngữ danh từ",
+				"Danh từ hoặc cụm danh từ có thể làm vị ngữ khi nói thời gian, ngày tháng hoặc tuổi.",
+				["Chủ ngữ + cụm thời gian/ngày tháng"],
+				[
+					["今天星期三。", "Hôm nay là thứ Tư."],
+					["明天九月一号。", "Ngày mai là ngày 1 tháng 9."]
+				],
+				{
+					choicePrompt: "Chọn câu nói thứ tự nhiên.",
+					answer: "今天星期三。",
+					wrong: ["今天是星期三是。", "星期三今天吗。"],
+					arrange: ["明天|九月|一号", "Ngày mai là ngày 1 tháng 9."],
+					input: ["Dịch: Hôm nay là thứ Tư.", "今天星期三"]
+				}
+			),
+			point(
+				"h12-l7-serial",
+				"连动句（1）– Câu liên động",
+				"Hai động từ nối tiếp biểu thị đi đến một nơi để thực hiện hành động.",
+				["S + 去 + địa điểm + động từ"],
+				[
+					["我去学校看书。", "Tôi đến trường đọc sách."],
+					["她去商店买杯子。", "Cô ấy đi cửa hàng mua cốc."]
+				],
+				{
+					choicePrompt: "Chọn câu liên động đúng.",
+					answer: "我去学校看书。",
+					wrong: ["我学校去看书。", "我看书去学校。"],
+					arrange: ["她|去|商店|买|杯子", "Cô ấy đi cửa hàng mua cốc."],
+					input: ["Dịch: Tôi đến trường đọc sách.", "我去学校看书"]
+				}
+			)
+		]
+	},
+	8: {
+		title: "BÀI 8: 我想喝茶",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l8-xiang",
+				"能愿动词“想” – Động từ năng nguyện 想",
+				"想 đứng trước động từ để biểu thị mong muốn; phủ định dùng 不想.",
+				["想 + động từ", "不想 + động từ"],
+				[
+					["我想学汉语。", "Tôi muốn học tiếng Trung."],
+					["我想买一个杯子。", "Tôi muốn mua một cái cốc."],
+					["她不想喝茶。", "Cô ấy không muốn uống trà."]
+				],
+				{
+					choicePrompt: "Chọn câu phủ định đúng.",
+					answer: "她不想喝茶。",
+					wrong: ["她想不喝茶。", "她不喝想茶。"],
+					arrange: ["我|想|买|一个|杯子", "Tôi muốn mua một cái cốc."],
+					input: ["Dịch: Tôi muốn học tiếng Trung.", "我想学汉语"]
+				}
+			),
+			point(
+				"h12-l8-duoshao",
+				"疑问代词“多少” – Đại từ nghi vấn 多少",
+				"多少 hỏi số lượng; 多少钱 hỏi giá tiền.",
+				["多少 + danh từ？", "……多少钱？"],
+				[
+					["你们学校有多少学生？", "Trường các bạn có bao nhiêu học sinh?"],
+					["这个杯子多少钱？", "Cái cốc này bao nhiêu tiền?"]
+				],
+				{
+					choicePrompt: "Muốn hỏi giá cái cốc, chọn câu đúng.",
+					answer: "这个杯子多少钱？",
+					wrong: ["这个杯子几岁？", "这个杯子钱多少个？"],
+					arrange: ["你们学校|有|多少|学生", "Trường các bạn có bao nhiêu học sinh?"],
+					input: ["Dịch: Cái cốc này bao nhiêu tiền?", "这个杯子多少钱"]
+				}
+			),
+			point(
+				"h12-l8-measure",
+				"量词“个、口” – Lượng từ 个、口",
+				"个 là lượng từ thông dụng; 口 dùng đếm người trong gia đình.",
+				["số + 个 + danh từ", "số + 口 + 人"],
+				[
+					["一个杯子", "Một cái cốc."],
+					["三个老师", "Ba giáo viên."],
+					["三口人", "Ba người trong gia đình."]
+				],
+				{
+					choicePrompt: "Nhà có ba người, chọn cụm đúng.",
+					answer: "三口人",
+					wrong: ["三个口人", "三人个"],
+					arrange: ["三|个|老师", "Ba giáo viên"],
+					input: ["Dịch: Một cái cốc.", "一个杯子"]
+				}
+			),
+			point(
+				"h12-l8-money",
+				"钱数的表达 – Cách nói số tiền",
+				"元 và 块 đều biểu thị đơn vị tiền; 块 thường dùng trong khẩu ngữ.",
+				["số + 元", "số + 块"],
+				[
+					["二十八元", "Hai mươi tám tệ."],
+					["二十八块", "Hai mươi tám đồng/tệ (khẩu ngữ)."]
+				],
+				{
+					choicePrompt: "Cách nói khẩu ngữ “28 tệ” là gì?",
+					answer: "二十八块",
+					wrong: ["二十八口", "二十八个"],
+					arrange: ["二十八|元", "Hai mươi tám tệ"],
+					input: ["Viết cách nói khẩu ngữ: 28 tệ.", "二十八块"]
+				}
+			)
+		]
+	},
+	9: {
+		title: "BÀI 9: 你儿子在哪儿工作？",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l9-zai-verb",
+				"动词“在” – Động từ 在",
+				"在 làm động từ biểu thị người hoặc vật ở một vị trí.",
+				["S + 在 + vị trí"],
+				[
+					["我朋友在学校。", "Bạn tôi ở trường."],
+					["小猫在椅子上。", "Mèo con ở trên ghế."]
+				],
+				{
+					choicePrompt: "Chọn câu chỉ vị trí đúng.",
+					answer: "小猫在椅子上。",
+					wrong: ["小猫椅子上在。", "小猫在上椅子。"],
+					arrange: ["我朋友|在|学校", "Bạn tôi ở trường."],
+					input: ["Dịch: Mèo con ở trên ghế.", "小猫在椅子上"]
+				}
+			),
+			point(
+				"h12-l9-nar",
+				"疑问代词“哪儿” – Đại từ nghi vấn 哪儿",
+				"哪儿 dùng để hỏi nơi chốn.",
+				["S + 在哪儿？", "S + 在哪儿 + động từ？"],
+				[
+					["你在哪儿工作？", "Bạn làm việc ở đâu?"],
+					["我的杯子在哪儿？", "Cốc của tôi ở đâu?"]
+				],
+				{
+					choicePrompt: "Muốn hỏi nơi làm việc, chọn câu đúng.",
+					answer: "你在哪儿工作？",
+					wrong: ["你工作什么？", "你在工作哪儿？"],
+					arrange: ["我的杯子|在|哪儿", "Cốc của tôi ở đâu?"],
+					input: ["Dịch: Bạn làm việc ở đâu?", "你在哪儿工作"]
+				}
+			),
+			point(
+				"h12-l9-zai-prep",
+				"介词“在” – Giới từ 在",
+				"在 đứng trước nơi chốn và trước động từ để nêu địa điểm diễn ra hành động.",
+				["S + 在 + nơi chốn + động từ"],
+				[
+					["我在学校工作。", "Tôi làm việc ở trường."],
+					["他在医院看书。", "Anh ấy đọc sách ở bệnh viện."]
+				],
+				{
+					choicePrompt: "Chọn vị trí đúng của 在.",
+					answer: "我在学校工作。",
+					wrong: ["我学校在工作。", "我工作在学校。"],
+					arrange: ["他|在|医院|看书", "Anh ấy đọc sách ở bệnh viện."],
+					input: ["Dịch: Tôi làm việc ở trường.", "我在学校工作"]
+				}
+			),
+			point(
+				"h12-l9-ne2",
+				"疑问助词“呢”（2）– Trợ từ nghi vấn 呢",
+				"呢 đặt cuối câu để hỏi về người, vật hoặc vị trí đã được nhắc đến.",
+				["Danh từ/cụm danh từ + 呢？", "Câu hỏi vị trí + 呢？"],
+				[
+					["我的小猫呢？", "Mèo con của tôi đâu?"],
+					["他在哪儿呢？", "Anh ấy ở đâu vậy?"]
+				],
+				{
+					choicePrompt: "Muốn hỏi “Mèo con của tôi đâu?”, chọn câu đúng.",
+					answer: "我的小猫呢？",
+					wrong: ["我的小猫吗？", "呢我的小猫？"],
+					arrange: ["他|在|哪儿|呢", "Anh ấy ở đâu vậy?"],
+					input: ["Điền trợ từ: 我的小猫___？", "呢"]
+				}
+			)
+		]
+	},
+	10: {
+		title: "BÀI 10: 我能坐这儿吗？",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l10-you",
+				"“有”字句表示存在 – Câu 有 biểu thị tồn tại",
+				"Dùng 有 sau từ chỉ vị trí để nói có người/vật; phủ định dùng 没有.",
+				["Vị trí + 有 + người/vật", "Vị trí + 没有 + người/vật"],
+				[
+					["桌子上有一个电脑。", "Trên bàn có một máy tính."],
+					["椅子上没有书。", "Trên ghế không có sách."]
+				],
+				{
+					choicePrompt: "Chọn câu phủ định đúng.",
+					answer: "椅子上没有书。",
+					wrong: ["椅子上不有书。", "椅子没有上书。"],
+					arrange: ["桌子上|有|一个|电脑", "Trên bàn có một máy tính."],
+					input: ["Dịch: Trên ghế không có sách.", "椅子上没有书"]
+				}
+			),
+			point(
+				"h12-l10-he",
+				"连词“和” – Liên từ 和",
+				"和 nối các thành phần đồng đẳng như danh từ hoặc cụm danh từ.",
+				["A + 和 + B"],
+				[
+					[
+						"我有一个中国朋友和一个美国朋友。",
+						"Tôi có một người bạn Trung Quốc và một người bạn Mỹ."
+					],
+					["桌子上有书和电脑。", "Trên bàn có sách và máy tính."]
+				],
+				{
+					choicePrompt: "Chọn câu dùng 和 đúng.",
+					answer: "桌子上有书和电脑。",
+					wrong: ["桌子上和有书电脑。", "桌子上有和书电脑。"],
+					arrange: ["书|和|电脑", "Sách và máy tính"],
+					input: ["Dịch: Trên bàn có sách và máy tính.", "桌子上有书和电脑"]
+				}
+			),
+			point(
+				"h12-l10-neng",
+				"能愿动词“能” – Động từ năng nguyện 能",
+				"能 biểu thị khả năng hoặc sự cho phép.",
+				["能 + động từ", "不能 + động từ"],
+				[
+					["我能坐这儿吗？", "Tôi có thể ngồi đây không?"],
+					["明天我能去商店。", "Ngày mai tôi có thể đi cửa hàng."]
+				],
+				{
+					choicePrompt: "Xin phép ngồi ở đây, chọn câu đúng.",
+					answer: "我能坐这儿吗？",
+					wrong: ["我坐能这儿吗？", "我能吗坐这儿？"],
+					arrange: ["明天|我|能|去|商店", "Ngày mai tôi có thể đi cửa hàng."],
+					input: ["Dịch: Tôi có thể ngồi đây không?", "我能坐这儿吗"]
+				}
+			),
+			point(
+				"h12-l10-qing",
+				"用“请”的祈使句 – Câu cầu khiến với 请",
+				"请 đứng trước động từ để tạo lời mời hoặc yêu cầu lịch sự.",
+				["请 + động từ"],
+				[
+					["请坐！", "Mời ngồi!"],
+					["请喝茶！", "Mời uống trà!"]
+				],
+				{
+					choicePrompt: "Mời người khác uống trà, chọn câu đúng.",
+					answer: "请喝茶！",
+					wrong: ["喝请茶！", "请茶喝！"],
+					arrange: ["请|坐", "Mời ngồi!"],
+					input: ["Dịch: Mời uống trà!", "请喝茶"]
+				}
+			)
+		]
+	},
+	11: {
+		title: "BÀI 11: 现在几点？",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l11-time",
+				"时间的表达 – Cách nói giờ",
+				"Giờ đứng trước phút. Hai giờ nói 两点, không nói 二点.",
+				["……点 + ……分"],
+				[
+					["上午八点", "Tám giờ sáng."],
+					["下午三点十分", "Ba giờ mười phút chiều."],
+					["五点三十分", "Năm giờ ba mươi phút."]
+				],
+				{
+					choicePrompt: "Cách nói “hai giờ” đúng là gì?",
+					answer: "两点",
+					wrong: ["二点", "点两"],
+					arrange: ["下午|三点|十分", "Ba giờ mười phút chiều"],
+					input: ["Dịch: Tám giờ sáng.", "上午八点"]
+				}
+			),
+			point(
+				"h12-l11-time-adverb",
+				"时间词做状语 – Từ chỉ thời gian làm trạng ngữ",
+				"Thời gian có thể đứng trước hoặc sau chủ ngữ, nhưng phải đứng trước động từ.",
+				["S + thời gian + V", "Thời gian + S + V"],
+				[
+					["妈妈六点做饭。", "Mẹ nấu cơm lúc sáu giờ."],
+					["六点妈妈做饭。", "Lúc sáu giờ mẹ nấu cơm."]
+				],
+				{
+					choicePrompt: "Chọn câu có trật tự thời gian đúng.",
+					answer: "妈妈六点做饭。",
+					wrong: ["妈妈做饭六点。", "六点做饭妈妈。"],
+					arrange: ["六点|妈妈|做饭", "Lúc sáu giờ mẹ nấu cơm."],
+					input: ["Dịch: Mẹ nấu cơm lúc sáu giờ.", "妈妈六点做饭", ["六点妈妈做饭"]]
+				}
+			),
+			point(
+				"h12-l11-qian",
+				"名词“前” – Danh từ 前",
+				"前 đứng sau thời gian hoặc khoảng thời gian để nói “trước”.",
+				["thời gian/khoảng thời gian + 前"],
+				[
+					["三天前", "Ba ngày trước."],
+					["八点前", "Trước tám giờ."],
+					["你星期五前能回家吗？", "Bạn có thể về nhà trước thứ Sáu không?"]
+				],
+				{
+					choicePrompt: "Cụm “trước tám giờ” là gì?",
+					answer: "八点前",
+					wrong: ["前八点", "八前点"],
+					arrange: ["三天|前", "Ba ngày trước"],
+					input: ["Dịch: Bạn có thể về nhà trước thứ Sáu không?", "你星期五前能回家吗"]
+				}
+			)
+		]
+	},
+	12: {
+		title: "BÀI 12: 明天天气怎么样？",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l12-zenmeyang",
+				"疑问代词“怎么样” – Đại từ nghi vấn 怎么样",
+				"怎么样 đặt sau chủ đề để hỏi tình trạng hoặc nhận xét.",
+				["Chủ đề + 怎么样？"],
+				[
+					["明天天气怎么样？", "Thời tiết ngày mai thế nào?"],
+					["你身体怎么样？", "Sức khỏe bạn thế nào?"]
+				],
+				{
+					choicePrompt: "Hỏi thời tiết ngày mai, chọn câu đúng.",
+					answer: "明天天气怎么样？",
+					wrong: ["明天怎么样天气？", "明天天气怎么吗？"],
+					arrange: ["你身体|怎么样", "Sức khỏe bạn thế nào?"],
+					input: ["Dịch: Thời tiết ngày mai thế nào?", "明天天气怎么样"]
+				}
+			),
+			point(
+				"h12-l12-subject-predicate",
+				"主谓谓语句 – Câu chủ-vị làm vị ngữ",
+				"Cụm chủ-vị có thể làm vị ngữ để miêu tả một bộ phận hoặc phương diện của chủ ngữ lớn.",
+				["Chủ ngữ lớn + cụm chủ-vị"],
+				[
+					["我身体不太好。", "Sức khỏe tôi không được tốt lắm."],
+					["明天天气很好。", "Thời tiết ngày mai rất đẹp."]
+				],
+				{
+					choicePrompt: "Chọn câu miêu tả sức khỏe đúng.",
+					answer: "我身体不太好。",
+					wrong: ["我不太好身体。", "身体我好不太。"],
+					arrange: ["明天|天气|很|好", "Thời tiết ngày mai rất đẹp."],
+					input: ["Dịch: Sức khỏe tôi không được tốt lắm.", "我身体不太好"]
+				}
+			),
+			point(
+				"h12-l12-tai",
+				"程度副词“太” – Phó từ mức độ 太",
+				"太……了 biểu thị mức độ cao; 不太 biểu thị “không…lắm”.",
+				["太 + tính từ + 了", "不太 + tính từ"],
+				[
+					["太热了！", "Nóng quá!"],
+					["天气太冷了。", "Thời tiết lạnh quá."],
+					["我身体不太好。", "Sức khỏe tôi không tốt lắm."]
+				],
+				{
+					choicePrompt: "Chọn câu “Nóng quá!”.",
+					answer: "太热了！",
+					wrong: ["热太了！", "太了热！"],
+					arrange: ["天气|太|冷|了", "Thời tiết lạnh quá."],
+					input: ["Dịch: Sức khỏe tôi không tốt lắm.", "我身体不太好"]
+				}
+			),
+			point(
+				"h12-l12-hui2",
+				"能愿动词“会”（2）– 会 biểu thị khả năng xảy ra",
+				"会 có thể biểu thị một tình huống có khả năng xảy ra trong tương lai.",
+				["会 + động từ", "不会 + động từ"],
+				[
+					["今天会下雨吗？", "Hôm nay có thể mưa không?"],
+					["明天她会来。", "Ngày mai cô ấy sẽ đến."],
+					["今天不会下雨。", "Hôm nay sẽ không mưa."]
+				],
+				{
+					choicePrompt: "Chọn câu dự đoán phủ định đúng.",
+					answer: "今天不会下雨。",
+					wrong: ["今天会不下雨。", "今天不下会雨。"],
+					arrange: ["明天|她|会|来", "Ngày mai cô ấy sẽ đến."],
+					input: ["Dịch: Hôm nay có thể mưa không?", "今天会下雨吗"]
+				}
+			)
+		]
+	},
+	13: {
+		title: "BÀI 13: 他在学做中国菜呢",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l13-wei",
+				"叹词“喂” – Thán từ 喂",
+				"喂 dùng khi gọi điện thoại hoặc nhấc máy.",
+				["喂，……"],
+				[
+					["喂，李老师在家吗？", "A lô, thầy/cô Lý có ở nhà không?"],
+					["喂，你在做什么呢？", "A lô, bạn đang làm gì vậy?"]
+				],
+				{
+					choicePrompt: "Khi nhấc điện thoại, từ mở đầu phù hợp là gì?",
+					answer: "喂",
+					wrong: ["再见", "谢谢"],
+					arrange: ["喂|你|在做|什么|呢", "A lô, bạn đang làm gì vậy?"],
+					input: ["Điền từ mở đầu cuộc gọi: ___，李老师在家吗？", "喂"]
+				}
+			),
+			point(
+				"h12-l13-progressive",
+				"“在……呢”表示动作正在进行 – Hành động đang diễn ra",
+				"在……呢 biểu thị hành động đang diễn ra; phủ định dùng 没在 + động từ hoặc 没 + động từ và không dùng 呢.",
+				["在 + V + O + 呢", "没在 + V / 没 + V"],
+				[
+					["我在看书呢。", "Tôi đang đọc sách."],
+					["他没看书。", "Anh ấy không đọc sách."],
+					["你在做什么呢？", "Bạn đang làm gì vậy?"]
+				],
+				{
+					choicePrompt: "Chọn câu phủ định đúng.",
+					answer: "他没看书。",
+					wrong: ["他没在看书呢。", "他不在看书呢。"],
+					arrange: ["我|在|看书|呢", "Tôi đang đọc sách."],
+					input: ["Dịch: Bạn đang làm gì vậy?", "你在做什么呢"]
+				},
+				["Trong dạng phủ định này không dùng 呢."]
+			),
+			point(
+				"h12-l13-phone",
+				"电话号码的表达 – Cách đọc số điện thoại",
+				"Đọc từng chữ số; số 1 trong số điện thoại thường đọc là yāo.",
+				["1 trong số điện thoại thường đọc yāo"],
+				[
+					["一：yāo", "Số 1 thường đọc là yāo trong số điện thoại."],
+					["八零一：bā líng yāo", "Đọc lần lượt từng chữ số."]
+				],
+				{
+					choicePrompt: "Số 1 trong số điện thoại thường đọc thế nào?",
+					answer: "yāo",
+					wrong: ["yīshí", "liǎng"],
+					arrange: ["八|零|一", "Số điện thoại giả: 801"],
+					input: ["Số 1 trong số điện thoại thường đọc là gì?", "yāo"]
+				},
+				["Chỉ dùng số giả để luyện đọc, không dùng thông tin cá nhân."]
+			),
+			point(
+				"h12-l13-ba",
+				"语气助词“吧” – Trợ từ ngữ khí 吧",
+				"吧 đặt cuối câu để thể hiện đề nghị hoặc gợi ý nhẹ nhàng.",
+				["Câu đề nghị + 吧"],
+				[
+					["请坐吧！", "Mời ngồi nhé!"],
+					["你下午打吧。", "Bạn gọi vào buổi chiều nhé."],
+					["我们在家吃饭吧。", "Chúng ta ăn cơm ở nhà nhé."]
+				],
+				{
+					choicePrompt: "Chọn câu đề nghị nhẹ nhàng.",
+					answer: "我们在家吃饭吧。",
+					wrong: ["吧我们在家吃饭。", "我们吧在家吃饭。"],
+					arrange: ["请|坐|吧", "Mời ngồi nhé!"],
+					input: ["Thêm 吧: 我们在家吃饭。", "我们在家吃饭吧"]
+				}
+			)
+		]
+	},
+	14: {
+		title: "BÀI 14: 她买了不少衣服",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l14-le",
+				"“了”表发生或完成 – 了 biểu thị xảy ra/hoàn thành",
+				"了 sau động từ hoặc cuối câu biểu thị hành động đã xảy ra; phủ định dùng 没 + động từ và bỏ 了.",
+				["S + V + O + 了", "S + V + 了 + số lượng/tính từ + O", "没 + V + O"],
+				[
+					["我去商店了。", "Tôi đã đi cửa hàng."],
+					["她买了一点儿苹果。", "Cô ấy đã mua một ít táo."],
+					["她没去商店。", "Cô ấy không đi cửa hàng."]
+				],
+				{
+					choicePrompt: "Chọn dạng phủ định đúng.",
+					answer: "她没去商店。",
+					wrong: ["她没去了商店。", "她不去了商店。"],
+					arrange: ["她|买了|一点儿|苹果", "Cô ấy đã mua một ít táo."],
+					input: ["Đổi sang phủ định: 她去了商店。", "她没去商店"]
+				}
+			),
+			point(
+				"h12-l14-hou",
+				"名词“后” – Danh từ 后",
+				"后 đứng sau thời gian hoặc khoảng thời gian để nói “sau”.",
+				["thời gian/khoảng thời gian + 后"],
+				[
+					["五分钟后", "Năm phút sau."],
+					["星期三后", "Sau thứ Tư."],
+					["他四十分钟后回来。", "Anh ấy quay lại sau bốn mươi phút."]
+				],
+				{
+					choicePrompt: "Cụm “năm phút sau” là gì?",
+					answer: "五分钟后",
+					wrong: ["后五分钟", "五后分钟"],
+					arrange: ["星期三|后", "Sau thứ Tư"],
+					input: ["Dịch: Anh ấy quay lại sau bốn mươi phút.", "他四十分钟后回来"]
+				}
+			),
+			point(
+				"h12-l14-a",
+				"语气助词“啊” – Trợ từ ngữ khí 啊",
+				"啊 đặt cuối câu để thêm sắc thái cảm xúc hoặc xác nhận.",
+				["Câu + 啊"],
+				[
+					["是啊！", "Đúng vậy!"],
+					["好啊！", "Được đấy!"]
+				],
+				{
+					choicePrompt: "Chọn cách xác nhận có sắc thái tự nhiên.",
+					answer: "是啊！",
+					wrong: ["啊是！", "是吗啊！"],
+					arrange: ["好|啊", "Được đấy!"],
+					input: ["Thêm 啊 để xác nhận: 是。", "是啊"]
+				}
+			),
+			point(
+				"h12-l14-dou",
+				"副词“都” – Phó từ 都",
+				"都 biểu thị tất cả; đối tượng được bao hàm phải đứng trước 都.",
+				["Đối tượng số nhiều + 都 + vị ngữ"],
+				[
+					["我们都是中国人。", "Chúng tôi đều là người Trung Quốc."],
+					["这些都是王方的东西。", "Những thứ này đều là đồ của Vương Phương."],
+					["他们都喜欢喝茶。", "Họ đều thích uống trà."]
+				],
+				{
+					choicePrompt: "Chọn vị trí đúng của 都.",
+					answer: "他们都喜欢喝茶。",
+					wrong: ["都他们喜欢喝茶。", "他们喜欢都喝茶。"],
+					arrange: ["我们|都|是|中国人", "Chúng tôi đều là người Trung Quốc."],
+					input: ["Dịch: Họ đều thích uống trà.", "他们都喜欢喝茶"]
+				},
+				["Thành phần được 都 bao hàm phải đặt trước 都."]
+			)
+		]
+	},
+	15: {
+		title: "BÀI 15: 我是坐飞机来的",
+		variant: "hsk1-2-0",
+		points: [
+			point(
+				"h12-l15-shide",
+				"“是……的”句 – Câu 是……的",
+				"Dùng để nhấn mạnh thời gian, địa điểm hoặc cách thức của một sự việc đã xảy ra.",
+				[
+					"S + 是 + thời gian/địa điểm/cách thức + V + 的",
+					"Phủ định: S + 不是 + thành phần nhấn mạnh + V + 的"
+				],
+				[
+					["我是昨天来的。", "Tôi đến hôm qua."],
+					["我们是在学校认识的。", "Chúng tôi quen nhau ở trường."],
+					["他们是坐出租车来的。", "Họ đến bằng taxi."],
+					["我不是昨天来的。", "Tôi không đến hôm qua."]
+				],
+				{
+					choicePrompt: "Chọn câu phủ định đúng.",
+					answer: "我不是昨天来的。",
+					wrong: ["我不昨天来的。", "我昨天不是来的。"],
+					arrange: ["他们|是|坐出租车|来|的", "Họ đến bằng taxi."],
+					input: ["Dùng 是……的 để nói: Tôi đến hôm qua.", "我是昨天来的", ["我昨天来的"]]
+				},
+				["Có thể bỏ 是 trong câu khẳng định và câu hỏi; dạng phủ định phải dùng 不是."]
+			),
+			point(
+				"h12-l15-date2",
+				"日期的表达（2）– Cách nói ngày tháng đầy đủ",
+				"Khi có năm, dùng trật tự năm → tháng → ngày → thứ; năm được đọc lần lượt từng chữ số.",
+				["年 → 月 → 日/号 → 星期"],
+				[
+					["二零一一年九月", "Tháng 9 năm 2011."],
+					["我们是二零一一年九月认识的。", "Chúng tôi quen nhau vào tháng 9 năm 2011."]
+				],
+				{
+					choicePrompt: "Cách đọc năm 2011 đúng là gì?",
+					answer: "二零一一年",
+					wrong: ["二千零十一年", "二十一十一年"],
+					arrange: ["二零一一年|九月", "Tháng 9 năm 2011"],
+					input: [
+						"Dịch: Chúng tôi quen nhau vào tháng 9 năm 2011.",
+						"我们是二零一一年九月认识的",
+						["我们二零一一年九月认识的"]
+					]
+				},
+				["Khi đọc năm, đọc lần lượt từng chữ số."]
+			)
+		]
+	}
+};
+
+export function getHsk12GrammarLesson(lessonId: number): GrammarLesson | undefined {
+	return lessons[lessonId];
+}
+
+export const hsk12GrammarLessons = lessons;

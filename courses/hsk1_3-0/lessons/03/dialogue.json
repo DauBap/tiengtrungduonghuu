@@ -1,0 +1,98 @@
+{
+  "lesson": 3,
+  "title": "我是中国人",
+  "title_pinyin": "Wǒ shì Zhōngguó rén",
+  "title_vi": "Tôi là người Trung Quốc",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "我是中国人。",
+          "pinyin": "Wǒ shì Zhōngguó rén.",
+          "vi": "Tôi là người Trung Quốc."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我是法国人。我的中文老师也是中国人。",
+          "pinyin": "Wǒ shì Fǎguó rén. Wǒ de Zhōngwén lǎoshī yě shì Zhōngguó rén.",
+          "vi": "Tôi là người Pháp. Giáo viên tiếng Trung của tôi cũng là người Trung Quốc."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "安妮",
+          "zh": "这是谁？",
+          "pinyin": "Zhè shì shéi?",
+          "vi": "Đây là ai vậy?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "这是我女朋友。",
+          "pinyin": "Zhè shì wǒ nǚpéngyou.",
+          "vi": "Đây là bạn gái của tôi."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "你女朋友是哪国人？",
+          "pinyin": "Nǐ nǚpéngyou shì nǎ guó rén?",
+          "vi": "Bạn gái của bạn là người nước nào?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "她也是泰国人。",
+          "pinyin": "Tā yě shì Tàiguó rén.",
+          "vi": "Cô ấy cũng là người Thái Lan."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "喂，一飞！",
+          "pinyin": "Wèi, Yīfēi!",
+          "vi": "A lô, Nhất Phi!"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "姐姐！",
+          "pinyin": "Jiějie!",
+          "vi": "Chị gái!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你工作还忙吗？",
+          "pinyin": "Nǐ gōngzuò hái máng ma?",
+          "vi": "Em làm việc còn bận không?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "对，还很忙。你也很忙吗？",
+          "pinyin": "Duì, hái hěn máng. Nǐ yě hěn máng ma?",
+          "vi": "Vâng, vẫn rất bận. Chị cũng rất bận à?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我不太忙。我们很想你。",
+          "pinyin": "Wǒ bú tài máng. Wǒmen hěn xiǎng nǐ.",
+          "vi": "Chị không bận lắm. Chúng tôi rất nhớ em."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "我也想你们。",
+          "pinyin": "Wǒ yě xiǎng nǐmen.",
+          "vi": "Em cũng nhớ mọi người."
+        }
+      ]
+    }
+  ]
+}

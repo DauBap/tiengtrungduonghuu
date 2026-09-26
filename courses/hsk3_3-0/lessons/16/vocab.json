@@ -1,0 +1,192 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 16,
+  "label": "Bài 16",
+  "title": "我听说有的熊猫出国了",
+  "short_vi": "Đến trung tâm nhận nuôi thú cưng; nói về đặc điểm của mèo, chó; tham quan vườn bách thú; giới thiệu về gấu trúc (tập tính ăn uống, ngủ nghỉ, là quốc bảo của Trung Quốc); tìm hiểu thông tin về gấu trúc",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "脏",
+      "pinyin": "zāng",
+      "adj": 6,
+      "vi": "bẩn, dơ"
+    },
+    {
+      "pos": 2,
+      "hanzi": "可爱",
+      "pinyin": "kě'ài",
+      "adj": 6,
+      "vi": "đáng yêu, dễ thương"
+    },
+    {
+      "pos": 3,
+      "hanzi": "一会儿",
+      "pinyin": "yíhuìr",
+      "adj": 18,
+      "vi": "một lát, một chốc"
+    },
+    {
+      "pos": 4,
+      "hanzi": "脚",
+      "pinyin": "jiǎo",
+      "adj": 2,
+      "vi": "chân, bàn chân"
+    },
+    {
+      "pos": 5,
+      "hanzi": "照顾",
+      "pinyin": "zhàogù",
+      "adj": 4,
+      "vi": "chăm sóc"
+    },
+    {
+      "pos": 6,
+      "hanzi": "好像",
+      "pinyin": "hǎoxiàng",
+      "adj": 4,
+      "vi": "hình như, giống như"
+    },
+    {
+      "pos": 7,
+      "hanzi": "认得",
+      "pinyin": "rènde",
+      "adj": 4,
+      "vi": "nhận ra, biết (mặt)"
+    },
+    {
+      "pos": 8,
+      "hanzi": "周末",
+      "pinyin": "zhōumò",
+      "adj": 2,
+      "vi": "cuối tuần"
+    },
+    {
+      "pos": 9,
+      "hanzi": "动物园",
+      "pinyin": "dòngwùyuán",
+      "adj": 2,
+      "vi": "vườn bách thú, sở thú"
+    },
+    {
+      "pos": 10,
+      "hanzi": "动物",
+      "pinyin": "dòngwù",
+      "adj": 2,
+      "vi": "động vật"
+    },
+    {
+      "pos": 11,
+      "hanzi": "大熊猫",
+      "pinyin": "dàxióngmāo",
+      "adj": 2,
+      "vi": "gấu trúc"
+    },
+    {
+      "pos": 12,
+      "hanzi": "奇怪",
+      "pinyin": "qíguài",
+      "adj": 6,
+      "vi": "kỳ lạ, lạ lùng"
+    },
+    {
+      "pos": 13,
+      "hanzi": "其实",
+      "pinyin": "qíshí",
+      "adj": 18,
+      "vi": "thực ra, thực tế"
+    },
+    {
+      "pos": 14,
+      "hanzi": "竹子",
+      "pinyin": "zhúzi",
+      "adj": 2,
+      "vi": "cây tre, cây trúc"
+    },
+    {
+      "pos": 15,
+      "hanzi": "国宝",
+      "pinyin": "guóbǎo",
+      "adj": 2,
+      "vi": "quốc bảo (báu vật quốc gia)"
+    },
+    {
+      "pos": 16,
+      "hanzi": "全",
+      "pinyin": "quán",
+      "adj": 6,
+      "vi": "toàn bộ, tất cả"
+    },
+    {
+      "pos": 17,
+      "hanzi": "野生",
+      "pinyin": "yěshēng",
+      "adj": 6,
+      "vi": "hoang dã (sống trong tự nhiên)"
+    },
+    {
+      "pos": 18,
+      "hanzi": "关于",
+      "pinyin": "guānyú",
+      "adj": 13,
+      "vi": "về (vấn đề gì đó)"
+    },
+    {
+      "pos": 19,
+      "hanzi": "饱",
+      "pinyin": "bǎo",
+      "adj": 6,
+      "vi": "no"
+    },
+    {
+      "pos": 20,
+      "hanzi": "张",
+      "pinyin": "zhāng",
+      "adj": 4,
+      "vi": "mở, há (miệng)"
+    },
+    {
+      "pos": 21,
+      "hanzi": "嘴",
+      "pinyin": "zuǐ",
+      "adj": 2,
+      "vi": "miệng"
+    },
+    {
+      "pos": 22,
+      "hanzi": "身边",
+      "pinyin": "shēnbiān",
+      "adj": 2,
+      "vi": "bên cạnh, bên mình"
+    },
+    {
+      "pos": 23,
+      "hanzi": "半天",
+      "pinyin": "bàntiān",
+      "adj": 21,
+      "vi": "nửa ngày, một hồi lâu"
+    },
+    {
+      "pos": 24,
+      "hanzi": "脸",
+      "pinyin": "liǎn",
+      "adj": 2,
+      "vi": "khuôn mặt"
+    },
+    {
+      "pos": 25,
+      "hanzi": "大人",
+      "pinyin": "dàren",
+      "adj": 2,
+      "vi": "người lớn"
+    },
+    {
+      "pos": 26,
+      "hanzi": "喜爱",
+      "pinyin": "xǐ'ài",
+      "adj": 4,
+      "vi": "yêu thích, mến mộ"
+    }
+  ]
+}

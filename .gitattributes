@@ -1,0 +1,2 @@
+courses/**/*.mp3 filter=lfs diff=lfs merge=lfs -text
+remix-app/public/audio/**/*.mp3 filter=lfs diff=lfs merge=lfs -text

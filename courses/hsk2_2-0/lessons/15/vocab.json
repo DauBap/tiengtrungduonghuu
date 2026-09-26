@@ -1,0 +1,66 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 15,
+  "label": "Bài 15",
+  "title": " 新年就要到了",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "日",
+      "pinyin": "rì",
+      "adj": 2,
+      "vi": "ngày"
+    },
+    {
+      "pos": 2,
+      "hanzi": "新年",
+      "pinyin": "xīnnián",
+      "adj": 2,
+      "vi": "năm mới, Tết"
+    },
+    {
+      "pos": 3,
+      "hanzi": "票",
+      "pinyin": "piào",
+      "adj": 2,
+      "vi": "vé"
+    },
+    {
+      "pos": 4,
+      "hanzi": "火车站",
+      "pinyin": "huǒchēzhàn",
+      "adj": 2,
+      "vi": "ga tàu hỏa"
+    },
+    {
+      "pos": 5,
+      "hanzi": "大家",
+      "pinyin": "dàjiā",
+      "adj": 1,
+      "vi": "mọi người"
+    },
+    {
+      "pos": 6,
+      "hanzi": "更",
+      "pinyin": "gèng",
+      "adj": 7,
+      "vi": "càng, hơn nữa"
+    },
+    {
+      "pos": 7,
+      "hanzi": "妹妹",
+      "pinyin": "mèimei",
+      "adj": 2,
+      "vi": "em gái"
+    },
+    {
+      "pos": 8,
+      "hanzi": "阴",
+      "pinyin": "yīn",
+      "adj": 6,
+      "vi": "u ám, nhiều mây"
+    }
+  ]
+}

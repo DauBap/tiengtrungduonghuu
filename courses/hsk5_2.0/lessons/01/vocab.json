@@ -1,0 +1,288 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 1,
+  "label": "Bài 1",
+  "title": "爱的细节",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "细节",
+      "pinyin": "xìjié",
+      "adj": 2,
+      "vi": "chi tiết"
+    },
+    {
+      "pos": 2,
+      "hanzi": "电台",
+      "pinyin": "diàntái",
+      "adj": 2,
+      "vi": "đài phát thanh"
+    },
+    {
+      "pos": 3,
+      "hanzi": "恩爱",
+      "pinyin": "ēn'ài",
+      "adj": 6,
+      "vi": "ân ái, đằm thắm (vợ chồng)"
+    },
+    {
+      "pos": 4,
+      "hanzi": "对比",
+      "pinyin": "duìbǐ",
+      "adj": [
+        null,
+        5
+      ],
+      "vi": "so sánh"
+    },
+    {
+      "pos": 5,
+      "hanzi": "入围",
+      "pinyin": "rùwéi",
+      "adj": 4,
+      "vi": "vượt qua vòng sơ tuyển"
+    },
+    {
+      "pos": 6,
+      "hanzi": "评委",
+      "pinyin": "píngwěi",
+      "adj": 2,
+      "vi": "ban giám khảo"
+    },
+    {
+      "pos": 7,
+      "hanzi": "如何",
+      "pinyin": "rúhé",
+      "adj": 1,
+      "vi": "như thế nào"
+    },
+    {
+      "pos": 8,
+      "hanzi": "瘫痪",
+      "pinyin": "tānhuàn",
+      "adj": 4,
+      "vi": "bị liệt"
+    },
+    {
+      "pos": 9,
+      "hanzi": "离婚",
+      "pinyin": "lí hūn",
+      "adj": 4,
+      "vi": "ly hôn"
+    },
+    {
+      "pos": 10,
+      "hanzi": "自杀",
+      "pinyin": "zìshā",
+      "adj": 4,
+      "vi": "tự tử"
+    },
+    {
+      "pos": 11,
+      "hanzi": "抱怨",
+      "pinyin": "bàoyuàn",
+      "adj": 4,
+      "vi": "oán trách, phàn nàn"
+    },
+    {
+      "pos": 12,
+      "hanzi": "爱护",
+      "pinyin": "àihù",
+      "adj": 4,
+      "vi": "yêu quý, quý trọng"
+    },
+    {
+      "pos": 13,
+      "hanzi": "婚姻",
+      "pinyin": "hūnyīn",
+      "adj": 2,
+      "vi": "hôn nhân"
+    },
+    {
+      "pos": 14,
+      "hanzi": "吵架",
+      "pinyin": "chǎo jià",
+      "adj": 4,
+      "vi": "cãi nhau"
+    },
+    {
+      "pos": 15,
+      "hanzi": "相敬如宾",
+      "pinyin": "xiāngjìng rúbīn",
+      "adj": [
+        null,
+        12
+      ],
+      "vi": "tương kính như tân"
+    },
+    {
+      "pos": 16,
+      "hanzi": "暗暗",
+      "pinyin": "àn'àn",
+      "adj": 7,
+      "vi": "thầm, ngầm ngầm"
+    },
+    {
+      "pos": 17,
+      "hanzi": "轮",
+      "pinyin": "lún",
+      "adj": 4,
+      "vi": "luân phiên, thay phiên"
+    },
+    {
+      "pos": 18,
+      "hanzi": "不耐烦",
+      "pinyin": "bú nàifán",
+      "adj": 6,
+      "vi": "sốt ruột, bực mình"
+    },
+    {
+      "pos": 19,
+      "hanzi": "靠",
+      "pinyin": "kào",
+      "adj": 4,
+      "vi": "dựa, tựa"
+    },
+    {
+      "pos": 20,
+      "hanzi": "肩膀",
+      "pinyin": "jiānbǎng",
+      "adj": 2,
+      "vi": "bờ vai, vai"
+    },
+    {
+      "pos": 21,
+      "hanzi": "喊",
+      "pinyin": "hǎn",
+      "adj": 4,
+      "vi": "kêu, gọi"
+    },
+    {
+      "pos": 22,
+      "hanzi": "伸",
+      "pinyin": "shēn",
+      "adj": 4,
+      "vi": "duỗi, chìa"
+    },
+    {
+      "pos": 23,
+      "hanzi": "手指",
+      "pinyin": "shǒuzhǐ",
+      "adj": 2,
+      "vi": "ngón tay"
+    },
+    {
+      "pos": 24,
+      "hanzi": "歪歪扭扭",
+      "pinyin": "wāiwāiniǔniǔ",
+      "adj": 6,
+      "vi": "xiêu vẹo, nguệch ngoạc"
+    },
+    {
+      "pos": 25,
+      "hanzi": "递",
+      "pinyin": "dì",
+      "adj": 4,
+      "vi": "đưa, chuyển"
+    },
+    {
+      "pos": 26,
+      "hanzi": "脑袋",
+      "pinyin": "nǎodai",
+      "adj": 2,
+      "vi": "đầu"
+    },
+    {
+      "pos": 27,
+      "hanzi": "女士",
+      "pinyin": "nǚshì",
+      "adj": 2,
+      "vi": "bà (dạng lịch sự để gọi phụ nữ)"
+    },
+    {
+      "pos": 28,
+      "hanzi": "叙述",
+      "pinyin": "xùshù",
+      "adj": 4,
+      "vi": "thuật lại"
+    },
+    {
+      "pos": 29,
+      "hanzi": "居然",
+      "pinyin": "jūrán",
+      "adj": 7,
+      "vi": "(chỉ sự bất ngờ) lại có thể, lại"
+    },
+    {
+      "pos": 30,
+      "hanzi": "催",
+      "pinyin": "cuī",
+      "adj": 4,
+      "vi": "thúc giục, hối thúc"
+    },
+    {
+      "pos": 31,
+      "hanzi": "等待",
+      "pinyin": "děngdài",
+      "adj": 4,
+      "vi": "đợi, chờ"
+    },
+    {
+      "pos": 32,
+      "hanzi": "蚊子",
+      "pinyin": "wénzi",
+      "adj": 2,
+      "vi": "con muỗi"
+    },
+    {
+      "pos": 33,
+      "hanzi": "半夜",
+      "pinyin": "bànyè",
+      "adj": 2,
+      "vi": "nửa đêm, đêm hôm"
+    },
+    {
+      "pos": 34,
+      "hanzi": "叮",
+      "pinyin": "dīng",
+      "adj": 4,
+      "vi": "đốt, chích"
+    },
+    {
+      "pos": 35,
+      "hanzi": "老婆",
+      "pinyin": "lǎopo",
+      "adj": 2,
+      "vi": "vợ"
+    },
+    {
+      "pos": 36,
+      "hanzi": "吵",
+      "pinyin": "chǎo",
+      "adj": [
+        4,
+        6
+      ],
+      "vi": "làm ồn; ồn ào"
+    },
+    {
+      "pos": 37,
+      "hanzi": "项",
+      "pinyin": "xiàng",
+      "adj": 8,
+      "vi": "hạng mục, mục"
+    },
+    {
+      "pos": 38,
+      "hanzi": "患难与共",
+      "pinyin": "huànnàn yǔgòng",
+      "adj": [
+        null,
+        12
+      ],
+      "vi": "hoạn nạn có nhau"
+    }
+  ]
+}

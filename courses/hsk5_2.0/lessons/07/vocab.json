@@ -1,0 +1,344 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 7,
+  "label": "Bài 7",
+  "title": "成语故事两则",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "成语",
+      "pinyin": "chéngyǔ",
+      "adj": 2,
+      "vi": "thành ngữ"
+    },
+    {
+      "pos": 2,
+      "hanzi": "则",
+      "pinyin": "zé",
+      "adj": 8,
+      "vi": "(được dùng để chia bài văn thành đoạn hoặc tự thành đoạn) mảu, bản"
+    },
+    {
+      "pos": 3,
+      "hanzi": "百人",
+      "pinyin": "mángrén",
+      "adj": 2,
+      "vi": "người mù"
+    },
+    {
+      "pos": 4,
+      "hanzi": "摸",
+      "pinyin": "mō",
+      "adj": 4,
+      "vi": "mò, sờ"
+    },
+    {
+      "pos": 5,
+      "hanzi": "（大）象",
+      "pinyin": "(dà)xiàng",
+      "adj": 2,
+      "vi": "con voi"
+    },
+    {
+      "pos": 6,
+      "hanzi": "智慧",
+      "pinyin": "zhìhuì",
+      "adj": 2,
+      "vi": "trí tuệ, sự sáng suốt"
+    },
+    {
+      "pos": 7,
+      "hanzi": "士兵",
+      "pinyin": "shìbīng",
+      "adj": 2,
+      "vi": "binh lính"
+    },
+    {
+      "pos": 8,
+      "hanzi": "瞎",
+      "pinyin": "xiā",
+      "adj": [
+        4,
+        7
+      ],
+      "vi": "bị mù; bừa mù quáng, vớ vẩn"
+    },
+    {
+      "pos": 9,
+      "hanzi": "分别",
+      "pinyin": "fēnbié",
+      "adj": 7,
+      "vi": "riêng rẽ, từng người"
+    },
+    {
+      "pos": 10,
+      "hanzi": "寻找",
+      "pinyin": "xúnzhǎo",
+      "adj": 4,
+      "vi": "tìm"
+    },
+    {
+      "pos": 11,
+      "hanzi": "牙齿",
+      "pinyin": "yáchǐ",
+      "adj": 2,
+      "vi": "răng"
+    },
+    {
+      "pos": 12,
+      "hanzi": "胡说",
+      "pinyin": "húshuō",
+      "adj": 4,
+      "vi": "nói bậy, nói bừa"
+    },
+    {
+      "pos": 13,
+      "hanzi": "尾巴",
+      "pinyin": "wěiba",
+      "adj": 2,
+      "vi": "cái đuôi"
+    },
+    {
+      "pos": 14,
+      "hanzi": "绳子",
+      "pinyin": "shéngzi",
+      "adj": 2,
+      "vi": "dây thừng"
+    },
+    {
+      "pos": 15,
+      "hanzi": "平",
+      "pinyin": "píng",
+      "adj": 6,
+      "vi": "bằng phẳng"
+    },
+    {
+      "pos": 16,
+      "hanzi": "墙",
+      "pinyin": "qiáng",
+      "adj": 2,
+      "vi": "(bức) tường"
+    },
+    {
+      "pos": 17,
+      "hanzi": "扇子",
+      "pinyin": "shànzi",
+      "adj": 2,
+      "vi": "(cái) quạt"
+    },
+    {
+      "pos": 18,
+      "hanzi": "片面",
+      "pinyin": "piànmiàn",
+      "adj": 6,
+      "vi": "phiến diện"
+    },
+    {
+      "pos": 19,
+      "hanzi": "结论",
+      "pinyin": "jiélùn",
+      "adj": 2,
+      "vi": "kết luận"
+    },
+    {
+      "pos": 20,
+      "hanzi": "精诚所至，金石为开",
+      "pinyin": "jīngchéng suǒzhì, jīnshí wéi kāi",
+      "adj": [
+        null,
+        12
+      ],
+      "vi": "lòng thành cảm động đất trời, đá vàng cứng phải vỡ (chỉ cần thành tâm làm hết sức mình thì có thể giải quyết được mọi vấn đề nan giải)"
+    },
+    {
+      "pos": 21,
+      "hanzi": "将军",
+      "pinyin": "jiāngjūn",
+      "adj": 2,
+      "vi": "tướng quân"
+    },
+    {
+      "pos": 22,
+      "hanzi": "善于",
+      "pinyin": "shànyú",
+      "adj": 4,
+      "vi": "giỏi về, có sở trường"
+    },
+    {
+      "pos": 23,
+      "hanzi": "称",
+      "pinyin": "chēng",
+      "adj": 4,
+      "vi": "gọi là, tán dương"
+    },
+    {
+      "pos": 24,
+      "hanzi": "打猎",
+      "pinyin": "dǎ liè",
+      "adj": 4,
+      "vi": "đi săn"
+    },
+    {
+      "pos": 25,
+      "hanzi": "忽然",
+      "pinyin": "hūrán",
+      "adj": 7,
+      "vi": "thình lình, bỗng nhiên"
+    },
+    {
+      "pos": 26,
+      "hanzi": "蹲",
+      "pinyin": "dūn",
+      "adj": 4,
+      "vi": "ngồi xổm"
+    },
+    {
+      "pos": 27,
+      "hanzi": "摇",
+      "pinyin": "yáo",
+      "adj": 4,
+      "vi": "lắc, vẫy"
+    },
+    {
+      "pos": 28,
+      "hanzi": "不要紧",
+      "pinyin": "bú yàojǐn",
+      "adj": 7,
+      "vi": "không hề gì, không sao cả"
+    },
+    {
+      "pos": 29,
+      "hanzi": "支",
+      "pinyin": "zhī",
+      "adj": 8,
+      "vi": "(dùng cho vật dài, mảnh, không uốn được) cây"
+    },
+    {
+      "pos": 30,
+      "hanzi": "摆",
+      "pinyin": "bǎi",
+      "adj": 4,
+      "vi": "bày biện, sắp đặt (tư thế)"
+    },
+    {
+      "pos": 31,
+      "hanzi": "姿势",
+      "pinyin": "zīshì",
+      "adj": 2,
+      "vi": "tư thế"
+    },
+    {
+      "pos": 32,
+      "hanzi": "全神贯注",
+      "pinyin": "quánshén guànzhù",
+      "adj": [
+        null,
+        2,
+        12
+      ],
+      "vi": "tập trung tinh thần"
+    },
+    {
+      "pos": 33,
+      "hanzi": "尽（力）",
+      "pinyin": "jìn(lì)",
+      "adj": 4,
+      "vi": "gắng hết sức"
+    },
+    {
+      "pos": 34,
+      "hanzi": "反应",
+      "pinyin": "fǎnyìng",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "phản ứng; sự phản ứng"
+    },
+    {
+      "pos": 35,
+      "hanzi": "确定",
+      "pinyin": "quèdìng",
+      "adj": 4,
+      "vi": "xác định, khẳng định"
+    },
+    {
+      "pos": 36,
+      "hanzi": "石头",
+      "pinyin": "shítou",
+      "adj": 2,
+      "vi": "đá"
+    },
+    {
+      "pos": 37,
+      "hanzi": "连续",
+      "pinyin": "liánxù",
+      "adj": 4,
+      "vi": "liên tục, liên tiếp"
+    },
+    {
+      "pos": 38,
+      "hanzi": "根",
+      "pinyin": "gēn",
+      "adj": [
+        2,
+        8
+      ],
+      "vi": "rễ cây, chân; (lượng từ được dùng cho vật dài và mảnh) chiếc, cái"
+    },
+    {
+      "pos": 39,
+      "hanzi": "碎",
+      "pinyin": "suì",
+      "adj": [
+        4,
+        6
+      ],
+      "vi": "vỡ; vụn vặt"
+    },
+    {
+      "pos": 40,
+      "hanzi": "杆",
+      "pinyin": "gǎn",
+      "adj": 2,
+      "vi": "cán, báng"
+    },
+    {
+      "pos": 41,
+      "hanzi": "哎",
+      "pinyin": "āi",
+      "adj": 16,
+      "vi": "(được dùng để diễn tả sự ngạc nhiên hoặc sự không hài lòng) ái chà, trời ơi"
+    },
+    {
+      "pos": 42,
+      "hanzi": "唉",
+      "pinyin": "ài",
+      "adj": 16,
+      "vi": "(được dùng để diễn tả sự thương cảm hoặc hối tiếc) ôi, than ôi, chao ơi"
+    },
+    {
+      "pos": 43,
+      "hanzi": "金属",
+      "pinyin": "jīnshǔ",
+      "adj": 2,
+      "vi": "kim loại"
+    },
+    {
+      "pos": 44,
+      "hanzi": "硬",
+      "pinyin": "yìng",
+      "adj": 6,
+      "vi": "cứng, rắn"
+    },
+    {
+      "pos": 45,
+      "hanzi": "便",
+      "pinyin": "biàn",
+      "adj": 7,
+      "vi": "(được dùng để chỉ việc gì xảy ra một cách tự nhiên trong điều kiện hoặc tình huống nào đó) thì, liền, bèn, là"
+    }
+  ]
+}

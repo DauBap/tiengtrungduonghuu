@@ -1,0 +1,279 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 32,
+  "label": "Bài 32",
+  "title": " 身边的环保",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "消失",
+      "pinyin": "xiāoshī",
+      "adj": 4,
+      "vi": "biến mất"
+    },
+    {
+      "pos": 2,
+      "hanzi": "洪水",
+      "pinyin": "hóngshuǐ",
+      "adj": 2,
+      "vi": "nước lũ"
+    },
+    {
+      "pos": 3,
+      "hanzi": "地震",
+      "pinyin": "dìzhèn",
+      "adj": 4,
+      "vi": "động đất"
+    },
+    {
+      "pos": 4,
+      "hanzi": "破坏",
+      "pinyin": "pòhuài",
+      "adj": 4,
+      "vi": "phá hủy, tàn phá"
+    },
+    {
+      "pos": 5,
+      "hanzi": "砍",
+      "pinyin": "kǎn",
+      "adj": 4,
+      "vi": "chặt, chẻ, bổ"
+    },
+    {
+      "pos": 6,
+      "hanzi": "生存",
+      "pinyin": "shēngcún",
+      "adj": 4,
+      "vi": "sinh sống, sống"
+    },
+    {
+      "pos": 7,
+      "hanzi": "沙漠",
+      "pinyin": "shāmò",
+      "adj": 2,
+      "vi": "sa mạc"
+    },
+    {
+      "pos": 8,
+      "hanzi": "公布",
+      "pinyin": "gōngbù",
+      "adj": 4,
+      "vi": "công bố"
+    },
+    {
+      "pos": 9,
+      "hanzi": "数据",
+      "pinyin": "shùjù",
+      "adj": 2,
+      "vi": "số liệu"
+    },
+    {
+      "pos": 10,
+      "hanzi": "真实",
+      "pinyin": "zhēnshí",
+      "adj": 6,
+      "vi": "thực tế, có thực"
+    },
+    {
+      "pos": 11,
+      "hanzi": "夸张",
+      "pinyin": "kuāzhāng",
+      "adj": 6,
+      "vi": "phóng đại, cường điệu"
+    },
+    {
+      "pos": 12,
+      "hanzi": "资源",
+      "pinyin": "zīyuán",
+      "adj": 2,
+      "vi": "tài nguyên"
+    },
+    {
+      "pos": 13,
+      "hanzi": "车祸",
+      "pinyin": "chēhuò",
+      "adj": 2,
+      "vi": "tai nạn giao thông"
+    },
+    {
+      "pos": 14,
+      "hanzi": "不安",
+      "pinyin": "bù'ān",
+      "adj": 6,
+      "vi": "lo lắng, không an lòng"
+    },
+    {
+      "pos": 15,
+      "hanzi": "工业",
+      "pinyin": "gōngyè",
+      "adj": 2,
+      "vi": "công nghiệp"
+    },
+    {
+      "pos": 16,
+      "hanzi": "农业",
+      "pinyin": "nóngyè",
+      "adj": 2,
+      "vi": "nông nghiệp"
+    },
+    {
+      "pos": 17,
+      "hanzi": "生产",
+      "pinyin": "shēngchǎn",
+      "adj": 4,
+      "vi": "sản xuất"
+    },
+    {
+      "pos": 18,
+      "hanzi": "大型",
+      "pinyin": "dàxíng",
+      "adj": 6,
+      "vi": "quy mô lớn, khổng lồ"
+    },
+    {
+      "pos": 19,
+      "hanzi": "工厂",
+      "pinyin": "gōngchǎng",
+      "adj": 2,
+      "vi": "công xưởng, nhà máy"
+    },
+    {
+      "pos": 20,
+      "hanzi": "废",
+      "pinyin": "fèi",
+      "adj": 6,
+      "vi": "thải, bỏ"
+    },
+    {
+      "pos": 21,
+      "hanzi": "燃烧",
+      "pinyin": "ránshāo",
+      "adj": 4,
+      "vi": "bốc cháy, đốt cháy"
+    },
+    {
+      "pos": 22,
+      "hanzi": "煤炭",
+      "pinyin": "méitàn",
+      "adj": 2,
+      "vi": "than đá"
+    },
+    {
+      "pos": 23,
+      "hanzi": "密切",
+      "pinyin": "mìqiè",
+      "adj": 6,
+      "vi": "mật thiết, thân mật"
+    },
+    {
+      "pos": 24,
+      "hanzi": "尾气",
+      "pinyin": "wěiqì",
+      "adj": 2,
+      "vi": "khí thải"
+    },
+    {
+      "pos": 25,
+      "hanzi": "幸运",
+      "pinyin": "xìngyùn",
+      "adj": 6,
+      "vi": "may mắn"
+    },
+    {
+      "pos": 26,
+      "hanzi": "敏感",
+      "pinyin": "mǐngǎn",
+      "adj": 6,
+      "vi": "nhạy cảm"
+    },
+    {
+      "pos": 27,
+      "hanzi": "自觉",
+      "pinyin": "zìjué",
+      "adj": 6,
+      "vi": "tự giác, có ý thức"
+    },
+    {
+      "pos": 28,
+      "hanzi": "设施",
+      "pinyin": "shèshī",
+      "adj": 2,
+      "vi": "thiết bị, phương tiện"
+    },
+    {
+      "pos": 29,
+      "hanzi": "能源",
+      "pinyin": "néngyuán",
+      "adj": 2,
+      "vi": "nguồn năng lượng"
+    },
+    {
+      "pos": 30,
+      "hanzi": "逐步",
+      "pinyin": "zhúbù",
+      "adj": 7,
+      "vi": "từng bước, dần dần"
+    },
+    {
+      "pos": 31,
+      "hanzi": "尽量",
+      "pinyin": "jìnliàng",
+      "adj": 7,
+      "vi": "cố gắng hết sức"
+    },
+    {
+      "pos": 32,
+      "hanzi": "私（人）",
+      "pinyin": "sī(rén)",
+      "adj": 2,
+      "vi": "riêng, cá nhân"
+    },
+    {
+      "pos": 33,
+      "hanzi": "鼓舞",
+      "pinyin": "gǔwǔ",
+      "adj": 4,
+      "vi": "cổ vũ, khích lệ"
+    },
+    {
+      "pos": 34,
+      "hanzi": "消极",
+      "pinyin": "xiāojí",
+      "adj": 6,
+      "vi": "tiêu cực"
+    },
+    {
+      "pos": 35,
+      "hanzi": "幻想",
+      "pinyin": "huànxiǎng",
+      "adj": 2,
+      "vi": "ảo tưởng, hoang tưởng"
+    },
+    {
+      "pos": 36,
+      "hanzi": "贡献",
+      "pinyin": "gòngxiàn",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "sự đóng góp; cống hiến"
+    },
+    {
+      "pos": 37,
+      "hanzi": "命运",
+      "pinyin": "mìngyùn",
+      "adj": 2,
+      "vi": "số phận, vận mệnh"
+    },
+    {
+      "pos": 38,
+      "hanzi": "掌握",
+      "pinyin": "zhǎngwò",
+      "adj": 4,
+      "vi": "nắm chắc, nắm vững, hiểu rõ"
+    }
+  ]
+}

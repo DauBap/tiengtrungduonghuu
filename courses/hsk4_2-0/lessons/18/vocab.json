@@ -1,0 +1,234 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 18,
+  "label": "Bài 18",
+  "title": "科技与世界",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "降落",
+      "pinyin": "jiàngluò",
+      "adj": 4,
+      "vi": "đáp xuống, hạ cánh"
+    },
+    {
+      "pos": 2,
+      "hanzi": "火",
+      "pinyin": "huǒ",
+      "adj": 6,
+      "vi": "chạy, đốt, được nhiều người ưa chuộng"
+    },
+    {
+      "pos": 3,
+      "hanzi": "作者",
+      "pinyin": "zuòzhě",
+      "adj": 2,
+      "vi": "tác giả"
+    },
+    {
+      "pos": 4,
+      "hanzi": "交通",
+      "pinyin": "jiāotōng",
+      "adj": 2,
+      "vi": "giao thông, thông tin liên lạc"
+    },
+    {
+      "pos": 5,
+      "hanzi": "技术",
+      "pinyin": "jìshù",
+      "adj": 2,
+      "vi": "kỹ thuật, công nghệ"
+    },
+    {
+      "pos": 6,
+      "hanzi": "是否",
+      "pinyin": "shìfǒu",
+      "adj": 7,
+      "vi": "hay không"
+    },
+    {
+      "pos": 7,
+      "hanzi": "秒",
+      "pinyin": "miǎo",
+      "adj": 8,
+      "vi": "giây"
+    },
+    {
+      "pos": 8,
+      "hanzi": "方式",
+      "pinyin": "fāngshì",
+      "adj": 2,
+      "vi": "phương thức, cách thức"
+    },
+    {
+      "pos": 9,
+      "hanzi": "受不了",
+      "pinyin": "shòubuliǎo",
+      "adj": 4,
+      "vi": "chịu không nổi, chịu không được"
+    },
+    {
+      "pos": 10,
+      "hanzi": "日记",
+      "pinyin": "rìjì",
+      "adj": 2,
+      "vi": "nhật ký"
+    },
+    {
+      "pos": 11,
+      "hanzi": "安全",
+      "pinyin": "ānquán",
+      "adj": 6,
+      "vi": "an toàn"
+    },
+    {
+      "pos": 12,
+      "hanzi": "密码",
+      "pinyin": "mìmǎ",
+      "adj": 2,
+      "vi": "mật mã"
+    },
+    {
+      "pos": 13,
+      "hanzi": "允许",
+      "pinyin": "yǔnxǔ",
+      "adj": 4,
+      "vi": "cho phép"
+    },
+    {
+      "pos": 14,
+      "hanzi": "座",
+      "pinyin": "zuò",
+      "adj": 8,
+      "vi": "(dùng cho cầu, núi, cao ốc...) tòa, hòn, cây"
+    },
+    {
+      "pos": 15,
+      "hanzi": "桥",
+      "pinyin": "qiáo",
+      "adj": 2,
+      "vi": "cầu"
+    },
+    {
+      "pos": 16,
+      "hanzi": "危险",
+      "pinyin": "wēixiǎn",
+      "adj": 6,
+      "vi": "nguy hiểm"
+    },
+    {
+      "pos": 17,
+      "hanzi": "接着",
+      "pinyin": "jiēzhe",
+      "adj": 7,
+      "vi": "ngay sau đó"
+    },
+    {
+      "pos": 18,
+      "hanzi": "警察",
+      "pinyin": "jǐngchá",
+      "adj": 2,
+      "vi": "cảnh sát"
+    },
+    {
+      "pos": 19,
+      "hanzi": "抓",
+      "pinyin": "zhuā",
+      "adj": 4,
+      "vi": "bắt, túm"
+    },
+    {
+      "pos": 20,
+      "hanzi": "咸",
+      "pinyin": "xián",
+      "adj": 6,
+      "vi": "mặn"
+    },
+    {
+      "pos": 21,
+      "hanzi": "矿泉水",
+      "pinyin": "kuàngquánshuǐ",
+      "adj": 2,
+      "vi": "nước suối"
+    },
+    {
+      "pos": 22,
+      "hanzi": "付款",
+      "pinyin": "fù kuǎn",
+      "adj": 4,
+      "vi": "trả tiền"
+    },
+    {
+      "pos": 23,
+      "hanzi": "举",
+      "pinyin": "jǔ",
+      "adj": 4,
+      "vi": "nêu, đưa ra"
+    },
+    {
+      "pos": 24,
+      "hanzi": "迷路",
+      "pinyin": "mí lù",
+      "adj": 4,
+      "vi": "lạc đường"
+    },
+    {
+      "pos": 25,
+      "hanzi": "地址",
+      "pinyin": "dìzhǐ",
+      "adj": 2,
+      "vi": "địa chỉ"
+    },
+    {
+      "pos": 26,
+      "hanzi": "地点",
+      "pinyin": "dìdiǎn",
+      "adj": 2,
+      "vi": "địa điểm, nơi"
+    },
+    {
+      "pos": 27,
+      "hanzi": "世纪",
+      "pinyin": "shìjì",
+      "adj": 2,
+      "vi": "thế kỷ"
+    },
+    {
+      "pos": 28,
+      "hanzi": "邮局",
+      "pinyin": "yóujú",
+      "adj": 2,
+      "vi": "bưu điện"
+    },
+    {
+      "pos": 29,
+      "hanzi": "收",
+      "pinyin": "shōu",
+      "adj": 4,
+      "vi": "nhận"
+    },
+    {
+      "pos": 30,
+      "hanzi": "信封",
+      "pinyin": "xìnfēng",
+      "adj": 2,
+      "vi": "phong thư, bì thư"
+    },
+    {
+      "pos": 31,
+      "hanzi": "网站",
+      "pinyin": "wǎngzhàn",
+      "adj": 2,
+      "vi": "trang web"
+    },
+    {
+      "pos": 32,
+      "hanzi": "信息",
+      "pinyin": "xìnxī",
+      "adj": 2,
+      "vi": "tin tức, thông tin"
+    }
+  ]
+}

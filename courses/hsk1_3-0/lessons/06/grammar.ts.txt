@@ -1,0 +1,223 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const explanation = "Đối chiếu đúng ý nghĩa và trật tự từ của cấu trúc đã học.";
+const input = (id: string, prompt: string, answer: string): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	explanation,
+	formula: "Giữ đúng trật tự từ; dấu câu và khoảng trắng không ảnh hưởng kết quả."
+});
+const choice = (
+	id: string,
+	answer: string,
+	options: [string, string, string],
+	image: string,
+	imageAlt: string
+): GrammarQuestion => ({
+	id,
+	prompt: "Chọn câu tiếng Trung phù hợp với hình.",
+	answer,
+	options,
+	image,
+	imageAlt,
+	explanation,
+	formula: "Quan sát chi tiết trong hình và chọn đúng một câu."
+});
+const arrange = (id: string, tokens: string[], answer: string): GrammarQuestion => ({
+	id,
+	prompt: "Sắp xếp các thẻ từ thành câu đúng.",
+	tokens,
+	answer,
+	explanation,
+	formula: "Chọn từng thẻ theo đúng trật tự câu."
+});
+const img = (name: string) => `/images/grammar/lesson6/${name}.svg`;
+
+const pictures: GrammarQuestion[] = [
+	choice(
+		"l6-p1",
+		"我想去超市。",
+		["我想去超市。", "我想去中国。", "我不想去超市。"],
+		img("want-supermarket"),
+		"Nhân vật nghĩ đến việc đi siêu thị"
+	),
+	choice(
+		"l6-p2",
+		"妈妈想买一些牛奶。",
+		["妈妈想买一些牛奶。", "妈妈想买一些米饭。", "妈妈不想买牛奶。"],
+		img("mother-wants-milk"),
+		"Mẹ muốn mua một ít sữa"
+	),
+	choice(
+		"l6-p3",
+		"姐姐想吃包子。",
+		["姐姐想吃包子。", "姐姐想吃米饭。", "姐姐想吃面条儿。"],
+		img("sister-wants-baozi"),
+		"Chị gái muốn ăn bánh bao"
+	),
+	choice(
+		"l6-p4",
+		"我去超市买东西。",
+		["我去超市买东西。", "我坐出租车去超市。", "我想去超市。"],
+		img("go-shop"),
+		"Nhân vật đi đến siêu thị rồi mua đồ"
+	),
+	choice(
+		"l6-p5",
+		"妈妈去超市买牛奶。",
+		["妈妈去超市买牛奶。", "妈妈去超市买米饭。", "妈妈想吃牛奶。"],
+		img("mother-shops-milk"),
+		"Mẹ đi siêu thị mua sữa"
+	),
+	choice(
+		"l6-p6",
+		"我们坐出租车去超市。",
+		["我们坐出租车去超市。", "我们去超市坐出租车。", "我们坐出租车买东西。"],
+		img("taxi-supermarket"),
+		"Một nhóm người đi taxi đến siêu thị"
+	),
+	choice(
+		"l6-p7",
+		"我们怎么去？",
+		["我们怎么去？", "我们想去吗？", "我们去哪儿？"],
+		img("how-to-go"),
+		"Mọi người bàn cách đi, cạnh taxi và dấu hỏi"
+	),
+	choice(
+		"l6-p8",
+		"你怎么去超市？",
+		["你怎么去超市？", "你想去超市吗？", "你去超市买什么？"],
+		img("ask-how-supermarket"),
+		"Một người hỏi bạn cách đi siêu thị"
+	)
+];
+
+const arrangements: GrammarQuestion[] = [
+	arrange("l6-a1", ["去超市", "我", "想"], "我想去超市。"),
+	arrange("l6-a2", ["一些牛奶", "想买", "妈妈"], "妈妈想买一些牛奶。"),
+	arrange("l6-a3", ["吃包子", "姐姐", "想"], "姐姐想吃包子。"),
+	arrange("l6-a4", ["不想", "我", "去"], "我不想去。"),
+	arrange("l6-a5", ["买东西", "去超市", "我"], "我去超市买东西。"),
+	arrange("l6-a6", ["买牛奶", "妈妈", "去超市"], "妈妈去超市买牛奶。"),
+	arrange("l6-a7", ["坐出租车", "我们", "去"], "我们坐出租车去。"),
+	arrange("l6-a8", ["去超市", "坐出租车", "我们"], "我们坐出租车去超市。"),
+	arrange("l6-a9", ["怎么", "我们", "去"], "我们怎么去？"),
+	arrange("l6-a10", ["去超市", "你", "怎么"], "你怎么去超市？")
+];
+
+const translations: GrammarQuestion[] = [
+	input("l6-t1", "Tôi muốn đi siêu thị.", "我想去超市。"),
+	input("l6-t2", "Mẹ muốn mua một ít sữa.", "妈妈想买一些牛奶。"),
+	input("l6-t3", "Chị gái muốn ăn bánh bao.", "姐姐想吃包子。"),
+	input("l6-t4", "Tôi không muốn đi.", "我不想去。"),
+	input("l6-t5", "Bạn muốn đi siêu thị không?", "你想去超市吗？"),
+	input("l6-t6", "Tôi đi siêu thị mua đồ.", "我去超市买东西。"),
+	input("l6-t7", "Mẹ đi siêu thị mua sữa.", "妈妈去超市买牛奶。"),
+	input("l6-t8", "Chúng tôi đi taxi đến siêu thị.", "我们坐出租车去超市。"),
+	input("l6-t9", "Chúng ta đi bằng cách nào?", "我们怎么去？"),
+	input("l6-t10", "Bạn đi siêu thị bằng cách nào?", "你怎么去超市？")
+];
+
+export const hsk1Lesson6Grammar: GrammarLesson = {
+	title: "Bài 6: 你的手机号是多少？",
+	variant: "hsk1-3-0-lesson6",
+	points: [
+		{
+			id: "xiang",
+			title: "Động từ năng nguyện 想",
+			explanation:
+				"想 đứng trước động từ để diễn tả mong muốn hoặc dự định làm một việc. Dạng phủ định dùng 不想.",
+			formulas: [
+				"Chủ ngữ + 想 + Động từ + Tân ngữ",
+				"Chủ ngữ + 不想 + Động từ + Tân ngữ",
+				"Chủ ngữ + 想 + Động từ + Tân ngữ + 吗？"
+			],
+			examples: [
+				{ chinese: "我想去超市。", vietnamese: "Tôi muốn đi siêu thị." },
+				{
+					chinese: "妈妈想买一些牛奶。",
+					vietnamese: "Mẹ muốn mua một ít sữa."
+				},
+				{ chinese: "姐姐想吃包子。", vietnamese: "Chị gái muốn ăn bánh bao." },
+				{ chinese: "我不想去。", vietnamese: "Tôi không muốn đi." },
+				{
+					chinese: "你想去超市吗？",
+					vietnamese: "Bạn muốn đi siêu thị không?"
+				}
+			],
+			exercises: [
+				{
+					id: "l6-picture",
+					title: "Bài tập 1: Nhìn hình và chọn câu đúng",
+					type: "choice",
+					questions: pictures
+				}
+			]
+		},
+		{
+			id: "serial-verbs",
+			title: "Câu liên động (1)",
+			explanation:
+				"Câu liên động có hai hoặc nhiều động từ hoặc cụm động từ cùng chung một chủ ngữ. Các hành động được xếp theo trình tự và có thể diễn tả mục đích hoặc phương thức.",
+			formulas: [
+				"Chủ ngữ + Động từ 1 + Địa điểm + Động từ 2 + Tân ngữ",
+				"Chủ ngữ + Phương thức + Động từ"
+			],
+			examples: [
+				{ chinese: "我去超市买东西。", vietnamese: "Tôi đi siêu thị mua đồ." },
+				{
+					chinese: "妈妈去超市买牛奶。",
+					vietnamese: "Mẹ đi siêu thị mua sữa."
+				},
+				{ chinese: "我们坐出租车去。", vietnamese: "Chúng tôi đi bằng taxi." },
+				{
+					chinese: "我们坐出租车去超市。",
+					vietnamese: "Chúng tôi đi taxi đến siêu thị."
+				}
+			],
+			notes: [
+				"去超市 là hành động thứ nhất; 买东西 là mục đích.",
+				"Đúng: 我去超市买东西。",
+				"Sai: 我买东西去超市。",
+				"Đúng: 我们坐出租车去超市。",
+				"Sai: 我们去超市坐出租车。"
+			],
+			exercises: [
+				{
+					id: "l6-arrange",
+					title: "Bài tập 2: Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: arrangements
+				}
+			]
+		},
+		{
+			id: "zenme",
+			title: "Đại từ nghi vấn 怎么",
+			explanation:
+				"怎么 đứng trước động từ để hỏi về phương thức hoặc cách thực hiện một hành động.",
+			formulas: ["Chủ ngữ + 怎么 + Động từ + Tân ngữ？"],
+			examples: [
+				{ chinese: "我们怎么去？", vietnamese: "Chúng ta đi bằng cách nào?" },
+				{
+					chinese: "你怎么去超市？",
+					vietnamese: "Bạn đi siêu thị bằng cách nào?"
+				},
+				{ chinese: "妈妈怎么去？", vietnamese: "Mẹ đi bằng cách nào?" },
+				{
+					chinese: "你怎么去超市？— 我坐出租车去。",
+					vietnamese: "Bạn đi siêu thị bằng cách nào? — Tôi đi bằng taxi."
+				}
+			],
+			exercises: [
+				{
+					id: "l6-translate",
+					title: "Bài tập 3: Dịch sang tiếng Trung",
+					type: "input",
+					questions: translations
+				}
+			]
+		}
+	]
+};

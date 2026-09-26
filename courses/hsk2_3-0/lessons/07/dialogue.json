@@ -1,0 +1,140 @@
+{
+  "lesson": 7,
+  "title": "她篮球打得很好",
+  "title_pinyin": "Tā lánqiú dǎ de hěn hǎo",
+  "title_vi": "Cô ấy chơi bóng rổ rất giỏi",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "陈天中",
+          "zh": "安妮，你是什么时候从北京回来的？",
+          "pinyin": "Ānnī, nǐ shì shénme shíhou cóng Běijīng huílái de?",
+          "vi": "Annie, bạn về từ Bắc Kinh lúc nào vậy?"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "昨天下午。天中，你怎么一下课就往外跑？",
+          "pinyin": "Zuótiān xiàwǔ. Tiānzhōng, nǐ zěnme yī xiàkè jiù wǎng wài pǎo?",
+          "vi": "Chiều hôm qua. Thiên Trung, sao cậu vừa tan học đã chạy ra ngoài thế?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我跟同学说好了，一起去打篮球。",
+          "pinyin": "Wǒ gēn tóngxué shuō hǎo le, yīqǐ qù dǎ lánqiú.",
+          "vi": "Tớ hẹn với bạn học rồi, cùng đi chơi bóng rổ."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "我也想跟你们一起玩。",
+          "pinyin": "Wǒ yě xiǎng gēn nǐmen yīqǐ wán.",
+          "vi": "Mình cũng muốn chơi cùng các cậu."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "没问题，走吧。",
+          "pinyin": "Méi wèntí, zǒu ba.",
+          "vi": "Không vấn đề, đi thôi."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "安妮",
+          "zh": "天中，你是不是很喜欢打篮球？",
+          "pinyin": "Tiānzhōng, nǐ shì bú shì hěn xǐhuan dǎ lánqiú?",
+          "vi": "Thiên Trung, cậu có phải rất thích chơi bóng rổ không?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "没错。",
+          "pinyin": "Méi cuò.",
+          "vi": "Không sai."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "你还喜欢什么运动？",
+          "pinyin": "Nǐ hái xǐhuan shénme yùndòng?",
+          "vi": "Cậu còn thích môn thể thao nào nữa?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我还喜欢踢足球，一到星期天就跟朋友们去踢球。",
+          "pinyin": "Wǒ hái xǐhuan tī zúqiú, yī dào xīngqītiān jiù gēn péngyoumen qù tī qiú.",
+          "vi": "Tớ còn thích đá bóng, cứ đến Chủ nhật là lại đi đá bóng với bạn bè."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "你踢得怎么样？",
+          "pinyin": "Nǐ tī de zěnmeyàng?",
+          "vi": "Cậu đá thế nào?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我踢得还可以。",
+          "pinyin": "Wǒ tī de hái kěyǐ.",
+          "vi": "Tớ đá cũng tạm được."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "陈天中",
+          "zh": "你篮球打得怎么样？",
+          "pinyin": "Nǐ lánqiú dǎ de zěnmeyàng?",
+          "vi": "Bạn chơi bóng rổ thế nào?"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "打得还可以。",
+          "pinyin": "Dǎ de hái kěyǐ.",
+          "vi": "Chơi cũng tạm được."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "跑步呢？你跑得快不快？",
+          "pinyin": "Pǎobù ne? Nǐ pǎo de kuài bù kuài?",
+          "vi": "Chạy bộ thì sao? Bạn chạy có nhanh không?"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "我跑得不快，也不太喜欢跑步。",
+          "pinyin": "Wǒ pǎo de bú kuài, yě bú tài xǐhuan pǎobù.",
+          "vi": "Tôi chạy không nhanh, cũng không thích chạy bộ lắm."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "那你喜欢游泳吗？",
+          "pinyin": "Nà nǐ xǐhuan yóuyǒng ma?",
+          "vi": "Vậy bạn có thích bơi lội không?"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "喜欢，但我游泳游得不快。",
+          "pinyin": "Xǐhuan, dàn wǒ yóuyǒng yóu de bú kuài.",
+          "vi": "Có thích, nhưng tôi bơi không nhanh."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "我的爱好是运动。从上小学开始，我每天都跟爸爸去运动。现在我篮球打得很好，足球踢得不错，游泳游得也很快。我一有时间就去运动。",
+          "pinyin": "Wǒ de àihào shì yùndòng. Cóng shàng xiǎoxué kāishǐ, wǒ měitiān dōu gēn bàba qù yùndòng. Xiànzài wǒ lánqiú dǎ de hěn hǎo, zúqiú tī de búcuò, yóuyǒng yóu de yě hěn kuài. Wǒ yī yǒu shíjiān jiù qù yùndòng.",
+          "vi": "Sở thích của tôi là thể thao. Từ khi bắt đầu học tiểu học, ngày nào tôi cũng đi tập thể thao với bố. Bây giờ tôi chơi bóng rổ rất giỏi, đá bóng khá tốt, bơi lội cũng rất nhanh. Hễ có thời gian là tôi đi tập thể thao."
+        }
+      ]
+    }
+  ]
+}

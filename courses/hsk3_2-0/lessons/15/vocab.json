@@ -1,0 +1,157 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 15,
+  "label": "Bài 15",
+  "title": "其他都没什么问题。",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "留学",
+      "pinyin": "liú xué",
+      "adj": 4,
+      "vi": "du học"
+    },
+    {
+      "pos": 2,
+      "hanzi": "水平",
+      "pinyin": "shuǐpíng",
+      "adj": 2,
+      "vi": "trình độ"
+    },
+    {
+      "pos": 3,
+      "hanzi": "提高",
+      "pinyin": "tí gāo",
+      "adj": 4,
+      "vi": "nâng cao, tiến bộ"
+    },
+    {
+      "pos": 4,
+      "hanzi": "练习",
+      "pinyin": "liànxí",
+      "adj": 2,
+      "vi": "bài tập"
+    },
+    {
+      "pos": 5,
+      "hanzi": "完成",
+      "pinyin": "wán chéng",
+      "adj": 4,
+      "vi": "hoàn thành"
+    },
+    {
+      "pos": 6,
+      "hanzi": "句子",
+      "pinyin": "jùzi",
+      "adj": 2,
+      "vi": "câu"
+    },
+    {
+      "pos": 7,
+      "hanzi": "其他",
+      "pinyin": "qítā",
+      "adj": 1,
+      "vi": "cái khác"
+    },
+    {
+      "pos": 8,
+      "hanzi": "发",
+      "pinyin": "fā",
+      "adj": 4,
+      "vi": "gửi, gửi đi"
+    },
+    {
+      "pos": 9,
+      "hanzi": "要求",
+      "pinyin": "yāoqiú",
+      "adj": 2,
+      "vi": "yêu cầu"
+    },
+    {
+      "pos": 10,
+      "hanzi": "注意",
+      "pinyin": "zhù yì",
+      "adj": 4,
+      "vi": "chú ý"
+    },
+    {
+      "pos": 11,
+      "hanzi": "上网",
+      "pinyin": "shàng wǎng",
+      "adj": 4,
+      "vi": "lên mạng"
+    },
+    {
+      "pos": 12,
+      "hanzi": "除了",
+      "pinyin": "chúle",
+      "adj": 13,
+      "vi": "ngoài...ra"
+    },
+    {
+      "pos": 13,
+      "hanzi": "新闻",
+      "pinyin": "xīnwén",
+      "adj": 2,
+      "vi": "tin tức"
+    },
+    {
+      "pos": 14,
+      "hanzi": "花",
+      "pinyin": "huā",
+      "adj": 4,
+      "vi": "tốn, tiêu tốn"
+    },
+    {
+      "pos": 15,
+      "hanzi": "极（了）",
+      "pinyin": "jí (le)",
+      "adj": 7,
+      "vi": "hết sức, cực kỳ"
+    },
+    {
+      "pos": 16,
+      "hanzi": "节日",
+      "pinyin": "jiérì",
+      "adj": 2,
+      "vi": "ngày lễ"
+    },
+    {
+      "pos": 17,
+      "hanzi": "举行",
+      "pinyin": "jǔxíng",
+      "adj": 4,
+      "vi": "tổ chức (hội họp, thi đấu...)"
+    },
+    {
+      "pos": 18,
+      "hanzi": "世界",
+      "pinyin": "shìjiè",
+      "adj": 2,
+      "vi": "thế giới"
+    },
+    {
+      "pos": 19,
+      "hanzi": "街道",
+      "pinyin": "jiēdào",
+      "adj": 2,
+      "vi": "đường, đường phố"
+    },
+    {
+      "pos": 20,
+      "hanzi": "各",
+      "pinyin": "gè",
+      "adj": 1,
+      "vi": "mỗi"
+    },
+    {
+      "pos": 21,
+      "hanzi": "文化",
+      "pinyin": "wénhuà",
+      "adj": 2,
+      "vi": "văn hóa"
+    }
+  ]
+}

@@ -1,0 +1,490 @@
+{
+	"title": "HSK2 - Sách bài tập",
+	"lesson": 7,
+	"lesson_title": "他篮球打得很好",
+	"lesson_pinyin": "Tā lánqiú dǎ de hěn hǎo",
+	"lesson_meaning": "Bạn ấy chơi bóng rổ rất hay",
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听一句话，选择正确图片。每题听两次。\nCâu 1–3: Nghe và chọn hình ảnh phù hợp với câu nghe được. Mỗi câu nghe hai lần.",
+					"example": {
+						"sentence": "我每天坐公交车去上班。",
+						"pinyin": "Wǒ měitiān zuò gōngjiāochē qù shàngbān.",
+						"meaning": "Tôi đi xe buýt đi làm hằng ngày.",
+						"correct_label": "A",
+						"options": ["A", "B", "C"]
+					},
+					"questions": [
+						{
+							"number": 1,
+							"answer": "A",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"answer": "C",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"answer": "C",
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择最匹配的图片。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn hình ảnh phù hợp nhất. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 4,
+							"answer": "C",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 5,
+							"answer": "B",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 6,
+							"answer": "A",
+							"options": ["A", "B", "C", "D"]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听对话，选择正确答案。每题听两次。\nCâu 7–10: Nghe hội thoại và chọn đáp án đúng. Mỗi câu nghe hai lần.",
+					"example": {
+						"sentence": "男：给您笔，请在这儿写一下您的姓名。\n女：好的，是这儿吗？",
+						"pinyin": "Nán: Gěi nín bǐ, qǐng zài zhèr xiě yíxià nín de xìngmíng.\nNǚ: Hǎo de, shì zhèr ma?",
+						"meaning": "Nam: Gửi cô bút, vui lòng viết tên của cô ở đây.\nNữ: Vâng, ở chỗ này đúng không?",
+						"question": "女的要写什么？",
+						"question_pinyin": "Nǚ de yào xiě shénme?",
+						"question_meaning": "Người nữ phải viết cái gì?",
+						"correct_label": "A",
+						"options": [
+							{
+								"label": "A",
+								"text": "姓名",
+								"pinyin": "xìngmíng",
+								"meaning": "họ tên"
+							},
+							{
+								"label": "B",
+								"text": "时间",
+								"pinyin": "shíjiān",
+								"meaning": "thời gian"
+							},
+							{
+								"label": "C",
+								"text": "问题",
+								"pinyin": "wèntí",
+								"meaning": "câu hỏi"
+							}
+						]
+					},
+					"questions": [
+						{
+							"number": 7,
+							"answer": "B",
+							"options": [
+								{
+									"label": "A",
+									"text": "打球",
+									"pinyin": "dǎ qiú"
+								},
+								{
+									"label": "B",
+									"text": "回家",
+									"pinyin": "huí jiā"
+								},
+								{
+									"label": "C",
+									"text": "做饭",
+									"pinyin": "zuò fàn"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "很好",
+									"pinyin": "hěn hǎo"
+								},
+								{
+									"label": "B",
+									"text": "不错",
+									"pinyin": "búcuò"
+								},
+								{
+									"label": "C",
+									"text": "不太好",
+									"pinyin": "bú tài hǎo"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "很好",
+									"pinyin": "hěn hǎo"
+								},
+								{
+									"label": "B",
+									"text": "不好",
+									"pinyin": "bù hǎo"
+								},
+								{
+									"label": "C",
+									"text": "不太好",
+									"pinyin": "bú tài hǎo"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"answer": "B",
+							"options": [
+								{
+									"label": "A",
+									"text": "要出去旅游",
+									"pinyin": "yào chūqù lǚyóu"
+								},
+								{
+									"label": "B",
+									"text": "要去接爸妈",
+									"pinyin": "yào qù jiē bàmā"
+								},
+								{
+									"label": "C",
+									"text": "这几天不高兴",
+									"pinyin": "zhè jǐ tiān bù gāoxìng"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—13题：选择与句子最匹配的图片。\nCâu 11–13: Chọn hình ảnh phù hợp nhất với câu.",
+					"embedded_example_image": true,
+					"example": {
+						"sentence": "每个星期六，我都去打篮球。",
+						"pinyin": "Měi ge Xīngqīliù, wǒ dōu qù dǎ lánqiú.",
+						"meaning": "Thứ Bảy nào tôi cũng đi chơi bóng rổ.",
+						"correct_label": "D",
+						"options": ["A", "B", "C", "D"]
+					},
+					"questions": [
+						{
+							"number": 11,
+							"answer": "C",
+							"sentence": "他字写得很漂亮。",
+							"pinyin": "Tā zì xiě de hěn piàoliang.",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 12,
+							"answer": "A",
+							"sentence": "孩子们玩得很高兴。",
+							"pinyin": "Háizimen wán de hěn gāoxìng.",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 13,
+							"answer": "B",
+							"sentence": "她一有时间就去旅游。",
+							"pinyin": "Tā yì yǒu shíjiān jiù qù lǚyóu.",
+							"options": ["A", "B", "C", "D"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第14—17题：选词填空。\nCâu 14–17: Chọn từ thích hợp điền vào chỗ trống.",
+					"hide_images": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "往",
+							"pinyin": "wǎng"
+						},
+						{
+							"label": "B",
+							"text": "爱好",
+							"pinyin": "àihào"
+						},
+						{
+							"label": "C",
+							"text": "运动",
+							"pinyin": "yùndòng"
+						},
+						{
+							"label": "D",
+							"text": "跑步",
+							"pinyin": "pǎobù"
+						},
+						{
+							"label": "E",
+							"text": "完",
+							"pinyin": "wán"
+						}
+					],
+					"example": {
+						"sentence": "题太多了，所以我没做（ ）。",
+						"pinyin": "Tí tài duō le, suǒyǐ wǒ méi zuò ( ).",
+						"meaning": "Bài tập nhiều quá, nên tôi chưa làm xong.",
+						"correct_label": "E"
+					},
+					"questions": [
+						{
+							"number": 14,
+							"answer": "A",
+							"sentence": "你（ ）前走，那边有一个公交站。",
+							"pinyin": "Nǐ ( ) qián zǒu, nàbian yǒu yí ge gōngjiāo zhàn."
+						},
+						{
+							"number": 15,
+							"answer": "B",
+							"sentence": "爷爷、奶奶的（ ）是看书、画画和写字。",
+							"pinyin": "Yéye, nǎinai de ( ) shì kàn shū, huàhuà hé xiězì."
+						},
+						{
+							"number": 16,
+							"answer": "D",
+							"sentence": "女：你的爱好是什么？\n男：我喜欢运动，游泳、（ ）什么的。",
+							"pinyin": "Nǚ: Nǐ de àihào shì shénme?\nNán: Wǒ xǐhuan yùndòng, yóuyǒng, ( ) shénme de."
+						},
+						{
+							"number": 17,
+							"answer": "C",
+							"sentence": "男：我们叫小李一起去打篮球吧？\n女：他不爱（ ），还是我们去打吧。",
+							"pinyin": "Nán: Wǒmen jiào Xiǎo Lǐ yìqǐ qù dǎ lánqiú ba?\nNǚ: Tā bú ài ( ), háishi wǒmen qù dǎ ba."
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第18—21题：匹配句子。\nCâu 18–21: Nối câu.",
+					"hide_images": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "鱼做得很好，这两个菜也可以。",
+							"pinyin": "Yú zuò de hěn hǎo, zhè liǎng ge cài yě kěyǐ."
+						},
+						{
+							"label": "B",
+							"text": "会，但踢得不太好。",
+							"pinyin": "Huì, dàn tī de bú tài hǎo."
+						},
+						{
+							"label": "C",
+							"text": "那我们出去运动运动吧。",
+							"pinyin": "Nà wǒmen chūqù yùndòng yùndòng ba."
+						},
+						{
+							"label": "D",
+							"text": "是，我一下班就过来。",
+							"pinyin": "Shì, wǒ yí xiàbān jiù guòlái."
+						},
+						{
+							"label": "E",
+							"text": "他出去了，一会儿就回来。",
+							"pinyin": "Tā chūqù le, yíhuìr jiù huílái."
+						}
+					],
+					"example": {
+						"question": "请问李老师在吗？",
+						"pinyin": "Qǐngwèn Lǐ lǎoshī zài ma?",
+						"meaning": "Xin hỏi, thầy Lý có ở đây không?",
+						"correct_label": "E"
+					},
+					"questions": [
+						{
+							"number": 18,
+							"answer": "B",
+							"question": "你会踢球吗？",
+							"pinyin": "Nǐ huì tī qiú ma?"
+						},
+						{
+							"number": 19,
+							"answer": "A",
+							"question": "今天晚上的菜怎么样？",
+							"pinyin": "Jīntiān wǎnshang de cài zěnmeyàng?"
+						},
+						{
+							"number": 20,
+							"answer": "D",
+							"question": "你每天都来这儿游泳吗？",
+							"pinyin": "Nǐ měitiān dōu lái zhèr yóuyǒng ma?"
+						},
+						{
+							"number": 21,
+							"answer": "C",
+							"question": "你们不要在家看电视、玩手机了。",
+							"pinyin": "Nǐmen bú yào zài jiā kàn diànshì, wán shǒujī le."
+						}
+					]
+				},
+				{
+					"part": "第四部分 - Phần 4",
+					"description": "第22—24题：选择正确答案。\nCâu 22–24: Đọc đoạn ngắn và chọn đáp án đúng.",
+					"hide_images": true,
+					"questions": [
+						{
+							"number": 22,
+							"answer": "A",
+							"sentence": "朋友们都知道我是学中文的，他们问我中文说得怎么样，我会跟他们说不太好，但我的中文老师觉得我说得不错。",
+							"pinyin": "Péngyoumen dōu zhīdào wǒ shì xué Zhōngwén de, tāmen wèn wǒ Zhōngwén shuō de zěnmeyàng, wǒ huì gēn tāmen shuō bú tài hǎo, dàn wǒ de Zhōngwén lǎoshī juéde wǒ shuō de búcuò.",
+							"question": "老师觉得他的中文怎么样？",
+							"question_pinyin": "Lǎoshī juéde tā de Zhōngwén zěnmeyàng?",
+							"options": [
+								{
+									"label": "A",
+									"text": "不错",
+									"pinyin": "búcuò"
+								},
+								{
+									"label": "B",
+									"text": "不好",
+									"pinyin": "bù hǎo"
+								},
+								{
+									"label": "C",
+									"text": "不太好",
+									"pinyin": "bú tài hǎo"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "B",
+							"sentence": "我喜欢旅游，一有时间就往外跑。我去过泰国、加拿大，但我还没去过中国。今年我想去中国看看。",
+							"pinyin": "Wǒ xǐhuan lǚyóu, yì yǒu shíjiān jiù wǎng wài pǎo. Wǒ qùguo Tàiguó, Jiānádà, dàn wǒ hái méi qùguo Zhōngguó. Jīnnián wǒ xiǎng qù Zhōngguó kànkan.",
+							"question": "他想去哪儿旅游？",
+							"question_pinyin": "Tā xiǎng qù nǎr lǚyóu?",
+							"options": [
+								{
+									"label": "A",
+									"text": "泰国",
+									"pinyin": "Tàiguó"
+								},
+								{
+									"label": "B",
+									"text": "中国",
+									"pinyin": "Zhōngguó"
+								},
+								{
+									"label": "C",
+									"text": "加拿大",
+									"pinyin": "Jiānádà"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "C",
+							"sentence": "今天是奶奶的80岁生日。爸爸、妈妈从早上起床就开始准备饭菜，有鱼、肉什么的，妈妈还做了长长的生日面。奶奶说这个生日过得很高兴。",
+							"pinyin": "Jīntiān shì nǎinai de bāshí suì shēngrì. Bàba, māma cóng zǎoshang qǐchuáng jiù kāishǐ zhǔnbèi fàncài, yǒu yú, ròu shénme de, māma hái zuò le chángcháng de shēngrìmiàn. Nǎinai shuō zhège shēngrì guò de hěn gāoxìng.",
+							"question": "生日面是谁做的？",
+							"question_pinyin": "Shēngrìmiàn shì shéi zuò de?",
+							"options": [
+								{
+									"label": "A",
+									"text": "爸爸",
+									"pinyin": "bàba"
+								},
+								{
+									"label": "B",
+									"text": "爷爷",
+									"pinyin": "yéye"
+								},
+								{
+									"label": "C",
+									"text": "妈妈",
+									"pinyin": "māma"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据部件组字。\nCâu 25–27: Ghép các bộ phận tạo thành chữ Hán hoàn chỉnh.",
+					"questions": [
+						{
+							"number": 25,
+							"answer": "A",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 26,
+							"answer": "C",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 27,
+							"answer": "B",
+							"options": ["A", "B", "C", "D"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：根据拼音写汉字。\nCâu 28–30: Viết chữ Hán dựa vào phiên âm.",
+					"example": {
+						"sentence": "你想喝茶还（是）喝咖啡？",
+						"pinyin": "Nǐ xiǎng hē chá hái (shì) hē kāfēi?",
+						"meaning": "Bạn muốn uống trà hay là uống cà phê?"
+					},
+					"questions": [
+						{
+							"number": 28,
+							"type": "writing_input",
+							"sentence": "你汉字写（ ）怎么样？",
+							"prompt_pinyin": "de",
+							"answer": "得"
+						},
+						{
+							"number": 29,
+							"type": "writing_input",
+							"sentence": "我爸爸的（ ）好是游泳。",
+							"prompt_pinyin": "ài",
+							"answer": "爱"
+						},
+						{
+							"number": 30,
+							"type": "writing_input",
+							"sentence": "我现在在足球场（ ）球呢。",
+							"prompt_pinyin": "tī",
+							"answer": "踢"
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,171 @@
+{
+	"course_id": "hsk1_3-0",
+	"course_name": "HSK 1 (3.0)",
+	"id": 9,
+	"label": "Bài 9 ",
+	"title": "我明天上午在学校学习",
+	"short_vi": "Mô tả sự tồn tại của sự vật, hỏi đáp về kế hoạch học tập ",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "前边",
+			"pinyin": "qiánbian",
+			"adj": 2,
+			"vi": "phía trước"
+		},
+		{
+			"pos": 2,
+			"hanzi": "边",
+			"pinyin": "bian / biān",
+			"adj": [2, 7],
+			"vi": "bên, bên cạnh"
+		},
+		{
+			"pos": 3,
+			"hanzi": "家",
+			"pinyin": "jiā",
+			"adj": 8,
+			"vi": "ngôi; hiệu; tiệm; quán; nhà (dùng chỉ nhà hoặc xí nghiệp)"
+		},
+		{
+			"pos": 4,
+			"hanzi": "那个",
+			"pinyin": "nàge",
+			"adj": 11,
+			"vi": "cái đó, cái kia"
+		},
+		{
+			"pos": 5,
+			"hanzi": "外边",
+			"pinyin": "wàibian",
+			"adj": 2,
+			"vi": "bên ngoài"
+		},
+		{
+			"pos": 6,
+			"hanzi": "椅子",
+			"pinyin": "yīzi",
+			"adj": 2,
+			"vi": "cái ghế"
+		},
+		{
+			"pos": 7,
+			"hanzi": "上",
+			"pinyin": "shang/shàng",
+			"adj": 2,
+			"vi": "(sử dụng sau danh từ) chỉ vị trí ở trên/ cao hơn"
+		},
+		{
+			"pos": 8,
+			"hanzi": "本",
+			"pinyin": "běn",
+			"adj": 8,
+			"vi": "Lượng từ dùng cho sách vở"
+		},
+		{
+			"pos": 9,
+			"hanzi": "书",
+			"pinyin": "shū",
+			"adj": 2,
+			"vi": "sách"
+		},
+		{
+			"pos": 10,
+			"hanzi": "那",
+			"pinyin": "nà",
+			"adj": 11,
+			"vi": "cái đó"
+		},
+		{
+			"pos": 11,
+			"hanzi": "第",
+			"pinyin": "dì",
+			"adj": 19,
+			"vi": "thứ (thứ tự, thứ hạng)"
+		},
+		{
+			"pos": 12,
+			"hanzi": "学习",
+			"pinyin": "xuéxí",
+			"adj": 4,
+			"vi": "học, học tập"
+		},
+		{
+			"pos": 13,
+			"hanzi": "做",
+			"pinyin": "zuò",
+			"adj": 4,
+			"vi": "làm"
+		},
+		{
+			"pos": 14,
+			"hanzi": "白天",
+			"pinyin": "báitiān",
+			"adj": 2,
+			"vi": "ban ngày"
+		},
+		{
+			"pos": 15,
+			"hanzi": "读书",
+			"pinyin": "dúshū",
+			"adj": 4,
+			"vi": "đọc sách"
+		},
+		{
+			"pos": 16,
+			"hanzi": "和",
+			"pinyin": "hé",
+			"adj": 10,
+			"vi": "và, với"
+		},
+		{
+			"pos": 17,
+			"hanzi": "朋友",
+			"pinyin": "péngyou",
+			"adj": 2,
+			"vi": "bạn bè"
+		},
+		{
+			"pos": 18,
+			"hanzi": "唱",
+			"pinyin": "chàng",
+			"adj": 4,
+			"vi": "hát"
+		},
+		{
+			"pos": 19,
+			"hanzi": "歌",
+			"pinyin": "gē",
+			"adj": 2,
+			"vi": "bài hát"
+		},
+		{
+			"pos": 20,
+			"hanzi": "好听",
+			"pinyin": "hǎotīng",
+			"adj": 6,
+			"vi": "hay, nghe hay"
+		},
+		{
+			"pos": 21,
+			"hanzi": "电视",
+			"pinyin": "diànshì",
+			"adj": 2,
+			"vi": "tivi"
+		},
+		{
+			"pos": 22,
+			"hanzi": "狗",
+			"pinyin": "gǒu",
+			"adj": 2,
+			"vi": "con chó"
+		},
+		{
+			"pos": 23,
+			"hanzi": "玩",
+			"pinyin": "wán",
+			"adj": 4,
+			"vi": "chơi"
+		}
+	]
+}

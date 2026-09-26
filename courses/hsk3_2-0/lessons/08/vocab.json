@@ -1,0 +1,129 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 8,
+  "label": "Bài 8",
+  "title": "你去哪儿我就去哪儿。",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "又",
+      "pinyin": "yòu",
+      "adj": 7,
+      "vi": "lại"
+    },
+    {
+      "pos": 2,
+      "hanzi": "满意",
+      "pinyin": "mǎnyì",
+      "adj": 4,
+      "vi": "hài lòng, vừa ý"
+    },
+    {
+      "pos": 3,
+      "hanzi": "电梯",
+      "pinyin": "diàntī",
+      "adj": 2,
+      "vi": "thang máy"
+    },
+    {
+      "pos": 4,
+      "hanzi": "层",
+      "pinyin": "céng",
+      "adj": 8,
+      "vi": "tầng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "害怕",
+      "pinyin": "hàipà",
+      "adj": 4,
+      "vi": "sợ"
+    },
+    {
+      "pos": 6,
+      "hanzi": "熊猫",
+      "pinyin": "xióngmāo",
+      "adj": 2,
+      "vi": "gấu trúc, panda"
+    },
+    {
+      "pos": 7,
+      "hanzi": "见面",
+      "pinyin": "jiàn miàn",
+      "adj": 4,
+      "vi": "gặp, gặp nhau"
+    },
+    {
+      "pos": 8,
+      "hanzi": "安静",
+      "pinyin": "ānjìng",
+      "adj": 6,
+      "vi": "yên tĩnh"
+    },
+    {
+      "pos": 9,
+      "hanzi": "可乐",
+      "pinyin": "kělè",
+      "adj": 2,
+      "vi": "coca-cola"
+    },
+    {
+      "pos": 10,
+      "hanzi": "一会儿",
+      "pinyin": "yíhuìr",
+      "adj": 2,
+      "vi": "chốc lát, một lát"
+    },
+    {
+      "pos": 11,
+      "hanzi": "马上",
+      "pinyin": "mǎshàng",
+      "adj": 7,
+      "vi": "liền, ngay lập tức"
+    },
+    {
+      "pos": 12,
+      "hanzi": "洗手间",
+      "pinyin": "xǐshǒujiān",
+      "adj": 2,
+      "vi": "nhà vệ sinh"
+    },
+    {
+      "pos": 13,
+      "hanzi": "老",
+      "pinyin": "lǎo",
+      "adj": 6,
+      "vi": "già, cũ"
+    },
+    {
+      "pos": 14,
+      "hanzi": "几乎",
+      "pinyin": "jīhū",
+      "adj": 7,
+      "vi": "hầu như, gần như"
+    },
+    {
+      "pos": 15,
+      "hanzi": "变化",
+      "pinyin": "biànhuà",
+      "adj": 4,
+      "vi": "thay đổi"
+    },
+    {
+      "pos": 16,
+      "hanzi": "健康",
+      "pinyin": "jiànkāng",
+      "adj": 6,
+      "vi": "khỏe mạnh"
+    },
+    {
+      "pos": 17,
+      "hanzi": "重要",
+      "pinyin": "zhòngyào",
+      "adj": 6,
+      "vi": "quan trọng"
+    }
+  ]
+}

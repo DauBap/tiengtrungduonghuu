@@ -1,0 +1,316 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 8,
+  "label": "Bài 8",
+  "title": " \"朝三暮四\"的古今义",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "朝三暮四",
+      "pinyin": "zhāosān mùsì",
+      "adj": [
+        null,
+        12
+      ],
+      "vi": "sáng ba chiều bốn (thay đổi thất thường)"
+    },
+    {
+      "pos": 2,
+      "hanzi": "词汇",
+      "pinyin": "cíhuì",
+      "adj": 2,
+      "vi": "từ vựng"
+    },
+    {
+      "pos": 3,
+      "hanzi": "固定",
+      "pinyin": "gùdìng",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "cố định; ổn định"
+    },
+    {
+      "pos": 4,
+      "hanzi": "结构",
+      "pinyin": "jiégòu",
+      "adj": 2,
+      "vi": "kết cấu, cấu trúc"
+    },
+    {
+      "pos": 5,
+      "hanzi": "整体",
+      "pinyin": "zhěngtǐ",
+      "adj": 2,
+      "vi": "chỉnh thể, toàn thể"
+    },
+    {
+      "pos": 6,
+      "hanzi": "综合",
+      "pinyin": "zōnghé",
+      "adj": [
+        4,
+        6
+      ],
+      "vi": "tổng hợp lại; tổng hợp"
+    },
+    {
+      "pos": 7,
+      "hanzi": "完整",
+      "pinyin": "wánzhěng",
+      "adj": 6,
+      "vi": "hoàn chỉnh, trọn vẹn"
+    },
+    {
+      "pos": 8,
+      "hanzi": "哲学家",
+      "pinyin": "zhéxuéjiā",
+      "adj": 2,
+      "vi": "nhà triết học"
+    },
+    {
+      "pos": 9,
+      "hanzi": "寓言",
+      "pinyin": "yùyán",
+      "adj": 2,
+      "vi": "truyện ngụ ngôn"
+    },
+    {
+      "pos": 10,
+      "hanzi": "喂养",
+      "pinyin": "wèiyǎng",
+      "adj": 4,
+      "vi": "nuôi"
+    },
+    {
+      "pos": 11,
+      "hanzi": "群",
+      "pinyin": "qún",
+      "adj": 8,
+      "vi": "bầy, đàn"
+    },
+    {
+      "pos": 12,
+      "hanzi": "猴子",
+      "pinyin": "hóuzi",
+      "adj": 2,
+      "vi": "con khỉ"
+    },
+    {
+      "pos": 13,
+      "hanzi": "宠物",
+      "pinyin": "chǒngwù",
+      "adj": 2,
+      "vi": "vật cưng, thú cưng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "相处",
+      "pinyin": "xiāngchǔ",
+      "adj": 4,
+      "vi": "chung sống"
+    },
+    {
+      "pos": 15,
+      "hanzi": "彼此",
+      "pinyin": "bǐcǐ",
+      "adj": 1,
+      "vi": "hai bên"
+    },
+    {
+      "pos": 16,
+      "hanzi": "表情",
+      "pinyin": "biǎoqíng",
+      "adj": 2,
+      "vi": "nét mặt, vẻ mặt"
+    },
+    {
+      "pos": 17,
+      "hanzi": "行为",
+      "pinyin": "xíngwéi",
+      "adj": 2,
+      "vi": "hành vi, hành động"
+    },
+    {
+      "pos": 18,
+      "hanzi": "对方",
+      "pinyin": "duìfāng",
+      "adj": 2,
+      "vi": "đối phương, phía bên kia"
+    },
+    {
+      "pos": 19,
+      "hanzi": "蔬菜",
+      "pinyin": "shūcài",
+      "adj": 2,
+      "vi": "rau cải"
+    },
+    {
+      "pos": 20,
+      "hanzi": "粮食",
+      "pinyin": "liángshi",
+      "adj": 2,
+      "vi": "lương thực"
+    },
+    {
+      "pos": 21,
+      "hanzi": "家庭",
+      "pinyin": "jiātíng",
+      "adj": 2,
+      "vi": "gia đình"
+    },
+    {
+      "pos": 22,
+      "hanzi": "财产",
+      "pinyin": "cáichǎn",
+      "adj": 2,
+      "vi": "tài sản, của cải"
+    },
+    {
+      "pos": 23,
+      "hanzi": "消费",
+      "pinyin": "xiāofèi",
+      "adj": 4,
+      "vi": "tiêu thụ, tiêu dùng"
+    },
+    {
+      "pos": 24,
+      "hanzi": "节省",
+      "pinyin": "jiéshěng",
+      "adj": 4,
+      "vi": "tiết kiệm, dành dụm"
+    },
+    {
+      "pos": 25,
+      "hanzi": "限制",
+      "pinyin": "xiànzhì",
+      "adj": 4,
+      "vi": "hạn chế"
+    },
+    {
+      "pos": 26,
+      "hanzi": "猪",
+      "pinyin": "zhū",
+      "adj": 2,
+      "vi": "heo"
+    },
+    {
+      "pos": 27,
+      "hanzi": "调皮",
+      "pinyin": "tiáopí",
+      "adj": 6,
+      "vi": "nghịch ngợm, tinh nghịch"
+    },
+    {
+      "pos": 28,
+      "hanzi": "淘气",
+      "pinyin": "táoqì",
+      "adj": 6,
+      "vi": "nghịch ngợm"
+    },
+    {
+      "pos": 29,
+      "hanzi": "橡子",
+      "pinyin": "xiàngzi",
+      "adj": 2,
+      "vi": "quả đấu, hạt dẻ rừng"
+    },
+    {
+      "pos": 30,
+      "hanzi": "果实",
+      "pinyin": "guǒshí",
+      "adj": 2,
+      "vi": "quả, trái cây"
+    },
+    {
+      "pos": 31,
+      "hanzi": "不足",
+      "pinyin": "bùzú",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "thiếu; không đủ"
+    },
+    {
+      "pos": 32,
+      "hanzi": "倒",
+      "pinyin": "dào",
+      "adj": 7,
+      "vi": "(chỉ sự trái ngược với điều được mong đợi hoặc suy nghĩ) lại"
+    },
+    {
+      "pos": 33,
+      "hanzi": "馒头",
+      "pinyin": "mántou",
+      "adj": 2,
+      "vi": "màn thầu, bánh bao không nhân"
+    },
+    {
+      "pos": 34,
+      "hanzi": "颗",
+      "pinyin": "kē",
+      "adj": 8,
+      "vi": "(được dùng cho vật có dạng hạt tròn nhỏ) hạt, viên"
+    },
+    {
+      "pos": 35,
+      "hanzi": "似乎",
+      "pinyin": "sìhū",
+      "adj": 7,
+      "vi": "dường như"
+    },
+    {
+      "pos": 36,
+      "hanzi": "吃亏",
+      "pinyin": "chī kuī",
+      "adj": 4,
+      "vi": "chịu thiệt, thiệt thòi"
+    },
+    {
+      "pos": 37,
+      "hanzi": "方式",
+      "pinyin": "fāngshì",
+      "adj": 2,
+      "vi": "phương thức, cách thức"
+    },
+    {
+      "pos": 38,
+      "hanzi": "安慰",
+      "pinyin": "ānwèi",
+      "adj": 4,
+      "vi": "an ủi, dỗ dành"
+    },
+    {
+      "pos": 39,
+      "hanzi": "要不",
+      "pinyin": "yàobu",
+      "adj": 10,
+      "vi": "nếu không thì"
+    },
+    {
+      "pos": 40,
+      "hanzi": "显得",
+      "pinyin": "xiǎnde",
+      "adj": 4,
+      "vi": "tỏ ra, có vẻ"
+    },
+    {
+      "pos": 41,
+      "hanzi": "格外",
+      "pinyin": "géwài",
+      "adj": 7,
+      "vi": "vô cùng, hết sức"
+    },
+    {
+      "pos": 42,
+      "hanzi": "情景",
+      "pinyin": "qíngjǐng",
+      "adj": 2,
+      "vi": "tình cảnh, cảnh tượng"
+    }
+  ]
+}

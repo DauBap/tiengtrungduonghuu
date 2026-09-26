@@ -1,0 +1,426 @@
+{
+	"title": "HSK3 - Sách bài tập",
+	"lesson": 15,
+	"lesson_title": "我是半个南京人",
+	"grading_pending": true,
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听对话，选择最匹配的图片。每题听两次。\nCâu 1–3: Nghe và chọn hình phù hợp. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 1,
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择正确答案。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 4,
+							"options": [
+								{
+									"label": "A",
+									"text": "鱼"
+								},
+								{
+									"label": "B",
+									"text": "鸡肉"
+								},
+								{
+									"label": "C",
+									"text": "鸡蛋面"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"options": [
+								{
+									"label": "A",
+									"text": "是南方人"
+								},
+								{
+									"label": "B",
+									"text": "来这儿很久了"
+								},
+								{
+									"label": "C",
+									"text": "在南方上的大学"
+								}
+							]
+						},
+						{
+							"number": 6,
+							"options": [
+								{
+									"label": "A",
+									"text": "生病了"
+								},
+								{
+									"label": "B",
+									"text": "有点儿累"
+								},
+								{
+									"label": "C",
+									"text": "睡觉睡多了"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听一段话，选择正确答案。每题听两次。\nCâu 7–10: Nghe đoạn thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 7,
+							"options": [
+								{
+									"label": "A",
+									"text": "花茶"
+								},
+								{
+									"label": "B",
+									"text": "绿茶"
+								},
+								{
+									"label": "C",
+									"text": "红茶"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"options": [
+								{
+									"label": "A",
+									"text": "有高高的山"
+								},
+								{
+									"label": "B",
+									"text": "有蓝色的鱼"
+								},
+								{
+									"label": "C",
+									"text": "有很多游客"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"options": [
+								{
+									"label": "A",
+									"text": "很快乐"
+								},
+								{
+									"label": "B",
+									"text": "对学习好"
+								},
+								{
+									"label": "C",
+									"text": "对身体好"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"options": [
+								{
+									"label": "A",
+									"text": "看电视"
+								},
+								{
+									"label": "B",
+									"text": "在外面玩"
+								},
+								{
+									"label": "C",
+									"text": "玩电脑游戏"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—15题：匹配句子。\nCâu 11–15: Nối câu.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "对，我去过中国十个以上的城市。"
+						},
+						{
+							"label": "B",
+							"text": "我不太了解他，只跟他见过几次。"
+						},
+						{
+							"label": "C",
+							"text": "我知道有一位老人很了解那里。"
+						},
+						{
+							"label": "D",
+							"text": "不是的，昨晚看足球比赛，睡得太晚了。"
+						},
+						{
+							"label": "E",
+							"text": "当然。我们先坐公交车，然后换地铁。"
+						},
+						{
+							"label": "F",
+							"text": "我明天要去南京旅游，把它放到朋友家了。"
+						}
+					],
+					"questions": [
+						{
+							"number": 11,
+							"answer": "B",
+							"question": "你和小王的关系怎么样？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 12,
+							"answer": "D",
+							"question": "你平时也是十点多才起床吗？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 13,
+							"answer": "A",
+							"question": "听说你对中国文化特别感兴趣？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 14,
+							"answer": "F",
+							"question": "我记得你养了一条狗，怎么不见了？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 15,
+							"answer": "C",
+							"question": "我想找个人给我讲讲那个城市的历史。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第16—20题：选词填空。\nCâu 16–20: Chọn từ điền vào chỗ trống.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "了解"
+						},
+						{
+							"label": "B",
+							"text": "游客"
+						},
+						{
+							"label": "C",
+							"text": "根据"
+						},
+						{
+							"label": "D",
+							"text": "遇见"
+						},
+						{
+							"label": "E",
+							"text": "鞋"
+						},
+						{
+							"label": "F",
+							"text": "附近"
+						}
+					],
+					"questions": [
+						{
+							"number": 16,
+							"answer": "C",
+							"sentence": "大家可以（ ）自己的需要选择要买的东西。"
+						},
+						{
+							"number": 17,
+							"answer": "B",
+							"sentence": "这些（ ）不一会儿就把要送人的礼物买好了。"
+						},
+						{
+							"number": 18,
+							"answer": "F",
+							"sentence": "我家（ ）有个公园，我经常去公园的草地上看书。"
+						},
+						{
+							"number": 19,
+							"answer": "A",
+							"sentence": "A：你（ ）黄河的历史吗？\nB：当然，我们上课的时候学过。"
+						},
+						{
+							"number": 20,
+							"answer": "D",
+							"sentence": "A：你今天怎么回来这么晚？\nB：我在路上（ ）了一个老朋友，跟他聊了好久。"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第21—24题：选择正确答案。\nCâu 21–24: Đọc và chọn đáp án đúng.",
+					"embedded_example_image": true,
+					"shared_passage": "23–24\n\n我每天都刷牙，而且每次都刷三分钟以上，可是没想到还是牙疼。可能是因为最近一段时间，我吃了太多甜的东西。以后我应该少吃点儿甜的，有时间还要再去医院检查一下。",
+					"shared_passage_start": 23,
+					"questions": [
+						{
+							"number": 21,
+							"answer": "A",
+							"sentence": "你看课文的时候别着急，一段一段地看，一个词一个词地看，一定能看懂的。",
+							"question": "看课文的时候应该怎么做？",
+							"options": [
+								{
+									"label": "A",
+									"text": "慢慢看"
+								},
+								{
+									"label": "B",
+									"text": "越看越快"
+								},
+								{
+									"label": "C",
+									"text": "边写边看"
+								}
+							]
+						},
+						{
+							"number": 22,
+							"answer": "B",
+							"sentence": "他爸爸是音乐学校的校长，妈妈是有名的音乐老师，可是他对音乐没什么兴趣。他想以后做个医生，帮助那些生病的人。",
+							"question": "他以后想做什么工作？",
+							"options": [
+								{
+									"label": "A",
+									"text": "校长"
+								},
+								{
+									"label": "B",
+									"text": "医生"
+								},
+								{
+									"label": "C",
+									"text": "音乐老师"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "B",
+							"question": "他为什么会牙疼？",
+							"options": [
+								{
+									"label": "A",
+									"text": "不是每天刷牙"
+								},
+								{
+									"label": "B",
+									"text": "吃了太多甜的"
+								},
+								{
+									"label": "C",
+									"text": "刷牙时间太短了"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "C",
+							"question": "他要做什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "多刷牙"
+								},
+								{
+									"label": "B",
+									"text": "少吃东西"
+								},
+								{
+									"label": "C",
+									"text": "去医院检查"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据拼音写汉字。\nCâu 25–27: Viết chữ Hán theo pinyin.",
+					"embedded_example_image": true,
+					"questions": [
+						{
+							"number": 25,
+							"type": "writing_input",
+							"sentence": "这（ ）时间，我一直住在朋友家里。",
+							"prompt_pinyin": "duàn"
+						},
+						{
+							"number": 26,
+							"type": "writing_input",
+							"sentence": "中国银行在（ ）路的北边还是南边？",
+							"prompt_pinyin": "mǎ"
+						},
+						{
+							"number": 27,
+							"type": "writing_input",
+							"sentence": "我家门前有一条小（ ），我常去游泳。",
+							"prompt_pinyin": "hé"
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：看图，用词造句。\nCâu 28–30: Nhìn hình và dùng từ gợi ý đặt câu.",
+					"questions": [
+						{
+							"number": 28,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 聊"
+						},
+						{
+							"number": 29,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 经过"
+						},
+						{
+							"number": 30,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 放学"
+						}
+					]
+				}
+			]
+		}
+	]
+}

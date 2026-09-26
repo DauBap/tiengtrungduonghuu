@@ -1,0 +1,302 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 14,
+  "label": "Bài 14",
+  "title": "北京的四合院",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "四合院",
+      "pinyin": "sìhéyuàn",
+      "adj": 2,
+      "vi": "tứ hợp viện"
+    },
+    {
+      "pos": 2,
+      "hanzi": "民居",
+      "pinyin": "mínjū",
+      "adj": 2,
+      "vi": "nhà ở của thường dân"
+    },
+    {
+      "pos": 3,
+      "hanzi": "组合",
+      "pinyin": "zǔhé",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "kết hợp; tổ hợp"
+    },
+    {
+      "pos": 4,
+      "hanzi": "建筑",
+      "pinyin": "jiànzhù",
+      "adj": 2,
+      "vi": "kiến trúc, công trình kiến trúc"
+    },
+    {
+      "pos": 5,
+      "hanzi": "形式",
+      "pinyin": "xíngshì",
+      "adj": 2,
+      "vi": "hình thức"
+    },
+    {
+      "pos": 6,
+      "hanzi": "所谓",
+      "pinyin": "suǒwèi",
+      "adj": 6,
+      "vi": "cái gọi là"
+    },
+    {
+      "pos": 7,
+      "hanzi": "方",
+      "pinyin": "fāng",
+      "adj": 2,
+      "vi": "vuông"
+    },
+    {
+      "pos": 8,
+      "hanzi": "广泛",
+      "pinyin": "guǎnfàn",
+      "adj": 6,
+      "vi": "rộng rãi"
+    },
+    {
+      "pos": 9,
+      "hanzi": "样式",
+      "pinyin": "yàngshì",
+      "adj": 2,
+      "vi": "hình thức, kiểu dáng"
+    },
+    {
+      "pos": 10,
+      "hanzi": "代表",
+      "pinyin": "dàibiǎo",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "đại biểu; đại diện"
+    },
+    {
+      "pos": 11,
+      "hanzi": "通常",
+      "pinyin": "tōngcháng",
+      "adj": 7,
+      "vi": "thường, bình thường"
+    },
+    {
+      "pos": 12,
+      "hanzi": "并列",
+      "pinyin": "bìngliè",
+      "adj": 4,
+      "vi": "đặt song song, đứng cạnh nhau"
+    },
+    {
+      "pos": 13,
+      "hanzi": "组成",
+      "pinyin": "zúchéng",
+      "adj": 4,
+      "vi": "tạo thành, hợp thành"
+    },
+    {
+      "pos": 14,
+      "hanzi": "长辈",
+      "pinyin": "zhǎngbèi",
+      "adj": 2,
+      "vi": "bề trên, bậc cha chú"
+    },
+    {
+      "pos": 15,
+      "hanzi": "具备",
+      "pinyin": "jùbèi",
+      "adj": 4,
+      "vi": "có đủ, có đầy"
+    },
+    {
+      "pos": 16,
+      "hanzi": "日常",
+      "pinyin": "rìcháng",
+      "adj": 6,
+      "vi": "hằng ngày"
+    },
+    {
+      "pos": 17,
+      "hanzi": "起居",
+      "pinyin": "qǐjū",
+      "adj": 2,
+      "vi": "sinh hoạt thường ngày"
+    },
+    {
+      "pos": 18,
+      "hanzi": "接待",
+      "pinyin": "jiēdài",
+      "adj": 4,
+      "vi": "tiếp đãi"
+    },
+    {
+      "pos": 19,
+      "hanzi": "功能",
+      "pinyin": "gōngnéng",
+      "adj": 2,
+      "vi": "chức năng"
+    },
+    {
+      "pos": 20,
+      "hanzi": "厢房",
+      "pinyin": "xiāngfáng",
+      "adj": 2,
+      "vi": "chái nhà, hiên nhà"
+    },
+    {
+      "pos": 21,
+      "hanzi": "走廊",
+      "pinyin": "zǒuláng",
+      "adj": 2,
+      "vi": "hành lang, hàng hiên"
+    },
+    {
+      "pos": 22,
+      "hanzi": "空间",
+      "pinyin": "kōngjiān",
+      "adj": 2,
+      "vi": "không gian"
+    },
+    {
+      "pos": 23,
+      "hanzi": "种",
+      "pinyin": "zhòng",
+      "adj": 4,
+      "vi": "trồng"
+    },
+    {
+      "pos": 24,
+      "hanzi": "竹子",
+      "pinyin": "zhúzi",
+      "adj": 2,
+      "vi": "cây trúc, cây tre"
+    },
+    {
+      "pos": 25,
+      "hanzi": "则",
+      "pinyin": "zé",
+      "adj": 10,
+      "vi": "(chỉ sự tương phản) trong khi đó"
+    },
+    {
+      "pos": 26,
+      "hanzi": "金鱼",
+      "pinyin": "jīnyú",
+      "adj": 2,
+      "vi": "cá vàng"
+    },
+    {
+      "pos": 27,
+      "hanzi": "创造",
+      "pinyin": "chuàngzào",
+      "adj": 4,
+      "vi": "sáng tạo, tạo ra"
+    },
+    {
+      "pos": 28,
+      "hanzi": "情趣",
+      "pinyin": "qíngqù",
+      "adj": 2,
+      "vi": "sự thú vị, điều thích thú"
+    },
+    {
+      "pos": 29,
+      "hanzi": "为",
+      "pinyin": "wéi",
+      "adj": 13,
+      "vi": "(thường được dùng với 所) bị, được"
+    },
+    {
+      "pos": 30,
+      "hanzi": "关闭",
+      "pinyin": "guānbì",
+      "adj": 4,
+      "vi": "đóng kín"
+    },
+    {
+      "pos": 31,
+      "hanzi": "封闭",
+      "pinyin": "fēngbì",
+      "adj": 4,
+      "vi": "khép kín"
+    },
+    {
+      "pos": 32,
+      "hanzi": "打交道",
+      "pinyin": "dǎ jiāodào",
+      "adj": 4,
+      "vi": "giao thiệp, tiếp xúc"
+    },
+    {
+      "pos": 33,
+      "hanzi": "日子",
+      "pinyin": "rìzi",
+      "adj": 2,
+      "vi": "cuộc sống"
+    },
+    {
+      "pos": 34,
+      "hanzi": "充分",
+      "pinyin": "chōngfèn",
+      "adj": 6,
+      "vi": "đầy đủ, trọn vẹn"
+    },
+    {
+      "pos": 35,
+      "hanzi": "令",
+      "pinyin": "lìng",
+      "adj": 4,
+      "vi": "khiến, làm cho"
+    },
+    {
+      "pos": 36,
+      "hanzi": "亲切",
+      "pinyin": "qīnqiè",
+      "adj": 6,
+      "vi": "thân mật, thân thiết"
+    },
+    {
+      "pos": 37,
+      "hanzi": "劳动",
+      "pinyin": "láodòng",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "lao động, công việc; làm việc, lao động (bằng chân tay)"
+    },
+    {
+      "pos": 38,
+      "hanzi": "人民",
+      "pinyin": "rénmín",
+      "adj": 2,
+      "vi": "nhân dân"
+    },
+    {
+      "pos": 39,
+      "hanzi": "矛盾",
+      "pinyin": "máodùn",
+      "adj": [
+        2,
+        6
+      ],
+      "vi": "sự mâu thuẫn; mâu thuẫn"
+    },
+    {
+      "pos": 40,
+      "hanzi": "浓",
+      "pinyin": "nóng",
+      "adj": 6,
+      "vi": "sâu sắc, đậm"
+    }
+  ]
+}

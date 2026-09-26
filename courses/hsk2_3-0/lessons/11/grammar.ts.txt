@@ -1,0 +1,235 @@
+import type { GrammarExercise, GrammarLesson } from "./types";
+
+type Row = {
+	id: string;
+	zh: string;
+	vi: string;
+	tokens: string[];
+	wrong: [string, string];
+	note: string;
+};
+const exercises = (prefix: string, rows: Row[]): GrammarExercise[] => [
+	{
+		id: `${prefix}-choice`,
+		title: "1. Chọn đáp án đúng",
+		type: "choice",
+		questions: rows.map((r, i) => {
+			const options: [string, string, string] =
+				i % 3 === 0
+					? [r.zh, ...r.wrong]
+					: i % 3 === 1
+						? [r.wrong[0], r.zh, r.wrong[1]]
+						: [...r.wrong, r.zh];
+			return {
+				id: `${r.id}c`,
+				prompt: `Chọn câu đúng: “${r.vi}”`,
+				answer: r.zh,
+				options,
+				completedSentence: r.zh,
+				meaning: r.vi,
+				explanation: r.note,
+				optionExplanations: Object.fromEntries(
+					options.map((o) => [
+						o,
+						o === r.zh ? `Đúng: ${r.note}` : "Sai: vị trí từ hoặc ý nghĩa ngữ pháp không phù hợp."
+					])
+				)
+			};
+		})
+	},
+	{
+		id: `${prefix}-arrange`,
+		title: "2. Sắp xếp từ thành câu",
+		type: "arrange",
+		questions: rows.map((r) => ({
+			id: `${r.id}a`,
+			prompt: r.vi,
+			answer: r.zh,
+			tokens: r.tokens,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	},
+	{
+		id: `${prefix}-translate`,
+		title: "3. Dịch Việt sang Trung",
+		type: "input",
+		questions: rows.map((r) => ({
+			id: `${r.id}t`,
+			prompt: r.vi,
+			answer: r.zh,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	}
+];
+
+export const hsk2Lesson11Grammar: GrammarLesson = {
+	title: "BÀI 11: 我最喜欢吃中国菜",
+	points: [
+		{
+			id: "durative-zhe",
+			title: "Trợ từ động thái “着” (1) – Duy trì động tác hoặc trạng thái",
+			explanation:
+				"“着” đặt ngay sau động từ để biểu thị một tư thế, động tác hoặc trạng thái đang được duy trì. Phủ định thường dùng “没(有) + động từ + 着”.",
+			formulas: ["Chủ ngữ + động từ + 着", "Chủ ngữ + 没(有) + động từ + 着"],
+			examples: [
+				{ chinese: "你在这儿坐着。", vietnamese: "Bạn ngồi ở đây đi." },
+				{ chinese: "门没开着。", vietnamese: "Cửa không mở." }
+			],
+			notes: ["“着” nhấn mạnh trạng thái đang duy trì, không chỉ một hành động đã hoàn thành."],
+			exercises: exercises("h2l11-zhe1", [
+				{
+					id: "z1",
+					zh: "你在这儿坐着",
+					vi: "Bạn ngồi ở đây đi.",
+					tokens: ["坐", "你", "着", "在这儿"],
+					wrong: ["你在这儿着坐", "你着在这儿坐"],
+					note: "着 đứng ngay sau động từ 坐."
+				},
+				{
+					id: "z2",
+					zh: "门没开着",
+					vi: "Cửa không mở.",
+					tokens: ["开", "门", "着", "没"],
+					wrong: ["门不开着了", "门着没开"],
+					note: "Phủ định trạng thái dùng 没 + 开着."
+				},
+				{
+					id: "z3",
+					zh: "他站着不动",
+					vi: "Anh ấy đứng yên không động đậy.",
+					tokens: ["不动", "他", "着", "站"],
+					wrong: ["他着站不动", "他站不动着"],
+					note: "站着 diễn tả tư thế đứng được duy trì."
+				},
+				{
+					id: "z4",
+					zh: "她笑着进来了",
+					vi: "Cô ấy mỉm cười đi vào.",
+					tokens: ["进来了", "笑", "她", "着"],
+					wrong: ["她着笑进来了", "她笑进来着了"],
+					note: "笑着 là trạng thái đi kèm khi thực hiện 进来."
+				},
+				{
+					id: "z5",
+					zh: "药店的门开着",
+					vi: "Cửa hiệu thuốc đang mở.",
+					tokens: ["开", "药店的门", "着"],
+					wrong: ["药店的门着开", "药店开着的门"],
+					note: "开着 biểu thị trạng thái cửa đang mở."
+				}
+			])
+		},
+		{
+			id: "zhe-with-object",
+			title: "Trợ từ động thái “着” (2) – Tân ngữ đứng sau “着”",
+			explanation:
+				"Khi động từ có tân ngữ, “着” vẫn đứng sát sau động từ và tân ngữ đứng sau “着”. Cấu trúc mô tả sự vật hoặc hiện tượng đang tồn tại trong trạng thái đó.",
+			formulas: ["Chủ ngữ + động từ + 着 + tân ngữ", "Nơi chốn + động từ + 着 + danh từ"],
+			examples: [
+				{ chinese: "还下着雪。", vietnamese: "Trời vẫn đang có tuyết rơi." },
+				{ chinese: "桌子上放着药。", vietnamese: "Trên bàn có đặt thuốc." }
+			],
+			notes: ["Không đặt tân ngữ vào giữa động từ và “着”."],
+			exercises: exercises("h2l11-zhe2", [
+				{
+					id: "o1",
+					zh: "外面还下着雪",
+					vi: "Bên ngoài vẫn đang có tuyết rơi.",
+					tokens: ["雪", "外面", "着", "还", "下"],
+					wrong: ["外面还下雪着", "外面还着下雪"],
+					note: "下 + 着 + 雪; tân ngữ 雪 đứng sau 着."
+				},
+				{
+					id: "o2",
+					zh: "桌子上放着药",
+					vi: "Trên bàn có đặt thuốc.",
+					tokens: ["药", "放", "桌子上", "着"],
+					wrong: ["桌子上放药着", "桌子上着放药"],
+					note: "放 + 着 + 药."
+				},
+				{
+					id: "o3",
+					zh: "门口站着一个人",
+					vi: "Trước cửa có một người đang đứng.",
+					tokens: ["站", "门口", "一个人", "着"],
+					wrong: ["门口站一个人着", "门口着站一个人"],
+					note: "站着一个人 mô tả sự tồn tại ở 门口."
+				},
+				{
+					id: "o4",
+					zh: "她手里拿着药",
+					vi: "Trong tay cô ấy đang cầm thuốc.",
+					tokens: ["药", "拿", "她手里", "着"],
+					wrong: ["她手里拿药着", "她手里着拿药"],
+					note: "拿 + 着 + 药."
+				},
+				{
+					id: "o5",
+					zh: "路上走着很多人",
+					vi: "Trên đường có nhiều người đang đi.",
+					tokens: ["很多人", "路上", "着", "走"],
+					wrong: ["路上走很多人着", "路上着走很多人"],
+					note: "走着很多人 mô tả trạng thái đang tồn tại trên đường."
+				}
+			])
+		},
+		{
+			id: "superlative-zui",
+			title: "Phó từ chỉ mức độ “最” – Nhất",
+			explanation:
+				"“最” đặt trước tính từ hoặc động từ tâm lý như 喜欢、爱 để biểu thị mức độ cao nhất trong một phạm vi so sánh.",
+			formulas: ["Chủ ngữ + 最 + tính từ", "Chủ ngữ + 最 + động từ tâm lý + tân ngữ"],
+			examples: [
+				{ chinese: "我最喜欢吃中国菜。", vietnamese: "Tôi thích ăn món Trung Quốc nhất." },
+				{ chinese: "这家药店最近。", vietnamese: "Hiệu thuốc này gần nhất." }
+			],
+			notes: ["“最” đứng ngay trước từ hoặc cụm từ mà nó bổ nghĩa."],
+			exercises: exercises("h2l11-zui", [
+				{
+					id: "m1",
+					zh: "我最喜欢吃中国菜",
+					vi: "Tôi thích ăn món Trung Quốc nhất.",
+					tokens: ["中国菜", "最", "我", "喜欢吃"],
+					wrong: ["我喜欢最吃中国菜", "最我喜欢吃中国菜"],
+					note: "最 đứng trước động từ tâm lý 喜欢."
+				},
+				{
+					id: "m2",
+					zh: "这家药店最近",
+					vi: "Hiệu thuốc này gần nhất.",
+					tokens: ["最近", "这家药店"],
+					wrong: ["这家最药店近", "最这家药店近"],
+					note: "最 đứng ngay trước tính từ 近."
+				},
+				{
+					id: "m3",
+					zh: "他跑得最快",
+					vi: "Anh ấy chạy nhanh nhất.",
+					tokens: ["最快", "他", "跑得"],
+					wrong: ["他最跑得快", "最他跑得快"],
+					note: "Trong bổ ngữ trạng thái, 最 bổ nghĩa cho 快."
+				},
+				{
+					id: "m4",
+					zh: "我最爱喝奶茶",
+					vi: "Tôi thích uống trà sữa nhất.",
+					tokens: ["喝奶茶", "我", "最爱"],
+					wrong: ["我爱最喝奶茶", "最我爱喝奶茶"],
+					note: "最 đứng trước động từ tâm lý 爱."
+				},
+				{
+					id: "m5",
+					zh: "他的身体最好",
+					vi: "Sức khỏe của anh ấy tốt nhất.",
+					tokens: ["最好", "他的身体"],
+					wrong: ["他的最身体好", "最他的身体好"],
+					note: "最 + 好 tạo mức độ cao nhất."
+				}
+			])
+		}
+	]
+};

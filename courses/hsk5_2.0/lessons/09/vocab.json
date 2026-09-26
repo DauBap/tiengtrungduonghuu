@@ -1,0 +1,292 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 9,
+  "label": "Bài 9",
+  "title": "别样鲁迅",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "表现",
+      "pinyin": "biǎoxiàn",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "thể hiện; biểu hiện"
+    },
+    {
+      "pos": 2,
+      "hanzi": "突出",
+      "pinyin": "tūchū",
+      "adj": 6,
+      "vi": "nổi bật, nổi trội"
+    },
+    {
+      "pos": 3,
+      "hanzi": "文学家",
+      "pinyin": "wénxuéjiā",
+      "adj": 2,
+      "vi": "nhà văn"
+    },
+    {
+      "pos": 4,
+      "hanzi": "算",
+      "pinyin": "suàn",
+      "adj": 4,
+      "vi": "coi là, xem là"
+    },
+    {
+      "pos": 5,
+      "hanzi": "地道",
+      "pinyin": "dídao",
+      "adj": 6,
+      "vi": "đích thực, chân chính, chính cống"
+    },
+    {
+      "pos": 6,
+      "hanzi": "行家",
+      "pinyin": "hángjia",
+      "adj": 2,
+      "vi": "người trong nghề, người thao nghề"
+    },
+    {
+      "pos": 7,
+      "hanzi": "亲自",
+      "pinyin": "qīnzì",
+      "adj": 7,
+      "vi": "tự, đích thân"
+    },
+    {
+      "pos": 8,
+      "hanzi": "见解",
+      "pinyin": "jiànjiě",
+      "adj": 2,
+      "vi": "cách nhìn, quan niệm"
+    },
+    {
+      "pos": 9,
+      "hanzi": "近代",
+      "pinyin": "jìndài",
+      "adj": 2,
+      "vi": "thời cận đại (chỉ khoảng thời gian từ giữa thế kỷ 19 đến năm 1919 trong lịch sử Trung Quốc)"
+    },
+    {
+      "pos": 10,
+      "hanzi": "时尚",
+      "pinyin": "shíshàng",
+      "adj": 2,
+      "vi": "mốt, thời trang"
+    },
+    {
+      "pos": 11,
+      "hanzi": "写作",
+      "pinyin": "xiězuò",
+      "adj": 4,
+      "vi": "sáng tác"
+    },
+    {
+      "pos": 12,
+      "hanzi": "点心",
+      "pinyin": "diǎnxin",
+      "adj": 2,
+      "vi": "bánh ngọt, điểm tâm"
+    },
+    {
+      "pos": 13,
+      "hanzi": "作为",
+      "pinyin": "zuòwéi",
+      "adj": [
+        4,
+        13
+      ],
+      "vi": "coi là, với tư cách"
+    },
+    {
+      "pos": 14,
+      "hanzi": "学问",
+      "pinyin": "xuéwen",
+      "adj": 2,
+      "vi": "tri thức, học thức"
+    },
+    {
+      "pos": 15,
+      "hanzi": "讲究",
+      "pinyin": "jiǎngjiu",
+      "adj": [
+        4,
+        6
+      ],
+      "vi": "chú ý, chú trọng; đẹp đẽ"
+    },
+    {
+      "pos": 16,
+      "hanzi": "平均",
+      "pinyin": "píngjūn",
+      "adj": 4,
+      "vi": "tính trung bình"
+    },
+    {
+      "pos": 17,
+      "hanzi": "胡同",
+      "pinyin": "hútòng",
+      "adj": 2,
+      "vi": "ngõ hẻm"
+    },
+    {
+      "pos": 18,
+      "hanzi": "位于",
+      "pinyin": "wèiyú",
+      "adj": 4,
+      "vi": "nằm ở"
+    },
+    {
+      "pos": 19,
+      "hanzi": "首",
+      "pinyin": "shǒu",
+      "adj": [
+        2,
+        8
+      ],
+      "vi": "người (vật) đứng đầu; bài"
+    },
+    {
+      "pos": 20,
+      "hanzi": "豪华",
+      "pinyin": "háohuá",
+      "adj": 6,
+      "vi": "sang trọng, lộng lẫy"
+    },
+    {
+      "pos": 21,
+      "hanzi": "光临",
+      "pinyin": "guānglín",
+      "adj": 4,
+      "vi": "đến dự, hay lui tới"
+    },
+    {
+      "pos": 22,
+      "hanzi": "交际",
+      "pinyin": "jiāojì",
+      "adj": 2,
+      "vi": "xã giao, sự giao thiệp"
+    },
+    {
+      "pos": 23,
+      "hanzi": "大方",
+      "pinyin": "dàfang",
+      "adj": 6,
+      "vi": "rộng rãi, hào phóng"
+    },
+    {
+      "pos": 24,
+      "hanzi": "好客",
+      "pinyin": "hàokè",
+      "adj": 4,
+      "vi": "hiếu khách, mến khách"
+    },
+    {
+      "pos": 25,
+      "hanzi": "呼朋唤友",
+      "pinyin": "hūpéng huànyǒu",
+      "adj": [
+        null,
+        2,
+        12
+      ],
+      "vi": "mời mọc bạn bè, tập hợp bạn bè"
+    },
+    {
+      "pos": 26,
+      "hanzi": "招待",
+      "pinyin": "zhāodài",
+      "adj": 4,
+      "vi": "chiêu đãi, thết đãi"
+    },
+    {
+      "pos": 27,
+      "hanzi": "高档",
+      "pinyin": "gāodàng",
+      "adj": 6,
+      "vi": "hảo hạng, cao cấp"
+    },
+    {
+      "pos": 28,
+      "hanzi": "胃口",
+      "pinyin": "wèikǒu",
+      "adj": 2,
+      "vi": "khẩu vị, sự thèm ăn"
+    },
+    {
+      "pos": 29,
+      "hanzi": "明明",
+      "pinyin": "míngmíng",
+      "adj": 7,
+      "vi": "rõ ràng, chắc chắn"
+    },
+    {
+      "pos": 30,
+      "hanzi": "胃",
+      "pinyin": "wèi",
+      "adj": 2,
+      "vi": "dạ dày, bao tử"
+    },
+    {
+      "pos": 31,
+      "hanzi": "戒",
+      "pinyin": "jiè",
+      "adj": 4,
+      "vi": "cai, bỏ"
+    },
+    {
+      "pos": 32,
+      "hanzi": "保存",
+      "pinyin": "bǎocún",
+      "adj": 4,
+      "vi": "giữ gìn, bảo tồn"
+    },
+    {
+      "pos": 33,
+      "hanzi": "资料",
+      "pinyin": "zīliào",
+      "adj": 2,
+      "vi": "tài liệu, tư liệu"
+    },
+    {
+      "pos": 34,
+      "hanzi": "曾经",
+      "pinyin": "céngjīng",
+      "adj": 7,
+      "vi": "đã từng"
+    },
+    {
+      "pos": 35,
+      "hanzi": "形容",
+      "pinyin": "xíngróng",
+      "adj": 4,
+      "vi": "hình dung, miêu tả"
+    },
+    {
+      "pos": 36,
+      "hanzi": "蒙眬",
+      "pinyin": "ménglóng",
+      "adj": 6,
+      "vi": "lờ mờ, mơ màng, mờ ảo"
+    },
+    {
+      "pos": 37,
+      "hanzi": "悠悠",
+      "pinyin": "yōuyōu",
+      "adj": 6,
+      "vi": "thong thả, ung dung"
+    },
+    {
+      "pos": 38,
+      "hanzi": "形象",
+      "pinyin": "xíngxiàng",
+      "adj": 6,
+      "vi": "sinh động"
+    }
+  ]
+}

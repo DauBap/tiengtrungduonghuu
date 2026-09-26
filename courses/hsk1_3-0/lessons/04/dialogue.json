@@ -1,0 +1,110 @@
+{
+  "lesson": 4,
+  "title": "我有两个孩子",
+  "title_pinyin": "Wǒ yǒu liǎng gè háizi",
+  "title_vi": "Tôi có hai đứa con",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "一飞忙吗？",
+          "pinyin": "Yīfēi máng ma?",
+          "vi": "Nhất Phi có bận không?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "她很忙。",
+          "pinyin": "Tā hěn máng.",
+          "vi": "Nó rất bận."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "她有多少个学生？",
+          "pinyin": "Tā yǒu duōshao gè xuéshēng?",
+          "vi": "Nó có bao nhiêu học sinh?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "她有二十个学生。",
+          "pinyin": "Tā yǒu èrshí gè xuéshēng.",
+          "vi": "Nó có hai mươi học sinh."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "我有两个哥哥，你呢？",
+          "pinyin": "Wǒ yǒu liǎng gè gēge, nǐ ne?",
+          "vi": "Tôi có hai người anh trai, còn bạn thì sao?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "我没有哥哥。",
+          "pinyin": "Wǒ méiyǒu gēge.",
+          "vi": "Tôi không có anh trai."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你家有几口人？",
+          "pinyin": "Nǐ jiā yǒu jǐ kǒu rén?",
+          "vi": "Nhà bạn có mấy người?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "我家有四口人，爸爸、妈妈、妹妹和我。",
+          "pinyin": "Wǒ jiā yǒu sì kǒu rén, bàba, māma, mèimei hé wǒ.",
+          "vi": "Nhà tôi có bốn người: bố, mẹ, em gái và tôi."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "杨同乐",
+          "zh": "这是您儿子吗？",
+          "pinyin": "Zhè shì nín érzi ma?",
+          "vi": "Đây là con trai của chị phải không?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "是的。我有两个孩子，一个儿子，一个女儿。",
+          "pinyin": "Shì de. Wǒ yǒu liǎng gè háizi, yí gè érzi, yí gè nǚ'ér.",
+          "vi": "Đúng vậy. Tôi có hai đứa con, một trai, một gái."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "您儿子几岁？",
+          "pinyin": "Nín érzi jǐ suì?",
+          "vi": "Con trai chị mấy tuổi?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "他今年五岁。",
+          "pinyin": "Tā jīnnián wǔ suì.",
+          "vi": "Cháu năm nay năm tuổi."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "您女儿多大？",
+          "pinyin": "Nín nǚ'ér duō dà?",
+          "vi": "Con gái chị bao nhiêu tuổi?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "她今年十二。",
+          "pinyin": "Tā jīnnián shí'èr.",
+          "vi": "Cháu năm nay mười hai."
+        }
+      ]
+    }
+  ]
+}

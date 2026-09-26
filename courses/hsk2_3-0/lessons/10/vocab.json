@@ -1,0 +1,112 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 10,
+  "label": "Bài 10",
+  "title": "就要考试了",
+  "short_vi": "Chuẩn bị đồ dùng học tập trước khi khai giảng; ôn tập và chuẩn bị cho kỳ thi; hỏi đáp về kết quả thi; trò chuyện về việc học hành",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "开学",
+      "pinyin": "Kāixué",
+      "adj": 4,
+      "vi": "Khai giảng"
+    },
+    {
+      "pos": 2,
+      "hanzi": "门",
+      "pinyin": "Mén",
+      "adj": 2,
+      "vi": "Cái cửa"
+    },
+    {
+      "pos": 3,
+      "hanzi": "后面",
+      "pinyin": "Hòumiàn",
+      "adj": 2,
+      "vi": "Đằng sau"
+    },
+    {
+      "pos": 4,
+      "hanzi": "笔",
+      "pinyin": "Bǐ",
+      "adj": 2,
+      "vi": "Cái bút"
+    },
+    {
+      "pos": 5,
+      "hanzi": "帮",
+      "pinyin": "Bāng",
+      "adj": 4,
+      "vi": "giúp"
+    },
+    {
+      "pos": 6,
+      "hanzi": "考试",
+      "pinyin": "Kǎoshì",
+      "adj": [
+        null,
+        2,
+        4
+      ],
+      "vi": "Thi, kì thi"
+    },
+    {
+      "pos": 7,
+      "hanzi": "词",
+      "pinyin": "Cí",
+      "adj": 2,
+      "vi": "Từ"
+    },
+    {
+      "pos": 8,
+      "hanzi": "本子",
+      "pinyin": "Běnzi",
+      "adj": 4,
+      "vi": "Quyển vở"
+    },
+    {
+      "pos": 9,
+      "hanzi": "错",
+      "pinyin": "Cuò",
+      "adj": 6,
+      "vi": "Sai"
+    },
+    {
+      "pos": 10,
+      "hanzi": "题",
+      "pinyin": "Tí",
+      "adj": 2,
+      "vi": "Câu hỏi"
+    },
+    {
+      "pos": 11,
+      "hanzi": "还是",
+      "pinyin": "Háishì",
+      "adj": 10,
+      "vi": "Hay là"
+    },
+    {
+      "pos": 12,
+      "hanzi": "考",
+      "pinyin": "Kǎo",
+      "adj": 4,
+      "vi": "thi"
+    },
+    {
+      "pos": 13,
+      "hanzi": "快要",
+      "pinyin": "Kuàiyào",
+      "adj": 18,
+      "vi": "Sắp"
+    },
+    {
+      "pos": 14,
+      "hanzi": "笑",
+      "pinyin": "Xiào",
+      "adj": 4,
+      "vi": "cười"
+    }
+  ]
+}

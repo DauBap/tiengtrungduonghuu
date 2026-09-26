@@ -1,0 +1,164 @@
+{
+  "lesson": 15,
+  "title": "我是半个南京人",
+  "title_pinyin": "Wǒ shì bàn gè Nánjīng rén",
+  "title_vi": "Tôi là nửa người Nam Kinh",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "您搬到蓝天小区一段时间了, 觉得怎么样?",
+          "pinyin": "Nín bān dào Lántiān xiǎoqū yī duàn shíjiān le, juéde zěnmeyàng?",
+          "vi": "Anh chuyển đến khu Lantian một thời gian rồi, thấy thế nào?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "小区环境挺好的, 附近买东西也很方便, 过马路就是超市。",
+          "pinyin": "Xiǎoqū huánjìng tǐng hǎo de, fùjìn mǎi dōngxi yě hěn fāngbiàn, guò mǎlù jiù shì chāoshì.",
+          "vi": "Môi trường khu phố khá tốt, mua đồ ở gần cũng rất tiện, qua đường là đến siêu thị."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "平时孩子们在哪儿玩?",
+          "pinyin": "Píngshí háizimen zài nǎr wán?",
+          "vi": "Bình thường các cháu chơi ở đâu?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "小区里有很多树, 孩子们放学后就在树下做游戏。你想买房子吗?",
+          "pinyin": "Xiǎoqū lǐ yǒu hěnduō shù, háizimen fàngxué hòu jiù zài shù xià zuò yóuxì. Nǐ xiǎng mǎi fángzi ma?",
+          "vi": "Trong khu phố có nhiều cây, bọn trẻ sau giờ học chơi dưới gốc cây. Bạn muốn mua nhà à?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "是。我想买一个大房子, 让我爸妈过来跟我一起住。",
+          "pinyin": "Shì. Wǒ xiǎng mǎi yī gè dà fángzi, ràng wǒ bà mā guòlái gēn wǒ yīqǐ zhù.",
+          "vi": "Vâng. Tôi muốn mua một căn nhà lớn, để bố mẹ tôi đến ở cùng."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "蓝天小区的老人挺多的, 这几年小区根据他们的需要, 有了很多变化。",
+          "pinyin": "Lántiān xiǎoqū de lǎorén tǐng duō de, zhè jǐ nián xiǎoqū gēnjiù tāmen de xūyào, yǒule hěnduō biànhuà.",
+          "vi": "Người già ở khu Lantian khá nhiều, mấy năm nay khu phố dựa theo nhu cầu của họ, có nhiều thay đổi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "真不错! 过几天我去蓝天小区看看。",
+          "pinyin": "Zhēn búcuò! Guò jǐ tiān wǒ qù Lántiān xiǎoqū kànkan.",
+          "vi": "Thật không tệ! Mấy hôm nữa tôi qua khu Lantian xem thử."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "假期我想去南京旅游, 但是我不太了解那里。",
+          "pinyin": "Jiàqī wǒ xiǎng qù Nánjīng lǚyóu, dànshì wǒ bú tài liǎojiě nàlǐ.",
+          "vi": "Kỳ nghỉ tôi muốn đi du lịch Nam Kinh, nhưng tôi không rành lắm về đó."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "我虽然不是南京人, 可是我是在南京上的大学, 可以说是半个南京人。",
+          "pinyin": "Wǒ suīrán bú shì Nánjīng rén, kěshì wǒ shì zài Nánjīng shàng de dàxué, kěyǐ shuō shì bàn gè Nánjīng rén.",
+          "vi": "Tôi tuy không phải người Nam Kinh, nhưng tôi học đại học ở Nam Kinh, có thể nói là nửa người Nam Kinh."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "太好了! 你快给我介绍一下南京吧。",
+          "pinyin": "Tài hǎo le! Nǐ kuài gěi wǒ jièshào yíxià Nánjīng ba.",
+          "vi": "Tuyệt quá! Anh mau giới thiệu cho tôi về Nam Kinh đi."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "南京有两千年以上的历史, 有老城、老街, 还有很多有名的景点, 每年去旅游的游客特别多。",
+          "pinyin": "Nánjīng yǒu liǎng qiān nián yǐshàng de lìshǐ, yǒu lǎochéng, lǎojiē, hái yǒu hěnduō yǒumíng de jǐngdiǎn, měinián qù lǚyóu de yóukè tèbié duō.",
+          "vi": "Nam Kinh có lịch sử trên hai nghìn năm, có thành phố cổ, phố cổ, còn có nhiều điểm tham quan nổi tiếng, mỗi năm du khách đến du lịch rất đông."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "除了这些以外, 你再告诉我一些外地人不知道的地方。",
+          "pinyin": "Chúle zhèxiē yǐwài, nǐ zài gàosu wǒ yīxiē wàidìrén bù zhīdào de dìfang.",
+          "vi": "Ngoài những thứ này ra, anh hãy nói cho tôi vài nơi mà người ngoài địa phương không biết."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "那太多了, 我得一点儿一点儿给您讲。",
+          "pinyin": "Nà tài duō le, wǒ děi yīdiǎnr yīdiǎnr gěi nín jiǎng.",
+          "vi": "Nhiều lắm, tôi phải kể cho chị từng chút một."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "行, 下班后我请你吃晚饭, 咱们边吃边聊。",
+          "pinyin": "Xíng, xiàbān hòu wǒ qǐng nǐ chī wǎnfàn, zánmen biān chī biān liáo.",
+          "vi": "Được, sau giờ làm tôi mời anh ăn tối, chúng ta vừa ăn vừa trò chuyện."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "小明, 中国有一条大河, 它的名字跟颜色有关系, 你知道是什么河吗?",
+          "pinyin": "Xiǎomíng, Zhōngguó yǒu yī tiáo dà hé, tā de míngzi gēn yánsè yǒu guānxi, nǐ zhīdào shì shénme hé ma?",
+          "vi": "Tiểu Minh, Trung Quốc có một dòng sông lớn, tên của nó có liên quan đến màu sắc, con có biết là sông gì không?"
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "我知道, 是黄河!",
+          "pinyin": "Wǒ zhīdào, shì Huánghé!",
+          "vi": "Con biết, là sông Hoàng Hà!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你说对了。我再问问你, 你知道它为什么叫黄河吗?",
+          "pinyin": "Nǐ shuō duì le. Wǒ zài wènwen nǐ, nǐ zhīdào tā wèishénme jiào Huánghé ma?",
+          "vi": "Con nói đúng. Mẹ hỏi con thêm, con có biết tại sao nó gọi là Hoàng Hà không?"
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "因为河水看起来是黄色的, 所以叫这个名字。黄河是中国最长的河吗?",
+          "pinyin": "Yīnwèi héshuǐ kàn qǐlái shì huángsè de, suǒyǐ jiào zhège míngzi. Huánghé shì Zhōngguó zuì cháng de hé ma?",
+          "vi": "Vì nước sông nhìn có màu vàng nên mới có tên đó ạ. Sông Hoàng Hà có phải là sông dài nhất Trung Quốc không ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "不是。黄河虽然不是最长的河, 可是在历史上很重要。",
+          "pinyin": "Bú shì. Huánghé suīrán bú shì zuì cháng de hé, kěshì zài lìshǐ shàng hěn zhòngyào.",
+          "vi": "Không phải. Hoàng Hà tuy không phải sông dài nhất, nhưng trong lịch sử rất quan trọng."
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "这个我知道。很久以前, 很多中国人都住在黄河边上。",
+          "pinyin": "Zhège wǒ zhīdào. Hěn jiǔ yǐqián, hěnduō Zhōngguó rén dōu zhù zài Huánghé biān shàng.",
+          "vi": "Cái này con biết ạ. Từ lâu lắm rồi, nhiều người Trung Quốc sống ở bên bờ sông Hoàng Hà."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "对。在我们中国人看来, 黄河像妈妈一样, 养了我们几千年。",
+          "pinyin": "Duì. Zài wǒmen Zhōngguó rén kànlái, Huánghé xiàng māma yīyàng, yǎng le wǒmen jǐ qiān nián.",
+          "vi": "Đúng vậy. Đối với người Trung Quốc chúng ta, sông Hoàng Hà như người mẹ, đã nuôi dưỡng chúng ta mấy nghìn năm."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "我小时候住在北京的西北边, 有一条非常有名的河经过那里。我家就住在河边。那里有高高的大树和绿绿的草地。春天, 河边的花都开了, 看起来特别漂亮。还记得小时候, 一到夏天我就去河里游泳。长大以后, 遇到什么不开心的事情, 我就去河边的树下坐着, 听听鸟叫, 看看河水, 跟遇见的朋友聊聊天儿, 难过的事情不一会儿就忘了。那是我最喜欢的地方。",
+          "pinyin": "Wǒ xiǎoshíhou zhù zài Běijīng de xīběi biān, yǒu yī tiáo fēicháng yǒumíng de hé jīngguò nàlǐ. Wǒ jiā jiù zhù zài hé biān. Nàlǐ yǒu gāogāo de dà shù hé lǜlǜ de cǎodì. Chūntiān, hé biān de huā dōu kāi le, kàn qǐlái tèbié piàoliang. Hái jìde xiǎoshíhou, yī dào xiàtiān wǒ jiù qù hé lǐ yóuyǒng. Zhǎng dà yǐhòu, yùdào shénme bù kāixīn de shìqing, wǒ jiù qù hé biān de shù xià zuòzhe, tīngting niǎo jiào, kànkan héshuǐ, gēn yùjiàn de péngyou liáoliao tiānr, nánguò de shìqing bù yīhuìr jiù wàng le. Nà shì wǒ zuì xǐhuan de dìfang.",
+          "vi": "Hồi nhỏ tôi sống ở phía tây bắc Bắc Kinh, có một dòng sông rất nổi tiếng chảy qua đó. Nhà tôi ở ngay bên bờ sông. Ở đó có những cây cao cao và bãi cỏ xanh xanh. Mùa xuân, hoa bên bờ sông đều nở, trông rất đẹp. Vẫn nhớ hồi nhỏ, cứ đến mùa hè là tôi lại ra sông bơi. Lớn lên, gặp chuyện gì không vui, tôi lại ra bờ sông ngồi dưới gốc cây, lắng nghe chim hót, nhìn dòng nước, trò chuyện với bạn bè tình cờ gặp, những chuyện buồn chẳng mấy chốc đã quên. Đó là nơi tôi yêu thích nhất."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 2,
+  "label": "Bài 2",
+  "title": "留串钥匙给父母",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "串",
+      "pinyin": "chuàn",
+      "adj": 8,
+      "vi": "xâu, chuỗi, đòi"
+    },
+    {
+      "pos": 2,
+      "hanzi": "一辈子",
+      "pinyin": "yíbèizi",
+      "adj": 2,
+      "vi": "suốt đời, cả đời"
+    },
+    {
+      "pos": 3,
+      "hanzi": "农村",
+      "pinyin": "nóngcūn",
+      "adj": 2,
+      "vi": "nông thôn"
+    },
+    {
+      "pos": 4,
+      "hanzi": "屋（子）",
+      "pinyin": "wū(zi)",
+      "adj": 2,
+      "vi": "nhà"
+    },
+    {
+      "pos": 5,
+      "hanzi": "断",
+      "pinyin": "duàn",
+      "adj": 4,
+      "vi": "cai, dứt"
+    },
+    {
+      "pos": 6,
+      "hanzi": "以来",
+      "pinyin": "yǐlái",
+      "adj": 2,
+      "vi": "đến nay"
+    },
+    {
+      "pos": 7,
+      "hanzi": "姥姥",
+      "pinyin": "lǎolao",
+      "adj": 2,
+      "vi": "bà ngoại"
+    },
+    {
+      "pos": 8,
+      "hanzi": "舅舅",
+      "pinyin": "jiùjiu",
+      "adj": 2,
+      "vi": "cậu"
+    },
+    {
+      "pos": 9,
+      "hanzi": "姑姑",
+      "pinyin": "gūgu",
+      "adj": 2,
+      "vi": "cô"
+    },
+    {
+      "pos": 10,
+      "hanzi": "坚决",
+      "pinyin": "jiānjué",
+      "adj": 6,
+      "vi": "kiên quyết"
+    },
+    {
+      "pos": 11,
+      "hanzi": "临",
+      "pinyin": "lín",
+      "adj": [
+        4,
+        13
+      ],
+      "vi": "gần, sát; lúc sắp"
+    },
+    {
+      "pos": 12,
+      "hanzi": "新房",
+      "pinyin": "xīnfáng",
+      "adj": 2,
+      "vi": "nhà mới"
+    },
+    {
+      "pos": 13,
+      "hanzi": "暖",
+      "pinyin": "nuǎn",
+      "adj": 6,
+      "vi": "ấm"
+    },
+    {
+      "pos": 14,
+      "hanzi": "老实",
+      "pinyin": "lǎoshí",
+      "adj": 6,
+      "vi": "thật thà"
+    },
+    {
+      "pos": 15,
+      "hanzi": "勤快",
+      "pinyin": "qínkuai",
+      "adj": 6,
+      "vi": "siêng năng, chăm chỉ"
+    },
+    {
+      "pos": 16,
+      "hanzi": "心疼",
+      "pinyin": "xīnténg",
+      "adj": 4,
+      "vi": "thương, xót xa"
+    },
+    {
+      "pos": 17,
+      "hanzi": "变化",
+      "pinyin": "biànhuà",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "thay đổi, biến đổi"
+    },
+    {
+      "pos": 18,
+      "hanzi": "感受",
+      "pinyin": "gǎnshòu",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "cảm nhận; sự cảm nhận"
+    },
+    {
+      "pos": 19,
+      "hanzi": "流泪",
+      "pinyin": "liú lèi",
+      "adj": 4,
+      "vi": "chảy nước mắt"
+    },
+    {
+      "pos": 20,
+      "hanzi": "卧室",
+      "pinyin": "wòshì",
+      "adj": 2,
+      "vi": "phòng ngủ"
+    },
+    {
+      "pos": 21,
+      "hanzi": "铺",
+      "pinyin": "pū",
+      "adj": 4,
+      "vi": "trải"
+    },
+    {
+      "pos": 22,
+      "hanzi": "飘",
+      "pinyin": "piāo",
+      "adj": 4,
+      "vi": "thoảng đưa, thoang thoảng"
+    },
+    {
+      "pos": 23,
+      "hanzi": "阵",
+      "pinyin": "zhèn",
+      "adj": 8,
+      "vi": "trận, cơn, làn"
+    },
+    {
+      "pos": 24,
+      "hanzi": "厨房",
+      "pinyin": "chúfáng",
+      "adj": 2,
+      "vi": "bếp"
+    },
+    {
+      "pos": 25,
+      "hanzi": "菜香",
+      "pinyin": "càixiāng",
+      "adj": 2,
+      "vi": "mùi thơm thức ăn"
+    },
+    {
+      "pos": 26,
+      "hanzi": "以来",
+      "pinyin": "yǐlái",
+      "adj": 2,
+      "vi": "đến nay"
+    },
+    {
+      "pos": 27,
+      "hanzi": "改革开放",
+      "pinyin": "gǎigé kāifàng",
+      "adj": [
+        null,
+        12
+      ],
+      "vi": "cải cách mở cửa"
+    },
+    {
+      "pos": 28,
+      "hanzi": "温暖",
+      "pinyin": "wēnnuǎn",
+      "adj": 6,
+      "vi": "ấm áp"
+    },
+    {
+      "pos": 29,
+      "hanzi": "鼻子",
+      "pinyin": "bízi",
+      "adj": 2,
+      "vi": "mũi"
+    },
+    {
+      "pos": 30,
+      "hanzi": "酸",
+      "pinyin": "suān",
+      "adj": 6,
+      "vi": "cay (mắt), chua lòng"
+    },
+    {
+      "pos": 31,
+      "hanzi": "热泪",
+      "pinyin": "rèlèi",
+      "adj": 2,
+      "vi": "nước mắt nóng"
+    },
+    {
+      "pos": 32,
+      "hanzi": "传统",
+      "pinyin": "chuántǒng",
+      "adj": [
+        2,
+        6
+      ],
+      "vi": "truyền thống; (thuộc) truyền thống"
+    },
+    {
+      "pos": 33,
+      "hanzi": "表示",
+      "pinyin": "biǎoshì",
+      "adj": 4,
+      "vi": "bày tỏ, thể hiện"
+    },
+    {
+      "pos": 34,
+      "hanzi": "卧室",
+      "pinyin": "wòshì",
+      "adj": 2,
+      "vi": "phòng ngủ"
+    },
+    {
+      "pos": 35,
+      "hanzi": "铺",
+      "pinyin": "pū",
+      "adj": 4,
+      "vi": "trải"
+    },
+    {
+      "pos": 36,
+      "hanzi": "飘",
+      "pinyin": "piāo",
+      "adj": 4,
+      "vi": "thoảng đưa, thoang thoảng"
+    },
+    {
+      "pos": 37,
+      "hanzi": "阵",
+      "pinyin": "zhèn",
+      "adj": 8,
+      "vi": "trận, cơn, làn"
+    },
+    {
+      "pos": 38,
+      "hanzi": "感受",
+      "pinyin": "gǎnshòu",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "cảm nhận; sự cảm nhận"
+    },
+    {
+      "pos": 39,
+      "hanzi": "流泪",
+      "pinyin": "liú lèi",
+      "adj": 4,
+      "vi": "chảy nước mắt"
+    }
+  ]
+}

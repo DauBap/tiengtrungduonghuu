@@ -1,0 +1,426 @@
+{
+	"title": "HSK3 - Sách bài tập",
+	"lesson": 13,
+	"lesson_title": "我的新邻居来自英国",
+	"grading_pending": true,
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听对话，选择最匹配的图片。每题听两次。\nCâu 1–3: Nghe và chọn hình phù hợp. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 1,
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择正确答案。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 4,
+							"options": [
+								{
+									"label": "A",
+									"text": "常骑车"
+								},
+								{
+									"label": "B",
+									"text": "不会骑车"
+								},
+								{
+									"label": "C",
+									"text": "想买自行车"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"options": [
+								{
+									"label": "A",
+									"text": "找书"
+								},
+								{
+									"label": "B",
+									"text": "看地图"
+								},
+								{
+									"label": "C",
+									"text": "找地图"
+								}
+							]
+						},
+						{
+							"number": 6,
+							"options": [
+								{
+									"label": "A",
+									"text": "找工作"
+								},
+								{
+									"label": "B",
+									"text": "学习新东西"
+								},
+								{
+									"label": "C",
+									"text": "教东西方文化"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听一段话，选择正确答案。每题听两次。\nCâu 7–10: Nghe đoạn thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 7,
+							"options": [
+								{
+									"label": "A",
+									"text": "她现在不骑了"
+								},
+								{
+									"label": "B",
+									"text": "是她的生日礼物"
+								},
+								{
+									"label": "C",
+									"text": "是她送妈妈的礼物"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"options": [
+								{
+									"label": "A",
+									"text": "酒"
+								},
+								{
+									"label": "B",
+									"text": "花"
+								},
+								{
+									"label": "C",
+									"text": "水果"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"options": [
+								{
+									"label": "A",
+									"text": "两天"
+								},
+								{
+									"label": "B",
+									"text": "一周"
+								},
+								{
+									"label": "C",
+									"text": "两个星期"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"options": [
+								{
+									"label": "A",
+									"text": "两个"
+								},
+								{
+									"label": "B",
+									"text": "三个"
+								},
+								{
+									"label": "C",
+									"text": "四个"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—15题：匹配句子。\nCâu 11–15: Nối câu.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "这些都是我去过的地方。"
+						},
+						{
+							"label": "B",
+							"text": "简单，我很有重这位家。"
+						},
+						{
+							"label": "C",
+							"text": "不好意思，可能是糖放多了。"
+						},
+						{
+							"label": "D",
+							"text": "对，没想到天气越来越冷了。"
+						},
+						{
+							"label": "E",
+							"text": "当然，我们先坐公交车，然后换地铁。"
+						},
+						{
+							"label": "F",
+							"text": "那是张先生和王女士，他们是夫妻。"
+						}
+					],
+					"questions": [
+						{
+							"number": 11,
+							"answer": "F",
+							"question": "那边走的两个人是谁？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 12,
+							"answer": "C",
+							"question": "你把蛋糕做得太甜了。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 13,
+							"answer": "A",
+							"question": "你的地图上怎么有这么多红点？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 14,
+							"answer": "B",
+							"question": "我觉得你们家的这些画太漂亮了。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 15,
+							"answer": "D",
+							"question": "明天有雪，出去的话，就再加一件衣服吧。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第16—20题：选词填空。\nCâu 16–20: Chọn từ điền vào chỗ trống.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "请客"
+						},
+						{
+							"label": "B",
+							"text": "感到"
+						},
+						{
+							"label": "C",
+							"text": "不同"
+						},
+						{
+							"label": "D",
+							"text": "放心"
+						},
+						{
+							"label": "E",
+							"text": "鞋"
+						},
+						{
+							"label": "F",
+							"text": "来自"
+						}
+					],
+					"questions": [
+						{
+							"number": 16,
+							"answer": "B",
+							"sentence": "我在比赛中得到了好成绩，（ ）特别快乐。"
+						},
+						{
+							"number": 17,
+							"answer": "C",
+							"sentence": "老师，我有一个问题：这两个词有什么（ ）？"
+						},
+						{
+							"number": 18,
+							"answer": "F",
+							"sentence": "大家好，我（ ）英国，欢迎你们有时间去旅游。"
+						},
+						{
+							"number": 19,
+							"answer": "A",
+							"sentence": "A：今天我（ ），您想吃什么就点什么。\nB：您太客气了，我吃什么都可以。"
+						},
+						{
+							"number": 20,
+							"answer": "D",
+							"sentence": "A：下课后，别忘了把这些书放回办公室去。\nB：好的，李老师，您（ ）吧。"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第21—24题：选择正确答案。\nCâu 21–24: Đọc và chọn đáp án đúng.",
+					"embedded_example_image": true,
+					"shared_passage": "23–24\n\n明天晚上公司有一个晚会，小丽很想参加，但是她找不到合适的衣服，需要买一条新裙子。小丽希望同事明天有时间的话，能和她一起去买，但是同事明天白天要去开会，没有时间去商场，只能和小丽在晚会上见了。",
+					"shared_passage_start": 23,
+					"questions": [
+						{
+							"number": 21,
+							"answer": "B",
+							"sentence": "喂，我才看见您的电话，刚才我去楼下接几位客人，没带手机。您找我有什么事？",
+							"question": "★ 他正在做什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "打电话"
+								},
+								{
+									"label": "B",
+									"text": "接客人"
+								},
+								{
+									"label": "C",
+									"text": "往楼下走"
+								}
+							]
+						},
+						{
+							"number": 22,
+							"answer": "C",
+							"sentence": "你写作业以前先复习笔记吗？小安跟你不同，她是遇到不会做的题再看笔记。",
+							"question": "★ 小安是怎么做的？",
+							"options": [
+								{
+									"label": "A",
+									"text": "先复习"
+								},
+								{
+									"label": "B",
+									"text": "先写作业"
+								},
+								{
+									"label": "C",
+									"text": "边看笔记边写作业"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "A",
+							"question": "★ 小丽明天做什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "买衣服"
+								},
+								{
+									"label": "B",
+									"text": "去开会"
+								},
+								{
+									"label": "C",
+									"text": "和朋友吃饭"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "A",
+							"question": "★ 关于同事，可以知道什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "要去参加晚会"
+								},
+								{
+									"label": "B",
+									"text": "没有合适的衣服"
+								},
+								{
+									"label": "C",
+									"text": "要跟小丽去买裙子"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据拼音写汉字。\nCâu 25–27: Viết chữ Hán theo pinyin.",
+					"embedded_example_image": true,
+					"questions": [
+						{
+							"number": 25,
+							"type": "writing_input",
+							"sentence": "我下周休假，打算去（ ）方旅游。",
+							"prompt_pinyin": "nán"
+						},
+						{
+							"number": 26,
+							"type": "writing_input",
+							"sentence": "五个人点四个菜有点儿少，再（ ）两个吧。",
+							"prompt_pinyin": "jiā"
+						},
+						{
+							"number": 27,
+							"type": "writing_input",
+							"sentence": "今天是我的生日，这是妈妈送我的生日（ ）物。",
+							"prompt_pinyin": "lǐ"
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：看图，用词造句。\nCâu 28–30: Nhìn hình và dùng từ gợi ý đặt câu.",
+					"questions": [
+						{
+							"number": 28,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 做客"
+						},
+						{
+							"number": 29,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 盘子"
+						},
+						{
+							"number": 30,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 聊天儿"
+						}
+					]
+				}
+			]
+		}
+	]
+}

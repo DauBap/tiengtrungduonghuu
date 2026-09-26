@@ -1,0 +1,230 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 5,
+  "label": "Bài 5",
+  "title": "只买对的，不买贵的",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "家具",
+      "pinyin": "jiājù",
+      "adj": 2,
+      "vi": "đồ dùng trong nhà"
+    },
+    {
+      "pos": 2,
+      "hanzi": "沙发",
+      "pinyin": "shāfā",
+      "adj": 2,
+      "vi": "ghế sôpha"
+    },
+    {
+      "pos": 3,
+      "hanzi": "打折",
+      "pinyin": "dǎ zhé",
+      "adj": 4,
+      "vi": "giảm giá"
+    },
+    {
+      "pos": 4,
+      "hanzi": "价格",
+      "pinyin": "jiàgé",
+      "adj": 2,
+      "vi": "giá cả"
+    },
+    {
+      "pos": 5,
+      "hanzi": "质量",
+      "pinyin": "zhìliàng",
+      "adj": 2,
+      "vi": "chất lượng"
+    },
+    {
+      "pos": 6,
+      "hanzi": "肯定",
+      "pinyin": "kěndìng",
+      "adj": 7,
+      "vi": "chắc chắn, nhất định"
+    },
+    {
+      "pos": 7,
+      "hanzi": "流行",
+      "pinyin": "liúxíng",
+      "adj": 4,
+      "vi": "được nhiều người ưa chuộng"
+    },
+    {
+      "pos": 8,
+      "hanzi": "顺便",
+      "pinyin": "shùnbiàn",
+      "adj": 7,
+      "vi": "nhân tiện"
+    },
+    {
+      "pos": 9,
+      "hanzi": "台",
+      "pinyin": "tái",
+      "adj": 8,
+      "vi": "(dùng cho máy móc) cái, chiếc"
+    },
+    {
+      "pos": 10,
+      "hanzi": "光",
+      "pinyin": "guāng",
+      "adj": 7,
+      "vi": "chỉ"
+    },
+    {
+      "pos": 11,
+      "hanzi": "实在",
+      "pinyin": "shízài",
+      "adj": 7,
+      "vi": "kỳ thực, quả thực"
+    },
+    {
+      "pos": 12,
+      "hanzi": "制冷",
+      "pinyin": "zhìlěng",
+      "adj": 4,
+      "vi": "làm lạnh, ướp lạnh"
+    },
+    {
+      "pos": 13,
+      "hanzi": "效果",
+      "pinyin": "xiàoguǒ",
+      "adj": 2,
+      "vi": "hiệu quả"
+    },
+    {
+      "pos": 14,
+      "hanzi": "现金",
+      "pinyin": "xiànjīn",
+      "adj": 2,
+      "vi": "tiền mặt"
+    },
+    {
+      "pos": 15,
+      "hanzi": "邀请",
+      "pinyin": "yāoqǐng",
+      "adj": 4,
+      "vi": "mời"
+    },
+    {
+      "pos": 16,
+      "hanzi": "葡萄",
+      "pinyin": "pútao",
+      "adj": 2,
+      "vi": "quả nho"
+    },
+    {
+      "pos": 17,
+      "hanzi": "艺术",
+      "pinyin": "yìshù",
+      "adj": [
+        2,
+        6
+      ],
+      "vi": "nghệ thuật; có tính nghệ thuật"
+    },
+    {
+      "pos": 18,
+      "hanzi": "广告",
+      "pinyin": "guǎnggào",
+      "adj": 2,
+      "vi": "quảng cáo"
+    },
+    {
+      "pos": 19,
+      "hanzi": "味道",
+      "pinyin": "wèidào",
+      "adj": 2,
+      "vi": "mùi vị"
+    },
+    {
+      "pos": 20,
+      "hanzi": "优点",
+      "pinyin": "yōudiǎn",
+      "adj": 2,
+      "vi": "ưu điểm"
+    },
+    {
+      "pos": 21,
+      "hanzi": "实际",
+      "pinyin": "shíjì",
+      "adj": 2,
+      "vi": "thực tế"
+    },
+    {
+      "pos": 22,
+      "hanzi": "考虑",
+      "pinyin": "kǎolù",
+      "adj": 4,
+      "vi": "suy xét, cân nhắc"
+    },
+    {
+      "pos": 23,
+      "hanzi": "标准",
+      "pinyin": "biāozhǔn",
+      "adj": 2,
+      "vi": "tiêu chuẩn, chuẩn mực"
+    },
+    {
+      "pos": 24,
+      "hanzi": "样子",
+      "pinyin": "yàngzi",
+      "adj": 2,
+      "vi": "kiểu dáng"
+    },
+    {
+      "pos": 25,
+      "hanzi": "年龄",
+      "pinyin": "niánlíng",
+      "adj": 2,
+      "vi": "tuổi"
+    },
+    {
+      "pos": 26,
+      "hanzi": "浪费",
+      "pinyin": "làngfèi",
+      "adj": 4,
+      "vi": "lãng phí, hoang phí"
+    },
+    {
+      "pos": 27,
+      "hanzi": "购物",
+      "pinyin": "gòu wù",
+      "adj": 4,
+      "vi": "mua sắm, mua hàng"
+    },
+    {
+      "pos": 28,
+      "hanzi": "尤其",
+      "pinyin": "yóuqí",
+      "adj": 7,
+      "vi": "đặc biệt là, nhất là"
+    },
+    {
+      "pos": 29,
+      "hanzi": "受到",
+      "pinyin": "shòudào",
+      "adj": 4,
+      "vi": "nhận được"
+    },
+    {
+      "pos": 30,
+      "hanzi": "任何",
+      "pinyin": "rènhé",
+      "adj": 2,
+      "vi": "bất cứ, bất kỳ"
+    },
+    {
+      "pos": 31,
+      "hanzi": "寄",
+      "pinyin": "jì",
+      "adj": 4,
+      "vi": "gửi"
+    }
+  ]
+}

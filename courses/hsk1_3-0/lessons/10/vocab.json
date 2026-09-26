@@ -1,0 +1,171 @@
+{
+	"course_id": "hsk1_3-0",
+	"course_name": "HSK 1 (3.0)",
+	"id": 10,
+	"label": "Bài 10",
+	"title": "这儿的苹果真便宜",
+	"short_vi": "Hỏi giá, diễn đạt cảm nhận về giá cả, chất lượng sản phẩm ",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "杯子",
+			"pinyin": "bēizi",
+			"adj": 2,
+			"vi": "cái ly/ cốc"
+		},
+		{
+			"pos": 2,
+			"hanzi": "售货员",
+			"pinyin": "shòuhuòyuán",
+			"adj": 2,
+			"vi": "nhân viên bán hàng"
+		},
+		{
+			"pos": 3,
+			"hanzi": "这边",
+			"pinyin": "zhèbiān",
+			"adj": 1,
+			"vi": "bên này"
+		},
+		{
+			"pos": 4,
+			"hanzi": "钱",
+			"pinyin": "qián",
+			"adj": 2,
+			"vi": "tiền"
+		},
+		{
+			"pos": 5,
+			"hanzi": "这些",
+			"pinyin": "zhèxiē",
+			"adj": 1,
+			"vi": "những cái này"
+		},
+		{
+			"pos": 6,
+			"hanzi": "块",
+			"pinyin": "kuài",
+			"adj": 8,
+			"vi": "mảnh, miếng"
+		},
+		{
+			"pos": 7,
+			"hanzi": "那些",
+			"pinyin": "nàxiē",
+			"adj": 1,
+			"vi": "những cái đó"
+		},
+		{
+			"pos": 8,
+			"hanzi": "这儿",
+			"pinyin": "zhèr",
+			"adj": 1,
+			"vi": "ở đây"
+		},
+		{
+			"pos": 9,
+			"hanzi": "水果",
+			"pinyin": "shuǐɡuǒ",
+			"adj": 2,
+			"vi": "trái cây"
+		},
+		{
+			"pos": 10,
+			"hanzi": "少",
+			"pinyin": "shǎo",
+			"adj": 6,
+			"vi": "ít"
+		},
+		{
+			"pos": 11,
+			"hanzi": "斤",
+			"pinyin": "jīn",
+			"adj": 8,
+			"vi": "cân"
+		},
+		{
+			"pos": 12,
+			"hanzi": "苹果",
+			"pinyin": "pínɡɡuǒ",
+			"adj": 2,
+			"vi": "quả táo"
+		},
+		{
+			"pos": 13,
+			"hanzi": "便宜",
+			"pinyin": "piányi",
+			"adj": 6,
+			"vi": "Rẻ"
+		},
+		{
+			"pos": 14,
+			"hanzi": "商店",
+			"pinyin": "shānɡdiàn",
+			"adj": 2,
+			"vi": "cửa hàng, store lớn"
+		},
+		{
+			"pos": 15,
+			"hanzi": "衣服",
+			"pinyin": "yīfu",
+			"adj": 2,
+			"vi": "quần áo"
+		},
+		{
+			"pos": 16,
+			"hanzi": "件",
+			"pinyin": "jiàn",
+			"adj": 8,
+			"vi": "kiện, gói, miếng,..."
+		},
+		{
+			"pos": 17,
+			"hanzi": "元",
+			"pinyin": "yuán",
+			"adj": 8,
+			"vi": "đồng"
+		},
+		{
+			"pos": 18,
+			"hanzi": "怎么样",
+			"pinyin": "zěnmeyànɡ",
+			"adj": [],
+			"vi": "thế nào; như thế nào"
+		},
+		{
+			"pos": 19,
+			"hanzi": "贵",
+			"pinyin": "ɡuì",
+			"adj": 6,
+			"vi": "đắt, quý"
+		},
+		{
+			"pos": 20,
+			"hanzi": "穿",
+			"pinyin": "chuān",
+			"adj": 4,
+			"vi": "mặc vào"
+		},
+		{
+			"pos": 21,
+			"hanzi": "女",
+			"pinyin": "nǚ",
+			"adj": 6,
+			"vi": "nữ, con gái"
+		},
+		{
+			"pos": 22,
+			"hanzi": "男",
+			"pinyin": "nán",
+			"adj": 6,
+			"vi": "nam, bạn nam"
+		},
+		{
+			"pos": 23,
+			"hanzi": "那儿",
+			"pinyin": "nàr",
+			"adj": 1,
+			"vi": "ở kia, ở đó"
+		}
+	]
+}

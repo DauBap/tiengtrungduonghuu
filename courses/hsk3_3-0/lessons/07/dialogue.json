@@ -1,0 +1,158 @@
+{
+  "lesson": 7,
+  "title": "那条裙子比短裤更好看",
+  "title_pinyin": "Nà tiáo qúnzi bǐ duǎnkù gèng hǎokàn",
+  "title_vi": "Cái váy đó đẹp hơn quần short",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "这辆自行车是小雪八岁的时候买的, 看起来有点儿旧了。",
+          "pinyin": "Zhè liàng zìxíngchē shì Xiǎoxuě bā suì de shíhou mǎi de, kàn qǐlái yǒudiǎnr jiù le.",
+          "vi": "Chiếc xe đạp này mua lúc Tiểu Tuyết tám tuổi, trông hơi cũ rồi."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "是啊, 她现在长高了, 这辆车已经太矮了。",
+          "pinyin": "Shì a, tā xiànzài zhǎng gāo le, zhè liàng chē yǐjīng tài ǎi le.",
+          "vi": "Đúng vậy, bây giờ nó đã cao hơn, xe này quá thấp rồi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "商场里开了一家自行车店, 咱们给她买辆新的吧。",
+          "pinyin": "Shāngchǎng lǐ kāile yī jiā zìxíngchē diàn, zánmen gěi tā mǎi liàng xīn de ba.",
+          "vi": "Trong trung tâm thương mại mới mở một cửa hàng xe đạp, chúng ta mua cho nó chiếc mới nhé."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好, 咱们带小雪一起去, 让她试一下。",
+          "pinyin": "Hǎo, zánmen dài Xiǎoxuě yīqǐ qù, ràng tā shì yíxià.",
+          "vi": "Được, chúng ta đưa Tiểu Tuyết đi cùng, để nó thử một chút."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "那今天就去吧! 我也想再看看衣服。咱们怎么去?",
+          "pinyin": "Nà jīntiān jiù qù ba! Wǒ yě xiǎng zài kànkan yīfu. Zánmen zěnme qù?",
+          "vi": "Vậy hôm nay đi luôn! Em cũng muốn xem lại quần áo. Chúng ta đi bằng cách nào?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "商场不远, 咱们可以走着去。",
+          "pinyin": "Shāngchǎng bù yuǎn, zánmen kěyǐ zǒuzhe qù.",
+          "vi": "Trung tâm thương mại không xa, chúng ta có thể đi bộ."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "你看我穿这条黄色的短裤好看吗?",
+          "pinyin": "Nǐ kàn wǒ chuān zhè tiáo huángsè de duǎnkù hǎokàn ma?",
+          "vi": "Anh xem em mặc cái quần short màu vàng này có đẹp không?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "大小合适, 但我觉得那条裙子比短裤更好看。",
+          "pinyin": "Dàxiǎo héshì, dàn wǒ juéde nà tiáo qúnzi bǐ duǎnkù gèng hǎokàn.",
+          "vi": "Kích cỡ vừa, nhưng anh thấy cái váy kia đẹp hơn quần short."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "裙子比短裤贵一点儿。",
+          "pinyin": "Qúnzi bǐ duǎnkù guì yìdiǎnr.",
+          "vi": "Váy đắt hơn quần short một chút."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "贵多少?",
+          "pinyin": "Guì duōshao?",
+          "vi": "Đắt bao nhiêu?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "裙子480, 短裤400。",
+          "pinyin": "Qúnzi sìbāi bāshí, duǎnkù sìbǎi.",
+          "vi": "Váy 480, quần short 400."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "裙子不比短裤贵多少, 还是买裙子吧, 你穿裙子更好看。",
+          "pinyin": "Qúnzi bù bǐ duǎnkù guì duōshao, háishì mǎi qúnzi ba, nǐ chuān qúnzi gèng hǎokàn.",
+          "vi": "Váy không đắt hơn quần short bao nhiêu, vẫn mua váy đi, em mặc váy đẹp hơn."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我多看看再决定。你看, 那边有买二送一!",
+          "pinyin": "Wǒ duō kànkan zài juédìng. Nǐ kàn, nàbian yǒu mǎi èr sòng yī!",
+          "vi": "Em xem thêm rồi quyết định. Anh xem, bên kia có mua hai tặng một!"
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "售货员",
+          "zh": "西瓜又大又新鲜, 不甜不要钱!",
+          "pinyin": "Xīguā yòu dà yòu xīnxiān, bù tián bú yào qián!",
+          "vi": "Dưa hấu vừa to vừa tươi, không ngọt không lấy tiền!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "西瓜看起来不错, 怎么卖?",
+          "pinyin": "Xīguā kàn qǐlái búcuò, zěnme mài?",
+          "vi": "Dưa hấu trông không tệ, bán thế nào?"
+        },
+        {
+          "speaker": "售货员",
+          "zh": "五块钱一公斤。来, 您先尝尝这块冰西瓜, 甜极了!",
+          "pinyin": "Wǔ kuài qián yī gōngjīn. Lái, nín xiān chángchang zhè kuài bīng xīguā, tián jí le!",
+          "vi": "Năm đồng một cân. Nào, chị nếm thử miếng dưa hấu ướp lạnh này xem, ngọt lắm!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "是挺甜的! 帮我选个大点儿的, 再来两斤香蕉。",
+          "pinyin": "Shì tǐng tián de! Bāng wǒ xuǎn ge dà diǎnr de, zài lái liǎng jīn xiāngjiāo.",
+          "vi": "Đúng là khá ngọt! Chọn cho tôi một quả to hơn một chút, rồi thêm hai cân chuối."
+        },
+        {
+          "speaker": "售货员",
+          "zh": "一共五十八块五毛。",
+          "pinyin": "Yīgòng wǔshí bā kuài wǔ máo.",
+          "vi": "Tổng cộng 58 đồng rưỡi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我买了这么多, 便宜点儿吧。",
+          "pinyin": "Wǒ mǎile zhème duō, piányi diǎnr ba.",
+          "vi": "Tôi mua nhiều thế này, bớt một chút nhé."
+        },
+        {
+          "speaker": "售货员",
+          "zh": "您给我五十五吧, 不能再便宜了。",
+          "pinyin": "Nín gěi wǒ wǔshíwǔ ba, bù néng zài piányi le.",
+          "vi": "Chị đưa tôi 55 đi, không thể rẻ hơn được nữa."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "这几天我们在新家坐着看电视的时候, 又发现了新问题。房子大了, 电视看起来就有点儿小。这个电视是我们结婚时买的, 是时候换个新电视了。今天我一直在网上选电视, 没想到, 现在的电视不但便宜, 而且用着非常方便, 有的电视叫它一声就能开机。我看了好几个, 都很满意, 晚上让一雪来决定吧。",
+          "pinyin": "Zhè jǐ tiān wǒmen zài xīn jiā zuòzhe kàn diànshì de shíhou, yòu fāxiànle xīn wèntí. Fángzi dà le, diànshì kàn qǐlái jiù yǒudiǎnr xiǎo. Zhège diànshì shì wǒmen jiéhūn shí mǎi de, shì shíhou huàn ge xīn diànshì le. Jīntiān wǒ yīzhí zài wǎngshàng xuǎn diànshì, méi xiǎng dào, xiànzài de diànshì bùdàn piányi, érqiě yòngzhe fēicháng fāngbiàn, yǒu de diànshì jiào tā yī shēng jiù néng kāijī. Wǒ kànle hǎo jǐ gè, dōu hěn mǎnyì, wǎnshang ràng Yīxuě lái juédìng ba.",
+          "vi": "Mấy ngày nay chúng tôi ngồi xem ti vi ở nhà mới, lại phát hiện ra vấn đề mới. Nhà rộng hơn, ti vi nhìn có vẻ hơi nhỏ. Cái ti vi này mua từ lúc chúng tôi kết hôn, đã đến lúc đổi ti vi mới rồi. Hôm nay tôi cứ lên mạng chọn ti vi, không ngờ, ti vi bây giờ không những rẻ mà còn rất tiện lợi, có loại chỉ cần gọi một tiếng là bật được. Tôi xem mấy cái, đều rất hài lòng, tối nay để Nhất Tuyết quyết định."
+        }
+      ]
+    }
+  ]
+}

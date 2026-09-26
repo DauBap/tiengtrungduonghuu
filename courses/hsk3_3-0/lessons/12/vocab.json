@@ -1,0 +1,202 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 12,
+  "label": "Bài 12",
+  "title": "这个季节天气变化很快",
+  "short_vi": "Trò chuyện về thời tiết (nắng, mưa, gió); đi dạo công viên, chèo thuyền; mượn ô, áo mưa khi trời mưa bất chợt; giới thiệu đặc điểm bốn mùa ở Bắc Kinh; bàn về sở thích các mùa trong năm",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "街",
+      "pinyin": "jiē",
+      "adj": 2,
+      "vi": "phố, đường phố"
+    },
+    {
+      "pos": 2,
+      "hanzi": "开花",
+      "pinyin": "kāihuā",
+      "adj": 4,
+      "vi": "nở hoa"
+    },
+    {
+      "pos": 3,
+      "hanzi": "公园",
+      "pinyin": "gōngyuán",
+      "adj": 2,
+      "vi": "công viên"
+    },
+    {
+      "pos": 4,
+      "hanzi": "船",
+      "pinyin": "chuán",
+      "adj": 2,
+      "vi": "thuyền"
+    },
+    {
+      "pos": 5,
+      "hanzi": "工作日",
+      "pinyin": "gōngzuòrì",
+      "adj": 2,
+      "vi": "ngày làm việc"
+    },
+    {
+      "pos": 6,
+      "hanzi": "地方",
+      "pinyin": "dìfang",
+      "adj": 2,
+      "vi": "nơi, nơi chốn"
+    },
+    {
+      "pos": 7,
+      "hanzi": "刚才",
+      "pinyin": "gāngcái",
+      "adj": 2,
+      "vi": "vừa mới, vừa, vừa rồi"
+    },
+    {
+      "pos": 8,
+      "hanzi": "刮",
+      "pinyin": "guā",
+      "adj": 4,
+      "vi": "nổi, thổi (gió)"
+    },
+    {
+      "pos": 9,
+      "hanzi": "风",
+      "pinyin": "fēng",
+      "adj": 2,
+      "vi": "gió"
+    },
+    {
+      "pos": 10,
+      "hanzi": "新闻",
+      "pinyin": "xīnwén",
+      "adj": 2,
+      "vi": "tin tức"
+    },
+    {
+      "pos": 11,
+      "hanzi": "伞",
+      "pinyin": "sǎn",
+      "adj": 2,
+      "vi": "ô"
+    },
+    {
+      "pos": 12,
+      "hanzi": "借",
+      "pinyin": "jiè",
+      "adj": 4,
+      "vi": "mượn, vay, cho vay, cho mượn"
+    },
+    {
+      "pos": 13,
+      "hanzi": "把",
+      "pinyin": "bǎ",
+      "adj": 8,
+      "vi": "cây, chiếc (dùng cho vật có tay cầm, có cán)"
+    },
+    {
+      "pos": 14,
+      "hanzi": "雨衣",
+      "pinyin": "yǔyī",
+      "adj": 2,
+      "vi": "Áo mưa"
+    },
+    {
+      "pos": 15,
+      "hanzi": "变",
+      "pinyin": "biàn",
+      "adj": 4,
+      "vi": "trở thành, biến thành, biến"
+    },
+    {
+      "pos": 16,
+      "hanzi": "变化",
+      "pinyin": "biànhuà",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "biến hóa, biến đổi/ sự thay đổi, sự biến hóa"
+    },
+    {
+      "pos": 17,
+      "hanzi": "季节",
+      "pinyin": "jìjié",
+      "adj": 2,
+      "vi": "mùa"
+    },
+    {
+      "pos": 18,
+      "hanzi": "冬天",
+      "pinyin": "dōngtiān",
+      "adj": 2,
+      "vi": "mùa đông"
+    },
+    {
+      "pos": 19,
+      "hanzi": "常常",
+      "pinyin": "chángcháng",
+      "adj": 18,
+      "vi": "thường"
+    },
+    {
+      "pos": 20,
+      "hanzi": "关注",
+      "pinyin": "guānzhù",
+      "adj": 4,
+      "vi": "quan tâm, chú ý, theo dõi"
+    },
+    {
+      "pos": 21,
+      "hanzi": "四季",
+      "pinyin": "sìjì",
+      "adj": 2,
+      "vi": "bốn mùa"
+    },
+    {
+      "pos": 22,
+      "hanzi": "春天",
+      "pinyin": "chūntiān",
+      "adj": 2,
+      "vi": "Mùa xuân"
+    },
+    {
+      "pos": 23,
+      "hanzi": "夏天",
+      "pinyin": "xiàtiān",
+      "adj": 2,
+      "vi": "Mùa hạ"
+    },
+    {
+      "pos": 24,
+      "hanzi": "凉快",
+      "pinyin": "liángkuai",
+      "adj": 6,
+      "vi": "Mát mẻ, mát lạnh"
+    },
+    {
+      "pos": 25,
+      "hanzi": "秋天",
+      "pinyin": "qiūtiān",
+      "adj": 2,
+      "vi": "Mùa thu"
+    },
+    {
+      "pos": 26,
+      "hanzi": "叶子",
+      "pinyin": "yèzi",
+      "adj": 2,
+      "vi": "lá cây, cái lá"
+    },
+    {
+      "pos": 27,
+      "hanzi": "变成",
+      "pinyin": "biànchéng",
+      "adj": 4,
+      "vi": "biến thành, trở thành"
+    }
+  ]
+}

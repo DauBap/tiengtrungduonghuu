@@ -1,0 +1,269 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 24,
+  "label": "Bài 24",
+  "title": "支教行动 ",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "支教",
+      "pinyin": "zhī jiào",
+      "adj": 4,
+      "vi": "dạy học tình nguyện"
+    },
+    {
+      "pos": 2,
+      "hanzi": "行动",
+      "pinyin": "xíngdòng",
+      "adj": 2,
+      "vi": "hoạt động, hành động"
+    },
+    {
+      "pos": 3,
+      "hanzi": "家访",
+      "pinyin": "jiāfǎng",
+      "adj": 4,
+      "vi": "đi thăm hỏi các gia đình"
+    },
+    {
+      "pos": 4,
+      "hanzi": "发言",
+      "pinyin": "fā yán",
+      "adj": 4,
+      "vi": "phát biểu"
+    },
+    {
+      "pos": 5,
+      "hanzi": "及格",
+      "pinyin": "jí gé",
+      "adj": 4,
+      "vi": "đạt yêu cầu"
+    },
+    {
+      "pos": 6,
+      "hanzi": "交往",
+      "pinyin": "jiāowǎng",
+      "adj": 4,
+      "vi": "giao du, kết bạn với"
+    },
+    {
+      "pos": 7,
+      "hanzi": "家务",
+      "pinyin": "jiāwù",
+      "adj": 2,
+      "vi": "việc nhà"
+    },
+    {
+      "pos": 8,
+      "hanzi": "体贴",
+      "pinyin": "tǐtiē",
+      "adj": 6,
+      "vi": "chu đáo, ân cần"
+    },
+    {
+      "pos": 9,
+      "hanzi": "排练",
+      "pinyin": "páiliàn",
+      "adj": 4,
+      "vi": "diễn tập, tập luyện"
+    },
+    {
+      "pos": 10,
+      "hanzi": "蝴蝶",
+      "pinyin": "húdié",
+      "adj": 2,
+      "vi": "bươm bướm"
+    },
+    {
+      "pos": 11,
+      "hanzi": "舞蹈",
+      "pinyin": "wǔdǎo",
+      "adj": 2,
+      "vi": "sự nhảy múa"
+    },
+    {
+      "pos": 12,
+      "hanzi": "冠军",
+      "pinyin": "guànjūn",
+      "adj": 2,
+      "vi": "quán quân, giải nhất"
+    },
+    {
+      "pos": 13,
+      "hanzi": "鼓掌",
+      "pinyin": "gǔ zhǎng",
+      "adj": 4,
+      "vi": "vỗ tay"
+    },
+    {
+      "pos": 14,
+      "hanzi": "用功",
+      "pinyin": "yònggōng",
+      "adj": 6,
+      "vi": "chăm chỉ, siêng năng"
+    },
+    {
+      "pos": 15,
+      "hanzi": "进步",
+      "pinyin": "jìnbù",
+      "adj": 4,
+      "vi": "tiến bộ, trở nên tốt hơn"
+    },
+    {
+      "pos": 16,
+      "hanzi": "题目",
+      "pinyin": "tímù",
+      "adj": 2,
+      "vi": "đầu đề"
+    },
+    {
+      "pos": 17,
+      "hanzi": "朗读",
+      "pinyin": "lǎngdú",
+      "adj": 4,
+      "vi": "đọc to"
+    },
+    {
+      "pos": 18,
+      "hanzi": "温柔",
+      "pinyin": "wēnróu",
+      "adj": 6,
+      "vi": "dịu dàng, êm dịu, mềm mại"
+    },
+    {
+      "pos": 19,
+      "hanzi": "热烈",
+      "pinyin": "rèliè",
+      "adj": 6,
+      "vi": "nhiệt liệt, sôi động"
+    },
+    {
+      "pos": 20,
+      "hanzi": "勇气",
+      "pinyin": "yǒngqì",
+      "adj": 2,
+      "vi": "sự can đảm"
+    },
+    {
+      "pos": 21,
+      "hanzi": "青壮年",
+      "pinyin": "qīng-zhuàngnián",
+      "adj": 2,
+      "vi": "thanh niên và tráng niên"
+    },
+    {
+      "pos": 22,
+      "hanzi": "闯",
+      "pinyin": "chuǎng",
+      "adj": 4,
+      "vi": "phiêu bạt, bôn ba, xông"
+    },
+    {
+      "pos": 23,
+      "hanzi": "留守",
+      "pinyin": "liúshǒu",
+      "adj": 4,
+      "vi": "ở lại để giữ gìn mọi thứ"
+    },
+    {
+      "pos": 24,
+      "hanzi": "主题",
+      "pinyin": "zhǔtí",
+      "adj": 2,
+      "vi": "chủ đề"
+    },
+    {
+      "pos": 25,
+      "hanzi": "地理",
+      "pinyin": "dìlǐ",
+      "adj": 2,
+      "vi": "địa lý"
+    },
+    {
+      "pos": 26,
+      "hanzi": "采访",
+      "pinyin": "cǎifǎng",
+      "adj": 4,
+      "vi": "phỏng vấn"
+    },
+    {
+      "pos": 27,
+      "hanzi": "利用",
+      "pinyin": "lìyong",
+      "adj": 4,
+      "vi": "sử dụng, dùng"
+    },
+    {
+      "pos": 28,
+      "hanzi": "空闲",
+      "pinyin": "kòngxián",
+      "adj": 6,
+      "vi": "nhàn rỗi, rỗi rãi"
+    },
+    {
+      "pos": 29,
+      "hanzi": "指导",
+      "pinyin": "zhǐdǎo",
+      "adj": 4,
+      "vi": "hướng dẫn, chỉ bảo"
+    },
+    {
+      "pos": 30,
+      "hanzi": "培训",
+      "pinyin": "péixùn",
+      "adj": 4,
+      "vi": "huấn luyện, đào tạo"
+    },
+    {
+      "pos": 31,
+      "hanzi": "建设",
+      "pinyin": "jiànshè",
+      "adj": 4,
+      "vi": "xây dựng, kiến thiết"
+    },
+    {
+      "pos": 32,
+      "hanzi": "操心",
+      "pinyin": "cāo xīn",
+      "adj": 4,
+      "vi": "bận tâm, lo nghĩ"
+    },
+    {
+      "pos": 33,
+      "hanzi": "承担",
+      "pinyin": "chéngdān",
+      "adj": 4,
+      "vi": "gánh vác, đảm nhận"
+    },
+    {
+      "pos": 34,
+      "hanzi": "义务",
+      "pinyin": "yìwù",
+      "adj": 2,
+      "vi": "nghĩa vụ"
+    },
+    {
+      "pos": 35,
+      "hanzi": "艰巨",
+      "pinyin": "jiānjù",
+      "adj": 6,
+      "vi": "gian khổ, nặng nề"
+    },
+    {
+      "pos": 36,
+      "hanzi": "力量",
+      "pinyin": "lìliàng",
+      "adj": 2,
+      "vi": "lực lượng, sức mạnh, sức lực"
+    },
+    {
+      "pos": 37,
+      "hanzi": "收获",
+      "pinyin": "shōuhuò",
+      "adj": 2,
+      "vi": "thu hoạch"
+    }
+  ]
+}

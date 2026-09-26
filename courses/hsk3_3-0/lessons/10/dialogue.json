@@ -1,0 +1,164 @@
+{
+  "lesson": 10,
+  "title": "你明天再把书还给我",
+  "title_pinyin": "Nǐ míngtiān zài bǎ shū huán gěi wǒ",
+  "title_vi": "Ngày mai cậu hãy trả sách cho tôi",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "同学",
+          "zh": "你的数学越来越好, 能不能介绍一下学习方法?",
+          "pinyin": "Nǐ de shùxué yuè lái yuè hǎo, néng bù néng jièshào yíxià xuéxí fāngfǎ?",
+          "vi": "Toán của bạn càng ngày càng tốt, có thể giới thiệu phương pháp học tập không?"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "没有什么特别的方法, 认真听课, 认真记笔记。",
+          "pinyin": "Méiyǒu shénme tèbié de fāngfǎ, rènzhēn tīng kè, rènzhēn jì bǐjì.",
+          "vi": "Không có phương pháp đặc biệt gì, chăm chú nghe giảng, chăm chú ghi chép."
+        },
+        {
+          "speaker": "同学",
+          "zh": "我看过你的笔记, 记得非常清楚。",
+          "pinyin": "Wǒ kàn guo nǐ de bǐjì, jì de fēicháng qīngchu.",
+          "vi": "Mình đã xem vở ghi chép của bạn, ghi rất rõ ràng."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "老师写在黑板上的题都很重要, 所以我会把这些题都记在本子上。",
+          "pinyin": "Lǎoshī xiě zài hēibǎn shàng de tí dōu hěn zhòngyào, suǒyǐ wǒ huì bǎ zhèxiē tí dōu jì zài běnzi shàng.",
+          "vi": "Những bài cô viết trên bảng đều rất quan trọng, nên mình sẽ ghi tất cả những bài đó vào vở."
+        },
+        {
+          "speaker": "同学",
+          "zh": "你说得对。我没有记笔记的习惯。",
+          "pinyin": "Nǐ shuō de duì. Wǒ méiyǒu jì bǐjì de xíguàn.",
+          "vi": "Bạn nói đúng. Mình không có thói quen ghi chép."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "笔记挺重要的, 我每天写作业以前, 都要看一遍。",
+          "pinyin": "Bǐjì tǐng zhòngyào de, wǒ měitiān xiě zuòyè yǐqián, dōu yào kàn yī biàn.",
+          "vi": "Vở ghi chép khá quan trọng, mỗi ngày trước khi làm bài tập, mình đều xem lại một lần."
+        },
+        {
+          "speaker": "同学",
+          "zh": "这个方法真好! 我以后也试试, 希望能提高成绩。",
+          "pinyin": "Zhège fāngfǎ zhēn hǎo! Wǒ yǐhòu yě shìshi, xīwàng néng tígāo chéngjì.",
+          "vi": "Phương pháp này thật tốt! Mình sau cũng thử, hy vọng có thể nâng cao thành tích."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "同学",
+          "zh": "小雪, 昨天的考试, 你考得怎么样?",
+          "pinyin": "Xiǎoxuě, zuótiān de kǎoshì, nǐ kǎo de zěnmeyàng?",
+          "vi": "Tiểu Tuyết, bài thi hôm qua, bạn thi thế nào?"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "我觉得历史有点儿难, 你呢?",
+          "pinyin": "Wǒ juéde lìshǐ yǒudiǎnr nán, nǐ ne?",
+          "vi": "Mình thấy môn Lịch sử hơi khó, còn bạn?"
+        },
+        {
+          "speaker": "同学",
+          "zh": "数学考试我没看清楚要求, 做错了好几个题, 考得挺差的。",
+          "pinyin": "Shùxué kǎoshì wǒ méi kàn qīngchu yāoqiú, zuò cuòle hǎo jǐ gè tí, kǎo de tǐng chà de.",
+          "vi": "Bài thi Toán mình không đọc kỹ yêu cầu, làm sai mất mấy câu, thi khá tệ."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "明天还有考试呢, 别想那么多了, 先复习外语吧。",
+          "pinyin": "Míngtiān hái yǒu kǎoshì ne, bié xiǎng nàme duō le, xiān fùxí wàiyǔ ba.",
+          "vi": "Ngày mai còn có thi nữa, đừng nghĩ nhiều nữa, trước hết ôn ngoại ngữ đi."
+        },
+        {
+          "speaker": "同学",
+          "zh": "外语作业里有几个问题, 我可以问问你吗?",
+          "pinyin": "Wàiyǔ zuòyè lǐ yǒu jǐ gè wèntí, wǒ kěyǐ wènwen nǐ ma?",
+          "vi": "Trong bài tập ngoại ngữ có mấy câu, mình có thể hỏi bạn không?"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "当然可以。在学习上, 遇到什么问题都可以问我。",
+          "pinyin": "Dāngrán kěyǐ. Zài xuéxí shàng, yùdào shénme wèntí dōu kěyǐ wèn wǒ.",
+          "vi": "Tất nhiên là được. Trong học tập, gặp vấn đề gì đều có thể hỏi mình."
+        },
+        {
+          "speaker": "同学",
+          "zh": "不好意思, 这几个题我也不会。咱们还是一起去办公室问问李老师吧。",
+          "pinyin": "Bù hǎoyìsi, zhè jǐ gè tí wǒ yě bú huì. Zánmen háishì yīqǐ qù bàngōngshì wènwen Lǐ lǎoshī ba.",
+          "vi": "Xin lỗi, mấy câu này mình cũng không biết. Chúng ta vẫn cùng đến văn phòng hỏi cô Lý đi."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "刘小雪",
+          "zh": "李老师, 书上有几个问题, 我们想问问您。",
+          "pinyin": "Lǐ lǎoshī, shū shàng yǒu jǐ gè wèntí, wǒmen xiǎng wènwen nín.",
+          "vi": "Cô Lý, trong sách có mấy câu, bọn em muốn hỏi cô ạ."
+        },
+        {
+          "speaker": "李老师",
+          "zh": "好, 坐下说吧, 哪个题不会?",
+          "pinyin": "Hǎo, zuòxia shuō ba, nǎge tí bú huì?",
+          "vi": "Được, ngồi xuống nói đi, câu nào không biết?"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "书上第五页的这个对话我看不懂, 小雪也不明白。",
+          "pinyin": "Shū shàng dì-wǔ yè de zhège duìhuà wǒ kàn bù dǒng, Xiǎoxuě yě bù míngbai.",
+          "vi": "Bài hội thoại ở trang năm trong sách em xem không hiểu, Tiểu Tuyết cũng không rõ ạ."
+        },
+        {
+          "speaker": "李老师",
+          "zh": "我课上讲过这几句话, 再给你们讲一遍。",
+          "pinyin": "Wǒ kè shàng jiǎng guo zhè jǐ jù huà, zài gěi nǐmen jiǎng yī biàn.",
+          "vi": "Cô đã giảng mấy câu này trên lớp rồi, cô giảng lại cho các em một lần nữa."
+        },
+        {
+          "speaker": "同学",
+          "zh": "我终于懂了。这些句子一点儿也不难。",
+          "pinyin": "Wǒ zhōngyú dǒng le. Zhèxiē jùzi yīdiǎnr yě bù nán.",
+          "vi": "Mình cuối cùng cũng hiểu rồi. Những câu này chẳng khó chút nào."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "我也明白了, 谢谢您, 李老师。",
+          "pinyin": "Wǒ yě míngbai le, xièxie nín, Lǐ lǎoshī.",
+          "vi": "Em cũng hiểu rồi, cảm ơn cô Lý ạ."
+        },
+        {
+          "speaker": "李老师",
+          "zh": "我这本书上还有几个练习, 你们回家也做一做, 明天再把书还给我。",
+          "pinyin": "Wǒ zhè běn shū shàng hái yǒu jǐ gè liànxí, nǐmen huí jiā yě zuò yī zuò, míngtiān zài bǎ shū huán gěi wǒ.",
+          "vi": "Trong cuốn sách này của cô còn có mấy bài tập, các em về nhà cũng làm thử, ngày mai hãy trả sách lại cho cô."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "刘小雪",
+          "zh": "家月姐姐: 你最近怎么样? 忙不忙? 我现在上初中二年级, 学习越来越忙, 后年就要考高中了。中国的学校一般是小学六年, 初中三年, 高中三年。妈妈说想考上好大学, 就得上一个好高中; 为了考上好高中, 初中就得有一个不错的成绩, 所以我现在非常努力。家月姐姐, 你知道吗? 在你的影响下, 我也开始喜欢拍照了。下次你再来北京, 我给你看看我照的照片。",
+          "pinyin": "Jiāyuè jiějie: Nǐ zuìjìn zěnmeyàng? Máng bù máng? Wǒ xiànzài shàng chūzhōng èr niánjí, xuéxí yuè lái yuè máng, hòunián jiù yào kǎo gāozhōng le. Zhōngguó de xuéxiào yībān shì xiǎoxué liù nián, chūzhōng sān nián, gāozhōng sān nián. Māma shuō xiǎng kǎo shàng hǎo dàxué, jiù dé shàng yī gè hǎo gāozhōng; wèile kǎo shàng hǎo gāozhōng, chūzhōng jiù děi yǒu yī gè búcuò de chéngjì, suǒyǐ wǒ xiànzài fēicháng nǔlì. Jiāyuè jiějie, nǐ zhīdào ma? Zài nǐ de yǐngxiǎng xià, wǒ yě kāishǐ xǐhuan pāizhào le. Xià cì nǐ zài lái Běijīng, wǒ gěi nǐ kànkan wǒ zhào de zhàopiàn.",
+          "vi": "Chị Gia Nguyệt: Chị gần đây thế nào? Có bận không? Em hiện đang học lớp 8 trung học cơ sở, việc học ngày càng bận, năm sau nữa là phải thi vào cấp 3. Trường học Trung Quốc thường là tiểu học 6 năm, trung học cơ sở 3 năm, trung học phổ thông 3 năm. Mẹ nói muốn thi vào đại học tốt thì phải học cấp 3 tốt; để thi vào cấp 3 tốt, thì cấp 2 phải có thành tích tốt, vì vậy em bây giờ rất cố gắng. Chị Gia Nguyệt, chị có biết không? Dưới ảnh hưởng của chị, em cũng bắt đầu thích chụp ảnh rồi. Lần sau chị lại đến Bắc Kinh, em sẽ cho chị xem những bức ảnh em chụp."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 1,
+  "label": "Bài 1",
+  "title": "她请我们吃了北京烤鸭",
+  "short_vi": "Gặp gỡ, đón tiếp bạn bè tại sân bay; cảm ơn, xin lỗi; nhờ vả giúp đỡ; trải nghiệm ẩm thực Bắc Kinh",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "就",
+      "pinyin": "jiù",
+      "adj": 18,
+      "vi": "Thì, liền, ngay, đã"
+    },
+    {
+      "pos": 2,
+      "hanzi": "给",
+      "pinyin": "gěi",
+      "adj": 13,
+      "vi": "cho"
+    },
+    {
+      "pos": 3,
+      "hanzi": "让",
+      "pinyin": "ràng",
+      "adj": 4,
+      "vi": "kêu, bảo"
+    },
+    {
+      "pos": 4,
+      "hanzi": "接",
+      "pinyin": "jiē",
+      "adj": 4,
+      "vi": "đón"
+    },
+    {
+      "pos": 5,
+      "hanzi": "次",
+      "pinyin": "cì",
+      "adj": 8,
+      "vi": "lần"
+    },
+    {
+      "pos": 6,
+      "hanzi": "旅游",
+      "pinyin": "lǚ yóu",
+      "adj": 4,
+      "vi": "du lịch"
+    },
+    {
+      "pos": 7,
+      "hanzi": "帮忙",
+      "pinyin": "bāngmáng",
+      "adj": 4,
+      "vi": "giúp, giúp đỡ"
+    },
+    {
+      "pos": 8,
+      "hanzi": "不好意思",
+      "pinyin": "bù hǎo  yì si",
+      "adj": 12,
+      "vi": "thật ngại quá, xin lỗi"
+    },
+    {
+      "pos": 9,
+      "hanzi": "已经",
+      "pinyin": "yǐ jīng",
+      "adj": 18,
+      "vi": "đã"
+    },
+    {
+      "pos": 10,
+      "hanzi": "那",
+      "pinyin": "nà",
+      "adj": 1,
+      "vi": "thế thì, vậy thì"
+    },
+    {
+      "pos": 11,
+      "hanzi": "介绍",
+      "pinyin": "jiè shào",
+      "adj": 4,
+      "vi": "Giới thiệu"
+    },
+    {
+      "pos": 12,
+      "hanzi": "有时",
+      "pinyin": "yǒu  shí",
+      "adj": 18,
+      "vi": "Có lúc, thỉnh thoảng"
+    },
+    {
+      "pos": 13,
+      "hanzi": "懂",
+      "pinyin": "dǒng",
+      "adj": 4,
+      "vi": "Hiểu, biết"
+    },
+    {
+      "pos": 14,
+      "hanzi": "意思",
+      "pinyin": "yì si",
+      "adj": 2,
+      "vi": "Ý, nghĩa"
+    },
+    {
+      "pos": 15,
+      "hanzi": "北京烤鸭",
+      "pinyin": "běi jīng kǎo yā",
+      "adj": 2,
+      "vi": "Vịt quay Bắc Kinh"
+    }
+  ]
+}

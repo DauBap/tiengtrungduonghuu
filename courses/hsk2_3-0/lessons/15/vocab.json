@@ -1,0 +1,94 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 15,
+  "label": "Bài 15",
+  "title": "我想再去一次中国",
+  "short_vi": "Làm bài thi và bàn về kế hoạch sau thi; nói về mong muốn đi du lịch Trung Quốc lần nữa; mua vé máy bay, đặt vé tham quan; chuẩn bị hành lý xuất ngoại",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "姓名",
+      "pinyin": "Xìngmíng",
+      "adj": 2,
+      "vi": "Họ tên"
+    },
+    {
+      "pos": 2,
+      "hanzi": "出国",
+      "pinyin": "Chūguó",
+      "adj": 4,
+      "vi": "Đi nước ngoài"
+    },
+    {
+      "pos": 3,
+      "hanzi": "门票",
+      "pinyin": "Ménpiào",
+      "adj": 2,
+      "vi": "Vé vào"
+    },
+    {
+      "pos": 4,
+      "hanzi": "高中",
+      "pinyin": "Gāozhōng",
+      "adj": 2,
+      "vi": "Cấp 3"
+    },
+    {
+      "pos": 5,
+      "hanzi": "出门",
+      "pinyin": "Chūmén",
+      "adj": 4,
+      "vi": "Ra ngoài"
+    },
+    {
+      "pos": 6,
+      "hanzi": "路",
+      "pinyin": "Lù",
+      "adj": 2,
+      "vi": "Đường"
+    },
+    {
+      "pos": 7,
+      "hanzi": "颐和园",
+      "pinyin": "Yíhéyuán",
+      "adj": 2,
+      "vi": "Di hòa viên ( bắc kinh )"
+    },
+    {
+      "pos": 8,
+      "hanzi": "机场",
+      "pinyin": "Jīchǎng",
+      "adj": 2,
+      "vi": "Sân bay"
+    },
+    {
+      "pos": 9,
+      "hanzi": "机票",
+      "pinyin": "Jīpiào",
+      "adj": 2,
+      "vi": "Vé máy bay"
+    },
+    {
+      "pos": 10,
+      "hanzi": "飞",
+      "pinyin": "Fēi",
+      "adj": 4,
+      "vi": "bay"
+    },
+    {
+      "pos": 11,
+      "hanzi": "好像",
+      "pinyin": "Hǎoxiàng",
+      "adj": 4,
+      "vi": "Hình như, dường như"
+    },
+    {
+      "pos": 12,
+      "hanzi": "鸟",
+      "pinyin": "Niǎo",
+      "adj": 2,
+      "vi": "Con chim"
+    }
+  ]
+}

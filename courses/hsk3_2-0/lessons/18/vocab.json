@@ -1,0 +1,129 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 18,
+  "label": "Bài 18",
+  "title": "我相信他们会同意的。",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "向",
+      "pinyin": "xiàng",
+      "adj": 13,
+      "vi": "đối với, về phía (chỉ hướng của hành động)"
+    },
+    {
+      "pos": 2,
+      "hanzi": "万",
+      "pinyin": "wàn",
+      "adj": 21,
+      "vi": "vạn, mười nghìn"
+    },
+    {
+      "pos": 3,
+      "hanzi": "只",
+      "pinyin": "zhī",
+      "adj": 8,
+      "vi": "con (được dùng cho động vật)"
+    },
+    {
+      "pos": 4,
+      "hanzi": "嘴",
+      "pinyin": "zuǐ",
+      "adj": 2,
+      "vi": "miệng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "动物",
+      "pinyin": "dòngwù",
+      "adj": 2,
+      "vi": "động vật, loài vật"
+    },
+    {
+      "pos": 6,
+      "hanzi": "段",
+      "pinyin": "duàn",
+      "adj": 8,
+      "vi": "khoảng, quãng"
+    },
+    {
+      "pos": 7,
+      "hanzi": "不但……而且……",
+      "pinyin": "búdàn……érqiě……",
+      "adj": 10,
+      "vi": "không những... mà còn..."
+    },
+    {
+      "pos": 8,
+      "hanzi": "有名",
+      "pinyin": "yǒumíng",
+      "adj": 6,
+      "vi": "có tiếng, nổi tiếng"
+    },
+    {
+      "pos": 9,
+      "hanzi": "同意",
+      "pinyin": "tóngyì",
+      "adj": 4,
+      "vi": "đồng ý, tán thành"
+    },
+    {
+      "pos": 10,
+      "hanzi": "相信",
+      "pinyin": "xiāngxìn",
+      "adj": 4,
+      "vi": "tin, tin tưởng"
+    },
+    {
+      "pos": 11,
+      "hanzi": "关于",
+      "pinyin": "guānyú",
+      "adj": 13,
+      "vi": "về"
+    },
+    {
+      "pos": 12,
+      "hanzi": "机会",
+      "pinyin": "jīhuì",
+      "adj": 2,
+      "vi": "cơ hội"
+    },
+    {
+      "pos": 13,
+      "hanzi": "国家",
+      "pinyin": "guójiā",
+      "adj": 2,
+      "vi": "đất nước, quốc gia"
+    },
+    {
+      "pos": 14,
+      "hanzi": "种",
+      "pinyin": "zhǒng",
+      "adj": 8,
+      "vi": "loại"
+    },
+    {
+      "pos": 15,
+      "hanzi": "特点",
+      "pinyin": "tèdiǎn",
+      "adj": 2,
+      "vi": "đặc điểm"
+    },
+    {
+      "pos": 16,
+      "hanzi": "奇怪",
+      "pinyin": "qíguài",
+      "adj": 6,
+      "vi": "kỳ lạ, lạ lùng"
+    },
+    {
+      "pos": 17,
+      "hanzi": "地",
+      "pinyin": "de",
+      "adj": 11,
+      "vi": "được dùng để nối trạng ngữ với động từ mà nó bổ nghĩa"
+    }
+  ]
+}

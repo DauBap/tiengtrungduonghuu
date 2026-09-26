@@ -1,0 +1,524 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const choice = (
+	id: string,
+	prompt: string,
+	answer: string,
+	options: [string, string, string],
+	meaning: string,
+	explanation: string
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	options,
+	completedSentence: answer,
+	meaning,
+	explanation,
+	optionExplanations: Object.fromEntries(
+		options.map((option) => [
+			option,
+			option === answer
+				? "Đúng: câu phù hợp cả ngữ pháp lẫn nghĩa của đề bài."
+				: "Sai: trật tự từ hoặc cấu trúc không phù hợp với nghĩa được yêu cầu."
+		])
+	)
+});
+
+const input = (
+	id: string,
+	prompt: string,
+	answer: string,
+	meaning: string,
+	explanation: string
+): GrammarQuestion => ({ id, prompt, answer, completedSentence: answer, meaning, explanation });
+
+const arrange = (
+	id: string,
+	prompt: string,
+	answer: string,
+	tokens: string[],
+	meaning: string,
+	explanation: string
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	tokens,
+	completedSentence: answer,
+	meaning,
+	explanation
+});
+
+export const hsk2Lesson2Grammar: GrammarLesson = {
+	title: "BÀI 2: 还是打车去北大吧",
+	points: [
+		{
+			id: "haishi-ba",
+			title: "Cấu trúc cố định “还是……吧” – Lựa chọn thiên hướng",
+			explanation:
+				"Dùng “还是……吧” khi cân nhắc rồi nghiêng về một lựa chọn, mang nghĩa “vẫn nên… thì hơn”. “还是” đứng trước hành động được chọn và “吧” đứng cuối câu.",
+			formulas: ["Chủ ngữ + 还是 + động từ/cụm động từ + 吧", "还是 + phương án được chọn + 吧"],
+			examples: [
+				{ chinese: "我们还是打车去吧。", vietnamese: "Chúng ta vẫn nên bắt taxi đi thì hơn." },
+				{
+					chinese: "车站太远，我们还是坐公交车吧。",
+					vietnamese: "Bến xe xa quá, chúng ta vẫn nên đi xe buýt thì hơn."
+				},
+				{
+					chinese: "别等了，你还是先走吧。",
+					vietnamese: "Đừng đợi nữa, bạn vẫn nên đi trước thì hơn."
+				}
+			],
+			notes: ["Không đặt “吧” giữa “还是” và cụm động từ được lựa chọn."],
+			exercises: [
+				{
+					id: "h2l2-haishi-choice",
+					title: "1. Chọn đáp án đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"hs-c1",
+							"Chọn câu đúng: “Chúng ta vẫn nên bắt taxi đi thì hơn.”",
+							"我们还是打车去吧。",
+							["我们还是打车去吧。", "我们吧还是打车去。", "我们还是吧打车去。"],
+							"Chúng ta vẫn nên bắt taxi đi thì hơn.",
+							"Cụm hành động đứng sau “还是”, còn “吧” đứng cuối câu."
+						),
+						choice(
+							"hs-c2",
+							"Bến xe rất xa. Chọn lời khuyên phù hợp.",
+							"我们还是坐公交车吧。",
+							["我们坐还是公交车吧。", "我们还是吧坐公交车。", "我们还是坐公交车吧。"],
+							"Chúng ta vẫn nên đi xe buýt thì hơn.",
+							"Ngữ cảnh dẫn tới lựa chọn “坐公交车”, đặt trong khung 还是…吧."
+						),
+						choice(
+							"hs-c3",
+							"Điền từ đúng: 别等了，你___先走吧。",
+							"还是",
+							["还是", "多", "的"],
+							"Đừng đợi nữa, bạn vẫn nên đi trước thì hơn.",
+							"“还是…吧” đưa ra lựa chọn thiên hướng sau khi cân nhắc."
+						),
+						choice(
+							"hs-c4",
+							"Chọn câu đúng: “Chúng ta vẫn nên đến Đại học Bắc Kinh thì hơn.”",
+							"我们还是去北京大学吧。",
+							["我们去还是北京大学吧。", "我们还是去北京大学吧。", "还是我们吧去北京大学。"],
+							"Chúng ta vẫn nên đến Đại học Bắc Kinh thì hơn.",
+							"“还是” đứng trước “去北京大学”, “吧” đứng cuối."
+						),
+						choice(
+							"hs-c5",
+							"Trời muộn rồi. Câu nào là lời lựa chọn tự nhiên?",
+							"我们还是明天去吧。",
+							["我们明天还是吧去。", "我们还是明天去吧。", "我们吧还是明天去。"],
+							"Chúng ta vẫn nên đi vào ngày mai thì hơn.",
+							"Thời gian và hành động được chọn nằm sau “还是”."
+						)
+					]
+				},
+				{
+					id: "h2l2-haishi-arrange",
+					title: "2. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: [
+						arrange(
+							"hs-a1",
+							"Chúng ta vẫn nên bắt taxi đi thì hơn.",
+							"我们还是打车去吧",
+							["打车", "我们", "吧", "还是", "去"],
+							"Chúng ta vẫn nên bắt taxi đi thì hơn.",
+							"还是 + 打车去 + 吧."
+						),
+						arrange(
+							"hs-a2",
+							"Bạn vẫn nên đi xe buýt thì hơn.",
+							"你还是坐公交车吧",
+							["公交车", "你", "吧", "坐", "还是"],
+							"Bạn vẫn nên đi xe buýt thì hơn.",
+							"“吧” đứng cuối lời khuyên."
+						),
+						arrange(
+							"hs-a3",
+							"Chúng ta vẫn nên đi Đại học Bắc Kinh thì hơn.",
+							"我们还是去北京大学吧",
+							["北京大学", "吧", "去", "我们", "还是"],
+							"Chúng ta vẫn nên đi Đại học Bắc Kinh thì hơn.",
+							"Cụm được chọn là “去北京大学”."
+						),
+						arrange(
+							"hs-a4",
+							"Bạn vẫn nên qua đây thì hơn.",
+							"你还是过来吧",
+							["吧", "你", "过来", "还是"],
+							"Bạn vẫn nên qua đây thì hơn.",
+							"还是 + 过来 + 吧."
+						),
+						arrange(
+							"hs-a5",
+							"Chúng ta vẫn nên đi vào ngày mai thì hơn.",
+							"我们还是明天去吧",
+							["去", "还是", "我们", "明天", "吧"],
+							"Chúng ta vẫn nên đi vào ngày mai thì hơn.",
+							"Thời gian “明天” đặt trước động từ “去”."
+						)
+					]
+				},
+				{
+					id: "h2l2-haishi-translate",
+					title: "3. Dịch Việt sang Trung",
+					type: "input",
+					questions: [
+						input(
+							"hs-t1",
+							"Chúng ta vẫn nên bắt taxi đi thì hơn.",
+							"我们还是打车去吧",
+							"Chúng ta vẫn nên bắt taxi đi thì hơn.",
+							"Dùng 还是 + 打车去 + 吧."
+						),
+						input(
+							"hs-t2",
+							"Bạn vẫn nên đi xe buýt thì hơn.",
+							"你还是坐公交车吧",
+							"Bạn vẫn nên đi xe buýt thì hơn.",
+							"Dùng 还是 + 坐公交车 + 吧."
+						),
+						input(
+							"hs-t3",
+							"Chúng ta vẫn nên đến Đại học Bắc Kinh thì hơn.",
+							"我们还是去北京大学吧",
+							"Chúng ta vẫn nên đến Đại học Bắc Kinh thì hơn.",
+							"“吧” đứng cuối câu."
+						),
+						input(
+							"hs-t4",
+							"Bạn vẫn nên qua đây thì hơn.",
+							"你还是过来吧",
+							"Bạn vẫn nên qua đây thì hơn.",
+							"Cụm hành động “过来” đứng sau 还是."
+						),
+						input(
+							"hs-t5",
+							"Chúng ta vẫn nên đi vào ngày mai thì hơn.",
+							"我们还是明天去吧",
+							"Chúng ta vẫn nên đi vào ngày mai thì hơn.",
+							"Đặt 明天 trước 去 trong khung 还是…吧."
+						)
+					]
+				}
+			]
+		},
+		{
+			id: "approximate-duo",
+			title: "Dùng “多” để diễn đạt số ước lượng",
+			explanation:
+				"“多” đặt sau số tròn hoặc sau số từ và trước lượng từ để biểu thị số lượng nhiều hơn con số đã nêu nhưng chưa tới đơn vị tròn kế tiếp.",
+			formulas: [
+				"Số tròn + 多 + lượng từ + danh từ",
+				"Số từ + lượng từ + 多 + danh từ (với số lượng nhỏ)"
+			],
+			examples: [
+				{
+					chinese: "北京大学有四万多名学生。",
+					vietnamese: "Đại học Bắc Kinh có hơn 40.000 sinh viên."
+				},
+				{ chinese: "这里有二十多间教室。", vietnamese: "Ở đây có hơn 20 phòng học." },
+				{ chinese: "他买了十多张票。", vietnamese: "Anh ấy đã mua hơn 10 tấm vé." }
+			],
+			notes: [
+				"Với số tròn từ hàng chục trở lên, trật tự thường là “số + 多 + lượng từ + danh từ”."
+			],
+			exercises: [
+				{
+					id: "h2l2-duo-choice",
+					title: "1. Chọn đáp án đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"duo-c1",
+							"Chọn cụm đúng: “hơn 40.000 sinh viên”.",
+							"四万多名学生",
+							["四万名多学生", "四万多名学生", "多四万名学生"],
+							"Hơn 40.000 sinh viên.",
+							"Sau số tròn “四万” là “多”, rồi đến lượng từ “名”."
+						),
+						choice(
+							"duo-c2",
+							"Chọn câu đúng: “Ở đây có hơn 20 phòng học.”",
+							"这里有二十多间教室。",
+							["这里有二十多间教室。", "这里有二十间多教室。", "这里多有二十间教室。"],
+							"Ở đây có hơn 20 phòng học.",
+							"Trật tự là 二十 + 多 + 间 + 教室."
+						),
+						choice(
+							"duo-c3",
+							"Điền từ đúng: 北京大学有四万___名学生。",
+							"多",
+							["还是", "的", "多"],
+							"Đại học Bắc Kinh có hơn 40.000 sinh viên.",
+							"“多” đứng sau số tròn để biểu thị số lẻ hơn."
+						),
+						choice(
+							"duo-c4",
+							"Chọn cụm đúng: “hơn 10 tấm vé”.",
+							"十多张票",
+							["十张多票", "多十张票", "十多张票"],
+							"Hơn 10 tấm vé.",
+							"Trật tự đúng là 十 + 多 + 张 + 票."
+						),
+						choice(
+							"duo-c5",
+							"Chọn câu đúng: “Có hơn 30 người nước ngoài.”",
+							"有三十多个外国人。",
+							["有三十个多外国人。", "有三十多个外国人。", "有多三十个外国人。"],
+							"Có hơn 30 người nước ngoài.",
+							"Trật tự đúng là 三十 + 多 + 个 + 外国人."
+						)
+					]
+				},
+				{
+					id: "h2l2-duo-arrange",
+					title: "2. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: [
+						arrange(
+							"duo-a1",
+							"Đại học Bắc Kinh có hơn 40.000 sinh viên.",
+							"北京大学有四万多名学生",
+							["学生", "四万", "有", "多", "北京大学", "名"],
+							"Đại học Bắc Kinh có hơn 40.000 sinh viên.",
+							"四万 + 多 + 名 + 学生."
+						),
+						arrange(
+							"duo-a2",
+							"Ở đây có hơn 20 phòng học.",
+							"这里有二十多间教室",
+							["多", "教室", "这里", "间", "二十", "有"],
+							"Ở đây có hơn 20 phòng học.",
+							"二十 + 多 + 间 + 教室."
+						),
+						arrange(
+							"duo-a3",
+							"Anh ấy mua hơn 10 tấm vé.",
+							"他买了十多张票",
+							["张", "他", "十", "票", "买了", "多"],
+							"Anh ấy mua hơn 10 tấm vé.",
+							"十 + 多 + 张 + 票."
+						),
+						arrange(
+							"duo-a4",
+							"Có hơn 30 người nước ngoài.",
+							"有三十多个外国人",
+							["个", "多", "外国人", "有", "三十"],
+							"Có hơn 30 người nước ngoài.",
+							"三十 + 多 + 个 + 外国人."
+						),
+						arrange(
+							"duo-a5",
+							"Có hơn 50 học sinh.",
+							"有五十多名学生",
+							["学生", "五十", "多", "有", "名"],
+							"Có hơn 50 học sinh.",
+							"五十 + 多 + 名 + 学生."
+						)
+					]
+				},
+				{
+					id: "h2l2-duo-translate",
+					title: "3. Dịch Việt sang Trung",
+					type: "input",
+					questions: [
+						input(
+							"duo-t1",
+							"Đại học Bắc Kinh có hơn 40.000 sinh viên.",
+							"北京大学有四万多名学生",
+							"Đại học Bắc Kinh có hơn 40.000 sinh viên.",
+							"四万多名学生 = hơn 40.000 sinh viên."
+						),
+						input(
+							"duo-t2",
+							"Ở đây có hơn 20 phòng học.",
+							"这里有二十多间教室",
+							"Ở đây có hơn 20 phòng học.",
+							"二十多间教室 = hơn 20 phòng học."
+						),
+						input(
+							"duo-t3",
+							"Anh ấy mua hơn 10 tấm vé.",
+							"他买了十多张票",
+							"Anh ấy mua hơn 10 tấm vé.",
+							"十多张票 = hơn 10 tấm vé."
+						),
+						input(
+							"duo-t4",
+							"Có hơn 30 người nước ngoài.",
+							"有三十多个外国人",
+							"Có hơn 30 người nước ngoài.",
+							"三十多个外国人 = hơn 30 người nước ngoài."
+						),
+						input(
+							"duo-t5",
+							"Có hơn 50 học sinh.",
+							"有五十多名学生",
+							"Có hơn 50 học sinh.",
+							"五十多名学生 = hơn 50 học sinh."
+						)
+					]
+				}
+			]
+		},
+		{
+			id: "attributive-clause",
+			title: "Động từ, cụm động từ và cụm chủ vị làm định ngữ",
+			explanation:
+				"Động từ, cụm động từ hoặc cụm chủ vị có thể đứng trước danh từ để bổ nghĩa cho danh từ đó. Khi định ngữ là một cụm, thường dùng “的” giữa định ngữ và danh từ trung tâm.",
+			formulas: ["Động từ/cụm động từ + 的 + danh từ", "Chủ ngữ + vị ngữ + 的 + danh từ"],
+			examples: [
+				{ chinese: "他们卖的电影票也很便宜。", vietnamese: "Vé xem phim họ bán cũng rất rẻ." },
+				{ chinese: "这是去北京大学的公交车。", vietnamese: "Đây là xe buýt đi Đại học Bắc Kinh." },
+				{ chinese: "网上买的票很便宜。", vietnamese: "Vé mua trên mạng rất rẻ." }
+			],
+			notes: ["Danh từ trung tâm phải đứng sau “的”; không đặt danh từ đó vào giữa cụm định ngữ."],
+			exercises: [
+				{
+					id: "h2l2-attr-choice",
+					title: "1. Chọn đáp án đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"at-c1",
+							"Chọn cụm đúng: “vé xem phim họ bán”.",
+							"他们卖的电影票",
+							["他们的卖电影票", "卖他们的电影票", "他们卖的电影票"],
+							"Vé xem phim họ bán.",
+							"Cụm chủ vị “他们卖” đứng trước 的 và danh từ “电影票”."
+						),
+						choice(
+							"at-c2",
+							"Chọn câu đúng: “Đây là xe buýt đi Đại học Bắc Kinh.”",
+							"这是去北京大学的公交车。",
+							["这是去北京大学的公交车。", "这是去的北京大学公交车。", "这是公交车的去北京大学。"],
+							"Đây là xe buýt đi Đại học Bắc Kinh.",
+							"“去北京大学” bổ nghĩa cho “公交车”."
+						),
+						choice(
+							"at-c3",
+							"Điền từ đúng: 网上买___票很便宜。",
+							"的",
+							["多", "吧", "的"],
+							"Vé mua trên mạng rất rẻ.",
+							"“的” nối cụm động từ “网上买” với danh từ “票”."
+						),
+						choice(
+							"at-c4",
+							"Chọn cụm đúng: “giáo viên tôi giới thiệu”.",
+							"我介绍的老师",
+							["我介绍的老师", "我的介绍老师", "老师我介绍的"],
+							"Giáo viên tôi giới thiệu.",
+							"Cụm chủ vị “我介绍” làm định ngữ trước “老师”."
+						),
+						choice(
+							"at-c5",
+							"Chọn câu đúng: “Phòng học chúng tôi dùng rất lớn.”",
+							"我们用的教室很大。",
+							["我们用教室的很大。", "教室我们用的很大。", "我们用的教室很大。"],
+							"Phòng học chúng tôi dùng rất lớn.",
+							"“我们用的” bổ nghĩa cho danh từ trung tâm “教室”."
+						)
+					]
+				},
+				{
+					id: "h2l2-attr-arrange",
+					title: "2. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: [
+						arrange(
+							"at-a1",
+							"Vé xem phim họ bán cũng rất rẻ.",
+							"他们卖的电影票也很便宜",
+							["也", "他们", "的", "很便宜", "电影票", "卖"],
+							"Vé xem phim họ bán cũng rất rẻ.",
+							"他们卖 + 的 + 电影票."
+						),
+						arrange(
+							"at-a2",
+							"Đây là xe buýt đi Đại học Bắc Kinh.",
+							"这是去北京大学的公交车",
+							["公交车", "的", "这", "北京大学", "是", "去"],
+							"Đây là xe buýt đi Đại học Bắc Kinh.",
+							"去北京大学 + 的 + 公交车."
+						),
+						arrange(
+							"at-a3",
+							"Vé mua trên mạng rất rẻ.",
+							"网上买的票很便宜",
+							["买", "很便宜", "票", "网上", "的"],
+							"Vé mua trên mạng rất rẻ.",
+							"网上买 + 的 + 票."
+						),
+						arrange(
+							"at-a4",
+							"Giáo viên tôi giới thiệu là người Trung Quốc.",
+							"我介绍的老师是中国人",
+							["老师", "我", "是", "中国人", "的", "介绍"],
+							"Giáo viên tôi giới thiệu là người Trung Quốc.",
+							"我介绍的 bổ nghĩa cho 老师."
+						),
+						arrange(
+							"at-a5",
+							"Phòng học chúng tôi dùng rất lớn.",
+							"我们用的教室很大",
+							["很大", "用", "教室", "的", "我们"],
+							"Phòng học chúng tôi dùng rất lớn.",
+							"我们用 + 的 + 教室."
+						)
+					]
+				},
+				{
+					id: "h2l2-attr-translate",
+					title: "3. Dịch Việt sang Trung",
+					type: "input",
+					questions: [
+						input(
+							"at-t1",
+							"Vé xem phim họ bán cũng rất rẻ.",
+							"他们卖的电影票也很便宜",
+							"Vé xem phim họ bán cũng rất rẻ.",
+							"他们卖的 bổ nghĩa cho 电影票."
+						),
+						input(
+							"at-t2",
+							"Đây là xe buýt đi Đại học Bắc Kinh.",
+							"这是去北京大学的公交车",
+							"Đây là xe buýt đi Đại học Bắc Kinh.",
+							"去北京大学的 bổ nghĩa cho 公交车."
+						),
+						input(
+							"at-t3",
+							"Vé mua trên mạng rất rẻ.",
+							"网上买的票很便宜",
+							"Vé mua trên mạng rất rẻ.",
+							"网上买的 bổ nghĩa cho 票."
+						),
+						input(
+							"at-t4",
+							"Giáo viên tôi giới thiệu là người Trung Quốc.",
+							"我介绍的老师是中国人",
+							"Giáo viên tôi giới thiệu là người Trung Quốc.",
+							"我介绍的 bổ nghĩa cho 老师."
+						),
+						input(
+							"at-t5",
+							"Phòng học chúng tôi dùng rất lớn.",
+							"我们用的教室很大",
+							"Phòng học chúng tôi dùng rất lớn.",
+							"我们用的 bổ nghĩa cho 教室."
+						)
+					]
+				}
+			]
+		}
+	]
+};

@@ -1,0 +1,152 @@
+{
+  "lesson": 1,
+  "title": "我们去机场接你们",
+  "title_pinyin": "Wǒmen qù jīchǎng jiē nǐmen",
+  "title_vi": "Chúng tôi ra sân bay đón các bạn",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "这是杨同乐吗? 他怎么跟白家月在一起?",
+          "pinyin": "Zhè shì Yáng Tónglè ma? Tā zěnme gēn Bái Jiāyuè zài yīqǐ?",
+          "vi": "Đây có phải là Dương Đồng Lạc không? Sao anh ấy lại ở cùng với Bạch Gia Nguyệt?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "他不是杨同乐, 他叫李文, 是白家月的好朋友。",
+          "pinyin": "Tā bú shì Yáng Tónglè, tā jiào Lǐ Wén, shì Bái Jiāyuè de hǎo péngyou.",
+          "vi": "Anh ấy không phải Dương Đồng Lạc, anh ấy tên là Lý Văn, là bạn thân của Bạch Gia Nguyệt."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我还以为是同乐呢, 他们看上去有点儿像。",
+          "pinyin": "Wǒ hái yǐwéi shì Tónglè ne, tāmen kàn shàngqu yǒudiǎnr xiàng.",
+          "vi": "Tôi cứ tưởng là Đồng Lạc, nhìn họ hơi giống nhau."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "是长得有点儿像, 但是他比同乐高, 身高有一米八。",
+          "pinyin": "Shì zhǎng de yǒudiǎnr xiàng, dànshì tā bǐ Tónglè gāo, shēngāo yǒu yī mǐ bā.",
+          "vi": "Đúng là hơi giống, nhưng anh ấy cao hơn Đồng Lạc, chiều cao một mét tám."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "看起来也比同乐瘦一点儿。",
+          "pinyin": "Kàn qǐlái yě bǐ Tónglè shòu yìdiǎnr.",
+          "vi": "Nhìn cũng gầy hơn Đồng Lạc một chút."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "下个星期家月和李文要来北京, 我去机场接他们。",
+          "pinyin": "Xià ge xīngqī Jiāyuè hé Lǐ Wén yào lái Běijīng, wǒ qù jīchǎng jiē tāmen.",
+          "vi": "Tuần sau Gia Nguyệt và Lý Văn sẽ đến Bắc Kinh, tôi ra sân bay đón họ."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "他们哪天到北京? 我跟你一起去机场接他们吧。",
+          "pinyin": "Tāmen nǎ tiān dào Běijīng? Wǒ gēn nǐ yīqǐ qù jīchǎng jiē tāmen ba.",
+          "vi": "Họ đến Bắc Kinh ngày nào? Tôi đi cùng chị ra sân bay đón họ nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "我的行李怎么还没出来? 是不是丢了?",
+          "pinyin": "Wǒ de xíngli zěnme hái méi chūlái? Shì bú shì diū le?",
+          "vi": "Hành lý của tôi sao vẫn chưa ra? Có phải bị mất không?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "你的行李箱是什么样的?",
+          "pinyin": "Nǐ de xínglixiāng shì shénme yàng de?",
+          "vi": "Vali của cậu trông như thế nào?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "是一个黑色的箱子, 上面写着我的名字和电话号码。",
+          "pinyin": "Shì yī gè hēisè de xiāngzi, shàngmian xiězhe wǒ de míngzi hé diànhuà hàomǎ.",
+          "vi": "Là một cái vali màu đen, trên đó có ghi tên và số điện thoại của tôi."
+        },
+        {
+          "speaker": "李文",
+          "zh": "我好像在哪儿看到过这个箱子, 是不是有人拿错了?",
+          "pinyin": "Wǒ hǎoxiàng zài nǎr kàn dào guo zhège xiāngzi, shì bú shì yǒu rén ná cuò le?",
+          "vi": "Tôi hình như đã thấy cái vali này ở đâu đó, có phải có người lấy nhầm không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我们快找谁问一下吧, 箱子里有不少重要的东西。",
+          "pinyin": "Wǒmen kuài zhǎo shuí wèn yíxià ba, xiāngzi lǐ yǒu bù shǎo zhòngyào de dōngxi.",
+          "vi": "Chúng ta mau hỏi ai đó xem, trong vali có khá nhiều thứ quan trọng."
+        },
+        {
+          "speaker": "李文",
+          "zh": "别着急, 我们拿着护照和机票, 去服务台问问吧。",
+          "pinyin": "Bié zhāojí, wǒmen ná zhe hùzhào hé jīpiào, qù fúwùtái wènwen ba.",
+          "vi": "Đừng vội, chúng ta cầm hộ chiếu và vé máy bay, ra quầy dịch vụ hỏi xem."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "飞机早就到了, 你看见白家月他们了吗?",
+          "pinyin": "Fēijī zǎo jiù dào le, nǐ kànjiàn Bái Jiāyuè tāmen le ma?",
+          "vi": "Máy bay đã đến từ lâu rồi, bạn có nhìn thấy Bạch Gia Nguyệt và mọi người không?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "没有, 他们应该快出来了。",
+          "pinyin": "Méiyǒu, tāmen yīnggāi kuài chūlái le.",
+          "vi": "Chưa, họ chắc sắp ra rồi."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我们站到中间去吧, 这样他们好找一些。",
+          "pinyin": "Wǒmen zhàn dào zhōngjiān qù ba, zhèyàng tāmen hǎo zhǎo yīxiē.",
+          "vi": "Chúng ta đứng vào giữa đi, như vậy họ dễ tìm hơn."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你看那个高个子的人是李文吗?",
+          "pinyin": "Nǐ kàn nàge gāo gèzi de rén shì Lǐ Wén ma?",
+          "vi": "Bạn xem người cao cao đằng kia có phải là Lý Văn không?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "你说的是哪个? 那个穿着黑衣服的短头发的年轻人?",
+          "pinyin": "Nǐ shuō de shì nǎge? Nàge chuānzhe hēi yīfu de duǎn tóufa de niánqīng rén?",
+          "vi": "Bạn nói người nào? Người thanh niên mặc áo đen tóc ngắn đằng kia?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "对, 那个人就是李文! 你看, 家月在他后面呢。",
+          "pinyin": "Duì, nàge rén jiù shì Lǐ Wén! Nǐ kàn, Jiāyuè zài tā hòumian ne.",
+          "vi": "Đúng, người đó chính là Lý Văn! Bạn xem, Gia Nguyệt ở phía sau anh ấy kìa."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "昨天我到北京了。虽然路上花了十几个小时, 但是跟家月坐在一起, 我觉得时间过得很快。到机场的时候, 家月发现行李箱不见了, 我带她去服务台, 帮助她找到了行李箱。走出机场的时候, 已经八点多了, 我们一出来就看见了王老师的姐姐, 她看起来比照片上年轻。晚上, 一雪姐带我们去吃了一家很好吃的中国菜。",
+          "pinyin": "Zuótiān wǒ dào Běijīng le. Suīrán lùshàng huāle shí jǐ gè xiǎoshí, dànshì gēn Jiāyuè zuò zài yīqǐ, wǒ juéde shíjiān guò de hěn kuài. Dào jīchǎng de shíhou, Jiāyuè fāxiàn xínglixiāng bùjiàn le, wǒ dài tā qù fúwùtái, bāngzhù tā zhǎodào le xínglixiāng. Zǒuchū jīchǎng de shíhou, yǐjīng bā diǎn duō le, wǒmen yī chūlái jiù kànjiànle Wáng lǎoshī de jiějie, tā kàn qǐlái bǐ zhàopiàn shàng niánqīng. Wǎnshang, Yīxuě jiě dài wǒmen qù chīle yī jiā hěn hǎochī de Zhōngguó cài.",
+          "vi": "Hôm qua tôi đến Bắc Kinh rồi. Tuy trên đường mất hơn mười tiếng, nhưng ngồi cùng với Gia Nguyệt, tôi thấy thời gian trôi rất nhanh. Khi đến sân bay, Gia Nguyệt phát hiện vali không thấy đâu, tôi đưa cô ấy ra quầy dịch vụ, giúp cô ấy tìm thấy vali. Khi bước ra khỏi sân bay, đã hơn 8 giờ rồi, vừa ra ngoài chúng tôi đã nhìn thấy chị gái của cô Vương, chị ấy trông trẻ hơn trong ảnh. Tối, chị Nhất Tuyết đưa chúng tôi đi ăn một quán đồ ăn Trung Quốc rất ngon."
+        }
+      ]
+    }
+  ]
+}

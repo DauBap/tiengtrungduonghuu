@@ -1,0 +1,146 @@
+{
+  "lesson": 2,
+  "title": "你们想吃什么就点什么",
+  "title_pinyin": "Nǐmen xiǎng chī shénme jiù diǎn shénme",
+  "title_vi": "Các bạn muốn ăn gì thì gọi món đó",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "家月、李文, 你们看看菜单, 想吃点儿什么?",
+          "pinyin": "Jiāyuè, Lǐ Wén, nǐmen kànkan càidān, xiǎng chī diǎnr shénme?",
+          "vi": "Gia Nguyệt, Lý Văn, các em xem thực đơn, muốn ăn gì nào?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "谢谢一雪姐, 我都可以, 你们点吧。",
+          "pinyin": "Xièxie Yīxuě jiě, wǒ dōu kěyǐ, nǐmen diǎn ba.",
+          "vi": "Cảm ơn chị Nhất Tuyết, em ăn gì cũng được, mọi người gọi đi ạ."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "飞了这么远, 现在还真是又饿又渴。",
+          "pinyin": "Fēile zhème yuǎn, xiànzài hái zhēn shì yòu è yòu kě.",
+          "vi": "Bay xa như vậy, bây giờ đúng là vừa đói vừa khát."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "那多点儿, 别客气。你们喝什么饮料?",
+          "pinyin": "Nà duō diǎnr, bié kèqi. Nǐmen hē shénme yǐnliào?",
+          "vi": "Vậy gọi nhiều một chút, đừng khách sáo. Các em uống gì?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好久没喝中国茶, 也好久没吃饺子了。我想喝绿茶、吃饺子, 可以吗?",
+          "pinyin": "Hǎo jiǔ méi hē Zhōngguó chá, yě hǎo jiǔ méi chī jiǎozi le. Wǒ xiǎng hē lǜchá, chī jiǎozi, kěyǐ ma?",
+          "vi": "Lâu rồi không uống trà Trung Quốc, cũng lâu rồi không ăn sủi cảo. Em muốn uống trà xanh, ăn sủi cảo, được không ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "没问题。你们看看还想吃什么。",
+          "pinyin": "Méi wèntí. Nǐmen kànkan hái xiǎng chī shénme.",
+          "vi": "Không vấn đề. Các em xem còn muốn ăn gì nữa không."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "服务员, 再给我们拿一双筷子、一个勺子和一个碗。",
+          "pinyin": "Fúwùyuán, zài gěi wǒmen ná yī shuāng kuàizi, yī gè sháozi hé yī gè wǎn.",
+          "vi": "Nhân viên phục vụ, lấy cho chúng tôi thêm một đôi đũa, một cái thìa và một cái bát."
+        },
+        {
+          "speaker": "服务员",
+          "zh": "好的, 请等一下, 我马上去拿。",
+          "pinyin": "Hǎo de, qǐng děng yíxià, wǒ mǎshàng qù ná.",
+          "vi": "Vâng ạ, xin đợi một chút, tôi đi lấy ngay."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "这家饭馆的服务很热情, 菜也都做得很好吃。你们尝尝, 看喜不喜欢这些菜。",
+          "pinyin": "Zhè jiā fànguǎn de fúwù hěn rèqíng, cài yě dōu zuò de hěn hǎochī. Nǐmen chángchang, kàn xǐ bù xǐhuan zhèxiē cài.",
+          "vi": "Quán ăn này phục vụ rất nhiệt tình, các món ăn cũng làm rất ngon. Các em nếm thử xem, xem có thích những món này không."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "哪个菜都好吃。您点的这些菜真不错。",
+          "pinyin": "Nǎge cài dōu hǎochī. Nín diǎn de zhèxiē cài zhēn búcuò.",
+          "vi": "Món nào cũng ngon. Những món chị gọi thật không tệ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "这里的饭菜又便宜又好吃, 我们经常来, 服务员都记住我们爱吃的菜了。",
+          "pinyin": "Zhèlǐ de fàncài yòu piányi yòu hǎochī, wǒmen jīngcháng lái, fúwùyuán dōu jìzhù wǒmen ài chī de cài le.",
+          "vi": "Đồ ăn ở đây vừa rẻ vừa ngon, chúng tôi thường đến, nhân viên phục vụ đều nhớ món chúng tôi thích rồi."
+        },
+        {
+          "speaker": "服务员",
+          "zh": "王姐, 您经常来吃饭, 今天送您一些水果, 请慢用。",
+          "pinyin": "Wáng jiě, nín jīngcháng lái chīfàn, jīntiān sòng nín yīxiē shuǐguǒ, qǐng màn yòng.",
+          "vi": "Chị Vương, chị thường đến ăn cơm, hôm nay tặng chị ít hoa quả, mời dùng chậm rãi."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "这个鸡肉饭太好吃了, 我要再来吃一次。",
+          "pinyin": "Zhège jīròu fàn tài hǎochī le, wǒ yào zài lái chī yī cì.",
+          "vi": "Cơm gà này ngon quá, tôi muốn đến ăn thêm một lần nữa."
+        },
+        {
+          "speaker": "李文",
+          "zh": "你可以拿走这张菜单, 看看下次还吃点儿什么。",
+          "pinyin": "Nǐ kěyǐ ná zǒu zhè zhāng càidān, kànkan xià cì hái chī diǎnr shénme.",
+          "vi": "Cậu có thể cầm tờ thực đơn này về, xem lần sau còn ăn gì."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "不用拿菜单, 在手机上就能看到, 也可以选好了让他们给你送。",
+          "pinyin": "Bú yòng ná càidān, zài shǒujī shàng jiù néng kàndào, yě kěyǐ xuǎn hǎo le ràng tāmen gěi nǐ sòng.",
+          "vi": "Không cần cầm thực đơn, trên điện thoại là có thể xem được, cũng có thể chọn xong để họ giao cho."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "他们家还能送外卖?",
+          "pinyin": "Tāmen jiā hái néng sòng wàimài?",
+          "vi": "Nhà họ còn có thể giao đồ ăn tận nơi à?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "对, 现在很多饭馆都能送外卖, 想吃什么就点什么。",
+          "pinyin": "Duì, xiànzài hěnduō fànguǎn dōu néng sòng wàimài, xiǎng chī shénme jiù diǎn shénme.",
+          "vi": "Đúng vậy, bây giờ nhiều quán ăn đều có thể giao đồ ăn, muốn ăn gì thì gọi món đó."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "那真是太方便了!",
+          "pinyin": "Nà zhēn shì tài fāngbiàn le!",
+          "vi": "Vậy thì thật tiện lợi quá!"
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "这些年在国外, 我很少自己做饭。早饭我吃一个面包, 有时候吃一块蛋糕, 再喝一杯咖啡。午饭和晚饭也都在外面吃。快要考试的时候又忙又累, 没时间出去吃饭, 家里又什么吃的都没有, 我可能好几天只吃方便面。现在回到中国了, 每天能吃到妈妈做的饭, 我真是太高兴了! 有时候妈妈只做几个简单的菜, 我也非常爱吃, 因为什么都没有妈妈做的饭好吃。",
+          "pinyin": "Zhèxiē nián zài guówài, wǒ hěn shǎo zìjǐ zuòfàn. Zǎofàn wǒ chī yī gè miànbāo, yǒu shíhou chī yī kuài dàngāo, zài hē yī bēi kāfēi. Wǔfàn hé wǎnfàn yě dōu zài wàimian chī. Kuài yào kǎoshì de shíhou yòu máng yòu lèi, méi shíjiān chūqù chīfàn, jiā lǐ yòu shénme chī de dōu méiyǒu, wǒ kěnéng hǎo jǐ tiān zhǐ chī fāngbiànmiàn. Xiànzài huí dào Zhōngguó le, měitiān néng chī dào māma zuò de fàn, wǒ zhēn shì tài gāoxìng le! Yǒu shíhou māma zhǐ zuò jǐ gè jiǎndān de cài, wǒ yě fēicháng ài chī, yīnwèi shénme dōu méiyǒu māma zuò de fàn hǎochī.",
+          "vi": "Những năm này ở nước ngoài, tôi rất ít khi tự nấu ăn. Bữa sáng tôi ăn một cái bánh mì, có khi ăn một miếng bánh ga-tô, rồi uống một cốc cà phê. Bữa trưa và bữa tối cũng ăn ngoài. Lúc sắp thi thì vừa bận vừa mệt, không có thời gian ra ngoài ăn, trong nhà lại chẳng có gì để ăn, tôi có thể mấy ngày chỉ ăn mì gói. Bây giờ về Trung Quốc rồi, ngày nào cũng được ăn cơm mẹ nấu, tôi vui quá! Có khi mẹ chỉ làm mấy món đơn giản, tôi cũng rất thích ăn, vì không gì ngon bằng cơm mẹ nấu."
+        }
+      ]
+    }
+  ]
+}

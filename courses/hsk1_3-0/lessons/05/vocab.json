@@ -1,0 +1,164 @@
+{
+	"course_id": "hsk1_3-0",
+	"course_name": "HSK 1 (3.0)",
+	"id": 5,
+	"label": "Bài 5",
+	"title": "今天我休息",
+	"short_vi": "Hỏi đáp về ngày tháng, thứ, khả năng làm việc gì",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "今天",
+			"pinyin": "jīntiān",
+			"adj": 2,
+			"vi": "hôm nay"
+		},
+		{
+			"pos": 2,
+			"hanzi": "号",
+			"pinyin": "hào",
+			"adj": 2,
+			"vi": "ngày"
+		},
+		{
+			"pos": 3,
+			"hanzi": "月",
+			"pinyin": "yuè",
+			"adj": 2,
+			"vi": "tháng"
+		},
+		{
+			"pos": 4,
+			"hanzi": "日",
+			"pinyin": "rì",
+			"adj": 2,
+			"vi": "ngày"
+		},
+		{
+			"pos": 5,
+			"hanzi": "星期",
+			"pinyin": "xīngqī",
+			"adj": 2,
+			"vi": "tuần"
+		},
+		{
+			"pos": 6,
+			"hanzi": "星期日",
+			"pinyin": "Xīngqīrì",
+			"adj": 2,
+			"vi": "chủ nhật"
+		},
+		{
+			"pos": 7,
+			"hanzi": "星期天",
+			"pinyin": "Xīngqītiān",
+			"adj": 2,
+			"vi": "chủ nhật"
+		},
+		{
+			"pos": 8,
+			"hanzi": "休息",
+			"pinyin": "xiūxi",
+			"adj": 4,
+			"vi": "nghỉ ngơi"
+		},
+		{
+			"pos": 9,
+			"hanzi": "会",
+			"pinyin": "huì",
+			"adj": 4,
+			"vi": "biết, có thể, có khả năng"
+		},
+		{
+			"pos": 10,
+			"hanzi": "做饭",
+			"pinyin": "zuò fàn",
+			"adj": [],
+			"vi": "nấu cơm"
+		},
+		{
+			"pos": 11,
+			"hanzi": "做",
+			"pinyin": "zuò",
+			"adj": 4,
+			"vi": "làm"
+		},
+		{
+			"pos": 12,
+			"hanzi": "面条儿",
+			"pinyin": "miàntiáo",
+			"adj": 2,
+			"vi": "mì sợi"
+		},
+		{
+			"pos": 13,
+			"hanzi": "饺子",
+			"pinyin": "jiǎozi",
+			"adj": 2,
+			"vi": "há cảo"
+		},
+		{
+			"pos": 14,
+			"hanzi": "一些",
+			"pinyin": "yīxiē",
+			"adj": 8,
+			"vi": "một chút"
+		},
+		{
+			"pos": 15,
+			"hanzi": "菜",
+			"pinyin": "cài",
+			"adj": 2,
+			"vi": "món ăn"
+		},
+		{
+			"pos": 16,
+			"hanzi": "下班",
+			"pinyin": "xiàbān",
+			"adj": 4,
+			"vi": "tan ca, tan làm"
+		},
+		{
+			"pos": 17,
+			"hanzi": "新",
+			"pinyin": "xīn",
+			"adj": 6,
+			"vi": "mới"
+		},
+		{
+			"pos": 18,
+			"hanzi": "电脑",
+			"pinyin": "diànnǎo",
+			"adj": 2,
+			"vi": "máy tính"
+		},
+		{
+			"pos": 19,
+			"hanzi": "真",
+			"pinyin": "zhēn",
+			"adj": 6,
+			"vi": "thật, sự thật"
+		},
+		{
+			"pos": 20,
+			"hanzi": "好看",
+			"pinyin": "hǎokàn",
+			"adj": 6,
+			"vi": "đẹp, nhìn đẹp mắt"
+		},
+		{
+			"pos": 21,
+			"hanzi": "喜欢",
+			"pinyin": "xǐhuan",
+			"adj": 4,
+			"vi": "like"
+		},
+		{
+			"pos": 22,
+			"hanzi": "它",
+			"pinyin": "tā",
+			"adj": 1,
+			"vi": "nó (chỉ vật)"
+		}
+	]
+}

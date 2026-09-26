@@ -1,0 +1,426 @@
+{
+	"title": "HSK3 - Sách bài tập",
+	"lesson": 12,
+	"lesson_title": "这个季节天气变化很快",
+	"grading_pending": true,
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听对话，选择最匹配的图片。每题听两次。\nCâu 1–3: Nghe và chọn hình phù hợp. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 1,
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择正确答案。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 4,
+							"options": [
+								{
+									"label": "A",
+									"text": "她想休息"
+								},
+								{
+									"label": "B",
+									"text": "她想工作日去"
+								},
+								{
+									"label": "C",
+									"text": "今天天气不好"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"options": [
+								{
+									"label": "A",
+									"text": "四季都不一样"
+								},
+								{
+									"label": "B",
+									"text": "每天都是夏天"
+								},
+								{
+									"label": "C",
+									"text": "一年有两个季节"
+								}
+							]
+						},
+						{
+							"number": 6,
+							"options": [
+								{
+									"label": "A",
+									"text": "给她一把雨伞"
+								},
+								{
+									"label": "B",
+									"text": "让她早点儿回家"
+								},
+								{
+									"label": "C",
+									"text": "告诉她已经下雨了"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听一段话，选择正确答案。每题听两次。\nCâu 7–10: Nghe đoạn thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 7,
+							"options": [
+								{
+									"label": "A",
+									"text": "天气热"
+								},
+								{
+									"label": "B",
+									"text": "太阳很早下山"
+								},
+								{
+									"label": "C",
+									"text": "很多人出去吃饭"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"options": [
+								{
+									"label": "A",
+									"text": "下大雨"
+								},
+								{
+									"label": "B",
+									"text": "刮大风"
+								},
+								{
+									"label": "C",
+									"text": "一直阴天"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"options": [
+								{
+									"label": "A",
+									"text": "常常刮风"
+								},
+								{
+									"label": "B",
+									"text": "不冷也不热"
+								},
+								{
+									"label": "C",
+									"text": "每天都很冷"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"options": [
+								{
+									"label": "A",
+									"text": "一年都很冷"
+								},
+								{
+									"label": "B",
+									"text": "每天都很热"
+								},
+								{
+									"label": "C",
+									"text": "王老师还不习惯"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—15题：匹配句子。\nCâu 11–15: Nối câu.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "是啊，每天都热得不想出门，还是房间里凉快。"
+						},
+						{
+							"label": "B",
+							"text": "李老师把雨伞借给我了，咱们一起走吧。"
+						},
+						{
+							"label": "C",
+							"text": "希望越来越多的人关注这个问题。"
+						},
+						{
+							"label": "D",
+							"text": "不一定，去年一次也没下。"
+						},
+						{
+							"label": "E",
+							"text": "当然。我们先坐公交车，然后换地铁。"
+						},
+						{
+							"label": "F",
+							"text": "医生也这么说，但是我已经习惯了。"
+						}
+					],
+					"questions": [
+						{
+							"number": 11,
+							"answer": "D",
+							"question": "这里冬天常下雪吗？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 12,
+							"answer": "B",
+							"question": "雨越下越大，一会儿怎么回家？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 13,
+							"answer": "A",
+							"question": "最近天气太热，空调都快要卖完了。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 14,
+							"answer": "C",
+							"question": "环境越来越差，我们得想想办法。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 15,
+							"answer": "F",
+							"question": "虽然夏天运动完很热，但是你也不应该马上喝很多冰水。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第16—20题：选词填空。\nCâu 16–20: Chọn từ điền vào chỗ trống.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "变成"
+						},
+						{
+							"label": "B",
+							"text": "刚才"
+						},
+						{
+							"label": "C",
+							"text": "常常"
+						},
+						{
+							"label": "D",
+							"text": "关注"
+						},
+						{
+							"label": "E",
+							"text": "鞋"
+						},
+						{
+							"label": "F",
+							"text": "地方"
+						}
+					],
+					"questions": [
+						{
+							"number": 16,
+							"answer": "C",
+							"sentence": "这个花园很安静，我吃完早饭（ ）一个人来这里走走。"
+						},
+						{
+							"number": 17,
+							"answer": "B",
+							"sentence": "（ ）还晴天呢，怎么突然就下起雨来了？"
+						},
+						{
+							"number": 18,
+							"answer": "D",
+							"sentence": "他每天早上都看新闻，非常（ ）天气的变化。"
+						},
+						{
+							"number": 19,
+							"answer": "A",
+							"sentence": "A：你在这儿住了好几年了，早就习惯了吧？\nB：是的。这里已经（ ）我的第二个家了，我会一直住下去。"
+						},
+						{
+							"number": 20,
+							"answer": "F",
+							"sentence": "A：咱们找个（ ）休息一会儿吧，雨可能要下起来了。\nB：好。前面有一家咖啡店，马上就到了。"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第21—24题：选择正确答案。\nCâu 21–24: Đọc và chọn đáp án đúng.",
+					"embedded_example_image": true,
+					"shared_passage": "23–24\n\n这张照片很有意思，是我跟同学们爬山的时候照的。那天我们爬完山就住在山上了。虽然是夏天，但太阳下山以后天气特别冷，风也很大。别的同学或者带了长裤，或者带了大衣，我只穿了一条短裤和一件衬衫。因为太冷了，同学们把雨衣都借给我了。你看，照片上就我一个人穿着好几件雨衣。",
+					"shared_passage_start": 23,
+					"questions": [
+						{
+							"number": 21,
+							"answer": "C",
+							"sentence": "今天早上一出门，我就发现比昨天冷得多。走了一会儿天突然黑了，我马上决定回家去拿雨伞了。",
+							"question": "今天早上的天气怎么样？",
+							"options": [
+								{
+									"label": "A",
+									"text": "下雨了"
+								},
+								{
+									"label": "B",
+									"text": "一直阴天"
+								},
+								{
+									"label": "C",
+									"text": "比昨天冷多了"
+								}
+							]
+						},
+						{
+							"number": 22,
+							"answer": "A",
+							"sentence": "下了好几天的雨，今天下午终于出太阳了，天气很舒服。我和朋友一起去公园走了走，公园里的花都开了，来看花的人挺多的。",
+							"question": "他为什么和朋友一起去公园？",
+							"options": [
+								{
+									"label": "A",
+									"text": "天气很舒服"
+								},
+								{
+									"label": "B",
+									"text": "公园里人不多"
+								},
+								{
+									"label": "C",
+									"text": "想找凉快的地方"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "C",
+							"question": "那天山上的天气怎么样？",
+							"options": [
+								{
+									"label": "A",
+									"text": "很热"
+								},
+								{
+									"label": "B",
+									"text": "下雨了"
+								},
+								{
+									"label": "C",
+									"text": "太阳下山后很冷"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "B",
+							"question": "同学们为什么把雨衣借给他？",
+							"options": [
+								{
+									"label": "A",
+									"text": "因为拍照有意思"
+								},
+								{
+									"label": "B",
+									"text": "因为他没带大衣"
+								},
+								{
+									"label": "C",
+									"text": "因为他雨衣丢了"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据拼音写汉字。\nCâu 25–27: Viết chữ Hán theo pinyin.",
+					"embedded_example_image": true,
+					"questions": [
+						{
+							"number": 25,
+							"type": "writing_input",
+							"sentence": "今天（ ）刮得很大，我们别去坐船了。",
+							"prompt_pinyin": "fēng"
+						},
+						{
+							"number": 26,
+							"type": "writing_input",
+							"sentence": "这几年住下来，我最喜欢的（ ）节还是秋天。",
+							"prompt_pinyin": "jì"
+						},
+						{
+							"number": 27,
+							"type": "writing_input",
+							"sentence": "秋天来了，天气变（ ）快了。",
+							"prompt_pinyin": "liáng"
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：看图，用词造句。\nCâu 28–30: Nhìn hình và dùng từ gợi ý đặt câu.",
+					"questions": [
+						{
+							"number": 28,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 刚才"
+						},
+						{
+							"number": 29,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 常常"
+						},
+						{
+							"number": 30,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 关注"
+						}
+					]
+				}
+			]
+		}
+	]
+}

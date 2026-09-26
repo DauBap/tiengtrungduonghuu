@@ -1,0 +1,101 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 4,
+  "label": "Bài 4",
+  "title": " 这个工作是他帮我介绍的 ",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "生日",
+      "pinyin": "shēngrì",
+      "adj": 2,
+      "vi": "sinh nhật"
+    },
+    {
+      "pos": 2,
+      "hanzi": "快乐",
+      "pinyin": "kuàilè",
+      "adj": 6,
+      "vi": "vui vẻ"
+    },
+    {
+      "pos": 3,
+      "hanzi": "给",
+      "pinyin": "gěi",
+      "adj": 13,
+      "vi": "(được dùng sau động từ) cho"
+    },
+    {
+      "pos": 4,
+      "hanzi": "接",
+      "pinyin": "jiē",
+      "adj": 4,
+      "vi": "nhận, nghe/trả lời (điện thoại)"
+    },
+    {
+      "pos": 5,
+      "hanzi": "晚上",
+      "pinyin": "wǎnshang",
+      "adj": 2,
+      "vi": "buổi tối"
+    },
+    {
+      "pos": 6,
+      "hanzi": "问",
+      "pinyin": "wèn",
+      "adj": 4,
+      "vi": "hỏi"
+    },
+    {
+      "pos": 7,
+      "hanzi": "非常",
+      "pinyin": "fēicháng",
+      "adj": 7,
+      "vi": "rất, vô cùng"
+    },
+    {
+      "pos": 8,
+      "hanzi": "开始",
+      "pinyin": "kāishǐ",
+      "adj": 4,
+      "vi": "bắt đầu"
+    },
+    {
+      "pos": 9,
+      "hanzi": "已经",
+      "pinyin": "yǐjīng",
+      "adj": 7,
+      "vi": "đã"
+    },
+    {
+      "pos": 10,
+      "hanzi": "长",
+      "pinyin": "cháng",
+      "adj": 6,
+      "vi": "dài, lâu"
+    },
+    {
+      "pos": 11,
+      "hanzi": "两",
+      "pinyin": "liǎng",
+      "adj": 21,
+      "vi": "hai"
+    },
+    {
+      "pos": 12,
+      "hanzi": "帮",
+      "pinyin": "bāng",
+      "adj": 4,
+      "vi": "giúp, giúp đỡ"
+    },
+    {
+      "pos": 13,
+      "hanzi": "介绍",
+      "pinyin": "jièshào",
+      "adj": 4,
+      "vi": "giới thiệu"
+    }
+  ]
+}

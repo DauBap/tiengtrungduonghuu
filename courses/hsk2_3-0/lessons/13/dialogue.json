@@ -1,0 +1,164 @@
+{
+  "lesson": 13,
+  "title": "我们爱上中文课",
+  "title_pinyin": "Wǒmen ài shàng Zhōngwén kè",
+  "title_vi": "Chúng tôi thích học tiếng Trung",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "时间过得真快啊！新年就要到了。",
+          "pinyin": "Shíjiān guò de zhēn kuài a! Xīnnián jiù yào dào le.",
+          "vi": "Thời gian trôi thật nhanh! Năm mới sắp đến rồi."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "这一年王老师教我们中文，每天工作都很累。",
+          "pinyin": "Zhè yī nián Wáng lǎoshī jiāo wǒmen Zhōngwén, měitiān gōngzuò dōu hěn lèi.",
+          "vi": "Năm nay cô Vương dạy chúng ta tiếng Trung, ngày nào làm việc cũng rất mệt."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "是啊，她教得很好。因为她，我们都非常爱上中文课。",
+          "pinyin": "Shì a, tā jiāo de hěn hǎo. Yīnwèi tā, wǒmen dōu fēicháng ài shàng Zhōngwén kè.",
+          "vi": "Đúng vậy, cô ấy dạy rất giỏi. Vì cô ấy, chúng tôi ai cũng rất thích học tiếng Trung."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我们给她准备个新年礼物吧。你觉得送给她什么好呢？",
+          "pinyin": "Wǒmen gěi tā zhǔnbèi ge xīnnián lǐwù ba. Nǐ juéde sòng gěi tā shénme hǎo ne?",
+          "vi": "Chúng ta chuẩn bị một món quà năm mới cho cô ấy đi. Cậu thấy tặng gì cho cô ấy thì tốt nhỉ?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "王老师喜欢花，就送给她花吧。",
+          "pinyin": "Wáng lǎoshī xǐhuan huā, jiù sòng gěi tā huā ba.",
+          "vi": "Cô Vương thích hoa, thì tặng hoa cho cô ấy đi."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "那我们去花店看看，现在买花的人多，希望花店还有漂亮的花。",
+          "pinyin": "Nà wǒmen qù huādiàn kànkan, xiànzài mǎi huā de rén duō, xīwàng huādiàn hái yǒu piàoliang de huā.",
+          "vi": "Vậy chúng ta đến cửa hàng hoa xem thử, bây giờ người mua hoa đông, hy vọng cửa hàng hoa vẫn còn hoa đẹp."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "王老师，今天的词比昨天多了十个。",
+          "pinyin": "Wáng lǎoshī, jīntiān de cí bǐ zuótiān duōle shí gè.",
+          "vi": "Cô Vương, hôm nay từ nhiều hơn hôm qua mười từ ạ."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "是啊！你们都学会了吗？",
+          "pinyin": "Shì a! Nǐmen dōu xuéhuì le ma?",
+          "vi": "Đúng vậy! Các em đều đã học thuộc chưa?"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "学会了，没有问题。",
+          "pinyin": "Xuéhuì le, méiyǒu wèntí.",
+          "vi": "Học thuộc rồi ạ, không vấn đề gì."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "好。现在我来说，你们在本子上面写。",
+          "pinyin": "Hǎo. Xiànzài wǒ lái shuō, nǐmen zài běnzi shàngmian xiě.",
+          "vi": "Tốt. Bây giờ cô đọc, các em viết lên vở."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "同学们，\"洗手间\"的\"间\"字写错了，它的里面是\"日\"，不是\"口\"。",
+          "pinyin": "Tóngxuémen, \"xǐshǒujiān\" de \"jiān\" zì xiě cuò le, tā de lǐmian shì \"rì\", bú shì \"kǒu\".",
+          "vi": "Các em, chữ \"间\" trong từ \"洗手间\" viết sai rồi, bên trong nó là \"日\", không phải \"口\"."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "\"日\"比\"口\"多一笔，写\"口\"就是\"问题\"的\"问\"了。",
+          "pinyin": "\"Rì\" bǐ \"kǒu\" duō yī bǐ, xiě \"kǒu\" jiù shì \"wèntí\" de \"wèn\" le.",
+          "vi": "\"日\" nhiều hơn \"口\" một nét, viết \"口\" thì thành \"问\" của từ \"问题\" rồi ạ."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "没错，你说得很对。",
+          "pinyin": "Méi cuò, nǐ shuō de hěn duì.",
+          "vi": "Đúng rồi, em nói rất đúng."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "安妮",
+          "zh": "家月，你觉得这个本子怎么样？",
+          "pinyin": "Jiāyuè, nǐ juéde zhège běnzi zěnmeyàng?",
+          "vi": "Gia Nguyệt, cậu thấy quyển vở này thế nào?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "很漂亮，多少钱一个？",
+          "pinyin": "Hěn piàoliang, duōshao qián yí gè?",
+          "vi": "Rất đẹp, bao nhiêu tiền một quyển?"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "比我们一起买的那个本子贵一点儿。",
+          "pinyin": "Bǐ wǒmen yīqǐ mǎi de nàge běnzi guì yìdiǎnr.",
+          "vi": "Đắt hơn một chút so với quyển vở chúng ta cùng mua."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "这么漂亮的本子，不可能贵一点儿吧？",
+          "pinyin": "Zhème piàoliang de běnzi, bù kěnéng guì yìdiǎnr ba?",
+          "vi": "Vở đẹp thế này, không thể chỉ đắt một chút được đúng không?"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "我是上网买的，真没那么贵。我买了两个，送你一个。",
+          "pinyin": "Wǒ shì shàng wǎng mǎi de, zhēn méi nàme guì. Wǒ mǎile liǎng gè, sòng nǐ yí gè.",
+          "vi": "Mình mua trên mạng đấy, thực sự không đắt như vậy. Mình mua hai quyển, tặng cậu một quyển."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "谢谢！那我送给你什么呢？",
+          "pinyin": "Xièxie! Nà wǒ sòng gěi nǐ shénme ne?",
+          "vi": "Cảm ơn! Vậy mình tặng lại cậu gì đây?"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "咖啡杯吧，我最喜欢喝咖啡了。",
+          "pinyin": "Kāfēi bēi ba, wǒ zuì xǐhuan hē kāfēi le.",
+          "vi": "Cốc cà phê đi, mình thích uống cà phê nhất."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好，那样我们就都有新年礼物了！",
+          "pinyin": "Hǎo, nàyàng wǒmen jiù dōu yǒu xīnnián lǐwù le!",
+          "vi": "Được, vậy là chúng ta đều có quà năm mới rồi!"
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "新年就要到了，安妮送给我一个新本子。她告诉我是在网上买的，比我的本子贵一点儿。我们班同学也送了王老师漂亮的花，希望她高高兴兴地过个新年。",
+          "pinyin": "Xīnnián jiù yào dào le, Ānnī sòng gěi wǒ yī ge xīn běnzi. Tā gàosu wǒ shì zài wǎngshàng mǎi de, bǐ wǒ de běnzi guì yìdiǎnr. Wǒmen bān tóngxué yě sòngle Wáng lǎoshī piàoliang de huā, xīwàng tā gāogāoxìngxìng de guò ge xīnnián.",
+          "vi": "Năm mới sắp đến rồi, Annie đã tặng tôi một quyển vở mới. Cậu ấy nói với tôi là mua trên mạng, đắt hơn vở của tôi một chút. Các bạn cùng lớp chúng tôi cũng tặng cô Vương những bông hoa đẹp, mong cô ấy vui vẻ đón năm mới."
+        }
+      ]
+    }
+  ]
+}

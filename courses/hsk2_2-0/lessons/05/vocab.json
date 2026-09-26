@@ -1,0 +1,108 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 5,
+  "label": "Bài 5",
+  "title": " 就买这件吧",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "外面",
+      "pinyin": "wàimiàn",
+      "adj": 2,
+      "vi": "bên ngoài"
+    },
+    {
+      "pos": 2,
+      "hanzi": "准备",
+      "pinyin": "zhǔnbèi",
+      "adj": 4,
+      "vi": "định, dự định"
+    },
+    {
+      "pos": 3,
+      "hanzi": "就",
+      "pinyin": "jiù",
+      "adj": 7,
+      "vi": "được dùng để chỉ một kết luận hay sự kiên quyết"
+    },
+    {
+      "pos": 4,
+      "hanzi": "鱼",
+      "pinyin": "yú",
+      "adj": 2,
+      "vi": "cá, món cá"
+    },
+    {
+      "pos": 5,
+      "hanzi": "吧",
+      "pinyin": "ba",
+      "adj": 11,
+      "vi": "được dùng ở cuối câu để chỉ sự thương lượng, lời đề nghị, thỉnh cầu hay mệnh lệnh"
+    },
+    {
+      "pos": 6,
+      "hanzi": "件",
+      "pinyin": "jiàn",
+      "adj": 8,
+      "vi": "(được dùng cho áo) cái, chiếc"
+    },
+    {
+      "pos": 7,
+      "hanzi": "还",
+      "pinyin": "hái",
+      "adj": 7,
+      "vi": "cũng, khá"
+    },
+    {
+      "pos": 8,
+      "hanzi": "可以",
+      "pinyin": "kěyǐ",
+      "adj": 6,
+      "vi": "không tệ, tạm được"
+    },
+    {
+      "pos": 9,
+      "hanzi": "不错",
+      "pinyin": "búcuò",
+      "adj": 6,
+      "vi": "tuyệt, khá tốt"
+    },
+    {
+      "pos": 10,
+      "hanzi": "考试",
+      "pinyin": "kǎoshì",
+      "adj": 2,
+      "vi": "cuộc thi, bài kiểm tra"
+    },
+    {
+      "pos": 11,
+      "hanzi": "意思",
+      "pinyin": "yìsi",
+      "adj": 2,
+      "vi": "nghĩa, ý nghĩa"
+    },
+    {
+      "pos": 12,
+      "hanzi": "咖啡",
+      "pinyin": "kāfēi",
+      "adj": 2,
+      "vi": "cà phê"
+    },
+    {
+      "pos": 13,
+      "hanzi": "对",
+      "pinyin": "duì",
+      "adj": 13,
+      "vi": "(được dùng trước danh từ hay đại từ) đối với, cho"
+    },
+    {
+      "pos": 14,
+      "hanzi": "以后",
+      "pinyin": "yǐhòu",
+      "adj": 2,
+      "vi": "sau này"
+    }
+  ]
+}

@@ -1,0 +1,308 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 16,
+  "label": "Bài 16",
+  "title": "体重与节食",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "节食",
+      "pinyin": "jiéshí",
+      "adj": 4,
+      "vi": "ăn kiêng"
+    },
+    {
+      "pos": 2,
+      "hanzi": "报道",
+      "pinyin": "bàodào",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "bài báo; đưa tin"
+    },
+    {
+      "pos": 3,
+      "hanzi": "营养",
+      "pinyin": "yíngyǎng",
+      "adj": 2,
+      "vi": "chất dinh dưỡng"
+    },
+    {
+      "pos": 4,
+      "hanzi": "摄入",
+      "pinyin": "shèrù",
+      "adj": 4,
+      "vi": "hấp thu"
+    },
+    {
+      "pos": 5,
+      "hanzi": "模式",
+      "pinyin": "móshì",
+      "adj": 2,
+      "vi": "kiểu, mô hình"
+    },
+    {
+      "pos": 6,
+      "hanzi": "波动",
+      "pinyin": "bōdòng",
+      "adj": 4,
+      "vi": "dao động, nhấp nhô"
+    },
+    {
+      "pos": 7,
+      "hanzi": "总共",
+      "pinyin": "zǒnggòng",
+      "adj": 7,
+      "vi": "có tất cả, tất cả"
+    },
+    {
+      "pos": 8,
+      "hanzi": "参与",
+      "pinyin": "cānyù",
+      "adj": 4,
+      "vi": "tham dự, tham gia"
+    },
+    {
+      "pos": 9,
+      "hanzi": "人员",
+      "pinyin": "rényuán",
+      "adj": 2,
+      "vi": "nhân viên"
+    },
+    {
+      "pos": 10,
+      "hanzi": "相对",
+      "pinyin": "xiāngduì",
+      "adj": 6,
+      "vi": "tương đối"
+    },
+    {
+      "pos": 11,
+      "hanzi": "类型",
+      "pinyin": "lèixíng",
+      "adj": 2,
+      "vi": "loại"
+    },
+    {
+      "pos": 12,
+      "hanzi": "称",
+      "pinyin": "chèng",
+      "adj": 4,
+      "vi": "cân"
+    },
+    {
+      "pos": 13,
+      "hanzi": "可靠",
+      "pinyin": "kěkào",
+      "adj": 6,
+      "vi": "đáng tin cậy"
+    },
+    {
+      "pos": 14,
+      "hanzi": "纳入",
+      "pinyin": "nàrù",
+      "adj": 4,
+      "vi": "đưa vào"
+    },
+    {
+      "pos": 15,
+      "hanzi": "分析",
+      "pinyin": "fēnxī",
+      "adj": 4,
+      "vi": "phân tích"
+    },
+    {
+      "pos": 16,
+      "hanzi": "志愿者",
+      "pinyin": "zhìyuànzhě",
+      "adj": 2,
+      "vi": "người tình nguyện"
+    },
+    {
+      "pos": 17,
+      "hanzi": "跟踪",
+      "pinyin": "gēnzōng",
+      "adj": 4,
+      "vi": "theo dõi, theo sát"
+    },
+    {
+      "pos": 18,
+      "hanzi": "成果",
+      "pinyin": "chéngguǒ",
+      "adj": 2,
+      "vi": "thành quả, kết quả"
+    },
+    {
+      "pos": 19,
+      "hanzi": "清晰",
+      "pinyin": "qīngxī",
+      "adj": 6,
+      "vi": "rõ ràng, rõ rệt"
+    },
+    {
+      "pos": 20,
+      "hanzi": "即",
+      "pinyin": "jí",
+      "adj": [
+        4,
+        7
+      ],
+      "vi": "nghĩa là; ngay"
+    },
+    {
+      "pos": 21,
+      "hanzi": "升",
+      "pinyin": "shēng",
+      "adj": 4,
+      "vi": "lên cao"
+    },
+    {
+      "pos": 22,
+      "hanzi": "达到",
+      "pinyin": "dá dào",
+      "adj": 4,
+      "vi": "đạt đến"
+    },
+    {
+      "pos": 23,
+      "hanzi": "意外",
+      "pinyin": "yìwài",
+      "adj": [
+        2,
+        6
+      ],
+      "vi": "bất ngờ; điều bất trắc"
+    },
+    {
+      "pos": 24,
+      "hanzi": "存在",
+      "pinyin": "cúnzài",
+      "adj": 4,
+      "vi": "tồn tại"
+    },
+    {
+      "pos": 25,
+      "hanzi": "明显",
+      "pinyin": "míngxiǎn",
+      "adj": 6,
+      "vi": "rõ ràng, nổi bật"
+    },
+    {
+      "pos": 26,
+      "hanzi": "补偿",
+      "pinyin": "bǔcháng",
+      "adj": 4,
+      "vi": "đền bù, bổ khuyết"
+    },
+    {
+      "pos": 27,
+      "hanzi": "立即",
+      "pinyin": "lìjí",
+      "adj": 7,
+      "vi": "lập tức, ngay"
+    },
+    {
+      "pos": 28,
+      "hanzi": "趋势",
+      "pinyin": "qūshì",
+      "adj": 2,
+      "vi": "xu hướng, chiều hướng"
+    },
+    {
+      "pos": 29,
+      "hanzi": "联合",
+      "pinyin": "liánhé",
+      "adj": [
+        4,
+        6
+      ],
+      "vi": "kết hợp, hợp nhất; chung"
+    },
+    {
+      "pos": 30,
+      "hanzi": "个别",
+      "pinyin": "gèbié",
+      "adj": 6,
+      "vi": "riêng lẻ, cá biệt"
+    },
+    {
+      "pos": 31,
+      "hanzi": "表明",
+      "pinyin": "biǎomíng",
+      "adj": 4,
+      "vi": "thể hiện, chứng tỏ"
+    },
+    {
+      "pos": 32,
+      "hanzi": "临时",
+      "pinyin": "línshí",
+      "adj": [
+        7,
+        6
+      ],
+      "vi": "đến lúc; tạm thời"
+    },
+    {
+      "pos": 33,
+      "hanzi": "现象",
+      "pinyin": "xiànxiàng",
+      "adj": 2,
+      "vi": "hiện tượng"
+    },
+    {
+      "pos": 34,
+      "hanzi": "非",
+      "pinyin": "fēi",
+      "adj": 4,
+      "vi": "không phải, không"
+    },
+    {
+      "pos": 35,
+      "hanzi": "就餐",
+      "pinyin": "jiùcān",
+      "adj": 4,
+      "vi": "đi ăn"
+    },
+    {
+      "pos": 36,
+      "hanzi": "放纵",
+      "pinyin": "fàngzòng",
+      "adj": 4,
+      "vi": "buông thả, không kiểm soát"
+    },
+    {
+      "pos": 37,
+      "hanzi": "苗条",
+      "pinyin": "miáotiao",
+      "adj": 6,
+      "vi": "thon thả, mảnh khảnh"
+    },
+    {
+      "pos": 38,
+      "hanzi": "借口",
+      "pinyin": "jièkǒu",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "cớ; lấy cớ"
+    },
+    {
+      "pos": 39,
+      "hanzi": "采取",
+      "pinyin": "cǎiqǔ",
+      "adj": 4,
+      "vi": "áp dụng, dùng"
+    },
+    {
+      "pos": 40,
+      "hanzi": "措施",
+      "pinyin": "cuòshī",
+      "adj": 2,
+      "vi": "biện pháp"
+    }
+  ]
+}

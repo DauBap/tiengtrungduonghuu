@@ -1,0 +1,329 @@
+{
+	"title": "HSK1 - Sách bài tập",
+	"lesson": 7,
+	"lesson_title": "我晚上六点半下班",
+	"lesson_pinyin": "Wǒ wǎnshang liù diǎn bàn xiàbān",
+	"lesson_meaning": "Em tan làm lúc 6 rưỡi tối",
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听短语，选择正确图片。每题听两次。\nCâu 1–3: Nghe và chọn hình ảnh phù hợp với nội dung nghe được. Mỗi câu nghe hai lần.",
+					"example": {
+						"question": "三个苹果",
+						"pinyin": "sān gè píngguǒ",
+						"meaning": "ba quả táo",
+						"correct_label": "C",
+						"options": ["A", "B", "C"]
+					},
+					"questions": [
+						{ "number": 1, "answer": "C", "options": ["A", "B", "C"] },
+						{ "number": 2, "answer": "A", "options": ["A", "B", "C"] },
+						{ "number": 3, "answer": "C", "options": ["A", "B", "C"] }
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4-5题：听问题，选择正确回答。每题听两次。\nCâu 4–5: Nghe câu hỏi, chọn câu trả lời đúng. Mỗi câu nghe hai lần.",
+					"example": {
+						"question": "今天天气怎么样？",
+						"pinyin": "Jīntiān tiānqì zěnmeyàng?",
+						"meaning": "Hôm nay thời tiết thế nào?",
+						"correct_label": "A",
+						"options": ["A", "B", "C"]
+					},
+					"questions": [
+						{
+							"number": 4,
+							"answer": "B",
+							"options": [
+								{ "label": "A", "text": "10:00" },
+								{ "label": "B", "text": "12:00" },
+								{ "label": "C", "text": "12号", "pinyin": "shí'èr hào", "meaning": "ngày 12" }
+							]
+						},
+						{
+							"number": 5,
+							"answer": "C",
+							"options": [
+								{ "label": "A", "text": "8月", "pinyin": "bā yuè", "meaning": "tháng 8" },
+								{ "label": "B", "text": "三分钟", "pinyin": "sān fēnzhōng", "meaning": "ba phút" },
+								{ "label": "C", "text": "7:10" }
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第6-8题：听对话，选择最匹配的图片。每题听两次。\nCâu 6–8: Nghe và chọn hình ảnh phù hợp nhất với hội thoại nghe được. Mỗi câu nghe hai lần.",
+					"hide_example_image": true,
+					"example": {
+						"correct_label": "A",
+						"speakers": [
+							{ "gender": "nữ", "text": "你好！", "pinyin": "Nǐ hǎo!", "meaning": "Xin chào!" },
+							{
+								"gender": "nam",
+								"text": "你好！很高兴认识你。",
+								"pinyin": "Nǐ hǎo! Hěn gāoxìng rènshi nǐ.",
+								"meaning": "Xin chào! Rất vui được gặp bạn."
+							}
+						]
+					},
+					"questions": [
+						{ "number": 6, "answer": "C", "options": ["A", "B", "C", "D"] },
+						{ "number": 7, "answer": "D", "options": ["A", "B", "C", "D"] },
+						{ "number": 8, "answer": "B", "options": ["A", "B", "C", "D"] }
+					]
+				},
+				{
+					"part": "第四部分 - Phần 4",
+					"description": "第9-10题：听句子和问题，选择正确答案。每题听两次。\nCâu 9–10: Nghe và chọn đáp án đúng. Mỗi câu nghe hai lần.",
+					"example": {
+						"sentence": "下午我去超市，我想买一些水果。",
+						"pinyin": "Xiàwǔ wǒ qù chāoshì, wǒ xiǎng mǎi yìxiē shuǐguǒ.",
+						"meaning": "Buổi chiều tôi đi siêu thị, tôi muốn mua một ít trái cây.",
+						"question": "说话人下午去哪里？",
+						"question_pinyin": "Shuōhuàrén xiàwǔ qù nǎlǐ?",
+						"question_meaning": "Buổi chiều nay người nói đi đâu?",
+						"correct_label": "A",
+						"options": ["A", "B", "C"]
+					},
+					"questions": [
+						{
+							"number": 9,
+							"answer": "A",
+							"options": [
+								{ "label": "A", "text": "上课", "pinyin": "shàngkè", "meaning": "lên lớp" },
+								{ "label": "B", "text": "上班", "pinyin": "shàngbān", "meaning": "đi làm" },
+								{ "label": "C", "text": "看电影", "pinyin": "kàn diànyǐng", "meaning": "xem phim" }
+							]
+						},
+						{
+							"number": 10,
+							"answer": "C",
+							"options": [
+								{ "label": "A", "text": "饭店", "pinyin": "fàndiàn", "meaning": "nhà hàng" },
+								{ "label": "B", "text": "菜店", "pinyin": "càidiàn", "meaning": "cửa hàng rau" },
+								{ "label": "C", "text": "超市", "pinyin": "chāoshì", "meaning": "siêu thị" }
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—13题：选择与句子最匹配的图片。\nCâu 11–13: Chọn hình ảnh phù hợp nhất với câu.",
+					"embedded_example_image": true,
+					"example": {
+						"sentence": "我很喜欢这本书。",
+						"pinyin": "Wǒ hěn xǐhuan zhè běn shū.",
+						"meaning": "Tôi rất thích cuốn sách này.",
+						"correct_label": "A",
+						"options": ["A", "B", "C", "D"]
+					},
+					"questions": [
+						{
+							"number": 11,
+							"answer": "D",
+							"sentence": "我在上课呢。",
+							"pinyin": "Wǒ zài shàngkè ne.",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 12,
+							"answer": "C",
+							"sentence": "我下午有事，晚上7:00见吧。",
+							"pinyin": "Wǒ xiàwǔ yǒu shì, wǎnshang qī diǎn jiàn ba.",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 13,
+							"answer": "B",
+							"sentence": "今天不上班，我去超市买东西。",
+							"pinyin": "Jīntiān bù shàngbān, wǒ qù chāoshì mǎi dōngxi.",
+							"options": ["A", "B", "C", "D"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第14—16题：匹配句子。\nCâu 14–16: Nối câu.",
+					"hide_images": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "早上七点半。",
+							"pinyin": "zǎoshang qī diǎn bàn."
+						},
+						{
+							"label": "B",
+							"text": "对不起，我有课。",
+							"pinyin": "duìbuqǐ, wǒ yǒu kè."
+						},
+						{
+							"label": "C",
+							"text": "电影院。",
+							"pinyin": "diànyǐngyuàn."
+						},
+						{
+							"label": "D",
+							"text": "好的，谢谢！",
+							"pinyin": "hǎo de, xièxie!"
+						}
+					],
+					"example": {
+						"question": "你喝水吗？",
+						"pinyin": "Nǐ hē shuǐ ma?",
+						"meaning": "Bạn có uống nước không?",
+						"correct_label": "D"
+					},
+					"questions": [
+						{
+							"number": 14,
+							"answer": "C",
+							"question": "我们在哪儿见？",
+							"pinyin": "Wǒmen zài nǎr jiàn?"
+						},
+						{
+							"number": 15,
+							"answer": "A",
+							"question": "现在几点？",
+							"pinyin": "Xiànzài jǐ diǎn?"
+						},
+						{
+							"number": 16,
+							"answer": "B",
+							"question": "我们下午去超市吧。",
+							"pinyin": "Wǒmen xiàwǔ qù chāoshì ba."
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第17—18题：选词填空。\nCâu 17–18: Chọn từ thích hợp điền vào chỗ trống.",
+					"hide_images": true,
+					"vocabulary": [
+						{ "word": "医院", "pinyin": "yīyuàn", "meaning": "bệnh viện" },
+						{ "word": "中午", "pinyin": "zhōngwǔ", "meaning": "buổi trưa" },
+						{ "word": "名字", "pinyin": "míngzi", "meaning": "tên" }
+					],
+					"example": {
+						"sentence": "你叫什么（ ）？",
+						"pinyin": "Nǐ jiào shénme ( )?",
+						"meaning": "Bạn tên là gì?",
+						"answer": "C",
+						"correct_label": "C",
+						"answer_word": "名字",
+						"answer_pinyin": "míngzi",
+						"answer_meaning": "tên"
+					},
+					"questions": [
+						{
+							"number": 17,
+							"answer": "B",
+							"sentence": "我们（ ）12:00下课。",
+							"pinyin": "Wǒmen ( ) shí'èr diǎn xiàkè.",
+							"options": [
+								{ "label": "A", "word": "医院", "pinyin": "yīyuàn", "meaning": "bệnh viện" },
+								{ "label": "B", "word": "中午", "pinyin": "zhōngwǔ", "meaning": "buổi trưa" },
+								{ "label": "C", "word": "名字", "pinyin": "míngzi", "meaning": "tên" }
+							]
+						},
+						{
+							"number": 18,
+							"answer": "A",
+							"sentence": "男：你现在在哪儿？\n女：我在（ ）呢。",
+							"pinyin": "Nán: Nǐ xiànzài zài nǎr?\nNǚ: Wǒ zài ( ) ne.",
+							"options": [
+								{ "label": "A", "word": "医院", "pinyin": "yīyuàn", "meaning": "bệnh viện" },
+								{ "label": "B", "word": "中午", "pinyin": "zhōngwǔ", "meaning": "buổi trưa" },
+								{ "label": "C", "word": "名字", "pinyin": "míngzi", "meaning": "tên" }
+							]
+						}
+					]
+				},
+				{
+					"part": "第四部分 - Phần 4",
+					"description": "第19—20题：选择正确答案。\nCâu 19–20: Chọn đáp án đúng.",
+					"hide_images": true,
+					"example": {
+						"sentence": "请问现在几点了？",
+						"pinyin": "Qǐngwèn xiànzài jǐ diǎn le?",
+						"meaning": "Xin hỏi bây giờ là mấy giờ rồi?",
+						"question": "说话人想知道什么？",
+						"question_pinyin": "Shuōhuàrén xiǎng zhīdào shénme?",
+						"question_meaning": "Người nói muốn biết điều gì?",
+						"correct_label": "A",
+						"options": [
+							{
+								"label": "A",
+								"text": "时间",
+								"pinyin": "shíjiān",
+								"meaning": "thời gian",
+								"correct": true
+							},
+							{
+								"label": "B",
+								"text": "名字",
+								"pinyin": "míngzi",
+								"meaning": "tên",
+								"correct": false
+							},
+							{
+								"label": "C",
+								"text": "房间号",
+								"pinyin": "fángjiānhào",
+								"meaning": "số phòng",
+								"correct": false
+							}
+						]
+					},
+					"questions": [
+						{
+							"number": 19,
+							"answer": "B",
+							"sentence": "我今天早上八点半上课，十点十分下课。",
+							"pinyin": "Wǒ jīntiān zǎoshang bā diǎn bàn shàngkè, shí diǎn shí fēn xiàkè.",
+							"question": "今天几点下课？",
+							"question_pinyin": "Jīntiān jǐ diǎn xiàkè?",
+							"options": [
+								{ "label": "A", "text": "8:30", "pinyin": "bā diǎn sānshí", "meaning": "8 giờ 30" },
+								{
+									"label": "B",
+									"text": "10:10",
+									"pinyin": "shí diǎn shí fēn",
+									"meaning": "10 giờ 10"
+								},
+								{
+									"label": "C",
+									"text": "10:20",
+									"pinyin": "shí diǎn èrshí",
+									"meaning": "10 giờ 20"
+								}
+							]
+						},
+						{
+							"number": 20,
+							"answer": "A",
+							"sentence": "妈妈今天休息，下午想去菜店买些菜。",
+							"pinyin": "Māma jīntiān xiūxi, xiàwǔ xiǎng qù càidiàn mǎi xiē cài.",
+							"question": "妈妈下午想去菜店买什么？",
+							"question_pinyin": "Māma xiàwǔ xiǎng qù càidiàn mǎi shénme?",
+							"options": [
+								{ "label": "A", "text": "菜", "pinyin": "cài", "meaning": "rau" },
+								{ "label": "B", "text": "饺子", "pinyin": "jiǎozi", "meaning": "sủi cảo" },
+								{ "label": "C", "text": "牛奶", "pinyin": "niúnǎi", "meaning": "sữa bò" }
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

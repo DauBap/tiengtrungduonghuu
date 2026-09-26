@@ -1,0 +1,38 @@
+{
+	"course_id": "hsk1_2",
+	"course_name": "HSK 1 (2.0)",
+
+	"id": 2,
+	"title": "谢谢",
+	"short_vi": "Cảm ơn, đáp lại và tạm biệt.",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "谢谢",
+			"pinyin": "xièxie",
+			"vi": "cảm ơn",
+			"adj": 4
+		},
+		{
+			"pos": 2,
+			"hanzi": "不",
+			"pinyin": "bù",
+			"vi": "không",
+			"adj": 7
+		},
+		{
+			"pos": 3,
+			"hanzi": "不客气",
+			"pinyin": "bú kèqi",
+			"vi": "không có gì",
+			"adj": 12
+		},
+		{
+			"pos": 4,
+			"hanzi": "再见",
+			"pinyin": "zàijiàn",
+			"vi": "tạm biệt",
+			"adj": 4
+		}
+	]
+}

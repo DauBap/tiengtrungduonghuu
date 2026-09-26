@@ -1,0 +1,115 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 2,
+  "label": "Bài 2",
+  "title": "我每天六点起床",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "生病",
+      "pinyin": "shēng bìng",
+      "adj": 4,
+      "vi": "bị bệnh, bị ốm"
+    },
+    {
+      "pos": 2,
+      "hanzi": "每",
+      "pinyin": "měi",
+      "adj": 1,
+      "vi": "mỗi"
+    },
+    {
+      "pos": 3,
+      "hanzi": "早上",
+      "pinyin": "zǎoshang",
+      "adj": 2,
+      "vi": "buổi sáng"
+    },
+    {
+      "pos": 4,
+      "hanzi": "跑步",
+      "pinyin": "pǎo bù",
+      "adj": 4,
+      "vi": "chạy bộ"
+    },
+    {
+      "pos": 5,
+      "hanzi": "起床",
+      "pinyin": "qǐ chuáng",
+      "adj": 4,
+      "vi": "thức dậy"
+    },
+    {
+      "pos": 6,
+      "hanzi": "药",
+      "pinyin": "yào",
+      "adj": 2,
+      "vi": "thuốc"
+    },
+    {
+      "pos": 7,
+      "hanzi": "身体",
+      "pinyin": "shēntǐ",
+      "adj": 2,
+      "vi": "sức khỏe, cơ thể"
+    },
+    {
+      "pos": 8,
+      "hanzi": "出院",
+      "pinyin": "chū yuàn",
+      "adj": 4,
+      "vi": "xuất viện"
+    },
+    {
+      "pos": 9,
+      "hanzi": "出",
+      "pinyin": "chū",
+      "adj": 4,
+      "vi": "ra, ra ngoài"
+    },
+    {
+      "pos": 10,
+      "hanzi": "高",
+      "pinyin": "gāo",
+      "adj": 6,
+      "vi": "cao"
+    },
+    {
+      "pos": 11,
+      "hanzi": "米",
+      "pinyin": "mǐ",
+      "adj": 8,
+      "vi": "mét"
+    },
+    {
+      "pos": 12,
+      "hanzi": "知道",
+      "pinyin": "zhīdào",
+      "adj": 4,
+      "vi": "biết"
+    },
+    {
+      "pos": 13,
+      "hanzi": "休息",
+      "pinyin": "xiūxi",
+      "adj": 4,
+      "vi": "nghỉ ngơi"
+    },
+    {
+      "pos": 14,
+      "hanzi": "忙",
+      "pinyin": "máng",
+      "adj": 6,
+      "vi": "bận"
+    },
+    {
+      "pos": 15,
+      "hanzi": "时间",
+      "pinyin": "shíjiān",
+      "adj": 2,
+      "vi": "thời gian"
+    }
+  ]
+}

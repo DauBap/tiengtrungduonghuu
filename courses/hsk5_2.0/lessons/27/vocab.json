@@ -1,0 +1,251 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 27,
+  "label": "Bài 27",
+  "title": "下棋 ",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "（象）棋",
+      "pinyin": "(xiàng)qí",
+      "adj": 2,
+      "vi": "cờ (tướng)"
+    },
+    {
+      "pos": 2,
+      "hanzi": "教练",
+      "pinyin": "jiàoliàn",
+      "adj": 2,
+      "vi": "huấn luyện viên"
+    },
+    {
+      "pos": 3,
+      "hanzi": "答应",
+      "pinyin": "dāying",
+      "adj": 4,
+      "vi": "đồng ý, ưng thuận"
+    },
+    {
+      "pos": 4,
+      "hanzi": "损失",
+      "pinyin": "sǔnshī",
+      "adj": 4,
+      "vi": "mất, tổn thất"
+    },
+    {
+      "pos": 5,
+      "hanzi": "睁",
+      "pinyin": "zhēng",
+      "adj": 4,
+      "vi": "mở (mắt)"
+    },
+    {
+      "pos": 6,
+      "hanzi": "将军",
+      "pinyin": "jiāngjūn",
+      "adj": 2,
+      "vi": "tướng quân; chiếu tướng (trong đánh cờ)"
+    },
+    {
+      "pos": 7,
+      "hanzi": "服气",
+      "pinyin": "fúqì",
+      "adj": 4,
+      "vi": "chịu phục, chịu thua"
+    },
+    {
+      "pos": 8,
+      "hanzi": "运气",
+      "pinyin": "yùnqi",
+      "adj": 2,
+      "vi": "số đỏ, vận may"
+    },
+    {
+      "pos": 9,
+      "hanzi": "局",
+      "pinyin": "jú",
+      "adj": 8,
+      "vi": "ván"
+    },
+    {
+      "pos": 10,
+      "hanzi": "发挥",
+      "pinyin": "fāhuī",
+      "adj": 4,
+      "vi": "phát huy"
+    },
+    {
+      "pos": 11,
+      "hanzi": "灰心",
+      "pinyin": "huīxīn",
+      "adj": 6,
+      "vi": "nản lòng, chán nản"
+    },
+    {
+      "pos": 12,
+      "hanzi": "吸取",
+      "pinyin": "xīqǔ",
+      "adj": 4,
+      "vi": "hấp thu, rút ra"
+    },
+    {
+      "pos": 13,
+      "hanzi": "教训",
+      "pinyin": "jiàoxùn",
+      "adj": 2,
+      "vi": "bài học kinh nghiệm"
+    },
+    {
+      "pos": 14,
+      "hanzi": "未必",
+      "pinyin": "wèibì",
+      "adj": 7,
+      "vi": "chưa chắc, không hẳn"
+    },
+    {
+      "pos": 15,
+      "hanzi": "次要",
+      "pinyin": "cìyào",
+      "adj": 6,
+      "vi": "thứ yếu, không quan trọng"
+    },
+    {
+      "pos": 16,
+      "hanzi": "因素",
+      "pinyin": "yīnsù",
+      "adj": 2,
+      "vi": "nhân tố"
+    },
+    {
+      "pos": 17,
+      "hanzi": "在于",
+      "pinyin": "zàiyú",
+      "adj": 4,
+      "vi": "cốt ở, ở chỗ"
+    },
+    {
+      "pos": 18,
+      "hanzi": "心态",
+      "pinyin": "xīntài",
+      "adj": 2,
+      "vi": "tâm lý, trạng thái tâm lý"
+    },
+    {
+      "pos": 19,
+      "hanzi": "珍惜",
+      "pinyin": "zhēnxī",
+      "adj": 4,
+      "vi": "quý trọng"
+    },
+    {
+      "pos": 20,
+      "hanzi": "否认",
+      "pinyin": "fǒurèn",
+      "adj": 4,
+      "vi": "phủ nhận, bác bỏ"
+    },
+    {
+      "pos": 21,
+      "hanzi": "观察",
+      "pinyin": "guānchá",
+      "adj": 4,
+      "vi": "quan sát, theo dõi"
+    },
+    {
+      "pos": 22,
+      "hanzi": "失去",
+      "pinyin": "shīqù",
+      "adj": 4,
+      "vi": "mất"
+    },
+    {
+      "pos": 23,
+      "hanzi": "期间",
+      "pinyin": "qījiān",
+      "adj": 2,
+      "vi": "thời gian, thời kỳ"
+    },
+    {
+      "pos": 24,
+      "hanzi": "把握",
+      "pinyin": "bǎwò",
+      "adj": 2,
+      "vi": "sự chắc chắn, sự tin chắc"
+    },
+    {
+      "pos": 25,
+      "hanzi": "不假思索",
+      "pinyin": "bùjiǎ-sīsuǒ",
+      "adj": [
+        null,
+        12
+      ],
+      "vi": "không cần cân nhắc, không cần suy nghĩ"
+    },
+    {
+      "pos": 26,
+      "hanzi": "犯",
+      "pinyin": "fàn",
+      "adj": 4,
+      "vi": "phạm (sai lầm, tội...)"
+    },
+    {
+      "pos": 27,
+      "hanzi": "过于",
+      "pinyin": "guòyú",
+      "adj": 7,
+      "vi": "quá, quá đáng"
+    },
+    {
+      "pos": 28,
+      "hanzi": "原则",
+      "pinyin": "yuánzé",
+      "adj": 2,
+      "vi": "nguyên tắc"
+    },
+    {
+      "pos": 29,
+      "hanzi": "责备",
+      "pinyin": "zébèi",
+      "adj": 4,
+      "vi": "quở trách, chỉ trích"
+    },
+    {
+      "pos": 30,
+      "hanzi": "必然",
+      "pinyin": "bìrán",
+      "adj": 6,
+      "vi": "thế nào cũng, chắc chắn"
+    },
+    {
+      "pos": 31,
+      "hanzi": "事先",
+      "pinyin": "shìxiān",
+      "adj": 2,
+      "vi": "trước đó"
+    },
+    {
+      "pos": 32,
+      "hanzi": "舍不得",
+      "pinyin": "shěbude",
+      "adj": 4,
+      "vi": "không nỡ, tiếc rẻ, luyến tiếc"
+    },
+    {
+      "pos": 33,
+      "hanzi": "后果",
+      "pinyin": "hòuguǒ",
+      "adj": 2,
+      "vi": "hậu quả"
+    },
+    {
+      "pos": 34,
+      "hanzi": "屡",
+      "pinyin": "lǚ",
+      "adj": 7,
+      "vi": "nhiều lần"
+    }
+  ]
+}

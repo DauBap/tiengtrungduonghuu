@@ -1,0 +1,45 @@
+{
+	"course_id": "hsk1_2",
+	"course_name": "HSK 1 (2.0)",
+
+	"id": 1,
+	"title": "你好",
+	"short_vi": "Chào hỏi cơ bản. Xin lỗi và đáp lại.",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "你",
+			"pinyin": "nǐ",
+			"vi": "bạn",
+			"adj": 1
+		},
+		{
+			"pos": 2,
+			"hanzi": "您",
+			"pinyin": "nín",
+			"vi": "ngài (lịch sự)",
+			"adj": 1
+		},
+		{
+			"pos": 3,
+			"hanzi": "你们",
+			"pinyin": "nǐmen",
+			"vi": "các bạn",
+			"adj": 1
+		},
+		{
+			"pos": 4,
+			"hanzi": "对不起",
+			"pinyin": "duìbuqǐ",
+			"vi": "xin lỗi",
+			"adj": 4
+		},
+		{
+			"pos": 5,
+			"hanzi": "没关系",
+			"pinyin": "méiguānxi",
+			"vi": "không sao",
+			"adj": 12
+		}
+	]
+}

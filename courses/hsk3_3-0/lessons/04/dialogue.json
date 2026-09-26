@@ -1,0 +1,164 @@
+{
+  "lesson": 4,
+  "title": "这家宾馆跟别的都不一样",
+  "title_pinyin": "Zhè jiā bīnguǎn gēn biéde dōu bù yīyàng",
+  "title_vi": "Khách sạn này không giống với những khách sạn khác",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一飞",
+          "zh": "这个假期咱们去哪儿玩玩吧。",
+          "pinyin": "Zhège jiàqī zánmen qù nǎr wánwan ba.",
+          "vi": "Kỳ nghỉ này chúng ta đi đâu chơi nhỉ."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "好啊, 你想去哪儿, 咱们就去哪儿。",
+          "pinyin": "Hǎo a, nǐ xiǎng qù nǎr, zánmen jiù qù nǎr.",
+          "vi": "Được thôi, em muốn đi đâu, chúng ta đi đó."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "你喜欢海, 找个海边住几天, 怎么样?",
+          "pinyin": "Nǐ xǐhuan hǎi, zhǎo ge hǎibiān zhù jǐ tiān, zěnmeyàng?",
+          "vi": "Anh thích biển, tìm một chỗ bên biển ở vài ngày, thế nào?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "现在去海边有点儿冷。",
+          "pinyin": "Xiànzài qù hǎibiān yǒudiǎnr lěng.",
+          "vi": "Bây giờ đi biển hơi lạnh."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "那去草原吧? 草原一点儿也不冷。",
+          "pinyin": "Nà qù cǎoyuán ba? Cǎoyuán yīdiǎnr yě bù lěng.",
+          "vi": "Vậy đi thảo nguyên đi? Thảo nguyên không lạnh chút nào."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "这个主意好! 我好久没骑马了。",
+          "pinyin": "Zhège zhǔyi hǎo! Wǒ hǎo jiǔ méi qí mǎ le.",
+          "vi": "Ý kiến này hay! Anh lâu rồi chưa cưỡi ngựa."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "对, 在草原上骑马、吃羊肉、看月亮, 一定很有意思。",
+          "pinyin": "Duì, zài cǎoyuán shàng qí mǎ, chī yángròu, kàn yuèliang, yīdìng hěn yǒu yìsi.",
+          "vi": "Đúng vậy, ở trên thảo nguyên cưỡi ngựa, ăn thịt cừu, ngắm trăng, nhất định rất thú vị."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "杨同乐",
+          "zh": "出去玩的机票买好了吗?",
+          "pinyin": "Chūqu wán de jīpiào mǎi hǎo le ma?",
+          "vi": "Vé máy bay đi chơi đã mua xong chưa?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "买好了。星期六上午十一点一刻起飞。",
+          "pinyin": "Mǎi hǎo le. Xīngqīliù shàngwǔ shíyī diǎn yī kè qǐfēi.",
+          "vi": "Mua xong rồi. Thứ Bảy 11 giờ 15 phút sáng cất cánh."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "宾馆也选好了吗?",
+          "pinyin": "Bīnguǎn yě xuǎn hǎo le ma?",
+          "vi": "Khách sạn cũng đã chọn xong chưa?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "是的, 这家宾馆很特别, 跟别的都不一样, 一出门就能看见牛和羊!",
+          "pinyin": "Shì de, zhè jiā bīnguǎn hěn tèbié, gēn biéde dōu bù yīyàng, yī chūmén jiù néng kànjiàn niú hé yáng!",
+          "vi": "Vâng, khách sạn này rất đặc biệt, không giống với những khách sạn khác, vừa ra khỏi cửa là đã có thể nhìn thấy bò và cừu!"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "太好了! 你看看要带什么东西?",
+          "pinyin": "Tài hǎo le! Nǐ kànkan yào dài shénme dōngxi?",
+          "vi": "Tuyệt quá! Em xem cần mang những gì?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "我们不用带太多东西, 别忘了拿上新买的相机。",
+          "pinyin": "Wǒmen bú yòng dài tài duō dōngxi, bié wàngle ná shàng xīn mǎi de xiàngjī.",
+          "vi": "Chúng ta không cần mang quá nhiều đồ, đừng quên cầm máy ảnh mới mua nhé."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "一定不会忘带的。我现在就去准备行李。",
+          "pinyin": "Yīdìng bú huì wàng dài de. Wǒ xiànzài jiù qù zhǔnbèi xíngli.",
+          "vi": "Nhất định sẽ không quên mang. Anh đi chuẩn bị hành lý ngay đây."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "小李",
+          "zh": "欢迎你们! 我是你们的司机, 我姓李, 叫我小李就可以。",
+          "pinyin": "Huānyíng nǐmen! Wǒ shì nǐmen de sījī, wǒ xìng Lǐ, jiào wǒ Xiǎo Lǐ jiù kěyǐ.",
+          "vi": "Chào mừng các bạn! Tôi là tài xế của các bạn, tôi họ Lý, gọi tôi là Tiểu Lý là được."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "您好! 不好意思, 飞机晚点了, 让您久等了。",
+          "pinyin": "Nín hǎo! Bù hǎoyìsi, fēijī wǎndiǎn le, ràng nín jiǔ děng le.",
+          "vi": "Xin chào anh! Xin lỗi, máy bay bị hoãn, để anh chờ lâu rồi."
+        },
+        {
+          "speaker": "小李",
+          "zh": "没关系。除了这个行李箱以外, 还有别的东西吗?",
+          "pinyin": "Méi guānxi. Chúle zhège xínglixiāng yǐwài, hái yǒu biéde dōngxi ma?",
+          "vi": "Không sao. Ngoài cái vali này ra, còn đồ gì khác không ạ?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "还有一个包, 我自己拿就可以。",
+          "pinyin": "Hái yǒu yī gè bāo, wǒ zìjǐ ná jiù kěyǐ.",
+          "vi": "Còn một cái túi, tôi tự cầm được."
+        },
+        {
+          "speaker": "小李",
+          "zh": "车在一层, 请跟我来。",
+          "pinyin": "Chē zài yī céng, qǐng gēn wǒ lái.",
+          "vi": "Xe ở tầng một, mời đi theo tôi."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "我们住的宾馆离机场远吗?",
+          "pinyin": "Wǒmen zhù de bīnguǎn lí jīchǎng yuǎn ma?",
+          "vi": "Khách sạn chúng tôi ở cách sân bay xa không?"
+        },
+        {
+          "speaker": "小李",
+          "zh": "不远, 三十分钟就能到。两位到了可以先休息休息, 晚饭的时候我叫你们。",
+          "pinyin": "Bù yuǎn, sānshí fēnzhōng jiù néng dào. Liǎng wèi dào le kěyǐ xiān xiūxi xiūxi, wǎnfàn de shíhou wǒ jiào nǐmen.",
+          "vi": "Không xa, 30 phút là tới. Hai vị đến nơi có thể nghỉ ngơi trước, đến bữa tối tôi gọi."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "今天是我们旅游的第一天。我们很早就起床去机场了, 没想到飞机晚点了。我们到的时候, 天已经黑了, 但是司机小李一直在机场等我们, 一点儿也没着急。他特别热情, 路上给我们介绍了很多东西, 还准备了水果。宾馆的房间跟我想的一样漂亮, 又大又干净, 我非常满意。",
+          "pinyin": "Jīntiān shì wǒmen lǚyóu de dì-yī tiān. Wǒmen hěn zǎo jiù qǐchuáng qù jīchǎng le, méi xiǎng dào fēijī wǎndiǎn le. Wǒmen dào de shíhou, tiān yǐjīng hēi le, dànshì sījī Xiǎo Lǐ yīzhí zài jīchǎng děng wǒmen, yīdiǎnr yě méi zhāojí. Tā tèbié rèqíng, lùshàng gěi wǒmen jièshào le hěnduō dōngxi, hái zhǔnbèi le shuǐguǒ. Bīnguǎn de fángjiān gēn wǒ xiǎng de yīyàng piàoliang, yòu dà yòu gānjìng, wǒ fēicháng mǎnyì.",
+          "vi": "Hôm nay là ngày đầu tiên của chuyến du lịch. Chúng tôi dậy từ rất sớm để ra sân bay, không ngờ máy bay bị hoãn. Khi chúng tôi đến, trời đã tối, nhưng tài xế Tiểu Lý vẫn luôn ở sân bay đợi chúng tôi, không hề sốt ruột chút nào. Anh ấy đặc biệt nhiệt tình, trên đường giới thiệu cho chúng tôi rất nhiều thứ, còn chuẩn bị hoa quả. Phòng khách sạn đẹp như tôi nghĩ, vừa rộng vừa sạch sẽ, tôi rất hài lòng."
+        }
+      ]
+    }
+  ]
+}

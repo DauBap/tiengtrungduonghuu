@@ -1,0 +1,94 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 13,
+  "label": "Bài 1",
+  "title": "门开着呢",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "着",
+      "pinyin": "zhe",
+      "adj": 11,
+      "vi": "được dùng để chỉ trạng thái"
+    },
+    {
+      "pos": 2,
+      "hanzi": "手",
+      "pinyin": "shǒu",
+      "adj": 2,
+      "vi": "tay"
+    },
+    {
+      "pos": 3,
+      "hanzi": "拿",
+      "pinyin": "ná",
+      "adj": 4,
+      "vi": "cầm"
+    },
+    {
+      "pos": 4,
+      "hanzi": "铅笔",
+      "pinyin": "qiānbǐ",
+      "adj": 2,
+      "vi": "bút chì"
+    },
+    {
+      "pos": 5,
+      "hanzi": "班",
+      "pinyin": "bān",
+      "adj": 2,
+      "vi": "lớp học"
+    },
+    {
+      "pos": 6,
+      "hanzi": "长",
+      "pinyin": "zhǎng",
+      "adj": 4,
+      "vi": "sinh ra, mọc"
+    },
+    {
+      "pos": 7,
+      "hanzi": "笑",
+      "pinyin": "xiào",
+      "adj": 4,
+      "vi": "cười"
+    },
+    {
+      "pos": 8,
+      "hanzi": "宾馆",
+      "pinyin": "bīnguǎn",
+      "adj": 2,
+      "vi": "khách sạn"
+    },
+    {
+      "pos": 9,
+      "hanzi": "一直",
+      "pinyin": "yīzhí",
+      "adj": 7,
+      "vi": "thẳng"
+    },
+    {
+      "pos": 10,
+      "hanzi": "往",
+      "pinyin": "wǎng",
+      "adj": 13,
+      "vi": "về phía"
+    },
+    {
+      "pos": 11,
+      "hanzi": "路口",
+      "pinyin": "lùkǒu",
+      "adj": 2,
+      "vi": "giao lộ"
+    },
+    {
+      "pos": 12,
+      "hanzi": "杨笑笑",
+      "pinyin": "Yáng Xiàoxiao",
+      "adj": 3,
+      "vi": "Dương Tiếu Tiếu (tên người)"
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "course_id": "hsk1_2",
+  "course_name": "HSK 1(2.0)",
+  "id": 14,
+  "label": "Bài 14",
+  "title": "她买了不少衣服",
+  "short_vi": "Hỏi và trả lời việc đã làm, đi đâu và mua gì. Miêu tả đồ vật.",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "东西",
+      "pinyin": "dōngxi",
+      "adj": 2,
+      "vi": "đồ"
+    },
+    {
+      "pos": 2,
+      "hanzi": "一点儿",
+      "pinyin": "yìdiǎnr",
+      "adj": [
+        8,
+        7
+      ],
+      "vi": "một chút"
+    },
+    {
+      "pos": 3,
+      "hanzi": "苹果",
+      "pinyin": "píngguǒ",
+      "adj": 2,
+      "vi": "táo"
+    },
+    {
+      "pos": 4,
+      "hanzi": "看见",
+      "pinyin": "kànjiàn",
+      "adj": 4,
+      "vi": "nhìn thấy"
+    },
+    {
+      "pos": 5,
+      "hanzi": "先生",
+      "pinyin": "xiānsheng",
+      "adj": 2,
+      "vi": "ông"
+    },
+    {
+      "pos": 6,
+      "hanzi": "开",
+      "pinyin": "kāi",
+      "adj": 4,
+      "vi": "mở"
+    },
+    {
+      "pos": 7,
+      "hanzi": "车",
+      "pinyin": "chē",
+      "adj": 2,
+      "vi": "xe"
+    },
+    {
+      "pos": 8,
+      "hanzi": "回来",
+      "pinyin": "huílai",
+      "adj": 4,
+      "vi": "quay lại"
+    },
+    {
+      "pos": 9,
+      "hanzi": "分钟",
+      "pinyin": "fēnzhōng",
+      "adj": 2,
+      "vi": "phút (đơn vị thời gian)"
+    },
+    {
+      "pos": 10,
+      "hanzi": "后",
+      "pinyin": "hòu",
+      "adj": [
+        2,
+        9
+      ],
+      "vi": "sau"
+    },
+    {
+      "pos": 11,
+      "hanzi": "衣服",
+      "pinyin": "yīfu",
+      "adj": 2,
+      "vi": "quần áo"
+    },
+    {
+      "pos": 12,
+      "hanzi": "漂亮",
+      "pinyin": "piàoliang",
+      "adj": 6,
+      "vi": "xinh đẹp"
+    },
+    {
+      "pos": 13,
+      "hanzi": "啊",
+      "pinyin": "a",
+      "adj": 15,
+      "vi": "à"
+    },
+    {
+      "pos": 14,
+      "hanzi": "少",
+      "pinyin": "shǎo",
+      "adj": 6,
+      "vi": "ít"
+    },
+    {
+      "pos": 15,
+      "hanzi": "不少",
+      "pinyin": "bù shǎo",
+      "adj": 6,
+      "vi": "không ít"
+    },
+    {
+      "pos": 16,
+      "hanzi": "这些",
+      "pinyin": "zhèxiē",
+      "adj": 1,
+      "vi": "những cái này"
+    },
+    {
+      "pos": 17,
+      "hanzi": "都",
+      "pinyin": "dōu",
+      "adj": 7,
+      "vi": "đều"
+    }
+  ]
+}

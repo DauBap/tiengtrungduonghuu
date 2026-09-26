@@ -1,0 +1,94 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 7,
+  "label": "Bài 7",
+  "title": "我跟她都认识五年了",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "同事",
+      "pinyin": "tóngshì",
+      "adj": 2,
+      "vi": "đồng nghiệp"
+    },
+    {
+      "pos": 2,
+      "hanzi": "以前",
+      "pinyin": "yǐqián",
+      "adj": 2,
+      "vi": "trước đây, trước kia"
+    },
+    {
+      "pos": 3,
+      "hanzi": "银行",
+      "pinyin": "yínháng",
+      "adj": 2,
+      "vi": "ngân hàng"
+    },
+    {
+      "pos": 4,
+      "hanzi": "久",
+      "pinyin": "jiǔ",
+      "adj": 6,
+      "vi": "lâu, lâu dài"
+    },
+    {
+      "pos": 5,
+      "hanzi": "感兴趣",
+      "pinyin": "gǎn xìngqù",
+      "adj": 4,
+      "vi": "có hứng thú, thích"
+    },
+    {
+      "pos": 6,
+      "hanzi": "结婚",
+      "pinyin": "jié hūn",
+      "adj": 4,
+      "vi": "kết hôn, cưới"
+    },
+    {
+      "pos": 7,
+      "hanzi": "欢迎",
+      "pinyin": "huānyíng",
+      "adj": 4,
+      "vi": "hoan nghênh, chào mừng"
+    },
+    {
+      "pos": 8,
+      "hanzi": "迟到",
+      "pinyin": "chídào",
+      "adj": 4,
+      "vi": "đến muộn"
+    },
+    {
+      "pos": 9,
+      "hanzi": "半",
+      "pinyin": "bàn",
+      "adj": 21,
+      "vi": "một nửa, rưỡi"
+    },
+    {
+      "pos": 10,
+      "hanzi": "接",
+      "pinyin": "jiē",
+      "adj": 4,
+      "vi": "đón"
+    },
+    {
+      "pos": 11,
+      "hanzi": "刻",
+      "pinyin": "kè",
+      "adj": 8,
+      "vi": "mười lăm phút"
+    },
+    {
+      "pos": 12,
+      "hanzi": "差",
+      "pinyin": "chà",
+      "adj": 4,
+      "vi": "kém, thiếu"
+    }
+  ]
+}

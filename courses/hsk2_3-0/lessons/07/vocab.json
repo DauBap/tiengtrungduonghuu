@@ -1,0 +1,127 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 7,
+  "label": "Bài 7",
+  "title": "她篮球打得很好",
+  "short_vi": "Trò chuyện về sở thích thể thao; rủ bạn cùng chơi; đánh giá khả năng chơi thể thao (tốt, không tốt)",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "从",
+      "pinyin": "Cóng",
+      "adj": 13,
+      "vi": "từ"
+    },
+    {
+      "pos": 2,
+      "hanzi": "往",
+      "pinyin": "Wǎng",
+      "adj": [
+        null,
+        13
+      ],
+      "vi": "Hướng tới, đi tới"
+    },
+    {
+      "pos": 3,
+      "hanzi": "跑",
+      "pinyin": "Pǎo",
+      "adj": 4,
+      "vi": "chạy"
+    },
+    {
+      "pos": 4,
+      "hanzi": "打",
+      "pinyin": "Dǎ",
+      "adj": 4,
+      "vi": "Chơi, đánh"
+    },
+    {
+      "pos": 5,
+      "hanzi": "篮球",
+      "pinyin": "Lánqiú",
+      "adj": 2,
+      "vi": "Bóng rổ"
+    },
+    {
+      "pos": 6,
+      "hanzi": "运动",
+      "pinyin": "Yùndòng",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "Vận động, thể thao"
+    },
+    {
+      "pos": 7,
+      "hanzi": "踢",
+      "pinyin": "Tī",
+      "adj": 4,
+      "vi": "đá"
+    },
+    {
+      "pos": 8,
+      "hanzi": "足球",
+      "pinyin": "Zúqiú",
+      "adj": 2,
+      "vi": "Bóng đá"
+    },
+    {
+      "pos": 9,
+      "hanzi": "球",
+      "pinyin": "Qiú",
+      "adj": 2,
+      "vi": "bóng"
+    },
+    {
+      "pos": 10,
+      "hanzi": "得",
+      "pinyin": "De",
+      "adj": 11,
+      "vi": "Đứng giữa V/ADJ và bổ ngữ của nó=> chỉ kết quả, mức độ"
+    },
+    {
+      "pos": 11,
+      "hanzi": "跑步",
+      "pinyin": "Pǎobù",
+      "adj": 4,
+      "vi": "Chạy bộ"
+    },
+    {
+      "pos": 12,
+      "hanzi": "游泳",
+      "pinyin": "Yóutǒng",
+      "adj": 4,
+      "vi": "Bơi lội"
+    },
+    {
+      "pos": 13,
+      "hanzi": "游",
+      "pinyin": "Yóu",
+      "adj": 4,
+      "vi": "bơi"
+    },
+    {
+      "pos": 14,
+      "hanzi": "爱好",
+      "pinyin": "Àihào",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "Sở thích / yêu thích"
+    },
+    {
+      "pos": 15,
+      "hanzi": "开始",
+      "pinyin": "Kāishǐ",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "Bắt đầu, sự bắt đầu"
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 2,
+  "label": "Bài 2",
+  "title": "他什么时候回来",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "腿",
+      "pinyin": "tuǐ",
+      "adj": 2,
+      "vi": "chân"
+    },
+    {
+      "pos": 2,
+      "hanzi": "疼",
+      "pinyin": "téng",
+      "adj": 6,
+      "vi": "đau, nhức"
+    },
+    {
+      "pos": 3,
+      "hanzi": "脚",
+      "pinyin": "jiǎo",
+      "adj": 2,
+      "vi": "bàn chân"
+    },
+    {
+      "pos": 4,
+      "hanzi": "树",
+      "pinyin": "shù",
+      "adj": 2,
+      "vi": "cây"
+    },
+    {
+      "pos": 5,
+      "hanzi": "容易",
+      "pinyin": "róngyì",
+      "adj": 6,
+      "vi": "dễ, dễ dàng"
+    },
+    {
+      "pos": 6,
+      "hanzi": "难",
+      "pinyin": "nán",
+      "adj": 6,
+      "vi": "khó, khó khăn"
+    },
+    {
+      "pos": 7,
+      "hanzi": "太太",
+      "pinyin": "tàitai",
+      "adj": 2,
+      "vi": "bà"
+    },
+    {
+      "pos": 8,
+      "hanzi": "秘书",
+      "pinyin": "mìshū",
+      "adj": 2,
+      "vi": "thư ký"
+    },
+    {
+      "pos": 9,
+      "hanzi": "经理",
+      "pinyin": "jīnglǐ",
+      "adj": 2,
+      "vi": "giám đốc"
+    },
+    {
+      "pos": 10,
+      "hanzi": "办公室",
+      "pinyin": "bàngōngshì",
+      "adj": 2,
+      "vi": "văn phòng"
+    },
+    {
+      "pos": 11,
+      "hanzi": "辆",
+      "pinyin": "liàng",
+      "adj": 8,
+      "vi": "(được dùng cho xe cộ) chiếc"
+    },
+    {
+      "pos": 12,
+      "hanzi": "楼",
+      "pinyin": "lóu",
+      "adj": 2,
+      "vi": "tòa nhà, lầu"
+    },
+    {
+      "pos": 13,
+      "hanzi": "拿",
+      "pinyin": "ná",
+      "adj": 4,
+      "vi": "cầm, lấy"
+    },
+    {
+      "pos": 14,
+      "hanzi": "把",
+      "pinyin": "bǎ",
+      "adj": 8,
+      "vi": "(dùng cho vật có cán hoặc tay cầm) con, cây"
+    },
+    {
+      "pos": 15,
+      "hanzi": "伞",
+      "pinyin": "sǎn",
+      "adj": 2,
+      "vi": "ô (dù)"
+    },
+    {
+      "pos": 16,
+      "hanzi": "胖",
+      "pinyin": "pàng",
+      "adj": 6,
+      "vi": "béo"
+    },
+    {
+      "pos": 17,
+      "hanzi": "其实",
+      "pinyin": "qíshí",
+      "adj": 7,
+      "vi": "thật ra"
+    },
+    {
+      "pos": 18,
+      "hanzi": "瘦",
+      "pinyin": "shòu",
+      "adj": 6,
+      "vi": "gầy, gầy còm"
+    }
+  ]
+}

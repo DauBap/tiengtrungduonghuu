@@ -1,0 +1,426 @@
+{
+	"title": "HSK3 - Sách bài tập",
+	"lesson": 10,
+	"lesson_title": "你明天再把书还给我",
+	"grading_pending": true,
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听对话，选择最匹配的图片。每题听两次。\nCâu 1–3: Nghe và chọn hình phù hợp. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 1,
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择正确答案。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 4,
+							"options": [
+								{
+									"label": "A",
+									"text": "每天读历史书"
+								},
+								{
+									"label": "B",
+									"text": "上课认真听课"
+								},
+								{
+									"label": "C",
+									"text": "看同学的笔记"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"options": [
+								{
+									"label": "A",
+									"text": "老师没讲过"
+								},
+								{
+									"label": "B",
+									"text": "女的做对了"
+								},
+								{
+									"label": "C",
+									"text": "男的觉得不太难"
+								}
+							]
+						},
+						{
+							"number": 6,
+							"options": [
+								{
+									"label": "A",
+									"text": "考得不好"
+								},
+								{
+									"label": "B",
+									"text": "没准备考试"
+								},
+								{
+									"label": "C",
+									"text": "每天都复习"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听一段话，选择正确答案。每题听两次。\nCâu 7–10: Nghe đoạn thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 7,
+							"options": [
+								{
+									"label": "A",
+									"text": "学习很认真"
+								},
+								{
+									"label": "B",
+									"text": "不常写作业"
+								},
+								{
+									"label": "C",
+									"text": "让妈妈检查作业"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"options": [
+								{
+									"label": "A",
+									"text": "画画"
+								},
+								{
+									"label": "B",
+									"text": "中文歌"
+								},
+								{
+									"label": "C",
+									"text": "中国电影"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"options": [
+								{
+									"label": "A",
+									"text": "不爱看书"
+								},
+								{
+									"label": "B",
+									"text": "学习认真"
+								},
+								{
+									"label": "C",
+									"text": "每天很早回家"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"options": [
+								{
+									"label": "A",
+									"text": "快要考试了"
+								},
+								{
+									"label": "B",
+									"text": "姐姐影响了他"
+								},
+								{
+									"label": "C",
+									"text": "考试成绩不好"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—15题：匹配句子。\nCâu 11–15: Nối câu.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "我想在出国前提高我的水平。"
+						},
+						{
+							"label": "B",
+							"text": "好主意。在数学上我帮你，历史上你多帮帮我。"
+						},
+						{
+							"label": "C",
+							"text": "你把它写在本子上，每天写几遍就记住了。"
+						},
+						{
+							"label": "D",
+							"text": "他现在就在办公室，咱们一起去吧。"
+						},
+						{
+							"label": "E",
+							"text": "当然。我们先坐公交车，然后换地铁。"
+						},
+						{
+							"label": "F",
+							"text": "对。我读三年级，她读二年级。"
+						}
+					],
+					"questions": [
+						{
+							"number": 11,
+							"answer": "D",
+							"question": "我有几个问题想问李老师，不知道什么时间合适。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 12,
+							"answer": "A",
+							"question": "你为什么每天用这么多时间学外语？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 13,
+							"answer": "F",
+							"question": "你和妹妹在一个学校读书吗？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 14,
+							"answer": "C",
+							"question": "我总是忘了这个字怎么写。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 15,
+							"answer": "B",
+							"question": "马上就要考试了，咱们一起复习吧。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第16—20题：选词填空。\nCâu 16–20: Chọn từ điền vào chỗ trống.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "差"
+						},
+						{
+							"label": "B",
+							"text": "要求"
+						},
+						{
+							"label": "C",
+							"text": "当然"
+						},
+						{
+							"label": "D",
+							"text": "遇到"
+						},
+						{
+							"label": "E",
+							"text": "鞋"
+						},
+						{
+							"label": "F",
+							"text": "清楚"
+						}
+					],
+					"questions": [
+						{
+							"number": 16,
+							"answer": "D",
+							"sentence": "我昨天在学校门口（ ）了以前的体育老师。"
+						},
+						{
+							"number": 17,
+							"answer": "A",
+							"sentence": "他这次考试考得很（ ），因为没认真复习。"
+						},
+						{
+							"number": 18,
+							"answer": "F",
+							"sentence": "我在教室外面，听不（ ）老师说什么。"
+						},
+						{
+							"number": 19,
+							"answer": "C",
+							"sentence": "A：你能帮我把这本书还给李老师吗？\nB：（ ）可以。"
+						},
+						{
+							"number": 20,
+							"answer": "B",
+							"sentence": "A：老师（ ）我们明天把错题本拿给他。\nB：我的错题太多了，今天晚上一定写不完。"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第21—24题：选择正确答案。\nCâu 21–24: Đọc và chọn đáp án đúng.",
+					"embedded_example_image": true,
+					"shared_passage": "23–24\n\n昨天作业里的几个错题我不太明白，想问问李老师。进办公室的时候，李老师正在给别的同学讲题，我站在旁边听了一会儿，发现我想问的句子跟这几个同学一样。李老师讲得很清楚，听完我们都明白了。我把作业本放进书包里，高高兴兴地走出了办公室。",
+					"shared_passage_start": 23,
+					"questions": [
+						{
+							"number": 21,
+							"answer": "C",
+							"sentence": "张老师教我们外语。他上课讲得很清楚，还常在休息的时候让我们听音乐，同学们都很喜欢他。",
+							"question": "关于张老师，可以知道什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "他教音乐"
+								},
+								{
+									"label": "B",
+									"text": "他上课听音乐"
+								},
+								{
+									"label": "C",
+									"text": "学生都很喜欢他"
+								}
+							]
+						},
+						{
+							"number": 22,
+							"answer": "A",
+							"sentence": "今天有历史课，但是我忘了带历史课本。上课时，我和同学一起看书、做练习，有点儿不方便。下次我一定会记得带。",
+							"question": "他今天怎么了？",
+							"options": [
+								{
+									"label": "A",
+									"text": "没带课本"
+								},
+								{
+									"label": "B",
+									"text": "没做练习"
+								},
+								{
+									"label": "C",
+									"text": "没上历史课"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "B",
+							"question": "他为什么去找李老师？",
+							"options": [
+								{
+									"label": "A",
+									"text": "他想找作业本"
+								},
+								{
+									"label": "B",
+									"text": "他有不明白的题"
+								},
+								{
+									"label": "C",
+									"text": "李老师要给他讲题"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "C",
+							"question": "关于李老师，可以知道什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "在上课"
+								},
+								{
+									"label": "B",
+									"text": "在教室里等他"
+								},
+								{
+									"label": "C",
+									"text": "在给学生讲题"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据拼音写汉字。\nCâu 25–27: Viết chữ Hán theo pinyin.",
+					"embedded_example_image": true,
+					"questions": [
+						{
+							"number": 25,
+							"type": "writing_input",
+							"sentence": "她一般（ ）这些东西放在桌子上。",
+							"prompt_pinyin": "bǎ"
+						},
+						{
+							"number": 26,
+							"type": "writing_input",
+							"sentence": "老师要求我们这个星期就开始（ ）习。",
+							"prompt_pinyin": "fù"
+						},
+						{
+							"number": 27,
+							"type": "writing_input",
+							"sentence": "这（ ）话我没听懂，请你再说一遍。",
+							"prompt_pinyin": "jù"
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：看图，用词造句。\nCâu 28–30: Nhìn hình và dùng từ gợi ý đặt câu.",
+					"questions": [
+						{
+							"number": 28,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 努力"
+						},
+						{
+							"number": 29,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 后年"
+						},
+						{
+							"number": 30,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 对话"
+						}
+					]
+				}
+			]
+		}
+	]
+}

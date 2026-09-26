@@ -1,0 +1,158 @@
+{
+  "lesson": 9,
+  "title": "打不好没关系",
+  "title_pinyin": "Dǎ bù hǎo méi guānxi",
+  "title_vi": "Đánh không tốt cũng không sao",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "家月, 对不起, 我昨天忘了还你校园卡了。",
+          "pinyin": "Jiāyuè, duìbuqǐ, wǒ zuótiān wàngle huán nǐ xiàoyuán kǎ le.",
+          "vi": "Gia Nguyệt, xin lỗi, hôm qua tớ quên trả thẻ sinh viên cho cậu."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "没关系。你怎么这么快就过来了?",
+          "pinyin": "Méi guānxi. Nǐ zěnme zhème kuài jiù guòlái le?",
+          "vi": "Không sao. Sao cậu nhanh vậy đã qua đây?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "我正在球场打球呢, 接了你的电话就跑过来了。",
+          "pinyin": "Wǒ zhèngzài qiúchǎng dǎqiú ne, jiēle nǐ de diànhuà jiù pǎo guòlái le.",
+          "vi": "Tớ đang chơi bóng ở sân bóng, nghe điện thoại của cậu xong là chạy qua luôn."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "听说为了准备运动会, 你们几个男生每天都练球。",
+          "pinyin": "Tīngshuō wèile zhǔnbèi yùndònghuì, nǐmen jǐ gè nánshēng měitiān dōu liàn qiú.",
+          "vi": "Nghe nói để chuẩn bị cho hội thao, mấy bạn nam các cậu ngày nào cũng tập bóng."
+        },
+        {
+          "speaker": "李文",
+          "zh": "是啊! 你打算参加运动会吗?",
+          "pinyin": "Shì a! Nǐ dǎsuàn cānjiā yùndònghuì ma?",
+          "vi": "Đúng vậy! Cậu định tham gia hội thao không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我想参加网球比赛, 最近一直在练习。",
+          "pinyin": "Wǒ xiǎng cānjiā wǎngqiú bǐsài, zuìjìn yīzhí zài liànxí.",
+          "vi": "Tớ muốn tham gia thi đấu quần vợt, gần đây đang tập luyện."
+        },
+        {
+          "speaker": "李文",
+          "zh": "好, 到时候我去看你的比赛。",
+          "pinyin": "Hǎo, dào shíhou wǒ qù kàn nǐ de bǐsài.",
+          "vi": "Được, lúc đó tớ đến xem cậu thi đấu."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "家月, 你跟我们一起打羽毛球吧?",
+          "pinyin": "Jiāyuè, nǐ gēn wǒmen yīqǐ dǎ yǔmáoqiú ba?",
+          "vi": "Gia Nguyệt, cậu chơi cầu lông cùng chúng tớ nhé?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我好多年没打羽毛球了, 几乎忘了怎么打了。",
+          "pinyin": "Wǒ hǎo duō nián méi dǎ yǔmáoqiú le, jīhū wàngle zěnme dǎ le.",
+          "vi": "Tớ nhiều năm không chơi cầu lông rồi, gần như quên cách chơi."
+        },
+        {
+          "speaker": "李文",
+          "zh": "不是比赛, 打不好没关系。",
+          "pinyin": "Bú shì bǐsài, dǎ bù hǎo méi guānxi.",
+          "vi": "Không phải thi đấu, đánh không tốt cũng không sao."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "这么多同学一起打, 如果总是接不住球, 就太不好意思了。",
+          "pinyin": "Zhème duō tóngxué yīqǐ dǎ, rúguǒ zǒngshì jiē bú zhù qiú, jiù tài bù hǎoyìsi le.",
+          "vi": "Nhiều bạn cùng chơi thế này, nếu cứ đỡ không được bóng thì thật xấu hổ quá."
+        },
+        {
+          "speaker": "李文",
+          "zh": "你想得太多了! 大家打球只是为了锻炼身体。",
+          "pinyin": "Nǐ xiǎng de tài duō le! Dàjiā dǎqiú zhǐshì wèile duànliàn shēntǐ.",
+          "vi": "Cậu nghĩ nhiều quá rồi! Mọi người chơi bóng chỉ là để rèn luyện sức khỏe thôi."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我先自己练练吧, 下周再跟你们一起打。",
+          "pinyin": "Wǒ xiān zìjǐ liànlian ba, xià zhōu zài gēn nǐmen yīqǐ dǎ.",
+          "vi": "Tớ tự tập trước đã, tuần sau hãy chơi cùng các cậu."
+        },
+        {
+          "speaker": "李文",
+          "zh": "我在教天中打羽毛球, 你可以过来跟我们一起练。",
+          "pinyin": "Wǒ zài jiāo Tiānzhōng dǎ yǔmáoqiú, nǐ kěyǐ guòlái gēn wǒmen yīqǐ liàn.",
+          "vi": "Tớ đang dạy Thiên Trung chơi cầu lông, cậu có thể qua tập cùng bọn tớ."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "哦, 冰箱里没啤酒了, 我下去买一些。",
+          "pinyin": "O, bīngxiāng lǐ méi píjiǔ le, wǒ xiàqu mǎi yīxiē.",
+          "vi": "Ồ, trong tủ lạnh hết bia rồi, tôi xuống dưới mua ít."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "你慢慢看吧, 这场比赛我越看越着急。",
+          "pinyin": "Nǐ mànmàn kàn ba, zhè chǎng bǐsài wǒ yuè kàn yuè zhāojí.",
+          "vi": "Cậu từ từ xem đi, trận đấu này tôi càng xem càng sốt ruột."
+        },
+        {
+          "speaker": "李文",
+          "zh": "比赛结束了吗? 比分怎么样?",
+          "pinyin": "Bǐsài jiéshù le ma? Bǐfēn zěnmeyàng?",
+          "vi": "Trận đấu kết thúc chưa? Tỷ số thế nào?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "踢了90分钟了, 他们一个球都没踢进。",
+          "pinyin": "Tīle jiǔshí fēnzhōng le, tāmen yī gè qiú dōu méi tī jìn.",
+          "vi": "Đá 90 phút rồi, họ không ghi nổi một bàn nào."
+        },
+        {
+          "speaker": "李文",
+          "zh": "看来球员们受到天气的影响了。",
+          "pinyin": "Kànlái qiúyuánmen shòudào tiānqì de yǐngxiǎng le.",
+          "vi": "Có vẻ các cầu thủ bị ảnh hưởng bởi thời tiết rồi."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "是啊, 这场比赛非常激烈, 大家体力消耗很大。",
+          "pinyin": "Shì a, zhè chǎng bǐsài fēicháng jīliè, dàjiā tǐlì xiāohào hěn dà.",
+          "vi": "Đúng vậy, trận đấu này rất gay cấn, mọi người tiêu hao thể lực lớn."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "我喜欢看体育比赛, 最爱看的就是奥运会。奥运会是世界上影响最大的体育比赛。从1896年到2024年, 每次奥运会都有非常多的运动员参加。第一位参加奥运会的中国运动员是刘长春, 他1932年参加了100米和200米短跑比赛。虽然他没有得到好成绩, 但是他让世界认识了中国。",
+          "pinyin": "Wǒ xǐhuan kàn tǐyù bǐsài, zuì ài kàn de jiù shì Àoyùnhuì. Àoyùnhuì shì shìjiè shàng yǐngxiǎng zuì dà de tǐyù bǐsài. Cóng yībājiǔliù nián dào èrlíngèrsì nián, měi cì Àoyùnhuì dōu yǒu fēicháng duō de yùndòngyuán cānjiā. Dì-yī wèi cānjiā Àoyùnhuì de Zhōngguó yùndòngyuán shì Liú Chángchūn, tā yījiǔsān'èr nián cānjiāle yībǎi mǐ hé èrbǎi mǐ duǎnpǎo bǐsài. Suīrán tā méiyǒu dédào hǎo chéngjī, dànshì tā ràng shìjiè rènshi le Zhōngguó.",
+          "vi": "Tôi thích xem các trận đấu thể thao, thích nhất là Thế vận hội Olympic. Olympic là giải đấu thể thao có ảnh hưởng lớn nhất thế giới. Từ năm 1896 đến năm 2024, mỗi kỳ Olympic đều có rất nhiều vận động viên tham gia. Vận động viên Trung Quốc đầu tiên tham gia Olympic là Lưu Trường Xuân, ông đã tham gia thi chạy ngắn 100m và 200m năm 1932. Tuy ông không đạt được thành tích tốt, nhưng ông đã khiến thế giới biết đến Trung Quốc."
+        }
+      ]
+    }
+  ]
+}

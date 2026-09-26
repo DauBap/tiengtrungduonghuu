@@ -1,0 +1,220 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 10,
+  "label": "Bài 10",
+  "title": "幸福的标准",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "礼拜天",
+      "pinyin": "lǐbàitiān",
+      "adj": 2,
+      "vi": "chủ nhật"
+    },
+    {
+      "pos": 2,
+      "hanzi": "空儿",
+      "pinyin": "kòngr",
+      "adj": 2,
+      "vi": "thời gian rỗi"
+    },
+    {
+      "pos": 3,
+      "hanzi": "母亲",
+      "pinyin": "mǔqīn",
+      "adj": 2,
+      "vi": "mẹ"
+    },
+    {
+      "pos": 4,
+      "hanzi": "不过",
+      "pinyin": "búguò",
+      "adj": 10,
+      "vi": "nhưng, song"
+    },
+    {
+      "pos": 5,
+      "hanzi": "永远",
+      "pinyin": "yǒngyuǎn",
+      "adj": 7,
+      "vi": "vĩnh viễn, mãi mãi"
+    },
+    {
+      "pos": 6,
+      "hanzi": "方向",
+      "pinyin": "fāngxiàng",
+      "adj": 2,
+      "vi": "phương hướng, sự định hướng"
+    },
+    {
+      "pos": 7,
+      "hanzi": "优秀",
+      "pinyin": "yōuxiù",
+      "adj": 6,
+      "vi": "xuất sắc, ưu tú"
+    },
+    {
+      "pos": 8,
+      "hanzi": "硕士",
+      "pinyin": "shuòshì",
+      "adj": 2,
+      "vi": "thạc sĩ"
+    },
+    {
+      "pos": 9,
+      "hanzi": "翻译",
+      "pinyin": "fānyì",
+      "adj": 2,
+      "vi": "phiên dịch viên"
+    },
+    {
+      "pos": 10,
+      "hanzi": "确实",
+      "pinyin": "quèshí",
+      "adj": 7,
+      "vi": "thực sự"
+    },
+    {
+      "pos": 11,
+      "hanzi": "兴奋",
+      "pinyin": "xīngfèn",
+      "adj": 6,
+      "vi": "hăng hái, phấn khởi"
+    },
+    {
+      "pos": 12,
+      "hanzi": "拉",
+      "pinyin": "lā",
+      "adj": 4,
+      "vi": "kéo, lôi, dắt"
+    },
+    {
+      "pos": 13,
+      "hanzi": "建议",
+      "pinyin": "jiànyì",
+      "adj": 2,
+      "vi": "kiến nghị, sự đề nghị"
+    },
+    {
+      "pos": 14,
+      "hanzi": "职业",
+      "pinyin": "zhíyè",
+      "adj": 2,
+      "vi": "nghề nghiệp"
+    },
+    {
+      "pos": 15,
+      "hanzi": "关键",
+      "pinyin": "guānjiàn",
+      "adj": 2,
+      "vi": "điều quan trọng, điểm mấu chốt"
+    },
+    {
+      "pos": 16,
+      "hanzi": "将来",
+      "pinyin": "jiānglái",
+      "adj": 2,
+      "vi": "tương lai"
+    },
+    {
+      "pos": 17,
+      "hanzi": "发展",
+      "pinyin": "fāzhǎn",
+      "adj": 4,
+      "vi": "phát triển"
+    },
+    {
+      "pos": 18,
+      "hanzi": "躺",
+      "pinyin": "tǎng",
+      "adj": 4,
+      "vi": "nằm"
+    },
+    {
+      "pos": 19,
+      "hanzi": "困",
+      "pinyin": "kùn",
+      "adj": 6,
+      "vi": "buồn ngủ"
+    },
+    {
+      "pos": 20,
+      "hanzi": "经济",
+      "pinyin": "jīngjì",
+      "adj": 2,
+      "vi": "kinh tế"
+    },
+    {
+      "pos": 21,
+      "hanzi": "条件",
+      "pinyin": "tiáojiàn",
+      "adj": 2,
+      "vi": "điều kiện"
+    },
+    {
+      "pos": 22,
+      "hanzi": "富",
+      "pinyin": "fù",
+      "adj": 6,
+      "vi": "giàu"
+    },
+    {
+      "pos": 23,
+      "hanzi": "穷",
+      "pinyin": "qióng",
+      "adj": 6,
+      "vi": "nghèo"
+    },
+    {
+      "pos": 24,
+      "hanzi": "等",
+      "pinyin": "děng",
+      "adj": 11,
+      "vi": "vân vân"
+    },
+    {
+      "pos": 25,
+      "hanzi": "由于",
+      "pinyin": "yóuyú",
+      "adj": 10,
+      "vi": "vì, bởi vì"
+    },
+    {
+      "pos": 26,
+      "hanzi": "比如",
+      "pinyin": "bǐrú",
+      "adj": 4,
+      "vi": "ví dụ, chẳng hạn"
+    },
+    {
+      "pos": 27,
+      "hanzi": "橡皮",
+      "pinyin": "xiàngpí",
+      "adj": 2,
+      "vi": "(cục) gôm, tẩy"
+    },
+    {
+      "pos": 28,
+      "hanzi": "糖",
+      "pinyin": "táng",
+      "adj": 2,
+      "vi": "kẹo"
+    },
+    {
+      "pos": 29,
+      "hanzi": "低",
+      "pinyin": "dī",
+      "adj": 6,
+      "vi": "thấp"
+    },
+    {
+      "pos": 30,
+      "hanzi": "答案",
+      "pinyin": "dá'àn",
+      "adj": 2,
+      "vi": "đáp án, câu trả lời, lời giải"
+    }
+  ]
+}

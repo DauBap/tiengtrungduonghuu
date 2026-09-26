@@ -1,0 +1,234 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 19,
+  "label": "Bài 19",
+  "title": " 生活的味道",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "学期",
+      "pinyin": "xuéqī",
+      "adj": 2,
+      "vi": "học kỳ"
+    },
+    {
+      "pos": 2,
+      "hanzi": "出生",
+      "pinyin": "chūshēng",
+      "adj": 4,
+      "vi": "ra đời, sinh ra"
+    },
+    {
+      "pos": 3,
+      "hanzi": "性别",
+      "pinyin": "xìngbié",
+      "adj": 2,
+      "vi": "giới tính"
+    },
+    {
+      "pos": 4,
+      "hanzi": "道歉",
+      "pinyin": "dào qiàn",
+      "adj": 4,
+      "vi": "xin lỗi"
+    },
+    {
+      "pos": 5,
+      "hanzi": "打印",
+      "pinyin": "dǎyìn",
+      "adj": 4,
+      "vi": "in"
+    },
+    {
+      "pos": 6,
+      "hanzi": "复印",
+      "pinyin": "fùyìn",
+      "adj": 4,
+      "vi": "photocopy, sao chụp"
+    },
+    {
+      "pos": 7,
+      "hanzi": "饺子",
+      "pinyin": "jiǎozi",
+      "adj": 2,
+      "vi": "bánh chẻo"
+    },
+    {
+      "pos": 8,
+      "hanzi": "刀",
+      "pinyin": "dǎo",
+      "adj": 2,
+      "vi": "con dao"
+    },
+    {
+      "pos": 9,
+      "hanzi": "破",
+      "pinyin": "pò",
+      "adj": 6,
+      "vi": "bị đứt, bị thủng"
+    },
+    {
+      "pos": 10,
+      "hanzi": "脱",
+      "pinyin": "tuō",
+      "adj": 4,
+      "vi": "cởi ra"
+    },
+    {
+      "pos": 11,
+      "hanzi": "理发",
+      "pinyin": "lǐfà",
+      "adj": 4,
+      "vi": "cắt tóc"
+    },
+    {
+      "pos": 12,
+      "hanzi": "包子",
+      "pinyin": "bāozi",
+      "adj": 2,
+      "vi": "bánh bao"
+    },
+    {
+      "pos": 13,
+      "hanzi": "零钱",
+      "pinyin": "língqián",
+      "adj": 2,
+      "vi": "tiền lẻ"
+    },
+    {
+      "pos": 14,
+      "hanzi": "打招呼",
+      "pinyin": "dǎ zhāohu",
+      "adj": 4,
+      "vi": "chào hỏi, chào"
+    },
+    {
+      "pos": 15,
+      "hanzi": "戴",
+      "pinyin": "dài",
+      "adj": 4,
+      "vi": "đeo, mang"
+    },
+    {
+      "pos": 16,
+      "hanzi": "眼镜",
+      "pinyin": "yǎnjìng",
+      "adj": 2,
+      "vi": "mắt kính"
+    },
+    {
+      "pos": 17,
+      "hanzi": "舞蹈",
+      "pinyin": "wǔdǎo",
+      "adj": 2,
+      "vi": "điệu múa"
+    },
+    {
+      "pos": 18,
+      "hanzi": "国籍",
+      "pinyin": "guójí",
+      "adj": 2,
+      "vi": "quốc tịch"
+    },
+    {
+      "pos": 19,
+      "hanzi": "抬",
+      "pinyin": "tái",
+      "adj": 4,
+      "vi": "giơ lên, đưa lên"
+    },
+    {
+      "pos": 20,
+      "hanzi": "胳膊",
+      "pinyin": "gēbo",
+      "adj": 2,
+      "vi": "cánh tay"
+    },
+    {
+      "pos": 21,
+      "hanzi": "转",
+      "pinyin": "zhuǎn",
+      "adj": 4,
+      "vi": "quay, xoay"
+    },
+    {
+      "pos": 22,
+      "hanzi": "租",
+      "pinyin": "zū",
+      "adj": 4,
+      "vi": "thuê, cho thuê"
+    },
+    {
+      "pos": 23,
+      "hanzi": "吵",
+      "pinyin": "chǎo",
+      "adj": 6,
+      "vi": "ồn ào"
+    },
+    {
+      "pos": 24,
+      "hanzi": "厨房",
+      "pinyin": "chúfáng",
+      "adj": 2,
+      "vi": "nhà bếp"
+    },
+    {
+      "pos": 25,
+      "hanzi": "房东",
+      "pinyin": "fángdōng",
+      "adj": 2,
+      "vi": "chủ nhà (nhà cho thuê)"
+    },
+    {
+      "pos": 26,
+      "hanzi": "占线",
+      "pinyin": "zhànxiàn",
+      "adj": 4,
+      "vi": "(đường dây điện thoại) bận"
+    },
+    {
+      "pos": 27,
+      "hanzi": "功夫",
+      "pinyin": "gōngfu",
+      "adj": 2,
+      "vi": "võ thuật, môn võ kung fu"
+    },
+    {
+      "pos": 28,
+      "hanzi": "乒乓球",
+      "pinyin": "pīngpāngqiú",
+      "adj": 2,
+      "vi": "bóng bàn"
+    },
+    {
+      "pos": 29,
+      "hanzi": "羽毛球",
+      "pinyin": "yǔmáoqiú",
+      "adj": 2,
+      "vi": "cầu lông"
+    },
+    {
+      "pos": 30,
+      "hanzi": "场",
+      "pinyin": "chǎng",
+      "adj": 8,
+      "vi": "(dùng cho thể thao, giải trí...) trận"
+    },
+    {
+      "pos": 31,
+      "hanzi": "禁止",
+      "pinyin": "jìnzhǐ",
+      "adj": 4,
+      "vi": "cấm"
+    },
+    {
+      "pos": 32,
+      "hanzi": "座位",
+      "pinyin": "zuòwèi",
+      "adj": 2,
+      "vi": "chỗ ngồi"
+    }
+  ]
+}

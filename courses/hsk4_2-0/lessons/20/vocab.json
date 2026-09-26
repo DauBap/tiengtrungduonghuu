@@ -1,0 +1,220 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 20,
+  "label": "Bài 20",
+  "title": "路上的风景",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "加油站",
+      "pinyin": "jiāyóuzhàn",
+      "adj": 2,
+      "vi": "trạm xăng dầu"
+    },
+    {
+      "pos": 2,
+      "hanzi": "航班",
+      "pinyin": "hángbān",
+      "adj": 2,
+      "vi": "chuyến bay"
+    },
+    {
+      "pos": 3,
+      "hanzi": "推迟",
+      "pinyin": "tuīchí",
+      "adj": 4,
+      "vi": "hoãn lại"
+    },
+    {
+      "pos": 4,
+      "hanzi": "高速公路",
+      "pinyin": "gāosù gōnglù",
+      "adj": 2,
+      "vi": "đường cao tốc"
+    },
+    {
+      "pos": 5,
+      "hanzi": "登机牌",
+      "pinyin": "dēngjīpái",
+      "adj": 2,
+      "vi": "thẻ lên máy bay"
+    },
+    {
+      "pos": 6,
+      "hanzi": "首都",
+      "pinyin": "shǒudū",
+      "adj": 2,
+      "vi": "thủ đô"
+    },
+    {
+      "pos": 7,
+      "hanzi": "旅行",
+      "pinyin": "lǚxíng",
+      "adj": 4,
+      "vi": "du lịch"
+    },
+    {
+      "pos": 8,
+      "hanzi": "怪",
+      "pinyin": "guài",
+      "adj": 7,
+      "vi": "rất, vô cùng"
+    },
+    {
+      "pos": 9,
+      "hanzi": "可怜",
+      "pinyin": "kělián",
+      "adj": 6,
+      "vi": "đáng thương, tội nghiệp"
+    },
+    {
+      "pos": 10,
+      "hanzi": "对面",
+      "pinyin": "duìmiàn",
+      "adj": 2,
+      "vi": "đối diện, trước mặt"
+    },
+    {
+      "pos": 11,
+      "hanzi": "烤鸭",
+      "pinyin": "kǎoyā",
+      "adj": 2,
+      "vi": "vịt quay"
+    },
+    {
+      "pos": 12,
+      "hanzi": "祝贺",
+      "pinyin": "zhùhè",
+      "adj": 4,
+      "vi": "chúc mừng"
+    },
+    {
+      "pos": 13,
+      "hanzi": "合格",
+      "pinyin": "hégé",
+      "adj": 6,
+      "vi": "đạt tiêu chuẩn, đạt yêu cầu"
+    },
+    {
+      "pos": 14,
+      "hanzi": "干杯",
+      "pinyin": "gān bēi",
+      "adj": 4,
+      "vi": "cạn ly"
+    },
+    {
+      "pos": 15,
+      "hanzi": "民族",
+      "pinyin": "mínzú",
+      "adj": 2,
+      "vi": "dân tộc"
+    },
+    {
+      "pos": 16,
+      "hanzi": "打扮",
+      "pinyin": "dǎban",
+      "adj": 4,
+      "vi": "trang điểm"
+    },
+    {
+      "pos": 17,
+      "hanzi": "笑话",
+      "pinyin": "xiàohua",
+      "adj": 2,
+      "vi": "truyện cười"
+    },
+    {
+      "pos": 18,
+      "hanzi": "存",
+      "pinyin": "cún",
+      "adj": 4,
+      "vi": "gửi"
+    },
+    {
+      "pos": 19,
+      "hanzi": "钥匙",
+      "pinyin": "yàoshi",
+      "adj": 2,
+      "vi": "chìa khóa"
+    },
+    {
+      "pos": 20,
+      "hanzi": "究竟",
+      "pinyin": "jiūjìng",
+      "adj": 7,
+      "vi": "(nhấn mạnh trong câu hỏi) rốt cuộc"
+    },
+    {
+      "pos": 21,
+      "hanzi": "棵",
+      "pinyin": "kē",
+      "adj": 8,
+      "vi": "(dùng cho thực vật) cây, ngọn"
+    },
+    {
+      "pos": 22,
+      "hanzi": "汤",
+      "pinyin": "tāng",
+      "adj": 2,
+      "vi": "canh, súp"
+    },
+    {
+      "pos": 23,
+      "hanzi": "对话",
+      "pinyin": "duìhuà",
+      "adj": 4,
+      "vi": "đối thoại, tiếp xúc"
+    },
+    {
+      "pos": 24,
+      "hanzi": "普通话",
+      "pinyin": "pǔtōnghuà",
+      "adj": 2,
+      "vi": "tiếng phổ thông, tiếng Quan thoại"
+    },
+    {
+      "pos": 25,
+      "hanzi": "小吃",
+      "pinyin": "xiǎochī",
+      "adj": 2,
+      "vi": "món ăn vặt"
+    },
+    {
+      "pos": 26,
+      "hanzi": "收拾",
+      "pinyin": "shōushi",
+      "adj": 4,
+      "vi": "thu dọn, thu xếp"
+    },
+    {
+      "pos": 27,
+      "hanzi": "出发",
+      "pinyin": "chūfā",
+      "adj": 4,
+      "vi": "xuất phát, khởi hành"
+    },
+    {
+      "pos": 28,
+      "hanzi": "辣",
+      "pinyin": "là",
+      "adj": 6,
+      "vi": "cay"
+    },
+    {
+      "pos": 29,
+      "hanzi": "香",
+      "pinyin": "xiāng",
+      "adj": 6,
+      "vi": "thơm"
+    },
+    {
+      "pos": 30,
+      "hanzi": "酸",
+      "pinyin": "suān",
+      "adj": 6,
+      "vi": "chua"
+    }
+  ]
+}

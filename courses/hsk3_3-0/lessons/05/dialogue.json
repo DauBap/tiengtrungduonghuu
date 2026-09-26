@@ -1,0 +1,158 @@
+{
+  "lesson": 5,
+  "title": "这样的照片才好看",
+  "title_pinyin": "Zhèyàng de zhàopiàn cái hǎokàn",
+  "title_vi": "Như thế này mới là ảnh đẹp",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "这个星期总是阴天, 今天终于晴了。",
+          "pinyin": "Zhège xīngqī zǒngshì yīntiān, jīntiān zhōngyú qíng le.",
+          "vi": "Tuần này cứ trời âm u mãi, hôm nay cuối cùng đã quang đãng rồi."
+        },
+        {
+          "speaker": "李文",
+          "zh": "现在天气好得很! 我们去爬山怎么样?",
+          "pinyin": "Xiànzài tiānqì hǎo de hěn! Wǒmen qù páshān zěnmeyàng?",
+          "vi": "Thời tiết bây giờ đẹp lắm! Chúng ta đi leo núi thế nào?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好啊! 又能锻炼身体, 又能照好看的照片。",
+          "pinyin": "Hǎo a! Yòu néng duànliàn shēntǐ, yòu néng zhào hǎokàn de zhàopiàn.",
+          "vi": "Được thôi! Vừa có thể rèn luyện thân thể, vừa có thể chụp ảnh đẹp."
+        },
+        {
+          "speaker": "李文",
+          "zh": "那我带点儿水和吃的, 咱们现在就去?",
+          "pinyin": "Nà wǒ dài diǎnr shuǐ hé chī de, zánmen xiànzài jiù qù?",
+          "vi": "Vậy tôi mang ít nước và đồ ăn, chúng ta đi ngay bây giờ?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我回去穿上运动鞋, 拿上大衣。要不要叫一雪姐一起去?",
+          "pinyin": "Wǒ huíqu chuān shàng yùndòngxié, ná shàng dàyī. Yào bú yào jiào Yīxuě jiě yīqǐ qù?",
+          "vi": "Tôi về mang giày thể thao và áo khoác. Có nên gọi chị Nhất Tuyết đi cùng không?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "好主意。给她打个电话吧。",
+          "pinyin": "Hǎo zhǔyi. Gěi tā dǎ ge diànhuà ba.",
+          "vi": "Ý kiến hay. Gọi điện cho chị ấy đi."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "这些照片是谁给您照的? 张张都非常好看。",
+          "pinyin": "Zhèxiē zhàopiàn shì shéi gěi nín zhào de? Zhāng zhāng dōu fēicháng hǎokàn.",
+          "vi": "Những bức ảnh này ai chụp cho chị vậy? Tấm nào cũng rất đẹp."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "一飞。她对拍照一直很感兴趣, 经常给我照相。",
+          "pinyin": "Yīfēi. Tā duì pāizhào yīzhí hěn gǎn xìngqù, jīngcháng gěi wǒ zhàoxiàng.",
+          "vi": "Nhất Phi. Em ấy luôn rất thích chụp ảnh, thường chụp cho chị."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我喜欢您大笑的这张, 看起来很漂亮。",
+          "pinyin": "Wǒ xǐhuan nín dàxiào de zhè zhāng, kàn qǐlái hěn piàoliang.",
+          "vi": "Em thích tấm chị cười lớn này, trông rất đẹp."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我觉得这张有点儿难看, 那时候我不知道她在给我照相。",
+          "pinyin": "Wǒ juéde zhè zhāng yǒudiǎnr nánkàn, nà shíhou wǒ bù zhīdào tā zài gěi wǒ zhàoxiàng.",
+          "vi": "Chị thấy tấm này hơi xấu, lúc đó chị không biết em ấy đang chụp mình."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "这样的照片才好看。我也喜欢拍照, 爬山的时候我给您照几张照片吧。",
+          "pinyin": "Zhèyàng de zhàopiàn cái hǎokàn. Wǒ yě xǐhuan pāizhào, páshān de shíhou wǒ gěi nín zhào jǐ zhāng zhàopiàn ba.",
+          "vi": "Như thế này mới là ảnh đẹp. Em cũng thích chụp ảnh, lúc leo núi em chụp cho chị vài tấm nhé."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好, 我可以比较一下你们两个谁的水平高。",
+          "pinyin": "Hǎo, wǒ kěyǐ bǐjiào yíxià nǐmen liǎng gè shéi de shuǐpíng gāo.",
+          "vi": "Được, chị có thể so sánh xem ai trong hai người có trình độ cao hơn."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "家月, 这里挺漂亮的, 咱们在这里拍照吧。",
+          "pinyin": "Jiāyuè, zhèlǐ tǐng piàoliang de, zánmen zài zhèlǐ pāizhào ba.",
+          "vi": "Gia Nguyệt, chỗ này khá đẹp, chúng ta chụp ảnh ở đây đi."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "这边没有太阳, 咱们去那边吧。",
+          "pinyin": "Zhèbiān méiyǒu tàiyáng, zánmen qù nàbian ba.",
+          "vi": "Bên này không có nắng, chúng ta sang bên kia đi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好。你觉得我站在这些树中间怎么样?",
+          "pinyin": "Hǎo. Nǐ juéde wǒ zhàn zài zhèxiē shù zhōngjiān zěnmeyàng?",
+          "vi": "Được. Em thấy chị đứng giữa những cây này thế nào?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "挺好的。等一下, 后边走过去两个人。",
+          "pinyin": "Tǐng hǎo de. Děng yíxià, hòubian zǒu guòqu liǎng gè rén.",
+          "vi": "Khá tốt. Đợi chút, phía sau có hai người đi qua."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我准备好了, 你照的时候告诉我。",
+          "pinyin": "Wǒ zhǔnbèi hǎo le, nǐ zhào de shíhou gàosu wǒ.",
+          "vi": "Chị chuẩn bị xong rồi, khi em chụp thì bảo chị nhé."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "你不用看着我, 想干什么都可以。",
+          "pinyin": "Nǐ bú yòng kànzhe wǒ, xiǎng gàn shénme dōu kěyǐ.",
+          "vi": "Chị không cần nhìn vào em, muốn làm gì cũng được."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "树上飞来了几只鸟, 我就看它们吧。",
+          "pinyin": "Shù shàng fēi lái le jǐ zhī niǎo, wǒ jiù kàn tāmen ba.",
+          "vi": "Trên cây bay đến mấy con chim, chị sẽ nhìn chúng."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "啊, 手机没电了。",
+          "pinyin": "A, shǒujī méi diàn le.",
+          "vi": "A, điện thoại hết pin rồi."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "家月, 我收到了你的那封邮件, 也看到了你给我照的照片, 张张都很漂亮。我已经告诉了一飞, 你的拍照水平比她高, 她难过得很, 哈哈。不知道你对中国的音乐有没有兴趣? 我送你一张明天下午音乐会的门票。音乐会七点多结束, 你听完了音乐会就来我家吃饭, 尝尝我做的中国菜。你觉得怎么样?",
+          "pinyin": "Jiāyuè, wǒ shōudào le nǐ de nà fēng yóujiàn, yě kàndào le nǐ gěi wǒ zhào de zhàopiàn, zhāng zhāng dōu hěn piàoliang. Wǒ yǐjīng gàosu le Yīfēi, nǐ de pāizhào shuǐpíng bǐ tā gāo, tā nánguò de hěn, hāhā. Bù zhīdào nǐ duì Zhōngguó de yīnyuè yǒu méiyǒu xìngqù? Wǒ sòng nǐ yī zhāng míngtiān xiàwǔ yīnyuèhuì de ménpiào. Yīnyuèhuì qī diǎn duō jiéshù, nǐ tīng wán le yīnyuèhuì jiù lái wǒ jiā chīfàn, chángchang wǒ zuò de Zhōngguó cài. Nǐ juéde zěnmeyàng?",
+          "vi": "Gia Nguyệt, chị đã nhận được email của em, và cũng đã xem những bức ảnh em chụp cho chị, tấm nào cũng rất đẹp. Chị đã nói với Nhất Phi rằng trình độ chụp ảnh của em cao hơn em ấy, em ấy buồn lắm, haha. Không biết em có hứng thú với âm nhạc Trung Quốc không? Chị tặng em một vé xem buổi hòa nhạc chiều mai. Buổi hòa nhạc kết thúc lúc hơn 7 giờ, em nghe xong thì đến nhà chị ăn cơm, nếm thử món Trung Quốc chị làm. Em thấy thế nào?"
+        }
+      ]
+    }
+  ]
+}

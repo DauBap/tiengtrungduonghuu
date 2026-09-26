@@ -1,0 +1,122 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 17,
+  "label": "Bài 17",
+  "title": "谁都有办法看好你的\"病\"",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "请假",
+      "pinyin": "qǐng jià",
+      "adj": 4,
+      "vi": "xin nghỉ phép"
+    },
+    {
+      "pos": 2,
+      "hanzi": "一共",
+      "pinyin": "yígòng",
+      "adj": 7,
+      "vi": "tổng cộng"
+    },
+    {
+      "pos": 3,
+      "hanzi": "邻居",
+      "pinyin": "línjū",
+      "adj": 2,
+      "vi": "láng giềng"
+    },
+    {
+      "pos": 4,
+      "hanzi": "后来",
+      "pinyin": "hòulái",
+      "adj": 2,
+      "vi": "sau này, sau đó"
+    },
+    {
+      "pos": 5,
+      "hanzi": "爱好",
+      "pinyin": "àihào",
+      "adj": 2,
+      "vi": "sở thích"
+    },
+    {
+      "pos": 6,
+      "hanzi": "办法",
+      "pinyin": "bànfǎ",
+      "adj": 2,
+      "vi": "cách, biện pháp"
+    },
+    {
+      "pos": 7,
+      "hanzi": "饱",
+      "pinyin": "bǎo",
+      "adj": 6,
+      "vi": "no"
+    },
+    {
+      "pos": 8,
+      "hanzi": "为了",
+      "pinyin": "wèile",
+      "adj": 13,
+      "vi": "để, vì"
+    },
+    {
+      "pos": 9,
+      "hanzi": "决定",
+      "pinyin": "juédìng",
+      "adj": 4,
+      "vi": "quyết định"
+    },
+    {
+      "pos": 10,
+      "hanzi": "选择",
+      "pinyin": "xuǎnzé",
+      "adj": 4,
+      "vi": "lựa chọn"
+    },
+    {
+      "pos": 11,
+      "hanzi": "冬（天）",
+      "pinyin": "dōng (tiān)",
+      "adj": 2,
+      "vi": "(mùa) đông"
+    },
+    {
+      "pos": 12,
+      "hanzi": "必须",
+      "pinyin": "bìxū",
+      "adj": 7,
+      "vi": "cần phải"
+    },
+    {
+      "pos": 13,
+      "hanzi": "根据",
+      "pinyin": "gēnjù",
+      "adj": 13,
+      "vi": "căn cứ vào, dựa vào"
+    },
+    {
+      "pos": 14,
+      "hanzi": "情况",
+      "pinyin": "qíngkuàng",
+      "adj": 2,
+      "vi": "tình hình, tình trạng"
+    },
+    {
+      "pos": 15,
+      "hanzi": "口",
+      "pinyin": "kǒu",
+      "adj": 2,
+      "vi": "miệng"
+    },
+    {
+      "pos": 16,
+      "hanzi": "渴",
+      "pinyin": "kě",
+      "adj": 6,
+      "vi": "khát"
+    }
+  ]
+}

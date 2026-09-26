@@ -1,0 +1,170 @@
+{
+  "lesson": 11,
+  "title": "看来我没办法解决这个问题",
+  "title_pinyin": "Kànlái wǒ méi bànfǎ jiějué zhège wèntí",
+  "title_vi": "Xem ra tôi không có cách giải quyết vấn đề này",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "会议下午几点开始?",
+          "pinyin": "Huìyì xiàwǔ jǐ diǎn kāishǐ?",
+          "vi": "Cuộc họp chiều mấy giờ bắt đầu?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "今天下午经理不在, 不开会了。",
+          "pinyin": "Jīntiān xiàwǔ jīnglǐ bú zài, bù kāi huì le.",
+          "vi": "Chiều nay giám đốc không có ở đây, không họp nữa."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "那什么时候开会?",
+          "pinyin": "Nà shénme shíhou kāi huì?",
+          "vi": "Vậy khi nào họp?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "后天上午十点, 会议地点换到第一会议室。我正要给大家发邮件。",
+          "pinyin": "Hòutiān shàngwǔ shí diǎn, huìyì dìdiǎn huàn dào dì-yī huìyìshì. Wǒ zhèngyào gěi dàjiā fā yóujiàn.",
+          "vi": "10 giờ sáng ngày mốt, địa điểm họp đổi sang phòng họp số một. Tôi đang định gửi email cho mọi người."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "开会的时候, 我们用会议室的电脑还是自己的笔记本电脑?",
+          "pinyin": "Kāi huì de shíhou, wǒmen yòng huìyìshì de diànnǎo háishì zìjǐ de bǐjìběn diànnǎo?",
+          "vi": "Lúc họp, chúng ta dùng máy tính trong phòng họp hay máy tính xách tay của mình?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "会议室的电脑或者自己的电脑都可以。",
+          "pinyin": "Huìyìshì de diànnǎo huòzhě zìjǐ de diànnǎo dōu kěyǐ.",
+          "vi": "Máy tính trong phòng họp hoặc máy của mình đều được."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "那到时候咱们早点儿过去, 你帮我把电脑接好吧。",
+          "pinyin": "Nà dào shíhou zánmen zǎo diǎnr guòqu, nǐ bāng wǒ bǎ diànnǎo jiē hǎo ba.",
+          "vi": "Vậy lúc đó chúng ta qua sớm một chút, cậu giúp tôi kết nối máy tính nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "杨同乐",
+          "zh": "电脑接好了吗?",
+          "pinyin": "Diànnǎo jiē hǎo le ma?",
+          "vi": "Máy tính đã kết nối xong chưa?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "已经接好了, 您开机看看有没有问题。",
+          "pinyin": "Yǐjīng jiē hǎo le, nín kāijī kànkan yǒu méiyǒu wèntí.",
+          "vi": "Đã kết nối xong rồi, anh bật máy xem có vấn đề gì không."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "现在什么都看不见。",
+          "pinyin": "Xiànzài shénme dōu kàn bú jiàn.",
+          "vi": "Bây giờ không nhìn thấy gì cả."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我检查一下哪里出问题了……您再试一下。",
+          "pinyin": "Wǒ jiǎnchá yíxià nǎlǐ chū wèntí le…… Nín zài shì yíxià.",
+          "vi": "Tôi kiểm tra xem chỗ nào có vấn đề… Anh thử lại lần nữa."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "看见了, 但是听不见声音。",
+          "pinyin": "Kànjiàn le, dànshì tīng bú jiàn shēngyīn.",
+          "vi": "Nhìn thấy rồi, nhưng không nghe thấy tiếng."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "现在呢?",
+          "pinyin": "Xiànzài ne?",
+          "vi": "Bây giờ thì sao?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "听得见声音, 但是声音有点儿小, 听不清楚。",
+          "pinyin": "Tīng de jiàn shēngyīn, dànshì shēngyīn yǒudiǎnr xiǎo, tīng bù qīngchu.",
+          "vi": "Nghe thấy tiếng, nhưng tiếng hơi nhỏ, nghe không rõ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "看来我没办法解决这个问题, 只能找别人来帮帮忙了。",
+          "pinyin": "Kànlái wǒ méi bànfǎ jiějué zhège wèntí, zhǐnéng zhǎo biéren lái bāngbang máng le.",
+          "vi": "Xem ra tôi không có cách giải quyết vấn đề này, chỉ có thể nhờ người khác đến giúp thôi."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "同乐, 你看见老张了吗?",
+          "pinyin": "Tónglè, nǐ kànjiàn Lǎo Zhāng le ma?",
+          "vi": "Đồng Lạc, cậu có nhìn thấy Lão Trương không?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "老张没来。他说家里有点儿事, 所以请假了。",
+          "pinyin": "Lǎo Zhāng méi lái. Tā shuō jiā lǐ yǒudiǎnr shì, suǒyǐ qǐngjià le.",
+          "vi": "Lão Trương không đến. Anh ấy nói trong nhà có việc, nên xin nghỉ phép."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好几个同事都休假了, 开会前这么多工作我怕干不完。",
+          "pinyin": "Hǎo jǐ gè tóngshì dōu xiūjià le, kāi huì qián zhème duō gōngzuò wǒ pà gàn bù wán.",
+          "vi": "Mấy đồng nghiệp đều nghỉ rồi, nhiều công việc thế này trước khi họp tôi sợ làm không xong."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "十二点多了, 咱们先去吃饭吧。吃完饭, 我跟您一起把这些工作做完。",
+          "pinyin": "Shí'èr diǎn duō le, zánmen xiān qù chīfàn ba. Chī wán fàn, wǒ gēn nín yīqǐ bǎ zhèxiē gōngzuò zuò wán.",
+          "vi": "Hơn 12 giờ rồi, chúng ta đi ăn cơm trước đã. Ăn xong, tôi sẽ giúp chị làm xong những công việc này."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你先去吃, 我想再干一会儿。明天开会前要发到公司的邮箱里。",
+          "pinyin": "Nǐ xiān qù chī, wǒ xiǎng zài gàn yīhuìr. Míngtiān kāi huì qián yào fā dào gōngsī de yóuxiāng lǐ.",
+          "vi": "Cậu đi ăn trước đi, tôi muốn làm thêm một lúc nữa. Trước khi họp ngày mai phải gửi vào hộp thư công ty."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "您没看到邮件吗? 经理还没回来呢, 下周才能开会。",
+          "pinyin": "Nín méi kàn dào yóujiàn ma? Jīnglǐ hái méi huílái ne, xià zhōu cáinéng kāi huì.",
+          "vi": "Chị không xem email à? Giám đốc vẫn chưa về, tuần sau mới họp được."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "那不着急了。走, 吃饭去。",
+          "pinyin": "Nà bù zhāojí le. Zǒu, chīfàn qù.",
+          "vi": "Vậy không vội nữa. Đi, ăn cơm thôi."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "前几天, 上海的同事来北京了。一起吃饭时, 他们跟我说最近有不少同事去上海工作了, 问我愿意不愿意也去上海。我是这样想的: 现在丈夫和孩子都在北京, 刘明的工作很忙, 小雪和小明也还小, 我去别的城市工作就要离开他们。虽然去上海可能会有更好的机会, 但是对我来说, 生活也很重要, 我不愿意为工作或学习离开家人。",
+          "pinyin": "Qián jǐ tiān, Shànghǎi de tóngshì lái Běijīng le. Yīqǐ chīfàn shí, tāmen gēn wǒ shuō zuìjìn yǒu bù shǎo tóngshì qù Shànghǎi gōngzuò le, wèn wǒ yuànyì bù yuànyì yě qù Shànghǎi. Wǒ shì zhèyàng xiǎng de: Xiànzài zhàngfu hé háizi dōu zài Běijīng, Liú Míng de gōngzuò hěn máng, Xiǎoxuě hé Xiǎomíng yě hái xiǎo, wǒ qù biéde chéngshì gōngzuò jiù yào líkāi tāmen. Suīrán qù Shànghǎi kěnéng huì yǒu gèng hǎo de jīhuì, dànshì duì wǒ lái shuō, shēnghuó yě hěn zhòngyào, wǒ bù yuànyì wèi gōngzuò huò xuéxí líkāi jiārén.",
+          "vi": "Mấy ngày trước, đồng nghiệp ở Thượng Hải đến Bắc Kinh. Khi cùng ăn cơm, họ nói với tôi rằng gần đây có không ít đồng nghiệp đã đến Thượng Hải làm việc, hỏi tôi có muốn đến Thượng Hải không. Tôi nghĩ như thế này: Bây giờ chồng và các con đều ở Bắc Kinh, công việc của Lưu Minh rất bận, Tiểu Tuyết và Tiểu Minh vẫn còn nhỏ, tôi đi làm ở thành phố khác thì phải xa họ. Tuy đến Thượng Hải có thể có cơ hội tốt hơn, nhưng đối với tôi, cuộc sống cũng rất quan trọng, tôi không muốn vì công việc hay học tập mà xa gia đình."
+        }
+      ]
+    }
+  ]
+}

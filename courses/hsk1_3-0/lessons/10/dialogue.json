@@ -1,0 +1,122 @@
+{
+  "lesson": 10,
+  "title": "这儿的苹果真便宜",
+  "title_pinyin": "Zhèr de píngguǒ zhēn piányi",
+  "title_vi": "Táo ở đây rẻ thật!",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "请问，有杯子吗？",
+          "pinyin": "Qǐngwèn, yǒu bēizi ma?",
+          "vi": "Xin hỏi, có cốc không ạ?"
+        },
+        {
+          "speaker": "售货员",
+          "zh": "有，杯子在这边。",
+          "pinyin": "Yǒu, bēizi zài zhèbiān.",
+          "vi": "Có, cốc ở bên này."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "多少钱一个？",
+          "pinyin": "Duōshao qián yí gè?",
+          "vi": "Bao nhiêu tiền một cái?"
+        },
+        {
+          "speaker": "售货员",
+          "zh": "这些五块钱一个，那些十块钱一个。",
+          "pinyin": "Zhèxiē wǔ kuài qián yí gè, nàxiē shí kuài qián yí gè.",
+          "vi": "Những cái này 5 đồng một cái, những cái kia 10 đồng một cái."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我买这个吧。",
+          "pinyin": "Wǒ mǎi zhège ba.",
+          "vi": "Tôi mua cái này nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "这儿的水果真不少！",
+          "pinyin": "Zhèr de shuǐguǒ zhēn bù shǎo!",
+          "vi": "Hoa quả ở đây thật không ít!"
+        },
+        {
+          "speaker": "售货员",
+          "zh": "您想买什么？",
+          "pinyin": "Nín xiǎng mǎi shénme?",
+          "vi": "Bà muốn mua gì ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我想买两斤苹果。",
+          "pinyin": "Wǒ xiǎng mǎi liǎng jīn píngguǒ.",
+          "vi": "Tôi muốn mua hai cân táo."
+        },
+        {
+          "speaker": "售货员",
+          "zh": "苹果三块五一斤。这些七块二，七块钱吧。",
+          "pinyin": "Píngguǒ sān kuài wǔ yī jīn. Zhèxiē qī kuài èr, qī kuài qián ba.",
+          "vi": "Táo 3 đồng rưỡi một cân. Của này 7 đồng 2, lấy 7 đồng nhé."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好的，这儿的苹果真便宜！",
+          "pinyin": "Hǎo de, zhèr de píngguǒ zhēn piányi!",
+          "vi": "Được thôi, táo ở đây rẻ thật!"
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "这家商店衣服真多！这件一百元，怎么样？",
+          "pinyin": "Zhè jiā shāngdiàn yīfu zhēn duō! Zhè jiàn yībǎi yuán, zěnmeyàng?",
+          "vi": "Cửa hàng này quần áo thật nhiều! Cái này 100 đồng, thế nào?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好看，也不贵。",
+          "pinyin": "Hǎokàn, yě bú guì.",
+          "vi": "Đẹp, cũng không đắt."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "小雪能穿，买一件吧。",
+          "pinyin": "Xiǎoxuě néng chuān, mǎi yī jiàn ba.",
+          "vi": "Tiểu Tuyết mặc vừa đấy, mua một cái nhé."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好的。小明能穿吗？",
+          "pinyin": "Hǎo de. Xiǎomíng néng chuān ma?",
+          "vi": "Được. Tiểu Minh mặc được không?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "不能。这些是女孩子穿的衣服，男孩子的衣服在那儿。",
+          "pinyin": "Bù néng. Zhèxiē shì nǚ háizi chuān de yīfu, nán háizi de yīfu zài nàr.",
+          "vi": "Không được. Những cái này là quần áo con gái mặc, quần áo con trai ở đằng kia."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好的。",
+          "pinyin": "Hǎo de.",
+          "vi": "Ừ."
+        }
+      ]
+    }
+  ]
+}

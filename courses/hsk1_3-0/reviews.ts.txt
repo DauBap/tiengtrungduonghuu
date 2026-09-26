@@ -1,0 +1,298 @@
+export type ReviewDirection = "vi2zh" | "zh2vi";
+export type ReviewQuestionType = "translation" | "reorder";
+
+export type ReviewQuestion = {
+	id: string;
+	direction: ReviewDirection;
+	prompt: string;
+	answer: string;
+	acceptedAnswers?: string[];
+	explanation: string;
+	type?: ReviewQuestionType;
+	tokens?: string[];
+	lesson?: number;
+};
+
+export type ReviewSection = {
+	id: string;
+	title: string;
+	questions: ReviewQuestion[];
+};
+
+export type ReviewSet = {
+	id: string;
+	courseId: string;
+	title: string;
+	subtitle: string;
+	questions?: ReviewQuestion[];
+	sections?: ReviewSection[];
+	legacyQuestions?: ReviewQuestion[];
+};
+
+const q = (id: string, direction: ReviewDirection, prompt: string, answer: string, explanation: string, acceptedAnswers: string[] = []): ReviewQuestion => ({
+	id,
+	direction,
+	prompt,
+	answer,
+	explanation,
+	acceptedAnswers: acceptedAnswers.length ? acceptedAnswers : undefined
+});
+
+const qA = (id: string, direction: ReviewDirection, prompt: string, answer: string, explanation: string, acceptedAnswers: string[]): ReviewQuestion => ({
+	id,
+	direction,
+	prompt,
+	answer,
+	explanation,
+	acceptedAnswers: acceptedAnswers.length ? acceptedAnswers : undefined
+});
+
+const r = (id: string, answer: string, tokens: string[], lesson: number, explanation: string): ReviewQuestion => ({
+	id,
+	direction: "vi2zh",
+	type: "reorder",
+	prompt: "Sắp xếp các từ thành câu đúng:",
+	answer,
+	tokens,
+	lesson,
+	explanation
+});
+
+const ql = (id: string, direction: ReviewDirection, prompt: string, answer: string, lesson: number, explanation: string, acceptedAnswers: string[] = []): ReviewQuestion => ({
+	...q(id, direction, prompt, answer, explanation, acceptedAnswers),
+	lesson
+});
+
+export const courseReviewTemplates: Record<string, Record<string, ReviewSet>> = {
+	"hsk1_3-0": {
+		"1": {
+			id: "1",
+			courseId: "hsk1_3-0",
+			title: "ÔN TẬP 1 – HSK1 3.0",
+			subtitle: "Luyện dịch Bài 1 đến Bài 5 (30 câu)",
+			sections: [
+				{
+					id: "1",
+					title: "Phần 1: Việt → Trung — Cơ bản",
+					questions: [q("1", "vi2zh", "Bạn có khỏe không?", "你好吗？", "Lời chào hỏi căn bản."), q("2", "vi2zh", "Tôi tên là Bạch Gia Nguyệt.", "我叫白家月。", "Giới thiệu tên."), q("3", "vi2zh", "Cô ấy là ai?", "她是谁？", "Hỏi danh tính."), q("4", "vi2zh", "Tôi là người Trung Quốc.", "我是中国人。", "Nêu quốc tịch."), q("5", "vi2zh", "Bạn là người nước nào?", "你是哪国人？", "Hỏi quốc tịch."), q("6", "vi2zh", "Giáo viên tiếng Trung của bạn tên là gì?", "你的中文老师叫什么名字？", "Hỏi tên."), q("7", "vi2zh", "Tôi có hai người anh trai.", "我有两个哥哥。", "Mô tả số lượng anh trai."), q("8", "vi2zh", "Nhà bạn có mấy người?", "你家有几口人？", "Hỏi số thành viên gia đình.")]
+				},
+				{
+					id: "2",
+					title: "Phần 2: Việt → Trung — Tổng hợp",
+					questions: [q("9", "vi2zh", "Tôi không có em trai.", "我没有弟弟。", "Nêu không có em trai."), q("10", "vi2zh", "Năm nay bạn bao nhiêu tuổi?", "你今年多大？", "Hỏi tuổi."), q("11", "vi2zh", "Con trai tôi năm nay 5 tuổi.", "我儿子今年五岁。", "Mô tả tuổi của con trai."), q("12", "vi2zh", "Hôm nay là ngày mấy tháng mấy?", "今天几月几号？", "Hỏi ngày tháng."), q("13", "vi2zh", "Hôm nay là ngày 8 tháng 9.", "今天9月8号。", "Nêu ngày tháng."), q("14", "vi2zh", "Hôm nay là thứ mấy?", "今天星期几？", "Hỏi thứ trong tuần."), q("15", "vi2zh", "Bạn biết nấu ăn không?", "你会做饭吗？", "Hỏi có biết nấu ăn.")]
+				},
+				{
+					id: "3",
+					title: "Phần 3: Trung → Việt — Cơ bản",
+					questions: [q("16", "zh2vi", "你好！我叫李文。", "Xin chào! Tôi tên là Lý Văn.", "Lời chào giới thiệu."), q("17", "zh2vi", "你是老师吗？", "Bạn là giáo viên phải không?", "Xác nhận danh tính."), q("18", "zh2vi", "她是你朋友吗？", "Cô ấy là bạn của bạn phải không?", "Xác nhận quan hệ."), q("19", "zh2vi", "你是哪国人？", "Bạn là người nước nào?", "Hỏi quốc tịch."), q("20", "zh2vi", "我有两个哥哥，你呢？", "Tôi có hai người anh trai, còn bạn?", "So sánh gia đình."), q("21", "zh2vi", "你家有几口人？", "Nhà bạn có mấy người?", "Hỏi số thành viên."), q("22", "zh2vi", "你有姐姐吗？", "Bạn có chị gái không?", "Hỏi về chị gái."), q("23", "zh2vi", "我没有妹妹。", "Tôi không có em gái.", "Nêu không có em gái.")]
+				},
+				{
+					id: "4",
+					title: "Phần 4: Trung → Việt — Tổng hợp",
+					questions: [q("24", "zh2vi", "我女儿今年十二岁。", "Con gái tôi năm nay 12 tuổi.", "Mô tả tuổi con gái."), q("25", "zh2vi", "今天2025年5月22号。", "Hôm nay là ngày 22 tháng 5 năm 2025.", "Nêu ngày tháng năm."), q("26", "zh2vi", "你会做饺子吗？", "Bạn biết làm sủi cảo không?", "Hỏi biết làm sủi cảo."), q("27", "zh2vi", "我不会做中国菜。", "Tôi không biết nấu món ăn Trung Quốc.", "Nêu không biết nấu Trung Quốc."), qA("28", "zh2vi", "这是谁的电脑？", "Đây là máy tính của ai?", "Hỏi chủ nhân máy tính.", ["Máy tính này là của ai?", "Đây là chiếc máy tính của ai?"]), q("29", "zh2vi", "老师的电脑是新的。", "Máy tính của giáo viên là mới.", "Mô tả máy tính giáo viên."), qA("30", "zh2vi", "老师的电脑很好看。", "Máy tính của giáo viên rất đẹp.", "Khen ngợi máy tính.", ["Máy tính của giáo viên đẹp.", "Chiếc máy tính của giáo viên rất đẹp."])]
+				}
+			]
+		},
+		"2": {
+			id: "2",
+			courseId: "hsk1_3-0",
+			title: "ÔN TẬP 2 – HSK1 3.0",
+			subtitle: "Luyện dịch Bài 6 đến Bài 10 (40 câu)",
+			sections: [
+				{
+					id: "1",
+					title: "Phần 1: Việt → Trung — Bài 6–8",
+					questions: [q("1", "vi2zh", "Số điện thoại của bạn là bao nhiêu?", "你的手机号是多少？", "Hỏi số điện thoại."), q("2", "vi2zh", "Ngày mai tôi muốn đi siêu thị mua đồ.", "明天我想去超市买东西。", "Nêu dự định đi siêu thị."), qA("3", "vi2zh", "Tôi muốn mua ít sữa bò.", "我想买些牛奶。", "Nêu muốn mua sữa bò.", ["我想买一些牛奶。"]), q("4", "vi2zh", "Bạn đi siêu thị bằng cách nào?", "你怎么去超市？", "Hỏi phương tiện đi siêu thị."), q("5", "vi2zh", "Bây giờ là mấy giờ?", "现在几点？", "Hỏi giờ hiện tại."), q("6", "vi2zh", "Chúng ta gặp nhau lúc 2 giờ chiều nhé.", "我们下午两点见吧。", "Hẹn gặp lúc 2 giờ chiều."), q("7", "vi2zh", "Ngày mai tôi còn học lúc 2 giờ chiều.", "我明天下午两点还上课呢。", "Nêu lịch học ngày mai."), q("8", "vi2zh", "Tôi tan làm lúc 6 rưỡi tối.", "我晚上六点半下班。", "Nêu giờ tan làm."), q("9", "vi2zh", "Bên ngoài phòng có một con mèo nhỏ.", "房间外有一只小猫。", "Mô tả con mèo ngoài phòng."), qA("10", "vi2zh", "Bạn có thể đến được lúc 2 giờ chiều không?", "下午两点你能到吗？", "Hỏi có thể đến lúc 2 giờ chiều.", ["你下午两点能到吗？"])]
+				},
+				{
+					id: "2",
+					title: "Phần 2: Việt → Trung — Bài 8–10",
+					questions: [q("11", "vi2zh", "Nó ở dưới cái bàn kia.", "它在桌子下呢。", "Nêu vị trí con mèo."), q("12", "vi2zh", "Bố của bác sĩ Hồ cũng làm việc ở bệnh viện.", "胡医生的爸爸也在医院工作。", "Mô tả nghề nghiệp của bố bác sĩ Hồ."), qA("13", "vi2zh", "Phía trước trường có một rạp chiếu phim.", "学校前边有一家电影院。", "Mô tả rạp chiếu phim trước trường.", ["学校前边有一个电影院。"]), q("14", "vi2zh", "Chúng ta đến đó xem phim nhé.", "我们去那儿看电影吧。", "Đề nghị đi xem phim."), qA("15", "vi2zh", "Sáng mai tôi học ở trường.", "我明天上午在学校学习。", "Trật tự thời gian, nơi chốn và động từ.", ["明天上午我在学校学习。"]), q("16", "vi2zh", "Trên bàn có hai quyển sách.", "桌子上有两本书。", "Câu tồn tại với 有."), q("17", "vi2zh", "Bộ quần áo này bao nhiêu tiền?", "这件衣服多少钱？", "Hỏi giá tiền."), qA("18", "vi2zh", "Ba tệ năm hào.", "三元五角。", "Cách nói số tiền.", ["三块五毛。"]), q("19", "vi2zh", "Táo ở đây thật rẻ!", "这儿的苹果真便宜！", "Câu vị ngữ tính từ."), q("20", "vi2zh", "Bộ quần áo này thế nào?", "这件衣服怎么样？", "Hỏi đánh giá với 怎么样.")]
+				},
+				{
+					id: "3",
+					title: "Phần 3: Trung → Việt — Bài 6–8",
+					questions: [q("21", "zh2vi", "你喜欢去哪儿？", "Bạn thích đi đâu?", "Hỏi nơi thích đi."), q("22", "zh2vi", "你去超市买什么？", "Bạn đi siêu thị mua gì?", "Hỏi mua gì ở siêu thị."), q("23", "zh2vi", "我想买些牛奶。", "Tôi muốn mua ít sữa bò.", "Nêu muốn mua sữa bò."), q("24", "zh2vi", "你怎么去超市？", "Bạn đi siêu thị bằng cách nào?", "Hỏi phương tiện đi siêu thị."), qA("25", "zh2vi", "早上八点四十分。", "8 giờ 40 phút sáng.", "Nêu giờ buổi sáng.", ["8 giờ 40 sáng.", "Buổi sáng 8 giờ 40 phút."]), qA("26", "zh2vi", "我下午还有事呢。", "Buổi chiều tôi vẫn còn có việc đấy.", "Nêu vẫn còn có việc buổi chiều.", ["Buổi chiều tôi còn có việc.", "Chiều tôi vẫn còn có việc.", "Chiều tôi còn có việc đấy."]), qA("27", "zh2vi", "我在家里呢。", "Tôi đang ở nhà.", "Nêu đang ở nhà.", ["Tôi ở nhà đây.", "Tôi đang ở trong nhà."]), q("28", "zh2vi", "我晚上六点半下班。", "Tôi tan làm lúc 6 rưỡi tối.", "Nêu giờ tan làm."), q("29", "zh2vi", "这只小猫真漂亮！", "Con mèo nhỏ này thật xinh đẹp!", "Khen con mèo đẹp."), qA("30", "zh2vi", "你家有两个医生吗？", "Nhà bạn có hai bác sĩ phải không?", "Hỏi gia đình có hai bác sĩ.", ["Nhà bạn có hai bác sĩ à?", "Gia đình bạn có hai bác sĩ phải không?"])]
+				},
+				{
+					id: "4",
+					title: "Phần 4: Trung → Việt — Bài 8–10",
+					questions: [q("31", "zh2vi", "它在桌子下呢。", "Nó ở dưới cái bàn kia.", "Nêu vị trí con mèo."), qA("32", "zh2vi", "我们在书店前见吧。", "Chúng ta gặp nhau trước hiệu sách nhé.", "Đề nghị nơi hẹn gặp.", ["Chúng ta gặp nhau ở trước hiệu sách nhé.", "Chúng mình gặp nhau trước hiệu sách nhé."]), qA("33", "zh2vi", "学校前边有一家电影院。", "Phía trước trường học có một rạp chiếu phim.", "Câu tồn tại chỉ vị trí.", ["Trước trường học có một rạp chiếu phim.", "Phía trước trường có một rạp chiếu phim."]), q("34", "zh2vi", "我们去那儿看电影吧。", "Chúng ta đến đó xem phim đi.", "Đề nghị đi xem phim."), q("35", "zh2vi", "我们七点在电影院外边见，好吗？", "Chúng ta gặp nhau lúc 7 giờ ở bên ngoài rạp chiếu phim nhé?", "Thời gian đứng trước nơi chốn."), q("36", "zh2vi", "椅子上有一本中文书，那是谁的书？", "Trên ghế có một quyển sách tiếng Trung, đó là sách của ai vậy?", "Câu tồn tại và hỏi sở hữu."), qA("37", "zh2vi", "这个苹果多少钱？", "Quả táo này bao nhiêu tiền?", "Hỏi giá táo.", ["Quả táo này giá bao nhiêu?", "Táo này bao nhiêu tiền?"]), qA("38", "zh2vi", "两块八毛。", "Hai tệ tám hào.", "Cách nói số tiền.", ["Hai đồng tám hào.", "2 tệ 8 hào."]), qA("39", "zh2vi", "这件衣服很好看。", "Bộ quần áo này rất đẹp.", "Câu vị ngữ tính từ.", ["Bộ quần áo này đẹp.", "Quần áo này rất đẹp."]), qA("40", "zh2vi", "那个电影怎么样？", "Bộ phim đó thế nào?", "Hỏi đánh giá với 怎么样.", ["Phim đó thế nào?", "Bộ phim kia thế nào?"])]
+				}
+			]
+		},
+		"3": {
+			id: "3",
+			courseId: "hsk1_3-0",
+			title: "ÔN TẬP 3 – HSK1 3.0",
+			subtitle: "Sắp xếp câu và luyện dịch Bài 1 đến Bài 15 (40 câu)",
+			sections: [
+				{
+					id: "1",
+					title: "Phần 1: Sắp xếp câu — Tổng hợp 1",
+					questions: [r("review3-order-01", "我明天上午在学校学习。", ["我", "明天", "上午", "在", "学校", "学习"], 9, "Trật tự chủ ngữ — thời gian — nơi chốn — động từ."), r("review3-order-02", "我爸爸也在医院工作呢。", ["我爸爸", "也", "在", "医院", "工作", "呢"], 8, "Phó từ 也, giới từ 在 và trợ từ 呢."), r("review3-order-03", "我们下午两点在书店前见吧。", ["我们", "下午", "两点", "在", "书店", "前", "见", "吧"], 9, "Thời gian, phương vị từ và câu đề nghị với 吧."), r("review3-order-04", "妈妈想去超市买一些牛奶。", ["妈妈", "想", "去", "超市", "买", "一些牛奶"], 6, "想 và câu liên động diễn tả mục đích."), r("review3-order-05", "你明天能坐出租车去学校吗？", ["你", "明天", "能", "坐出租车", "去", "学校", "吗"], 8, "能, trạng ngữ thời gian và câu hỏi 吗."), r("review3-order-06", "学校前边有一家电影院。", ["学校", "前边", "有", "一家电影院"], 9, "Câu tồn tại với 有 và phương vị từ."), r("review3-order-07", "这件衣服三元五角，真便宜！", ["这件衣服", "三元", "五角", "真", "便宜"], 10, "Cách nói số tiền và câu vị ngữ tính từ."), r("review3-order-08", "你觉得这件衣服怎么样？", ["你", "觉得", "这件衣服", "怎么样"], 10, "Hỏi đánh giá với 怎么样."), r("review3-order-09", "他正在饭店找朋友呢。", ["他", "正在", "饭店", "找", "朋友", "呢"], 11, "Hành động đang diễn ra với 正在……呢."), r("review3-order-10", "你明天去不去电影院看电影？", ["你", "明天", "去", "不", "去", "电影院", "看电影"], 11, "Câu hỏi chính phản và trạng ngữ thời gian.")]
+				},
+				{
+					id: "2",
+					title: "Phần 2: Sắp xếp câu — Tổng hợp 2",
+					questions: [r("review3-order-11", "昨天下雪了，今天天气太冷了。", ["昨天", "下雪", "了", "今天", "天气", "太", "冷", "了"], 12, "Sự thay đổi với 了 và cấu trúc 太……了."), r("review3-order-12", "妈妈生病了，今天没去上班。", ["妈妈", "生病", "了", "今天", "没", "去", "上班"], 12, "了 và phủ định sự việc đã không xảy ra bằng 没."), r("review3-order-13", "你可以给我一杯热水吗？", ["你", "可以", "给", "我", "一杯热水", "吗"], 13, "可以 và câu có hai tân ngữ với 给."), r("review3-order-14", "我可以打电话问一下老师吗？", ["我", "可以", "打电话", "问", "一下", "老师", "吗"], 13, "可以 và động từ + 一下."), r("review3-order-15", "我看了一个电影，也吃了中国菜。", ["我", "看", "了", "一个电影", "也", "吃", "了", "中国菜"], 14, "Trợ từ động thái 了 kết hợp phó từ 也."), r("review3-order-16", "他们都没去电影院看电影。", ["他们", "都", "没", "去", "电影院", "看电影"], 14, "Phó từ phạm vi 都 và phủ định bằng 没."), r("review3-order-17", "她上了中文课，还说了很多话。", ["她", "上", "了", "中文课", "还", "说", "了", "很多话"], 14, "Từ li hợp, trợ từ động thái 了 và câu ghép với 还."), r("review3-order-18", "我喜欢苹果，也喜欢牛奶。", ["我", "喜欢", "苹果", "也", "喜欢", "牛奶"], 15, "Câu ghép đẳng lập với 也."), r("review3-order-19", "他会开车，还会做饭。", ["他", "会", "开车", "还", "会", "做饭"], 15, "Câu ghép đẳng lập với 还 và động từ năng nguyện 会."), r("review3-order-20", "北京很好看，还很好玩儿。", ["北京", "很", "好看", "还", "很", "好玩儿"], 15, "Câu ghép bổ sung đặc điểm với 还.")]
+				},
+				{
+					id: "3",
+					title: "Phần 3: Việt → Trung — Trọng tâm Bài 10–15",
+					questions: [ql("review3-vi2zh-01", "vi2zh", "Ba tệ năm hào.", "三元五角。", 10, "Cách nói số tiền.", ["三块五毛。"]), ql("review3-vi2zh-02", "vi2zh", "Táo ở đây thật rẻ!", "这儿的苹果真便宜！", 10, "Câu vị ngữ tính từ."), ql("review3-vi2zh-03", "vi2zh", "Mẹ đang nấu ăn đấy.", "妈妈正在做饭呢。", 11, "Hành động đang diễn ra.", ["妈妈在做饭呢。", "妈妈做饭呢。"]), ql("review3-vi2zh-04", "vi2zh", "Tôi muốn đi nhà hàng.", "我要去饭店。", 11, "Động từ năng nguyện 要."), ql("review3-vi2zh-05", "vi2zh", "Hôm qua không mưa.", "昨天没下雨。", 12, "Phủ định sự việc đã không xảy ra."), ql("review3-vi2zh-06", "vi2zh", "Tôi có thể hỏi bạn một câu hỏi không?", "我可以问你一个问题吗？", 13, "Xin phép với 可以 và hai tân ngữ."), ql("review3-vi2zh-07", "vi2zh", "Anh ấy đã ngủ một giấc.", "他睡了一觉。", 14, "Từ li hợp 睡觉."), ql("review3-vi2zh-08", "vi2zh", "Những quả táo này đều rất rẻ.", "这些苹果都很便宜。", 14, "Phó từ phạm vi 都."), ql("review3-vi2zh-09", "vi2zh", "Anh ấy biết lái xe, còn biết nấu ăn.", "他会开车，还会做饭。", 15, "Câu ghép với 还."), ql("review3-vi2zh-10", "vi2zh", "Ngày mai tôi phải đi sân bay, còn phải đón bạn.", "我明天要去机场，还要接朋友。", 15, "Câu ghép bổ sung với 还.")]
+				},
+				{
+					id: "4",
+					title: "Phần 4: Trung → Việt — Trọng tâm Bài 10–15",
+					questions: [ql("review3-zh2vi-01", "zh2vi", "那个电影怎么样？", "Bộ phim đó thế nào?", 10, "Hỏi đánh giá với 怎么样.", ["Phim đó thế nào?", "Bộ phim kia thế nào?"]), ql("review3-zh2vi-02", "zh2vi", "我没在上课。", "Tôi không đang lên lớp.", 11, "Phủ định hành động đang diễn ra.", ["Tôi không học ở lớp.", "Tôi không ở lớp học."]), ql("review3-zh2vi-03", "zh2vi", "下雨了。", "Mưa rồi.", 12, "Câu phi chủ vị."), ql("review3-zh2vi-04", "zh2vi", "这个菜太好吃了！", "Món ăn này ngon quá!", 12, "Cấu trúc 太……了."), ql("review3-zh2vi-05", "zh2vi", "你可以坐。", "Bạn có thể ngồi.", 13, "Động từ năng nguyện 可以.", ["Bạn được phép ngồi."]), ql("review3-zh2vi-06", "zh2vi", "妈妈给我一个鸡蛋。", "Mẹ đưa cho tôi một quả trứng.", 13, "Câu có hai tân ngữ."), ql("review3-zh2vi-07", "zh2vi", "妈妈没买牛奶。", "Mẹ không mua sữa.", 14, "Phủ định bằng 没.", ["Mẹ đã không mua sữa."]), ql("review3-zh2vi-08", "zh2vi", "她说了很多话。", "Cô ấy đã nói rất nhiều.", 14, "Từ li hợp 说话."), ql("review3-zh2vi-09", "zh2vi", "他是医生，也是老师。", "Anh ấy là bác sĩ, cũng là giáo viên.", 15, "Câu ghép với 也."), ql("review3-zh2vi-10", "zh2vi", "北京很好看，还很好玩儿。", "Bắc Kinh rất đẹp, hơn nữa còn rất vui.", 15, "Câu ghép với 还.", ["Bắc Kinh rất đẹp, hơn nữa còn rất thú vị."])]
+				}
+			],
+			legacyQuestions: [
+				q("1", "vi2zh", "Khi nào bạn có thể đến nhà hàng?", "你什么时候能到饭店？", "Hỏi thời điểm đến nhà hàng."),
+				q("2", "vi2zh", "Tôi vẫn chưa biết, đang tìm đây.", "还不知道，正在找呢。", "Nêu đang tìm kiếm."),
+				q("3", "vi2zh", "Nhà hàng có phải ở phía sau siêu thị không?", "饭店是不是在超市后边？", "Hỏi vị trí nhà hàng."),
+				q("4", "vi2zh", "Bạn có lái xe không?", "你开车没开车？", "Hỏi có lái xe không."),
+				q("5", "vi2zh", "Tôi không lái xe, đang đi taxi đây.", "我没开车，坐车呢。", "Nêu đi taxi thay vì lái xe."),
+				q("6", "vi2zh", "Bạn vẫn đang học đại học à?", "你还读大学吗？", "Hỏi có đang học đại học."),
+				q("7", "vi2zh", "Tôi đang học đại học.", "我读大学呢。", "Nêu đang học đại học."),
+				q("8", "vi2zh", "Học đại học có bận không?", "大学忙不忙？", "Hỏi học đại học có bận."),
+				q("9", "vi2zh", "Bố hỏi chị, em trai có đi siêu thị không?", "爸爸问姐姐，弟弟去不去超市？", "Hỏi qua lời bố về em trai đi siêu thị."),
+				q("10", "vi2zh", "Em trai không muốn đi, nó muốn chơi với các bạn.", "弟弟不想去，他要跟小朋友玩。", "Nêu em trai không muốn đi."),
+				q("11", "vi2zh", "Nó đang ngủ.", "他正在睡觉呢。", "Nêu đang ngủ."),
+				q("12", "vi2zh", "Hôm nay thời tiết thế nào?", "今天天气怎么样？", "Hỏi thời tiết hôm nay."),
+				q("13", "vi2zh", "Bên chỗ tôi đã mưa rồi.", "我们这儿下雨了。", "Nêu trời đã mưa."),
+				q("14", "vi2zh", "Mưa to không?", "雨大不大？", "Hỏi mưa to không."),
+				q("15", "vi2zh", "Hơi to một chút. Tôi cảm thấy rất lạnh.", "有点儿大。我觉得很冷。", "Mô tả mưa và cảm giác lạnh."),
+				q("16", "vi2zh", "Hôm qua tuyết đã rơi rồi.", "昨天下雪了。", "Nêu tuyết đã rơi hôm qua."),
+				q("17", "vi2zh", "Lạnh quá!", "太冷了！", "Cảm thán trời lạnh."),
+				q("18", "vi2zh", "Hôm qua bạn không đến công ty, bị ốm à?", "你昨天没来公司，生病了？", "Hỏi lý do vắng mặt công ty."),
+				q("19", "vi2zh", "Vâng, hôm qua tôi đã đến bệnh viện khám bệnh.", "对，我昨天去医院看病了。", "Xác nhận đã đi khám bệnh."),
+				q("20", "vi2zh", "Bác sĩ, tôi bị ốm rồi.", "医生，我病了。", "Báo với bác sĩ bị ốm."),
+				q("21", "vi2zh", "Bạn cảm thấy thế nào?", "你觉得怎么样？", "Hỏi cảm giác hiện tại."),
+				q("22", "vi2zh", "Tôi rất lạnh.", "我很冷。", "Nêu cảm thấy lạnh."),
+				q("23", "vi2zh", "Uống một chút thuốc, hôm nay nghỉ nửa ngày nhé.", "吃一点儿药，今天休息半天吧。", "Dặn uống thuốc và nghỉ ngơi."),
+				q("24", "vi2zh", "Về nhà rồi uống thêm chút nước ấm nhé.", "回家后再喝些热水。", "Dặn uống nước ấm khi về nhà."),
+				q("25", "vi2zh", "Tôi có thể hỏi thêm cô một câu nữa được không ạ?", "我可以再问您一个问题吗？", "Xin phép hỏi thêm câu hỏi."),
+				q("26", "vi2zh", "Cửa hàng nhỏ kia có bán điện thoại không?", "那个小店卖不卖手机？", "Hỏi cửa hàng có bán điện thoại."),
+				q("27", "vi2zh", "Tôi có thể ngồi đây không?", "我可以坐这儿吗？", "Xin phép ngồi."),
+				q("28", "vi2zh", "Bạn uống gì?", "您喝什么？", "Hỏi muốn uống gì."),
+				q("29", "vi2zh", "Bạn còn muốn gì nữa không?", "您还要什么？", "Hỏi còn muốn gì thêm."),
+				q("30", "vi2zh", "Bạn đã ăn sáng chưa?", "你吃早饭了吗？", "Hỏi đã ăn sáng chưa."),
+				q("31", "vi2zh", "Cho tôi một cốc trà, được không?", "给我一杯茶，好吗？", "Yêu cầu một cốc trà."),
+				q("32", "vi2zh", "Bạn muốn bao nhiêu sủi cảo?", "你要多少饺子？", "Hỏi số lượng sủi cảo muốn ăn."),
+				q("33", "vi2zh", "Bạn có thích ăn cơm không?", "你爱吃米饭吗？", "Hỏi thích ăn cơm không."),
+				q("34", "vi2zh", "Các bạn muốn ăn gì?", "你们要吃什么？", "Hỏi muốn ăn gì."),
+				q("35", "vi2zh", "Tôi có thể xem cái đó một chút không?", "我可以看一下那个吗？", "Xin phép xem thử."),
+				q("36", "vi2zh", "Bạn có thể giúp tôi một chút không?", "你能帮我一下吗？", "Nhờ giúp đỡ."),
+				q("37", "vi2zh", "Bạn đã nhìn thấy cô Vương chưa?", "你看见王老师了吗？", "Hỏi đã gặp cô Vương chưa."),
+				q("38", "vi2zh", "Bạn đã xem phim chưa?", "你看电影了吗？", "Hỏi đã xem phim chưa."),
+				q("39", "vi2zh", "Bạn đã biết viết chữ Hán chưa?", "你会写汉字了吗？", "Hỏi đã biết viết chữ Hán chưa."),
+				q("40", "vi2zh", "Các bạn đều biết nói tiếng Trung phải không?", "你们都会说汉语吗？", "Hỏi có biết nói tiếng Trung không."),
+				q("41", "vi2zh", "Hôm qua bạn đã đi cửa hàng chưa?", "你昨天去商店了吗？", "Hỏi đã đi cửa hàng chưa."),
+				q("42", "vi2zh", "Bạn đã ngủ chưa?", "你睡觉了吗？", "Hỏi đã ngủ chưa."),
+				q("43", "vi2zh", "Bạn đã đọc sách gì?", "你读了什么书？", "Hỏi đã đọc sách gì."),
+				q("44", "vi2zh", "Bạn đã ăn cơm chưa?", "你吃饭了没有？", "Hỏi đã ăn cơm chưa."),
+				q("45", "vi2zh", "Anh ấy đã lên lớp chưa?", "他上课了吗？", "Hỏi đã lên lớp chưa."),
+				q("46", "vi2zh", "Bạn thích ăn món nào?", "你爱吃哪个菜？", "Hỏi món ăn yêu thích."),
+				q("47", "vi2zh", "Mấy món ăn này có ngon không?", "这些菜好吃吗？", "Hỏi món ăn có ngon không."),
+				q("48", "vi2zh", "Năm ngoái bạn đã đi đâu?", "你去年去哪儿了？", "Hỏi năm ngoái đã đi đâu."),
+				q("49", "vi2zh", "Các bạn đều muốn đi đâu?", "你们都想去哪儿？", "Hỏi muốn đi đâu."),
+				q("50", "vi2zh", "Máy bay của các bạn mất mấy giờ?", "你们的飞机要几个小时？", "Hỏi thời gian bay."),
+				q("51", "vi2zh", "Khi nào bạn đi Bắc Kinh?", "你什么时候去北京？", "Hỏi thời điểm đi Bắc Kinh."),
+				q("52", "vi2zh", "Gia đình bạn ở Bắc Kinh phải không?", "你的家人在北京吗？", "Hỏi gia đình có ở Bắc Kinh."),
+				q("53", "vi2zh", "Bạn có thích uống trà không?", "你爱喝茶吗？", "Hỏi thích uống trà không."),
+				q("54", "vi2zh", "Bạn có thích làm món ăn Trung Quốc không?", "你喜欢做中国菜吗？", "Hỏi thích nấu món Trung Quốc không."),
+				q("55", "vi2zh", "Bạn đi máy bay hay đi tàu lửa?", "你坐飞机去还是坐火车去？", "Hỏi phương tiện di chuyển."),
+				q("56", "vi2zh", "Mấy giờ bạn đến sân bay?", "你几点到机场？", "Hỏi giờ đến sân bay."),
+				q("57", "vi2zh", "Tôi đã xem một bộ phim trên tàu lửa.", "我在火车上看了一个电影。", "Nêu đã xem phim trên tàu."),
+				q("58", "vi2zh", "Trên bàn có một quyển sách tiếng Trung.", "桌子上有一本中文书。", "Mô tả sách trên bàn."),
+				q("59", "vi2zh", "Đây là quyển sách tiếng Trung thứ hai của tôi.", "这是我的第二本中文书。", "Mô tả quyển sách tiếng Trung thứ hai."),
+				q("60", "vi2zh", "Ngày mai thứ Bảy, bạn làm gì?", "明天星期六，你做什么？", "Hỏi kế hoạch thứ Bảy."),
+				q("61", "zh2vi", "你什么时候能到饭店？", "Khi nào bạn có thể đến nhà hàng?", "Hỏi thời điểm đến nhà hàng."),
+				q("62", "zh2vi", "还不知道，正在找呢。", "Vẫn chưa biết, đang tìm đây.", "Nêu đang tìm kiếm."),
+				q("63", "zh2vi", "饭店是不是在超市后边？", "Nhà hàng có phải ở phía sau siêu thị không?", "Hỏi vị trí nhà hàng."),
+				q("64", "zh2vi", "你开车没开车？", "Bạn có lái xe không?", "Hỏi có lái xe không."),
+				q("65", "zh2vi", "我没开车，坐车呢。", "Tôi không lái xe, đang ngồi xe (taxi) đây.", "Nêu đi taxi thay vì lái xe."),
+				q("66", "zh2vi", "你还读大学吗？", "Bạn vẫn đang học đại học à?", "Hỏi có đang học đại học."),
+				q("67", "zh2vi", "我读大学呢。", "Tôi đang học đại học.", "Nêu đang học đại học."),
+				q("68", "zh2vi", "大学忙不忙？", "Học đại học có bận không?", "Hỏi học đại học có bận."),
+				q("69", "zh2vi", "爸爸问姐姐，弟弟去不去超市？", "Bố hỏi chị, em trai có đi siêu thị không?", "Hỏi qua lời bố về em trai đi siêu thị."),
+				q("70", "zh2vi", "弟弟不想去，他要跟小朋友玩。", "Em trai không muốn đi, nó muốn chơi với các bạn.", "Nêu em trai không muốn đi."),
+				q("71", "zh2vi", "他正在睡觉呢。", "Nó đang ngủ.", "Nêu đang ngủ."),
+				q("72", "zh2vi", "今天天气怎么样？", "Hôm nay thời tiết thế nào?", "Hỏi thời tiết hôm nay."),
+				q("73", "zh2vi", "我们这儿下雨了。", "Bên chỗ tôi đã mưa rồi.", "Nêu trời đã mưa."),
+				q("74", "zh2vi", "雨大不大？", "Mưa to không?", "Hỏi mưa to không."),
+				q("75", "zh2vi", "有点儿大。我觉得很冷。", "Hơi to một chút. Tôi cảm thấy rất lạnh.", "Mô tả mưa và cảm giác lạnh."),
+				q("76", "zh2vi", "昨天下雪了。", "Hôm qua tuyết đã rơi rồi.", "Nêu tuyết đã rơi hôm qua."),
+				q("77", "zh2vi", "太冷了！", "Lạnh quá!", "Cảm thán trời lạnh."),
+				q("78", "zh2vi", "你昨天没来公司，生病了？", "Hôm qua bạn không đến công ty, bị ốm à?", "Hỏi lý do vắng mặt công ty."),
+				q("79", "zh2vi", "对，我昨天去医院看病了。", "Vâng, hôm qua tôi đã đến bệnh viện khám bệnh.", "Xác nhận đã đi khám bệnh."),
+				q("80", "zh2vi", "医生，我病了。", "Bác sĩ, tôi bị ốm rồi.", "Báo với bác sĩ bị ốm."),
+				q("81", "zh2vi", "你觉得怎么样？", "Bạn cảm thấy thế nào?", "Hỏi cảm giác hiện tại."),
+				q("82", "zh2vi", "我很冷。", "Tôi rất lạnh.", "Nêu cảm thấy lạnh."),
+				q("83", "zh2vi", "吃一点儿药，今天休息半天吧。", "Uống một chút thuốc, hôm nay nghỉ nửa ngày nhé.", "Dặn uống thuốc và nghỉ ngơi."),
+				q("84", "zh2vi", "回家后再喝些热水。", "Về nhà rồi uống thêm chút nước ấm nhé.", "Dặn uống nước ấm khi về nhà."),
+				q("85", "zh2vi", "我可以再问您一个问题吗？", "Tôi có thể hỏi thêm cô một câu nữa được không ạ?", "Xin phép hỏi thêm câu hỏi."),
+				q("86", "zh2vi", "那个小店卖不卖手机？", "Cửa hàng nhỏ kia có bán điện thoại không?", "Hỏi cửa hàng có bán điện thoại."),
+				q("87", "zh2vi", "我可以坐这儿吗？", "Tôi có thể ngồi đây không?", "Xin phép ngồi."),
+				q("88", "zh2vi", "您喝什么？", "Bạn uống gì?", "Hỏi muốn uống gì."),
+				q("89", "zh2vi", "您还要什么？", "Bạn còn muốn gì nữa không?", "Hỏi còn muốn gì thêm."),
+				q("90", "zh2vi", "你吃早饭了吗？", "Bạn đã ăn sáng chưa?", "Hỏi đã ăn sáng chưa."),
+				q("91", "zh2vi", "请给我一杯茶。", "Cho tôi một cốc trà.", "Yêu cầu một cốc trà."),
+				q("92", "zh2vi", "你要多少饺子？", "Bạn muốn bao nhiêu sủi cảo?", "Hỏi số lượng sủi cảo muốn ăn."),
+				q("93", "zh2vi", "你爱吃米饭吗？", "Bạn có thích ăn cơm không?", "Hỏi thích ăn cơm không."),
+				q("94", "zh2vi", "你们要吃什么？", "Các bạn muốn ăn gì?", "Hỏi muốn ăn gì."),
+				q("95", "zh2vi", "我可以看一下那个吗？", "Tôi có thể xem cái đó một chút không?", "Xin phép xem thử."),
+				q("96", "zh2vi", "你能帮我一下吗？", "Bạn có thể giúp tôi một chút không?", "Nhờ giúp đỡ."),
+				q("97", "zh2vi", "你看见王老师了吗？", "Bạn đã nhìn thấy cô Vương chưa?", "Hỏi đã gặp cô Vương chưa."),
+				q("98", "zh2vi", "你看电影了吗？", "Bạn đã xem phim chưa?", "Hỏi đã xem phim chưa."),
+				q("99", "zh2vi", "你会写汉字了吗？", "Bạn đã biết viết chữ Hán chưa?", "Hỏi đã biết viết chữ Hán chưa."),
+				q("100", "zh2vi", "你们都会说汉语吗？", "Các bạn đều biết nói tiếng Trung phải không?", "Hỏi có biết nói tiếng Trung không."),
+				q("101", "zh2vi", "你昨天去商店了吗？", "Hôm qua bạn đã đi cửa hàng chưa?", "Hỏi đã đi cửa hàng chưa."),
+				q("102", "zh2vi", "你睡觉了吗？", "Bạn đã ngủ chưa?", "Hỏi đã ngủ chưa."),
+				q("103", "zh2vi", "你读了什么书？", "Bạn đã đọc sách gì?", "Hỏi đã đọc sách gì."),
+				q("104", "zh2vi", "你吃饭了没有？", "Bạn đã ăn cơm chưa?", "Hỏi đã ăn cơm chưa."),
+				q("105", "zh2vi", "他上课了吗？", "Anh ấy đã lên lớp chưa?", "Hỏi đã lên lớp chưa."),
+				q("106", "zh2vi", "你爱吃哪个菜？", "Bạn thích ăn món nào?", "Hỏi món ăn yêu thích."),
+				q("107", "zh2vi", "这些菜好吃吗？", "Mấy món ăn này có ngon không?", "Hỏi món ăn có ngon không."),
+				q("108", "zh2vi", "你去年去哪儿了？", "Năm ngoái bạn đã đi đâu?", "Hỏi năm ngoái đã đi đâu."),
+				q("109", "zh2vi", "你们都想去哪儿？", "Các bạn đều muốn đi đâu?", "Hỏi muốn đi đâu."),
+				q("110", "zh2vi", "你们的飞机要几个小时？", "Máy bay của các bạn mất mấy giờ?", "Hỏi thời gian bay."),
+				q("111", "zh2vi", "你什么时候去北京？", "Khi nào bạn đi Bắc Kinh?", "Hỏi thời điểm đi Bắc Kinh."),
+				q("112", "zh2vi", "你的家人在北京吗？", "Gia đình bạn ở Bắc Kinh phải không?", "Hỏi gia đình có ở Bắc Kinh."),
+				q("113", "zh2vi", "你爱喝茶吗？", "Bạn có thích uống trà không?", "Hỏi thích uống trà không."),
+				q("114", "zh2vi", "你喜欢做中国菜吗？", "Bạn có thích làm món ăn Trung Quốc không?", "Hỏi thích nấu món Trung Quốc không."),
+				q("115", "zh2vi", "你坐飞机去还是坐火车去？", "Bạn đi máy bay hay đi tàu lửa?", "Hỏi phương tiện di chuyển."),
+				q("116", "zh2vi", "你几点到机场？", "Mấy giờ bạn đến sân bay?", "Hỏi giờ đến sân bay."),
+				q("117", "zh2vi", "我在火车上看了一个电影。", "Tôi đã xem một bộ phim trên tàu lửa.", "Nêu đã xem phim trên tàu."),
+				q("118", "zh2vi", "桌子上有一本中文书。", "Trên bàn có một quyển sách tiếng Trung.", "Mô tả sách trên bàn."),
+				q("119", "zh2vi", "这是我的第二本中文书。", "Đây là quyển sách tiếng Trung thứ hai của tôi.", "Mô tả quyển sách tiếng Trung thứ hai."),
+				q("120", "zh2vi", "明天星期六，你做什么？", "Ngày mai thứ Bảy, bạn làm gì?", "Hỏi kế hoạch thứ Bảy.")
+			]
+		}
+	}
+};
+
+export function getReviewSet(courseId: string, reviewId: string) {
+	const normalizedCourse = courseId.toLowerCase();
+	const normalizedReview = reviewId.toLowerCase();
+	const review = courseReviewTemplates[normalizedCourse]?.[normalizedReview];
+
+	if (!review) {
+		return {
+			id: String(reviewId),
+			courseId: String(courseId),
+			title: "ÔN TẬP",
+			subtitle: "Đang được cập nhật",
+			questions: []
+		};
+	}
+
+	return review;
+}
+
+export function getReviewIds(courseId: string) {
+	const normalizedCourse = courseId.toLowerCase();
+	return Object.keys(courseReviewTemplates[normalizedCourse] ?? {});
+}

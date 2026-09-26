@@ -1,0 +1,244 @@
+import type { GrammarExercise, GrammarLesson } from "./types";
+
+type Row = {
+	id: string;
+	zh: string;
+	vi: string;
+	tokens: string[];
+	wrong: [string, string];
+	note: string;
+};
+const exercises = (prefix: string, rows: Row[]): GrammarExercise[] => [
+	{
+		id: `${prefix}-choice`,
+		title: "1. Chọn đáp án đúng",
+		type: "choice",
+		questions: rows.map((r, i) => {
+			const options: [string, string, string] =
+				i % 3 === 0
+					? [r.zh, ...r.wrong]
+					: i % 3 === 1
+						? [r.wrong[0], r.zh, r.wrong[1]]
+						: [...r.wrong, r.zh];
+			return {
+				id: `${r.id}c`,
+				prompt: `Chọn câu đúng: “${r.vi}”`,
+				answer: r.zh,
+				options,
+				completedSentence: r.zh,
+				meaning: r.vi,
+				explanation: r.note,
+				optionExplanations: Object.fromEntries(
+					options.map((o) => [
+						o,
+						o === r.zh
+							? `Đúng: ${r.note}`
+							: "Sai: vị trí bổ ngữ số lần hoặc thành phần số lượng không đúng."
+					])
+				)
+			};
+		})
+	},
+	{
+		id: `${prefix}-arrange`,
+		title: "2. Sắp xếp từ thành câu",
+		type: "arrange",
+		questions: rows.map((r) => ({
+			id: `${r.id}a`,
+			prompt: r.vi,
+			answer: r.zh,
+			tokens: r.tokens,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	},
+	{
+		id: `${prefix}-translate`,
+		title: "3. Dịch Việt sang Trung",
+		type: "input",
+		questions: rows.map((r) => ({
+			id: `${r.id}t`,
+			prompt: r.vi,
+			answer: r.zh,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	}
+];
+
+export const hsk2Lesson15Grammar: GrammarLesson = {
+	title: "BÀI 15: 我想再去一次中国",
+	points: [
+		{
+			id: "frequency-complement",
+			title: "Bổ ngữ động lượng (1) – Động từ + số từ + 次",
+			explanation:
+				"Cụm “số từ + 次” đứng sau động từ để cho biết hành động xảy ra bao nhiêu lần. “再” đặt trước động từ khi muốn làm thêm một lần nữa.",
+			formulas: ["Động từ + số từ + 次", "再 + động từ + số từ + 次"],
+			examples: [
+				{ chinese: "我去过一次。", vietnamese: "Tôi đã từng đi một lần." },
+				{ chinese: "我想再去一次中国。", vietnamese: "Tôi muốn đi Trung Quốc thêm một lần nữa." }
+			],
+			notes: ["“次” đứng sau số từ; không nói 次一、次两."],
+			exercises: exercises("h2l15-freq1", [
+				{
+					id: "f1",
+					zh: "我去过一次",
+					vi: "Tôi đã từng đi một lần.",
+					tokens: ["一次", "我", "去过"],
+					wrong: ["我去一次过", "我去过次一"],
+					note: "一次 đứng sau động từ 去过."
+				},
+				{
+					id: "f2",
+					zh: "我想再去一次中国",
+					vi: "Tôi muốn đi Trung Quốc thêm một lần nữa.",
+					tokens: ["中国", "我想", "一次", "再去"],
+					wrong: ["我想一次再去中国", "我想再一次去中国次"],
+					note: "再 đứng trước 去; 一次 đứng sau động từ."
+				},
+				{
+					id: "f3",
+					zh: "他出过两次国",
+					vi: "Anh ấy đã ra nước ngoài hai lần.",
+					tokens: ["国", "出过", "他", "两次"],
+					wrong: ["他两次国出过", "他出过次两国"],
+					note: "Động từ ly hợp 出国 có thể tách: 出过两次国."
+				},
+				{
+					id: "f4",
+					zh: "我去过三次颐和园",
+					vi: "Tôi đã đến Di Hòa Viên ba lần.",
+					tokens: ["颐和园", "三次", "我", "去过"],
+					wrong: ["我去三次过颐和园", "我去过次三颐和园"],
+					note: "三次 bổ sung số lần cho 去过."
+				},
+				{
+					id: "f5",
+					zh: "请再说一次",
+					vi: "Xin hãy nói lại một lần nữa.",
+					tokens: ["一次", "请", "再说"],
+					wrong: ["请一次再说", "请再一次说次"],
+					note: "再说一次 = nói lại một lần."
+				}
+			])
+		},
+		{
+			id: "frequency-object",
+			title: "Bổ ngữ động lượng (2) – Vị trí của tân ngữ",
+			explanation:
+				"Tên người hoặc địa danh có thể đứng trước hoặc sau bổ ngữ động lượng. Tân ngữ chỉ sự vật thường đứng sau bổ ngữ; đại từ nhân xưng phải đứng trước bổ ngữ số lần.",
+			formulas: [
+				"Động từ + tên người/địa danh + số lần",
+				"Động từ + số lần + tên người/địa danh/sự vật",
+				"Động từ + đại từ + số lần"
+			],
+			examples: [
+				{ chinese: "我见过她两次。", vietnamese: "Tôi đã gặp cô ấy hai lần." },
+				{ chinese: "我去过北京两次。", vietnamese: "Tôi đã đến Bắc Kinh hai lần." }
+			],
+			notes: ["Đại từ 她/他/我 không đặt sau cụm 两次、三次 trong mẫu này."],
+			exercises: exercises("h2l15-freq2", [
+				{
+					id: "o1",
+					zh: "我见过她两次",
+					vi: "Tôi đã gặp cô ấy hai lần.",
+					tokens: ["她", "我", "两次", "见过"],
+					wrong: ["我见过两次她", "我两次见过她"],
+					note: "Tân ngữ đại từ 她 phải đứng trước 两次."
+				},
+				{
+					id: "o2",
+					zh: "我去过北京两次",
+					vi: "Tôi đã đến Bắc Kinh hai lần.",
+					tokens: ["两次", "北京", "我", "去过"],
+					wrong: ["我去北京两次过", "我去过次两北京"],
+					note: "Địa danh 北京 có thể đứng trước bổ ngữ 两次."
+				},
+				{
+					id: "o3",
+					zh: "他见过李老师三次",
+					vi: "Anh ấy đã gặp thầy Lý ba lần.",
+					tokens: ["三次", "见过", "李老师", "他"],
+					wrong: ["他见李老师三次过", "他见过次三李老师"],
+					note: "Tên người 李老师 đứng trước 三次."
+				},
+				{
+					id: "o4",
+					zh: "我看过两次这个电影",
+					vi: "Tôi đã xem bộ phim này hai lần.",
+					tokens: ["这个电影", "看过", "两次", "我"],
+					wrong: ["我这个电影看过两次", "我看过这个两次电影"],
+					note: "Tân ngữ sự vật đứng sau bổ ngữ 两次."
+				},
+				{
+					id: "o5",
+					zh: "她去过三次中国",
+					vi: "Cô ấy đã đến Trung Quốc ba lần.",
+					tokens: ["中国", "她", "三次", "去过"],
+					wrong: ["她去三次过中国", "她去过次三中国"],
+					note: "Địa danh cũng có thể đứng sau 三次."
+				}
+			])
+		},
+		{
+			id: "you-quantity",
+			title: "Câu chữ “有” (2) – Đạt đến một lượng nhất định",
+			explanation:
+				"“有 + cụm số lượng” nhấn mạnh thời gian, độ dài hoặc số lượng đã đạt đến một mức nhất định. Với thời gian không thực hiện hành động, dùng “有 + thời lượng + 没 + động từ + 了”.",
+			formulas: ["Chủ ngữ + 有 + cụm số lượng", "Chủ ngữ + 有 + thời lượng + 没 + động từ + 了"],
+			examples: [
+				{
+					chinese: "你有一年没回国了吧？",
+					vietnamese: "Bạn đã một năm chưa về nước rồi phải không?"
+				},
+				{ chinese: "我有三天没出门了。", vietnamese: "Tôi đã ba ngày không ra ngoài rồi." }
+			],
+			notes: ["Cụm thời lượng đứng ngay sau “有” và trước “没 + động từ”."],
+			exercises: exercises("h2l15-you", [
+				{
+					id: "y1",
+					zh: "你有一年没回国了吧",
+					vi: "Bạn đã một năm chưa về nước rồi phải không?",
+					tokens: ["没回国", "你", "吧", "有一年", "了"],
+					wrong: ["你一年有没回国了吧", "你有没一年回国了吧"],
+					note: "有一年 đứng trước 没回国了."
+				},
+				{
+					id: "y2",
+					zh: "我有三天没出门了",
+					vi: "Tôi đã ba ngày không ra ngoài rồi.",
+					tokens: ["没出门", "我", "了", "有三天"],
+					wrong: ["我三天有没出门了", "我有没三天出门了"],
+					note: "有三天 + 没出门 + 了."
+				},
+				{
+					id: "y3",
+					zh: "他有两年没出国了",
+					vi: "Anh ấy đã hai năm không ra nước ngoài rồi.",
+					tokens: ["有两年", "他", "了", "没出国"],
+					wrong: ["他两年有没出国了", "他有没两年出国了"],
+					note: "有两年 nhấn mạnh thời lượng đã đạt tới."
+				},
+				{
+					id: "y4",
+					zh: "我们有一个星期没上课了",
+					vi: "Chúng tôi đã một tuần không lên lớp rồi.",
+					tokens: ["没上课", "我们", "有一个星期", "了"],
+					wrong: ["我们一个星期有没上课了", "我们有没一个星期上课了"],
+					note: "有一个星期 + 没上课 + 了."
+				},
+				{
+					id: "y5",
+					zh: "她有一个月没见他了",
+					vi: "Cô ấy đã một tháng không gặp anh ấy rồi.",
+					tokens: ["没见他", "有一个月", "她", "了"],
+					wrong: ["她一个月有没见他了", "她有没一个月见他了"],
+					note: "Thời lượng 有一个月 đứng trước 没见他."
+				}
+			])
+		}
+	]
+};

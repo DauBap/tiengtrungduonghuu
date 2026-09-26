@@ -1,0 +1,150 @@
+{
+	"course_id": "hsk1_3-0",
+	"course_name": "HSK 1 (3.0)",
+	"id": 13,
+	"label": "Bài 13",
+	"title": "请给我一杯茶",
+	"short_vi": "Gọi đồ ăn/uống, hỏi xin phép, yêu cầu lịch sự ",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "可以",
+			"pinyin": "kěyǐ",
+			"adj": 4,
+			"vi": "có thể"
+		},
+		{
+			"pos": 2,
+			"hanzi": "再",
+			"pinyin": "zài",
+			"adj": 7,
+			"vi": "lần nữa"
+		},
+		{
+			"pos": 3,
+			"hanzi": "问题",
+			"pinyin": "wèntí",
+			"adj": 2,
+			"vi": "vấn đề, câu hỏi"
+		},
+		{
+			"pos": 4,
+			"hanzi": "卖",
+			"pinyin": "mài",
+			"adj": 4,
+			"vi": "bán"
+		},
+		{
+			"pos": 5,
+			"hanzi": "打电话",
+			"pinyin": "dǎ diànhuà",
+			"adj": 4,
+			"vi": "gọi điện thoại"
+		},
+		{
+			"pos": 6,
+			"hanzi": "一下",
+			"pinyin": "yíxià",
+			"adj": 8,
+			"vi": "1 tý, 1 chút, 1 cái, thử xem"
+		},
+		{
+			"pos": 7,
+			"hanzi": "服务员",
+			"pinyin": "fúwùyuán",
+			"adj": 2,
+			"vi": "nhân viên phục vụ"
+		},
+		{
+			"pos": 8,
+			"hanzi": "女士",
+			"pinyin": "nǚshì",
+			"adj": 2,
+			"vi": "cô gái, bà"
+		},
+		{
+			"pos": 9,
+			"hanzi": "请",
+			"pinyin": "qǐng",
+			"adj": 4,
+			"vi": "mời, hãy"
+		},
+		{
+			"pos": 10,
+			"hanzi": "坐",
+			"pinyin": "zuò",
+			"adj": 4,
+			"vi": "ngồi"
+		},
+		{
+			"pos": 11,
+			"hanzi": "给",
+			"pinyin": "gěi",
+			"adj": 4,
+			"vi": "gửi, đưa"
+		},
+		{
+			"pos": 12,
+			"hanzi": "杯",
+			"pinyin": "bēi",
+			"adj": 2,
+			"vi": "cái ly, cốc"
+		},
+		{
+			"pos": 13,
+			"hanzi": "要",
+			"pinyin": "yào",
+			"adj": 4,
+			"vi": "muốn, cần"
+		},
+		{
+			"pos": 14,
+			"hanzi": "早饭",
+			"pinyin": "zǎofàn",
+			"adj": 2,
+			"vi": "bữa sáng"
+		},
+		{
+			"pos": 15,
+			"hanzi": "这个",
+			"pinyin": "zhège",
+			"adj": 1,
+			"vi": "cái này"
+		},
+		{
+			"pos": 16,
+			"hanzi": "面包",
+			"pinyin": "miànbāo",
+			"adj": 2,
+			"vi": "bánh mỳ"
+		},
+		{
+			"pos": 17,
+			"hanzi": "鸡蛋",
+			"pinyin": "jīdàn",
+			"adj": 2,
+			"vi": "trứng gà"
+		},
+		{
+			"pos": 18,
+			"hanzi": "先生",
+			"pinyin": "xiānsheng",
+			"adj": 2,
+			"vi": "tiên sinh, ông, ngài"
+		},
+		{
+			"pos": 19,
+			"hanzi": "一半",
+			"pinyin": "yíbàn",
+			"adj": 8,
+			"vi": "1 nửa"
+		},
+		{
+			"pos": 20,
+			"hanzi": "茶",
+			"pinyin": "chá",
+			"adj": 2,
+			"vi": "trà"
+		}
+	]
+}

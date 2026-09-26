@@ -1,0 +1,216 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 31,
+  "label": "Bài 31",
+  "title": " 登门槛效应",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "门槛",
+      "pinyin": "ménkǎn",
+      "adj": 2,
+      "vi": "ngưỡng cửa, bậc cửa"
+    },
+    {
+      "pos": 2,
+      "hanzi": "报社",
+      "pinyin": "bàoshè",
+      "adj": 2,
+      "vi": "tòa soạn"
+    },
+    {
+      "pos": 3,
+      "hanzi": "编辑",
+      "pinyin": "biānjí",
+      "adj": 2,
+      "vi": "biên tập viên"
+    },
+    {
+      "pos": 4,
+      "hanzi": "嗯",
+      "pinyin": "ng",
+      "adj": 16,
+      "vi": "được dùng để chỉ sự đồng ý, khẳng định"
+    },
+    {
+      "pos": 5,
+      "hanzi": "轻易",
+      "pinyin": "qīngyì",
+      "adj": 6,
+      "vi": "dễ dàng"
+    },
+    {
+      "pos": 6,
+      "hanzi": "处理",
+      "pinyin": "chǔlǐ",
+      "adj": 4,
+      "vi": "giải quyết, xử lý"
+    },
+    {
+      "pos": 7,
+      "hanzi": "社区",
+      "pinyin": "shèqū",
+      "adj": 2,
+      "vi": "phường xã, khu vực, phố"
+    },
+    {
+      "pos": 8,
+      "hanzi": "劝",
+      "pinyin": "quàn",
+      "adj": 4,
+      "vi": "khuyên"
+    },
+    {
+      "pos": 9,
+      "hanzi": "圆",
+      "pinyin": "yuán",
+      "adj": 6,
+      "vi": "tròn"
+    },
+    {
+      "pos": 10,
+      "hanzi": "标志",
+      "pinyin": "biāozhì",
+      "adj": 2,
+      "vi": "ký hiệu"
+    },
+    {
+      "pos": 11,
+      "hanzi": "出示",
+      "pinyin": "chūshì",
+      "adj": 4,
+      "vi": "trình ra, đưa cho xem"
+    },
+    {
+      "pos": 12,
+      "hanzi": "赞成",
+      "pinyin": "zànchéng",
+      "adj": 4,
+      "vi": "đồng ý, tán thành"
+    },
+    {
+      "pos": 13,
+      "hanzi": "请愿书",
+      "pinyin": "qǐngyuànshū",
+      "adj": 2,
+      "vi": "đơn xin, đơn thỉnh cầu"
+    },
+    {
+      "pos": 14,
+      "hanzi": "恋爱",
+      "pinyin": "liàn'ài",
+      "adj": 2,
+      "vi": "tình yêu"
+    },
+    {
+      "pos": 15,
+      "hanzi": "迫切",
+      "pinyin": "pòqiè",
+      "adj": 6,
+      "vi": "cấp bách, khẩn cấp, bức thiết, thiết tha"
+    },
+    {
+      "pos": 16,
+      "hanzi": "犹豫",
+      "pinyin": "yóuyù",
+      "adj": 6,
+      "vi": "do dự, lưỡng lự"
+    },
+    {
+      "pos": 17,
+      "hanzi": "冷淡",
+      "pinyin": "lěngdàn",
+      "adj": 6,
+      "vi": "lạnh nhạt, hờ hững"
+    },
+    {
+      "pos": 18,
+      "hanzi": "无所谓",
+      "pinyin": "wúsuǒwèi",
+      "adj": 4,
+      "vi": "không sao cả, không hề gì"
+    },
+    {
+      "pos": 19,
+      "hanzi": "值班",
+      "pinyin": "zhí bān",
+      "adj": 4,
+      "vi": "trực ban"
+    },
+    {
+      "pos": 20,
+      "hanzi": "报告",
+      "pinyin": "bàogao",
+      "adj": 2,
+      "vi": "bản báo cáo"
+    },
+    {
+      "pos": 21,
+      "hanzi": "八成（儿）",
+      "pinyin": "bāchéng(r)",
+      "adj": 7,
+      "vi": "hầu như, chắc chắn"
+    },
+    {
+      "pos": 22,
+      "hanzi": "模糊",
+      "pinyin": "móhu",
+      "adj": 6,
+      "vi": "mơ hồ, mập mờ"
+    },
+    {
+      "pos": 23,
+      "hanzi": "狡猾",
+      "pinyin": "jiǎohuá",
+      "adj": 6,
+      "vi": "xảo quyệt, xảo trá"
+    },
+    {
+      "pos": 24,
+      "hanzi": "了不起",
+      "pinyin": "liǎobuqǐ",
+      "adj": 6,
+      "vi": "tài ba, giỏi, vĩ đại"
+    },
+    {
+      "pos": 25,
+      "hanzi": "身段",
+      "pinyin": "shēnduàn",
+      "adj": 2,
+      "vi": "dáng vẻ, thái độ"
+    },
+    {
+      "pos": 26,
+      "hanzi": "缩短",
+      "pinyin": "suōduǎn",
+      "adj": 4,
+      "vi": "rút ngắn"
+    },
+    {
+      "pos": 27,
+      "hanzi": "看不起",
+      "pinyin": "kànbuqǐ",
+      "adj": 4,
+      "vi": "khinh thường, xem thường"
+    },
+    {
+      "pos": 28,
+      "hanzi": "谦虚",
+      "pinyin": "qiānxū",
+      "adj": 6,
+      "vi": "khiêm tốn"
+    },
+    {
+      "pos": 29,
+      "hanzi": "实践",
+      "pinyin": "shíjiàn",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "thực tiễn; thực hành"
+    }
+  ]
+}

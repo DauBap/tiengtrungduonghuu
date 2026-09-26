@@ -1,0 +1,581 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const choice = (
+	id: string,
+	prompt: string,
+	answer: string,
+	options: [string, string, string],
+	meaning: string,
+	explanation: string,
+	optionExplanations: Record<string, string>
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	options,
+	completedSentence: answer,
+	meaning,
+	explanation,
+	optionExplanations
+});
+
+const input = (
+	id: string,
+	prompt: string,
+	answer: string,
+	meaning: string,
+	explanation: string,
+	acceptedAnswers?: string[]
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	acceptedAnswers,
+	completedSentence: answer,
+	meaning,
+	explanation
+});
+
+const arrange = (
+	id: string,
+	prompt: string,
+	answer: string,
+	tokens: string[],
+	meaning: string,
+	explanation: string
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	tokens,
+	completedSentence: answer,
+	meaning,
+	explanation
+});
+
+const commonChoiceReason = (correct: string, wrong1: string, wrong2: string) => ({
+	[correct]: "Đúng: cấu trúc và vị trí từ phù hợp với nghĩa của đề bài.",
+	[wrong1]: "Sai: trật tự hoặc cấu trúc ngữ pháp không phù hợp.",
+	[wrong2]: "Sai: cách diễn đạt này không đúng với nghĩa được yêu cầu."
+});
+
+export const hsk2Lesson1Grammar: GrammarLesson = {
+	title: "BÀI 1: 她请我们吃了北京烤鸭",
+	points: [
+		{
+			id: "ba-conjecture",
+			title: "Trợ từ ngữ khí “吧” (2) – Diễn tả suy đoán",
+			explanation:
+				"“吧” đặt ở cuối câu nghi vấn để biểu thị người nói đang suy đoán hoặc ước tính và muốn người nghe xác nhận. Ngữ điệu thường nhẹ hơn câu hỏi dùng “吗”.",
+			formulas: ["Câu trần thuật + 吧？", "Chủ ngữ + vị ngữ + 吧？"],
+			examples: [
+				{
+					chinese: "你们就是她的学生吧？",
+					vietnamese: "Các em chính là học sinh của cô ấy phải không?"
+				},
+				{ chinese: "他已经到北京了吧？", vietnamese: "Anh ấy đã đến Bắc Kinh rồi phải không?" },
+				{
+					chinese: "你也喜欢北京烤鸭吧？",
+					vietnamese: "Bạn cũng thích vịt quay Bắc Kinh phải không?"
+				}
+			],
+			notes: [
+				"“吧” trong điểm ngữ pháp này dùng để xin xác nhận một phán đoán, không phải để đề nghị hay thúc giục."
+			],
+			exercises: [
+				{
+					id: "h2l1-ba-choice",
+					title: "1. Chọn đáp án đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"ba-c1",
+							"Chọn câu đúng: “Các bạn là học sinh của cô ấy phải không?”",
+							"你们是她的学生吧？",
+							["你们是她的学生吧？", "吧你们是她的学生？", "你们吧是她的学生？"],
+							"Các bạn là học sinh của cô ấy phải không?",
+							"“吧” đứng cuối câu để người nói xin xác nhận suy đoán.",
+							commonChoiceReason("你们是她的学生吧？", "吧你们是她的学生？", "你们吧是她的学生？")
+						),
+						choice(
+							"ba-c2",
+							"Điền từ thích hợp: 他已经到北京了___？",
+							"吧",
+							["吗", "吧", "的"],
+							"Anh ấy đã đến Bắc Kinh rồi phải không?",
+							"Câu có “已经…了” nêu một phán đoán cần xác nhận nên dùng “吧”.",
+							{
+								吗: "Chưa thể hiện sắc thái suy đoán mềm của đề bài.",
+								吧: "Đúng: đặt cuối câu để xin xác nhận suy đoán.",
+								的: "“的” không làm trợ từ nghi vấn trong cấu trúc này."
+							}
+						),
+						choice(
+							"ba-c3",
+							"Chọn câu hỏi suy đoán đúng.",
+							"她就是你的老师吧？",
+							["她吧就是你的老师？", "她就是吧你的老师？", "她就是你的老师吧？"],
+							"Cô ấy chính là giáo viên của bạn phải không?",
+							"Trợ từ “吧” phải đứng ở cuối toàn bộ câu.",
+							commonChoiceReason("她就是你的老师吧？", "她吧就是你的老师？", "她就是吧你的老师？")
+						),
+						choice(
+							"ba-c4",
+							"Chọn câu đúng: “Bạn cũng hiểu ý của cô ấy phải không?”",
+							"你也懂她的意思吧？",
+							["你也懂吧她的意思？", "你也懂她的意思吧？", "你吧也懂她的意思？"],
+							"Bạn cũng hiểu ý của cô ấy phải không?",
+							"Giữ trật tự chủ ngữ + 也 + động từ + tân ngữ, rồi thêm “吧” cuối câu.",
+							commonChoiceReason("你也懂她的意思吧？", "你也懂吧她的意思？", "你吧也懂她的意思？")
+						),
+						choice(
+							"ba-c5",
+							"Câu nào dùng “吧” để xin xác nhận một phán đoán?",
+							"你是来旅游的吧？",
+							["你是吧来旅游的？", "吧你是来旅游的？", "你是来旅游的吧？"],
+							"Bạn đến để du lịch phải không?",
+							"“吧” ở cuối câu thể hiện người nói đã có phán đoán và muốn xác nhận.",
+							commonChoiceReason("你是来旅游的吧？", "你是吧来旅游的？", "吧你是来旅游的？")
+						)
+					]
+				},
+				{
+					id: "h2l1-ba-arrange",
+					title: "2. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: [
+						arrange(
+							"ba-a1",
+							"Bạn là học sinh của cô ấy phải không?",
+							"你是她的学生吧",
+							["她的", "吧", "你", "学生", "是"],
+							"Bạn là học sinh của cô ấy phải không?",
+							"Đặt “吧” ở cuối câu."
+						),
+						arrange(
+							"ba-a2",
+							"Anh ấy đã đến rồi phải không?",
+							"他已经到了吧",
+							["到了", "他", "吧", "已经"],
+							"Anh ấy đã đến rồi phải không?",
+							"“已经…了” đứng trước “吧”."
+						),
+						arrange(
+							"ba-a3",
+							"Bạn hiểu ý của tôi phải không?",
+							"你懂我的意思吧",
+							["吧", "我的", "你", "意思", "懂"],
+							"Bạn hiểu ý của tôi phải không?",
+							"Tân ngữ đứng sau động từ, “吧” đứng cuối."
+						),
+						arrange(
+							"ba-a4",
+							"Cô ấy cũng thích vịt quay Bắc Kinh phải không?",
+							"她也喜欢北京烤鸭吧",
+							["北京烤鸭", "她", "吧", "喜欢", "也"],
+							"Cô ấy cũng thích vịt quay Bắc Kinh phải không?",
+							"“也” đứng trước động từ “喜欢”."
+						),
+						arrange(
+							"ba-a5",
+							"Các bạn đến để du lịch phải không?",
+							"你们是来旅游的吧",
+							["旅游", "是", "吧", "你们", "来", "的"],
+							"Các bạn đến để du lịch phải không?",
+							"Cấu trúc 是…的 đứng trước trợ từ cuối câu “吧”."
+						)
+					]
+				},
+				{
+					id: "h2l1-ba-translate",
+					title: "3. Dịch Việt sang Trung",
+					type: "input",
+					questions: [
+						input(
+							"ba-t1",
+							"Bạn là bạn của cô ấy phải không?",
+							"你是她的朋友吧",
+							"Bạn là bạn của cô ấy phải không?",
+							"Thêm “吧” ở cuối câu trần thuật."
+						),
+						input(
+							"ba-t2",
+							"Anh ấy đã đến Bắc Kinh rồi phải không?",
+							"他已经到北京了吧",
+							"Anh ấy đã đến Bắc Kinh rồi phải không?",
+							"“吧” đứng sau “了” ở cuối câu."
+						),
+						input(
+							"ba-t3",
+							"Cô ấy là giáo viên của bạn phải không?",
+							"她是你的老师吧",
+							"Cô ấy là giáo viên của bạn phải không?",
+							"Câu phán đoán hoàn chỉnh rồi mới thêm “吧”."
+						),
+						input(
+							"ba-t4",
+							"Các bạn cũng hiểu phải không?",
+							"你们也懂吧",
+							"Các bạn cũng hiểu phải không?",
+							"“吧” đứng cuối câu để xin xác nhận."
+						),
+						input(
+							"ba-t5",
+							"Bạn đến để du lịch phải không?",
+							"你是来旅游的吧",
+							"Bạn đến để du lịch phải không?",
+							"Kết hợp 是…的 với “吧” ở cuối."
+						)
+					]
+				}
+			]
+		},
+		{
+			id: "shi-de",
+			title: "Câu “是……的” – Nhấn mạnh chi tiết đã xảy ra",
+			explanation:
+				"Dùng “是……的” để nhấn mạnh thời gian, địa điểm, phương thức hoặc mục đích của một sự việc đã xảy ra. Thành phần cần nhấn mạnh đặt sau “是”, còn “的” thường ở cuối câu.",
+			formulas: [
+				"Chủ ngữ + 是 + thành phần được nhấn mạnh + động từ + 的",
+				"Chủ ngữ + 是 + từ nghi vấn + động từ + 的？"
+			],
+			examples: [
+				{ chinese: "我们是来旅游的。", vietnamese: "Chúng tôi đến để du lịch." },
+				{ chinese: "你是什么时候到的？", vietnamese: "Bạn đến khi nào vậy?" },
+				{ chinese: "他是坐飞机来北京的。", vietnamese: "Anh ấy đến Bắc Kinh bằng máy bay." }
+			],
+			notes: [
+				"Không dùng cấu trúc này để kể một hành động thường xuyên hoặc một sự việc chưa xảy ra."
+			],
+			exercises: [
+				{
+					id: "h2l1-shide-choice",
+					title: "1. Chọn đáp án đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"sd-c1",
+							"Chọn câu đúng: “Chúng tôi đến để du lịch.”",
+							"我们是来旅游的。",
+							["我们来是旅游的。", "我们是来旅游的。", "我们的是来旅游。"],
+							"Chúng tôi đến để du lịch.",
+							"“来旅游” là mục đích được đặt giữa “是” và “的”.",
+							commonChoiceReason("我们是来旅游的。", "我们来是旅游的。", "我们的是来旅游。")
+						),
+						choice(
+							"sd-c2",
+							"Chọn câu hỏi đúng: “Bạn đến khi nào?”",
+							"你是什么时候到的？",
+							["你是什么时候到的？", "你什么时候是到的？", "你是到的什么时候？"],
+							"Bạn đến khi nào vậy?",
+							"Từ nghi vấn “什么时候” đứng sau “是”, trước động từ “到”.",
+							commonChoiceReason("你是什么时候到的？", "你什么时候是到的？", "你是到的什么时候？")
+						),
+						choice(
+							"sd-c3",
+							"Câu nào nhấn mạnh phương thức “đi máy bay”?",
+							"他是坐飞机来北京的。",
+							["他坐是飞机来北京的。", "他是坐飞机来北京的。", "他是来北京的坐飞机。"],
+							"Anh ấy đến Bắc Kinh bằng máy bay.",
+							"Cụm phương thức “坐飞机” nằm trong khung 是…的.",
+							commonChoiceReason(
+								"他是坐飞机来北京的。",
+								"他坐是飞机来北京的。",
+								"他是来北京的坐飞机。"
+							)
+						),
+						choice(
+							"sd-c4",
+							"Điền từ đúng: 我们___昨天到北京的。",
+							"是",
+							["的", "吗", "是"],
+							"Chúng tôi đến Bắc Kinh hôm qua.",
+							"“昨天” là thời gian được nhấn mạnh sau “是”.",
+							{
+								的: "Sai: câu đã có “的” ở cuối.",
+								吗: "Sai: đây không phải câu hỏi có/không.",
+								是: "Đúng: tạo khung 是…的."
+							}
+						),
+						choice(
+							"sd-c5",
+							"Chọn câu đúng: “Cô ấy đến cùng bạn của cô ấy.”",
+							"她是和她的朋友一起来的。",
+							["她和是她的朋友一起来的。", "她是和她的朋友一起来的。", "她是和她的朋友的来一起。"],
+							"Cô ấy đến cùng bạn của cô ấy.",
+							"Cụm “和她的朋友一起” được nhấn mạnh giữa 是 và 的.",
+							commonChoiceReason(
+								"她是和她的朋友一起来的。",
+								"她和是她的朋友一起来的。",
+								"她是和她的朋友的来一起。"
+							)
+						)
+					]
+				},
+				{
+					id: "h2l1-shide-arrange",
+					title: "2. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: [
+						arrange(
+							"sd-a1",
+							"Chúng tôi đến để du lịch.",
+							"我们是来旅游的",
+							["的", "来", "我们", "旅游", "是"],
+							"Chúng tôi đến để du lịch.",
+							"Đặt mục đích “来旅游” giữa 是 và 的."
+						),
+						arrange(
+							"sd-a2",
+							"Bạn đến khi nào?",
+							"你是什么时候到的",
+							["到", "你", "的", "什么时候", "是"],
+							"Bạn đến khi nào vậy?",
+							"“什么时候” đứng sau 是."
+						),
+						arrange(
+							"sd-a3",
+							"Anh ấy đến Bắc Kinh hôm qua.",
+							"他是昨天到北京的",
+							["北京", "昨天", "他", "的", "到", "是"],
+							"Anh ấy đến Bắc Kinh hôm qua.",
+							"Thời gian “昨天” là phần được nhấn mạnh."
+						),
+						arrange(
+							"sd-a4",
+							"Cô ấy đến bằng máy bay.",
+							"她是坐飞机来的",
+							["坐飞机", "的", "她", "来", "是"],
+							"Cô ấy đến bằng máy bay.",
+							"Phương thức “坐飞机” nằm sau 是."
+						),
+						arrange(
+							"sd-a5",
+							"Các bạn đến cùng ai?",
+							"你们是和谁一起来的",
+							["一起", "谁", "的", "你们", "来", "是", "和"],
+							"Các bạn đến cùng ai?",
+							"“和谁一起” là thành phần được hỏi trong khung 是…的."
+						)
+					]
+				},
+				{
+					id: "h2l1-shide-translate",
+					title: "3. Dịch Việt sang Trung",
+					type: "input",
+					questions: [
+						input(
+							"sd-t1",
+							"Chúng tôi đến để du lịch.",
+							"我们是来旅游的",
+							"Chúng tôi đến để du lịch.",
+							"Dùng 是 + 来旅游 + 的."
+						),
+						input(
+							"sd-t2",
+							"Bạn đến khi nào?",
+							"你是什么时候到的",
+							"Bạn đến khi nào vậy?",
+							"Từ nghi vấn đặt giữa 是 và động từ 到."
+						),
+						input(
+							"sd-t3",
+							"Anh ấy đến Bắc Kinh hôm qua.",
+							"他是昨天到北京的",
+							"Anh ấy đến Bắc Kinh hôm qua.",
+							"Nhấn mạnh thời gian “昨天”."
+						),
+						input(
+							"sd-t4",
+							"Cô ấy đến bằng máy bay.",
+							"她是坐飞机来的",
+							"Cô ấy đến bằng máy bay.",
+							"Nhấn mạnh phương thức “坐飞机”."
+						),
+						input(
+							"sd-t5",
+							"Các bạn đến cùng ai?",
+							"你们是和谁一起来的",
+							"Các bạn đến cùng ai?",
+							"Hỏi người đi cùng bằng “和谁一起”."
+						)
+					]
+				}
+			]
+		},
+		{
+			id: "pivotal",
+			title: "Câu kiêm ngữ – 请/让/叫 + người + động từ",
+			explanation:
+				"Trong câu kiêm ngữ, tân ngữ của “请/让/叫” đồng thời là chủ ngữ của động từ phía sau. Cấu trúc này diễn tả nhờ, mời, bảo hoặc cho phép ai làm việc gì.",
+			formulas: [
+				"Chủ ngữ + 请 + người + động từ (+ tân ngữ)",
+				"Chủ ngữ + 让/叫 + người + động từ (+ tân ngữ)"
+			],
+			examples: [
+				{ chinese: "我想请你帮个忙。", vietnamese: "Tôi muốn nhờ bạn giúp một việc." },
+				{
+					chinese: "她请我们吃北京烤鸭。",
+					vietnamese: "Cô ấy mời chúng tôi ăn vịt quay Bắc Kinh."
+				},
+				{ chinese: "老师让我们介绍自己。", vietnamese: "Giáo viên bảo chúng tôi tự giới thiệu." }
+			],
+			notes: ["Người thực hiện hành động thứ hai phải đứng ngay sau 请、让 hoặc 叫."],
+			exercises: [
+				{
+					id: "h2l1-pivotal-choice",
+					title: "1. Chọn đáp án đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"pv-c1",
+							"Chọn câu đúng: “Cô ấy mời chúng tôi ăn vịt quay Bắc Kinh.”",
+							"她请我们吃北京烤鸭。",
+							["她我们请吃北京烤鸭。", "她请吃我们北京烤鸭。", "她请我们吃北京烤鸭。"],
+							"Cô ấy mời chúng tôi ăn vịt quay Bắc Kinh.",
+							"“我们” vừa là tân ngữ của 请 vừa là người thực hiện 吃.",
+							commonChoiceReason(
+								"她请我们吃北京烤鸭。",
+								"她我们请吃北京烤鸭。",
+								"她请吃我们北京烤鸭。"
+							)
+						),
+						choice(
+							"pv-c2",
+							"Chọn câu đúng: “Tôi muốn nhờ bạn giúp một việc.”",
+							"我想请你帮个忙。",
+							["我想请你帮个忙。", "我想你请帮个忙。", "我想请帮你个忙。"],
+							"Tôi muốn nhờ bạn giúp một việc.",
+							"Người được nhờ “你” đứng giữa 请 và động từ 帮.",
+							commonChoiceReason("我想请你帮个忙。", "我想你请帮个忙。", "我想请帮你个忙。")
+						),
+						choice(
+							"pv-c3",
+							"Chọn câu đúng: “Giáo viên bảo chúng tôi giới thiệu.”",
+							"老师让我们介绍。",
+							["老师我们让介绍。", "老师让我们介绍。", "老师让介绍我们。"],
+							"Giáo viên bảo chúng tôi giới thiệu.",
+							"“我们” là người thực hiện hành động 介绍 nên đứng sau 让.",
+							commonChoiceReason("老师让我们介绍。", "老师我们让介绍。", "老师让介绍我们。")
+						),
+						choice(
+							"pv-c4",
+							"Điền cụm từ đúng: 他___我去接你。",
+							"叫",
+							["的", "吧", "叫"],
+							"Anh ấy bảo tôi đi đón bạn.",
+							"“叫 + người + động từ” diễn tả bảo ai làm gì.",
+							{
+								的: "Sai: “的” không mang nghĩa sai khiến.",
+								吧: "Sai: “吧” là trợ từ cuối câu.",
+								叫: "Đúng: 叫我去接你 = bảo tôi đi đón bạn."
+							}
+						),
+						choice(
+							"pv-c5",
+							"Chọn câu đúng: “Cô ấy cho tôi giới thiệu người bạn này.”",
+							"她让我介绍这个朋友。",
+							["她我让介绍这个朋友。", "她让我介绍这个朋友。", "她让介绍我这个朋友。"],
+							"Cô ấy cho tôi giới thiệu người bạn này.",
+							"Người thực hiện “介绍” là “我”, đặt ngay sau 让.",
+							commonChoiceReason(
+								"她让我介绍这个朋友。",
+								"她我让介绍这个朋友。",
+								"她让介绍我这个朋友。"
+							)
+						)
+					]
+				},
+				{
+					id: "h2l1-pivotal-arrange",
+					title: "2. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: [
+						arrange(
+							"pv-a1",
+							"Cô ấy mời chúng tôi ăn vịt quay Bắc Kinh.",
+							"她请我们吃北京烤鸭",
+							["我们", "北京烤鸭", "她", "请", "吃"],
+							"Cô ấy mời chúng tôi ăn vịt quay Bắc Kinh.",
+							"请 + người + động từ + tân ngữ."
+						),
+						arrange(
+							"pv-a2",
+							"Tôi muốn nhờ bạn giúp một việc.",
+							"我想请你帮个忙",
+							["你", "请", "帮个忙", "我", "想"],
+							"Tôi muốn nhờ bạn giúp một việc.",
+							"Người được nhờ đứng giữa 请 và động từ."
+						),
+						arrange(
+							"pv-a3",
+							"Giáo viên bảo chúng tôi giới thiệu.",
+							"老师让我们介绍",
+							["我们", "老师", "介绍", "让"],
+							"Giáo viên bảo chúng tôi giới thiệu.",
+							"让 + 我们 + 介绍."
+						),
+						arrange(
+							"pv-a4",
+							"Anh ấy bảo tôi đi đón bạn.",
+							"他叫我去接你",
+							["去", "他", "你", "叫", "接", "我"],
+							"Anh ấy bảo tôi đi đón bạn.",
+							"叫 + người + chuỗi động từ 去接."
+						),
+						arrange(
+							"pv-a5",
+							"Bạn hãy để cô ấy giới thiệu.",
+							"你让她介绍吧",
+							["她", "吧", "介绍", "你", "让"],
+							"Bạn hãy để cô ấy giới thiệu nhé.",
+							"让 + người + động từ; “吧” đứng cuối câu."
+						)
+					]
+				},
+				{
+					id: "h2l1-pivotal-translate",
+					title: "3. Dịch Việt sang Trung",
+					type: "input",
+					questions: [
+						input(
+							"pv-t1",
+							"Cô ấy mời chúng tôi ăn vịt quay Bắc Kinh.",
+							"她请我们吃北京烤鸭",
+							"Cô ấy mời chúng tôi ăn vịt quay Bắc Kinh.",
+							"请 + 我们 + 吃北京烤鸭."
+						),
+						input(
+							"pv-t2",
+							"Tôi muốn nhờ bạn giúp một việc.",
+							"我想请你帮个忙",
+							"Tôi muốn nhờ bạn giúp một việc.",
+							"请 + 你 + 帮个忙."
+						),
+						input(
+							"pv-t3",
+							"Giáo viên bảo chúng tôi giới thiệu.",
+							"老师让我们介绍",
+							"Giáo viên bảo chúng tôi giới thiệu.",
+							"让 + 我们 + 介绍."
+						),
+						input(
+							"pv-t4",
+							"Anh ấy bảo tôi đi đón bạn.",
+							"他叫我去接你",
+							"Anh ấy bảo tôi đi đón bạn.",
+							"叫 + 我 + 去接你."
+						),
+						input(
+							"pv-t5",
+							"Cô ấy cho tôi giới thiệu người bạn này.",
+							"她让我介绍这个朋友",
+							"Cô ấy cho tôi giới thiệu người bạn này.",
+							"让 + 我 + 介绍这个朋友."
+						)
+					]
+				}
+			]
+		}
+	]
+};

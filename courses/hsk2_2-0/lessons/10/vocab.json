@@ -1,0 +1,73 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 10,
+  "label": "Bài 10",
+  "title": "别找了，手机在桌子上呢",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "课",
+      "pinyin": "kè",
+      "adj": 2,
+      "vi": "giờ học, môn, bài"
+    },
+    {
+      "pos": 2,
+      "hanzi": "帮助",
+      "pinyin": "bāngzhù",
+      "adj": 4,
+      "vi": "giúp ích, giúp đỡ"
+    },
+    {
+      "pos": 3,
+      "hanzi": "别",
+      "pinyin": "bié",
+      "adj": 7,
+      "vi": "đừng"
+    },
+    {
+      "pos": 4,
+      "hanzi": "哥哥",
+      "pinyin": "gēge",
+      "adj": 2,
+      "vi": "anh trai"
+    },
+    {
+      "pos": 5,
+      "hanzi": "鸡蛋",
+      "pinyin": "jīdàn",
+      "adj": 2,
+      "vi": "trứng gà"
+    },
+    {
+      "pos": 6,
+      "hanzi": "西瓜",
+      "pinyin": "xīguā",
+      "adj": 2,
+      "vi": "dưa hấu"
+    },
+    {
+      "pos": 7,
+      "hanzi": "正在",
+      "pinyin": "zhèngzài",
+      "adj": 7,
+      "vi": "đang"
+    },
+    {
+      "pos": 8,
+      "hanzi": "手机",
+      "pinyin": "shǒujī",
+      "adj": 2,
+      "vi": "điện thoại di động"
+    },
+    {
+      "pos": 9,
+      "hanzi": "洗",
+      "pinyin": "xǐ",
+      "adj": 4,
+      "vi": "giặt, rửa"
+    }
+  ]
+}

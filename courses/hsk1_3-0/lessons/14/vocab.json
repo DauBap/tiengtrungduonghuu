@@ -1,0 +1,206 @@
+{
+	"course_id": "hsk1_3-0",
+	"course_name": "HSK 1 (3.0)",
+	"id": 14,
+	"label": "Bài 14",
+	"title": "我看了一个电影",
+	"short_vi": " Kể lại hành động đã xảy ra, hỏi đáp về tình hình học tập ",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "上",
+			"pinyin": "shànɡ",
+			"adj": 4,
+			"vi": "lên"
+		},
+		{
+			"pos": 2,
+			"hanzi": "火车",
+			"pinyin": "huǒchē",
+			"adj": 2,
+			"vi": "tàu hỏa"
+		},
+		{
+			"pos": 3,
+			"hanzi": "中午",
+			"pinyin": "zhōnɡwǔ",
+			"adj": 2,
+			"vi": "buổi trưa"
+		},
+		{
+			"pos": 4,
+			"hanzi": "开",
+			"pinyin": "kāi",
+			"adj": 4,
+			"vi": "lái (lái xe oto)"
+		},
+		{
+			"pos": 5,
+			"hanzi": "有些",
+			"pinyin": "yǒuxiē",
+			"adj": 1,
+			"vi": "một số, một chút một vài"
+		},
+		{
+			"pos": 6,
+			"hanzi": "有的",
+			"pinyin": "yǒude",
+			"adj": 1,
+			"vi": "có loại, một số"
+		},
+		{
+			"pos": 7,
+			"hanzi": "了",
+			"pinyin": "le",
+			"adj": 11,
+			"vi": "thường được dùng sau động từ để chỉ sự hoàn thành của một hành động."
+		},
+		{
+			"pos": 8,
+			"hanzi": "写",
+			"pinyin": "xiě",
+			"adj": 4,
+			"vi": "viết"
+		},
+		{
+			"pos": 9,
+			"hanzi": "都",
+			"pinyin": "dōu",
+			"adj": 7,
+			"vi": "đều"
+		},
+		{
+			"pos": 10,
+			"hanzi": "听见",
+			"pinyin": "tīnɡjiàn",
+			"adj": 4,
+			"vi": "nghe thấy, nghe được"
+		},
+		{
+			"pos": 11,
+			"hanzi": "不要",
+			"pinyin": "búyào",
+			"adj": 7,
+			"vi": "không (không muốn, không cần)"
+		},
+		{
+			"pos": 12,
+			"hanzi": "说话",
+			"pinyin": "shuōhuà",
+			"adj": 4,
+			"vi": "nói (nói chuyện)"
+		},
+		{
+			"pos": 13,
+			"hanzi": "听",
+			"pinyin": "tīnɡ",
+			"adj": 4,
+			"vi": "nghe"
+		},
+		{
+			"pos": 14,
+			"hanzi": "哪些",
+			"pinyin": "nǎxiē",
+			"adj": 1,
+			"vi": "những cái đó"
+		},
+		{
+			"pos": 15,
+			"hanzi": "字",
+			"pinyin": "zì",
+			"adj": 1,
+			"vi": "chữ"
+		},
+		{
+			"pos": 16,
+			"hanzi": "汉语",
+			"pinyin": "Hànyǔ",
+			"adj": [],
+			"vi": "Tiếng Trung"
+		},
+		{
+			"pos": 17,
+			"hanzi": "汉字",
+			"pinyin": "Hànzì",
+			"adj": [],
+			"vi": "Hán Tự (từ tiếng Trung)"
+		},
+		{
+			"pos": 18,
+			"hanzi": "明年",
+			"pinyin": "mínɡnián",
+			"adj": 2,
+			"vi": "năm sau"
+		},
+		{
+			"pos": 19,
+			"hanzi": "上",
+			"pinyin": "shàng",
+			"adj": 4,
+			"vi": "lên"
+		},
+		{
+			"pos": 20,
+			"hanzi": "中学",
+			"pinyin": "zhōnɡxué",
+			"adj": 2,
+			"vi": "trường trung học"
+		},
+		{
+			"pos": 21,
+			"hanzi": "小学",
+			"pinyin": "xiǎoxué",
+			"adj": 2,
+			"vi": "trường tiểu học"
+		},
+		{
+			"pos": 22,
+			"hanzi": "中学生",
+			"pinyin": "zhōnɡxuéshēnɡ",
+			"adj": 2,
+			"vi": "học sinh trung học"
+		},
+		{
+			"pos": 23,
+			"hanzi": "小学生",
+			"pinyin": "xiǎoxuéshēnɡ",
+			"adj": 2,
+			"vi": "học sinh tiểu học"
+		},
+		{
+			"pos": 24,
+			"hanzi": "上学",
+			"pinyin": "shànɡxué",
+			"adj": 4,
+			"vi": "đi học"
+		},
+		{
+			"pos": 25,
+			"hanzi": "他们",
+			"pinyin": "tāmen",
+			"adj": 1,
+			"vi": "bọn họ (chỉ chung)"
+		},
+		{
+			"pos": 26,
+			"hanzi": "她们",
+			"pinyin": "tāmen",
+			"adj": 1,
+			"vi": "bọn họ (chỉ con gái)"
+		},
+		{
+			"pos": 27,
+			"hanzi": "它们",
+			"pinyin": "tāmen",
+			"adj": 1,
+			"vi": "những cái đó (chỉ vật)"
+		},
+		{
+			"pos": 28,
+			"hanzi": "晚",
+			"pinyin": "wǎn",
+			"adj": 6,
+			"vi": "tối, trễ, muộn"
+		}
+	]
+}

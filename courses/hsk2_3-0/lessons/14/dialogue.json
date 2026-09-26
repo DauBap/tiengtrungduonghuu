@@ -1,0 +1,152 @@
+{
+  "lesson": 14,
+  "title": "一个人过年多没意思啊",
+  "title_pinyin": "Yī gè rén guò nián duō méi yìsi a",
+  "title_vi": "Một mình đón năm mới thật chán",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "王老师，你家楼下站着一个人。",
+          "pinyin": "Wáng lǎoshī, nǐ jiā lóuxià zhànzhe yī gè rén.",
+          "vi": "Cô Vương, dưới nhà cô có một người đang đứng."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "我家楼下？我看看。",
+          "pinyin": "Wǒ jiā lóuxià? Wǒ kànkan.",
+          "vi": "Dưới nhà cô à? Cô xem nào."
+        },
+        {
+          "speaker": "李文",
+          "zh": "那个人穿着黑色的裤子，手里还拿着一个黑色的包。",
+          "pinyin": "Nàge rén chuānzhe hēisè de kùzi, shǒu lǐ hái názhe yī gè hēisè de bāo.",
+          "vi": "Người đó mặc quần màu đen, trên tay còn cầm một cái túi màu đen."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "我看见那个人了，他是我男朋友。",
+          "pinyin": "Wǒ kànjiàn nàge rén le, tā shì wǒ nánpéngyou.",
+          "vi": "Cô nhìn thấy người đó rồi, anh ấy là bạn trai của cô."
+        },
+        {
+          "speaker": "李文",
+          "zh": "那我们快过去吧。",
+          "pinyin": "Nà wǒmen kuài guòqu ba.",
+          "vi": "Vậy chúng ta mau qua đó đi."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一飞",
+          "zh": "同乐，真的是你啊！上次打电话，你说有时间过来看我，没想到这么快就来了！",
+          "pinyin": "Tónglè, zhēn de shì nǐ a! Shàng cì dǎ diànhuà, nǐ shuō yǒu shíjiān guòlái kàn wǒ, méi xiǎng dào zhème kuài jiù lái le!",
+          "vi": "Đồng Lạc, đúng là anh! Lần trước gọi điện, anh nói có thời gian qua thăm em, không ngờ nhanh vậy đã đến rồi!"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "就要过年了，你一个人在这儿多没意思啊，所以我就早早过来了。",
+          "pinyin": "Jiù yào guò nián le, nǐ yī gè rén zài zhèr duō méi yìsi a, suǒyǐ wǒ jiù zǎozǎo guòlái le.",
+          "vi": "Sắp đến Tết rồi, em một mình ở đây chán quá nên anh đã đến sớm."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "你能来，我太高兴了！",
+          "pinyin": "Nǐ néng lái, wǒ tài gāoxìng le!",
+          "vi": "Anh có thể đến, em vui quá!"
+        },
+        {
+          "speaker": "李文",
+          "zh": "一飞，你旁边这位是？",
+          "pinyin": "Yīfēi, nǐ pángbiān zhè wèi shì?",
+          "vi": "Nhất Phi, vị này bên cạnh cô là ai vậy?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "同乐，这是李文，他在我们学校学医。李文，这是我男朋友杨同乐。",
+          "pinyin": "Tónglè, zhè shì Lǐ Wén, tā zài wǒmen xuéxiào xué yī. Lǐ Wén, zhè shì wǒ nánpéngyou Yáng Tónglè.",
+          "vi": "Đồng Lạc, đây là Lý Văn, bạn ấy học y ở trường em. Lý Văn, đây là bạn trai của cô, Dương Đồng Lạc."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "李文，很高兴认识你！",
+          "pinyin": "Lǐ Wén, hěn gāoxìng rènshi nǐ!",
+          "vi": "Lý Văn, rất vui được làm quen với bạn!"
+        },
+        {
+          "speaker": "李文",
+          "zh": "认识你我也很高兴！我家就在前面那个楼，有时间来玩。",
+          "pinyin": "Rènshi nǐ wǒ yě hěn gāoxìng! Wǒ jiā jiù zài qiánmian nàge lóu, yǒu shíjiān lái wán.",
+          "vi": "Mình cũng rất vui được làm quen với anh! Nhà mình ở ngay tòa nhà đằng kia, có thời gian sang chơi nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "杨同乐",
+          "zh": "一飞，你住的房子真不错，很大，离学校也不远。",
+          "pinyin": "Yīfēi, nǐ zhù de fángzi zhēn búcuò, hěn dà, lí xuéxiào yě bù yuǎn.",
+          "vi": "Nhất Phi, căn nhà em ở thật không tệ, rất rộng, cách trường cũng không xa."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "是啊！我楼下还住着一家中国人，他们人很好。",
+          "pinyin": "Shì a! Wǒ lóuxià hái zhùzhe yī jiā Zhōngguó rén, tāmen rén hěn hǎo.",
+          "vi": "Đúng vậy! Dưới nhà em còn có một gia đình người Trung Quốc, họ rất tốt bụng."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "这样你有事情就可以找他们帮忙。",
+          "pinyin": "Zhèyàng nǐ yǒu shìqing jiù kěyǐ zhǎo tāmen bāngmáng.",
+          "vi": "Vậy là em có việc có thể nhờ họ giúp đỡ."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "对，我也帮他们家的小孩儿学中文。",
+          "pinyin": "Duì, wǒ yě bāng tāmen jiā de xiǎoháir xué Zhōngwén.",
+          "vi": "Đúng vậy, em cũng giúp con của họ học tiếng Trung."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "我记得你跟我说过，是个女孩儿，学得也很好。",
+          "pinyin": "Wǒ jìde nǐ gēn wǒ shuō guo, shì ge nǚháir, xué de yě hěn hǎo.",
+          "vi": "Anh nhớ em đã nói với anh, là một bé gái, học cũng rất giỏi."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "没错，她经常跑上来找我玩。",
+          "pinyin": "Méi cuò, tā jīngcháng pǎo shànglái zhǎo wǒ wán.",
+          "vi": "Đúng vậy, bé thường chạy lên tầng tìm em chơi."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "你问问他们什么时候有时间，我请他们吃个饭。",
+          "pinyin": "Nǐ wènwen tāmen shénme shíhou yǒu shíjiān, wǒ qǐng tāmen chī ge fàn.",
+          "vi": "Em hỏi xem họ khi nào có thời gian, anh mời họ một bữa."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "我男朋友姓杨，叫杨同乐。他高个子、大眼睛，唱歌唱得很好，跳舞跳得也不错。他和我姐姐一起工作，是姐姐介绍我们认识的。他告诉我，从见到我的第一天开始，他就喜欢上我了。",
+          "pinyin": "Wǒ nánpéngyou xìng Yáng, jiào Yáng Tónglè. Tā gāo gèzi, dà yǎnjīng, chànggē chàng de hěn hǎo, tiàowǔ tiào de yě búcuò. Tā hé wǒ jiějie yīqǐ gōngzuò, shì jiějie jièshào wǒmen rènshi de. Tā gàosu wǒ, cóng jiàn dào wǒ de dì-yī tiān kāishǐ, tā jiù xǐhuan shàng wǒ le.",
+          "vi": "Bạn trai của tôi họ Dương, tên là Dương Đồng Lạc. Anh ấy dáng cao, mắt to, hát rất hay, nhảy múa cũng không tệ. Anh ấy làm việc cùng với chị gái tôi, chị ấy đã giới thiệu chúng tôi làm quen. Anh ấy nói với tôi, từ ngày đầu tiên gặp tôi, anh ấy đã thích tôi rồi."
+        }
+      ]
+    }
+  ]
+}

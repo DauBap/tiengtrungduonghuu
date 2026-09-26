@@ -1,0 +1,101 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 6,
+  "label": "Bài 6",
+  "title": "你怎么不吃了 ",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "门",
+      "pinyin": "mén",
+      "adj": 2,
+      "vi": "cửa, cổng"
+    },
+    {
+      "pos": 2,
+      "hanzi": "外",
+      "pinyin": "wài",
+      "adj": 2,
+      "vi": "bên ngoài"
+    },
+    {
+      "pos": 3,
+      "hanzi": "自行车",
+      "pinyin": "zìxíngchē",
+      "adj": 2,
+      "vi": "xe đạp"
+    },
+    {
+      "pos": 4,
+      "hanzi": "羊肉",
+      "pinyin": "yángròu",
+      "adj": 2,
+      "vi": "thịt dê/cừu"
+    },
+    {
+      "pos": 5,
+      "hanzi": "好吃",
+      "pinyin": "hǎochī",
+      "adj": 6,
+      "vi": "ngon"
+    },
+    {
+      "pos": 6,
+      "hanzi": "面条",
+      "pinyin": "miàntiáo",
+      "adj": 2,
+      "vi": "mì sợi"
+    },
+    {
+      "pos": 7,
+      "hanzi": "打篮球",
+      "pinyin": "dǎ lánqiú",
+      "adj": 4,
+      "vi": "chơi bóng rổ"
+    },
+    {
+      "pos": 8,
+      "hanzi": "因为",
+      "pinyin": "yīnwèi",
+      "adj": 10,
+      "vi": "bởi vì"
+    },
+    {
+      "pos": 9,
+      "hanzi": "所以",
+      "pinyin": "suǒyǐ",
+      "adj": 10,
+      "vi": "cho nên"
+    },
+    {
+      "pos": 10,
+      "hanzi": "游泳",
+      "pinyin": "yóu yǒng",
+      "adj": 4,
+      "vi": "bơi"
+    },
+    {
+      "pos": 11,
+      "hanzi": "经常",
+      "pinyin": "jīngcháng",
+      "adj": 7,
+      "vi": "thường xuyên"
+    },
+    {
+      "pos": 12,
+      "hanzi": "公斤",
+      "pinyin": "gōngjīn",
+      "adj": 8,
+      "vi": "kilôgram"
+    },
+    {
+      "pos": 13,
+      "hanzi": "姐姐",
+      "pinyin": "jiějie",
+      "adj": 2,
+      "vi": "chị gái"
+    }
+  ]
+}

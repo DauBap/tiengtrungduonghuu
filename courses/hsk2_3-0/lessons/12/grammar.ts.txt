@@ -1,0 +1,240 @@
+import type { GrammarExercise, GrammarLesson } from "./types";
+
+type Row = {
+	id: string;
+	zh: string;
+	vi: string;
+	tokens: string[];
+	wrong: [string, string];
+	note: string;
+};
+const exercises = (prefix: string, rows: Row[]): GrammarExercise[] => [
+	{
+		id: `${prefix}-choice`,
+		title: "1. Chọn đáp án đúng",
+		type: "choice",
+		questions: rows.map((r, i) => {
+			const options: [string, string, string] =
+				i % 3 === 0
+					? [r.zh, ...r.wrong]
+					: i % 3 === 1
+						? [r.wrong[0], r.zh, r.wrong[1]]
+						: [...r.wrong, r.zh];
+			return {
+				id: `${r.id}c`,
+				prompt: `Chọn câu đúng: “${r.vi}”`,
+				answer: r.zh,
+				options,
+				completedSentence: r.zh,
+				meaning: r.vi,
+				explanation: r.note,
+				optionExplanations: Object.fromEntries(
+					options.map((o) => [
+						o,
+						o === r.zh
+							? `Đúng: ${r.note}`
+							: "Sai: vị trí thành phần so sánh hoặc bổ ngữ không đúng."
+					])
+				)
+			};
+		})
+	},
+	{
+		id: `${prefix}-arrange`,
+		title: "2. Sắp xếp từ thành câu",
+		type: "arrange",
+		questions: rows.map((r) => ({
+			id: `${r.id}a`,
+			prompt: r.vi,
+			answer: r.zh,
+			tokens: r.tokens,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	},
+	{
+		id: `${prefix}-translate`,
+		title: "3. Dịch Việt sang Trung",
+		type: "input",
+		questions: rows.map((r) => ({
+			id: `${r.id}t`,
+			prompt: r.vi,
+			answer: r.zh,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	}
+];
+
+export const hsk2Lesson12Grammar: GrammarLesson = {
+	title: "BÀI 12: 这里比北京冷多了",
+	points: [
+		{
+			id: "large-difference",
+			title: "Câu so sánh (4) – Nhấn mạnh với “多了/得多”",
+			explanation:
+				"“多了” hoặc “得多” đặt sau tính từ trong câu có “比” để nhấn mạnh mức chênh lệch rất lớn. Hai cách có nghĩa gần nhau: hơn nhiều.",
+			formulas: ["A + 比 + B + tính từ + 多了", "A + 比 + B + tính từ + 得多"],
+			examples: [
+				{ chinese: "这里比北京冷多了。", vietnamese: "Ở đây lạnh hơn Bắc Kinh nhiều." },
+				{ chinese: "坐地铁比走路快得多。", vietnamese: "Đi tàu điện ngầm nhanh hơn đi bộ nhiều." }
+			],
+			notes: ["“多了/得多” đứng sau tính từ, không đứng trước tính từ."],
+			exercises: exercises("h2l12-large", [
+				{
+					id: "l1",
+					zh: "这里比北京冷多了",
+					vi: "Ở đây lạnh hơn Bắc Kinh nhiều.",
+					tokens: ["北京", "冷", "这里", "多了", "比"],
+					wrong: ["这里比北京多了冷", "这里多了比北京冷"],
+					note: "冷 + 多了 đứng sau A 比 B."
+				},
+				{
+					id: "l2",
+					zh: "坐地铁比走路快得多",
+					vi: "Đi tàu điện ngầm nhanh hơn đi bộ nhiều.",
+					tokens: ["快", "比", "走路", "得多", "坐地铁"],
+					wrong: ["坐地铁比走路得多快", "坐地铁得多比走路快"],
+					note: "快 + 得多 biểu thị chênh lệch lớn."
+				},
+				{
+					id: "l3",
+					zh: "今天比昨天晴多了",
+					vi: "Hôm nay nắng hơn hôm qua nhiều.",
+					tokens: ["昨天", "晴", "今天", "多了", "比"],
+					wrong: ["今天比昨天多了晴", "今天晴多了比昨天"],
+					note: "晴 + 多了 đứng cuối câu."
+				},
+				{
+					id: "l4",
+					zh: "这座楼比那座高得多",
+					vi: "Tòa nhà này cao hơn tòa kia nhiều.",
+					tokens: ["那座", "高", "这座楼", "得多", "比"],
+					wrong: ["这座楼比那座得多高", "这座楼得多比那座高"],
+					note: "高 + 得多 nhấn mạnh độ cao chênh lệch."
+				},
+				{
+					id: "l5",
+					zh: "外面比房间冷得多",
+					vi: "Bên ngoài lạnh hơn trong phòng nhiều.",
+					tokens: ["房间", "得多", "外面", "冷", "比"],
+					wrong: ["外面比房间得多冷", "外面冷得多比房间"],
+					note: "冷 + 得多 phải đứng sau đối tượng B."
+				}
+			])
+		},
+		{
+			id: "state-comparison",
+			title: "Câu so sánh (5) – “比” trong câu có bổ ngữ trạng thái",
+			explanation:
+				"Khi so sánh trạng thái của hành động, “比” có thể đứng trước động từ hoặc nằm trong phần bổ ngữ sau “得”. Hai mẫu đều làm rõ đối tượng và mức độ của hành động.",
+			formulas: ["A + 比 + B + động từ + 得 + bổ ngữ", "A + động từ + 得 + 比 + B + bổ ngữ"],
+			examples: [
+				{ chinese: "昨天比今天下得大。", vietnamese: "Hôm qua tuyết rơi to hơn hôm nay." },
+				{ chinese: "李文跑得比白家月快。", vietnamese: "Lý Văn chạy nhanh hơn Bạch Gia Nguyệt." }
+			],
+			notes: ["Trong mẫu thứ hai, “比 + B” đứng sau “得” và trước tính từ."],
+			exercises: exercises("h2l12-state", [
+				{
+					id: "s1",
+					zh: "昨天比今天下得大",
+					vi: "Hôm qua tuyết rơi to hơn hôm nay.",
+					tokens: ["大", "今天", "昨天", "得", "下", "比"],
+					wrong: ["昨天下比今天得大", "昨天下得大比今天"],
+					note: "Mẫu A 比 B + 下得大."
+				},
+				{
+					id: "s2",
+					zh: "李文跑得比白家月快",
+					vi: "Lý Văn chạy nhanh hơn Bạch Gia Nguyệt.",
+					tokens: ["比", "快", "跑得", "李文", "白家月"],
+					wrong: ["李文跑比白家月得快", "李文跑得快比白家月"],
+					note: "Mẫu A + 跑得 + 比 B + 快."
+				},
+				{
+					id: "s3",
+					zh: "他比我走得慢",
+					vi: "Anh ấy đi chậm hơn tôi.",
+					tokens: ["走得慢", "我", "他", "比"],
+					wrong: ["他走比我得慢", "他走得慢比我"],
+					note: "Mẫu A 比 B + 走得慢."
+				},
+				{
+					id: "s4",
+					zh: "她说得比我好",
+					vi: "Cô ấy nói tốt hơn tôi.",
+					tokens: ["好", "说得", "她", "比我"],
+					wrong: ["她说比我得好", "她说得好比我"],
+					note: "比我 nằm giữa 得 và 好."
+				},
+				{
+					id: "s5",
+					zh: "今天下得比昨天大",
+					vi: "Hôm nay tuyết rơi to hơn hôm qua.",
+					tokens: ["比昨天", "大", "今天", "下得"],
+					wrong: ["今天下比昨天得大", "今天下得大比昨天"],
+					note: "Mẫu A + 下得 + 比 B + 大."
+				}
+			])
+		},
+		{
+			id: "object-state-comparison",
+			title: "Câu so sánh (6) – Có tân ngữ và bổ ngữ trạng thái",
+			explanation:
+				"Khi động từ vừa có tân ngữ vừa có bổ ngữ trạng thái, có thể đưa tân ngữ lên trước động từ hoặc lặp lại động từ. Phần “比 + đối tượng” đứng trong bổ ngữ sau “得”.",
+			formulas: [
+				"Chủ ngữ + tân ngữ + động từ + 得 + 比 B + tính từ",
+				"Chủ ngữ + động từ + tân ngữ + động từ + 得 + 比 B + tính từ"
+			],
+			examples: [
+				{ chinese: "你跑步跑得比我快。", vietnamese: "Bạn chạy bộ nhanh hơn tôi." },
+				{ chinese: "他篮球打得比我好。", vietnamese: "Anh ấy chơi bóng rổ giỏi hơn tôi." }
+			],
+			notes: ["Không đặt tân ngữ sau toàn bộ bổ ngữ trạng thái."],
+			exercises: exercises("h2l12-object", [
+				{
+					id: "o1",
+					zh: "你跑步跑得比我快",
+					vi: "Bạn chạy bộ nhanh hơn tôi.",
+					tokens: ["比我", "跑步", "快", "你", "跑得"],
+					wrong: ["你跑步得比我快", "你跑得比我快步"],
+					note: "跑步 là động từ ly hợp nên lặp 跑 trước 得."
+				},
+				{
+					id: "o2",
+					zh: "他篮球打得比我好",
+					vi: "Anh ấy chơi bóng rổ giỏi hơn tôi.",
+					tokens: ["比我", "篮球", "他", "打得", "好"],
+					wrong: ["他打篮球得比我好", "他篮球得打比我好"],
+					note: "Tân ngữ 篮球 đứng trước 打得."
+				},
+				{
+					id: "o3",
+					zh: "她汉字写得比我漂亮",
+					vi: "Cô ấy viết chữ Hán đẹp hơn tôi.",
+					tokens: ["写得", "汉字", "比我", "漂亮", "她"],
+					wrong: ["她写汉字得比我漂亮", "她汉字得写比我漂亮"],
+					note: "汉字 + 写得 + 比我 + 漂亮."
+				},
+				{
+					id: "o4",
+					zh: "我游泳游得比他慢",
+					vi: "Tôi bơi chậm hơn anh ấy.",
+					tokens: ["游泳", "慢", "我", "游得", "比他"],
+					wrong: ["我游泳得比他慢", "我游得比他慢泳"],
+					note: "游泳 là động từ ly hợp nên lặp 游."
+				},
+				{
+					id: "o5",
+					zh: "你足球踢得比他好",
+					vi: "Bạn đá bóng giỏi hơn anh ấy.",
+					tokens: ["比他", "足球", "你", "好", "踢得"],
+					wrong: ["你踢足球得比他好", "你足球得踢比他好"],
+					note: "足球 đứng trước 踢得比他好."
+				}
+			])
+		}
+	]
+};

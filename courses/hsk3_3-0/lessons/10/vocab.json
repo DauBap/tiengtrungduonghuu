@@ -1,0 +1,221 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 10,
+  "label": "Bài 10",
+  "title": "你明天再把书还给我",
+  "short_vi": "Chia sẻ phương pháp học tập (ghi chép, ôn bài); bàn về bài thi (lịch sử, toán, ngoại ngữ); hỏi bài giáo viên tại văn phòng; giới thiệu hệ thống giáo dục Trung Quốc (tiểu học, THCS, THPT, đại học)",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "数学",
+      "pinyin": "shùxué",
+      "adj": 2,
+      "vi": "Môn toán"
+    },
+    {
+      "pos": 2,
+      "hanzi": "认真",
+      "pinyin": "rènzhēn",
+      "adj": 6,
+      "vi": "nghiêm túc, chăm chỉ"
+    },
+    {
+      "pos": 3,
+      "hanzi": "笔记",
+      "pinyin": "bǐjì",
+      "adj": 2,
+      "vi": "Vở ghi chép"
+    },
+    {
+      "pos": 4,
+      "hanzi": "清楚",
+      "pinyin": "qīngchu",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "Rõ, rõ ràng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "黑板",
+      "pinyin": "hēibǎn",
+      "adj": 2,
+      "vi": "bảng đen"
+    },
+    {
+      "pos": 6,
+      "hanzi": "把",
+      "pinyin": "bǎ",
+      "adj": 13,
+      "vi": "(giới từ dùng để đưa tân ngữ lên trước động từ)"
+    },
+    {
+      "pos": 7,
+      "hanzi": "作业",
+      "pinyin": "zuòyè",
+      "adj": 2,
+      "vi": "bài tập về nhà"
+    },
+    {
+      "pos": 8,
+      "hanzi": "遍",
+      "pinyin": "biàn",
+      "adj": 8,
+      "vi": "(lượng từ) lần, lượt"
+    },
+    {
+      "pos": 9,
+      "hanzi": "提高",
+      "pinyin": "tígāo",
+      "adj": 4,
+      "vi": "nâng cao"
+    },
+    {
+      "pos": 10,
+      "hanzi": "历史",
+      "pinyin": "lìshǐ",
+      "adj": 2,
+      "vi": "lịch sử"
+    },
+    {
+      "pos": 11,
+      "hanzi": "难",
+      "pinyin": "nán",
+      "adj": 6,
+      "vi": "khó"
+    },
+    {
+      "pos": 12,
+      "hanzi": "要求",
+      "pinyin": "yāoqiú",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "yêu cầu"
+    },
+    {
+      "pos": 13,
+      "hanzi": "差",
+      "pinyin": "chà",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "thiếu, kém"
+    },
+    {
+      "pos": 14,
+      "hanzi": "复习",
+      "pinyin": "fùxí",
+      "adj": 4,
+      "vi": "ôn tập"
+    },
+    {
+      "pos": 15,
+      "hanzi": "外语",
+      "pinyin": "wàiyǔ",
+      "adj": 2,
+      "vi": "ngoại ngữ"
+    },
+    {
+      "pos": 16,
+      "hanzi": "当然",
+      "pinyin": "dāngrán",
+      "adj": 18,
+      "vi": "tất nhiên, đương nhiên"
+    },
+    {
+      "pos": 17,
+      "hanzi": "遇到",
+      "pinyin": "yùdào",
+      "adj": 4,
+      "vi": "gặp phải, gặp"
+    },
+    {
+      "pos": 18,
+      "hanzi": "办公室",
+      "pinyin": "bàngōngshì",
+      "adj": 2,
+      "vi": "văn phòng"
+    },
+    {
+      "pos": 19,
+      "hanzi": "页",
+      "pinyin": "yè",
+      "adj": 8,
+      "vi": "trang"
+    },
+    {
+      "pos": 20,
+      "hanzi": "对话",
+      "pinyin": "duìhuà",
+      "adj": 4,
+      "vi": "hội thoại"
+    },
+    {
+      "pos": 21,
+      "hanzi": "明白",
+      "pinyin": "míngbai",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "hiểu"
+    },
+    {
+      "pos": 22,
+      "hanzi": "讲",
+      "pinyin": "jiǎng",
+      "adj": 4,
+      "vi": "nói, kể, giảng"
+    },
+    {
+      "pos": 23,
+      "hanzi": "句",
+      "pinyin": "jù",
+      "adj": 8,
+      "vi": "câu"
+    },
+    {
+      "pos": 24,
+      "hanzi": "句子",
+      "pinyin": "jùzi",
+      "adj": 2,
+      "vi": "câu"
+    },
+    {
+      "pos": 25,
+      "hanzi": "年级",
+      "pinyin": "niánjí",
+      "adj": 2,
+      "vi": "năm học, lớp học"
+    },
+    {
+      "pos": 26,
+      "hanzi": "后年",
+      "pinyin": "hòunián",
+      "adj": 2,
+      "vi": "năm sau"
+    },
+    {
+      "pos": 27,
+      "hanzi": "一般",
+      "pinyin": "yìbān",
+      "adj": 6,
+      "vi": "thường, thông thường, bình thường"
+    },
+    {
+      "pos": 28,
+      "hanzi": "努力",
+      "pinyin": "nǔlì",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "cố gắng, nỗ lực"
+    }
+  ]
+}

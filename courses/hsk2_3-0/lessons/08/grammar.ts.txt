@@ -1,0 +1,238 @@
+import type { GrammarExercise, GrammarLesson } from "./types";
+
+type Row = {
+	id: string;
+	zh: string;
+	vi: string;
+	tokens: string[];
+	wrong: [string, string];
+	note: string;
+};
+const exercises = (prefix: string, rows: Row[]): GrammarExercise[] => [
+	{
+		id: `${prefix}-choice`,
+		title: "1. Chọn đáp án đúng",
+		type: "choice",
+		questions: rows.map((r, i) => {
+			const options: [string, string, string] =
+				i % 3 === 0
+					? [r.zh, ...r.wrong]
+					: i % 3 === 1
+						? [r.wrong[0], r.zh, r.wrong[1]]
+						: [...r.wrong, r.zh];
+			return {
+				id: `${r.id}c`,
+				prompt: `Chọn câu đúng: “${r.vi}”`,
+				answer: r.zh,
+				options,
+				completedSentence: r.zh,
+				meaning: r.vi,
+				explanation: r.note,
+				optionExplanations: Object.fromEntries(
+					options.map((o) => [
+						o,
+						o === r.zh ? `Đúng: ${r.note}` : "Sai: sai trật tự so sánh hoặc quan hệ ý nghĩa."
+					])
+				)
+			};
+		})
+	},
+	{
+		id: `${prefix}-arrange`,
+		title: "2. Sắp xếp từ thành câu",
+		type: "arrange",
+		questions: rows.map((r) => ({
+			id: `${r.id}a`,
+			prompt: r.vi,
+			answer: r.zh,
+			tokens: r.tokens,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	},
+	{
+		id: `${prefix}-translate`,
+		title: "3. Dịch Việt sang Trung",
+		type: "input",
+		questions: rows.map((r) => ({
+			id: `${r.id}t`,
+			prompt: r.vi,
+			answer: r.zh,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	}
+];
+
+export const hsk2Lesson8Grammar: GrammarLesson = {
+	title: "BÀI 8: 虽然你忘了，但是我记得",
+	points: [
+		{
+			id: "bi-comparison",
+			title: "Câu so sánh (1) – A 比 B + tính từ",
+			explanation:
+				"Dùng “比” để so sánh sự khác biệt về tính chất hoặc trạng thái. Đối tượng A đứng trước “比”, đối tượng B đứng sau “比”, rồi đến tính từ mô tả điểm khác biệt.",
+			formulas: ["A + 比 + B + tính từ", "A + 比 + B + động từ/cụm tính từ"],
+			examples: [
+				{ chinese: "左边的比右边的好看。", vietnamese: "Cái bên trái đẹp hơn cái bên phải." },
+				{ chinese: "这块手表比那块贵。", vietnamese: "Chiếc đồng hồ này đắt hơn chiếc kia." }
+			],
+			notes: ["Thông thường không dùng “很” ngay trước tính từ trong câu so sánh cơ bản với “比”."],
+			exercises: exercises("h2l8-bi", [
+				{
+					id: "b1",
+					zh: "左边的比右边的好看",
+					vi: "Cái bên trái đẹp hơn cái bên phải.",
+					tokens: ["好看", "左边的", "比", "右边的"],
+					wrong: ["左边的右边的比好看", "比左边的右边的好看"],
+					note: "Trật tự là A + 比 + B + 好看."
+				},
+				{
+					id: "b2",
+					zh: "这块手表比那块贵",
+					vi: "Chiếc đồng hồ này đắt hơn chiếc kia.",
+					tokens: ["那块", "贵", "这块手表", "比"],
+					wrong: ["这块手表那块比贵", "这块手表比贵那块"],
+					note: "这块手表 là A, 那块 là B."
+				},
+				{
+					id: "b3",
+					zh: "今天比昨天冷",
+					vi: "Hôm nay lạnh hơn hôm qua.",
+					tokens: ["昨天", "冷", "今天", "比"],
+					wrong: ["今天昨天比冷", "比今天昨天冷"],
+					note: "今天 + 比 + 昨天 + 冷."
+				},
+				{
+					id: "b4",
+					zh: "这个饭馆比那个饭馆远",
+					vi: "Nhà hàng này xa hơn nhà hàng kia.",
+					tokens: ["远", "那个饭馆", "比", "这个饭馆"],
+					wrong: ["这个饭馆那个饭馆比远", "这个饭馆比远那个饭馆"],
+					note: "Tính từ 远 đứng cuối câu so sánh."
+				},
+				{
+					id: "b5",
+					zh: "他比我跑得快",
+					vi: "Anh ấy chạy nhanh hơn tôi.",
+					tokens: ["跑得快", "他", "我", "比"],
+					wrong: ["他跑得比我快", "他比跑得我快"],
+					note: "Trong mẫu cơ bản của bài: 他 + 比 + 我 + 跑得快."
+				}
+			])
+		},
+		{
+			id: "enhanced-comparison",
+			title: "Câu so sánh (2) – Nhấn mạnh với “还” và “更”",
+			explanation:
+				"“还” hoặc “更” đặt trước tính từ trong câu có “比” để nhấn mạnh mức độ cao hơn nữa. “更” mang nghĩa “càng/hơn nữa”; “还” thường thể hiện vượt ngoài dự đoán hoặc cao hơn một mức đã nêu.",
+			formulas: ["A + 比 + B + 更 + tính từ", "A + 比 + B + 还 + tính từ"],
+			examples: [
+				{ chinese: "这个电影比那个更有意思。", vietnamese: "Bộ phim này thú vị hơn bộ phim kia." },
+				{ chinese: "左边的比右边的还好看。", vietnamese: "Cái bên trái còn đẹp hơn cái bên phải." }
+			],
+			notes: ["“更/还” đứng sau đối tượng B và ngay trước tính từ."],
+			exercises: exercises("h2l8-more", [
+				{
+					id: "m1",
+					zh: "这个电影比那个更有意思",
+					vi: "Bộ phim này thú vị hơn bộ phim kia.",
+					tokens: ["更有意思", "那个", "比", "这个电影"],
+					wrong: ["这个电影更比那个有意思", "这个电影比更那个有意思"],
+					note: "更 đứng ngay trước 有意思."
+				},
+				{
+					id: "m2",
+					zh: "左边的比右边的还好看",
+					vi: "Cái bên trái còn đẹp hơn cái bên phải.",
+					tokens: ["还好看", "右边的", "左边的", "比"],
+					wrong: ["左边的还比右边的好看", "左边的比还右边的好看"],
+					note: "还 đứng sau B và trước 好看."
+				},
+				{
+					id: "m3",
+					zh: "今天比昨天更冷",
+					vi: "Hôm nay còn lạnh hơn hôm qua.",
+					tokens: ["更冷", "比", "今天", "昨天"],
+					wrong: ["今天更比昨天冷", "今天比更昨天冷"],
+					note: "更修饰 tính từ 冷."
+				},
+				{
+					id: "m4",
+					zh: "这个饭馆比那个还远",
+					vi: "Nhà hàng này còn xa hơn nhà hàng kia.",
+					tokens: ["还远", "这个饭馆", "那个", "比"],
+					wrong: ["这个饭馆还比那个远", "这个饭馆比还那个远"],
+					note: "还 đứng trước 远."
+				},
+				{
+					id: "m5",
+					zh: "爱情片比这个电影更有意思",
+					vi: "Phim tình cảm còn thú vị hơn bộ phim này.",
+					tokens: ["这个电影", "更有意思", "爱情片", "比"],
+					wrong: ["爱情片更比这个电影有意思", "爱情片比更这个电影有意思"],
+					note: "A 比 B 更 + tính từ."
+				}
+			])
+		},
+		{
+			id: "suiran-danshi",
+			title: "Câu ghép “虽然……，但是……” – Mặc dù… nhưng…",
+			explanation:
+				"“虽然” dẫn ra điều kiện hoặc sự việc được thừa nhận, còn “但是” dẫn ra kết quả trái với điều thường được mong đợi. Hai vế tạo quan hệ nhượng bộ và tương phản.",
+			formulas: ["虽然 + vế nhượng bộ，但是 + vế tương phản", "Chủ ngữ + 虽然……，但是……"],
+			examples: [
+				{ chinese: "虽然你忘了，但是我记得。", vietnamese: "Mặc dù bạn quên nhưng tôi vẫn nhớ." },
+				{
+					chinese: "虽然饭馆很远，但是我们还是去了。",
+					vietnamese: "Mặc dù nhà hàng xa nhưng chúng tôi vẫn đi."
+				}
+			],
+			notes: ["“虽然” thuộc vế thứ nhất; “但是” thuộc vế thứ hai, không đảo vị trí hai từ."],
+			exercises: exercises("h2l8-contrast", [
+				{
+					id: "c1",
+					zh: "虽然你忘了但是我记得",
+					vi: "Mặc dù bạn quên nhưng tôi vẫn nhớ.",
+					tokens: ["我记得", "虽然", "你忘了", "但是"],
+					wrong: ["但是你忘了虽然我记得", "虽然但是你忘了我记得"],
+					note: "虽然 dẫn vế nhượng bộ; 但是 dẫn vế tương phản."
+				},
+				{
+					id: "c2",
+					zh: "虽然饭馆很远但是我们还是去了",
+					vi: "Mặc dù nhà hàng xa nhưng chúng tôi vẫn đi.",
+					tokens: ["但是", "很远", "还是去了", "饭馆", "我们", "虽然"],
+					wrong: ["但是饭馆很远虽然我们还是去了", "虽然但是饭馆很远我们还是去了"],
+					note: "Hai vế giữ đúng thứ tự 虽然…但是…."
+				},
+				{
+					id: "c3",
+					zh: "虽然这个电影很长但是很有意思",
+					vi: "Mặc dù bộ phim này dài nhưng rất thú vị.",
+					tokens: ["很有意思", "这个电影", "但是", "很长", "虽然"],
+					wrong: ["但是这个电影很长虽然很有意思", "虽然但是这个电影很长很有意思"],
+					note: "Dài và thú vị tạo quan hệ tương phản."
+				},
+				{
+					id: "c4",
+					zh: "虽然手表很贵但是她买了",
+					vi: "Mặc dù đồng hồ đắt nhưng cô ấy đã mua.",
+					tokens: ["她买了", "手表", "虽然", "但是", "很贵"],
+					wrong: ["但是手表很贵虽然她买了", "虽然但是手表很贵她买了"],
+					note: "Việc mua trái với dự đoán từ nguyên nhân “rất đắt”."
+				},
+				{
+					id: "c5",
+					zh: "虽然丈夫忘了但是妻子记得",
+					vi: "Mặc dù người chồng quên nhưng người vợ nhớ.",
+					tokens: ["妻子记得", "但是", "丈夫忘了", "虽然"],
+					wrong: ["但是丈夫忘了虽然妻子记得", "虽然但是丈夫忘了妻子记得"],
+					note: "Hai chủ ngữ nằm ở hai vế tương phản."
+				}
+			])
+		}
+	]
+};

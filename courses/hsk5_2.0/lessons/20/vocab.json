@@ -1,0 +1,271 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 20,
+  "label": "Bài 20",
+  "title": "小人书摊 ",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "摊",
+      "pinyin": "tān",
+      "adj": 2,
+      "vi": "quầy, sạp"
+    },
+    {
+      "pos": 2,
+      "hanzi": "出版",
+      "pinyin": "chūbǎn",
+      "adj": 4,
+      "vi": "xuất bản"
+    },
+    {
+      "pos": 3,
+      "hanzi": "连环画",
+      "pinyin": "liánhuánhuà",
+      "adj": 2,
+      "vi": "sách truyện tranh"
+    },
+    {
+      "pos": 4,
+      "hanzi": "年代",
+      "pinyin": "niándài",
+      "adj": 2,
+      "vi": "thập kỷ"
+    },
+    {
+      "pos": 5,
+      "hanzi": "单调",
+      "pinyin": "dāndiào",
+      "adj": 6,
+      "vi": "đơn điệu, nhàm chán"
+    },
+    {
+      "pos": 6,
+      "hanzi": "网络",
+      "pinyin": "wǎngluò",
+      "adj": 2,
+      "vi": "mạng (Internet)"
+    },
+    {
+      "pos": 7,
+      "hanzi": "动画片",
+      "pinyin": "dònghuàpiàn",
+      "adj": 2,
+      "vi": "phim hoạt hình"
+    },
+    {
+      "pos": 8,
+      "hanzi": "娱乐",
+      "pinyin": "yúlè",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "thú tiêu khiển; giải trí"
+    },
+    {
+      "pos": 9,
+      "hanzi": "无数",
+      "pinyin": "wúshù",
+      "adj": 6,
+      "vi": "vô số"
+    },
+    {
+      "pos": 10,
+      "hanzi": "青少年",
+      "pinyin": "qīng-shàonián",
+      "adj": 2,
+      "vi": "thanh thiếu niên"
+    },
+    {
+      "pos": 11,
+      "hanzi": "从事",
+      "pinyin": "cóngshì",
+      "adj": 4,
+      "vi": "làm, tham gia"
+    },
+    {
+      "pos": 12,
+      "hanzi": "毫无",
+      "pinyin": "háowú",
+      "adj": 7,
+      "vi": "không chút"
+    },
+    {
+      "pos": 13,
+      "hanzi": "疑问",
+      "pinyin": "yíwèn",
+      "adj": 2,
+      "vi": "sự nghi ngờ"
+    },
+    {
+      "pos": 14,
+      "hanzi": "棚子",
+      "pinyin": "péngzi",
+      "adj": 2,
+      "vi": "lều, chuồng"
+    },
+    {
+      "pos": 15,
+      "hanzi": "砖头",
+      "pinyin": "zhuāntóu",
+      "adj": 2,
+      "vi": "gạch"
+    },
+    {
+      "pos": 16,
+      "hanzi": "支",
+      "pinyin": "zhī",
+      "adj": 4,
+      "vi": "chống, đỡ"
+    },
+    {
+      "pos": 17,
+      "hanzi": "粗糙",
+      "pinyin": "cūcao",
+      "adj": 6,
+      "vi": "sần sùi, thô, gồ ghề"
+    },
+    {
+      "pos": 18,
+      "hanzi": "木头",
+      "pinyin": "mùtou",
+      "adj": 2,
+      "vi": "gỗ"
+    },
+    {
+      "pos": 19,
+      "hanzi": "题材",
+      "pinyin": "tícái",
+      "adj": 2,
+      "vi": "đề tài, chủ đề"
+    },
+    {
+      "pos": 20,
+      "hanzi": "翻",
+      "pinyin": "fān",
+      "adj": 4,
+      "vi": "lật, giở"
+    },
+    {
+      "pos": 21,
+      "hanzi": "搭",
+      "pinyin": "dā",
+      "adj": 4,
+      "vi": "vắt, mắc"
+    },
+    {
+      "pos": 22,
+      "hanzi": "整齐",
+      "pinyin": "zhěngqí",
+      "adj": 6,
+      "vi": "ngay ngắn, đều đặn, ngăn nắp"
+    },
+    {
+      "pos": 23,
+      "hanzi": "年纪",
+      "pinyin": "niánjì",
+      "adj": 2,
+      "vi": "tuổi"
+    },
+    {
+      "pos": 24,
+      "hanzi": "身材",
+      "pinyin": "shēncái",
+      "adj": 2,
+      "vi": "vóc dáng, dáng người"
+    },
+    {
+      "pos": 25,
+      "hanzi": "成人",
+      "pinyin": "chéngrén",
+      "adj": 2,
+      "vi": "người lớn"
+    },
+    {
+      "pos": 26,
+      "hanzi": "册",
+      "pinyin": "cè",
+      "adj": 8,
+      "vi": "cuốn, quyển, tập"
+    },
+    {
+      "pos": 27,
+      "hanzi": "假如",
+      "pinyin": "jiǎrú",
+      "adj": 10,
+      "vi": "nếu"
+    },
+    {
+      "pos": 28,
+      "hanzi": "登记",
+      "pinyin": "dēngjì",
+      "adj": 4,
+      "vi": "đăng ký, ghi vào sổ"
+    },
+    {
+      "pos": 29,
+      "hanzi": "记录",
+      "pinyin": "jìlù",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "ký lục, lời ghi; ghi chép"
+    },
+    {
+      "pos": 30,
+      "hanzi": "手续",
+      "pinyin": "shǒuxù",
+      "adj": 2,
+      "vi": "thủ tục"
+    },
+    {
+      "pos": 31,
+      "hanzi": "办理",
+      "pinyin": "bànlǐ",
+      "adj": 4,
+      "vi": "giải quyết, làm"
+    },
+    {
+      "pos": 32,
+      "hanzi": "押金",
+      "pinyin": "yājīn",
+      "adj": 2,
+      "vi": "tiền thế chấp, tiền đặt cọc"
+    },
+    {
+      "pos": 33,
+      "hanzi": "凭",
+      "pinyin": "píng",
+      "adj": [
+        4,
+        13
+      ],
+      "vi": "dựa vào; căn cứ"
+    },
+    {
+      "pos": 34,
+      "hanzi": "印刷",
+      "pinyin": "yìnshuā",
+      "adj": 4,
+      "vi": "in (sách, báo...)"
+    },
+    {
+      "pos": 35,
+      "hanzi": "涨",
+      "pinyin": "zhǎng",
+      "adj": 4,
+      "vi": "lên cao, tăng"
+    },
+    {
+      "pos": 36,
+      "hanzi": "收藏",
+      "pinyin": "shōucáng",
+      "adj": 4,
+      "vi": "sưu tầm, thu thập"
+    }
+  ]
+}

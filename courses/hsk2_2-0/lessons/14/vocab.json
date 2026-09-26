@@ -1,0 +1,59 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 14,
+  "label": "Bài 4",
+  "title": "你看过那个电影吗？",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "有意思",
+      "pinyin": "yǒu yìsi",
+      "adj": 6,
+      "vi": "thú vị"
+    },
+    {
+      "pos": 2,
+      "hanzi": "但是",
+      "pinyin": "dànshì",
+      "adj": 10,
+      "vi": "nhưng"
+    },
+    {
+      "pos": 3,
+      "hanzi": "虽然",
+      "pinyin": "suīrán",
+      "adj": 10,
+      "vi": "mặc dù, tuy"
+    },
+    {
+      "pos": 4,
+      "hanzi": "次",
+      "pinyin": "cì",
+      "adj": 8,
+      "vi": "lần"
+    },
+    {
+      "pos": 5,
+      "hanzi": "玩儿",
+      "pinyin": "wánr",
+      "adj": 4,
+      "vi": "chơi, chơi đùa"
+    },
+    {
+      "pos": 6,
+      "hanzi": "晴",
+      "pinyin": "qíng",
+      "adj": 6,
+      "vi": "có nắng, nắng ráo"
+    },
+    {
+      "pos": 7,
+      "hanzi": "百",
+      "pinyin": "bǎi",
+      "adj": 21,
+      "vi": "một trăm, trăm"
+    }
+  ]
+}

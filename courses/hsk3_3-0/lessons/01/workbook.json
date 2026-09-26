@@ -1,0 +1,426 @@
+{
+	"title": "HSK3 - Sách bài tập",
+	"lesson": 1,
+	"lesson_title": "我们去机场接你们",
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听对话，选择正确图片。每题听两次。\nCâu 1–3: Nghe và chọn hình phù hợp. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 1,
+							"answer": "A",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"answer": "C",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"answer": "B",
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择正确答案。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 4,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "买箱子"
+								},
+								{
+									"label": "B",
+									"text": "找箱子"
+								},
+								{
+									"label": "C",
+									"text": "拿箱子"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"answer": "B",
+							"options": [
+								{
+									"label": "A",
+									"text": "男孩儿"
+								},
+								{
+									"label": "B",
+									"text": "女孩儿"
+								},
+								{
+									"label": "C",
+									"text": "最高的人"
+								}
+							]
+						},
+						{
+							"number": 6,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "接人"
+								},
+								{
+									"label": "B",
+									"text": "画画"
+								},
+								{
+									"label": "C",
+									"text": "等行李"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听一段话，选择正确答案。每题听两次。\nCâu 7–10: Nghe đoạn thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 7,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "去考试"
+								},
+								{
+									"label": "B",
+									"text": "去国外"
+								},
+								{
+									"label": "C",
+									"text": "接朋友"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "一个"
+								},
+								{
+									"label": "B",
+									"text": "两个"
+								},
+								{
+									"label": "C",
+									"text": "三个"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "看照片"
+								},
+								{
+									"label": "B",
+									"text": "坐公交车"
+								},
+								{
+									"label": "C",
+									"text": "接新老师"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"answer": "B",
+							"options": [
+								{
+									"label": "A",
+									"text": "比照片上瘦"
+								},
+								{
+									"label": "B",
+									"text": "比照片上年轻"
+								},
+								{
+									"label": "C",
+									"text": "头发比照片上短"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—15题：匹配句子。\nCâu 11–15: Nối câu.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{ "label": "A", "text": "我们身高都是一米七，但是她比我瘦。" },
+						{ "label": "B", "text": "别着急，我去服务台问问，会找到的。" },
+						{ "label": "C", "text": "左边第二个，他跟我长得不像。" },
+						{ "label": "D", "text": "那是我妹妹，我带她来的。" },
+						{ "label": "E", "text": "当然。我们先坐公交车，然后换地铁。" },
+						{ "label": "F", "text": "不客气，我可以看一下您的护照吗？" }
+					],
+					"questions": [
+						{
+							"number": 11,
+							"answer": "D",
+							"question": "那是谁？我怎么没有见过她？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 12,
+							"answer": "C",
+							"question": "照片上哪个是你哥哥？我没找到。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 13,
+							"answer": "F",
+							"question": "谢谢您，这就是我的箱子。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 14,
+							"answer": "A",
+							"question": "她看起来好像比你高一些。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 15,
+							"answer": "B",
+							"question": "我的箱子不见了，里面有很多重要的东西。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第16—20题：选词填空。\nCâu 16–20: Chọn từ điền vào chỗ trống.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "像"
+						},
+						{
+							"label": "B",
+							"text": "以为"
+						},
+						{
+							"label": "C",
+							"text": "重要"
+						},
+						{
+							"label": "D",
+							"text": "帮助"
+						},
+						{
+							"label": "E",
+							"text": "鞋"
+						},
+						{
+							"label": "F",
+							"text": "应该"
+						}
+					],
+					"questions": [
+						{
+							"number": 16,
+							"answer": "C",
+							"sentence": "我的手机在国外不能用，你有（ ）的事情可以给我妈妈打电话。"
+						},
+						{
+							"number": 17,
+							"answer": "D",
+							"sentence": "箱子就放在这里吧，谢谢你们的（ ）。"
+						},
+						{
+							"number": 18,
+							"answer": "F",
+							"sentence": "别着急，你的箱子（ ）可以找到。"
+						},
+						{
+							"number": 19,
+							"answer": "A",
+							"sentence": "A：这是我爱人的弟弟，叫刘东，在电脑公司工作。\nB：他们长得很（ ）。"
+						},
+						{
+							"number": 20,
+							"answer": "B",
+							"sentence": "A：你怎么这么高兴？\nB：我（ ）钱包丢了，但是在书包里找到了。"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第21—24题：选择正确答案。\nCâu 21–24: Đọc và chọn đáp án đúng.",
+					"embedded_example_image": true,
+					"shared_passage": "23–24\n\n你们看，照片里那个短头发的男孩儿就是我，我站在中间。我左边是一个头发很长的年轻女孩儿，她穿着黑色的上衣、红色的裤子，正在看书；我右边是一个个子很高的男孩儿，他穿着白色的上衣，手里拿着一个大包，看起来有点儿不高兴。",
+					"shared_passage_start": 23,
+					"questions": [
+						{
+							"number": 21,
+							"answer": "C",
+							"sentence": "照片上的人个子不高，穿着一件红色的上衣，头发很长也很黑。我好像在哪儿见过她。",
+							"question": "照片上的人怎么样？",
+							"options": [
+								{
+									"label": "A",
+									"text": "个子很高"
+								},
+								{
+									"label": "B",
+									"text": "长得很黑"
+								},
+								{
+									"label": "C",
+									"text": "他好像见过"
+								}
+							]
+						},
+						{
+							"number": 22,
+							"answer": "B",
+							"sentence": "李先生以为护照不见了，着急地找了很长时间。没想到妻子一回家就帮他找到了，他忘了护照在箱子里了。",
+							"question": "关于李先生，可以知道什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "护照在妻子那儿"
+								},
+								{
+									"label": "B",
+									"text": "他的东西找到了"
+								},
+								{
+									"label": "C",
+									"text": "他的行李箱丢了"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "B",
+							"question": "关于照片，可以知道什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "照片里有四个人"
+								},
+								{
+									"label": "B",
+									"text": "女孩儿穿着红裤子"
+								},
+								{
+									"label": "C",
+									"text": "男孩儿个子不高"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "C",
+							"question": "关于他右边的男孩儿，可以知道什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "头发很短"
+								},
+								{
+									"label": "B",
+									"text": "站在中间"
+								},
+								{
+									"label": "C",
+									"text": "拿着一个大包"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据拼音写汉字。\nCâu 25–27: Viết chữ Hán theo pinyin.",
+					"embedded_example_image": true,
+					"questions": [
+						{
+							"number": 25,
+							"answer": "急",
+							"type": "writing_input",
+							"sentence": "他看上去很着（ ）。",
+							"prompt_pinyin": "jí"
+						},
+						{
+							"number": 26,
+							"answer": "护",
+							"type": "writing_input",
+							"sentence": "这是我的（ ）照号码。",
+							"prompt_pinyin": "hù"
+						},
+						{
+							"number": 27,
+							"answer": "重",
+							"type": "writing_input",
+							"sentence": "这件事很（ ）要，你不要忘了。",
+							"prompt_pinyin": "zhòng"
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：看图，用词造句。\nCâu 28–30: Nhìn hình và dùng từ gợi ý đặt câu.",
+					"questions": [
+						{
+							"number": 28,
+							"answer": "我以为她是你的姐姐。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 以为",
+							"accepted_answers": ["我以为她是她的姐姐。"]
+						},
+						{
+							"number": 29,
+							"answer": "他应该经常去健身。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 应该",
+							"accepted_answers": ["他应该多锻炼身体。"]
+						},
+						{
+							"number": 30,
+							"answer": "她好像在等公交车。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 好像",
+							"accepted_answers": ["她好像要坐公交车。"]
+						}
+					]
+				}
+			]
+		}
+	]
+}

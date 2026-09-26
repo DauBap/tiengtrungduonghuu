@@ -1,0 +1,101 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 13,
+  "label": "Bài 13",
+  "title": "我们爱上中文课",
+  "short_vi": "Trò chuyện về việc học tiếng Trung; bàn bạc chọn quà tặng cô giáo nhân dịp năm mới; thực hành viết chữ Hán; tặng quà bạn bè",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "新年",
+      "pinyin": "Xīnnián",
+      "adj": 2,
+      "vi": "Năm mới"
+    },
+    {
+      "pos": 2,
+      "hanzi": "教",
+      "pinyin": "Jiāo",
+      "adj": 4,
+      "vi": "dạy"
+    },
+    {
+      "pos": 3,
+      "hanzi": "花",
+      "pinyin": "Huā",
+      "adj": 2,
+      "vi": "Bông hoa"
+    },
+    {
+      "pos": 4,
+      "hanzi": "希望",
+      "pinyin": "Xīwàng",
+      "adj": 4,
+      "vi": "Hi vọng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "上面",
+      "pinyin": "Shàngmiàn",
+      "adj": 2,
+      "vi": "Phía trên ( bề mặt )"
+    },
+    {
+      "pos": 6,
+      "hanzi": "洗手间",
+      "pinyin": "Xǐshǒujiān",
+      "adj": 2,
+      "vi": "Nhà vệ sinh"
+    },
+    {
+      "pos": 7,
+      "hanzi": "里面",
+      "pinyin": "Lǐmiàn",
+      "adj": 2,
+      "vi": "Bên trong"
+    },
+    {
+      "pos": 8,
+      "hanzi": "笔",
+      "pinyin": "Bǐ",
+      "adj": 2,
+      "vi": "nét"
+    },
+    {
+      "pos": 9,
+      "hanzi": "可能",
+      "pinyin": "Kěnéng",
+      "adj": 4,
+      "vi": "Có lẽ, có thể"
+    },
+    {
+      "pos": 10,
+      "hanzi": "上网",
+      "pinyin": "Shàngwǎng",
+      "adj": 4,
+      "vi": "Lên mạng"
+    },
+    {
+      "pos": 11,
+      "hanzi": "那样",
+      "pinyin": "Nàyàng",
+      "adj": 1,
+      "vi": "Như vậy"
+    },
+    {
+      "pos": 12,
+      "hanzi": "告诉",
+      "pinyin": "Gàosu",
+      "adj": 4,
+      "vi": "Nói cho"
+    },
+    {
+      "pos": 13,
+      "hanzi": "班",
+      "pinyin": "Bān",
+      "adj": 2,
+      "vi": "lớp"
+    }
+  ]
+}

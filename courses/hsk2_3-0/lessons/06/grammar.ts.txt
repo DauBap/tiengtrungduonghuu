@@ -1,0 +1,211 @@
+import type { GrammarExercise, GrammarLesson } from "./types";
+
+type Row = { id: string; zh: string; vi: string; tokens: string[]; wrong: [string, string] };
+const exercises = (prefix: string, rows: Row[]): GrammarExercise[] => [
+	{
+		id: `${prefix}-choice`,
+		title: "1. Chọn đáp án đúng",
+		type: "choice",
+		questions: rows.map((r, i) => ({
+			id: `${r.id}c`,
+			prompt: `Chọn câu đúng: “${r.vi}”`,
+			answer: r.zh,
+			options:
+				i % 3 === 0
+					? [r.zh, ...r.wrong]
+					: i % 3 === 1
+						? [r.wrong[0], r.zh, r.wrong[1]]
+						: [...r.wrong, r.zh],
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: "Đáp án đúng có cấu trúc và trật tự từ phù hợp.",
+			optionExplanations: {
+				[r.zh]: "Đúng: đúng cấu trúc trọng tâm.",
+				[r.wrong[0]]: "Sai: sai trật tự hoặc hình thức cấu trúc.",
+				[r.wrong[1]]: "Sai: cách kết hợp từ không đúng."
+			}
+		}))
+	},
+	{
+		id: `${prefix}-arrange`,
+		title: "2. Sắp xếp từ thành câu",
+		type: "arrange",
+		questions: rows.map((r) => ({
+			id: `${r.id}a`,
+			prompt: r.vi,
+			answer: r.zh,
+			tokens: r.tokens,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: "Sắp xếp theo đúng trật tự câu tiếng Trung."
+		}))
+	},
+	{
+		id: `${prefix}-translate`,
+		title: "3. Dịch Việt sang Trung",
+		type: "input",
+		questions: rows.map((r) => ({
+			id: `${r.id}t`,
+			prompt: r.vi,
+			answer: r.zh,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: "Câu trả lời dùng đúng điểm ngữ pháp của bài."
+		}))
+	}
+];
+
+export const hsk2Lesson6Grammar: GrammarLesson = {
+	title: "BÀI 6: 小雪，生日快乐！",
+	points: [
+		{
+			id: "adjective-reduplication",
+			title: "Tính từ lặp lại – Dạng AA và AABB",
+			explanation:
+				"Tính từ đơn âm tiết có thể lặp theo dạng AA, tính từ song âm tiết thường lặp theo dạng AABB. Cách nói này làm nổi bật mức độ hoặc thể hiện tình cảm yêu thích.",
+			formulas: ["Đơn âm tiết: A → AA", "Song âm tiết: AB → AABB", "Tính từ lặp + 的 + danh từ"],
+			examples: [
+				{ chinese: "一个大大的蛋糕。", vietnamese: "Một chiếc bánh ga-tô to." },
+				{ chinese: "每天都高高兴兴的。", vietnamese: "Ngày nào cũng vui vẻ." }
+			],
+			notes: ["Sau tính từ lặp làm định ngữ thường phải có “的”."],
+			exercises: exercises("h2l6-adj", [
+				{
+					id: "ar1",
+					zh: "一个大大的蛋糕",
+					vi: "Một chiếc bánh ga-tô to.",
+					tokens: ["蛋糕", "大", "一个", "的", "大"],
+					wrong: ["一个大的大蛋糕", "一个大大蛋糕的"]
+				},
+				{
+					id: "ar2",
+					zh: "她每天都高高兴兴的",
+					vi: "Ngày nào cô ấy cũng vui vẻ.",
+					tokens: ["高兴", "她", "的", "每天", "高兴", "都"],
+					wrong: ["她每天都高兴高兴的", "她高高每天兴兴的都"]
+				},
+				{
+					id: "ar3",
+					zh: "这是一个红红的苹果",
+					vi: "Đây là một quả táo đỏ tươi.",
+					tokens: ["苹果", "红", "这是", "的", "一个", "红"],
+					wrong: ["这是一个红的红苹果", "这是红红一个苹果的"]
+				},
+				{
+					id: "ar4",
+					zh: "孩子们快快乐乐的",
+					vi: "Các em nhỏ rất vui vẻ.",
+					tokens: ["快乐", "孩子们", "的", "快乐"],
+					wrong: ["孩子们快乐快乐的", "孩子们快快的乐乐"]
+				},
+				{
+					id: "ar5",
+					zh: "她有一双大大的眼睛",
+					vi: "Cô ấy có một đôi mắt to.",
+					tokens: ["眼睛", "她", "大", "有", "的", "一双", "大"],
+					wrong: ["她有一双大的大眼睛", "她有大大一双眼睛的"]
+				}
+			])
+		},
+		{
+			id: "shenme-de",
+			title: "Cụm cố định “什么的” – Liệt kê chưa đầy đủ",
+			explanation:
+				"“什么的” đặt sau một hoặc nhiều mục được nêu để cho biết danh sách còn những thứ tương tự chưa kể hết, tương đương “vân vân”.",
+			formulas: ["A、B、C 什么的", "有/买/准备 + A、B 什么的"],
+			examples: [
+				{
+					chinese: "有爸爸、妈妈、弟弟，还有黑色的狗、白色的猫什么的。",
+					vietnamese: "Có bố, mẹ, em trai, chó đen, mèo trắng vân vân."
+				}
+			],
+			notes: ["“什么的” đứng sau phần liệt kê, không đứng trước các mục."],
+			exercises: exercises("h2l6-shenme", [
+				{
+					id: "sm1",
+					zh: "我买了蛋糕水果什么的",
+					vi: "Tôi mua bánh ga-tô, hoa quả vân vân.",
+					tokens: ["什么的", "我", "水果", "买了", "蛋糕"],
+					wrong: ["我什么的买了蛋糕水果", "我买了什么的蛋糕水果"]
+				},
+				{
+					id: "sm2",
+					zh: "家里有狗猫什么的",
+					vi: "Trong nhà có chó, mèo vân vân.",
+					tokens: ["猫", "有", "什么的", "家里", "狗"],
+					wrong: ["家里什么的有狗猫", "家里有狗什么的猫"]
+				},
+				{
+					id: "sm3",
+					zh: "生日要准备礼物奶茶什么的",
+					vi: "Sinh nhật cần chuẩn bị quà, trà sữa vân vân.",
+					tokens: ["什么的", "准备", "生日", "礼物", "要", "奶茶"],
+					wrong: ["生日什么的要准备礼物奶茶", "生日要什么的准备礼物奶茶"]
+				},
+				{
+					id: "sm4",
+					zh: "我喜欢红色绿色什么的",
+					vi: "Tôi thích màu đỏ, màu xanh vân vân.",
+					tokens: ["绿色", "喜欢", "什么的", "我", "红色"],
+					wrong: ["我什么的喜欢红色绿色", "我喜欢什么的红色绿色"]
+				},
+				{
+					id: "sm5",
+					zh: "桌子上有面包苹果什么的",
+					vi: "Trên bàn có bánh mì, táo vân vân.",
+					tokens: ["苹果", "有", "桌子上", "什么的", "面包"],
+					wrong: ["桌子上什么的有面包苹果", "桌子上有面包什么的苹果"]
+				}
+			])
+		},
+		{
+			id: "structural-de",
+			title: "Trợ từ kết cấu “地” – Trạng thái của hành động",
+			explanation:
+				"“地” đặt giữa từ hoặc cụm từ miêu tả trạng thái và động từ, cho biết hành động được thực hiện như thế nào.",
+			formulas: ["Tính từ + 地 + động từ", "Tính từ lặp + 地 + động từ"],
+			examples: [
+				{ chinese: "高高兴兴地玩。", vietnamese: "Chơi một cách vui vẻ." },
+				{ chinese: "他慢慢地走。", vietnamese: "Anh ấy đi chậm rãi." }
+			],
+			notes: ["Phân biệt “地” trước động từ với “的” trước danh từ."],
+			exercises: exercises("h2l6-di", [
+				{
+					id: "di1",
+					zh: "孩子们高高兴兴地玩",
+					vi: "Các em nhỏ chơi một cách vui vẻ.",
+					tokens: ["地", "孩子们", "玩", "高兴", "高兴"],
+					wrong: ["孩子们高高兴兴的玩", "孩子们地高高兴兴玩"]
+				},
+				{
+					id: "di2",
+					zh: "他慢慢地走过来",
+					vi: "Anh ấy chậm rãi đi qua đây.",
+					tokens: ["走过来", "慢", "他", "地", "慢"],
+					wrong: ["他慢慢的走过来", "他地慢慢走过来"]
+				},
+				{
+					id: "di3",
+					zh: "她高兴地打开礼物",
+					vi: "Cô ấy vui vẻ mở quà.",
+					tokens: ["礼物", "她", "地", "打开", "高兴"],
+					wrong: ["她高兴的打开礼物", "她地高兴打开礼物"]
+				},
+				{
+					id: "di4",
+					zh: "大家快快乐乐地过生日",
+					vi: "Mọi người vui vẻ đón sinh nhật.",
+					tokens: ["过生日", "快乐", "大家", "地", "快乐"],
+					wrong: ["大家快快乐乐的过生日", "大家地快快乐乐过生日"]
+				},
+				{
+					id: "di5",
+					zh: "她认真地准备蛋糕",
+					vi: "Cô ấy nghiêm túc chuẩn bị bánh ga-tô.",
+					tokens: ["准备", "认真", "她", "蛋糕", "地"],
+					wrong: ["她认真的准备蛋糕", "她地认真准备蛋糕"]
+				}
+			])
+		}
+	]
+};

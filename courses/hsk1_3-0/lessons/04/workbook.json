@@ -1,0 +1,390 @@
+{
+	"title": "HSK1 - Sách bài tập",
+	"lesson": 4,
+	"lesson_title": "我有两个孩子",
+	"lesson_pinyin": "Wǒ yǒu liǎng gè háizi",
+	"lesson_meaning": "Tôi có hai đứa con",
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听短语，选择正确图片。每题听两次。\nCâu 1–3: Nghe và chọn hình ảnh phù hợp với nội dung nghe được. Mỗi câu nghe hai lần.",
+					"example": {
+						"question": "三个苹果",
+						"pinyin": "sān gè píngguǒ",
+						"meaning": "ba quả táo",
+						"correct_label": "A",
+						"options": ["A", "B", "C"]
+					},
+					"questions": [
+						{ "number": 1, "answer": "B", "options": ["A", "B", "C"] },
+						{ "number": 2, "answer": "C", "options": ["A", "B", "C"] },
+						{ "number": 3, "answer": "B", "options": ["A", "B", "C"] }
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4-5题：听问题，选择正确回答。每题听两次。\nCâu 4–5: Nghe câu hỏi, chọn câu trả lời đúng. Mỗi câu nghe hai lần.",
+					"example": {
+						"question": "今天天气怎么样？",
+						"pinyin": "Jīntiān tiānqì zěnmeyàng?",
+						"meaning": "Hôm nay thời tiết thế nào?",
+						"options": [
+							{
+								"label": "A",
+								"text": "非常热",
+								"pinyin": "fēicháng rè",
+								"meaning": "rất nóng",
+								"correct": true
+							},
+							{
+								"label": "B",
+								"text": "很好听",
+								"pinyin": "hěn hǎotīng",
+								"meaning": "nghe rất hay",
+								"correct": false
+							},
+							{
+								"label": "C",
+								"text": "在喝水",
+								"pinyin": "zài hē shuǐ",
+								"meaning": "đang uống nước",
+								"correct": false
+							}
+						]
+					},
+					"questions": [
+						{
+							"number": 4,
+							"answer": "B",
+							"options": [
+								{ "label": "A", "text": "十人", "pinyin": "shí rén", "meaning": "mười người" },
+								{ "label": "B", "text": "20个", "pinyin": "èrshí gè", "meaning": "20 cái" },
+								{ "label": "C", "text": "三口人", "pinyin": "sān kǒu rén", "meaning": "ba người" }
+							]
+						},
+						{
+							"number": 5,
+							"answer": "B",
+							"options": [
+								{ "label": "A", "text": "大", "pinyin": "dà", "meaning": "lớn" },
+								{ "label": "B", "text": "12岁", "pinyin": "shí'èr suì", "meaning": "12 tuổi" },
+								{ "label": "C", "text": "两千", "pinyin": "liǎngqiān", "meaning": "hai nghìn" }
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第6-8题：听对话，选择最匹配的图片。每题听两次。\nCâu 6–8: Nghe và chọn hình ảnh phù hợp nhất với hội thoại nghe được. Mỗi câu nghe hai lần.",
+					"example": {
+						"speakers": [
+							{ "gender": "nữ", "text": "你好！", "pinyin": "Nǐ hǎo!", "meaning": "Xin chào!" },
+							{
+								"gender": "nam",
+								"text": "你好！很高兴认识你。",
+								"pinyin": "Nǐ hǎo! Hěn gāoxìng rènshi nǐ.",
+								"meaning": "Xin chào! Rất vui được gặp bạn."
+							}
+						],
+						"correct_label": "A"
+					},
+					"questions": [
+						{ "number": 6, "answer": "D", "options": ["A", "B", "C", "D"] },
+						{ "number": 7, "answer": "C", "options": ["A", "B", "C", "D"] },
+						{ "number": 8, "answer": "B", "options": ["A", "B", "C", "D"] }
+					]
+				},
+				{
+					"part": "第四部分 - Phần 4",
+					"description": "第9-10题：听句子和问题，选择正确答案。每题听两次。\nCâu 9-10: Nghe và chọn đáp án đúng. Mỗi câu nghe hai lần.",
+					"example": {
+						"sentence": "下午我去超市，我想买一些水果。",
+						"pinyin": "Xiàwǔ wǒ qù chāoshì, wǒ xiǎng mǎi yìxiē shuǐguǒ.",
+						"meaning": "Buổi chiều tôi đi siêu thị, tôi muốn mua một ít trái cây.",
+						"question": "说话人下午去哪里？",
+						"question_pinyin": "Shuōhuà rén xiàwǔ qù nǎlǐ?",
+						"question_meaning": "Buổi chiều nay người nói đi đâu?",
+						"correct_label": "A",
+						"options": [
+							{
+								"label": "A",
+								"text": "超市",
+								"pinyin": "chāoshì",
+								"meaning": "siêu thị",
+								"correct": true
+							},
+							{
+								"label": "B",
+								"text": "医院",
+								"pinyin": "yīyuàn",
+								"meaning": "bệnh viện",
+								"correct": false
+							},
+							{
+								"label": "C",
+								"text": "学校",
+								"pinyin": "xuéxiào",
+								"meaning": "trường học",
+								"correct": false
+							}
+						]
+					},
+					"questions": [
+						{
+							"number": 9,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "中国人",
+									"pinyin": "Zhōngguó rén",
+									"meaning": "người Trung Quốc"
+								},
+								{
+									"label": "B",
+									"text": "泰国人",
+									"pinyin": "Tàiguó rén",
+									"meaning": "người Thái Lan"
+								},
+								{ "label": "C", "text": "法国人", "pinyin": "Fǎguó rén", "meaning": "người Pháp" }
+							]
+						},
+						{
+							"number": 10,
+							"answer": "C",
+							"options": [
+								{ "label": "A", "text": "安妮", "pinyin": "Ānnī", "meaning": "Annie" },
+								{
+									"label": "B",
+									"text": "王一飞",
+									"pinyin": "Wáng Yīfēi",
+									"meaning": "Vương Nhất Phi"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—13题：选择与句子最匹配的图片。\nCâu 11–13: Chọn hình ảnh phù hợp nhất với câu.",
+					"example": {
+						"sentence": "我很喜欢这本书。",
+						"pinyin": "Wǒ hěn xǐhuan zhè běn shū.",
+						"meaning": "Tôi rất thích cuốn sách này.",
+						"correct_label": "A",
+						"options": ["A", "B", "C", "D"]
+					},
+					"questions": [
+						{
+							"number": 11,
+							"answer": "C",
+							"sentence": "老师，您好！",
+							"pinyin": "Lǎoshī, nín hǎo!",
+							"meaning": "Thưa cô, chào cô ạ!",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 12,
+							"answer": "D",
+							"sentence": "我家有四口人。",
+							"pinyin": "Wǒ jiā yǒu sì kǒu rén.",
+							"meaning": "Nhà tôi có bốn người.",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 13,
+							"answer": "B",
+							"sentence": "我哥哥今年20岁。",
+							"pinyin": "Wǒ gēge jīnnián èrshí suì.",
+							"meaning": "Anh trai tôi năm nay 20 tuổi.",
+							"options": ["A", "B", "C", "D"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第14—16题：匹配句子。\nCâu 14–16: Nối câu.",
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "好的，谢谢！",
+							"pinyin": "Hǎo de, xièxie!",
+							"meaning": "Vâng, cảm ơn!"
+						},
+						{
+							"label": "B",
+							"text": "他今年5岁。",
+							"pinyin": "Tā jīnnián wǔ suì.",
+							"meaning": "Anh ấy năm nay 5 tuổi."
+						},
+						{
+							"label": "C",
+							"text": "我女朋友。",
+							"pinyin": "Wǒ nǚpéngyou.",
+							"meaning": "Bạn gái tôi."
+						},
+						{ "label": "D", "text": "是的。", "pinyin": "Shì de.", "meaning": "Đúng vậy." }
+					],
+					"example": {
+						"question": "你喝水吗？",
+						"pinyin": "Nǐ hē shuǐ ma?",
+						"meaning": "Bạn có uống nước không?",
+						"correct_label": "A"
+					},
+					"questions": [
+						{
+							"number": 14,
+							"answer": "C",
+							"question": "她是谁？",
+							"pinyin": "Tā shì shéi?",
+							"meaning": "Cô ấy là ai?"
+						},
+						{
+							"number": 15,
+							"answer": "D",
+							"question": "你是法国人吗？",
+							"pinyin": "Nǐ shì Fǎguó rén ma?",
+							"meaning": "Bạn là người Pháp phải không?"
+						},
+						{
+							"number": 16,
+							"answer": "B",
+							"question": "您儿子多大？",
+							"pinyin": "Nín érzi duō dà?",
+							"meaning": "Con trai chị bao nhiêu tuổi?"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第17—18题：选词填空。\nCâu 17–18: Chọn từ thích hợp điền vào chỗ trống.",
+					"vocabulary": [
+						{ "word": "想", "pinyin": "xiǎng", "meaning": "muốn, nhớ" },
+						{ "word": "忙", "pinyin": "máng", "meaning": "bận" },
+						{ "word": "名字", "pinyin": "míngzi", "meaning": "tên" }
+					],
+					"example": {
+						"sentence": "你叫什么（ ）？",
+						"pinyin": "Nǐ jiào shénme ( )?",
+						"meaning": "Bạn tên là gì?",
+						"answer": "C",
+						"answer_word": "名字",
+						"answer_pinyin": "míngzi",
+						"answer_meaning": "tên"
+					},
+					"questions": [
+						{
+							"number": 17,
+							"answer": "B",
+							"sentence": "她工作很（ ）。",
+							"pinyin": "Tā gōngzuò hěn ( ).",
+							"meaning": "Cô ấy làm việc rất ( ).",
+							"options": [
+								{ "label": "A", "word": "想", "pinyin": "xiǎng", "meaning": "muốn, nhớ" },
+								{ "label": "B", "word": "忙", "pinyin": "máng", "meaning": "bận" },
+								{ "label": "C", "word": "名字", "pinyin": "míngzi", "meaning": "tên" }
+							]
+						},
+						{
+							"number": 18,
+							"answer": "A",
+							"sentence": "男：你们好吗？\n女：很好，我们很（ ）你。",
+							"pinyin": "Nán: Nǐmen hǎo ma?\nNǚ: Hěn hǎo, wǒmen hěn ( ) nǐ.",
+							"meaning": "Nam: Các bạn có khỏe không?\nNữ: Rất khỏe, chúng tôi rất ( ) bạn.",
+							"options": [
+								{ "label": "A", "word": "想", "pinyin": "xiǎng", "meaning": "muốn, nhớ" },
+								{ "label": "B", "word": "忙", "pinyin": "máng", "meaning": "bận" },
+								{ "label": "C", "word": "名字", "pinyin": "míngzi", "meaning": "tên" }
+							]
+						}
+					]
+				},
+				{
+					"part": "第四部分 - Phần 4",
+					"description": "第19—20题：选择正确答案。\nCâu 19–20: Chọn đáp án đúng.",
+					"example": {
+						"sentence": "请问现在几点了？",
+						"pinyin": "Qǐngwèn xiànzài jǐ diǎn le?",
+						"meaning": "Xin hỏi bây giờ là mấy giờ rồi?",
+						"question": "说话人想知道什么？",
+						"question_pinyin": "Shuōhuàrén xiǎng zhīdào shénme?",
+						"question_meaning": "Người nói muốn biết điều gì?",
+						"options": [
+							{
+								"label": "A",
+								"text": "时间",
+								"pinyin": "shíjiān",
+								"meaning": "thời gian",
+								"correct": true
+							},
+							{
+								"label": "B",
+								"text": "名字",
+								"pinyin": "míngzi",
+								"meaning": "tên",
+								"correct": false
+							},
+							{
+								"label": "C",
+								"text": "房间号",
+								"pinyin": "fángjiān hào",
+								"meaning": "số phòng",
+								"correct": false
+							}
+						]
+					},
+					"questions": [
+						{
+							"number": 19,
+							"answer": "B",
+							"sentence": "我家有三口人，爸爸、妈妈和我。",
+							"pinyin": "Wǒ jiā yǒu sān kǒu rén, bàba, māmā hé wǒ.",
+							"meaning": "Nhà tôi có ba người, bố, mẹ và tôi.",
+							"question": "说话人家里有：",
+							"question_pinyin": "Shuōhuàrén jiā li yǒu:",
+							"question_meaning": "Trong nhà người nói có:",
+							"options": [
+								{ "label": "A", "text": "姐姐", "pinyin": "jiějie", "meaning": "chị gái" },
+								{ "label": "B", "text": "三口人", "pinyin": "sān kǒu rén", "meaning": "ba người" },
+								{ "label": "C", "text": "四口人", "pinyin": "sì kǒu rén", "meaning": "bốn người" }
+							]
+						},
+						{
+							"number": 20,
+							"answer": "A",
+							"sentence": "她是法国人，我不是。",
+							"pinyin": "Tā shì Fǎguó rén, wǒ bú shì.",
+							"meaning": "Cô ấy là người Pháp, tôi không phải.",
+							"question": "“她”是：",
+							"question_pinyin": "\"Tā\" shì:",
+							"question_meaning": "“Cô ấy” là:",
+							"options": [
+								{ "label": "A", "text": "法国人", "pinyin": "Fǎguó rén", "meaning": "người Pháp" },
+								{
+									"label": "B",
+									"text": "中国人",
+									"pinyin": "Zhōngguó rén",
+									"meaning": "người Trung Quốc"
+								},
+								{
+									"label": "C",
+									"text": "泰国人",
+									"pinyin": "Tàiguó rén",
+									"meaning": "người Thái Lan"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

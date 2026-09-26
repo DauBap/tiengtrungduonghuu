@@ -1,0 +1,171 @@
+{
+	"course_id": "hsk1_3-0",
+	"course_name": "HSK 1 (3.0)",
+	"id": 6,
+	"label": "Bài 6",
+	"title": "你的手机号是多少？",
+	"short_vi": "Hỏi số điện thoại, diễn đạt mục đích và phương thức hành động",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "手机",
+			"pinyin": "shǒujī",
+			"adj": 2,
+			"vi": "điện thoại"
+		},
+		{
+			"pos": 2,
+			"hanzi": "电话",
+			"pinyin": "diànhuà",
+			"adj": 2,
+			"vi": "gọi điện thoại"
+		},
+		{
+			"pos": 3,
+			"hanzi": "号",
+			"pinyin": "hào",
+			"adj": 2,
+			"vi": "số"
+		},
+		{
+			"pos": 4,
+			"hanzi": "明天",
+			"pinyin": "mínɡtiān",
+			"adj": 2,
+			"vi": "ngày mai"
+		},
+		{
+			"pos": 5,
+			"hanzi": "去",
+			"pinyin": "qù",
+			"adj": 4,
+			"vi": "đi"
+		},
+		{
+			"pos": 6,
+			"hanzi": "哪儿",
+			"pinyin": "nǎr",
+			"adj": 11,
+			"vi": "ở đâu"
+		},
+		{
+			"pos": 7,
+			"hanzi": "想",
+			"pinyin": "xiǎnɡ",
+			"adj": [],
+			"vi": "muốn"
+		},
+		{
+			"pos": 8,
+			"hanzi": "超市",
+			"pinyin": "chāoshì",
+			"adj": 2,
+			"vi": "siêu thị"
+		},
+		{
+			"pos": 9,
+			"hanzi": "买",
+			"pinyin": "mǎi",
+			"adj": 4,
+			"vi": "mua"
+		},
+		{
+			"pos": 10,
+			"hanzi": "东西",
+			"pinyin": "dōnɡxi",
+			"adj": 2,
+			"vi": "thứ, đồ vật"
+		},
+		{
+			"pos": 11,
+			"hanzi": "些",
+			"pinyin": "xiē",
+			"adj": 8,
+			"vi": "1 ít"
+		},
+		{
+			"pos": 12,
+			"hanzi": "牛奶",
+			"pinyin": "niúnǎi",
+			"adj": 2,
+			"vi": "sữa bò"
+		},
+		{
+			"pos": 13,
+			"hanzi": "吃",
+			"pinyin": "chī",
+			"adj": 4,
+			"vi": "ăn"
+		},
+		{
+			"pos": 14,
+			"hanzi": "晚饭",
+			"pinyin": "wǎnfàn",
+			"adj": 2,
+			"vi": "ăn tối"
+		},
+		{
+			"pos": 15,
+			"hanzi": "那边",
+			"pinyin": "nàbiān",
+			"adj": 11,
+			"vi": "ở bên kia"
+		},
+		{
+			"pos": 16,
+			"hanzi": "包子",
+			"pinyin": "bāozi",
+			"adj": 2,
+			"vi": "bánh bao"
+		},
+		{
+			"pos": 17,
+			"hanzi": "非常",
+			"pinyin": "fēichánɡ",
+			"adj": 7,
+			"vi": "rất, phi thường, vô cùng"
+		},
+		{
+			"pos": 18,
+			"hanzi": "好吃",
+			"pinyin": "hǎochī",
+			"adj": 6,
+			"vi": "ngon, ngon miệng"
+		},
+		{
+			"pos": 19,
+			"hanzi": "米饭",
+			"pinyin": "mǐfàn",
+			"adj": 2,
+			"vi": "cơm trắng"
+		},
+		{
+			"pos": 20,
+			"hanzi": "怎么",
+			"pinyin": "zěnme",
+			"adj": 4,
+			"vi": "sao; làm sao; thế nào (tính chất, tình hình, phương thức, nguyên nhân,...)"
+		},
+		{
+			"pos": 21,
+			"hanzi": "坐",
+			"pinyin": "zuò",
+			"adj": 2,
+			"vi": "ngồi, đi (trên xe)"
+		},
+		{
+			"pos": 22,
+			"hanzi": "出租车",
+			"pinyin": "chūzūchē",
+			"adj": 2,
+			"vi": "taxi"
+		},
+		{
+			"pos": 23,
+			"hanzi": "西安饭店",
+			"pinyin": "Xī'ān Fàndiàn",
+			"adj": [],
+			"vi": "Nhà hàng Tây An"
+		}
+	]
+}

@@ -1,0 +1,222 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const explanation = "Đối chiếu đúng ý nghĩa và trật tự từ của cấu trúc đã học.";
+const input = (
+	id: string,
+	prompt: string,
+	answer: string,
+	acceptedAnswers: string[] = []
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	acceptedAnswers,
+	explanation,
+	formula: "Giữ đúng trật tự từ; dấu câu và khoảng trắng không ảnh hưởng kết quả."
+});
+const choice = (
+	id: string,
+	answer: string,
+	options: [string, string, string],
+	image: string,
+	imageAlt: string
+): GrammarQuestion => ({
+	id,
+	prompt: "Chọn câu tiếng Trung phù hợp với hình.",
+	answer,
+	options,
+	image,
+	imageAlt,
+	explanation,
+	formula: "Quan sát chi tiết trong hình và chọn đúng một câu."
+});
+const arrange = (id: string, tokens: string[], answer: string): GrammarQuestion => ({
+	id,
+	prompt: "Sắp xếp các thẻ từ thành câu đúng.",
+	tokens,
+	answer,
+	explanation,
+	formula: "Chọn từng thẻ theo đúng trật tự câu."
+});
+const img = (name: string) => `/images/grammar/lesson11/${name}.svg`;
+
+const pictures: GrammarQuestion[] = [
+	choice(
+		"l11-p1",
+		"这个电影好不好？",
+		["这个电影好不好？", "这个电影怎么样？", "这个电影多少钱？"],
+		img("movie-good-or-not"),
+		"Một người hỏi bộ phim hay hay không hay"
+	),
+	choice(
+		"l11-p2",
+		"你明天去不去超市？",
+		["你明天去不去超市？", "你明天怎么去超市？", "你明天想去超市吗？"],
+		img("tomorrow-market-or-not"),
+		"Một người hỏi ngày mai bạn có đi siêu thị không"
+	),
+	choice(
+		"l11-p3",
+		"她忙不忙？",
+		["她忙不忙？", "她是不是大学生？", "她在不在饭店？"],
+		img("busy-or-not"),
+		"Một người hỏi cô gái có bận không"
+	),
+	choice(
+		"l11-p4",
+		"他正在上课。",
+		["他正在上课。", "他正在下课。", "他要上课。"],
+		img("class-in-progress"),
+		"Một nam sinh đang lên lớp"
+	),
+	choice(
+		"l11-p5",
+		"她正在找车呢。",
+		["她正在找车呢。", "她正在开车呢。", "她要买车。"],
+		img("looking-for-car"),
+		"Một cô gái đang tìm xe"
+	),
+	choice(
+		"l11-p6",
+		"小朋友睡觉呢。",
+		["小朋友睡觉呢。", "小朋友起床呢。", "小朋友上课呢。"],
+		img("child-sleeping"),
+		"Một bạn nhỏ đang ngủ"
+	),
+	choice(
+		"l11-p7",
+		"我没在上课。",
+		["我没在上课。", "我正在上课。", "我要上课。"],
+		img("not-in-class"),
+		"Lớp học nhưng nhân vật không học, có dấu phủ định"
+	),
+	choice(
+		"l11-p8",
+		"我要去饭店。",
+		["我要去饭店。", "我正在饭店。", "我不想去饭店。"],
+		img("plan-restaurant"),
+		"Nhân vật dự định đi nhà hàng"
+	)
+];
+
+const arrangements: GrammarQuestion[] = [
+	arrange("l11-a1", ["好不好", "这个电影"], "这个电影好不好？"),
+	arrange("l11-a2", ["去不去超市", "你", "明天"], "你明天去不去超市？"),
+	arrange("l11-a3", ["大学生", "她", "是不是"], "她是不是大学生？"),
+	arrange("l11-a4", ["有没有", "你", "车"], "你有没有车？"),
+	arrange("l11-a5", ["正在上课", "他"], "他正在上课。"),
+	arrange("l11-a6", ["做饭呢", "正在", "妈妈"], "妈妈正在做饭呢。"),
+	arrange("l11-a7", ["找朋友呢", "我", "在"], "我在找朋友呢。"),
+	arrange("l11-a8", ["没在上课", "我"], "我没在上课。"),
+	arrange("l11-a9", ["去饭店", "我要"], "我要去饭店。"),
+	arrange("l11-a10", ["开车去超市", "要", "爸爸"], "爸爸要开车去超市。")
+];
+
+const translations: GrammarQuestion[] = [
+	input("l11-t1", "Bộ phim này có hay không?", "这个电影好不好？"),
+	input("l11-t2", "Ngày mai bạn có đi siêu thị không?", "你明天去不去超市？"),
+	input("l11-t3", "Cô ấy có phải sinh viên không?", "她是不是大学生？"),
+	input("l11-t4", "Bạn có xe không?", "你有没有车？"),
+	input("l11-t5", "Anh ấy đang lên lớp.", "他正在上课。"),
+	input("l11-t6", "Mẹ đang nấu ăn đấy.", "妈妈正在做饭呢。", ["妈妈在做饭呢。", "妈妈做饭呢。"]),
+	input("l11-t7", "Tôi đang tìm bạn.", "我正在找朋友。", [
+		"我在找朋友。",
+		"我正在找朋友呢。",
+		"我在找朋友呢。"
+	]),
+	input("l11-t8", "Tôi không đang lên lớp.", "我没在上课。", ["我没有在上课。"]),
+	input("l11-t9", "Tôi muốn đi nhà hàng.", "我要去饭店。"),
+	input("l11-t10", "Bố muốn lái xe đi siêu thị.", "爸爸要开车去超市。")
+];
+
+export const hsk1Lesson11Grammar: GrammarLesson = {
+	title: "Bài 11: 我读大学呢",
+	variant: "hsk1-3-0-lesson11",
+	points: [
+		{
+			id: "affirmative-negative-question",
+			title: "Câu hỏi chính phản",
+			explanation:
+				"Câu hỏi chính phản đặt dạng khẳng định và phủ định cạnh nhau để người nghe lựa chọn hoặc xác nhận. Không đặt 吗 ở cuối loại câu hỏi này.",
+			formulas: [
+				"Chủ ngữ + Động từ + 不 + Động từ + Tân ngữ？",
+				"Chủ ngữ + 是不是 + Danh từ？",
+				"Chủ ngữ + 有没有 + Danh từ？",
+				"Chủ ngữ + Tính từ + 不 + Tính từ？"
+			],
+			examples: [
+				{ chinese: "你去不去超市？", vietnamese: "Bạn có đi siêu thị không?" },
+				{ chinese: "你看不看电影？", vietnamese: "Bạn có xem phim không?" },
+				{ chinese: "你想不想吃包子？", vietnamese: "Bạn có muốn ăn bánh bao không?" },
+				{ chinese: "她是不是大学生？", vietnamese: "Cô ấy có phải sinh viên không?" },
+				{ chinese: "他是不是医生？", vietnamese: "Anh ấy có phải bác sĩ không?" },
+				{ chinese: "你有没有车？", vietnamese: "Bạn có xe không?" },
+				{ chinese: "这个电影好不好？", vietnamese: "Bộ phim này có hay không?" },
+				{ chinese: "这件衣服贵不贵？", vietnamese: "Bộ quần áo này có đắt không?" },
+				{ chinese: "她忙不忙？", vietnamese: "Cô ấy có bận không?" }
+			],
+			notes: ["Đúng: 你去不去超市？", "Sai: 你去不去超市吗？"],
+			exercises: [
+				{
+					id: "l11-picture",
+					title: "Bài tập 1: Nhìn hình và chọn đáp án đúng",
+					type: "choice",
+					questions: pictures
+				}
+			]
+		},
+		{
+			id: "ongoing-action",
+			title: "Hành động đang diễn ra",
+			explanation:
+				"在 hoặc 正在 đứng trước động từ để biểu thị hành động đang diễn ra; 正在 nhấn mạnh thời điểm nói. Có thể thêm 呢 cuối câu hoặc dùng Động từ + 呢. Phủ định dùng 没/没有, không dùng 不.",
+			formulas: [
+				"Chủ ngữ + 在/正在 + Động từ",
+				"Chủ ngữ + 在/正在 + Động từ + 呢",
+				"Chủ ngữ + Động từ + 呢",
+				"Chủ ngữ + 没/没有 + 在 + Động từ"
+			],
+			examples: [
+				{ chinese: "他正在上课。", vietnamese: "Anh ấy đang lên lớp." },
+				{ chinese: "妈妈在做饭。", vietnamese: "Mẹ đang nấu ăn." },
+				{ chinese: "她正在找车。", vietnamese: "Cô ấy đang tìm xe." },
+				{ chinese: "他正在上课呢。", vietnamese: "Anh ấy đang lên lớp đấy." },
+				{ chinese: "我正在找朋友呢。", vietnamese: "Tôi đang tìm bạn đấy." },
+				{ chinese: "小朋友睡觉呢。", vietnamese: "Bạn nhỏ đang ngủ." },
+				{ chinese: "我没在上课。", vietnamese: "Tôi không đang lên lớp." },
+				{ chinese: "他没有在睡觉。", vietnamese: "Anh ấy không đang ngủ." }
+			],
+			notes: ["Đúng: 我没在上课。", "Sai: 我不正在上课。"],
+			exercises: [
+				{
+					id: "l11-arrange",
+					title: "Bài tập 2: Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: arrangements
+				}
+			]
+		},
+		{
+			id: "modal-yao",
+			title: "Động từ năng nguyện 要",
+			explanation:
+				"Trong bài này, 要 diễn tả mong muốn hoặc dự định làm một việc. Khi nói “không muốn làm”, ưu tiên 不想; không dùng 不要 như phủ định thông thường vì 不要 thường mang nghĩa “đừng”.",
+			formulas: ["Chủ ngữ + 要 + Động từ + Tân ngữ", "Chủ ngữ + 不想 + Động từ"],
+			examples: [
+				{ chinese: "我要去超市。", vietnamese: "Tôi muốn đi siêu thị." },
+				{ chinese: "妈妈要买牛奶。", vietnamese: "Mẹ muốn mua sữa." },
+				{ chinese: "他要找朋友。", vietnamese: "Anh ấy muốn tìm bạn." },
+				{ chinese: "爸爸要开车去饭店。", vietnamese: "Bố muốn lái xe đi nhà hàng." },
+				{ chinese: "我不想去。", vietnamese: "Tôi không muốn đi." }
+			],
+			exercises: [
+				{
+					id: "l11-translate",
+					title: "Bài tập 3: Dịch sang tiếng Trung",
+					type: "input",
+					questions: translations
+				}
+			]
+		}
+	]
+};

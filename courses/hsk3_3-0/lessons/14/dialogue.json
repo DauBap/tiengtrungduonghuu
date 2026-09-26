@@ -1,0 +1,158 @@
+{
+  "lesson": 14,
+  "title": "这本书被别人借走了",
+  "title_pinyin": "Zhè běn shū bèi biéren jiè zǒu le",
+  "title_vi": "Cuốn sách này đã bị người khác mượn mất",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "我借的这本词典最好今天还, 但是我没时间去。",
+          "pinyin": "Wǒ jiè de zhè běn cídiǎn zuì hǎo jīntiān huán, dànshì wǒ méi shíjiān qù.",
+          "vi": "Cuốn từ điển tôi mượn tốt nhất hôm nay nên trả, nhưng tôi không có thời gian đi."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "下午我只有两节课, 可以帮你去图书馆还书。",
+          "pinyin": "Xiàwǔ wǒ zhǐyǒu liǎng jié kè, kěyǐ bāng nǐ qù túshūguǎn huán shū.",
+          "vi": "Chiều tôi chỉ có hai tiết, có thể giúp cậu đến thư viện trả sách."
+        },
+        {
+          "speaker": "李文",
+          "zh": "那太谢谢了。你能再帮我借本书吗?",
+          "pinyin": "Nà tài xièxie le. Nǐ néng zài bāng wǒ jiè běn shū ma?",
+          "vi": "Cảm ơn cậu nhiều. Cậu có thể giúp tớ mượn thêm một cuốn sách không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "行, 你告诉我书名。",
+          "pinyin": "Xíng, nǐ gàosu wǒ shūmíng.",
+          "vi": "Được, cậu nói tên sách cho tớ."
+        },
+        {
+          "speaker": "李文",
+          "zh": "我把名字写在纸上吧。我去了好几次图书馆, 这本书都被别人借走了。",
+          "pinyin": "Wǒ bǎ míngzi xiě zài zhǐ shàng ba. Wǒ qùle hǎo jǐ cì túshūguǎn, zhè běn shū dōu bèi biéren jiè zǒu le.",
+          "vi": "Tớ viết tên ra giấy nhé. Tớ đến thư viện mấy lần, cuốn sách này đều bị người khác mượn mất."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "《名人的故事》? 我有这本书。明天我借给你吧。",
+          "pinyin": "\"Míngrén de Gùshi\"? Wǒ yǒu zhè běn shū. Míngtiān wǒ jiè gěi nǐ ba.",
+          "vi": "\"Câu chuyện của người nổi tiếng\"? Tớ có cuốn này. Ngày mai tớ cho cậu mượn nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "安妮",
+          "zh": "今天下课早, 你一会儿做什么?",
+          "pinyin": "Jīntiān xiàkè zǎo, nǐ yīhuìr zuò shénme?",
+          "vi": "Hôm nay tan học sớm, một lát cậu làm gì?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我今天忙得很, 要先去图书馆借书, 然后去游泳。",
+          "pinyin": "Wǒ jīntiān máng de hěn, yào xiān qù túshūguǎn jiè shū, ránhòu qù yóuyǒng.",
+          "vi": "Hôm nay tớ bận lắm, phải đến thư viện mượn sách trước, rồi đi bơi."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "咱们一起走吧, 我想去图书馆看看中文报纸。",
+          "pinyin": "Zánmen yīqǐ zǒu ba, wǒ xiǎng qù túshūguǎn kànkan Zhōngwén bàozhǐ.",
+          "vi": "Chúng ta đi cùng nhau nhé, mình muốn đến thư viện xem báo tiếng Trung."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "等等, 我的校园卡不见了, 没有卡进不去图书馆。",
+          "pinyin": "Děngdeng, wǒ de xiàoyuán kǎ bújiàn le, méiyǒu kǎ jìn bú qù túshūguǎn.",
+          "vi": "Đợi đã, thẻ sinh viên của tớ không thấy đâu, không có thẻ thì không vào được thư viện."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "你想想上一次用是什么时候?",
+          "pinyin": "Nǐ xiǎngxiang shàng yī cì yòng shì shénme shíhou?",
+          "vi": "Cậu nghĩ xem lần cuối dùng là khi nào?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我忘记了, 可能被我放在家里了。",
+          "pinyin": "Wǒ wàngjì le, kěnéng bèi wǒ fàng zài jiā lǐ le.",
+          "vi": "Tớ quên mất, có thể để ở nhà rồi."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "进不去图书馆也没关系, 上网看看有没有电子书。",
+          "pinyin": "Jìn bú qù túshūguǎn yě méi guānxi, shàng wǎng kànkan yǒu méiyǒu diànzǐ shū.",
+          "vi": "Không vào được thư viện cũng không sao, lên mạng xem có sách điện tử không."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "不行, 我必须去, 我还得帮李文还书呢。",
+          "pinyin": "Bùxíng, wǒ bìxū qù, wǒ hái děi bāng Lǐ Wén huán shū ne.",
+          "vi": "Không được, tớ nhất định phải đi, tớ còn phải trả sách giúp Lý Văn nữa."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "下周学校有晚会, 你知道吗?",
+          "pinyin": "Xià zhōu xuéxiào yǒu wǎnhuì, nǐ zhīdào ma?",
+          "vi": "Tuần sau trường có buổi tối văn nghệ, cậu có biết không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "知道, 我和几个女生要表演一个节目。你也参加吗?",
+          "pinyin": "Zhīdào, wǒ hé jǐ gè nǚshēng yào biǎoyǎn yī gè jiémù. Nǐ yě cānjiā ma?",
+          "vi": "Biết, tớ và mấy bạn nữ sẽ biểu diễn một tiết mục. Cậu cũng tham gia à?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "我想唱中文歌, 但是还没找到人一起表演, 不知道怎么办。",
+          "pinyin": "Wǒ xiǎng chàng Zhōngwén gē, dànshì hái méi zhǎodào rén yīqǐ biǎoyǎn, bù zhīdào zěnme bàn.",
+          "vi": "Tớ muốn hát tiếng Trung, nhưng chưa tìm được người cùng biểu diễn, không biết làm thế nào."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "找不到人, 你就一个人唱吧。",
+          "pinyin": "Zhǎo bú dào rén, nǐ jiù yī gè rén chàng ba.",
+          "vi": "Không tìm được người, cậu hát một mình đi."
+        },
+        {
+          "speaker": "李文",
+          "zh": "一想到要在校长、老师和那么多同学面前表演, 我就有些紧张。",
+          "pinyin": "Yī xiǎng dào yào zài xiàozhǎng, lǎoshī hé nàme duō tóngxué miànqián biǎoyǎn, wǒ jiù yǒuxiē jǐnzhāng.",
+          "vi": "Cứ nghĩ đến việc phải biểu diễn trước mặt hiệu trưởng, thầy cô và nhiều bạn học như vậy, tớ lại hơi căng thẳng."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "紧张什么啊, 我们都喜欢听你唱歌, 你要相信自己。",
+          "pinyin": "Jǐnzhāng shénme a, wǒmen dōu xǐhuan tīng nǐ chànggē, nǐ yào xiāngxìn zìjǐ.",
+          "vi": "Căng thẳng gì chứ, bọn tớ đều thích nghe cậu hát, cậu phải tin vào bản thân."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "昨天是我们学校的新年晚会, 每个班级的同学都表演节目了。晚会是八点开始的, 差不多十二点才结束。我一个晚上跟大家一起又唱又跳, 开心极了, 也累坏了。我最喜欢的节目是留学生们跳舞, 最后老师和校长也被叫起来一块儿跳, 特别有意思。过几天学校的网站上会有晚会的视频, 我打算再看一遍。",
+          "pinyin": "Zuótiān shì wǒmen xuéxiào de xīnnián wǎnhuì, měi gè bānjí de tóngxué dōu biǎoyǎn jiémù le. Wǎnhuì shì bā diǎn kāishǐ de, chàbuduō shí'èr diǎn cái jiéshù. Wǒ yī gè wǎnshang gēn dàjiā yīqǐ yòu chàng yòu tiào, kāixīn jí le, yě lèi huài le. Wǒ zuì xǐhuan de jiémù shì liúxuéshēngmen tiàowǔ, zuìhòu lǎoshī hé xiàozhǎng yě bèi jiào qǐlái yīkuài tiào, tèbié yǒu yìsi. Guò jǐ tiān xuéxiào de wǎngzhàn shàng huì yǒu wǎnhuì de shìpín, wǒ dǎsuàn zài kàn yī biàn.",
+          "vi": "Hôm qua là buổi tối văn nghệ chào năm mới của trường tôi, các bạn mỗi lớp đều biểu diễn tiết mục. Buổi tối bắt đầu lúc 8 giờ, gần 12 giờ mới kết thúc. Một tối tôi cùng mọi người vừa hát vừa nhảy, vui vô cùng, cũng mệt rã rời. Tiết mục tôi thích nhất là các bạn du học sinh nhảy múa, cuối cùng các thầy cô và hiệu trưởng cũng được gọi lên nhảy cùng, rất thú vị. Mấy hôm nữa trên trang web của trường sẽ có video của buổi tối, tôi định xem lại một lần nữa."
+        }
+      ]
+    }
+  ]
+}

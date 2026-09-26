@@ -1,0 +1,227 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 16,
+  "label": "Bài 16",
+  "title": "生活可以更美好",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "博士",
+      "pinyin": "bóshì",
+      "adj": 2,
+      "vi": "tiến sĩ"
+    },
+    {
+      "pos": 2,
+      "hanzi": "签证",
+      "pinyin": "qiānzhèng",
+      "adj": 2,
+      "vi": "thị thực, visa"
+    },
+    {
+      "pos": 3,
+      "hanzi": "报名",
+      "pinyin": "bàomíng",
+      "adj": 4,
+      "vi": "ghi danh, đăng ký"
+    },
+    {
+      "pos": 4,
+      "hanzi": "表格",
+      "pinyin": "biǎogé",
+      "adj": 2,
+      "vi": "bản kê khai, mẫu đơn"
+    },
+    {
+      "pos": 5,
+      "hanzi": "传真",
+      "pinyin": "chuánzhēn",
+      "adj": 4,
+      "vi": "gửi fax"
+    },
+    {
+      "pos": 6,
+      "hanzi": "号码",
+      "pinyin": "hàomǎ",
+      "adj": 2,
+      "vi": "số"
+    },
+    {
+      "pos": 7,
+      "hanzi": "参观",
+      "pinyin": "cānguān",
+      "adj": 4,
+      "vi": "tham quan, đi thăm"
+    },
+    {
+      "pos": 8,
+      "hanzi": "激动",
+      "pinyin": "jīdòng",
+      "adj": 6,
+      "vi": "cảm động, xúc động"
+    },
+    {
+      "pos": 9,
+      "hanzi": "小伙子",
+      "pinyin": "xiǎohuǒzi",
+      "adj": 2,
+      "vi": "chàng trai"
+    },
+    {
+      "pos": 10,
+      "hanzi": "记者",
+      "pinyin": "jìzhě",
+      "adj": 2,
+      "vi": "phóng viên, nhà báo"
+    },
+    {
+      "pos": 11,
+      "hanzi": "代表",
+      "pinyin": "dàibiǎo",
+      "adj": 4,
+      "vi": "đại diện, thay mặt"
+    },
+    {
+      "pos": 12,
+      "hanzi": "恐怕",
+      "pinyin": "kǒngpà",
+      "adj": 7,
+      "vi": "e rằng, có lẽ"
+    },
+    {
+      "pos": 13,
+      "hanzi": "失望",
+      "pinyin": "shīwàng",
+      "adj": 4,
+      "vi": "thất vọng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "郊区",
+      "pinyin": "jiāoqū",
+      "adj": 2,
+      "vi": "vùng ngoại ô"
+    },
+    {
+      "pos": 15,
+      "hanzi": "到底",
+      "pinyin": "dàodǐ",
+      "adj": 7,
+      "vi": "(nhấn mạnh trong câu hỏi) rốt cuộc"
+    },
+    {
+      "pos": 16,
+      "hanzi": "呀",
+      "pinyin": "ya",
+      "adj": 11,
+      "vi": "(biến thể của 啊, dùng cuối câu hỏi cho giọng nhẹ nhàng hơn)"
+    },
+    {
+      "pos": 17,
+      "hanzi": "导游",
+      "pinyin": "dǎoyóu",
+      "adj": 2,
+      "vi": "hướng dẫn viên du lịch"
+    },
+    {
+      "pos": 18,
+      "hanzi": "礼貌",
+      "pinyin": "lǐmào",
+      "adj": 6,
+      "vi": "lễ phép, lịch sự"
+    },
+    {
+      "pos": 19,
+      "hanzi": "原谅",
+      "pinyin": "yuánliàng",
+      "adj": 4,
+      "vi": "tha"
+    },
+    {
+      "pos": 20,
+      "hanzi": "挂",
+      "pinyin": "guà",
+      "adj": 4,
+      "vi": "treo, móc"
+    },
+    {
+      "pos": 21,
+      "hanzi": "同情",
+      "pinyin": "tóngqíng",
+      "adj": 4,
+      "vi": "thông cảm, đồng tình"
+    },
+    {
+      "pos": 22,
+      "hanzi": "推",
+      "pinyin": "tuī",
+      "adj": 4,
+      "vi": "hoãn lại, đẩy, triển khai"
+    },
+    {
+      "pos": 23,
+      "hanzi": "预习",
+      "pinyin": "yùxí",
+      "adj": 4,
+      "vi": "chuẩn bị bài"
+    },
+    {
+      "pos": 24,
+      "hanzi": "重点",
+      "pinyin": "zhòngdiǎn",
+      "adj": 2,
+      "vi": "trọng điểm, trọng tâm"
+    },
+    {
+      "pos": 25,
+      "hanzi": "马虎",
+      "pinyin": "mǎhu",
+      "adj": 6,
+      "vi": "cẩu thả, lơ đễnh"
+    },
+    {
+      "pos": 26,
+      "hanzi": "自信",
+      "pinyin": "zìxìn",
+      "adj": 6,
+      "vi": "tự tin"
+    },
+    {
+      "pos": 27,
+      "hanzi": "冷静",
+      "pinyin": "lěngjìng",
+      "adj": 6,
+      "vi": "bình tĩnh, điềm tĩnh"
+    },
+    {
+      "pos": 28,
+      "hanzi": "累",
+      "pinyin": "lèi",
+      "adj": 4,
+      "vi": "mệt"
+    },
+    {
+      "pos": 29,
+      "hanzi": "重视",
+      "pinyin": "zhòngshì",
+      "adj": 4,
+      "vi": "xem trọng, chú trọng"
+    },
+    {
+      "pos": 30,
+      "hanzi": "敢",
+      "pinyin": "gǎn",
+      "adj": 4,
+      "vi": "dám"
+    },
+    {
+      "pos": 31,
+      "hanzi": "尊重",
+      "pinyin": "zūnzhòng",
+      "adj": 4,
+      "vi": "tôn trọng"
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 16,
+  "label": "Bài 16",
+  "title": "我现在累得下了班就想睡觉",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "城市",
+      "pinyin": "chéngshì",
+      "adj": 2,
+      "vi": "thành phố"
+    },
+    {
+      "pos": 2,
+      "hanzi": "如果",
+      "pinyin": "rúguǒ",
+      "adj": 10,
+      "vi": "nếu"
+    },
+    {
+      "pos": 3,
+      "hanzi": "认为",
+      "pinyin": "rènwéi",
+      "adj": 4,
+      "vi": "cho rằng"
+    },
+    {
+      "pos": 4,
+      "hanzi": "皮鞋",
+      "pinyin": "píxié",
+      "adj": 2,
+      "vi": "giày da"
+    },
+    {
+      "pos": 5,
+      "hanzi": "帽子",
+      "pinyin": "màozi",
+      "adj": 2,
+      "vi": "mũ, nón"
+    },
+    {
+      "pos": 6,
+      "hanzi": "长",
+      "pinyin": "zhǎng",
+      "adj": 4,
+      "vi": "trưởng thành, lớn lên"
+    },
+    {
+      "pos": 7,
+      "hanzi": "可爱",
+      "pinyin": "kě'ài",
+      "adj": 6,
+      "vi": "đáng yêu, dễ thương"
+    },
+    {
+      "pos": 8,
+      "hanzi": "米",
+      "pinyin": "mǐ",
+      "adj": 2,
+      "vi": "mét"
+    },
+    {
+      "pos": 9,
+      "hanzi": "公斤",
+      "pinyin": "gōngjīn",
+      "adj": 2,
+      "vi": "kilôgam"
+    },
+    {
+      "pos": 10,
+      "hanzi": "鼻子",
+      "pinyin": "bízi",
+      "adj": 2,
+      "vi": "mũi"
+    },
+    {
+      "pos": 11,
+      "hanzi": "头发",
+      "pinyin": "tóufa",
+      "adj": 2,
+      "vi": "tóc"
+    },
+    {
+      "pos": 12,
+      "hanzi": "检查",
+      "pinyin": "jiǎnchá",
+      "adj": 4,
+      "vi": "kiểm tra, khám"
+    },
+    {
+      "pos": 13,
+      "hanzi": "刷牙",
+      "pinyin": "shuā yá",
+      "adj": 4,
+      "vi": "chải răng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "关系",
+      "pinyin": "guānxi",
+      "adj": 2,
+      "vi": "quan hệ"
+    },
+    {
+      "pos": 15,
+      "hanzi": "别人",
+      "pinyin": "biérén",
+      "adj": 2,
+      "vi": "người khác"
+    },
+    {
+      "pos": 16,
+      "hanzi": "词语",
+      "pinyin": "cíyǔ",
+      "adj": 2,
+      "vi": "từ ngữ"
+    }
+  ]
+}

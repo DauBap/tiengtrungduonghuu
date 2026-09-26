@@ -1,0 +1,214 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const explanation = "Đối chiếu đúng ý nghĩa và trật tự từ của cấu trúc đã học.";
+const input = (
+	id: string,
+	prompt: string,
+	answer: string,
+	acceptedAnswers: string[] = []
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	acceptedAnswers,
+	explanation,
+	formula: "Giữ đúng trật tự từ; dấu câu và khoảng trắng không ảnh hưởng kết quả."
+});
+const choice = (
+	id: string,
+	prompt: string,
+	answer: string,
+	options: [string, string, string],
+	image: string,
+	imageAlt: string
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	options,
+	image,
+	imageAlt,
+	explanation,
+	formula: "Quan sát chi tiết trong hình và chọn đúng một đáp án."
+});
+const arrange = (id: string, tokens: string[], answer: string): GrammarQuestion => ({
+	id,
+	prompt: "Sắp xếp các thẻ từ thành câu đúng.",
+	tokens,
+	answer,
+	explanation,
+	formula: "Chọn từng thẻ theo đúng trật tự câu."
+});
+const img = (name: string) => `/images/grammar/lesson10/${name}.svg`;
+
+const pictures: GrammarQuestion[] = [
+	choice(
+		"l10-p1",
+		"多少钱？",
+		"十元。",
+		["十元。", "十角。", "一元。"],
+		img("price-10"),
+		"Nhãn giá 10 tệ"
+	),
+	choice(
+		"l10-p2",
+		"多少钱？",
+		"三元五角。",
+		["三元五角。", "五元三角。", "三元五分。"],
+		img("price-3-5"),
+		"Nhãn giá 3 tệ 5 hào"
+	),
+	choice(
+		"l10-p3",
+		"Chọn câu phù hợp với hình.",
+		"这儿的苹果真便宜！",
+		["这儿的苹果真便宜！", "这儿的苹果真贵！", "那些衣服真便宜！"],
+		img("cheap-apples"),
+		"Những quả táo có giá rẻ"
+	),
+	choice(
+		"l10-p4",
+		"Chọn câu phù hợp với hình.",
+		"这件衣服真贵。",
+		["这件衣服真贵。", "这件衣服真便宜。", "这个苹果真贵。"],
+		img("expensive-clothes"),
+		"Một bộ quần áo có giá cao"
+	),
+	choice(
+		"l10-p5",
+		"Chọn câu phù hợp với hình.",
+		"这件衣服很好看。",
+		["这件衣服很好看。", "这件衣服不好看。", "这件衣服很好吃。"],
+		img("nice-clothes"),
+		"Một bộ quần áo đẹp với đánh giá tích cực"
+	),
+	choice(
+		"l10-p6",
+		"Chọn câu phù hợp với hình.",
+		"这些苹果不贵。",
+		["这些苹果不贵。", "这些苹果不好看。", "那些衣服不贵。"],
+		img("apples-not-expensive"),
+		"Những quả táo có giá không đắt"
+	),
+	choice(
+		"l10-p7",
+		"Chọn câu hỏi phù hợp với hình.",
+		"这件衣服怎么样？",
+		["这件衣服怎么样？", "这件衣服多少钱？", "这件衣服怎么穿？"],
+		img("ask-clothes-opinion"),
+		"Một người hỏi ý kiến về bộ quần áo"
+	),
+	choice(
+		"l10-p8",
+		"Chọn câu hỏi phù hợp với hình.",
+		"那个电影怎么样？",
+		["那个电影怎么样？", "那个电影多少钱？", "你怎么去电影院？"],
+		img("ask-movie-opinion"),
+		"Một người hỏi ý kiến về một bộ phim"
+	)
+];
+
+const arrangements: GrammarQuestion[] = [
+	arrange("l10-a1", ["五角", "三元"], "三元五角。"),
+	arrange("l10-a2", ["八毛", "两块"], "两块八毛。"),
+	arrange("l10-a3", ["多少钱", "这个苹果"], "这个苹果多少钱？"),
+	arrange("l10-a4", ["多少钱", "这件衣服"], "这件衣服多少钱？"),
+	arrange("l10-a5", ["真便宜", "这儿的苹果"], "这儿的苹果真便宜！"),
+	arrange("l10-a6", ["很好看", "这件衣服"], "这件衣服很好看。"),
+	arrange("l10-a7", ["不贵", "这些苹果"], "这些苹果不贵。"),
+	arrange("l10-a8", ["非常好吃", "这个苹果"], "这个苹果非常好吃。"),
+	arrange("l10-a9", ["怎么样", "这件衣服"], "这件衣服怎么样？"),
+	arrange("l10-a10", ["那个电影", "怎么样"], "那个电影怎么样？")
+];
+
+const translations: GrammarQuestion[] = [
+	input("l10-t1", "Mười tệ.", "十元。", ["十块。"]),
+	input("l10-t2", "Ba tệ năm hào.", "三元五角。", ["三块五毛。"]),
+	input("l10-t3", "Hai tệ tám hào.", "两元八角。", ["两块八毛。"]),
+	input("l10-t4", "Quả táo này bao nhiêu tiền?", "这个苹果多少钱？"),
+	input("l10-t5", "Bộ quần áo này bao nhiêu tiền?", "这件衣服多少钱？"),
+	input("l10-t6", "Táo ở đây thật rẻ!", "这儿的苹果真便宜！"),
+	input("l10-t7", "Bộ quần áo này rất đẹp.", "这件衣服很好看。"),
+	input("l10-t8", "Những quả táo này không đắt.", "这些苹果不贵。"),
+	input("l10-t9", "Bộ quần áo này thế nào?", "这件衣服怎么样？"),
+	input("l10-t10", "Bộ phim đó thế nào?", "那个电影怎么样？")
+];
+
+export const hsk1Lesson10Grammar: GrammarLesson = {
+	title: "Bài 10: 这儿的苹果真便宜！",
+	variant: "hsk1-3-0-lesson10",
+	points: [
+		{
+			id: "money",
+			title: "Cách diễn đạt số tiền",
+			explanation:
+				"元 và 角 là cách nói trang trọng; 块 và 毛 thường dùng trong khẩu ngữ. 分 dùng trong cả hai cách. Một 元 bằng 10 角 và 100 分; một 角 bằng 10 分.",
+			formulas: ["Số + 元/块 + Số + 角/毛 + Số + 分", "多少钱？"],
+			examples: [
+				{ chinese: "十元 / 十块", vietnamese: "10 tệ." },
+				{ chinese: "三元五角 / 三块五毛", vietnamese: "3 tệ 5 hào." },
+				{ chinese: "两元八角 / 两块八毛", vietnamese: "2 tệ 8 hào." },
+				{ chinese: "一元两角五分", vietnamese: "1 tệ 2 hào 5 xu." },
+				{ chinese: "这个苹果多少钱？", vietnamese: "Quả táo này bao nhiêu tiền?" },
+				{ chinese: "这件衣服多少钱？", vietnamese: "Bộ quần áo này bao nhiêu tiền?" }
+			],
+			notes: ["1元 = 10角", "1角 = 10分", "1元 = 100分", "Đúng: 三元五角", "Sai: 五角三元"],
+			exercises: [
+				{
+					id: "l10-picture",
+					title: "Bài tập 1: Nhìn hình và chọn đáp án đúng",
+					type: "choice",
+					questions: pictures
+				}
+			]
+		},
+		{
+			id: "adjective-predicate",
+			title: "Câu vị ngữ tính từ",
+			explanation:
+				"Tính từ có thể trực tiếp làm vị ngữ mà không cần 是. Trong câu miêu tả thông thường, 很 thường nối chủ ngữ với tính từ và không phải lúc nào cũng nhấn mạnh nghĩa “rất”.",
+			formulas: ["Chủ ngữ + Phó từ mức độ + Tính từ", "Chủ ngữ + 不 + Tính từ"],
+			examples: [
+				{ chinese: "这儿的苹果真便宜！", vietnamese: "Táo ở đây thật rẻ!" },
+				{ chinese: "这件衣服很好看。", vietnamese: "Bộ quần áo này rất đẹp." },
+				{ chinese: "那个电影非常好看。", vietnamese: "Bộ phim đó rất hay." },
+				{ chinese: "这些苹果不贵。", vietnamese: "Những quả táo này không đắt." },
+				{ chinese: "这件衣服不好看。", vietnamese: "Bộ quần áo này không đẹp." }
+			],
+			notes: ["Đúng: 这件衣服很好看。", "Không dùng: 这件衣服是很好看。"],
+			exercises: [
+				{
+					id: "l10-arrange",
+					title: "Bài tập 2: Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: arrangements
+				}
+			]
+		},
+		{
+			id: "zenmeyang",
+			title: "Đại từ nghi vấn 怎么样",
+			explanation:
+				"怎么样 dùng để hỏi ý kiến, đánh giá hoặc tình hình. 怎么 hỏi cách thức, còn 怎么样 hỏi nhận xét hoặc đánh giá.",
+			formulas: ["Chủ ngữ + 怎么样？"],
+			examples: [
+				{ chinese: "这件衣服怎么样？", vietnamese: "Bộ quần áo này thế nào?" },
+				{ chinese: "这些苹果怎么样？", vietnamese: "Những quả táo này thế nào?" },
+				{ chinese: "那个电影怎么样？", vietnamese: "Bộ phim đó thế nào?" },
+				{
+					chinese: "很好看。/ 真便宜。/ 不贵。/ 非常好吃。",
+					vietnamese: "Các cách trả lời thường gặp."
+				},
+				{ chinese: "你怎么去超市？", vietnamese: "Bạn đi siêu thị bằng cách nào?" }
+			],
+			exercises: [
+				{
+					id: "l10-translate",
+					title: "Bài tập 3: Dịch sang tiếng Trung",
+					type: "input",
+					questions: translations
+				}
+			]
+		}
+	]
+};

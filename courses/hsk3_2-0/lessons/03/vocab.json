@@ -1,0 +1,129 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 3,
+  "label": "Bài 3",
+  "title": "桌子上放着很多饮料",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "还是",
+      "pinyin": "háishi",
+      "adj": 10,
+      "vi": "hay"
+    },
+    {
+      "pos": 2,
+      "hanzi": "爬山",
+      "pinyin": "pá shān",
+      "adj": 4,
+      "vi": "leo núi"
+    },
+    {
+      "pos": 3,
+      "hanzi": "小心",
+      "pinyin": "xiǎoxīn",
+      "adj": 6,
+      "vi": "cẩn thận"
+    },
+    {
+      "pos": 4,
+      "hanzi": "条",
+      "pinyin": "tiáo",
+      "adj": 8,
+      "vi": "(dùng cho quần, váy...) cái"
+    },
+    {
+      "pos": 5,
+      "hanzi": "裤子",
+      "pinyin": "kùzi",
+      "adj": 2,
+      "vi": "quần"
+    },
+    {
+      "pos": 6,
+      "hanzi": "记得",
+      "pinyin": "jìde",
+      "adj": 4,
+      "vi": "nhớ, còn nhớ"
+    },
+    {
+      "pos": 7,
+      "hanzi": "衬衫",
+      "pinyin": "chènshān",
+      "adj": 2,
+      "vi": "áo sơmi"
+    },
+    {
+      "pos": 8,
+      "hanzi": "元",
+      "pinyin": "yuán",
+      "adj": 8,
+      "vi": "(đơn vị tiền tệ) đồng"
+    },
+    {
+      "pos": 9,
+      "hanzi": "新鲜",
+      "pinyin": "xīnxiān",
+      "adj": 6,
+      "vi": "tươi"
+    },
+    {
+      "pos": 10,
+      "hanzi": "甜",
+      "pinyin": "tián",
+      "adj": 6,
+      "vi": "ngọt"
+    },
+    {
+      "pos": 11,
+      "hanzi": "只",
+      "pinyin": "zhǐ",
+      "adj": 7,
+      "vi": "chỉ"
+    },
+    {
+      "pos": 12,
+      "hanzi": "放",
+      "pinyin": "fàng",
+      "adj": 4,
+      "vi": "đặt, để"
+    },
+    {
+      "pos": 13,
+      "hanzi": "饮料",
+      "pinyin": "yǐnliào",
+      "adj": 2,
+      "vi": "đồ uống, thức uống"
+    },
+    {
+      "pos": 14,
+      "hanzi": "或者",
+      "pinyin": "huòzhě",
+      "adj": 10,
+      "vi": "hoặc"
+    },
+    {
+      "pos": 15,
+      "hanzi": "舒服",
+      "pinyin": "shūfu",
+      "adj": 6,
+      "vi": "dễ chịu"
+    },
+    {
+      "pos": 16,
+      "hanzi": "花",
+      "pinyin": "huā",
+      "adj": 2,
+      "vi": "hoa"
+    },
+    {
+      "pos": 17,
+      "hanzi": "绿",
+      "pinyin": "lǜ",
+      "adj": 6,
+      "vi": "có màu xanh lá cây"
+    }
+  ]
+}

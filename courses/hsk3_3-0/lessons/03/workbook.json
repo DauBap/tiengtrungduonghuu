@@ -1,0 +1,426 @@
+{
+	"title": "HSK3 - Sách bài tập",
+	"lesson": 3,
+	"lesson_title": "这个小区挺好的",
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听对话，选择最匹配的图片。每题听两次。\nCâu 1–3: Nghe và chọn hình phù hợp. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 1,
+							"answer": "B",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"answer": "A",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"answer": "C",
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择正确答案。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 4,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "关门"
+								},
+								{
+									"label": "B",
+									"text": "买手机"
+								},
+								{
+									"label": "C",
+									"text": "办信用卡"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "坏了"
+								},
+								{
+									"label": "B",
+									"text": "还能用"
+								},
+								{
+									"label": "C",
+									"text": "是新买的"
+								}
+							]
+						},
+						{
+							"number": 6,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "带个花园"
+								},
+								{
+									"label": "B",
+									"text": "现在没人住"
+								},
+								{
+									"label": "C",
+									"text": "能马上搬进去"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听一段话，选择正确答案。每题听两次。\nCâu 7–10: Nghe đoạn thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 7,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "家离学校远"
+								},
+								{
+									"label": "B",
+									"text": "孩子上高中了"
+								},
+								{
+									"label": "C",
+									"text": "家离商场太近"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"answer": "B",
+							"options": [
+								{
+									"label": "A",
+									"text": "搬家"
+								},
+								{
+									"label": "B",
+									"text": "休息"
+								},
+								{
+									"label": "C",
+									"text": "准备搬家的东西"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "要还信用卡"
+								},
+								{
+									"label": "B",
+									"text": "买东西能便宜点儿"
+								},
+								{
+									"label": "C",
+									"text": "想在手机上买东西"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "花了很多钱"
+								},
+								{
+									"label": "B",
+									"text": "每个月都要还钱"
+								},
+								{
+									"label": "C",
+									"text": "银行离家挺远的"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—15题：匹配句子。\nCâu 11–15: Nối câu.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{ "label": "A", "text": "我很喜欢这里的环境。" },
+						{ "label": "B", "text": "好，我马上让小王去买。" },
+						{ "label": "C", "text": "那我去外面再看一会儿书。" },
+						{ "label": "D", "text": "对，我看电视看到两点多才休息。" },
+						{ "label": "E", "text": "当然，我们先坐公交车，然后换地铁。" },
+						{ "label": "F", "text": "周五到下周一不上班，可以休息休息。" }
+					],
+					"questions": [
+						{
+							"number": 11,
+							"answer": "B",
+							"question": "公司里没有白纸了。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 12,
+							"answer": "F",
+							"question": "这几天大家都忙坏了。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 13,
+							"answer": "C",
+							"question": "我要睡觉了，你关一下灯吧。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 14,
+							"answer": "A",
+							"question": "你觉得咱们搬到这个小区怎么样？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 15,
+							"answer": "D",
+							"question": "你看起来有点儿累，是不是昨天睡得很晚？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第16—20题：选词填空。\nCâu 16–20: Chọn từ điền vào chỗ trống.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "需要"
+						},
+						{
+							"label": "B",
+							"text": "冰箱"
+						},
+						{
+							"label": "C",
+							"text": "听说"
+						},
+						{
+							"label": "D",
+							"text": "花园"
+						},
+						{
+							"label": "E",
+							"text": "钱"
+						},
+						{
+							"label": "F",
+							"text": "卫生间"
+						}
+					],
+					"questions": [
+						{
+							"number": 16,
+							"answer": "C",
+							"sentence": "（ ）你护照丢了，找到了吗？"
+						},
+						{
+							"number": 17,
+							"answer": "D",
+							"sentence": "那边有一个（ ），咱们去走走吧。"
+						},
+						{
+							"number": 18,
+							"answer": "A",
+							"sentence": "我家离公司太远了，我（ ）换个近点儿的小区。"
+						},
+						{
+							"number": 19,
+							"answer": "F",
+							"sentence": "A：（ ）在哪儿？你知道吗？\nB：知道，在二层，你从这儿上去就能看到。"
+						},
+						{
+							"number": 20,
+							"answer": "B",
+							"sentence": "A：妈妈，我回来了，现在又热又渴。\nB：我买了冰激凌，在（ ）里，你自己去拿。"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第21—24题：选择正确答案。\nCâu 21–24: Đọc và chọn đáp án đúng.",
+					"embedded_example_image": true,
+					"shared_passage": "23–24\n\n下个星期我就要搬家了，我今天给搬家公司打了一个电话，没想到搬家那么贵。我现在住在四层，新家在十层，搬一个箱子要50块钱。看着我那30多个箱子，我想今天晚上我就在家给朋友们打电话吧。",
+					"shared_passage_start": 23,
+					"questions": [
+						{
+							"number": 21,
+							"answer": "B",
+							"sentence": "我们小区的环境挺好的，里面还有一个花园，很多人吃完晚饭后都会去那里走一走，休息休息。",
+							"question": "那个小区：",
+							"options": [
+								{
+									"label": "A",
+									"text": "不能休息"
+								},
+								{
+									"label": "B",
+									"text": "环境不错"
+								},
+								{
+									"label": "C",
+									"text": "旁边有个花园"
+								}
+							]
+						},
+						{
+							"number": 22,
+							"answer": "C",
+							"sentence": "下周就要搬新家了，咱们明天去打扫一下吧。还要再买几个纸箱，你看，这些东西都需要放在箱子里。",
+							"question": "他们明天要做什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "搬家"
+								},
+								{
+									"label": "B",
+									"text": "拿箱子"
+								},
+								{
+									"label": "C",
+									"text": "打扫新家"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "C",
+							"question": "他的新家在几层？",
+							"options": [
+								{
+									"label": "A",
+									"text": "一层"
+								},
+								{
+									"label": "B",
+									"text": "四层"
+								},
+								{
+									"label": "C",
+									"text": "十层"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "B",
+							"question": "他可能会怎么搬家？",
+							"options": [
+								{
+									"label": "A",
+									"text": "自己搬家"
+								},
+								{
+									"label": "B",
+									"text": "请朋友帮忙"
+								},
+								{
+									"label": "C",
+									"text": "找搬家公司"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据拼音写汉字。\nCâu 25–27: Viết chữ Hán theo pinyin.",
+					"embedded_example_image": true,
+					"questions": [
+						{
+							"number": 25,
+							"answer": "卡",
+							"type": "writing_input",
+							"sentence": "银行卡（ ）明天就能办好。",
+							"prompt_pinyin": "kǎ"
+						},
+						{
+							"number": 26,
+							"answer": "灯",
+							"type": "writing_input",
+							"sentence": "家里的（ ）坏了，你去买个新的吧。",
+							"prompt_pinyin": "dēng"
+						},
+						{
+							"number": 27,
+							"answer": "层",
+							"type": "writing_input",
+							"sentence": "我家住在三（ ），302号。",
+							"prompt_pinyin": "céng"
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：看图，用词造句。\nCâu 28–30: Nhìn hình và dùng từ gợi ý đặt câu.",
+					"questions": [
+						{
+							"number": 28,
+							"answer": "他把电脑关了。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 关",
+							"accepted_answers": ["他关上了电脑。"]
+						},
+						{
+							"number": 29,
+							"answer": "他们正在搬家。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 搬",
+							"accepted_answers": ["他们在搬东西。"]
+						},
+						{
+							"number": 30,
+							"answer": "她正在打扫房间。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 打扫",
+							"accepted_answers": ["她把房间打扫干净了。"]
+						}
+					]
+				}
+			]
+		}
+	]
+}

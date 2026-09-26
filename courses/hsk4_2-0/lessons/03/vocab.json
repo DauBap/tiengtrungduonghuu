@@ -1,0 +1,227 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 3,
+  "label": "Bài 3",
+  "title": "经理对我印象不错",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "挺",
+      "pinyin": "tǐng",
+      "adj": 7,
+      "vi": "rất"
+    },
+    {
+      "pos": 2,
+      "hanzi": "紧张",
+      "pinyin": "jǐnzhāng",
+      "adj": 6,
+      "vi": "hồi hộp, căng thẳng"
+    },
+    {
+      "pos": 3,
+      "hanzi": "信心",
+      "pinyin": "xìnxīn",
+      "adj": 2,
+      "vi": "lòng tin, sự tự tin"
+    },
+    {
+      "pos": 4,
+      "hanzi": "能力",
+      "pinyin": "nénglì",
+      "adj": 2,
+      "vi": "năng lực, khả năng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "招聘",
+      "pinyin": "zhāopìn",
+      "adj": 4,
+      "vi": "tuyển dụng"
+    },
+    {
+      "pos": 6,
+      "hanzi": "提供",
+      "pinyin": "tígōng",
+      "adj": 4,
+      "vi": "cung cấp"
+    },
+    {
+      "pos": 7,
+      "hanzi": "负责",
+      "pinyin": "fùzé",
+      "adj": 4,
+      "vi": "phụ trách, chịu trách nhiệm"
+    },
+    {
+      "pos": 8,
+      "hanzi": "本来",
+      "pinyin": "běnlái",
+      "adj": 7,
+      "vi": "lúc đầu, trước đây"
+    },
+    {
+      "pos": 9,
+      "hanzi": "应聘",
+      "pinyin": "yìngpìn",
+      "adj": 4,
+      "vi": "xin việc"
+    },
+    {
+      "pos": 10,
+      "hanzi": "材料",
+      "pinyin": "cáiliào",
+      "adj": 2,
+      "vi": "tư liệu, tài liệu"
+    },
+    {
+      "pos": 11,
+      "hanzi": "符合",
+      "pinyin": "fúhé",
+      "adj": 4,
+      "vi": "phù hợp"
+    },
+    {
+      "pos": 12,
+      "hanzi": "通知",
+      "pinyin": "tōngzhī",
+      "adj": 4,
+      "vi": "báo tin, thông báo"
+    },
+    {
+      "pos": 13,
+      "hanzi": "律师",
+      "pinyin": "lǜshī",
+      "adj": 2,
+      "vi": "luật sư"
+    },
+    {
+      "pos": 14,
+      "hanzi": "专业",
+      "pinyin": "zhuānyè",
+      "adj": 2,
+      "vi": "chuyên ngành"
+    },
+    {
+      "pos": 15,
+      "hanzi": "另外",
+      "pinyin": "lìngwài",
+      "adj": 10,
+      "vi": "ngoài ra"
+    },
+    {
+      "pos": 16,
+      "hanzi": "收入",
+      "pinyin": "shōurù",
+      "adj": 2,
+      "vi": "thu nhập"
+    },
+    {
+      "pos": 17,
+      "hanzi": "咱们",
+      "pinyin": "zánmen",
+      "adj": 2,
+      "vi": "chúng ta, chúng mình"
+    },
+    {
+      "pos": 18,
+      "hanzi": "安排",
+      "pinyin": "ānpái",
+      "adj": 4,
+      "vi": "sắp xếp"
+    },
+    {
+      "pos": 19,
+      "hanzi": "首先",
+      "pinyin": "shǒuxiān",
+      "adj": 2,
+      "vi": "trước hết, trước tiên"
+    },
+    {
+      "pos": 20,
+      "hanzi": "正式",
+      "pinyin": "zhèngshì",
+      "adj": 6,
+      "vi": "chính thức, trang trọng"
+    },
+    {
+      "pos": 21,
+      "hanzi": "留",
+      "pinyin": "liú",
+      "adj": 4,
+      "vi": "để lại"
+    },
+    {
+      "pos": 22,
+      "hanzi": "其次",
+      "pinyin": "qícì",
+      "adj": 2,
+      "vi": "thứ hai, sau đó"
+    },
+    {
+      "pos": 23,
+      "hanzi": "诚实",
+      "pinyin": "chéngshí",
+      "adj": 6,
+      "vi": "thành thật"
+    },
+    {
+      "pos": 24,
+      "hanzi": "改变",
+      "pinyin": "gǎibiàn",
+      "adj": 4,
+      "vi": "thay đổi"
+    },
+    {
+      "pos": 25,
+      "hanzi": "感觉",
+      "pinyin": "gǎnjué",
+      "adj": 2,
+      "vi": "cảm giác, cảm nghĩ"
+    },
+    {
+      "pos": 26,
+      "hanzi": "判断",
+      "pinyin": "pànduàn",
+      "adj": 4,
+      "vi": "nhận xét, đánh giá"
+    },
+    {
+      "pos": 27,
+      "hanzi": "顾客",
+      "pinyin": "gùkè",
+      "adj": 2,
+      "vi": "khách hàng"
+    },
+    {
+      "pos": 28,
+      "hanzi": "准时",
+      "pinyin": "zhǔnshí",
+      "adj": 6,
+      "vi": "đúng giờ"
+    },
+    {
+      "pos": 29,
+      "hanzi": "不管",
+      "pinyin": "bùguǎn",
+      "adj": 10,
+      "vi": "bất kể, bất luận"
+    },
+    {
+      "pos": 30,
+      "hanzi": "与",
+      "pinyin": "yǔ",
+      "adj": 13,
+      "vi": "với, và"
+    },
+    {
+      "pos": 31,
+      "hanzi": "约会",
+      "pinyin": "yuēhuì",
+      "adj": 4,
+      "vi": "hẹn gặp, hẹn hò"
+    }
+  ]
+}

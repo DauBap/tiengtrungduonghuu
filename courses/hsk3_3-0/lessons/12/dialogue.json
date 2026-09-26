@@ -1,0 +1,170 @@
+{
+  "lesson": 12,
+  "title": "这个季节天气变化很快",
+  "title_pinyin": "Zhège jìjié tiānqì biànhuà hěn kuài",
+  "title_vi": "Thời tiết mùa này thay đổi rất nhanh",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一飞",
+          "zh": "王老师, 您看, 这条街上的树都开花了。",
+          "pinyin": "Wáng lǎoshī, nín kàn, zhè tiáo jiē shàng de shù dōu kāihuā le.",
+          "vi": "Cô Vương, chị xem, cây trên phố này đều ra hoa rồi."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "上周我去公园坐船了, 公园里的花也开了。",
+          "pinyin": "Shàng zhōu wǒ qù gōngyuán zuò chuán le, gōngyuán lǐ de huā yě kāi le.",
+          "vi": "Tuần trước tôi đến công viên đi thuyền, hoa trong công viên cũng nở rồi."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "天气这么好, 下午我也想去公园坐船。",
+          "pinyin": "Tiānqì zhème hǎo, xiàwǔ wǒ yě xiǎng qù gōngyuán zuò chuán.",
+          "vi": "Thời tiết đẹp thế này, chiều tôi cũng muốn đến công viên đi thuyền."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "去吧! 今天是工作日, 人应该不多。",
+          "pinyin": "Qù ba! Jīntiān shì gōngzuòrì, rén yīnggāi bù duō.",
+          "vi": "Đi đi! Hôm nay là ngày làm việc, người chắc không đông."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "您有时间吗? 我想跟您一起去。",
+          "pinyin": "Nín yǒu shíjiān ma? Wǒ xiǎng gēn nín yīqǐ qù.",
+          "vi": "Chị có thời gian không? Em muốn đi cùng chị."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我今天下午有课, 不能去太远的地方。",
+          "pinyin": "Wǒ jīntiān xiàwǔ yǒu kè, bù néng qù tài yuǎn de dìfang.",
+          "vi": "Tôi chiều nay có tiết học, không thể đi xa được."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "那咱们换一天去?",
+          "pinyin": "Nà zánmen huàn yī tiān qù?",
+          "vi": "Vậy chúng ta đổi ngày khác đi?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "行。或者明天去, 或者后天去, 我给你打电话。",
+          "pinyin": "Xíng. Huòzhě míngtiān qù, huòzhě hòutiān qù, wǒ gěi nǐ dǎ diànhuà.",
+          "vi": "Được. Hoặc ngày mai đi, hoặc ngày mốt đi, tôi gọi điện cho em."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "刚才还是大晴天呢, 怎么突然就刮起风来了?",
+          "pinyin": "Gāngcái háishì dà qíngtiān ne, zěnme tūrán jiù guā qǐ fēng lái le?",
+          "vi": "Vừa nãy còn trời nắng to, sao đột nhiên gió lại nổi lên thế?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "好像新闻里说今天有雨。",
+          "pinyin": "Hǎoxiàng xīnwén lǐ shuō jīntiān yǒu yǔ.",
+          "vi": "Hình như tin tức nói hôm nay có mưa."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "啊? 我每天书包里都放着雨伞, 就今天没带。",
+          "pinyin": "A? Wǒ měitiān shūbāo lǐ dōu fàngzhe yǔsǎn, jiù jīntiān méi dài.",
+          "vi": "Hả? Ngày nào tôi cũng để ô trong cặp, hôm nay lại không mang."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "我可以借给你, 我车里有一把伞和一件雨衣。",
+          "pinyin": "Wǒ kěyǐ jiè gěi nǐ, wǒ chē lǐ yǒu yī bǎ sǎn hé yī jiàn yǔyī.",
+          "vi": "Tôi có thể cho em mượn, trong xe tôi có một cái ô và một cái áo mưa."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "谢谢, 希望下午天气能变好。",
+          "pinyin": "Xièxie, xīwàng xiàwǔ tiānqì néng biàn hǎo.",
+          "vi": "Cảm ơn, mong chiều trời sẽ đẹp lên."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "这个季节天气变化很快。",
+          "pinyin": "Zhège jìjié tiānqì biànhuà hěn kuài.",
+          "vi": "Mùa này thời tiết thay đổi rất nhanh."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "雨已经下起来了, 咱们快点儿走吧。",
+          "pinyin": "Yǔ yǐjīng xià qǐlái le, zánmen kuài diǎnr zǒu ba.",
+          "vi": "Mưa đã bắt đầu rơi rồi, chúng ta nhanh lên đi."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "您来这里已经一年多了, 习惯了吧?",
+          "pinyin": "Nín lái zhèlǐ yǐjīng yī nián duō le, xíguàn le ba?",
+          "vi": "Chị đến đây đã hơn một năm rồi, đã quen chưa ạ?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "别的早就习惯了, 就是天气我还不太习惯。",
+          "pinyin": "Biéde zǎo jiù xíguàn le, jiù shì tiānqì wǒ hái bú tài xíguàn.",
+          "vi": "Những thứ khác em đã quen từ lâu rồi, chỉ có thời tiết là em chưa quen lắm."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "为什么? 您不喜欢这里的天气吗?",
+          "pinyin": "Wèishénme? Nín bù xǐhuan zhèlǐ de tiānqì ma?",
+          "vi": "Tại sao ạ? Chị không thích thời tiết ở đây à?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "我觉得冬天太冷了。",
+          "pinyin": "Wǒ juéde dōngtiān tài lěng le.",
+          "vi": "Em thấy mùa đông quá lạnh."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "冬天虽然冷, 但是下雪的时候特别漂亮。",
+          "pinyin": "Dōngtiān suīrán lěng, dànshì xià xuě de shíhou tèbié piàoliang.",
+          "vi": "Mùa đông tuy lạnh, nhưng lúc tuyết rơi rất đẹp."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "我也喜欢雪。北京常常下雪, 但听说今年就下了一次。",
+          "pinyin": "Wǒ yě xǐhuan xuě. Běijīng chángcháng xià xuě, dàn tīngshuō jīnnián jiù xiàle yī cì.",
+          "vi": "Em cũng thích tuyết. Bắc Kinh thường xuyên có tuyết, nhưng nghe nói năm nay chỉ rơi một lần."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我没关注过北京的天气, 但是新闻里说过, 今年冬天很多地方雪下得都少了。",
+          "pinyin": "Wǒ méi guānzhù guo Běijīng de tiānqì, dànshì xīnwén lǐ shuō guo, jīnnián dōngtiān hěnduō dìfang xuě xià de dōu shǎo le.",
+          "vi": "Tôi không để ý thời tiết Bắc Kinh, nhưng tin tức có nói, mùa đông năm nay nhiều nơi tuyết rơi ít hơn rồi."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "我离开北京到这里工作一年多了。这一年多住下来, 我还是更喜欢北京的四季。北京的春天最舒服, 天气不冷不热。夏天白天很热, 但是晚上比较凉快。秋天树上的叶子都变成了红色、黄色, 非常漂亮。冬天不但冷, 而且风很大, 我最不喜欢冬天。每个人都有自己最喜欢的季节, 你最喜欢哪个季节呢?",
+          "pinyin": "Wǒ líkāi Běijīng dào zhèlǐ gōngzuò yī nián duō le. Zhè yī nián duō zhù xiàlái, wǒ háishì gèng xǐhuan Běijīng de sìjì. Běijīng de chūntiān zuì shūfu, tiānqì bù lěng bú rè. Xiàtiān báitiān hěn rè, dànshì wǎnshang bǐjiào liángkuai. Qiūtiān shù shàng de yèzi dōu biàn chéngle hóngsè, huángsè, fēicháng piàoliang. Dōngtiān bùdàn lěng, érqiě fēng hěn dà, wǒ zuì bù xǐhuan dōngtiān. Měi gè rén dōu yǒu zìjǐ zuì xǐhuan de jìjié, nǐ zuì xǐhuan nǎge jìjié ne?",
+          "vi": "Tôi rời Bắc Kinh đến đây làm việc đã hơn một năm. Hơn một năm ở đây, tôi vẫn thích bốn mùa ở Bắc Kinh hơn. Mùa xuân ở Bắc Kinh thoải mái nhất, thời tiết không lạnh không nóng. Mùa hè ban ngày rất nóng, nhưng ban đêm tương đối mát mẻ. Mùa thu lá trên cây đều chuyển sang màu đỏ, vàng, rất đẹp. Mùa đông không những lạnh mà gió còn rất to, tôi không thích mùa đông nhất. Mỗi người đều có mùa mình thích nhất, bạn thích mùa nào nhất?"
+        }
+      ]
+    }
+  ]
+}

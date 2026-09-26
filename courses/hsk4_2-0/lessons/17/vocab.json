@@ -1,0 +1,213 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 17,
+  "label": "Bài 17",
+  "title": "人与自然",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "凉快",
+      "pinyin": "liángkuai",
+      "adj": 6,
+      "vi": "mát mẻ"
+    },
+    {
+      "pos": 2,
+      "hanzi": "热闹",
+      "pinyin": "rènao",
+      "adj": 6,
+      "vi": "náo nhiệt"
+    },
+    {
+      "pos": 3,
+      "hanzi": "云",
+      "pinyin": "yún",
+      "adj": 2,
+      "vi": "mây"
+    },
+    {
+      "pos": 4,
+      "hanzi": "广播",
+      "pinyin": "guǎngbō",
+      "adj": 2,
+      "vi": "chương trình phát thanh/truyền hình"
+    },
+    {
+      "pos": 5,
+      "hanzi": "照",
+      "pinyin": "zhào",
+      "adj": 4,
+      "vi": "chụp (ảnh)"
+    },
+    {
+      "pos": 6,
+      "hanzi": "倒",
+      "pinyin": "dào",
+      "adj": 7,
+      "vi": "(chỉ sự tương phản) nhưng, lại"
+    },
+    {
+      "pos": 7,
+      "hanzi": "毛",
+      "pinyin": "máo",
+      "adj": 2,
+      "vi": "lông"
+    },
+    {
+      "pos": 8,
+      "hanzi": "抱",
+      "pinyin": "bào",
+      "adj": 4,
+      "vi": "bế, bồng, ôm"
+    },
+    {
+      "pos": 9,
+      "hanzi": "干",
+      "pinyin": "gàn",
+      "adj": 4,
+      "vi": "làm"
+    },
+    {
+      "pos": 10,
+      "hanzi": "严格",
+      "pinyin": "yángé",
+      "adj": 6,
+      "vi": "nghiêm khắc, nghiêm ngặt"
+    },
+    {
+      "pos": 11,
+      "hanzi": "难受",
+      "pinyin": "nánshòu",
+      "adj": 6,
+      "vi": "bực bội, buồn rầu"
+    },
+    {
+      "pos": 12,
+      "hanzi": "趟",
+      "pinyin": "tàng",
+      "adj": 8,
+      "vi": "(chỉ số lần đi lại) lần, chuyến"
+    },
+    {
+      "pos": 13,
+      "hanzi": "放暑假",
+      "pinyin": "fàng shǔjià",
+      "adj": 4,
+      "vi": "nghỉ hè"
+    },
+    {
+      "pos": 14,
+      "hanzi": "老虎",
+      "pinyin": "lǎohǔ",
+      "adj": 2,
+      "vi": "hổ, cọp"
+    },
+    {
+      "pos": 15,
+      "hanzi": "入口",
+      "pinyin": "rùkǒu",
+      "adj": 2,
+      "vi": "cổng vào"
+    },
+    {
+      "pos": 16,
+      "hanzi": "排队",
+      "pinyin": "pái duì",
+      "adj": 4,
+      "vi": "xếp hàng"
+    },
+    {
+      "pos": 17,
+      "hanzi": "活泼",
+      "pinyin": "huópō",
+      "adj": 6,
+      "vi": "hoạt bát, nhanh nhẹn"
+    },
+    {
+      "pos": 18,
+      "hanzi": "社会",
+      "pinyin": "shèhuì",
+      "adj": 2,
+      "vi": "xã hội"
+    },
+    {
+      "pos": 19,
+      "hanzi": "竞争",
+      "pinyin": "jìngzhēng",
+      "adj": 4,
+      "vi": "cạnh tranh"
+    },
+    {
+      "pos": 20,
+      "hanzi": "森林",
+      "pinyin": "sēnlín",
+      "adj": 2,
+      "vi": "rừng rậm"
+    },
+    {
+      "pos": 21,
+      "hanzi": "剩",
+      "pinyin": "shèng",
+      "adj": 4,
+      "vi": "còn lại"
+    },
+    {
+      "pos": 22,
+      "hanzi": "暖和",
+      "pinyin": "nuǎnhuo",
+      "adj": 6,
+      "vi": "ấm áp"
+    },
+    {
+      "pos": 23,
+      "hanzi": "海洋",
+      "pinyin": "hǎiyáng",
+      "adj": 2,
+      "vi": "biển, đại dương"
+    },
+    {
+      "pos": 24,
+      "hanzi": "底",
+      "pinyin": "dǐ",
+      "adj": 2,
+      "vi": "đáy"
+    },
+    {
+      "pos": 25,
+      "hanzi": "美人鱼",
+      "pinyin": "Měirényú",
+      "adj": 2,
+      "vi": "người cá"
+    },
+    {
+      "pos": 26,
+      "hanzi": "公里",
+      "pinyin": "gōnglǐ",
+      "adj": 8,
+      "vi": "kilômét"
+    },
+    {
+      "pos": 27,
+      "hanzi": "仍然",
+      "pinyin": "réngrán",
+      "adj": 7,
+      "vi": "vẫn"
+    },
+    {
+      "pos": 28,
+      "hanzi": "排列",
+      "pinyin": "páiliè",
+      "adj": 4,
+      "vi": "sắp xếp (theo thứ tự)"
+    },
+    {
+      "pos": 29,
+      "hanzi": "梦",
+      "pinyin": "mèng",
+      "adj": 2,
+      "vi": "giấc mơ"
+    }
+  ]
+}

@@ -1,0 +1,300 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 6,
+  "label": "Bài 6",
+  "title": "除夕的由来",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "除夕",
+      "pinyin": "chúxī",
+      "adj": 2,
+      "vi": "đêm giao thừa, trừ tịch"
+    },
+    {
+      "pos": 2,
+      "hanzi": "由来",
+      "pinyin": "yóulái",
+      "adj": 2,
+      "vi": "nguồn gốc, âm lịch, Nông lịch"
+    },
+    {
+      "pos": 3,
+      "hanzi": "农历",
+      "pinyin": "nónglì",
+      "adj": 2,
+      "vi": "âm lịch, Nông lịch"
+    },
+    {
+      "pos": 4,
+      "hanzi": "守岁",
+      "pinyin": "shǒusuì",
+      "adj": 4,
+      "vi": "đón giao thừa"
+    },
+    {
+      "pos": 5,
+      "hanzi": "怪物",
+      "pinyin": "guàiwù",
+      "adj": 2,
+      "vi": "quái vật"
+    },
+    {
+      "pos": 6,
+      "hanzi": "伤害",
+      "pinyin": "shānghài",
+      "adj": 4,
+      "vi": "làm hại"
+    },
+    {
+      "pos": 7,
+      "hanzi": "恨",
+      "pinyin": "hèn",
+      "adj": 4,
+      "vi": "căm hận, căm ghét"
+    },
+    {
+      "pos": 8,
+      "hanzi": "骨（头）",
+      "pinyin": "gǔ(tou)",
+      "adj": 2,
+      "vi": "xương"
+    },
+    {
+      "pos": 9,
+      "hanzi": "无奈",
+      "pinyin": "wúnài",
+      "adj": 4,
+      "vi": "không biết làm sao, không có cách nào"
+    },
+    {
+      "pos": 10,
+      "hanzi": "英雄",
+      "pinyin": "yīngxióng",
+      "adj": 2,
+      "vi": "anh hùng"
+    },
+    {
+      "pos": 11,
+      "hanzi": "英俊",
+      "pinyin": "yīngjùn",
+      "adj": 6,
+      "vi": "anh tuấn, khôi ngô"
+    },
+    {
+      "pos": 12,
+      "hanzi": "咬",
+      "pinyin": "yǎo",
+      "adj": 4,
+      "vi": "cắn"
+    },
+    {
+      "pos": 13,
+      "hanzi": "外公",
+      "pinyin": "wàigōng",
+      "adj": 2,
+      "vi": "ông ngoại"
+    },
+    {
+      "pos": 14,
+      "hanzi": "询问",
+      "pinyin": "xúnwèn",
+      "adj": 4,
+      "vi": "hỏi thăm"
+    },
+    {
+      "pos": 15,
+      "hanzi": "天真",
+      "pinyin": "tiānzhēn",
+      "adj": 6,
+      "vi": "ngây thơ, hồn nhiên"
+    },
+    {
+      "pos": 16,
+      "hanzi": "杀",
+      "pinyin": "shā",
+      "adj": 4,
+      "vi": "giết"
+    },
+    {
+      "pos": 17,
+      "hanzi": "（代）替",
+      "pinyin": "(dài)tì",
+      "adj": 4,
+      "vi": "thay thế"
+    },
+    {
+      "pos": 18,
+      "hanzi": "除",
+      "pinyin": "chú",
+      "adj": 4,
+      "vi": "trừ khử"
+    },
+    {
+      "pos": 19,
+      "hanzi": "制造",
+      "pinyin": "zhìzào",
+      "adj": 4,
+      "vi": "gây ra, sản xuất"
+    },
+    {
+      "pos": 20,
+      "hanzi": "灾害",
+      "pinyin": "zāihài",
+      "adj": 2,
+      "vi": "tai họa"
+    },
+    {
+      "pos": 21,
+      "hanzi": "逃",
+      "pinyin": "táo",
+      "adj": 4,
+      "vi": "chạy trốn"
+    },
+    {
+      "pos": 22,
+      "hanzi": "影子",
+      "pinyin": "yǐngzi",
+      "adj": 2,
+      "vi": "bóng dáng"
+    },
+    {
+      "pos": 23,
+      "hanzi": "此外",
+      "pinyin": "cǐwài",
+      "adj": 10,
+      "vi": "ngoài ra, hơn nữa"
+    },
+    {
+      "pos": 24,
+      "hanzi": "说不定",
+      "pinyin": "shuōbudìng",
+      "adj": 7,
+      "vi": "có lẽ, có thể"
+    },
+    {
+      "pos": 25,
+      "hanzi": "熬夜",
+      "pinyin": "áo yè",
+      "adj": 4,
+      "vi": "thức khuya"
+    },
+    {
+      "pos": 26,
+      "hanzi": "赶紧",
+      "pinyin": "gǎnjǐn",
+      "adj": 7,
+      "vi": "ngay lập tức"
+    },
+    {
+      "pos": 27,
+      "hanzi": "果然",
+      "pinyin": "guǒrán",
+      "adj": 7,
+      "vi": "quả nhiên"
+    },
+    {
+      "pos": 28,
+      "hanzi": "姑娘",
+      "pinyin": "gūniang",
+      "adj": 2,
+      "vi": "cô gái, thiếu nữ"
+    },
+    {
+      "pos": 29,
+      "hanzi": "锅",
+      "pinyin": "guō",
+      "adj": 2,
+      "vi": "(cái) nồi"
+    },
+    {
+      "pos": 30,
+      "hanzi": "盆（子）",
+      "pinyin": "pén(zi)",
+      "adj": 2,
+      "vi": "chậu, bồn"
+    },
+    {
+      "pos": 31,
+      "hanzi": "整个",
+      "pinyin": "zhěnggè",
+      "adj": 6,
+      "vi": "cả"
+    },
+    {
+      "pos": 32,
+      "hanzi": "吓",
+      "pinyin": "xià",
+      "adj": 4,
+      "vi": "làm cho khiếp sợ"
+    },
+    {
+      "pos": 33,
+      "hanzi": "似的",
+      "pinyin": "shìde",
+      "adj": 11,
+      "vi": "(chỉ sự giống nhau) dường như, tựa như"
+    },
+    {
+      "pos": 34,
+      "hanzi": "追",
+      "pinyin": "zhuī",
+      "adj": 4,
+      "vi": "đuổi theo"
+    },
+    {
+      "pos": 35,
+      "hanzi": "箭",
+      "pinyin": "jiàn",
+      "adj": 2,
+      "vi": "mũi tên"
+    },
+    {
+      "pos": 36,
+      "hanzi": "射（击）",
+      "pinyin": "shè(jī)",
+      "adj": 4,
+      "vi": "bắn"
+    },
+    {
+      "pos": 37,
+      "hanzi": "纷纷",
+      "pinyin": "fēnfēn",
+      "adj": [
+        6,
+        7
+      ],
+      "vi": "tới tấp, dồn dập; nhao nhao, sôi nổi"
+    },
+    {
+      "pos": 38,
+      "hanzi": "表达",
+      "pinyin": "biǎodá",
+      "adj": 4,
+      "vi": "bày tỏ, giải bày"
+    },
+    {
+      "pos": 39,
+      "hanzi": "意义",
+      "pinyin": "yìyì",
+      "adj": 2,
+      "vi": "ý nghĩa, tầm quan trọng"
+    },
+    {
+      "pos": 40,
+      "hanzi": "鞭炮",
+      "pinyin": "biānpào",
+      "adj": 2,
+      "vi": "pháo"
+    },
+    {
+      "pos": 41,
+      "hanzi": "风俗",
+      "pinyin": "fēngsú",
+      "adj": 2,
+      "vi": "phong tục, tục lệ"
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 9,
+  "label": "Bài 9",
+  "title": "阳光总在风雨后",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "饼干",
+      "pinyin": "bǐnggān",
+      "adj": 2,
+      "vi": "bánh quy"
+    },
+    {
+      "pos": 2,
+      "hanzi": "难道",
+      "pinyin": "nándào",
+      "adj": 7,
+      "vi": "dùng trong câu hỏi tu từ để nhấn mạnh"
+    },
+    {
+      "pos": 3,
+      "hanzi": "得",
+      "pinyin": "děi",
+      "adj": 5,
+      "vi": "phải"
+    },
+    {
+      "pos": 4,
+      "hanzi": "坚持",
+      "pinyin": "jiānchí",
+      "adj": 4,
+      "vi": "kiên trì, khăng khăng giữ"
+    },
+    {
+      "pos": 5,
+      "hanzi": "放弃",
+      "pinyin": "fàngqì",
+      "adj": 4,
+      "vi": "từ bỏ, bỏ"
+    },
+    {
+      "pos": 6,
+      "hanzi": "主意",
+      "pinyin": "zhǔyi",
+      "adj": 2,
+      "vi": "ý định, ý kiến"
+    },
+    {
+      "pos": 7,
+      "hanzi": "网球",
+      "pinyin": "wǎngqiú",
+      "adj": 2,
+      "vi": "quần vợt"
+    },
+    {
+      "pos": 8,
+      "hanzi": "国际",
+      "pinyin": "guójì",
+      "adj": 2,
+      "vi": "quốc tế"
+    },
+    {
+      "pos": 9,
+      "hanzi": "轻松",
+      "pinyin": "qīngsōng",
+      "adj": 6,
+      "vi": "nhẹ nhàng, dễ dàng"
+    },
+    {
+      "pos": 10,
+      "hanzi": "赢",
+      "pinyin": "yíng",
+      "adj": 4,
+      "vi": "thắng"
+    },
+    {
+      "pos": 11,
+      "hanzi": "随便",
+      "pinyin": "suíbiàn",
+      "adj": 6,
+      "vi": "tình cờ, tùy tiện"
+    },
+    {
+      "pos": 12,
+      "hanzi": "汗",
+      "pinyin": "hàn",
+      "adj": 2,
+      "vi": "mồ hôi"
+    },
+    {
+      "pos": 13,
+      "hanzi": "通过",
+      "pinyin": "tōngguò",
+      "adj": 13,
+      "vi": "qua, nhờ vào"
+    },
+    {
+      "pos": 14,
+      "hanzi": "篇",
+      "pinyin": "piān",
+      "adj": 8,
+      "vi": "(dùng cho bài văn, giấy...) bài, tờ..."
+    },
+    {
+      "pos": 15,
+      "hanzi": "作家",
+      "pinyin": "zuòjiā",
+      "adj": 2,
+      "vi": "nhà văn"
+    },
+    {
+      "pos": 16,
+      "hanzi": "当时",
+      "pinyin": "dāngshí",
+      "adj": 2,
+      "vi": "lúc đó"
+    },
+    {
+      "pos": 17,
+      "hanzi": "可是",
+      "pinyin": "kěshì",
+      "adj": 10,
+      "vi": "nhưng"
+    },
+    {
+      "pos": 18,
+      "hanzi": "正确",
+      "pinyin": "zhèngquè",
+      "adj": 6,
+      "vi": "đúng, chính xác"
+    },
+    {
+      "pos": 19,
+      "hanzi": "理想",
+      "pinyin": "lǐxiǎng",
+      "adj": 2,
+      "vi": "lý tưởng"
+    },
+    {
+      "pos": 20,
+      "hanzi": "勇敢",
+      "pinyin": "yǒnggǎn",
+      "adj": 6,
+      "vi": "dũng cảm, gan dạ"
+    },
+    {
+      "pos": 21,
+      "hanzi": "结果",
+      "pinyin": "jiéguǒ",
+      "adj": 2,
+      "vi": "kết quả"
+    },
+    {
+      "pos": 22,
+      "hanzi": "失败",
+      "pinyin": "shībài",
+      "adj": 4,
+      "vi": "thất bại"
+    },
+    {
+      "pos": 23,
+      "hanzi": "过程",
+      "pinyin": "guòchéng",
+      "adj": 2,
+      "vi": "quá trình"
+    },
+    {
+      "pos": 24,
+      "hanzi": "至少",
+      "pinyin": "zhìshǎo",
+      "adj": 7,
+      "vi": "ít nhất"
+    },
+    {
+      "pos": 25,
+      "hanzi": "总结",
+      "pinyin": "zǒngjié",
+      "adj": 4,
+      "vi": "tổng kết"
+    },
+    {
+      "pos": 26,
+      "hanzi": "取",
+      "pinyin": "qǔ",
+      "adj": 4,
+      "vi": "đạt được"
+    },
+    {
+      "pos": 27,
+      "hanzi": "经历",
+      "pinyin": "jīnglì",
+      "adj": 4,
+      "vi": "trải qua"
+    },
+    {
+      "pos": 28,
+      "hanzi": "许多",
+      "pinyin": "xǔduō",
+      "adj": 21,
+      "vi": "rất nhiều"
+    },
+    {
+      "pos": 29,
+      "hanzi": "区别",
+      "pinyin": "qūbié",
+      "adj": 2,
+      "vi": "sự khác biệt"
+    },
+    {
+      "pos": 30,
+      "hanzi": "暂时",
+      "pinyin": "zànshí",
+      "adj": 2,
+      "vi": "tạm thời, nhất thời"
+    },
+    {
+      "pos": 31,
+      "hanzi": "面对",
+      "pinyin": "miànduì",
+      "adj": 4,
+      "vi": "đương đầu, đối mặt"
+    }
+  ]
+}

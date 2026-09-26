@@ -1,0 +1,299 @@
+import type { GrammarExercise, GrammarLesson, GrammarQuestion } from "./types";
+
+type C = [string, string, string, [string, string, string], string];
+type A = [string, string, string, string[]];
+type I = [string, string, string];
+const make = (prefix: string, cs: C[], as: A[], ins: I[]): GrammarExercise[] => [
+	{
+		id: `${prefix}-choice`,
+		title: "1. Chọn đáp án đúng",
+		type: "choice",
+		questions: cs.map(([id, prompt, answer, options, meaning]) => ({
+			id,
+			prompt,
+			answer,
+			options,
+			meaning,
+			completedSentence: answer,
+			explanation: "Đáp án đúng giữ đúng vị trí của bổ ngữ và phù hợp với nghĩa đề bài.",
+			optionExplanations: Object.fromEntries(
+				options.map((o) => [
+					o,
+					o === answer
+						? "Đúng: đúng cấu trúc và ngữ cảnh."
+						: "Sai: sai trật tự, hướng hoặc quan hệ ý nghĩa."
+				])
+			)
+		}))
+	},
+	{
+		id: `${prefix}-arrange`,
+		title: "2. Sắp xếp từ thành câu",
+		type: "arrange",
+		questions: as.map(([id, prompt, answer, tokens]) => ({
+			id,
+			prompt,
+			answer,
+			tokens,
+			meaning: prompt,
+			completedSentence: answer,
+			explanation: "Sắp xếp theo đúng trật tự của cấu trúc ngữ pháp."
+		}))
+	},
+	{
+		id: `${prefix}-translate`,
+		title: "3. Dịch Việt sang Trung",
+		type: "input",
+		questions: ins.map(([id, prompt, answer]) => ({
+			id,
+			prompt,
+			answer,
+			meaning: prompt,
+			completedSentence: answer,
+			explanation: "Câu trả lời dùng đúng cấu trúc trọng tâm của bài."
+		}))
+	}
+];
+
+export const hsk2Lesson5Grammar: GrammarLesson = {
+	title: "BÀI 5: 第一次去中国朋友家",
+	points: [
+		{
+			id: "simple-direction",
+			title: "Bổ ngữ xu hướng đơn (1) – Động từ + 来/去",
+			explanation:
+				"“来” chỉ hướng tiến lại gần vị trí người nói; “去” chỉ hướng rời xa vị trí người nói. Chúng đứng sau động từ chỉ hướng như 上、下、进、出、回、过.",
+			formulas: ["Động từ chỉ hướng + 来", "Động từ chỉ hướng + 去"],
+			examples: [
+				{ chinese: "你快下来吧。", vietnamese: "Mau xuống đây đi." },
+				{ chinese: "我不上去了。", vietnamese: "Tôi không lên trên nữa." },
+				{ chinese: "请进来。", vietnamese: "Mời vào đây." }
+			],
+			notes: [
+				"Chọn 来 hay 去 theo hướng so với vị trí của người nói, không theo vị trí của chủ ngữ."
+			],
+			exercises: make(
+				"h2l5-dir1",
+				[
+					[
+						"d1c1",
+						"Người nói ở dưới. Chọn câu: “Mau xuống đây đi.”",
+						"你快下来吧。",
+						["你快下去吧。", "你快下来吧。", "你来快下吧。"],
+						"Mau xuống đây đi."
+					],
+					[
+						"d1c2",
+						"Người nói ở dưới, người kia đi lên xa người nói. Chọn câu đúng.",
+						"你上去吧。",
+						["你去上吧。", "你上来吧。", "你上去吧。"],
+						"Bạn lên trên đi."
+					],
+					[
+						"d1c3",
+						"Người nói ở trong phòng. Điền đúng: 请进___。",
+						"来",
+						["去", "来", "了"],
+						"Mời vào đây."
+					],
+					[
+						"d1c4",
+						"Người nói bảo bạn trở về chỗ người nói.",
+						"你快回来吧。",
+						["你快回去吧。", "你快回来吧。", "你回快来吧。"],
+						"Bạn mau quay lại đây đi."
+					],
+					[
+						"d1c5",
+						"Người nói ở trên. Chọn câu: “Tôi không đi xuống nữa.”",
+						"我不下去了。",
+						["我不下去了。", "我不下来了。", "我下不去了。"],
+						"Tôi không đi xuống nữa."
+					]
+				],
+				[
+					["d1a1", "Mau xuống đây đi.", "你快下来吧", ["吧", "下", "你", "来", "快"]],
+					["d1a2", "Tôi không lên trên nữa.", "我不上去了", ["上", "了", "我", "去", "不"]],
+					["d1a3", "Mời vào đây.", "请进来", ["来", "请", "进"]],
+					["d1a4", "Bạn mau quay lại đây đi.", "你快回来吧", ["回", "吧", "快", "你", "来"]],
+					["d1a5", "Ông nội đi xuống rồi.", "爷爷下去了", ["爷爷", "去", "了", "下"]]
+				],
+				[
+					["d1t1", "Mau xuống đây đi.", "你快下来吧"],
+					["d1t2", "Tôi không lên trên nữa.", "我不上去了"],
+					["d1t3", "Mời vào đây.", "请进来"],
+					["d1t4", "Bạn mau quay lại đây đi.", "你快回来吧"],
+					["d1t5", "Ông nội đi xuống rồi.", "爷爷下去了"]
+				]
+			)
+		},
+		{
+			id: "direction-object",
+			title: "Bổ ngữ xu hướng đơn (2) – Vị trí của tân ngữ",
+			explanation:
+				"Nếu tân ngữ là địa điểm, nó phải đứng giữa động từ chỉ hướng và 来/去. Nếu tân ngữ là sự vật, có thể đặt trước hoặc sau 来/去 tùy cách diễn đạt.",
+			formulas: [
+				"Động từ + địa điểm + 来/去",
+				"Động từ + sự vật + 来/去",
+				"Động từ + 来/去 + sự vật"
+			],
+			examples: [
+				{ chinese: "你快进教室来吧。", vietnamese: "Mau vào lớp đây đi." },
+				{ chinese: "他买回很多水果。", vietnamese: "Anh ấy mua về rất nhiều hoa quả." },
+				{ chinese: "请拿礼物进来。", vietnamese: "Hãy mang quà vào đây." }
+			],
+			notes: ["Không đặt địa điểm sau 来/去 trong mẫu đang học: nói 进教室来, không nói 进来教室."],
+			exercises: make(
+				"h2l5-dir2",
+				[
+					[
+						"d2c1",
+						"Người nói ở trong lớp. Chọn câu: “Mau vào lớp đây đi.”",
+						"你快进教室来吧。",
+						["你快进来教室吧。", "你快教室进来吧。", "你快进教室来吧。"],
+						"Mau vào lớp đây đi."
+					],
+					[
+						"d2c2",
+						"Chọn câu đúng: “Anh ấy mua về rất nhiều hoa quả.”",
+						"他买回很多水果。",
+						["他买回很多水果。", "他回买很多水果。", "他买很多回水果。"],
+						"Anh ấy mua về rất nhiều hoa quả."
+					],
+					[
+						"d2c3",
+						"Điền đúng: 她走___酒店去。",
+						"进",
+						["来", "进", "都"],
+						"Cô ấy đi vào khách sạn."
+					],
+					[
+						"d2c4",
+						"Người nói ở trong nhà. Chọn câu: “Mang quà vào đây.”",
+						"拿礼物进来。",
+						["拿进来礼物。", "礼物拿来进。", "拿礼物进来。"],
+						"Mang quà vào đây."
+					],
+					[
+						"d2c5",
+						"Chọn câu đúng: “Anh ấy mang trà sữa về khách sạn.”",
+						"他拿奶茶回酒店去。",
+						["他拿奶茶回酒店去。", "他回去酒店拿奶茶。", "他拿回去酒店奶茶。"],
+						"Anh ấy mang trà sữa về khách sạn."
+					]
+				],
+				[
+					["d2a1", "Mau vào lớp đây đi.", "你快进教室来吧", ["教室", "你", "来", "进", "吧", "快"]],
+					[
+						"d2a2",
+						"Anh ấy mua về rất nhiều hoa quả.",
+						"他买回很多水果",
+						["很多", "回", "水果", "买", "他"]
+					],
+					["d2a3", "Cô ấy đi vào khách sạn.", "她走进酒店去", ["酒店", "去", "走", "进", "她"]],
+					["d2a4", "Mang quà vào đây.", "拿礼物进来", ["进", "礼物", "来", "拿"]],
+					[
+						"d2a5",
+						"Anh ấy mang trà sữa về khách sạn.",
+						"他拿奶茶回酒店去",
+						["酒店", "奶茶", "拿", "去", "他", "回"]
+					]
+				],
+				[
+					["d2t1", "Mau vào lớp đây đi.", "你快进教室来吧"],
+					["d2t2", "Anh ấy mua về rất nhiều hoa quả.", "他买回很多水果"],
+					["d2t3", "Cô ấy đi vào khách sạn.", "她走进酒店去"],
+					["d2t4", "Mang quà vào đây.", "拿礼物进来"],
+					["d2t5", "Anh ấy mang trà sữa về khách sạn.", "他拿奶茶回酒店去"]
+				]
+			)
+		},
+		{
+			id: "dou-le",
+			title: "Cấu trúc “都……了” – Nhấn mạnh tình trạng đã đến mức",
+			explanation:
+				"“都……了” nhấn mạnh thời gian, số lượng hoặc tình trạng đã đạt đến một mức nào đó, thường kèm sắc thái thúc giục, ngạc nhiên hoặc không hài lòng.",
+			formulas: ["都 + thời gian/số lượng/tình trạng + 了", "Chủ ngữ + 都 + vị ngữ + 了"],
+			examples: [
+				{ chinese: "都十二点了，我们吃饭吧。", vietnamese: "Đã 12 giờ rồi, chúng ta ăn cơm đi." },
+				{ chinese: "你都等一个小时了。", vietnamese: "Bạn đã đợi một tiếng rồi." },
+				{ chinese: "我们都准备好了。", vietnamese: "Chúng tôi đều chuẩn bị xong rồi." }
+			],
+			notes: ["“了” thường đứng cuối phần tình trạng được nhấn mạnh; không đặt ngay sau “都”."],
+			exercises: make(
+				"h2l5-doule",
+				[
+					[
+						"dlc1",
+						"Chọn câu đúng: “Đã 12 giờ rồi, chúng ta ăn cơm đi.”",
+						"都十二点了，我们吃饭吧。",
+						["了都十二点，我们吃饭吧。", "都了十二点，我们吃饭吧。", "都十二点了，我们吃饭吧。"],
+						"Đã 12 giờ rồi, chúng ta ăn cơm đi."
+					],
+					[
+						"dlc2",
+						"Chọn câu đúng: “Bạn đã đợi một tiếng rồi.”",
+						"你都等一个小时了。",
+						["你都等一个小时了。", "你了都等一个小时。", "你都了等一个小时。"],
+						"Bạn đã đợi một tiếng rồi."
+					],
+					[
+						"dlc3",
+						"Điền đúng: ___这么晚了，你快回去吧。",
+						"都",
+						["去", "都", "来"],
+						"Đã muộn thế này rồi, bạn mau về đi."
+					],
+					[
+						"dlc4",
+						"Chọn câu đúng: “Chúng tôi đều chuẩn bị xong rồi.”",
+						"我们都准备好了。",
+						["我们准备都好了。", "我们都准备好了。", "我们都好了准备。"],
+						"Chúng tôi đều chuẩn bị xong rồi."
+					],
+					[
+						"dlc5",
+						"Chọn câu đúng: “Bà đã đợi rất lâu rồi.”",
+						"奶奶都等很久了。",
+						["奶奶都等很久了。", "奶奶等都了很久。", "奶奶都了等很久。"],
+						"Bà đã đợi rất lâu rồi."
+					]
+				],
+				[
+					[
+						"dla1",
+						"Đã 12 giờ rồi, chúng ta ăn cơm đi.",
+						"都十二点了我们吃饭吧",
+						["吃饭", "十二点", "都", "吧", "我们", "了"]
+					],
+					[
+						"dla2",
+						"Bạn đã đợi một tiếng rồi.",
+						"你都等一个小时了",
+						["一个小时", "了", "等", "你", "都"]
+					],
+					[
+						"dla3",
+						"Đã muộn thế này rồi, bạn mau về đi.",
+						"都这么晚了你快回去吧",
+						["回去", "你", "了", "吧", "这么晚", "都", "快"]
+					],
+					[
+						"dla4",
+						"Chúng tôi đều chuẩn bị xong rồi.",
+						"我们都准备好了",
+						["准备", "都", "好", "了", "我们"]
+					],
+					["dla5", "Bà đã đợi rất lâu rồi.", "奶奶都等很久了", ["很久", "奶奶", "了", "等", "都"]]
+				],
+				[
+					["dlt1", "Đã 12 giờ rồi, chúng ta ăn cơm đi.", "都十二点了我们吃饭吧"],
+					["dlt2", "Bạn đã đợi một tiếng rồi.", "你都等一个小时了"],
+					["dlt3", "Đã muộn thế này rồi, bạn mau về đi.", "都这么晚了你快回去吧"],
+					["dlt4", "Chúng tôi đều chuẩn bị xong rồi.", "我们都准备好了"],
+					["dlt5", "Bà đã đợi rất lâu rồi.", "奶奶都等很久了"]
+				]
+			)
+		}
+	]
+};

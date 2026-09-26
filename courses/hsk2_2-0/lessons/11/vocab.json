@@ -1,0 +1,87 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 11,
+  "label": "Bài 11",
+  "title": "他比我大三岁",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "唱歌",
+      "pinyin": "chàng gē",
+      "adj": 4,
+      "vi": "hát"
+    },
+    {
+      "pos": 2,
+      "hanzi": "男",
+      "pinyin": "nán",
+      "adj": 6,
+      "vi": "thuộc về nam giới"
+    },
+    {
+      "pos": 3,
+      "hanzi": "女",
+      "pinyin": "nǚ",
+      "adj": 6,
+      "vi": "thuộc về nữ giới"
+    },
+    {
+      "pos": 4,
+      "hanzi": "孩子",
+      "pinyin": "háizi",
+      "adj": 2,
+      "vi": "trẻ con, trẻ em"
+    },
+    {
+      "pos": 5,
+      "hanzi": "右边",
+      "pinyin": "yòubian",
+      "adj": 2,
+      "vi": "bên phải"
+    },
+    {
+      "pos": 6,
+      "hanzi": "比",
+      "pinyin": "bǐ",
+      "adj": 13,
+      "vi": "hơn (dùng trong cấu trúc so sánh)"
+    },
+    {
+      "pos": 7,
+      "hanzi": "便宜",
+      "pinyin": "piányi",
+      "adj": 6,
+      "vi": "rẻ"
+    },
+    {
+      "pos": 8,
+      "hanzi": "说话",
+      "pinyin": "shuō huà",
+      "adj": 4,
+      "vi": "nói chuyện"
+    },
+    {
+      "pos": 9,
+      "hanzi": "可能",
+      "pinyin": "kěnéng",
+      "adj": 1,
+      "vi": "có thể, có lẽ"
+    },
+    {
+      "pos": 10,
+      "hanzi": "去年",
+      "pinyin": "qùnián",
+      "adj": 2,
+      "vi": "năm ngoái"
+    },
+    {
+      "pos": 11,
+      "hanzi": "姓",
+      "pinyin": "xìng",
+      "adj": 4,
+      "vi": "mang họ"
+    }
+  ]
+}

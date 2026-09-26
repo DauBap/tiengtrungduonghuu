@@ -1,0 +1,262 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 30,
+  "label": "Bài 30",
+  "title": "竞争让市场更高效",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "沙丁鱼",
+      "pinyin": "shādīngyú",
+      "adj": 2,
+      "vi": "cá mòi"
+    },
+    {
+      "pos": 2,
+      "hanzi": "运输",
+      "pinyin": "yùnshū",
+      "adj": 4,
+      "vi": "vận chuyển"
+    },
+    {
+      "pos": 3,
+      "hanzi": "岸",
+      "pinyin": "àn",
+      "adj": 2,
+      "vi": "bờ (sông, biển...)"
+    },
+    {
+      "pos": 4,
+      "hanzi": "商品",
+      "pinyin": "shāngpǐn",
+      "adj": 2,
+      "vi": "hàng hóa"
+    },
+    {
+      "pos": 5,
+      "hanzi": "延长",
+      "pinyin": "yáncháng",
+      "adj": 4,
+      "vi": "kéo dài"
+    },
+    {
+      "pos": 6,
+      "hanzi": "存活",
+      "pinyin": "cúnhuó",
+      "adj": 4,
+      "vi": "sống sót, tồn tại"
+    },
+    {
+      "pos": 7,
+      "hanzi": "改善",
+      "pinyin": "gǎishàn",
+      "adj": 4,
+      "vi": "cải thiện"
+    },
+    {
+      "pos": 8,
+      "hanzi": "无意",
+      "pinyin": "wúyì",
+      "adj": 7,
+      "vi": "tình cờ"
+    },
+    {
+      "pos": 9,
+      "hanzi": "巧妙",
+      "pinyin": "qiǎomiào",
+      "adj": 6,
+      "vi": "khéo léo, tài tình, hay"
+    },
+    {
+      "pos": 10,
+      "hanzi": "实用",
+      "pinyin": "shíyòng",
+      "adj": 6,
+      "vi": "thực dụng"
+    },
+    {
+      "pos": 11,
+      "hanzi": "天敌",
+      "pinyin": "tiāndí",
+      "adj": 2,
+      "vi": "kẻ thù tự nhiên"
+    },
+    {
+      "pos": 12,
+      "hanzi": "鲶鱼",
+      "pinyin": "niányú",
+      "adj": 2,
+      "vi": "cá nheo"
+    },
+    {
+      "pos": 13,
+      "hanzi": "设备",
+      "pinyin": "shèbèi",
+      "adj": 2,
+      "vi": "thiết bị, dụng cụ"
+    },
+    {
+      "pos": 14,
+      "hanzi": "和平",
+      "pinyin": "hépíng",
+      "adj": 6,
+      "vi": "hòa bình"
+    },
+    {
+      "pos": 15,
+      "hanzi": "构成",
+      "pinyin": "gòuchéng",
+      "adj": 4,
+      "vi": "tạo thành, hình thành"
+    },
+    {
+      "pos": 16,
+      "hanzi": "逃避",
+      "pinyin": "táobì",
+      "adj": 4,
+      "vi": "chạy trốn, trốn tránh"
+    },
+    {
+      "pos": 17,
+      "hanzi": "不断",
+      "pinyin": "búduàn",
+      "adj": 7,
+      "vi": "không ngừng, liên tục"
+    },
+    {
+      "pos": 18,
+      "hanzi": "旺盛",
+      "pinyin": "wàngshèng",
+      "adj": 6,
+      "vi": "dồi dào, mạnh mẽ"
+    },
+    {
+      "pos": 19,
+      "hanzi": "比例",
+      "pinyin": "bǐlì",
+      "adj": 2,
+      "vi": "tỷ lệ"
+    },
+    {
+      "pos": 20,
+      "hanzi": "感想",
+      "pinyin": "gǎnxiǎng",
+      "adj": 2,
+      "vi": "cảm tưởng, cảm nghĩ"
+    },
+    {
+      "pos": 21,
+      "hanzi": "体会",
+      "pinyin": "tǐhuì",
+      "adj": 2,
+      "vi": "nhận thức, sự hiểu biết"
+    },
+    {
+      "pos": 22,
+      "hanzi": "概念",
+      "pinyin": "gàiniàn",
+      "adj": 2,
+      "vi": "khái niệm, ý niệm"
+    },
+    {
+      "pos": 23,
+      "hanzi": "核心",
+      "pinyin": "héxīn",
+      "adj": 2,
+      "vi": "phần cốt lõi, nòng cốt"
+    },
+    {
+      "pos": 24,
+      "hanzi": "刺激",
+      "pinyin": "cìjī",
+      "adj": 4,
+      "vi": "kích thích, thúc đẩy"
+    },
+    {
+      "pos": 25,
+      "hanzi": "活力",
+      "pinyin": "huólì",
+      "adj": 2,
+      "vi": "sức sống"
+    },
+    {
+      "pos": 26,
+      "hanzi": "落后",
+      "pinyin": "luòhòu",
+      "adj": 4,
+      "vi": "tụt lại đằng sau, thụt lùi"
+    },
+    {
+      "pos": 27,
+      "hanzi": "本质",
+      "pinyin": "běnzhì",
+      "adj": 2,
+      "vi": "bản chất"
+    },
+    {
+      "pos": 28,
+      "hanzi": "员工",
+      "pinyin": "yuángōng",
+      "adj": 2,
+      "vi": "công nhân viên"
+    },
+    {
+      "pos": 29,
+      "hanzi": "危机",
+      "pinyin": "wēijī",
+      "adj": 2,
+      "vi": "sự khủng hoảng"
+    },
+    {
+      "pos": 30,
+      "hanzi": "有利",
+      "pinyin": "yǒulì",
+      "adj": 6,
+      "vi": "có lợi, có ích"
+    },
+    {
+      "pos": 31,
+      "hanzi": "挖掘",
+      "pinyin": "wājué",
+      "adj": 4,
+      "vi": "khai thác, đào"
+    },
+    {
+      "pos": 32,
+      "hanzi": "潜力",
+      "pinyin": "qiánlì",
+      "adj": 2,
+      "vi": "tiềm lực"
+    },
+    {
+      "pos": 33,
+      "hanzi": "决赛",
+      "pinyin": "juésài",
+      "adj": 4,
+      "vi": "thi đấu chung kết"
+    },
+    {
+      "pos": 34,
+      "hanzi": "接近",
+      "pinyin": "jiējìn",
+      "adj": 4,
+      "vi": "đến gần, tới gần"
+    },
+    {
+      "pos": 35,
+      "hanzi": "佳",
+      "pinyin": "jiā",
+      "adj": 6,
+      "vi": "tốt, đẹp, hay"
+    },
+    {
+      "pos": 36,
+      "hanzi": "的确",
+      "pinyin": "díquè",
+      "adj": 7,
+      "vi": "đích thực, quả thực"
+    }
+  ]
+}

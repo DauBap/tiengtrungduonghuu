@@ -1,0 +1,158 @@
+{
+  "lesson": 13,
+  "title": "我的新邻居来自英国",
+  "title_pinyin": "Wǒ de xīn línjū láizì Yīngguó",
+  "title_vi": "Người hàng xóm mới của tôi đến từ Anh Quốc",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "今天我请客, 你们想吃什么就点什么!",
+          "pinyin": "Jīntiān wǒ qǐngkè, nǐmen xiǎng chī shénme jiù diǎn shénme!",
+          "vi": "Hôm nay tôi mời, các bạn muốn ăn gì thì gọi món đó!"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "那我就不客气了。听说这家饭馆的鱼做得很特别?",
+          "pinyin": "Nà wǒ jiù bú kèqi le. Tīngshuō zhè jiā fànguǎn de yú zuò de hěn tèbié?",
+          "vi": "Vậy tôi không khách sáo nữa. Nghe nói quán này làm cá rất đặc biệt?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "对, 南方菜跟你们北方菜的做法不同。除了鱼, 你们还想吃什么?",
+          "pinyin": "Duì, nánfāng cài gēn nǐmen běifāng cài de zuòfǎ bùtóng. Chúle yú, nǐmen hái xiǎng chī shénme?",
+          "vi": "Đúng, món ăn phương Nam khác với cách làm món ăn phương Bắc của các bạn. Ngoài cá, các bạn còn muốn ăn gì nữa?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "我不常吃南方菜, 还是你决定吧。",
+          "pinyin": "Wǒ bù cháng chī nánfāng cài, háishì nǐ juédìng ba.",
+          "vi": "Tôi ít khi ăn đồ ăn phương Nam, vẫn là bạn quyết định đi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好, 那再加一个鸡肉, 一个……",
+          "pinyin": "Hǎo, nà zài jiā yī gè jīròu, yī gè……",
+          "vi": "Được, vậy thêm một món gà, một..."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "咱们就三个人, 别点那么多。",
+          "pinyin": "Zánmen jiù sān gè rén, bié diǎn nàme duō.",
+          "vi": "Chúng ta chỉ có ba người, đừng gọi nhiều thế."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好, 那先来这几个菜。对了, 下周我儿子过生日, 你们有时间的话, 就来我家做客, 我给你们做北京菜。",
+          "pinyin": "Hǎo, nà xiān lái zhè jǐ ge cài. Duìle, xià zhōu wǒ érzi guò shēngrì, nǐmen yǒu shíjiān de huà, jiù lái wǒ jiā zuòkè, wǒ gěi nǐmen zuò Běijīng cài.",
+          "vi": "Được, vậy trước hết gọi mấy món này. À này, tuần sau con trai tôi sinh nhật, nếu các bạn có thời gian thì đến nhà tôi chơi, tôi làm món Bắc Kinh cho các bạn."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "第一次请新邻居来做客, 总是担心有什么没准备好。",
+          "pinyin": "Dì-yī cì qǐng xīn línjū lái zuòkè, zǒngshì dānxīn yǒu shénme méi zhǔnbèi hǎo.",
+          "vi": "Lần đầu mời hàng xóm mới đến chơi, lúc nào cũng lo có gì chưa chuẩn bị xong."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "放心吧, 我帮你看了, 都已经准备好了。",
+          "pinyin": "Fàngxīn ba, wǒ bāng nǐ kàn le, dōu yǐjīng zhǔnbèi hǎo le.",
+          "vi": "Yên tâm đi, anh đã xem giúp em rồi, đều đã chuẩn bị xong cả."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我记得刚才已经把饮料拿出来了, 怎么不见了?",
+          "pinyin": "Wǒ jìde gāngcái yǐjīng bǎ yǐnliào ná chūlái le, zěnme bújiàn le?",
+          "vi": "Em nhớ vừa nãy đã lấy đồ uống ra, sao không thấy nữa?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我把饮料和酒都放进冰箱里了, 客人来了再拿出来。",
+          "pinyin": "Wǒ bǎ yǐnliào hé jiǔ dōu fàng jìn bīngxiāng lǐ le, kèrén lái le zài ná chūlái.",
+          "vi": "Anh để đồ uống và rượu vào tủ lạnh rồi, khách đến sẽ lấy ra."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "音乐的声音合适吗?",
+          "pinyin": "Yīnyuè de shēngyīn héshì ma?",
+          "vi": "Âm lượng nhạc có phù hợp không?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "你把声音开得太大了, 我去关小一点儿。",
+          "pinyin": "Nǐ bǎ shēngyīn kāi de tài dà le, wǒ qù guān xiǎo yìdiǎnr.",
+          "vi": "Em mở âm lượng to quá, anh xuống vặn nhỏ một chút."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好, 那我们就等客人来吧。",
+          "pinyin": "Hǎo, nà wǒmen jiù děng kèrén lái ba.",
+          "vi": "Được, vậy chúng ta đợi khách đến nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "谢谢你们来参加我儿子的生日晚会, 希望大家今晚玩得开心。",
+          "pinyin": "Xièxie nǐmen lái cānjiā wǒ érzi de shēngrì wǎnhuì, xīwàng dàjiā jīnwǎn wán de kāixīn.",
+          "vi": "Cảm ơn các bạn đã đến tham dự buổi tiệc sinh nhật con trai tôi, hy vọng mọi người tối nay chơi vui vẻ."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "小明, 生日快乐! 我准备了一个小礼物, 希望你喜欢!",
+          "pinyin": "Xiǎomíng, shēngrì kuàilè! Wǒ zhǔnbèile yī gè xiǎo lǐwù, xīwàng nǐ xǐhuan!",
+          "vi": "Tiểu Minh, sinh nhật vui vẻ! Chú đã chuẩn bị một món quà nhỏ, hy vọng cháu thích!"
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "谢谢您, 我可以打开吗?",
+          "pinyin": "Xièxie nín, wǒ kěyǐ dǎkāi ma?",
+          "vi": "Cảm ơn chú, cháu có thể mở ra không ạ?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "当然可以, 你妈妈说你跟姐姐一样, 都喜欢画画, 对吗?",
+          "pinyin": "Dāngrán kěyǐ, nǐ māma shuō nǐ gēn jiějie yīyàng, dōu xǐhuan huàhuà, duì ma?",
+          "vi": "Tất nhiên, mẹ cháu nói cháu và chị gái đều thích vẽ, đúng không?"
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "对, 我想做一名画家。啊! 画板和画笔, 这正是我需要的。我太喜欢了。",
+          "pinyin": "Duì, wǒ xiǎng zuò yī míng huàjiā. A! Huàbǎn hé huàbǐ, zhè zhèng shì wǒ xūyào de. Wǒ tài xǐhuan le.",
+          "vi": "Đúng ạ, cháu muốn trở thành một họa sĩ. A! Bảng vẽ và bút vẽ, đây đúng là thứ cháu cần. Cháu thích quá."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我去把盘子拿过来, 咱们一边吃蛋糕, 一边聊天儿吧。",
+          "pinyin": "Wǒ qù bǎ pánzi ná guòlái, zánmen yībiān chī dàngāo, yībiān liáotiānr ba.",
+          "vi": "Em đi lấy đĩa, chúng ta vừa ăn bánh ga-tô vừa trò chuyện nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "我的新邻居是来自英国的夫妻。上周我去他们家做客了。他们做了很多好吃的, 还准备了英国的红茶。那天我跟他们一边喝红茶, 一边聊天儿, 直到十二点多才回家。他们年轻的时候喜欢旅游, 他家有一张世界地图, 上面每一个红点都是他们去过的地方。后来, 他们感到东方的文化很特别, 就开始学习中文。今天是小明的生日, 我请他们到我家玩, 来看看中国人的家, 也尝尝中国菜。",
+          "pinyin": "Wǒ de xīn línjū shì láizì Yīngguó de fūqī. Shàng zhōu wǒ qù tāmen jiā zuòkè le. Tāmen zuòle hěnduō hǎochī de, hái zhǔnbèile Yīngguó de hóngchá. Nà tiān wǒ gēn tāmen yībiān hē hóngchá, yībiān liáotiānr, zhídào shí'èr diǎn duō cái huí jiā. Tāmen niánqīng de shíhou xǐhuan lǚyóu, tā jiā yǒu yī zhāng shìjiè dìtú, shàngmian měi yī gè hóng diǎn dōu shì tāmen qù guo de dìfang. Hòulái, tāmen gǎndào dōngfāng de wénhuà hěn tèbié, jiù kāishǐ xuéxí Zhōngwén. Jīntiān shì Xiǎomíng de shēngrì, wǒ qǐng tāmen dào wǒ jiā wán, lái kànkan Zhōngguó rén de jiā, yě chángchang Zhōngguó cài.",
+          "vi": "Người hàng xóm mới của tôi là một cặp vợ chồng đến từ Anh Quốc. Tuần trước tôi đến nhà họ chơi. Họ làm rất nhiều đồ ăn ngon, còn chuẩn bị trà đen Anh. Hôm đó tôi vừa uống trà đen vừa trò chuyện với họ, đến hơn 12 giờ mới về nhà. Hồi trẻ họ thích du lịch, nhà họ có một tấm bản đồ thế giới, mỗi chấm đỏ trên đó là nơi họ đã từng đến. Sau đó, họ cảm thấy văn hóa phương Đông rất đặc biệt, bắt đầu học tiếng Trung. Hôm nay là sinh nhật của Tiểu Minh, tôi mời họ đến nhà tôi chơi, để xem nhà của người Trung Quốc, và nếm thử đồ ăn Trung Quốc."
+        }
+      ]
+    }
+  ]
+}

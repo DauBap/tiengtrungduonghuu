@@ -1,0 +1,1064 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+import { getHsk12GrammarLesson } from "./hsk1-2-0";
+import { hsk1Lesson4Grammar } from "./hsk1-3-0-lesson4";
+import { hsk1Lesson5Grammar } from "./hsk1-3-0-lesson5";
+import { hsk1Lesson6Grammar } from "./hsk1-3-0-lesson6";
+import { hsk1Lesson7Grammar } from "./hsk1-3-0-lesson7";
+import { hsk1Lesson8Grammar } from "./hsk1-3-0-lesson8";
+import { hsk1Lesson9Grammar } from "./hsk1-3-0-lesson9";
+import { hsk1Lesson10Grammar } from "./hsk1-3-0-lesson10";
+import { hsk1Lesson11Grammar } from "./hsk1-3-0-lesson11";
+import { hsk1Lesson12Grammar } from "./hsk1-3-0-lesson12";
+import { hsk1Lesson13Grammar } from "./hsk1-3-0-lesson13";
+import { hsk1Lesson14Grammar } from "./hsk1-3-0-lesson14";
+import { hsk1Lesson15Grammar } from "./hsk1-3-0-lesson15";
+import { hsk2Lesson1Grammar } from "./hsk2-3-0-lesson1";
+import { hsk2Lesson2Grammar } from "./hsk2-3-0-lesson2";
+import { hsk2Lesson3Grammar } from "./hsk2-3-0-lesson3";
+import { hsk2Lesson4Grammar } from "./hsk2-3-0-lesson4";
+import { hsk2Lesson5Grammar } from "./hsk2-3-0-lesson5";
+import { hsk2Lesson6Grammar } from "./hsk2-3-0-lesson6";
+import { hsk2Lesson7Grammar } from "./hsk2-3-0-lesson7";
+import { hsk2Lesson8Grammar } from "./hsk2-3-0-lesson8";
+import { hsk2Lesson9Grammar } from "./hsk2-3-0-lesson9";
+import { hsk2Lesson10Grammar } from "./hsk2-3-0-lesson10";
+import { hsk2Lesson11Grammar } from "./hsk2-3-0-lesson11";
+import { hsk2Lesson12Grammar } from "./hsk2-3-0-lesson12";
+import { hsk2Lesson13Grammar } from "./hsk2-3-0-lesson13";
+import { hsk2Lesson14Grammar } from "./hsk2-3-0-lesson14";
+import { hsk2Lesson15Grammar } from "./hsk2-3-0-lesson15";
+
+const choice = (
+	id: string,
+	prompt: string,
+	answer: string,
+	options: [string, string, string],
+	meaning: string,
+	explanation: string,
+	optionExplanations: Record<string, string>,
+	completedSentence = answer
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	options,
+	meaning,
+	explanation,
+	optionExplanations,
+	completedSentence
+});
+const input = (id: string, prompt: string, answer: string): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	completedSentence: answer,
+	meaning: prompt,
+	explanation: "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+	formula: "Theo công thức của điểm ngữ pháp này."
+});
+const arrange = (
+	id: string,
+	prompt: string,
+	answer: string,
+	tokens: string[]
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	tokens,
+	completedSentence: answer,
+	meaning: prompt,
+	explanation: "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+	formula: "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+});
+
+export const hsk1Lesson3Grammar: GrammarLesson = {
+	title: "BÀI 3: GIỚI THIỆU QUỐC TỊCH",
+	points: [
+		{
+			id: "shi",
+			title: "“是”字句 – Câu chữ “是”",
+			explanation: "Dùng để xác định hoặc giới thiệu người, quốc tịch, nghề nghiệp và sự vật.",
+			formulas: [
+				"Khẳng định: Chủ ngữ + 是 + danh từ",
+				"Phủ định: Chủ ngữ + 不是 + danh từ",
+				"Nghi vấn: Chủ ngữ + 是 + danh từ + 吗？"
+			],
+			examples: [
+				{ chinese: "我是越南人。", vietnamese: "Tôi là người Việt Nam." },
+				{ chinese: "他是中国人。", vietnamese: "Anh ấy là người Trung Quốc." },
+				{ chinese: "她不是美国人。", vietnamese: "Cô ấy không phải là người Mỹ." },
+				{ chinese: "你是老师吗？", vietnamese: "Bạn là giáo viên phải không?" }
+			],
+			notes: ["Không dùng “不” đứng một mình trước danh từ. Dạng phủ định đúng là “不是”."],
+			exercises: [
+				{
+					id: "shi-choice",
+					title: "1. Chọn đáp án đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"sc1",
+							"Chọn câu đúng với nghĩa “Tôi là người Việt Nam.”",
+							"我是越南人。",
+							["我是越南人。", "我越南人。", "我不是越南人。"],
+							"Tôi là người Việt Nam.",
+							"Dùng 是 để nối chủ ngữ 我 với danh từ 越南人 trong câu khẳng định.",
+							{
+								"我是越南人。": "Đúng cấu trúc Chủ ngữ + 是 + danh từ.",
+								"我越南人。": "Thiếu động từ 是.",
+								"我不是越南人。": "不是 làm nghĩa câu thành phủ định."
+							}
+						),
+						choice(
+							"sc2",
+							"Chọn câu đúng với nghĩa “Cô ấy không phải là người Trung Quốc.”",
+							"她不是中国人。",
+							["她不中国人。", "她不是中国人。", "她是中国人不是。"],
+							"Cô ấy không phải là người Trung Quốc.",
+							"Phủ định của 是 là 不是 và 不是 đứng trước danh từ.",
+							{
+								"她不中国人。": "Không dùng 不 trực tiếp trước danh từ.",
+								"她不是中国人。": "Đúng cấu trúc Chủ ngữ + 不是 + danh từ.",
+								"她是中国人不是。": "不是 bị đặt sai ở cuối câu."
+							}
+						),
+						choice(
+							"sc3",
+							"Mary nói: “他是老师。” Chọn câu có cùng nghĩa.",
+							"他是老师。",
+							["他老师是。", "他是老师。", "是他老师。"],
+							"Anh ấy là giáo viên.",
+							"是 đứng giữa chủ ngữ 他 và danh từ 老师.",
+							{
+								"他老师是。": "是 không đặt ở cuối câu.",
+								"他是老师。": "Đúng trật tự Chủ ngữ + 是 + danh từ.",
+								"是他老师。": "Câu giới thiệu này không đặt 是 trước chủ ngữ."
+							}
+						),
+						choice(
+							"sc4",
+							"Người nói xác nhận “Chúng tôi là học sinh.” Chọn câu đúng.",
+							"我们是学生。",
+							["我们不是学生。", "我们学生。", "我们是学生。"],
+							"Chúng tôi là học sinh.",
+							"Đây là câu khẳng định nên dùng 是.",
+							{
+								"我们不是学生。": "Câu này mang nghĩa phủ định, trái ngữ cảnh.",
+								"我们学生。": "Thiếu 是 giữa chủ ngữ và danh từ.",
+								"我们是学生。": "Đúng ngữ pháp và đúng nghĩa."
+							}
+						),
+						choice(
+							"sc5",
+							"Chọn câu đúng với nghĩa “Bạn không phải là người Mỹ.”",
+							"你不是美国人。",
+							["你是美国人。", "你不美国人。", "你不是美国人。"],
+							"Bạn không phải là người Mỹ.",
+							"Dùng 不是 cho câu danh từ phủ định.",
+							{
+								"你是美国人。": "Câu này là khẳng định, trái nghĩa đề bài.",
+								"你不美国人。": "Không dùng 不 trực tiếp trước danh từ.",
+								"你不是美国人。": "Đúng cấu trúc phủ định."
+							}
+						),
+						choice(
+							"sc6",
+							"Chọn câu đúng với nghĩa “Cô ấy là bạn học của tôi.”",
+							"她是我的同学。",
+							["她我的同学。", "她是我的同学。", "她不是我的同学。"],
+							"Cô ấy là bạn học của tôi.",
+							"是 giới thiệu thân phận; 我的同学 là cụm danh từ.",
+							{
+								"她我的同学。": "Thiếu động từ 是.",
+								"她是我的同学。": "Đúng cấu trúc và đúng nghĩa.",
+								"她不是我的同学。": "不是 làm câu thành phủ định."
+							}
+						),
+						choice(
+							"sc7",
+							"Theo thông tin “他是法国人，不是英国人”, chọn câu đúng.",
+							"他不是英国人。",
+							["他不是英国人。", "他不英国人。", "他是英国人。"],
+							"Anh ấy không phải là người Anh.",
+							"Ngữ cảnh xác nhận anh ấy là người Pháp, vì vậy câu phủ định về quốc tịch Anh phù hợp.",
+							{
+								"他不是英国人。": "Đúng cả ngữ pháp và ngữ cảnh.",
+								"他不英国人。": "Sai cấu trúc phủ định trước danh từ.",
+								"他是英国人。": "Trái với thông tin đã cho."
+							}
+						),
+						choice(
+							"sc8",
+							"Chọn câu giới thiệu đúng: “Họ là bạn của tôi.”",
+							"他们是我的朋友。",
+							["他们我的朋友是。", "他们是我的朋友。", "他们吗我的朋友。"],
+							"Họ là bạn của tôi.",
+							"是 nối chủ ngữ 他们 với cụm danh từ 我的朋友.",
+							{
+								"他们我的朋友是。": "Trật tự từ sai; 是 không đứng cuối.",
+								"他们是我的朋友。": "Đúng cấu trúc câu chữ 是.",
+								"他们吗我的朋友。": "吗 không thay thế được động từ 是."
+							}
+						),
+						choice(
+							"sc9",
+							"Chọn câu đúng với nghĩa “Cô ấy không phải là giáo viên.”",
+							"她不是老师。",
+							["她是老师不是。", "她不是老师。", "她的老师。"],
+							"Cô ấy không phải là giáo viên.",
+							"不是 phải đứng trước danh từ 老师.",
+							{
+								"她是老师不是。": "Sai vị trí của 不是.",
+								"她不是老师。": "Đúng cấu trúc phủ định.",
+								"她的老师。": "Đây là cụm “giáo viên của cô ấy”, không phải câu phủ định."
+							}
+						),
+						choice(
+							"sc10",
+							"Chọn câu đúng để xác nhận “Các bạn là người Trung Quốc.”",
+							"你们是中国人。",
+							["你们中国人吗。", "是你们中国人。", "你们是中国人。"],
+							"Các bạn là người Trung Quốc.",
+							"Câu xác nhận dùng trật tự Chủ ngữ + 是 + danh từ.",
+							{
+								"你们中国人吗。": "Thiếu 是 và lại biến thành câu hỏi.",
+								"是你们中国人。": "是 đặt sai trước chủ ngữ.",
+								"你们是中国人。": "Đúng ngữ pháp và đúng nghĩa."
+							}
+						)
+					]
+				},
+				{
+					id: "shi-arrange",
+					title: "2. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: [
+						arrange("sa1", "Tôi là người Việt Nam.", "我是越南人", ["越南人", "我", "是"]),
+						arrange("sa2", "Anh ấy là người Trung Quốc.", "他是中国人", ["中国人", "是", "他"]),
+						arrange("sa3", "Cô ấy không phải người Mỹ.", "她不是美国人", ["美国人", "她", "不是"]),
+						arrange("sa4", "Chúng tôi là học sinh.", "我们是学生", ["学生", "是", "我们"]),
+						arrange("sa5", "Bạn là giáo viên phải không?", "你是老师吗", ["老师", "吗", "你", "是"])
+					]
+				},
+				{
+					id: "shi-translate",
+					title: "3. Dịch Việt sang Trung",
+					type: "input",
+					questions: [
+						input("st1", "Tôi là người Trung Quốc.", "我是中国人"),
+						input("st2", "Cô ấy là giáo viên.", "她是老师"),
+						input("st3", "Anh ấy không phải là học sinh.", "他不是学生"),
+						input("st4", "Chúng tôi là người Việt Nam.", "我们是越南人"),
+						input("st5", "Bạn là người Mỹ phải không?", "你是美国人吗")
+					]
+				},
+				{
+					id: "shi-negative",
+					title: "4. Chuyển câu khẳng định thành câu phủ định",
+					type: "input",
+					questions: [
+						input("sn1", "我是越南人。", "我不是越南人"),
+						input("sn2", "他是中国人。", "他不是中国人"),
+						input("sn3", "她是老师。", "她不是老师"),
+						input("sn4", "我们是学生。", "我们不是学生"),
+						input("sn5", "你是我的朋友。", "你不是我的朋友")
+					]
+				}
+			]
+		},
+		{
+			id: "de",
+			title: "结构助词“的” – Trợ từ kết cấu “的”",
+			explanation:
+				"“的” được đặt giữa định ngữ và trung tâm ngữ, thường biểu thị quan hệ sở hữu hoặc bổ nghĩa. Trong tiếng Việt thường tương đương với từ “của”.",
+			formulas: ["Đại từ/danh từ + 的 + danh từ", "Định ngữ + 的 + trung tâm ngữ"],
+			examples: [
+				{ chinese: "我的老师", vietnamese: "Giáo viên của tôi." },
+				{ chinese: "他的朋友", vietnamese: "Bạn của anh ấy." },
+				{ chinese: "她是我的同学。", vietnamese: "Cô ấy là bạn học của tôi." },
+				{ chinese: "他是老师的学生。", vietnamese: "Anh ấy là học sinh của giáo viên." },
+				{ chinese: "这是玛丽的书。", vietnamese: "Đây là sách của Mary." }
+			],
+			exercises: [
+				{
+					id: "de-position",
+					title: "1. Chọn đáp án đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"dp1",
+							"Chọn cụm từ có nghĩa “giáo viên của tôi”.",
+							"我的老师",
+							["我的老师", "我是老师", "我吗老师"],
+							"Giáo viên của tôi.",
+							"的 đứng giữa người sở hữu 我 và danh từ 老师.",
+							{
+								我的老师: "Đúng cấu trúc Đại từ + 的 + danh từ.",
+								我是老师: "Nghĩa là “Tôi là giáo viên”, không biểu thị sở hữu.",
+								我吗老师: "吗 đặt sai và không tạo quan hệ sở hữu."
+							}
+						),
+						choice(
+							"dp2",
+							"Chọn cụm từ có nghĩa “bạn của anh ấy”.",
+							"他的朋友",
+							["他朋友的", "他的朋友", "他是朋友"],
+							"Bạn của anh ấy.",
+							"的 phải đứng sau 他 và trước trung tâm ngữ 朋友.",
+							{
+								他朋友的: "的 đứng cuối, thiếu trung tâm ngữ theo sau.",
+								他的朋友: "Đúng vị trí của 的.",
+								他是朋友: "Đây là câu “Anh ấy là bạn”, không phải cụm sở hữu."
+							}
+						),
+						choice(
+							"dp3",
+							"Chọn cụm từ có nghĩa “học sinh của giáo viên”.",
+							"老师的学生",
+							["老师学生的", "的老师学生", "老师的学生"],
+							"Học sinh của giáo viên.",
+							"老师 là định ngữ sở hữu, 学生 là trung tâm ngữ; 的 nằm giữa hai phần.",
+							{
+								老师学生的: "的 đứng cuối và thiếu trung tâm ngữ sau nó.",
+								的老师学生: "的 không đứng trước định ngữ 老师.",
+								老师的学生: "Đúng trật tự định ngữ + 的 + trung tâm ngữ."
+							}
+						),
+						choice(
+							"dp4",
+							"Chọn câu đúng với nghĩa “Cô ấy là bạn học của tôi.”",
+							"她是我的同学。",
+							["她是我的同学。", "她的我是同学。", "她是我同学的。"],
+							"Cô ấy là bạn học của tôi.",
+							"Trong 我的同学, 的 nối 我 với danh từ 同学.",
+							{
+								"她是我的同学。": "Đúng vị trí của 的 và đúng nghĩa.",
+								"她的我是同学。": "的 gắn sai vào 她 và trật tự câu sai.",
+								"她是我同学的。": "的 đứng cuối, không có trung tâm ngữ theo sau."
+							}
+						),
+						choice(
+							"dp5",
+							"Chọn câu đúng với nghĩa “Đây là sách của Mary.”",
+							"这是玛丽的书。",
+							["这是玛丽书的。", "这是的玛丽书。", "这是玛丽的书。"],
+							"Đây là sách của Mary.",
+							"的 đứng giữa 玛丽 và danh từ 书.",
+							{
+								"这是玛丽书的。": "的 đứng cuối và thiếu trung tâm ngữ.",
+								"这是的玛丽书。": "的 không đứng trước người sở hữu 玛丽.",
+								"这是玛丽的书。": "Đúng cấu trúc sở hữu."
+							}
+						),
+						choice(
+							"dp6",
+							"Chọn cụm từ đúng: “tên của bạn”.",
+							"你的名字",
+							["你名字的", "你的名字", "你是名字"],
+							"Tên của bạn.",
+							"你的 bổ nghĩa cho danh từ 名字.",
+							{
+								你名字的: "的 đứng sai ở cuối cụm.",
+								你的名字: "Đúng cấu trúc sở hữu.",
+								你是名字: "Nghĩa thành “Bạn là tên”, không hợp lý."
+							}
+						),
+						choice(
+							"dp7",
+							"Chọn câu đúng với nghĩa “Anh ấy là học sinh của cô ấy.”",
+							"他是她的学生。",
+							["他是她的学生。", "他她的是学生。", "他的她学生。"],
+							"Anh ấy là học sinh của cô ấy.",
+							"她的学生 là cụm danh từ “học sinh của cô ấy”.",
+							{
+								"他是她的学生。": "Đúng vị trí 的 và đúng trật tự câu.",
+								"他她的是学生。": "Sai trật tự; cụm sở hữu bị tách khỏi danh từ.",
+								"他的她学生。": "的 gắn với 他 làm sai quan hệ sở hữu."
+							}
+						),
+						choice(
+							"dp8",
+							"Chọn cụm từ có nghĩa “bạn học của chúng tôi”.",
+							"我们的同学",
+							["我们同学的", "的我们同学", "我们的同学"],
+							"Bạn học của chúng tôi.",
+							"的 nằm giữa đại từ 我们 và danh từ 同学.",
+							{
+								我们同学的: "的 đứng cuối, thiếu trung tâm ngữ.",
+								的我们同学: "的 đứng sai trước định ngữ.",
+								我们的同学: "Đúng cấu trúc sở hữu."
+							}
+						),
+						choice(
+							"dp9",
+							"Chọn câu đúng với nghĩa “Cô ấy là bạn của giáo viên.”",
+							"她是老师的朋友。",
+							["她是老师朋友的。", "她是老师的朋友。", "她的老师是朋友。"],
+							"Cô ấy là bạn của giáo viên.",
+							"老师的朋友 là “bạn của giáo viên”.",
+							{
+								"她是老师朋友的。": "的 đứng cuối và không có trung tâm ngữ.",
+								"她是老师的朋友。": "Đúng cấu trúc và đúng nghĩa.",
+								"她的老师是朋友。": "Nghĩa đổi thành “Giáo viên của cô ấy là bạn”."
+							}
+						),
+						choice(
+							"dp10",
+							"Chọn cụm từ đúng với nghĩa “người bạn Trung Quốc của tôi”.",
+							"我的中国朋友",
+							["我中国的朋友", "我的中国朋友", "中国朋友我的"],
+							"Người bạn Trung Quốc của tôi.",
+							"我的 bổ nghĩa cho cụm trung tâm 中国朋友.",
+							{
+								我中国的朋友: "的 đặt sau 中国 làm sai quan hệ “của tôi”.",
+								我的中国朋友: "Đúng trật tự sở hữu và bổ nghĩa.",
+								中国朋友我的: "Cụm sở hữu bị đảo sai trật tự."
+							}
+						)
+					]
+				},
+				{
+					id: "de-match",
+					title: "2. Nối hai vế tạo thành cụm từ hoặc câu đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"dm1",
+							"Nối “我” để tạo cụm “giáo viên của tôi”.",
+							"的老师",
+							["的老师", "老师的", "是老师"],
+							"我的老师 — Giáo viên của tôi.",
+							"Sau người sở hữu 我 cần 的 + trung tâm ngữ 老师.",
+							{
+								的老师: "Ghép thành 我的老师, đúng nghĩa.",
+								老师的: "Ghép thành 我老师的, 的 đứng cuối.",
+								是老师: "Ghép thành 我是老师, nghĩa là “Tôi là giáo viên”."
+							},
+							"我的老师"
+						),
+						choice(
+							"dm2",
+							"Nối “他” để tạo cụm “bạn của anh ấy”.",
+							"的朋友",
+							["朋友的", "的朋友", "吗朋友"],
+							"他的朋友 — Bạn của anh ấy.",
+							"Sau 他 dùng 的朋友 để tạo quan hệ sở hữu.",
+							{
+								朋友的: "的 đứng cuối sau khi ghép.",
+								的朋友: "Ghép thành 他的朋友, đúng.",
+								吗朋友: "吗 không biểu thị sở hữu."
+							},
+							"他的朋友"
+						),
+						choice(
+							"dm3",
+							"Nối “老师” để tạo cụm “học sinh của giáo viên”.",
+							"的学生",
+							["是学生", "学生的", "的学生"],
+							"老师的学生 — Học sinh của giáo viên.",
+							"的学生 đặt sau 老师 tạo cụm sở hữu hoàn chỉnh.",
+							{
+								是学生: "Tạo câu “Giáo viên là học sinh”, sai nghĩa.",
+								学生的: "的 đứng cuối, thiếu trung tâm ngữ.",
+								的学生: "Ghép đúng thành 老师的学生."
+							},
+							"老师的学生"
+						),
+						choice(
+							"dm4",
+							"Nối “玛丽” để tạo cụm “sách của Mary”.",
+							"的书",
+							["的书", "书的", "是书"],
+							"玛丽的书 — Sách của Mary.",
+							"的 đứng giữa 玛丽 và danh từ 书.",
+							{
+								的书: "Ghép đúng thành 玛丽的书.",
+								书的: "的 đứng cuối cụm.",
+								是书: "Tạo câu “Mary là sách”, sai nghĩa."
+							},
+							"玛丽的书"
+						),
+						choice(
+							"dm5",
+							"Nối “她” để tạo cụm “bạn học của cô ấy”.",
+							"的同学",
+							["同学的", "是同学", "的同学"],
+							"她的同学 — Bạn học của cô ấy.",
+							"的同学 hoàn thiện cụm sở hữu sau 她.",
+							{
+								同学的: "的 đứng cuối, thiếu danh từ trung tâm.",
+								是同学: "Tạo câu “Cô ấy là bạn học”, không phải cụm sở hữu.",
+								的同学: "Ghép đúng thành 她的同学."
+							},
+							"她的同学"
+						),
+						choice(
+							"dm6",
+							"Nối “你” để tạo cụm “tên của bạn”.",
+							"的名字",
+							["名字的", "的名字", "吗名字"],
+							"你的名字 — Tên của bạn.",
+							"的名字 đứng sau 你 tạo cụm sở hữu.",
+							{
+								名字的: "的 đặt sai ở cuối.",
+								的名字: "Ghép đúng thành 你的名字.",
+								吗名字: "吗 là trợ từ nghi vấn, không chỉ sở hữu."
+							},
+							"你的名字"
+						),
+						choice(
+							"dm7",
+							"Nối “我们” để tạo cụm “bạn của chúng tôi”.",
+							"的朋友",
+							["是朋友", "的朋友", "朋友吗"],
+							"我们的朋友 — Bạn của chúng tôi.",
+							"的连接 我们 với danh từ 朋友.",
+							{
+								是朋友: "Tạo câu khẳng định, không phải cụm sở hữu.",
+								的朋友: "Ghép đúng thành 我们的朋友.",
+								朋友吗: "吗 tạo sắc thái hỏi và không biểu thị sở hữu."
+							},
+							"我们的朋友"
+						),
+						choice(
+							"dm8",
+							"Nối “中国” để tạo cụm “người Trung Quốc”.",
+							"人",
+							["的人", "人", "是人"],
+							"中国人 — Người Trung Quốc.",
+							"中国人 là từ ghép chỉ quốc tịch; trường hợp này không dùng 的.",
+							{
+								的人: "中国的人 có nghĩa “người của/ở Trung Quốc”, không phải từ chỉ quốc tịch cần chọn.",
+								人: "Ghép đúng thành 中国人.",
+								是人: "Tạo câu thiếu chủ ngữ rõ ràng, không phải từ chỉ quốc tịch."
+							},
+							"中国人"
+						),
+						choice(
+							"dm9",
+							"Nối “法国” để tạo cụm “người bạn Pháp của tôi”: 我的法国 + …",
+							"朋友",
+							["的朋友", "朋友", "是朋友"],
+							"我的法国朋友 — Người bạn Pháp của tôi.",
+							"法国 trực tiếp bổ nghĩa cho 朋友; 的 đã xuất hiện sau 我.",
+							{
+								的朋友: "Thêm 的 sau 法国 không phù hợp với cụm từ cơ bản này.",
+								朋友: "Ghép đúng thành 我的法国朋友.",
+								是朋友: "是 không đặt bên trong cụm danh từ."
+							},
+							"我的法国朋友"
+						),
+						choice(
+							"dm10",
+							"Nối “美国人” để hoàn thành câu “Cô ấy là người Mỹ”: 她 + …",
+							"是美国人",
+							["美国人的", "吗美国人", "是美国人"],
+							"她是美国人 — Cô ấy là người Mỹ.",
+							"Sau chủ ngữ 她 dùng 是 + danh từ 美国人.",
+							{
+								美国人的: "Thiếu 是 và 的 đứng cuối.",
+								吗美国人: "吗 sai vị trí và câu thiếu 是.",
+								是美国人: "Ghép thành câu khẳng định đúng."
+							},
+							"她是美国人"
+						)
+					]
+				},
+				{
+					id: "de-arrange",
+					title: "3. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: [
+						arrange("da1", "Giáo viên của tôi", "我的老师", ["老师", "的", "我"]),
+						arrange("da2", "Bạn của anh ấy", "他的朋友", ["朋友", "他", "的"]),
+						arrange("da3", "Cô ấy là bạn học của tôi.", "她是我的同学", [
+							"同学",
+							"她",
+							"的",
+							"我",
+							"是"
+						]),
+						arrange("da4", "Anh ấy là học sinh của giáo viên.", "他是老师的学生", [
+							"学生",
+							"的",
+							"老师",
+							"是",
+							"他"
+						]),
+						arrange("da5", "Đây là sách của Mary.", "这是玛丽的书", [
+							"书",
+							"玛丽",
+							"的",
+							"这",
+							"是"
+						])
+					]
+				},
+				{
+					id: "de-translate",
+					title: "4. Dịch Việt sang Trung",
+					type: "input",
+					questions: [
+						input("dt1", "Giáo viên của tôi", "我的老师"),
+						input("dt2", "Bạn của cô ấy", "她的朋友"),
+						input("dt3", "Anh ấy là bạn học của tôi.", "他是我的同学"),
+						input("dt4", "Cô ấy là học sinh của giáo viên.", "她是老师的学生"),
+						input("dt5", "Đây là sách của bạn.", "这是你的书")
+					]
+				}
+			]
+		},
+		{
+			id: "ma",
+			title: "用“吗”的是非问句 – Câu hỏi “có…không” với “吗”",
+			explanation:
+				"Đặt “吗” ở cuối câu trần thuật để biến câu đó thành câu hỏi “có…không/phải không”.",
+			formulas: ["Câu trần thuật + 吗？", "Chủ ngữ + 是 + danh từ + 吗？"],
+			examples: [
+				{ chinese: "你是越南人吗？", vietnamese: "Bạn là người Việt Nam phải không?" },
+				{ chinese: "她是老师吗？", vietnamese: "Cô ấy là giáo viên phải không?" },
+				{ chinese: "他是你的朋友吗？", vietnamese: "Anh ấy là bạn của bạn phải không?" }
+			],
+			answers: ["是，我是越南人。", "对，我是越南人。", "不，我不是越南人。"],
+			notes: [
+				"“吗” đặt ở cuối câu.",
+				"Không dùng đồng thời “吗” và đại từ nghi vấn như “谁、什么” trong cùng một câu hỏi thông thường."
+			],
+			exercises: [
+				{
+					id: "ma-transform",
+					title: "1. Chuyển câu trần thuật thành câu hỏi với “吗”",
+					type: "input",
+					questions: [
+						input("mt1", "你是越南人。", "你是越南人吗"),
+						input("mt2", "她是老师。", "她是老师吗"),
+						input("mt3", "他是你的朋友。", "他是你的朋友吗"),
+						input("mt4", "你们是学生。", "你们是学生吗"),
+						input("mt5", "她是中国人。", "她是中国人吗")
+					]
+				},
+				{
+					id: "ma-choice",
+					title: "2. Chọn câu hỏi đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"mc1",
+							"Chọn câu đúng với nghĩa “Bạn là người Việt Nam phải không?”",
+							"你是越南人吗？",
+							["你吗是越南人？", "你是越南人吗？", "吗你是越南人？"],
+							"Bạn là người Việt Nam phải không?",
+							"Đặt 吗 ở cuối câu trần thuật hoàn chỉnh.",
+							{
+								"你吗是越南人？": "吗 chen sai giữa chủ ngữ và 是.",
+								"你是越南人吗？": "Đúng: câu trần thuật + 吗.",
+								"吗你是越南人？": "吗 không đặt ở đầu câu."
+							}
+						),
+						choice(
+							"mc2",
+							"Chọn câu đúng với nghĩa “Cô ấy là giáo viên phải không?”",
+							"她是老师吗？",
+							["她是吗老师？", "她吗是老师？", "她是老师吗？"],
+							"Cô ấy là giáo viên phải không?",
+							"吗 phải đứng cuối câu, sau danh từ 老师.",
+							{
+								"她是吗老师？": "吗 đứng sai trước danh từ.",
+								"她吗是老师？": "吗 đứng sai trước 是.",
+								"她是老师吗？": "Đúng cấu trúc Chủ ngữ + 是 + danh từ + 吗."
+							}
+						),
+						choice(
+							"mc3",
+							"Chọn câu đúng với nghĩa “Anh ấy là bạn của bạn phải không?”",
+							"他是你的朋友吗？",
+							["他是你的朋友吗？", "他吗是你的朋友？", "他是你吗的朋友？"],
+							"Anh ấy là bạn của bạn phải không?",
+							"Giữ nguyên câu 他是你的朋友 rồi thêm 吗 ở cuối.",
+							{
+								"他是你的朋友吗？": "Đúng vị trí của 吗.",
+								"他吗是你的朋友？": "吗 chen sai sau chủ ngữ.",
+								"他是你吗的朋友？": "吗 phá vỡ cụm sở hữu 你的朋友."
+							}
+						),
+						choice(
+							"mc4",
+							"Chọn câu đúng với nghĩa “Các bạn là học sinh phải không?”",
+							"你们是学生吗？",
+							["你们是吗学生？", "你们是学生吗？", "你们学生吗？"],
+							"Các bạn là học sinh phải không?",
+							"Câu danh từ cần 是; 吗 đứng cuối.",
+							{
+								"你们是吗学生？": "吗 sai vị trí.",
+								"你们是学生吗？": "Đúng và đủ 是, 吗.",
+								"你们学生吗？": "Thiếu 是 trong mẫu câu đang học."
+							}
+						),
+						choice(
+							"mc5",
+							"Chọn câu đúng với nghĩa “Cô ấy là người Mỹ phải không?”",
+							"她是美国人吗？",
+							["她是美国人吗？", "她吗美国人？", "她是吗美国人？"],
+							"Cô ấy là người Mỹ phải không?",
+							"Thêm 吗 cuối câu 她是美国人.",
+							{
+								"她是美国人吗？": "Đúng cấu trúc.",
+								"她吗美国人？": "Thiếu 是 và 吗 sai vị trí.",
+								"她是吗美国人？": "吗 không đứng giữa 是 và danh từ."
+							}
+						),
+						choice(
+							"mc6",
+							"Muốn hỏi “Đây là sách của Mary phải không?”, chọn câu đúng.",
+							"这是玛丽的书吗？",
+							["这吗是玛丽的书？", "这是玛丽吗的书？", "这是玛丽的书吗？"],
+							"Đây là sách của Mary phải không?",
+							"吗 đứng cuối toàn bộ câu, không chen vào cụm 玛丽的书.",
+							{
+								"这吗是玛丽的书？": "吗 đứng sai sau chủ ngữ.",
+								"这是玛丽吗的书？": "吗 làm sai cụm sở hữu.",
+								"这是玛丽的书吗？": "Đúng vị trí của 吗."
+							}
+						),
+						choice(
+							"mc7",
+							"Câu nào là câu hỏi “Họ là người Trung Quốc phải không?”",
+							"他们是中国人吗？",
+							["他们是中国人吗？", "他们中国人是吗？", "吗他们是中国人？"],
+							"Họ là người Trung Quốc phải không?",
+							"Dùng câu trần thuật 他们是中国人 và thêm 吗 cuối câu.",
+							{
+								"他们是中国人吗？": "Đúng ngữ pháp.",
+								"他们中国人是吗？": "是 bị đảo ra sau danh từ.",
+								"吗他们是中国人？": "吗 không đặt đầu câu."
+							}
+						),
+						choice(
+							"mc8",
+							"Chọn câu hỏi đúng để hỏi “Ai là giáo viên?”",
+							"谁是老师？",
+							["谁是老师吗？", "谁吗是老师？", "谁是老师？"],
+							"Ai là giáo viên?",
+							"谁 đã là đại từ nghi vấn nên không dùng thêm 吗.",
+							{
+								"谁是老师吗？": "Dùng đồng thời 谁 và 吗 không phù hợp.",
+								"谁吗是老师？": "Vừa thừa 吗 vừa sai vị trí.",
+								"谁是老师？": "Đúng câu hỏi với 谁."
+							}
+						),
+						choice(
+							"mc9",
+							"Chọn câu hỏi đúng để hỏi “Tên bạn là gì?”",
+							"你的名字是什么？",
+							["你的名字是什么吗？", "你的名字吗是什么？", "你的名字是什么？"],
+							"Tên bạn là gì?",
+							"什么 là từ nghi vấn; không thêm 吗.",
+							{
+								"你的名字是什么吗？": "Không dùng đồng thời 什么 và 吗 trong câu hỏi này.",
+								"你的名字吗是什么？": "吗 sai vị trí và thừa.",
+								"你的名字是什么？": "Đúng câu hỏi với 什么."
+							}
+						),
+						choice(
+							"mc10",
+							"Chọn câu đúng với nghĩa “Anh ấy không phải là học sinh phải không?”",
+							"他不是学生吗？",
+							["他不学生吗？", "他不是学生吗？", "他吗不是学生？"],
+							"Anh ấy không phải là học sinh phải không?",
+							"Câu phủ định hoàn chỉnh dùng 不是, sau đó thêm 吗 ở cuối.",
+							{
+								"他不学生吗？": "Không dùng 不 trực tiếp trước danh từ.",
+								"他不是学生吗？": "Đúng cấu trúc phủ định + 吗.",
+								"他吗不是学生？": "吗 sai vị trí sau chủ ngữ."
+							}
+						)
+					]
+				},
+				{
+					id: "ma-arrange",
+					title: "3. Sắp xếp từ thành câu hỏi",
+					type: "arrange",
+					questions: [
+						arrange("mr1", "Bạn là người Việt Nam phải không?", "你是越南人吗", [
+							"吗",
+							"越南人",
+							"你",
+							"是"
+						]),
+						arrange("mr2", "Cô ấy là giáo viên phải không?", "她是老师吗", [
+							"老师",
+							"吗",
+							"是",
+							"她"
+						]),
+						arrange("mr3", "Anh ấy là bạn của bạn phải không?", "他是你的朋友吗", [
+							"朋友",
+							"吗",
+							"你的",
+							"是",
+							"他"
+						]),
+						arrange("mr4", "Các bạn là học sinh phải không?", "你们是学生吗", [
+							"吗",
+							"学生",
+							"你们",
+							"是"
+						]),
+						arrange("mr5", "Cô ấy là người Trung Quốc phải không?", "她是中国人吗", [
+							"中国人",
+							"她",
+							"吗",
+							"是"
+						])
+					]
+				},
+				{
+					id: "ma-answer",
+					title: "4. Chọn câu trả lời phù hợp",
+					type: "choice",
+					questions: [
+						choice(
+							"man1",
+							"你是越南人吗？（Trả lời: đúng）",
+							"是，我是越南人。",
+							["是，我是越南人。", "不，我不是越南人。", "吗，我是越南人。"],
+							"Bạn là người Việt Nam phải không? — Vâng, tôi là người Việt Nam.",
+							"Khi thông tin đúng, trả lời 是 rồi nhắc lại câu khẳng định.",
+							{
+								"是，我是越南人。": "Đúng với chỉ dẫn “đúng”.",
+								"不，我不是越南人。": "Đây là câu trả lời phủ định, trái ngữ cảnh.",
+								"吗，我是越南人。": "吗 không dùng để mở đầu câu trả lời."
+							}
+						),
+						choice(
+							"man2",
+							"她是老师吗？（Trả lời: không）",
+							"不，她不是老师。",
+							["是，她是老师。", "不，她不是老师。", "对，她是老师。"],
+							"Cô ấy là giáo viên phải không? — Không, cô ấy không phải giáo viên.",
+							"Trả lời phủ định dùng 不 ở đầu và 不是 trong mệnh đề.",
+							{
+								"是，她是老师。": "Đây là câu trả lời khẳng định.",
+								"不，她不是老师。": "Đúng ngữ pháp và đúng chỉ dẫn phủ định.",
+								"对，她是老师。": "对 xác nhận thông tin là đúng, trái ngữ cảnh."
+							}
+						),
+						choice(
+							"man3",
+							"他是你的朋友吗？（Trả lời: đúng）",
+							"对，他是我的朋友。",
+							["不，他不是我的朋友。", "对，他是我的朋友。", "吗，他是我的朋友。"],
+							"Anh ấy là bạn của bạn phải không? — Đúng, anh ấy là bạn của tôi.",
+							"对 dùng để xác nhận; khi trả lời đổi 你的 thành 我的.",
+							{
+								"不，他不是我的朋友。": "Phủ định thông tin, trái chỉ dẫn.",
+								"对，他是我的朋友。": "Đúng nghĩa và đúng ngôi sở hữu.",
+								"吗，他是我的朋友。": "吗 không mở đầu câu trả lời."
+							}
+						),
+						choice(
+							"man4",
+							"你们是学生吗？（Trả lời thay cho 我们: đúng）",
+							"是，我们是学生。",
+							["是，我们是学生。", "不，你们不是学生。", "是，你们是学生。"],
+							"Các bạn là học sinh phải không? — Vâng, chúng tôi là học sinh.",
+							"Người được hỏi dùng 我们 để tự xưng khi trả lời.",
+							{
+								"是，我们是学生。": "Đúng nội dung và chuyển ngôi phù hợp.",
+								"不，你们不是学生。": "Phủ định và không chuyển ngôi.",
+								"是，你们是学生。":
+									"Xác nhận nhưng dùng 你们 để gọi người đối diện, không đúng vai người trả lời."
+							}
+						),
+						choice(
+							"man5",
+							"她是美国人吗？（Thông tin: cô ấy là người Pháp）",
+							"不，她不是美国人。",
+							["对，她是美国人。", "不，她不是美国人。", "是，她是法国人吗？"],
+							"Cô ấy là người Mỹ phải không? — Không, cô ấy không phải người Mỹ.",
+							"Thông tin đã cho phủ định quốc tịch Mỹ, nên dùng 不 + 不是.",
+							{
+								"对，她是美国人。": "Trái với thông tin cô ấy là người Pháp.",
+								"不，她不是美国人。": "Đúng ngữ pháp và ngữ cảnh.",
+								"是，她是法国人吗？": "Đây lại là câu hỏi và không trả lời trực tiếp câu đã hỏi."
+							}
+						),
+						choice(
+							"man6",
+							"这是你的书吗？（Trả lời: đúng）",
+							"是，这是我的书。",
+							["不，这不是我的书。", "吗，这是我的书。", "是，这是我的书。"],
+							"Đây là sách của bạn phải không? — Vâng, đây là sách của tôi.",
+							"Trả lời khẳng định dùng 是 và đổi 你的 thành 我的.",
+							{
+								"不，这不是我的书。": "Câu phủ định, trái chỉ dẫn.",
+								"吗，这是我的书。": "吗 không dùng làm từ xác nhận.",
+								"是，这是我的书。": "Đúng và chuyển ngôi sở hữu phù hợp."
+							}
+						),
+						choice(
+							"man7",
+							"他是老师吗？（Thông tin: anh ấy là học sinh）",
+							"不，他不是老师。",
+							["不，他不是老师。", "是，他是老师。", "对，他不是老师吗？"],
+							"Anh ấy là giáo viên phải không? — Không, anh ấy không phải giáo viên.",
+							"Thông tin “là học sinh” loại trừ “là giáo viên” trong ngữ cảnh bài tập.",
+							{
+								"不，他不是老师。": "Đúng câu trả lời phủ định.",
+								"是，他是老师。": "Trái thông tin đã cho.",
+								"对，他不是老师吗？": "Biến thành câu hỏi khác và dùng 对 không phù hợp."
+							}
+						),
+						choice(
+							"man8",
+							"你是老师的学生吗？（Trả lời: đúng）",
+							"对，我是老师的学生。",
+							["对，我是老师的学生。", "不，我是老师的学生。", "对，你是老师的学生。"],
+							"Bạn là học sinh của giáo viên phải không? — Đúng, tôi là học sinh của giáo viên.",
+							"Dùng 对 để xác nhận và đổi chủ ngữ 你 thành 我.",
+							{
+								"对，我是老师的学生。": "Đúng nội dung và đúng ngôi.",
+								"不，我是老师的学生。": "不 mâu thuẫn với mệnh đề khẳng định theo sau.",
+								"对，你是老师的学生。": "Không chuyển ngôi khi người được hỏi tự trả lời."
+							}
+						),
+						choice(
+							"man9",
+							"他们是中国人吗？（Trả lời: không）",
+							"不，他们不是中国人。",
+							["是，他们不是中国人。", "不，他们不是中国人。", "吗，他们是中国人。"],
+							"Họ là người Trung Quốc phải không? — Không, họ không phải người Trung Quốc.",
+							"Câu trả lời phủ định cần 不 và mệnh đề 不是.",
+							{
+								"是，他们不是中国人。": "是 xác nhận nhưng mệnh đề lại phủ định, mâu thuẫn.",
+								"不，他们不是中国人。": "Đúng cấu trúc trả lời phủ định.",
+								"吗，他们是中国人。": "吗 không mở đầu câu trả lời."
+							}
+						),
+						choice(
+							"man10",
+							"她是你的同学吗？（Trả lời: đúng）",
+							"是，她是我的同学。",
+							["不，她不是我的同学。", "是，她是你的同学。", "是，她是我的同学。"],
+							"Cô ấy là bạn học của bạn phải không? — Vâng, cô ấy là bạn học của tôi.",
+							"Trả lời khẳng định và đổi sở hữu 你的 thành 我的.",
+							{
+								"不，她不是我的同学。": "Phủ định, trái chỉ dẫn.",
+								"是，她是你的同学。": "Không đổi ngôi sở hữu khi trả lời.",
+								"是，她是我的同学。": "Đúng nghĩa và đúng ngôi."
+							}
+						)
+					]
+				},
+				{
+					id: "ma-translate",
+					title: "5. Dịch câu hỏi Việt sang Trung",
+					type: "input",
+					questions: [
+						input("mtr1", "Bạn là người Việt Nam phải không?", "你是越南人吗"),
+						input("mtr2", "Cô ấy là giáo viên phải không?", "她是老师吗"),
+						input("mtr3", "Anh ấy là bạn của bạn phải không?", "他是你的朋友吗"),
+						input("mtr4", "Các bạn là học sinh phải không?", "你们是学生吗"),
+						input("mtr5", "Cô ấy là người Trung Quốc phải không?", "她是中国人吗")
+					]
+				}
+			]
+		}
+	]
+};
+
+const extraLesson3Questions: Record<string, GrammarQuestion[]> = {
+	"shi-arrange": [
+		arrange("sa6", "Họ là bạn của tôi.", "他们是我的朋友", ["朋友", "他们", "我的", "是"]),
+		arrange("sa7", "Bạn là người Nhật Bản.", "你是日本人", ["日本人", "你", "是"]),
+		arrange("sa8", "Họ không phải là người Hàn Quốc.", "他们不是韩国人", ["韩国人", "不是", "他们"])
+	],
+	"shi-translate": [
+		input("st6", "Họ là người Nhật Bản.", "他们是日本人"),
+		input("st7", "Cô ấy là bạn của tôi.", "她是我的朋友"),
+		input("st8", "Bạn không phải là giáo viên.", "你不是老师")
+	],
+	"shi-negative": [
+		input("sn6", "他们是韩国人。", "他们不是韩国人"),
+		input("sn7", "她是我的朋友。", "她不是我的朋友"),
+		input("sn8", "你是日本人。", "你不是日本人")
+	],
+	"de-arrange": [
+		arrange("da6", "Bạn của họ.", "他们的朋友", ["朋友", "他们", "的"]),
+		arrange("da7", "Cô ấy là giáo viên của tôi.", "她是我的老师", ["我的", "老师", "她", "是"]),
+		arrange("da8", "Đây là bạn học của họ.", "这是他们的同学", ["同学", "他们", "这", "的", "是"])
+	],
+	"de-translate": [
+		input("dt6", "Bạn của họ.", "他们的朋友"),
+		input("dt7", "Cô ấy là giáo viên của tôi.", "她是我的老师"),
+		input("dt8", "Đây là bạn học của họ.", "这是他们的同学")
+	],
+	"ma-transform": [
+		input("mt6", "他们是日本人。", "他们是日本人吗"),
+		input("mt7", "你不是学生。", "你不是学生吗"),
+		input("mt8", "她是我的同学。", "她是我的同学吗")
+	],
+	"ma-arrange": [
+		arrange("mr6", "Họ là người Nhật Bản phải không?", "他们是日本人吗", ["日本人", "吗", "他们", "是"]),
+		arrange("mr7", "Bạn không phải là giáo viên phải không?", "你不是老师吗", ["老师", "你", "吗", "不是"]),
+		arrange("mr8", "Cô ấy là bạn học của tôi phải không?", "她是我的同学吗", ["吗", "我的", "同学", "她", "是"])
+	],
+	"ma-translate": [
+		input("mtr6", "Họ là người Nhật Bản phải không?", "他们是日本人吗"),
+		input("mtr7", "Bạn không phải là giáo viên phải không?", "你不是老师吗"),
+		input("mtr8", "Cô ấy là bạn học của tôi phải không?", "她是我的同学吗")
+	]
+};
+
+for (const point of hsk1Lesson3Grammar.points) {
+	for (const exercise of point.exercises) {
+		exercise.questions.push(...(extraLesson3Questions[exercise.id] ?? []));
+	}
+}
+
+const maPoint = hsk1Lesson3Grammar.points.find((point) => point.id === "ma");
+if (maPoint) {
+	const exerciseOrder = ["ma-choice", "ma-transform", "ma-arrange", "ma-translate"];
+	maPoint.exercises = maPoint.exercises
+		.filter((exercise) => exerciseOrder.includes(exercise.id))
+		.sort((a, b) => exerciseOrder.indexOf(a.id) - exerciseOrder.indexOf(b.id));
+}
+
+export function getGrammarLesson(courseId: string, lessonId: number): GrammarLesson | undefined {
+	const normalizedCourseId = courseId.toLowerCase();
+	if (normalizedCourseId === "hsk1_2") return getHsk12GrammarLesson(lessonId);
+	if (["hsk2_3-0", "hsk2_3.0"].includes(normalizedCourseId)) {
+		if (lessonId === 1) return hsk2Lesson1Grammar;
+		if (lessonId === 2) return hsk2Lesson2Grammar;
+		if (lessonId === 3) return hsk2Lesson3Grammar;
+		if (lessonId === 4) return hsk2Lesson4Grammar;
+		if (lessonId === 5) return hsk2Lesson5Grammar;
+		if (lessonId === 6) return hsk2Lesson6Grammar;
+		if (lessonId === 7) return hsk2Lesson7Grammar;
+		if (lessonId === 8) return hsk2Lesson8Grammar;
+		if (lessonId === 9) return hsk2Lesson9Grammar;
+		if (lessonId === 10) return hsk2Lesson10Grammar;
+		if (lessonId === 11) return hsk2Lesson11Grammar;
+		if (lessonId === 12) return hsk2Lesson12Grammar;
+		if (lessonId === 13) return hsk2Lesson13Grammar;
+		if (lessonId === 14) return hsk2Lesson14Grammar;
+		if (lessonId === 15) return hsk2Lesson15Grammar;
+		return undefined;
+	}
+	if (normalizedCourseId !== "hsk1_3-0") return undefined;
+	if (lessonId === 3) return hsk1Lesson3Grammar;
+	if (lessonId === 4) return hsk1Lesson4Grammar;
+	if (lessonId === 5) return hsk1Lesson5Grammar;
+	if (lessonId === 6) return hsk1Lesson6Grammar;
+	if (lessonId === 7) return hsk1Lesson7Grammar;
+	if (lessonId === 8) return hsk1Lesson8Grammar;
+	if (lessonId === 9) return hsk1Lesson9Grammar;
+	if (lessonId === 10) return hsk1Lesson10Grammar;
+	if (lessonId === 11) return hsk1Lesson11Grammar;
+	if (lessonId === 12) return hsk1Lesson12Grammar;
+	if (lessonId === 13) return hsk1Lesson13Grammar;
+	if (lessonId === 14) return hsk1Lesson14Grammar;
+	if (lessonId === 15) return hsk1Lesson15Grammar;
+	return undefined;
+}

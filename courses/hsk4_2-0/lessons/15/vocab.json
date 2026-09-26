@@ -1,0 +1,234 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 15,
+  "label": "Bài 15",
+  "title": "教育孩子的艺术",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "弹钢琴",
+      "pinyin": "tán gāngqín",
+      "adj": 4,
+      "vi": "chơi đàn dương cầm"
+    },
+    {
+      "pos": 2,
+      "hanzi": "棒",
+      "pinyin": "bàng",
+      "adj": 6,
+      "vi": "xuất sắc, hay, giỏi"
+    },
+    {
+      "pos": 3,
+      "hanzi": "孙子",
+      "pinyin": "sūnzi",
+      "adj": 2,
+      "vi": "cháu nội, trai"
+    },
+    {
+      "pos": 4,
+      "hanzi": "寒假",
+      "pinyin": "hánjià",
+      "adj": 2,
+      "vi": "kỳ nghỉ đông"
+    },
+    {
+      "pos": 5,
+      "hanzi": "父亲",
+      "pinyin": "fùqīn",
+      "adj": 2,
+      "vi": "cha, bố"
+    },
+    {
+      "pos": 6,
+      "hanzi": "闹钟",
+      "pinyin": "nàozhōng",
+      "adj": 2,
+      "vi": "đồng hồ báo thức"
+    },
+    {
+      "pos": 7,
+      "hanzi": "响",
+      "pinyin": "xiǎng",
+      "adj": 4,
+      "vi": "reo, vang lên"
+    },
+    {
+      "pos": 8,
+      "hanzi": "醒",
+      "pinyin": "xǐng",
+      "adj": 4,
+      "vi": "thức dậy, tỉnh dậy"
+    },
+    {
+      "pos": 9,
+      "hanzi": "赶",
+      "pinyin": "gǎn",
+      "adj": 4,
+      "vi": "vội, gấp rút"
+    },
+    {
+      "pos": 10,
+      "hanzi": "厕所",
+      "pinyin": "cèsuǒ",
+      "adj": 2,
+      "vi": "nhà vệ sinh"
+    },
+    {
+      "pos": 11,
+      "hanzi": "批评",
+      "pinyin": "pīpíng",
+      "adj": 4,
+      "vi": "phê bình"
+    },
+    {
+      "pos": 12,
+      "hanzi": "弄",
+      "pinyin": "nòng",
+      "adj": 4,
+      "vi": "làm"
+    },
+    {
+      "pos": 13,
+      "hanzi": "管理",
+      "pinyin": "guǎnlǐ",
+      "adj": 4,
+      "vi": "quản lý"
+    },
+    {
+      "pos": 14,
+      "hanzi": "打针",
+      "pinyin": "dǎ zhēn",
+      "adj": 4,
+      "vi": "tiêm, chích"
+    },
+    {
+      "pos": 15,
+      "hanzi": "护士",
+      "pinyin": "hùshi",
+      "adj": 2,
+      "vi": "y tá"
+    },
+    {
+      "pos": 16,
+      "hanzi": "表扬",
+      "pinyin": "biǎoyáng",
+      "adj": 4,
+      "vi": "khen ngợi, biểu dương"
+    },
+    {
+      "pos": 17,
+      "hanzi": "千万",
+      "pinyin": "qiānwàn",
+      "adj": 7,
+      "vi": "nhất thiết phải"
+    },
+    {
+      "pos": 18,
+      "hanzi": "怀疑",
+      "pinyin": "huáiyí",
+      "adj": 4,
+      "vi": "nghi ngờ, hoài nghi"
+    },
+    {
+      "pos": 19,
+      "hanzi": "故意",
+      "pinyin": "gùyì",
+      "adj": 7,
+      "vi": "cố tình, cố ý"
+    },
+    {
+      "pos": 20,
+      "hanzi": "敲",
+      "pinyin": "qiāo",
+      "adj": 4,
+      "vi": "gõ, khua"
+    },
+    {
+      "pos": 21,
+      "hanzi": "整理",
+      "pinyin": "zhěnglǐ",
+      "adj": 4,
+      "vi": "thu dọn, dọn dẹp"
+    },
+    {
+      "pos": 22,
+      "hanzi": "合适",
+      "pinyin": "héshì",
+      "adj": 6,
+      "vi": "thích hợp"
+    },
+    {
+      "pos": 23,
+      "hanzi": "骗",
+      "pinyin": "piàn",
+      "adj": 4,
+      "vi": "lừa gạt"
+    },
+    {
+      "pos": 24,
+      "hanzi": "儿童",
+      "pinyin": "értóng",
+      "adj": 2,
+      "vi": "trẻ em"
+    },
+    {
+      "pos": 25,
+      "hanzi": "假",
+      "pinyin": "jiǎ",
+      "adj": 6,
+      "vi": "giả dối, không thật"
+    },
+    {
+      "pos": 26,
+      "hanzi": "左右",
+      "pinyin": "zuǒyòu",
+      "adj": 4,
+      "vi": "khoảng, khoảng chừng"
+    },
+    {
+      "pos": 27,
+      "hanzi": "懒",
+      "pinyin": "lǎn",
+      "adj": 6,
+      "vi": "lười, lười nhác"
+    },
+    {
+      "pos": 28,
+      "hanzi": "笨",
+      "pinyin": "bèn",
+      "adj": 6,
+      "vi": "đần, ngốc"
+    },
+    {
+      "pos": 29,
+      "hanzi": "粗心",
+      "pinyin": "cūxīn",
+      "adj": 6,
+      "vi": "cẩu thả"
+    },
+    {
+      "pos": 30,
+      "hanzi": "骄傲",
+      "pinyin": "jiāo'ào",
+      "adj": 6,
+      "vi": "kiêu ngạo"
+    },
+    {
+      "pos": 31,
+      "hanzi": "害羞",
+      "pinyin": "hàixiū",
+      "adj": 4,
+      "vi": "ngượng ngùng, thẹn thùng"
+    },
+    {
+      "pos": 32,
+      "hanzi": "省",
+      "pinyin": "shěng",
+      "adj": 4,
+      "vi": "tinh"
+    }
+  ]
+}

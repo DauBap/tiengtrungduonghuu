@@ -1,0 +1,73 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 12,
+  "label": "Bài 12",
+  "title": "你穿得太少了",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "得",
+      "pinyin": "de",
+      "adj": 11,
+      "vi": "được dùng sau động từ hay tính từ, theo sau 得 là bổ ngữ chỉ kết quả hay mức độ"
+    },
+    {
+      "pos": 2,
+      "hanzi": "妻子",
+      "pinyin": "qīzi",
+      "adj": 2,
+      "vi": "vợ"
+    },
+    {
+      "pos": 3,
+      "hanzi": "雪",
+      "pinyin": "xuě",
+      "adj": 2,
+      "vi": "tuyết"
+    },
+    {
+      "pos": 4,
+      "hanzi": "零",
+      "pinyin": "líng",
+      "adj": 21,
+      "vi": "số không"
+    },
+    {
+      "pos": 5,
+      "hanzi": "度",
+      "pinyin": "dù",
+      "adj": 2,
+      "vi": "độ (đơn vị đo nhiệt độ)"
+    },
+    {
+      "pos": 6,
+      "hanzi": "穿",
+      "pinyin": "chuān",
+      "adj": 4,
+      "vi": "mặc, mang"
+    },
+    {
+      "pos": 7,
+      "hanzi": "进",
+      "pinyin": "jìn",
+      "adj": 4,
+      "vi": "vào"
+    },
+    {
+      "pos": 8,
+      "hanzi": "弟弟",
+      "pinyin": "dìdi",
+      "adj": 2,
+      "vi": "em trai"
+    },
+    {
+      "pos": 9,
+      "hanzi": "近",
+      "pinyin": "jìn",
+      "adj": 6,
+      "vi": "gần"
+    }
+  ]
+}

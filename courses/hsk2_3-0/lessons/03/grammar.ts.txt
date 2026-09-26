@@ -1,0 +1,516 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const choice = (
+	id: string,
+	prompt: string,
+	answer: string,
+	options: [string, string, string],
+	meaning: string,
+	explanation: string
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	options,
+	completedSentence: answer,
+	meaning,
+	explanation,
+	optionExplanations: Object.fromEntries(
+		options.map((option) => [
+			option,
+			option === answer
+				? "Đúng: đáp án phù hợp cả cấu trúc ngữ pháp lẫn nghĩa của đề bài."
+				: "Sai: cấu trúc hoặc trật tự từ không phù hợp với yêu cầu."
+		])
+	)
+});
+
+const input = (
+	id: string,
+	prompt: string,
+	answer: string,
+	meaning: string,
+	explanation: string
+): GrammarQuestion => ({ id, prompt, answer, completedSentence: answer, meaning, explanation });
+
+const arrange = (
+	id: string,
+	prompt: string,
+	answer: string,
+	tokens: string[],
+	meaning: string,
+	explanation: string
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	tokens,
+	completedSentence: answer,
+	meaning,
+	explanation
+});
+
+export const hsk2Lesson3Grammar: GrammarLesson = {
+	title: "BÀI 3: 我想去西安旅游",
+	points: [
+		{
+			id: "result-complement",
+			title: "Bổ ngữ kết quả – Kết quả của hành động",
+			explanation:
+				"Động từ hoặc tính từ đứng ngay sau động từ chính để cho biết hành động đạt được kết quả gì. Trong câu phủ định về việc chưa đạt kết quả, thường dùng “没(有)” trước động từ.",
+			formulas: [
+				"Chủ ngữ + động từ + bổ ngữ kết quả + 了",
+				"Chủ ngữ + 没(有) + động từ + bổ ngữ kết quả + tân ngữ"
+			],
+			examples: [
+				{ chinese: "菜都做好了。", vietnamese: "Đồ ăn đã làm xong rồi." },
+				{ chinese: "我没吃完饭。", vietnamese: "Tôi chưa ăn xong cơm." },
+				{ chinese: "我听懂了。", vietnamese: "Tôi đã nghe hiểu rồi." }
+			],
+			notes: ["Bổ ngữ kết quả phải đứng sát sau động từ chính: 做好、吃完、听懂、找到."],
+			exercises: [
+				{
+					id: "h2l3-result-choice",
+					title: "1. Chọn đáp án đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"rc-c1",
+							"Chọn câu đúng: “Đồ ăn đã làm xong rồi.”",
+							"菜都做好了。",
+							["菜都做了好。", "菜都做好了。", "菜好都做了。"],
+							"Đồ ăn đã làm xong rồi.",
+							"“好” đứng ngay sau “做” để chỉ kết quả hoàn thành."
+						),
+						choice(
+							"rc-c2",
+							"Chọn câu đúng: “Tôi chưa ăn xong cơm.”",
+							"我没吃完饭。",
+							["我没吃完饭。", "我不吃饭完。", "我吃没完饭。"],
+							"Tôi chưa ăn xong cơm.",
+							"Phủ định kết quả chưa đạt dùng 没 + 吃完."
+						),
+						choice(
+							"rc-c3",
+							"Điền từ thích hợp: 我已经看___网上的介绍了。",
+							"完",
+							["完", "吧", "多"],
+							"Tôi đã xem xong phần giới thiệu trên mạng.",
+							"“看完” nghĩa là xem xong."
+						),
+						choice(
+							"rc-c4",
+							"Chọn câu đúng: “Bạn đã tìm thấy vé chưa?”",
+							"你找到票了吗？",
+							["你找票到了吗？", "你到找票了吗？", "你找到票了吗？"],
+							"Bạn đã tìm thấy vé chưa?",
+							"“到” đứng sau “找” tạo “找到” – tìm thấy."
+						),
+						choice(
+							"rc-c5",
+							"Chọn câu đúng: “Tôi đã nghe hiểu lời giáo viên nói.”",
+							"我听懂老师的话了。",
+							["我听老师懂的话了。", "我懂听老师的话了。", "我听懂老师的话了。"],
+							"Tôi đã nghe hiểu lời giáo viên nói.",
+							"“懂” là kết quả của hành động nghe, tạo thành “听懂”."
+						)
+					]
+				},
+				{
+					id: "h2l3-result-arrange",
+					title: "2. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: [
+						arrange(
+							"rc-a1",
+							"Đồ ăn đã làm xong rồi.",
+							"菜都做好了",
+							["好", "菜", "了", "做", "都"],
+							"Đồ ăn đã làm xong rồi.",
+							"做 + 好 tạo cụm động từ kết quả 做好."
+						),
+						arrange(
+							"rc-a2",
+							"Tôi chưa ăn xong cơm.",
+							"我没吃完饭",
+							["饭", "我", "完", "没", "吃"],
+							"Tôi chưa ăn xong cơm.",
+							"没 + 吃完 + 饭."
+						),
+						arrange(
+							"rc-a3",
+							"Tôi đã xem xong phần giới thiệu trên mạng.",
+							"我看完网上的介绍了",
+							["介绍", "了", "我", "网上", "完", "的", "看"],
+							"Tôi đã xem xong phần giới thiệu trên mạng.",
+							"看完 đứng trước tân ngữ."
+						),
+						arrange(
+							"rc-a4",
+							"Anh ấy đã tìm thấy vé rồi.",
+							"他找到票了",
+							["票", "到", "他", "了", "找"],
+							"Anh ấy đã tìm thấy vé rồi.",
+							"找 + 到 = tìm thấy."
+						),
+						arrange(
+							"rc-a5",
+							"Tôi đã nghe hiểu rồi.",
+							"我听懂了",
+							["懂", "了", "我", "听"],
+							"Tôi đã nghe hiểu rồi.",
+							"听 + 懂 = nghe hiểu."
+						)
+					]
+				},
+				{
+					id: "h2l3-result-translate",
+					title: "3. Dịch Việt sang Trung",
+					type: "input",
+					questions: [
+						input(
+							"rc-t1",
+							"Đồ ăn đã làm xong rồi.",
+							"菜都做好了",
+							"Đồ ăn đã làm xong rồi.",
+							"Dùng bổ ngữ kết quả 好 sau 做."
+						),
+						input(
+							"rc-t2",
+							"Tôi chưa ăn xong cơm.",
+							"我没吃完饭",
+							"Tôi chưa ăn xong cơm.",
+							"Dùng 没 + 吃完."
+						),
+						input(
+							"rc-t3",
+							"Tôi đã xem xong phần giới thiệu trên mạng.",
+							"我看完网上的介绍了",
+							"Tôi đã xem xong phần giới thiệu trên mạng.",
+							"看完 biểu thị xem đến hết."
+						),
+						input(
+							"rc-t4",
+							"Anh ấy đã tìm thấy vé rồi.",
+							"他找到票了",
+							"Anh ấy đã tìm thấy vé rồi.",
+							"找到 biểu thị kết quả đã tìm thấy."
+						),
+						input(
+							"rc-t5",
+							"Tôi đã nghe hiểu rồi.",
+							"我听懂了",
+							"Tôi đã nghe hiểu rồi.",
+							"听懂 biểu thị nghe và đạt kết quả hiểu."
+						)
+					]
+				}
+			]
+		},
+		{
+			id: "reduplication-present",
+			title: "Động từ lặp lại (1) – Hành động ngắn hoặc làm thử",
+			explanation:
+				"Lặp lại động từ làm cho hành động có sắc thái nhẹ nhàng: làm trong thời gian ngắn, làm một ít hoặc thử làm. Động từ đơn tiết dùng AA; động từ song tiết dùng ABAB; động từ ly hợp thường dùng AAB.",
+			formulas: ["Đơn tiết: A → AA", "Song tiết: AB → ABAB", "Động từ ly hợp: AB → AAB"],
+			examples: [
+				{ chinese: "你想想。", vietnamese: "Bạn nghĩ thử xem." },
+				{ chinese: "我想休息休息。", vietnamese: "Tôi muốn nghỉ ngơi một chút." },
+				{ chinese: "我们聊聊天吧。", vietnamese: "Chúng ta trò chuyện một chút nhé." }
+			],
+			notes: ["Dạng lặp lại này không diễn tả một hành động kéo dài hoặc số lượng lớn."],
+			exercises: [
+				{
+					id: "h2l3-redup1-choice",
+					title: "1. Chọn đáp án đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"r1-c1",
+							"Chọn câu đúng: “Bạn nghĩ thử xem.”",
+							"你想想。",
+							["你想想。", "你想想想。", "你想了想了。"],
+							"Bạn nghĩ thử xem.",
+							"Động từ đơn tiết 想 lặp theo dạng AA: 想想."
+						),
+						choice(
+							"r1-c2",
+							"Chọn dạng lặp đúng của “休息”.",
+							"休息休息",
+							["休休息息", "休息休息", "休休息"],
+							"Nghỉ ngơi một chút.",
+							"Động từ song tiết AB lặp thành ABAB."
+						),
+						choice(
+							"r1-c3",
+							"Điền dạng đúng: 这个介绍不错，你___吧。",
+							"看看",
+							["看看看", "看了看", "看看"],
+							"Phần giới thiệu này không tệ, bạn xem thử nhé.",
+							"Hành động chưa xảy ra, động từ đơn tiết 看 dùng dạng 看看."
+						),
+						choice(
+							"r1-c4",
+							"Chọn câu đúng: “Chúng ta trò chuyện một chút nhé.”",
+							"我们聊聊天吧。",
+							["我们聊天聊天吧。", "我们聊聊天吧。", "我们聊聊了天吧。"],
+							"Chúng ta trò chuyện một chút nhé.",
+							"Động từ ly hợp 聊天 lặp theo dạng AAB: 聊聊天."
+						),
+						choice(
+							"r1-c5",
+							"Chọn câu đúng: “Bạn thử nếm món ăn này xem.”",
+							"你尝尝这个菜。",
+							["你尝这个尝菜。", "你尝尝这个菜。", "你尝了尝这个菜。"],
+							"Bạn thử nếm món ăn này xem.",
+							"Ngữ cảnh đề nghị hiện tại dùng dạng AA: 尝尝."
+						)
+					]
+				},
+				{
+					id: "h2l3-redup1-arrange",
+					title: "2. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: [
+						arrange(
+							"r1-a1",
+							"Bạn nghĩ thử xem.",
+							"你想想",
+							["想", "你", "想"],
+							"Bạn nghĩ thử xem.",
+							"Hai thẻ 想 đứng liền nhau."
+						),
+						arrange(
+							"r1-a2",
+							"Tôi muốn nghỉ ngơi một chút.",
+							"我想休息休息",
+							["休息", "我", "想", "休息"],
+							"Tôi muốn nghỉ ngơi một chút.",
+							"休息 lặp theo dạng ABAB."
+						),
+						arrange(
+							"r1-a3",
+							"Bạn xem thử phần giới thiệu này nhé.",
+							"你看看这个介绍吧",
+							["看", "介绍", "你", "吧", "这个", "看"],
+							"Bạn xem thử phần giới thiệu này nhé.",
+							"看看 đứng trước tân ngữ."
+						),
+						arrange(
+							"r1-a4",
+							"Chúng ta trò chuyện một chút nhé.",
+							"我们聊聊天吧",
+							["天", "吧", "聊", "我们", "聊"],
+							"Chúng ta trò chuyện một chút nhé.",
+							"聊 + 聊 + 天 là dạng AAB."
+						),
+						arrange(
+							"r1-a5",
+							"Bạn thử nếm món ăn này xem.",
+							"你尝尝这个菜",
+							["尝", "这个", "你", "菜", "尝"],
+							"Bạn thử nếm món ăn này xem.",
+							"尝 lặp thành 尝尝."
+						)
+					]
+				},
+				{
+					id: "h2l3-redup1-translate",
+					title: "3. Dịch Việt sang Trung",
+					type: "input",
+					questions: [
+						input(
+							"r1-t1",
+							"Bạn nghĩ thử xem.",
+							"你想想",
+							"Bạn nghĩ thử xem.",
+							"想 lặp thành 想想."
+						),
+						input(
+							"r1-t2",
+							"Tôi muốn nghỉ ngơi một chút.",
+							"我想休息休息",
+							"Tôi muốn nghỉ ngơi một chút.",
+							"休息 lặp thành 休息休息."
+						),
+						input(
+							"r1-t3",
+							"Bạn xem thử phần giới thiệu này nhé.",
+							"你看看这个介绍吧",
+							"Bạn xem thử phần giới thiệu này nhé.",
+							"看看 mang nghĩa xem thử."
+						),
+						input(
+							"r1-t4",
+							"Chúng ta trò chuyện một chút nhé.",
+							"我们聊聊天吧",
+							"Chúng ta trò chuyện một chút nhé.",
+							"聊天 lặp thành 聊聊天."
+						),
+						input(
+							"r1-t5",
+							"Bạn thử nếm món ăn này xem.",
+							"你尝尝这个菜",
+							"Bạn thử nếm món ăn này xem.",
+							"尝尝 mang nghĩa nếm thử."
+						)
+					]
+				}
+			]
+		},
+		{
+			id: "reduplication-past",
+			title: "Động từ lặp lại (2) – Hành động đã xảy ra",
+			explanation:
+				"Khi hành động ngắn hoặc làm thử đã xảy ra, “了” được đặt trong dạng lặp. Động từ đơn tiết thường dùng A了A; động từ song tiết có thể dùng AB了一下; động từ ly hợp dùng A了AB.",
+			formulas: ["Đơn tiết: A了A", "Song tiết: AB了一下", "Động từ ly hợp: A了AB"],
+			examples: [
+				{
+					chinese: "我看了看网上的介绍。",
+					vietnamese: "Tôi đã xem thử phần giới thiệu trên mạng."
+				},
+				{ chinese: "我休息了一下。", vietnamese: "Tôi đã nghỉ một lát." },
+				{ chinese: "我们聊了聊天。", vietnamese: "Chúng tôi đã trò chuyện một lát." }
+			],
+			notes: ["“了” không đặt sau cả hai động từ trong dạng A了A."],
+			exercises: [
+				{
+					id: "h2l3-redup2-choice",
+					title: "1. Chọn đáp án đúng",
+					type: "choice",
+					questions: [
+						choice(
+							"r2-c1",
+							"Chọn câu đúng: “Tôi đã xem thử phần giới thiệu trên mạng.”",
+							"我看了看网上的介绍。",
+							["我看看了网上的介绍。", "我看了看网上的介绍。", "我看了网上的看介绍。"],
+							"Tôi đã xem thử phần giới thiệu trên mạng.",
+							"Động từ đơn tiết 看 dùng dạng A了A: 看了看."
+						),
+						choice(
+							"r2-c2",
+							"Chọn dạng đúng: “đã nghỉ một lát”.",
+							"休息了一下",
+							["休了休息", "休息一下了", "休息了一下"],
+							"Đã nghỉ một lát.",
+							"Động từ song tiết dùng 休息了一下."
+						),
+						choice(
+							"r2-c3",
+							"Điền dạng đúng: 他___这张票。",
+							"看了看",
+							["看看", "看了看", "看了了看"],
+							"Anh ấy đã xem thử tấm vé này.",
+							"Hành động đã xảy ra nên dùng 看了看."
+						),
+						choice(
+							"r2-c4",
+							"Chọn câu đúng: “Chúng tôi đã trò chuyện một lát.”",
+							"我们聊了聊天。",
+							["我们聊了聊天。", "我们聊天了聊天。", "我们聊聊天了。"],
+							"Chúng tôi đã trò chuyện một lát.",
+							"Động từ ly hợp 聊天 dùng dạng A了AB: 聊了聊天."
+						),
+						choice(
+							"r2-c5",
+							"Chọn câu đúng: “Tôi đã nghĩ thử một chút.”",
+							"我想了想。",
+							["我想想了。", "我想了了想。", "我想了想。"],
+							"Tôi đã nghĩ thử một chút.",
+							"想 dùng dạng A了A: 想了想."
+						)
+					]
+				},
+				{
+					id: "h2l3-redup2-arrange",
+					title: "2. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: [
+						arrange(
+							"r2-a1",
+							"Tôi đã xem thử phần giới thiệu trên mạng.",
+							"我看了看网上的介绍",
+							["介绍", "看", "我", "的", "了", "网上", "看"],
+							"Tôi đã xem thử phần giới thiệu trên mạng.",
+							"看 + 了 + 看 đứng trước tân ngữ."
+						),
+						arrange(
+							"r2-a2",
+							"Tôi đã nghỉ một lát.",
+							"我休息了一下",
+							["一下", "我", "了", "休息"],
+							"Tôi đã nghỉ một lát.",
+							"休息 + 了 + 一下."
+						),
+						arrange(
+							"r2-a3",
+							"Anh ấy đã xem thử tấm vé này.",
+							"他看了看这张票",
+							["看", "他", "这张票", "了", "看"],
+							"Anh ấy đã xem thử tấm vé này.",
+							"看了看 đứng trước 这张票."
+						),
+						arrange(
+							"r2-a4",
+							"Chúng tôi đã trò chuyện một lát.",
+							"我们聊了聊天",
+							["天", "聊", "我们", "了", "聊"],
+							"Chúng tôi đã trò chuyện một lát.",
+							"聊 + 了 + 聊 + 天."
+						),
+						arrange(
+							"r2-a5",
+							"Tôi đã nghĩ thử một chút.",
+							"我想了想",
+							["想", "了", "我", "想"],
+							"Tôi đã nghĩ thử một chút.",
+							"想 + 了 + 想."
+						)
+					]
+				},
+				{
+					id: "h2l3-redup2-translate",
+					title: "3. Dịch Việt sang Trung",
+					type: "input",
+					questions: [
+						input(
+							"r2-t1",
+							"Tôi đã xem thử phần giới thiệu trên mạng.",
+							"我看了看网上的介绍",
+							"Tôi đã xem thử phần giới thiệu trên mạng.",
+							"看 dùng dạng 看了看."
+						),
+						input(
+							"r2-t2",
+							"Tôi đã nghỉ một lát.",
+							"我休息了一下",
+							"Tôi đã nghỉ một lát.",
+							"休息 dùng với 了一下."
+						),
+						input(
+							"r2-t3",
+							"Anh ấy đã xem thử tấm vé này.",
+							"他看了看这张票",
+							"Anh ấy đã xem thử tấm vé này.",
+							"看了看 biểu thị đã xem trong thời gian ngắn."
+						),
+						input(
+							"r2-t4",
+							"Chúng tôi đã trò chuyện một lát.",
+							"我们聊了聊天",
+							"Chúng tôi đã trò chuyện một lát.",
+							"聊天 dùng dạng 聊了聊天."
+						),
+						input(
+							"r2-t5",
+							"Tôi đã nghĩ thử một chút.",
+							"我想了想",
+							"Tôi đã nghĩ thử một chút.",
+							"想 dùng dạng 想了想."
+						)
+					]
+				}
+			]
+		}
+	]
+};

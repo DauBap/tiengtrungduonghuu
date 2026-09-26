@@ -1,0 +1,290 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 28,
+  "label": "Bài 28",
+  "title": "最受欢迎的毕业生 ",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "届",
+      "pinyin": "jiè",
+      "adj": 8,
+      "vi": "khóa, lần, đợt"
+    },
+    {
+      "pos": 2,
+      "hanzi": "本科",
+      "pinyin": "běnkē",
+      "adj": 2,
+      "vi": "đại học chính quy"
+    },
+    {
+      "pos": 3,
+      "hanzi": "面对",
+      "pinyin": "miànduì",
+      "adj": 4,
+      "vi": "đương đầu"
+    },
+    {
+      "pos": 4,
+      "hanzi": "乐观",
+      "pinyin": "lèguān",
+      "adj": 6,
+      "vi": "lạc quan"
+    },
+    {
+      "pos": 5,
+      "hanzi": "就业",
+      "pinyin": "jiù yè",
+      "adj": 4,
+      "vi": "tìm việc làm"
+    },
+    {
+      "pos": 6,
+      "hanzi": "实话",
+      "pinyin": "shíhuà",
+      "adj": 2,
+      "vi": "lời nói thật"
+    },
+    {
+      "pos": 7,
+      "hanzi": "优势",
+      "pinyin": "yōushì",
+      "adj": 2,
+      "vi": "ưu thế"
+    },
+    {
+      "pos": 8,
+      "hanzi": "简历",
+      "pinyin": "jiǎnlì",
+      "adj": 2,
+      "vi": "lý lịch sơ lược"
+    },
+    {
+      "pos": 9,
+      "hanzi": "现场",
+      "pinyin": "xiànchǎng",
+      "adj": 2,
+      "vi": "hiện trường, nơi, chỗ"
+    },
+    {
+      "pos": 10,
+      "hanzi": "职位",
+      "pinyin": "zhíwèi",
+      "adj": 2,
+      "vi": "chức vụ"
+    },
+    {
+      "pos": 11,
+      "hanzi": "体验",
+      "pinyin": "tǐyàn",
+      "adj": 4,
+      "vi": "thể nghiệm"
+    },
+    {
+      "pos": 12,
+      "hanzi": "从此",
+      "pinyin": "cóngcǐ",
+      "adj": 7,
+      "vi": "từ đó"
+    },
+    {
+      "pos": 13,
+      "hanzi": "范围",
+      "pinyin": "fànwéi",
+      "adj": 2,
+      "vi": "phạm vi"
+    },
+    {
+      "pos": 14,
+      "hanzi": "初（级）中（学）",
+      "pinyin": "chū(jí) zhōng(xué)",
+      "adj": 2,
+      "vi": "trung học cơ sở"
+    },
+    {
+      "pos": 15,
+      "hanzi": "顾问",
+      "pinyin": "gùwèn",
+      "adj": 2,
+      "vi": "người tư vấn, cố vấn"
+    },
+    {
+      "pos": 16,
+      "hanzi": "参考",
+      "pinyin": "cānkǎo",
+      "adj": 4,
+      "vi": "tham khảo"
+    },
+    {
+      "pos": 17,
+      "hanzi": "成长",
+      "pinyin": "chéngzhǎng",
+      "adj": 4,
+      "vi": "trưởng thành"
+    },
+    {
+      "pos": 18,
+      "hanzi": "制作",
+      "pinyin": "zhìzuò",
+      "adj": 4,
+      "vi": "chế tạo, làm ra"
+    },
+    {
+      "pos": 19,
+      "hanzi": "才艺",
+      "pinyin": "cáiyì",
+      "adj": 2,
+      "vi": "tài nghệ"
+    },
+    {
+      "pos": 20,
+      "hanzi": "假设",
+      "pinyin": "jiǎshè",
+      "adj": 4,
+      "vi": "giả sử"
+    },
+    {
+      "pos": 21,
+      "hanzi": "乘",
+      "pinyin": "chéng",
+      "adj": 4,
+      "vi": "đi xe, đón xe"
+    },
+    {
+      "pos": 22,
+      "hanzi": "反应",
+      "pinyin": "fǎnyìng",
+      "adj": 4,
+      "vi": "phản ứng lại"
+    },
+    {
+      "pos": 23,
+      "hanzi": "到达",
+      "pinyin": "dàodá",
+      "adj": 4,
+      "vi": "đến, tới"
+    },
+    {
+      "pos": 24,
+      "hanzi": "老板",
+      "pinyin": "lǎobǎn",
+      "adj": 2,
+      "vi": "ông chủ"
+    },
+    {
+      "pos": 25,
+      "hanzi": "陆续",
+      "pinyin": "lùxù",
+      "adj": 7,
+      "vi": "lần lượt, liên tiếp"
+    },
+    {
+      "pos": 26,
+      "hanzi": "提问",
+      "pinyin": "tíwèn",
+      "adj": 4,
+      "vi": "đưa ra câu hỏi"
+    },
+    {
+      "pos": 27,
+      "hanzi": "堆",
+      "pinyin": "duī",
+      "adj": 8,
+      "vi": "đống, đám, lô"
+    },
+    {
+      "pos": 28,
+      "hanzi": "情侣",
+      "pinyin": "qínglǚ",
+      "adj": 2,
+      "vi": "tình nhân"
+    },
+    {
+      "pos": 29,
+      "hanzi": "制订",
+      "pinyin": "zhìdìng",
+      "adj": 4,
+      "vi": "lập ra, vạch ra"
+    },
+    {
+      "pos": 30,
+      "hanzi": "休闲",
+      "pinyin": "xiūxián",
+      "adj": 4,
+      "vi": "nghỉ ngơi và giải trí"
+    },
+    {
+      "pos": 31,
+      "hanzi": "具体",
+      "pinyin": "jùtǐ",
+      "adj": 6,
+      "vi": "cụ thể, tỉ mỉ"
+    },
+    {
+      "pos": 32,
+      "hanzi": "专注",
+      "pinyin": "zhuānzhù",
+      "adj": 6,
+      "vi": "mê mải, dồn hết tâm trí vào"
+    },
+    {
+      "pos": 33,
+      "hanzi": "显然",
+      "pinyin": "xiǎnrán",
+      "adj": 6,
+      "vi": "rõ ràng, hiển nhiên"
+    },
+    {
+      "pos": 34,
+      "hanzi": "成立",
+      "pinyin": "chénglì",
+      "adj": 4,
+      "vi": "thành lập, lập"
+    },
+    {
+      "pos": 35,
+      "hanzi": "部门",
+      "pinyin": "bùmén",
+      "adj": 2,
+      "vi": "ban, vị trí việc làm"
+    },
+    {
+      "pos": 36,
+      "hanzi": "执着",
+      "pinyin": "zhízhuó",
+      "adj": 6,
+      "vi": "bền bỉ, kiên trì"
+    },
+    {
+      "pos": 37,
+      "hanzi": "光明",
+      "pinyin": "guāngmíng",
+      "adj": 6,
+      "vi": "sáng sủa, tươi sáng"
+    },
+    {
+      "pos": 38,
+      "hanzi": "前途",
+      "pinyin": "qiántú",
+      "adj": 2,
+      "vi": "tiền đồ, tương lai, triển vọng"
+    },
+    {
+      "pos": 39,
+      "hanzi": "行业",
+      "pinyin": "hángyè",
+      "adj": 2,
+      "vi": "ngành, nghề"
+    },
+    {
+      "pos": 40,
+      "hanzi": "缺乏",
+      "pinyin": "quēfá",
+      "adj": 4,
+      "vi": "thiếu, không có đủ"
+    }
+  ]
+}

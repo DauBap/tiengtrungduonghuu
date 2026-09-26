@@ -1,0 +1,110 @@
+{
+  "lesson": 7,
+  "title": "我晚上六点半下班",
+  "title_pinyin": "Wǒ wǎnshang liù diǎn bàn xiàbān",
+  "title_vi": "Tôi tan làm lúc 6 rưỡi tối",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "现在几点？",
+          "pinyin": "Xiànzài jǐ diǎn?",
+          "vi": "Bây giờ là mấy giờ?"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "早上八点四十。",
+          "pinyin": "Zǎoshang bā diǎn sìshí.",
+          "vi": "8 giờ 40 phút sáng."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我上午十点十分有课。",
+          "pinyin": "Wǒ shàngwǔ shí diǎn shí fēn yǒu kè.",
+          "vi": "Tôi có tiết học lúc 10 giờ 10 phút sáng."
+        },
+        {
+          "speaker": "安妮",
+          "zh": "好的，我们下午两点见吧。",
+          "pinyin": "Hǎo de, wǒmen xiàwǔ liǎng diǎn jiàn ba.",
+          "vi": "Được rồi, chúng ta gặp nhau lúc 2 giờ chiều nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "下午我想去电影院看电影，你去吗？",
+          "pinyin": "Xiàwǔ wǒ xiǎng qù diànyǐngyuàn kàn diànyǐng, nǐ qù ma?",
+          "vi": "Chiều nay tôi muốn đến rạp xem phim, bạn đi không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我不想去，下午还有事。",
+          "pinyin": "Wǒ bù xiǎng qù, xiàwǔ hái yǒu shì.",
+          "vi": "Tôi không muốn đi, chiều còn có việc."
+        },
+        {
+          "speaker": "李文",
+          "zh": "好的。明天呢？",
+          "pinyin": "Hǎo de. Míngtiān ne?",
+          "vi": "Được thôi. Ngày mai thì sao?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我明天下午两点还上课呢，四点半下课。",
+          "pinyin": "Wǒ míngtiān xiàwǔ liǎng diǎn hái shàngkè ne, sì diǎn bàn xiàkè.",
+          "vi": "Ngày mai 2 giờ chiều tôi còn phải lên lớp, 4 giờ rưỡi mới tan học."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "喂，你在哪儿呢？",
+          "pinyin": "Wèi, nǐ zài nǎr ne?",
+          "vi": "A lô, anh đang ở đâu đấy?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我在家里呢。",
+          "pinyin": "Wǒ zài jiāli ne.",
+          "vi": "Tôi đang ở nhà."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我晚上六点半下班。",
+          "pinyin": "Wǒ wǎnshang liù diǎn bàn xiàbān.",
+          "vi": "Tôi 6 rưỡi tối tan làm."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我八点去医院上班。",
+          "pinyin": "Wǒ bā diǎn qù yīyuàn shàngbān.",
+          "vi": "Tôi 8 giờ đi bệnh viện làm việc."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好的，你去店里买些菜吧。",
+          "pinyin": "Hǎo de, nǐ qù diànli mǎi xiē cài ba.",
+          "vi": "Được rồi, anh ra cửa hàng mua ít rau nhé."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好，我十分钟后去。",
+          "pinyin": "Hǎo, wǒ shí fēnzhōng hòu qù.",
+          "vi": "Ừ, 10 phút nữa tôi đi."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,269 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 33,
+  "label": "Bài 33",
+  "title": " 以堵治堵——缓解交通有妙招",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "缓解",
+      "pinyin": "huǎnjiě",
+      "adj": 4,
+      "vi": "làm dịu, xoa dịu"
+    },
+    {
+      "pos": 2,
+      "hanzi": "招（儿）",
+      "pinyin": "zhāo(r)",
+      "adj": 2,
+      "vi": "biện pháp, phương pháp"
+    },
+    {
+      "pos": 3,
+      "hanzi": "繁荣",
+      "pinyin": "fánróng",
+      "adj": 6,
+      "vi": "phồn thịnh, phát triển mạnh"
+    },
+    {
+      "pos": 4,
+      "hanzi": "体现",
+      "pinyin": "tǐxiàn",
+      "adj": 4,
+      "vi": "thể hiện, phản ánh"
+    },
+    {
+      "pos": 5,
+      "hanzi": "拥挤",
+      "pinyin": "yōngjǐ",
+      "adj": 6,
+      "vi": "đông nghịt, chật nịch"
+    },
+    {
+      "pos": 6,
+      "hanzi": "家常",
+      "pinyin": "jiācháng",
+      "adj": 2,
+      "vi": "việc thường ngày"
+    },
+    {
+      "pos": 7,
+      "hanzi": "面积",
+      "pinyin": "miànjī",
+      "adj": 2,
+      "vi": "diện tích"
+    },
+    {
+      "pos": 8,
+      "hanzi": "宽",
+      "pinyin": "kuān",
+      "adj": 6,
+      "vi": "rộng"
+    },
+    {
+      "pos": 9,
+      "hanzi": "主观",
+      "pinyin": "zhùguān",
+      "adj": 6,
+      "vi": "chủ quan"
+    },
+    {
+      "pos": 10,
+      "hanzi": "扩（大）",
+      "pinyin": "kuò(dà)",
+      "adj": 4,
+      "vi": "mở rộng"
+    },
+    {
+      "pos": 11,
+      "hanzi": "根治",
+      "pinyin": "gēnzhì",
+      "adj": 4,
+      "vi": "trị tận gốc"
+    },
+    {
+      "pos": 12,
+      "hanzi": "不妨",
+      "pinyin": "bùfáng",
+      "adj": 7,
+      "vi": "đừng ngại, có thể làm"
+    },
+    {
+      "pos": 13,
+      "hanzi": "展开",
+      "pinyin": "zhǎnkāi",
+      "adj": 4,
+      "vi": "triển khai, tiến hành"
+    },
+    {
+      "pos": 14,
+      "hanzi": "归纳",
+      "pinyin": "guīnà",
+      "adj": 4,
+      "vi": "tổng kết, tóm tắt"
+    },
+    {
+      "pos": 15,
+      "hanzi": "虚心",
+      "pinyin": "xūxīn",
+      "adj": 6,
+      "vi": "khiêm tốn"
+    },
+    {
+      "pos": 16,
+      "hanzi": "咨询",
+      "pinyin": "zīxún",
+      "adj": 4,
+      "vi": "tư vấn, hỏi ý kiến"
+    },
+    {
+      "pos": 17,
+      "hanzi": "中旬",
+      "pinyin": "zhōngxún",
+      "adj": 2,
+      "vi": "trung tuần"
+    },
+    {
+      "pos": 18,
+      "hanzi": "照常",
+      "pinyin": "zhàocháng",
+      "adj": 7,
+      "vi": "như thường lệ"
+    },
+    {
+      "pos": 19,
+      "hanzi": "健身",
+      "pinyin": "jiànshēn",
+      "adj": 4,
+      "vi": "tập thể dục"
+    },
+    {
+      "pos": 20,
+      "hanzi": "图",
+      "pinyin": "tú",
+      "adj": 4,
+      "vi": "ham muốn"
+    },
+    {
+      "pos": 21,
+      "hanzi": "受（伤）",
+      "pinyin": "shòu(shāng)",
+      "adj": 4,
+      "vi": "bị (thương)"
+    },
+    {
+      "pos": 22,
+      "hanzi": "保险",
+      "pinyin": "bǎoxiǎn",
+      "adj": 2,
+      "vi": "hợp đồng bảo hiểm"
+    },
+    {
+      "pos": 23,
+      "hanzi": "赔偿",
+      "pinyin": "péicháng",
+      "adj": 4,
+      "vi": "bồi thường, đền bù"
+    },
+    {
+      "pos": 24,
+      "hanzi": "政府",
+      "pinyin": "zhèngfǔ",
+      "adj": 2,
+      "vi": "chính phủ/ chính quyền"
+    },
+    {
+      "pos": 25,
+      "hanzi": "批准",
+      "pinyin": "pīzhǔn",
+      "adj": 4,
+      "vi": "phê chuẩn, phê duyệt"
+    },
+    {
+      "pos": 26,
+      "hanzi": "改革",
+      "pinyin": "gǎigé",
+      "adj": 4,
+      "vi": "cải cách, sửa đổi"
+    },
+    {
+      "pos": 27,
+      "hanzi": "取消",
+      "pinyin": "qǔxiāo",
+      "adj": 4,
+      "vi": "hủy bỏ, xóa bỏ"
+    },
+    {
+      "pos": 28,
+      "hanzi": "行人",
+      "pinyin": "xíngrén",
+      "adj": 2,
+      "vi": "người đi bộ"
+    },
+    {
+      "pos": 29,
+      "hanzi": "广场",
+      "pinyin": "guǎngchǎng",
+      "adj": 2,
+      "vi": "quảng trường"
+    },
+    {
+      "pos": 30,
+      "hanzi": "商务",
+      "pinyin": "shāngwù",
+      "adj": 2,
+      "vi": "thương vụ, công việc buôn bán"
+    },
+    {
+      "pos": 31,
+      "hanzi": "大厦",
+      "pinyin": "dàshà",
+      "adj": 2,
+      "vi": "cao ốc, tòa nhà đồ sộ"
+    },
+    {
+      "pos": 32,
+      "hanzi": "难怪",
+      "pinyin": "nánguài",
+      "adj": 4,
+      "vi": "có thể hiểu được, khó trách"
+    },
+    {
+      "pos": 33,
+      "hanzi": "与其",
+      "pinyin": "yǔqí",
+      "adj": 10,
+      "vi": "thà... còn hơn..."
+    },
+    {
+      "pos": 34,
+      "hanzi": "汽油",
+      "pinyin": "qìyóu",
+      "adj": 2,
+      "vi": "xăng"
+    },
+    {
+      "pos": 35,
+      "hanzi": "明确",
+      "pinyin": "míngquè",
+      "adj": 6,
+      "vi": "rõ ràng"
+    },
+    {
+      "pos": 36,
+      "hanzi": "期待",
+      "pinyin": "qīdài",
+      "adj": 4,
+      "vi": "mong đợi, kỳ vọng"
+    },
+    {
+      "pos": 37,
+      "hanzi": "解放",
+      "pinyin": "jiěfàng",
+      "adj": 4,
+      "vi": "giải phóng, thả tự do"
+    }
+  ]
+}

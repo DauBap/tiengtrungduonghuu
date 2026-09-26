@@ -1,0 +1,216 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 18,
+  "label": "Bài 18",
+  "title": "我学会了包饺子",
+  "short_vi": "Trải nghiệm đón Tết Nguyên Đán cùng gia đình bạn Trung Quốc; chúc Tết bố mẹ bạn; xem ảnh cũ, nghe kể chuyện thời thơ ấu; học cách gói sủi cảo (bánh chẻo); xem Tết Nguyên Đán trên truyền hình; cảm nhận về tình cảm gia đình và sự phát triển bản thân",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "怎样",
+      "pinyin": "zěnyàng",
+      "adj": 1,
+      "vi": "thế nào, ra sao"
+    },
+    {
+      "pos": 2,
+      "hanzi": "过节",
+      "pinyin": "guòjié",
+      "adj": 4,
+      "vi": "đón lễ, ăn tết"
+    },
+    {
+      "pos": 3,
+      "hanzi": "节",
+      "pinyin": "jié",
+      "adj": 2,
+      "vi": "lễ, tiết"
+    },
+    {
+      "pos": 4,
+      "hanzi": "节日",
+      "pinyin": "jiérì",
+      "adj": 2,
+      "vi": "ngày lễ, ngày tết"
+    },
+    {
+      "pos": 5,
+      "hanzi": "联欢",
+      "pinyin": "liánhuān",
+      "adj": 4,
+      "vi": "liên hoan"
+    },
+    {
+      "pos": 6,
+      "hanzi": "大概",
+      "pinyin": "dàgài",
+      "adj": [
+        6,
+        18
+      ],
+      "vi": "khoảng, có lẽ, đại khái"
+    },
+    {
+      "pos": 7,
+      "hanzi": "春节",
+      "pinyin": "Chūnjié",
+      "adj": 2,
+      "vi": "Tết Nguyên Đán (Tết Xuân)"
+    },
+    {
+      "pos": 8,
+      "hanzi": "阿姨",
+      "pinyin": "āyí",
+      "adj": 2,
+      "vi": "dì, cô, cô giúp việc"
+    },
+    {
+      "pos": 9,
+      "hanzi": "叔叔",
+      "pinyin": "shūshu",
+      "adj": 2,
+      "vi": "chú"
+    },
+    {
+      "pos": 10,
+      "hanzi": "收",
+      "pinyin": "shōu",
+      "adj": 4,
+      "vi": "nhận, thu nhận"
+    },
+    {
+      "pos": 11,
+      "hanzi": "总",
+      "pinyin": "zǒng",
+      "adj": 18,
+      "vi": "luôn luôn, luôn"
+    },
+    {
+      "pos": 12,
+      "hanzi": "起",
+      "pinyin": "qǐ",
+      "adj": 4,
+      "vi": "(dùng sau động từ để chỉ đối tượng liên quan)"
+    },
+    {
+      "pos": 13,
+      "hanzi": "见面",
+      "pinyin": "jiànmiàn",
+      "adj": 4,
+      "vi": "gặp mặt"
+    },
+    {
+      "pos": 14,
+      "hanzi": "矿泉水",
+      "pinyin": "kuàngquánshuǐ",
+      "adj": 2,
+      "vi": "nước khoáng"
+    },
+    {
+      "pos": 15,
+      "hanzi": "刚刚",
+      "pinyin": "gānggāng",
+      "adj": 18,
+      "vi": "vừa mới, vừa xong"
+    },
+    {
+      "pos": 16,
+      "hanzi": "出发",
+      "pinyin": "chūfā",
+      "adj": 4,
+      "vi": "xuất phát, lên đường"
+    },
+    {
+      "pos": 17,
+      "hanzi": "不久",
+      "pinyin": "bùjiǔ",
+      "adj": 6,
+      "vi": "chẳng bao lâu, sớm"
+    },
+    {
+      "pos": 18,
+      "hanzi": "发生",
+      "pinyin": "fāshēng",
+      "adj": 4,
+      "vi": "xảy ra, phát sinh"
+    },
+    {
+      "pos": 19,
+      "hanzi": "刚",
+      "pinyin": "gāng",
+      "adj": 18,
+      "vi": "vừa mới (chỉ một thời gian rất ngắn trước đó)"
+    },
+    {
+      "pos": 20,
+      "hanzi": "只要",
+      "pinyin": "zhǐyào",
+      "adj": 10,
+      "vi": "chỉ cần, miễn là"
+    },
+    {
+      "pos": 21,
+      "hanzi": "学期",
+      "pinyin": "xuéqī",
+      "adj": 2,
+      "vi": "học kỳ"
+    },
+    {
+      "pos": 22,
+      "hanzi": "毕业",
+      "pinyin": "bìyè",
+      "adj": 4,
+      "vi": "tốt nghiệp"
+    },
+    {
+      "pos": 23,
+      "hanzi": "出生",
+      "pinyin": "chūshēng",
+      "adj": 4,
+      "vi": "sinh ra"
+    },
+    {
+      "pos": 24,
+      "hanzi": "过去",
+      "pinyin": "guòqù",
+      "adj": 2,
+      "vi": "quá khứ"
+    },
+    {
+      "pos": 25,
+      "hanzi": "懂得",
+      "pinyin": "dǒngde",
+      "adj": 4,
+      "vi": "hiểu, biết"
+    },
+    {
+      "pos": 26,
+      "hanzi": "坚持",
+      "pinyin": "jiānchí",
+      "adj": 4,
+      "vi": "kiên trì"
+    },
+    {
+      "pos": 27,
+      "hanzi": "完成",
+      "pinyin": "wánchéng",
+      "adj": 4,
+      "vi": "hoàn thành"
+    },
+    {
+      "pos": 28,
+      "hanzi": "目标",
+      "pinyin": "mùbiāo",
+      "adj": 2,
+      "vi": "mục tiêu"
+    },
+    {
+      "pos": 29,
+      "hanzi": "发展",
+      "pinyin": "fāzhǎn",
+      "adj": 4,
+      "vi": "phát triển"
+    }
+  ]
+}

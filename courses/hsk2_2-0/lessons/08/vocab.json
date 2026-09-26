@@ -1,0 +1,80 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 8,
+  "label": "Bài 8",
+  "title": "让我想想再告诉你 ",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "再",
+      "pinyin": "zài",
+      "adj": 7,
+      "vi": "lại, lần nữa, hẳng, hãy, sẽ"
+    },
+    {
+      "pos": 2,
+      "hanzi": "让",
+      "pinyin": "ràng",
+      "adj": 4,
+      "vi": "để, bảo"
+    },
+    {
+      "pos": 3,
+      "hanzi": "告诉",
+      "pinyin": "gàosu",
+      "adj": 4,
+      "vi": "nói cho biết"
+    },
+    {
+      "pos": 4,
+      "hanzi": "等",
+      "pinyin": "děng",
+      "adj": 4,
+      "vi": "đợi"
+    },
+    {
+      "pos": 5,
+      "hanzi": "找",
+      "pinyin": "zhǎo",
+      "adj": 4,
+      "vi": "tìm"
+    },
+    {
+      "pos": 6,
+      "hanzi": "事情",
+      "pinyin": "shìqing",
+      "adj": 2,
+      "vi": "sự việc"
+    },
+    {
+      "pos": 7,
+      "hanzi": "服务员",
+      "pinyin": "fúwùyuán",
+      "adj": 2,
+      "vi": "nhân viên phục vụ"
+    },
+    {
+      "pos": 8,
+      "hanzi": "白",
+      "pinyin": "bái",
+      "adj": 6,
+      "vi": "có màu trắng"
+    },
+    {
+      "pos": 9,
+      "hanzi": "黑",
+      "pinyin": "hēi",
+      "adj": 6,
+      "vi": "có màu đen"
+    },
+    {
+      "pos": 10,
+      "hanzi": "贵",
+      "pinyin": "guì",
+      "adj": 6,
+      "vi": "đắt"
+    }
+  ]
+}

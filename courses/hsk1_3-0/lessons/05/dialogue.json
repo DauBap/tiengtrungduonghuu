@@ -1,0 +1,110 @@
+{
+  "lesson": 5,
+  "title": "今天我休息",
+  "title_pinyin": "Jīntiān wǒ xiūxi",
+  "title_vi": "Hôm nay tôi nghỉ",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "今天几号？",
+          "pinyin": "Jīntiān jǐ hào?",
+          "vi": "Hôm nay là ngày mấy?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "今天9月8号。",
+          "pinyin": "Jīntiān jiǔ yuè bā hào.",
+          "vi": "Hôm nay là ngày 8 tháng 9."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "星期几？",
+          "pinyin": "Xīngqī jǐ?",
+          "vi": "Thứ mấy?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "星期日。今天我休息。",
+          "pinyin": "Xīngqīrì. Jīntiān wǒ xiūxi.",
+          "vi": "Chủ nhật. Hôm nay tôi nghỉ."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "你会做饭吗？",
+          "pinyin": "Nǐ huì zuòfàn ma?",
+          "vi": "Bạn có biết nấu cơm không?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "我会做。",
+          "pinyin": "Wǒ huì zuò.",
+          "vi": "Tôi biết."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你会做什么？",
+          "pinyin": "Nǐ huì zuò shénme?",
+          "vi": "Bạn biết làm gì?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "我会做面条儿、饺子，也会做一些菜。星期天我也做饭。",
+          "pinyin": "Wǒ huì zuò miàntiáor, jiǎozi, yě huì zuò yìxiē cài. Xīngqītiān wǒ yě zuòfàn.",
+          "vi": "Tôi biết làm mì sợi, sủi cảo, cũng biết làm vài món ăn. Chủ nhật tôi cũng nấu ăn."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "同乐，下班吗？",
+          "pinyin": "Tónglè, xiàbān ma?",
+          "vi": "Đồng Lạc, tan làm à?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "下班。",
+          "pinyin": "Xiàbān.",
+          "vi": "Tan làm rồi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "这是你的新电脑吗？",
+          "pinyin": "Zhè shì nǐ de xīn diànnǎo ma?",
+          "vi": "Đây là máy tính mới của bạn à?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "是的，是我的新电脑。",
+          "pinyin": "Shì de, shì wǒ de xīn diànnǎo.",
+          "vi": "Đúng vậy, là máy tính mới của tôi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "真好看！",
+          "pinyin": "Zhēn hǎokàn!",
+          "vi": "Đẹp thật đấy!"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "我也很喜欢它。",
+          "pinyin": "Wǒ yě hěn xǐhuān tā.",
+          "vi": "Tôi cũng rất thích nó."
+        }
+      ]
+    }
+  ]
+}

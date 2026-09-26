@@ -1,0 +1,311 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 18,
+  "label": "Bài 18",
+  "title": "抽象艺术美不美？",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "抽象",
+      "pinyin": "chōuxiàng",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "trừu tượng; trừu tượng hóa"
+    },
+    {
+      "pos": 2,
+      "hanzi": "古典",
+      "pinyin": "gǔdiǎn",
+      "adj": 6,
+      "vi": "cổ điển"
+    },
+    {
+      "pos": 3,
+      "hanzi": "欣赏",
+      "pinyin": "xīnshǎng",
+      "adj": 4,
+      "vi": "thưởng thức"
+    },
+    {
+      "pos": 4,
+      "hanzi": "布",
+      "pinyin": "bù",
+      "adj": 2,
+      "vi": "vải"
+    },
+    {
+      "pos": 5,
+      "hanzi": "规则",
+      "pinyin": "guīzé",
+      "adj": [
+        6,
+        2
+      ],
+      "vi": "đúng quy tắc, ngay ngắn; quy tắc"
+    },
+    {
+      "pos": 6,
+      "hanzi": "派",
+      "pinyin": "pài",
+      "adj": 2,
+      "vi": "phái, bè cánh"
+    },
+    {
+      "pos": 7,
+      "hanzi": "作品",
+      "pinyin": "zuòpǐn",
+      "adj": 2,
+      "vi": "tác phẩm"
+    },
+    {
+      "pos": 8,
+      "hanzi": "洒",
+      "pinyin": "sǎ",
+      "adj": 4,
+      "vi": "rắc, rải"
+    },
+    {
+      "pos": 9,
+      "hanzi": "极其",
+      "pinyin": "jíqí",
+      "adj": 7,
+      "vi": "vô cùng, hết sức"
+    },
+    {
+      "pos": 10,
+      "hanzi": "神秘",
+      "pinyin": "shénmì",
+      "adj": 6,
+      "vi": "thần bí, huyền bí"
+    },
+    {
+      "pos": 11,
+      "hanzi": "丑（陋）",
+      "pinyin": "chǒu(lòu)",
+      "adj": 6,
+      "vi": "xấu xí"
+    },
+    {
+      "pos": 12,
+      "hanzi": "自由",
+      "pinyin": "zìyóu",
+      "adj": [
+        2,
+        6
+      ],
+      "vi": "sự tự do; tự do"
+    },
+    {
+      "pos": 13,
+      "hanzi": "设计",
+      "pinyin": "shèjì",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "thiết kế; bản thiết kế"
+    },
+    {
+      "pos": 14,
+      "hanzi": "组",
+      "pinyin": "zǔ",
+      "adj": [
+        2,
+        8
+      ],
+      "vi": "tổ, nhóm"
+    },
+    {
+      "pos": 15,
+      "hanzi": "幅",
+      "pinyin": "fú",
+      "adj": 8,
+      "vi": "(được dùng cho bức tranh và vải vóc...) bức, tấm, miếng"
+    },
+    {
+      "pos": 16,
+      "hanzi": "出自",
+      "pinyin": "chūzì",
+      "adj": 4,
+      "vi": "xuất phát từ, đến từ"
+    },
+    {
+      "pos": 17,
+      "hanzi": "业余",
+      "pinyin": "yèyú",
+      "adj": 6,
+      "vi": "nghiệp dư"
+    },
+    {
+      "pos": 18,
+      "hanzi": "婴儿",
+      "pinyin": "yīng'ér",
+      "adj": 2,
+      "vi": "trẻ sơ sinh"
+    },
+    {
+      "pos": 19,
+      "hanzi": "猩猩",
+      "pinyin": "xīngxing",
+      "adj": 2,
+      "vi": "(con) đười ươi, (con) tinh tinh"
+    },
+    {
+      "pos": 20,
+      "hanzi": "涂鸦",
+      "pinyin": "túyā",
+      "adj": 4,
+      "vi": "vẽ/viết nguệch ngoạc"
+    },
+    {
+      "pos": 21,
+      "hanzi": "签",
+      "pinyin": "qiān",
+      "adj": 4,
+      "vi": "ký tên"
+    },
+    {
+      "pos": 22,
+      "hanzi": "其余",
+      "pinyin": "qíyú",
+      "adj": 2,
+      "vi": "cái còn lại, những cái khác"
+    },
+    {
+      "pos": 23,
+      "hanzi": "身份",
+      "pinyin": "shēnfèn",
+      "adj": 2,
+      "vi": "thân phận, địa vị"
+    },
+    {
+      "pos": 24,
+      "hanzi": "确认",
+      "pinyin": "quèrèn",
+      "adj": 4,
+      "vi": "xác nhận"
+    },
+    {
+      "pos": 25,
+      "hanzi": "随手",
+      "pinyin": "suíshǒu",
+      "adj": 7,
+      "vi": "tiện tay, thuận tay"
+    },
+    {
+      "pos": 26,
+      "hanzi": "分辨",
+      "pinyin": "fēnbiàn",
+      "adj": 4,
+      "vi": "phân biệt"
+    },
+    {
+      "pos": 27,
+      "hanzi": "挥",
+      "pinyin": "huī",
+      "adj": 4,
+      "vi": "vẫy, múa, vung"
+    },
+    {
+      "pos": 28,
+      "hanzi": "可见",
+      "pinyin": "kějiàn",
+      "adj": 10,
+      "vi": "có thể thấy rõ"
+    },
+    {
+      "pos": 29,
+      "hanzi": "哪怕",
+      "pinyin": "nǎpà",
+      "adj": 10,
+      "vi": "dù cho, cho dù"
+    },
+    {
+      "pos": 30,
+      "hanzi": "元素",
+      "pinyin": "yuánsù",
+      "adj": 2,
+      "vi": "yếu tố, nguyên tố"
+    },
+    {
+      "pos": 31,
+      "hanzi": "调整",
+      "pinyin": "tiáozhěng",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "điều chỉnh; sự điều chỉnh"
+    },
+    {
+      "pos": 32,
+      "hanzi": "位置",
+      "pinyin": "wèizhi",
+      "adj": 2,
+      "vi": "vị trí"
+    },
+    {
+      "pos": 33,
+      "hanzi": "含意",
+      "pinyin": "hányì",
+      "adj": 2,
+      "vi": "hàm ý, ẩn ý"
+    },
+    {
+      "pos": 34,
+      "hanzi": "区域",
+      "pinyin": "qūyù",
+      "adj": 2,
+      "vi": "khu vực, vùng"
+    },
+    {
+      "pos": 35,
+      "hanzi": "活跃",
+      "pinyin": "huóyuè",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "sinh động, sôi nổi; làm sôi nổi, đẩy mạnh"
+    },
+    {
+      "pos": 36,
+      "hanzi": "布局",
+      "pinyin": "bùjú",
+      "adj": 2,
+      "vi": "bố cục"
+    },
+    {
+      "pos": 37,
+      "hanzi": "事实",
+      "pinyin": "shìshí",
+      "adj": 2,
+      "vi": "sự thật"
+    },
+    {
+      "pos": 38,
+      "hanzi": "目前",
+      "pinyin": "mùqián",
+      "adj": 2,
+      "vi": "hiện nay"
+    },
+    {
+      "pos": 39,
+      "hanzi": "证据",
+      "pinyin": "zhèngjù",
+      "adj": 2,
+      "vi": "chứng cứ, bằng chứng"
+    },
+    {
+      "pos": 40,
+      "hanzi": "话题",
+      "pinyin": "huàtí",
+      "adj": 2,
+      "vi": "chủ đề, đề tài"
+    }
+  ]
+}

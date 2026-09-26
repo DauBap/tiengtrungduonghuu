@@ -1,0 +1,222 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 9,
+  "label": "Bài 9",
+  "title": "打不好没关系",
+  "short_vi": "Chuẩn bị cho hội thao; bàn về các môn thể thao (bóng rổ, bóng đá, quần vợt, cầu lông); rủ nhau tập luyện; đánh giá trình độ chơi thể thao; giới thiệu về Thế vận hội Olympic",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "校园",
+      "pinyin": "xiàoyuán",
+      "adj": 2,
+      "vi": "trường học, khuôn viên trường"
+    },
+    {
+      "pos": 2,
+      "hanzi": "卡",
+      "pinyin": "kǎ",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "thẻ, thẻ ngân hàng; kẹt, bị mắc kẹt"
+    },
+    {
+      "pos": 3,
+      "hanzi": "球场",
+      "pinyin": "qiúchǎng",
+      "adj": 2,
+      "vi": "sân chơi thể thao (sân bóng, sân tennis, sân cầu lông…)"
+    },
+    {
+      "pos": 4,
+      "hanzi": "为了",
+      "pinyin": "wèile",
+      "adj": 13,
+      "vi": "để, vì, nhằm mục đích"
+    },
+    {
+      "pos": 5,
+      "hanzi": "运动会",
+      "pinyin": "yùndònghuì",
+      "adj": 2,
+      "vi": "hội thao, đại hội thể dục thể thao"
+    },
+    {
+      "pos": 6,
+      "hanzi": "男生",
+      "pinyin": "nánshēng",
+      "adj": 2,
+      "vi": "Nam sinh, con trai"
+    },
+    {
+      "pos": 7,
+      "hanzi": "练",
+      "pinyin": "liàn",
+      "adj": 4,
+      "vi": "Luyện tập, rèn luyện"
+    },
+    {
+      "pos": 8,
+      "hanzi": "参加",
+      "pinyin": "cānjiā",
+      "adj": 4,
+      "vi": "Tham gia, tham dự"
+    },
+    {
+      "pos": 9,
+      "hanzi": "网球",
+      "pinyin": "wǎngqiú",
+      "adj": 2,
+      "vi": "môn quần vợt"
+    },
+    {
+      "pos": 10,
+      "hanzi": "比赛",
+      "pinyin": "bǐsài",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "trận đấu, thi đấu; tổ chức thi đấu"
+    },
+    {
+      "pos": 11,
+      "hanzi": "练习",
+      "pinyin": "liànxí",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "Luyện tập, bài tập"
+    },
+    {
+      "pos": 12,
+      "hanzi": "好多",
+      "pinyin": "hǎoduō",
+      "adj": [
+        6,
+        18
+      ],
+      "vi": "Nhiều, rất nhiều"
+    },
+    {
+      "pos": 13,
+      "hanzi": "几乎",
+      "pinyin": "jīhū",
+      "adj": 18,
+      "vi": "Gần như, hầu như"
+    },
+    {
+      "pos": 14,
+      "hanzi": "只是",
+      "pinyin": "zhǐshì",
+      "adj": [
+        18,
+        10
+      ],
+      "vi": "Chỉ là, chỉ có, nhưng mà"
+    },
+    {
+      "pos": 15,
+      "hanzi": "啤酒",
+      "pinyin": "píjiǔ",
+      "adj": 2,
+      "vi": "bia"
+    },
+    {
+      "pos": 16,
+      "hanzi": "回",
+      "pinyin": "huí",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "Về"
+    },
+    {
+      "pos": 17,
+      "hanzi": "紧张",
+      "pinyin": "jǐnzhāng",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "căng thẳng, hồi hộp, lo lắng; gấp rút"
+    },
+    {
+      "pos": 18,
+      "hanzi": "主要",
+      "pinyin": "zhǔyào",
+      "adj": [
+        6,
+        18
+      ],
+      "vi": "chính, chủ yếu, quan trọng nhất"
+    },
+    {
+      "pos": 19,
+      "hanzi": "受到",
+      "pinyin": "shòudào",
+      "adj": 4,
+      "vi": "nhận được, chịu, nhận"
+    },
+    {
+      "pos": 20,
+      "hanzi": "影响",
+      "pinyin": "yǐngxiǎng",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "Ảnh hưởng, tác động"
+    },
+    {
+      "pos": 21,
+      "hanzi": "得分",
+      "pinyin": "dé fēn",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "Ghi điểm, điểm số"
+    },
+    {
+      "pos": 22,
+      "hanzi": "体育",
+      "pinyin": "tǐyù",
+      "adj": 2,
+      "vi": "thể thao, giáo dục thể chất"
+    },
+    {
+      "pos": 23,
+      "hanzi": "世界",
+      "pinyin": "shìjiè",
+      "adj": 2,
+      "vi": "thế giới"
+    },
+    {
+      "pos": 24,
+      "hanzi": "运动员",
+      "pinyin": "yùndòngyuán",
+      "adj": 2,
+      "vi": "vận động viên, người chơi thể thao"
+    },
+    {
+      "pos": 25,
+      "hanzi": "得到",
+      "pinyin": "dédào",
+      "adj": 4,
+      "vi": "nhận được, đạt được, thu được"
+    },
+    {
+      "pos": 26,
+      "hanzi": "成绩",
+      "pinyin": "chéngjì",
+      "adj": 2,
+      "vi": "thành tích"
+    }
+  ]
+}

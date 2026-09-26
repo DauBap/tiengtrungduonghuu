@@ -1,0 +1,212 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const explanation = "Đối chiếu đúng ý nghĩa và trật tự từ của cấu trúc đã học.";
+const input = (id: string, prompt: string, answer: string): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	explanation,
+	formula: "Giữ đúng trật tự từ; dấu câu và khoảng trắng không ảnh hưởng kết quả."
+});
+const choice = (
+	id: string,
+	answer: string,
+	options: [string, string, string],
+	image: string,
+	imageAlt: string
+): GrammarQuestion => ({
+	id,
+	prompt: "Chọn câu tiếng Trung phù hợp với hình.",
+	answer,
+	options,
+	image,
+	imageAlt,
+	explanation,
+	formula: "Quan sát chi tiết trong hình và chọn đúng một câu."
+});
+const arrange = (id: string, tokens: string[], answer: string): GrammarQuestion => ({
+	id,
+	prompt: "Sắp xếp các thẻ từ thành câu đúng.",
+	tokens,
+	answer,
+	explanation,
+	formula: "Chọn từng thẻ theo đúng trật tự câu."
+});
+const img = (name: string) => `/images/grammar/lesson9/${name}.svg`;
+
+const pictures: GrammarQuestion[] = [
+	choice(
+		"l9-p1",
+		"学校前边有一家电影院。",
+		["学校前边有一家电影院。", "电影院前边有一个学校。", "学校里有一家电影院。"],
+		img("cinema-before-school"),
+		"Phía trước trường học có một rạp chiếu phim"
+	),
+	choice(
+		"l9-p2",
+		"桌子上有两本书。",
+		["桌子上有两本书。", "桌子下有两本书。", "桌子上有一本书。"],
+		img("two-books-on-table"),
+		"Trên bàn có hai quyển sách"
+	),
+	choice(
+		"l9-p3",
+		"桌子上是一本书。",
+		["桌子上是一本书。", "桌子下是一本书。", "桌子上是两本书。"],
+		img("one-book-on-table"),
+		"Thứ nằm trên bàn là một quyển sách"
+	),
+	choice(
+		"l9-p4",
+		"桌子下有一只小狗。",
+		["桌子下有一只小狗。", "桌子上有一只小狗。", "桌子下有一只小猫。"],
+		img("dog-under-table"),
+		"Dưới bàn có một chú chó con"
+	),
+	choice(
+		"l9-p5",
+		"我明天上午在学校学习。",
+		["我明天上午在学校学习。", "我今天上午在学校学习。", "我明天上午在家学习。"],
+		img("tomorrow-study-school"),
+		"Sáng mai nhân vật học ở trường"
+	),
+	choice(
+		"l9-p6",
+		"我们七点在电影院外边见。",
+		["我们七点在电影院外边见。", "我们八点在电影院外边见。", "我们七点在电影院里见。"],
+		img("meet-outside-cinema"),
+		"Hai người gặp nhau bên ngoài rạp chiếu phim lúc 7 giờ"
+	),
+	choice(
+		"l9-p7",
+		"第一本书",
+		["第一本书", "第二本书", "第三本书"],
+		img("first-book"),
+		"Ba quyển sách, quyển thứ nhất được đánh dấu"
+	),
+	choice(
+		"l9-p8",
+		"第三个学生",
+		["第三个学生", "第二个学生", "三个学生"],
+		img("third-student"),
+		"Ba học sinh, học sinh thứ ba được đánh dấu"
+	)
+];
+
+const arrangements: GrammarQuestion[] = [
+	arrange("l9-a1", ["一家电影院", "学校前边", "有"], "学校前边有一家电影院。"),
+	arrange("l9-a2", ["两本书", "有", "桌子上"], "桌子上有两本书。"),
+	arrange("l9-a3", ["一本书", "桌子上", "是"], "桌子上是一本书。"),
+	arrange("l9-a4", ["有小狗", "桌子下"], "桌子下有小狗。"),
+	arrange("l9-a5", ["在学校学习", "我", "明天上午"], "我明天上午在学校学习。"),
+	arrange("l9-a6", ["见", "在电影院外边", "我们", "七点"], "我们七点在电影院外边见。"),
+	arrange("l9-a7", ["在医院工作", "明天上午", "爸爸"], "爸爸明天上午在医院工作。"),
+	arrange("l9-a8", ["看电视", "我", "下午", "在家"], "我下午在家看电视。"),
+	arrange("l9-a9", ["书", "第一本"], "第一本书。"),
+	arrange("l9-a10", ["第三个", "学生"], "第三个学生。")
+];
+
+const translations: GrammarQuestion[] = [
+	input("l9-t1", "Phía trước trường học có một rạp chiếu phim.", "学校前边有一家电影院。"),
+	input("l9-t2", "Trên bàn có hai quyển sách.", "桌子上有两本书。"),
+	input("l9-t3", "Thứ ở trên bàn là một quyển sách.", "桌子上是一本书。"),
+	input("l9-t4", "Dưới bàn có một chú chó con.", "桌子下有小狗。"),
+	input("l9-t5", "Sáng mai tôi học ở trường.", "我明天上午在学校学习。"),
+	input(
+		"l9-t6",
+		"Chúng ta gặp nhau bên ngoài rạp chiếu phim lúc 7 giờ.",
+		"我们七点在电影院外边见。"
+	),
+	input("l9-t7", "Sáng mai bố làm việc ở bệnh viện.", "爸爸明天上午在医院工作。"),
+	input("l9-t8", "Buổi chiều tôi xem tivi ở nhà.", "我下午在家看电视。"),
+	input("l9-t9", "Quyển sách thứ nhất.", "第一本书。"),
+	input("l9-t10", "Học sinh thứ ba.", "第三个学生。")
+];
+
+export const hsk1Lesson9Grammar: GrammarLesson = {
+	title: "Bài 9: 我明天上午在学校学习",
+	variant: "hsk1-3-0-lesson9",
+	points: [
+		{
+			id: "existential-one",
+			title: "Câu tồn tại (1)",
+			explanation:
+				"Câu tồn tại diễn tả sự tồn tại của người hoặc vật tại một nơi. Nơi chốn đứng đầu câu, người hoặc vật đứng sau 有 hoặc 是. 有 nhấn mạnh sự tồn tại hay số lượng; 是 nhấn mạnh vật ở vị trí đó là gì.",
+			formulas: ["Nơi chốn + 有 + Người/Vật", "Nơi chốn + 是 + Người/Vật"],
+			examples: [
+				{
+					chinese: "学校前边有一家电影院。",
+					vietnamese: "Phía trước trường học có một rạp chiếu phim."
+				},
+				{ chinese: "桌子上有两本书。", vietnamese: "Trên bàn có hai quyển sách." },
+				{ chinese: "桌子下有一只小狗。", vietnamese: "Dưới bàn có một chú chó con." },
+				{ chinese: "桌子上是一本书。", vietnamese: "Trên bàn là một quyển sách." },
+				{ chinese: "学校前边是电影院。", vietnamese: "Phía trước trường học là rạp chiếu phim." }
+			],
+			notes: [
+				"有 nhấn mạnh sự tồn tại hoặc số lượng.",
+				"是 nhấn mạnh người hoặc vật ở vị trí đó là gì.",
+				"So sánh: 桌子上有一本书。/ 桌子上是一本书。"
+			],
+			exercises: [
+				{
+					id: "l9-picture",
+					title: "Bài tập 1: Nhìn hình và chọn câu đúng",
+					type: "choice",
+					questions: pictures
+				}
+			]
+		},
+		{
+			id: "time-place-order",
+			title: "Trật tự thời gian và nơi chốn",
+			explanation:
+				"Khi thời gian và nơi chốn cùng làm trạng ngữ, thời gian thường đứng trước nơi chốn.",
+			formulas: [
+				"Chủ ngữ + Thời gian + 在 + Nơi chốn + Động từ",
+				"Chủ ngữ → Thời gian → Nơi chốn → Động từ"
+			],
+			examples: [
+				{ chinese: "我明天上午在学校学习。", vietnamese: "Sáng mai tôi học ở trường." },
+				{
+					chinese: "我们七点在电影院外边见。",
+					vietnamese: "Chúng ta gặp bên ngoài rạp chiếu phim lúc 7 giờ."
+				},
+				{ chinese: "爸爸明天上午在医院工作。", vietnamese: "Sáng mai bố làm việc ở bệnh viện." },
+				{ chinese: "我下午在家看电视。", vietnamese: "Buổi chiều tôi xem tivi ở nhà." }
+			],
+			notes: ["Đúng: 我明天上午在学校学习。", "Sai: 我在学校明天上午学习。"],
+			exercises: [
+				{
+					id: "l9-arrange",
+					title: "Bài tập 2: Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: arrangements
+				}
+			]
+		},
+		{
+			id: "ordinal-di",
+			title: "第 chỉ số thứ tự",
+			explanation:
+				"第 đứng trước số đếm để tạo số thứ tự. Khi có lượng từ và danh từ, 第 cùng số từ đứng trước lượng từ.",
+			formulas: ["第 + Số từ", "第 + Số từ + Lượng từ + Danh từ"],
+			examples: [
+				{ chinese: "第一 / 第二 / 第三", vietnamese: "Thứ nhất / thứ hai / thứ ba." },
+				{ chinese: "第一个学生", vietnamese: "Học sinh thứ nhất." },
+				{ chinese: "第二本书", vietnamese: "Quyển sách thứ hai." },
+				{ chinese: "第三个朋友", vietnamese: "Người bạn thứ ba." },
+				{ chinese: "第五课", vietnamese: "Bài học thứ năm." }
+			],
+			notes: ["Số lượng: 三个学生 — ba học sinh.", "Số thứ tự: 第三个学生 — học sinh thứ ba."],
+			exercises: [
+				{
+					id: "l9-translate",
+					title: "Bài tập 3: Dịch sang tiếng Trung",
+					type: "input",
+					questions: translations
+				}
+			]
+		}
+	]
+};

@@ -1,0 +1,178 @@
+{
+	"course_id": "hsk1_3-0",
+	"course_name": "HSK 1 (3.0)",
+	"id": 8,
+	"label": "Bài 8",
+	"title": "我爸爸也在医院工作",
+	"short_vi": "Mô tả vị trí của đồ vật, hỏi đáp về nơi làm việc",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "房间",
+			"pinyin": "fánɡjiān",
+			"adj": 2,
+			"vi": "phòng"
+		},
+		{
+			"pos": 2,
+			"hanzi": "外",
+			"pinyin": "wài",
+			"adj": 2,
+			"vi": "ngoài, bên ngoài"
+		},
+		{
+			"pos": 3,
+			"hanzi": "只",
+			"pinyin": "zhī",
+			"adj": 8,
+			"vi": "lượng từ chỉ con vật"
+		},
+		{
+			"pos": 4,
+			"hanzi": "小",
+			"pinyin": "xiǎo",
+			"adj": 6,
+			"vi": "nhỏ, nhỏ bé"
+		},
+		{
+			"pos": 5,
+			"hanzi": "猫",
+			"pinyin": "māo",
+			"adj": 2,
+			"vi": "con mèo"
+		},
+		{
+			"pos": 6,
+			"hanzi": "没",
+			"pinyin": "méi",
+			"adj": 6,
+			"vi": "chưa"
+		},
+		{
+			"pos": 7,
+			"hanzi": "看见",
+			"pinyin": "kànjiàn",
+			"adj": 4,
+			"vi": "nhìn thấy"
+		},
+		{
+			"pos": 8,
+			"hanzi": "桌子",
+			"pinyin": "zhuōzi",
+			"adj": 2,
+			"vi": "bàn"
+		},
+		{
+			"pos": 9,
+			"hanzi": "下",
+			"pinyin": "xià",
+			"adj": [],
+			"vi": "ở dưới"
+		},
+		{
+			"pos": 10,
+			"hanzi": "漂亮",
+			"pinyin": "piàolianɡ",
+			"adj": 6,
+			"vi": "xinh đẹp"
+		},
+		{
+			"pos": 11,
+			"hanzi": "在",
+			"pinyin": "zài",
+			"adj": 13,
+			"vi": "ở, tại"
+		},
+		{
+			"pos": 12,
+			"hanzi": "学校",
+			"pinyin": "xuéxiào",
+			"adj": 2,
+			"vi": "trường học"
+		},
+		{
+			"pos": 13,
+			"hanzi": "书店",
+			"pinyin": "shūdiàn",
+			"adj": 2,
+			"vi": "tiệm sách"
+		},
+		{
+			"pos": 14,
+			"hanzi": "前",
+			"pinyin": "qián",
+			"adj": 2,
+			"vi": "ở trước"
+		},
+		{
+			"pos": 15,
+			"hanzi": "能",
+			"pinyin": "néng",
+			"adj": 4,
+			"vi": "có thể, có khả năng"
+		},
+		{
+			"pos": 16,
+			"hanzi": "到",
+			"pinyin": "dào",
+			"adj": 4,
+			"vi": "đến, tới nơi"
+		},
+		{
+			"pos": 17,
+			"hanzi": "午饭",
+			"pinyin": "wǔfàn",
+			"adj": 2,
+			"vi": "Bữa trưa"
+		},
+		{
+			"pos": 18,
+			"hanzi": "饭",
+			"pinyin": "fàn",
+			"adj": 2,
+			"vi": "cơm, bữa ăn"
+		},
+		{
+			"pos": 19,
+			"hanzi": "大",
+			"pinyin": "dà",
+			"adj": 6,
+			"vi": "to, lớn"
+		},
+		{
+			"pos": 20,
+			"hanzi": "病人",
+			"pinyin": "bìnɡrén",
+			"adj": 2,
+			"vi": "bệnh nhân"
+		},
+		{
+			"pos": 21,
+			"hanzi": "多",
+			"pinyin": "duō",
+			"adj": 6,
+			"vi": "nhiều, rất nhiều"
+		},
+		{
+			"pos": 22,
+			"hanzi": "医生",
+			"pinyin": "yīshēnɡ",
+			"adj": 2,
+			"vi": "bác sĩ"
+		},
+		{
+			"pos": 23,
+			"hanzi": "工作",
+			"pinyin": "ɡōnɡzuò",
+			"adj": 4,
+			"vi": "công việc"
+		},
+		{
+			"pos": 24,
+			"hanzi": "胡医生",
+			"pinyin": "Hú yīshēnɡ",
+			"adj": [],
+			"vi": "Bác sĩ Hồ"
+		}
+	]
+}

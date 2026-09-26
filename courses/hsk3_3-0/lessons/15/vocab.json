@@ -1,0 +1,184 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 15,
+  "label": "Bài 15",
+  "title": "我是半个南京人",
+  "short_vi": "Hỏi về khu dân cư, môi trường sống; giới thiệu về thành phố Nam Kinh (lịch sử, danh lam thắng cảnh); bàn về sông Hoàng Hà và ý nghĩa văn hóa; kể về kỷ niệm tuổi thơ bên dòng sông",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "蓝",
+      "pinyin": "lán",
+      "adj": 6,
+      "vi": "xanh lam"
+    },
+    {
+      "pos": 2,
+      "hanzi": "段",
+      "pinyin": "duàn",
+      "adj": 8,
+      "vi": "đoạn, khoảng (thời gian/khoảng cách)"
+    },
+    {
+      "pos": 3,
+      "hanzi": "附近",
+      "pinyin": "fùjìn",
+      "adj": 2,
+      "vi": "gần đây, lân cận"
+    },
+    {
+      "pos": 4,
+      "hanzi": "马路",
+      "pinyin": "mǎlù",
+      "adj": 2,
+      "vi": "đường lớn, đường cái"
+    },
+    {
+      "pos": 5,
+      "hanzi": "平时",
+      "pinyin": "píngshí",
+      "adj": 2,
+      "vi": "bình thường, lúc bình thường"
+    },
+    {
+      "pos": 6,
+      "hanzi": "放学",
+      "pinyin": "fàngxué",
+      "adj": 4,
+      "vi": "tan học"
+    },
+    {
+      "pos": 7,
+      "hanzi": "游戏",
+      "pinyin": "yóuxì",
+      "adj": 2,
+      "vi": "trò chơi"
+    },
+    {
+      "pos": 8,
+      "hanzi": "老人",
+      "pinyin": "lǎorén",
+      "adj": 2,
+      "vi": "người già"
+    },
+    {
+      "pos": 9,
+      "hanzi": "根据",
+      "pinyin": "gēnjù",
+      "adj": [
+        13,
+        4
+      ],
+      "vi": "căn cứ vào, dựa vào"
+    },
+    {
+      "pos": 10,
+      "hanzi": "了解",
+      "pinyin": "liǎojiě",
+      "adj": 4,
+      "vi": "hiểu, tìm hiểu"
+    },
+    {
+      "pos": 11,
+      "hanzi": "可是",
+      "pinyin": "kěshì",
+      "adj": 10,
+      "vi": "nhưng, nhưng mà"
+    },
+    {
+      "pos": 12,
+      "hanzi": "以上",
+      "pinyin": "yǐshàng",
+      "adj": 2,
+      "vi": "trở lên, hơn"
+    },
+    {
+      "pos": 13,
+      "hanzi": "有名",
+      "pinyin": "yǒumíng",
+      "adj": 6,
+      "vi": "nổi tiếng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "景点",
+      "pinyin": "jǐngdiǎn",
+      "adj": 2,
+      "vi": "danh lam thắng cảnh, điểm tham quan"
+    },
+    {
+      "pos": 15,
+      "hanzi": "游客",
+      "pinyin": "yóukè",
+      "adj": 2,
+      "vi": "du khách, khách du lịch"
+    },
+    {
+      "pos": 16,
+      "hanzi": "外地",
+      "pinyin": "wàidì",
+      "adj": 2,
+      "vi": "nơi khác, vùng khác"
+    },
+    {
+      "pos": 17,
+      "hanzi": "聊",
+      "pinyin": "liáo",
+      "adj": 4,
+      "vi": "tán gẫu, trò chuyện"
+    },
+    {
+      "pos": 18,
+      "hanzi": "河",
+      "pinyin": "hé",
+      "adj": 2,
+      "vi": "sông"
+    },
+    {
+      "pos": 19,
+      "hanzi": "关系",
+      "pinyin": "guānxì",
+      "adj": 2,
+      "vi": "quan hệ, mối quan hệ"
+    },
+    {
+      "pos": 20,
+      "hanzi": "养",
+      "pinyin": "yǎng",
+      "adj": 4,
+      "vi": "nuôi, chăm sóc"
+    },
+    {
+      "pos": 21,
+      "hanzi": "西北",
+      "pinyin": "xīběi",
+      "adj": 2,
+      "vi": "Tây Bắc"
+    },
+    {
+      "pos": 22,
+      "hanzi": "经过",
+      "pinyin": "jīngguò",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "đi qua, trải qua, quá trình"
+    },
+    {
+      "pos": 23,
+      "hanzi": "草地",
+      "pinyin": "cǎodì",
+      "adj": 2,
+      "vi": "bãi cỏ, đồng cỏ"
+    },
+    {
+      "pos": 24,
+      "hanzi": "遇见",
+      "pinyin": "yùjiàn",
+      "adj": 4,
+      "vi": "gặp gỡ, bắt gặp"
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 12,
+  "label": "Bài 12",
+  "title": "把重要的东西放在我这儿吧",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "太阳",
+      "pinyin": "tàiyáng",
+      "adj": 2,
+      "vi": "mặt trời"
+    },
+    {
+      "pos": 2,
+      "hanzi": "西",
+      "pinyin": "xī",
+      "adj": 2,
+      "vi": "phía tây, hướng tây"
+    },
+    {
+      "pos": 3,
+      "hanzi": "生气",
+      "pinyin": "shēng qì",
+      "adj": 4,
+      "vi": "giận, tức giận"
+    },
+    {
+      "pos": 4,
+      "hanzi": "行李箱",
+      "pinyin": "xínglixiāng",
+      "adj": 2,
+      "vi": "hành lý, vali"
+    },
+    {
+      "pos": 5,
+      "hanzi": "自己",
+      "pinyin": "zìjǐ",
+      "adj": 2,
+      "vi": "tự mình, bản thân"
+    },
+    {
+      "pos": 6,
+      "hanzi": "包",
+      "pinyin": "bāo",
+      "adj": 2,
+      "vi": "cặp, túi"
+    },
+    {
+      "pos": 7,
+      "hanzi": "发现",
+      "pinyin": "fāxiàn",
+      "adj": 4,
+      "vi": "phát hiện"
+    },
+    {
+      "pos": 8,
+      "hanzi": "护照",
+      "pinyin": "hùzhào",
+      "adj": 2,
+      "vi": "hộ chiếu"
+    },
+    {
+      "pos": 9,
+      "hanzi": "起飞",
+      "pinyin": "qǐfēi",
+      "adj": 4,
+      "vi": "cất cánh (máy bay)"
+    },
+    {
+      "pos": 10,
+      "hanzi": "司机",
+      "pinyin": "sījī",
+      "adj": 2,
+      "vi": "tài xế"
+    },
+    {
+      "pos": 11,
+      "hanzi": "教",
+      "pinyin": "jiāo",
+      "adj": 4,
+      "vi": "dạy"
+    },
+    {
+      "pos": 12,
+      "hanzi": "画",
+      "pinyin": "huà",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "vẽ; tranh"
+    },
+    {
+      "pos": 13,
+      "hanzi": "需要",
+      "pinyin": "xūyào",
+      "adj": 4,
+      "vi": "cần"
+    },
+    {
+      "pos": 14,
+      "hanzi": "黑板",
+      "pinyin": "hēibǎn",
+      "adj": 2,
+      "vi": "bảng đen"
+    }
+  ]
+}

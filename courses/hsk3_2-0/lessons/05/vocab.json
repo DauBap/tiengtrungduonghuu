@@ -1,0 +1,101 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 5,
+  "label": "Bài 5",
+  "title": "我最近越来越胖了",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "发烧",
+      "pinyin": "fā shāo",
+      "adj": 4,
+      "vi": "sốt"
+    },
+    {
+      "pos": 2,
+      "hanzi": "为",
+      "pinyin": "wèi",
+      "adj": 13,
+      "vi": "cho"
+    },
+    {
+      "pos": 3,
+      "hanzi": "照顾",
+      "pinyin": "zhàogù",
+      "adj": 4,
+      "vi": "chăm sóc"
+    },
+    {
+      "pos": 4,
+      "hanzi": "用",
+      "pinyin": "yòng",
+      "adj": 4,
+      "vi": "cần"
+    },
+    {
+      "pos": 5,
+      "hanzi": "感冒",
+      "pinyin": "gǎnmào",
+      "adj": 4,
+      "vi": "bị cảm"
+    },
+    {
+      "pos": 6,
+      "hanzi": "季节",
+      "pinyin": "jìjié",
+      "adj": 2,
+      "vi": "mùa"
+    },
+    {
+      "pos": 7,
+      "hanzi": "当然",
+      "pinyin": "dāngrán",
+      "adj": 7,
+      "vi": "đương nhiên, dĩ nhiên"
+    },
+    {
+      "pos": 8,
+      "hanzi": "春（天）",
+      "pinyin": "chūn (tiān)",
+      "adj": 2,
+      "vi": "(mùa) xuân"
+    },
+    {
+      "pos": 9,
+      "hanzi": "草",
+      "pinyin": "cǎo",
+      "adj": 2,
+      "vi": "cỏ"
+    },
+    {
+      "pos": 10,
+      "hanzi": "夏（天）",
+      "pinyin": "xià (tiān)",
+      "adj": 2,
+      "vi": "(mùa) hè"
+    },
+    {
+      "pos": 11,
+      "hanzi": "裙子",
+      "pinyin": "qúnzi",
+      "adj": 2,
+      "vi": "váy"
+    },
+    {
+      "pos": 12,
+      "hanzi": "最近",
+      "pinyin": "zuìjìn",
+      "adj": 7,
+      "vi": "gần đây, dạo này"
+    },
+    {
+      "pos": 13,
+      "hanzi": "越",
+      "pinyin": "yuè",
+      "adj": 7,
+      "vi": "càng"
+    }
+  ]
+}

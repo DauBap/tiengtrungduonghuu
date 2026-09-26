@@ -1,0 +1,111 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 6,
+  "label": "Bài 6",
+  "title": "小雪，生日快乐！",
+  "short_vi": "Chuẩn bị quà sinh nhật; tổ chức tiệc sinh nhật trong gia đình; hỏi và đáp về sở thích (vẽ, ăn uống...); tục lệ ăn mì trong ngày sinh nhật",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "生日",
+      "pinyin": "Shēngrì",
+      "adj": 2,
+      "vi": "Sinh nhật"
+    },
+    {
+      "pos": 2,
+      "hanzi": "忘",
+      "pinyin": "Wàng",
+      "adj": 4,
+      "vi": "Quên"
+    },
+    {
+      "pos": 3,
+      "hanzi": "画",
+      "pinyin": "Huà",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "Vẽ; bức tranh, bức vẽ"
+    },
+    {
+      "pos": 4,
+      "hanzi": "画笔",
+      "pinyin": "Huàbǐ",
+      "adj": 2,
+      "vi": "Bút màu, cọ vẽ"
+    },
+    {
+      "pos": 5,
+      "hanzi": "蛋糕",
+      "pinyin": "Dàn gāo",
+      "adj": 2,
+      "vi": "Bánh kem"
+    },
+    {
+      "pos": 6,
+      "hanzi": "快乐",
+      "pinyin": "Kuàilè",
+      "adj": 6,
+      "vi": "Vui vẻ, hạnh phúc"
+    },
+    {
+      "pos": 7,
+      "hanzi": "打开",
+      "pinyin": "Dǎkāi",
+      "adj": 4,
+      "vi": "mở"
+    },
+    {
+      "pos": 8,
+      "hanzi": "长",
+      "pinyin": "Cháng",
+      "adj": 6,
+      "vi": "dài"
+    },
+    {
+      "pos": 9,
+      "hanzi": "鱼",
+      "pinyin": "Yú",
+      "adj": 2,
+      "vi": "cá"
+    },
+    {
+      "pos": 10,
+      "hanzi": "肉",
+      "pinyin": "Ròu",
+      "adj": 2,
+      "vi": "thịt"
+    },
+    {
+      "pos": 11,
+      "hanzi": "过",
+      "pinyin": "Guò",
+      "adj": 4,
+      "vi": "Đón, trải qua ( ngày lễ )"
+    },
+    {
+      "pos": 12,
+      "hanzi": "地",
+      "pinyin": "De",
+      "adj": 11,
+      "vi": "1 cách...( dùng với trạng từ/cụm trạng từ)"
+    },
+    {
+      "pos": 13,
+      "hanzi": "床",
+      "pinyin": "Chuáng",
+      "adj": 2,
+      "vi": "Cái giường"
+    },
+    {
+      "pos": 14,
+      "hanzi": "舒服",
+      "pinyin": "Shùfu",
+      "adj": 6,
+      "vi": "Thoải mái, dễ chịu"
+    }
+  ]
+}

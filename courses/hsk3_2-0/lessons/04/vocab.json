@@ -1,0 +1,122 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 4,
+  "label": "Bài 4",
+  "title": "她总是笑着跟客人说话",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "比赛",
+      "pinyin": "bǐsài",
+      "adj": 2,
+      "vi": "cuộc thi đấu"
+    },
+    {
+      "pos": 2,
+      "hanzi": "照片",
+      "pinyin": "zhàopiàn",
+      "adj": 2,
+      "vi": "bức ảnh"
+    },
+    {
+      "pos": 3,
+      "hanzi": "年级",
+      "pinyin": "niánjí",
+      "adj": 2,
+      "vi": "lớp"
+    },
+    {
+      "pos": 4,
+      "hanzi": "又",
+      "pinyin": "yòu",
+      "adj": 7,
+      "vi": "vừa"
+    },
+    {
+      "pos": 5,
+      "hanzi": "聪明",
+      "pinyin": "cōngming",
+      "adj": 6,
+      "vi": "thông minh"
+    },
+    {
+      "pos": 6,
+      "hanzi": "热情",
+      "pinyin": "rèqíng",
+      "adj": 6,
+      "vi": "nhiệt tình"
+    },
+    {
+      "pos": 7,
+      "hanzi": "努力",
+      "pinyin": "nǔlì",
+      "adj": 6,
+      "vi": "hăng hái, tích cực làm việc"
+    },
+    {
+      "pos": 8,
+      "hanzi": "总是",
+      "pinyin": "zǒngshì",
+      "adj": 7,
+      "vi": "luôn luôn"
+    },
+    {
+      "pos": 9,
+      "hanzi": "回答",
+      "pinyin": "huídá",
+      "adj": 4,
+      "vi": "trả lời"
+    },
+    {
+      "pos": 10,
+      "hanzi": "站",
+      "pinyin": "zhàn",
+      "adj": 4,
+      "vi": "đứng"
+    },
+    {
+      "pos": 11,
+      "hanzi": "饿",
+      "pinyin": "è",
+      "adj": 6,
+      "vi": "đói"
+    },
+    {
+      "pos": 12,
+      "hanzi": "超市",
+      "pinyin": "chāoshì",
+      "adj": 2,
+      "vi": "siêu thị"
+    },
+    {
+      "pos": 13,
+      "hanzi": "蛋糕",
+      "pinyin": "dàngāo",
+      "adj": 2,
+      "vi": "bánh kem"
+    },
+    {
+      "pos": 14,
+      "hanzi": "年轻",
+      "pinyin": "niánqīng",
+      "adj": 6,
+      "vi": "trẻ tuổi"
+    },
+    {
+      "pos": 15,
+      "hanzi": "认真",
+      "pinyin": "rènzhēn",
+      "adj": 6,
+      "vi": "nghiêm túc, chăm chỉ"
+    },
+    {
+      "pos": 16,
+      "hanzi": "客人",
+      "pinyin": "kèrén",
+      "adj": 2,
+      "vi": "khách, khách hàng"
+    }
+  ]
+}

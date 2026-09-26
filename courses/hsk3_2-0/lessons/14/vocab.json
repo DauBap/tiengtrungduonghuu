@@ -1,0 +1,129 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 14,
+  "label": "Bài 14",
+  "title": "你把水果拿过来",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "打扫",
+      "pinyin": "dǎsǎo",
+      "adj": 4,
+      "vi": "quét dọn"
+    },
+    {
+      "pos": 2,
+      "hanzi": "干净",
+      "pinyin": "gānjìng",
+      "adj": 6,
+      "vi": "sạch sẽ"
+    },
+    {
+      "pos": 3,
+      "hanzi": "然后",
+      "pinyin": "ránhòu",
+      "adj": 10,
+      "vi": "sau đó"
+    },
+    {
+      "pos": 4,
+      "hanzi": "冰箱",
+      "pinyin": "bīngxiāng",
+      "adj": 2,
+      "vi": "tủ lạnh"
+    },
+    {
+      "pos": 5,
+      "hanzi": "洗澡",
+      "pinyin": "xǐ zǎo",
+      "adj": 4,
+      "vi": "tắm, tắm rửa"
+    },
+    {
+      "pos": 6,
+      "hanzi": "节目",
+      "pinyin": "jiémù",
+      "adj": 2,
+      "vi": "chương trình (truyền hình)"
+    },
+    {
+      "pos": 7,
+      "hanzi": "月亮",
+      "pinyin": "yuèliang",
+      "adj": 2,
+      "vi": "mặt trăng"
+    },
+    {
+      "pos": 8,
+      "hanzi": "像",
+      "pinyin": "xiàng",
+      "adj": 4,
+      "vi": "giống"
+    },
+    {
+      "pos": 9,
+      "hanzi": "盘子",
+      "pinyin": "pánzi",
+      "adj": 2,
+      "vi": "đĩa, mâm"
+    },
+    {
+      "pos": 10,
+      "hanzi": "刮风",
+      "pinyin": "guā fēng",
+      "adj": 4,
+      "vi": "nổi gió"
+    },
+    {
+      "pos": 11,
+      "hanzi": "叔叔",
+      "pinyin": "shūshu",
+      "adj": 2,
+      "vi": "chú"
+    },
+    {
+      "pos": 12,
+      "hanzi": "阿姨",
+      "pinyin": "āyí",
+      "adj": 2,
+      "vi": "dì, cô"
+    },
+    {
+      "pos": 13,
+      "hanzi": "故事",
+      "pinyin": "gùshi",
+      "adj": 2,
+      "vi": "truyện, câu chuyện"
+    },
+    {
+      "pos": 14,
+      "hanzi": "声音",
+      "pinyin": "shēngyīn",
+      "adj": 2,
+      "vi": "âm thanh, tiếng"
+    },
+    {
+      "pos": 15,
+      "hanzi": "菜单",
+      "pinyin": "càidān",
+      "adj": 2,
+      "vi": "thực đơn"
+    },
+    {
+      "pos": 16,
+      "hanzi": "简单",
+      "pinyin": "jiǎndān",
+      "adj": 6,
+      "vi": "đơn giản"
+    },
+    {
+      "pos": 17,
+      "hanzi": "香蕉",
+      "pinyin": "xiāngjiāo",
+      "adj": 2,
+      "vi": "chuối tiêu"
+    }
+  ]
+}

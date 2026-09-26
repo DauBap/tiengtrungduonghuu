@@ -1,0 +1,234 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 14,
+  "label": "Bài 14",
+  "title": "保护地球母亲",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "出差",
+      "pinyin": "chū chāi",
+      "adj": 4,
+      "vi": "đi công tác"
+    },
+    {
+      "pos": 2,
+      "hanzi": "毛巾",
+      "pinyin": "máojīn",
+      "adj": 2,
+      "vi": "khăn lau"
+    },
+    {
+      "pos": 3,
+      "hanzi": "牙膏",
+      "pinyin": "yágāo",
+      "adj": 2,
+      "vi": "kem đánh răng"
+    },
+    {
+      "pos": 4,
+      "hanzi": "重",
+      "pinyin": "zhòng",
+      "adj": 6,
+      "vi": "nặng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "行",
+      "pinyin": "xíng",
+      "adj": 4,
+      "vi": "được, đồng ý"
+    },
+    {
+      "pos": 6,
+      "hanzi": "省",
+      "pinyin": "shěng",
+      "adj": 4,
+      "vi": "tiết kiệm"
+    },
+    {
+      "pos": 7,
+      "hanzi": "污染",
+      "pinyin": "wūrǎn",
+      "adj": 4,
+      "vi": "làm ô nhiễm"
+    },
+    {
+      "pos": 8,
+      "hanzi": "卫生间",
+      "pinyin": "wèishēngjiān",
+      "adj": 2,
+      "vi": "nhà vệ sinh"
+    },
+    {
+      "pos": 9,
+      "hanzi": "脏",
+      "pinyin": "zāng",
+      "adj": 6,
+      "vi": "bẩn, bẩn thỉu"
+    },
+    {
+      "pos": 10,
+      "hanzi": "抱歉",
+      "pinyin": "bàoqiàn",
+      "adj": 4,
+      "vi": "xin lỗi"
+    },
+    {
+      "pos": 11,
+      "hanzi": "空",
+      "pinyin": "kōng",
+      "adj": 6,
+      "vi": "trống, rỗng, không"
+    },
+    {
+      "pos": 12,
+      "hanzi": "盒子",
+      "pinyin": "hézi",
+      "adj": 2,
+      "vi": "hộp"
+    },
+    {
+      "pos": 13,
+      "hanzi": "扔",
+      "pinyin": "rēng",
+      "adj": 4,
+      "vi": "vứt bỏ"
+    },
+    {
+      "pos": 14,
+      "hanzi": "以",
+      "pinyin": "yǐ",
+      "adj": 13,
+      "vi": "dựa vào, bằng"
+    },
+    {
+      "pos": 15,
+      "hanzi": "速度",
+      "pinyin": "sùdù",
+      "adj": 2,
+      "vi": "tốc độ"
+    },
+    {
+      "pos": 16,
+      "hanzi": "地球",
+      "pinyin": "dìqiú",
+      "adj": 2,
+      "vi": "trái đất"
+    },
+    {
+      "pos": 17,
+      "hanzi": "既然",
+      "pinyin": "jìrán",
+      "adj": 10,
+      "vi": "vì, đã...thì..."
+    },
+    {
+      "pos": 18,
+      "hanzi": "停",
+      "pinyin": "tíng",
+      "adj": 4,
+      "vi": "ngừng, cúp, cắt"
+    },
+    {
+      "pos": 19,
+      "hanzi": "得意",
+      "pinyin": "déyì",
+      "adj": 6,
+      "vi": "hể hả, đắc chí"
+    },
+    {
+      "pos": 20,
+      "hanzi": "目的",
+      "pinyin": "mùdì",
+      "adj": 2,
+      "vi": "mục đích"
+    },
+    {
+      "pos": 21,
+      "hanzi": "暖",
+      "pinyin": "nuǎn",
+      "adj": 6,
+      "vi": "ấm, ấm áp"
+    },
+    {
+      "pos": 22,
+      "hanzi": "塑料袋",
+      "pinyin": "sùliàodài",
+      "adj": 2,
+      "vi": "túi nilông, túi nhựa"
+    },
+    {
+      "pos": 23,
+      "hanzi": "于是",
+      "pinyin": "yúshì",
+      "adj": 10,
+      "vi": "thế là"
+    },
+    {
+      "pos": 24,
+      "hanzi": "鼓励",
+      "pinyin": "gǔlì",
+      "adj": 4,
+      "vi": "khuyến khích"
+    },
+    {
+      "pos": 25,
+      "hanzi": "拒绝",
+      "pinyin": "jùjué",
+      "adj": 4,
+      "vi": "từ chối"
+    },
+    {
+      "pos": 26,
+      "hanzi": "减少",
+      "pinyin": "jiǎnshǎo",
+      "adj": 4,
+      "vi": "giảm bớt"
+    },
+    {
+      "pos": 27,
+      "hanzi": "数量",
+      "pinyin": "shùliàng",
+      "adj": 2,
+      "vi": "số lượng"
+    },
+    {
+      "pos": 28,
+      "hanzi": "温度",
+      "pinyin": "wēndù",
+      "adj": 2,
+      "vi": "nhiệt độ"
+    },
+    {
+      "pos": 29,
+      "hanzi": "乘坐",
+      "pinyin": "chéngzuò",
+      "adj": 4,
+      "vi": "đi, đáp (xe buýt...)"
+    },
+    {
+      "pos": 30,
+      "hanzi": "丢",
+      "pinyin": "diū",
+      "adj": 4,
+      "vi": "ném, vứt"
+    },
+    {
+      "pos": 31,
+      "hanzi": "垃圾桶",
+      "pinyin": "lājītǒng",
+      "adj": 2,
+      "vi": "thùng rác"
+    },
+    {
+      "pos": 32,
+      "hanzi": "美丽",
+      "pinyin": "měilì",
+      "adj": 6,
+      "vi": "đẹp"
+    }
+  ]
+}

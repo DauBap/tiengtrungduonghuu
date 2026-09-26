@@ -1,0 +1,146 @@
+{
+  "lesson": 4,
+  "title": "你穿红色的很好看",
+  "title_pinyin": "Nǐ chuān hóngsè de hěn hǎokàn",
+  "title_vi": "Bạn mặc màu đỏ rất đẹp",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "刘小雪",
+          "zh": "妈妈，我们来过这家商场吗？",
+          "pinyin": "Māma, wǒmen lái guo zhè jiā shāngchǎng ma?",
+          "vi": "Mẹ ơi, chúng ta đã đến trung tâm thương mại này chưa ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "没来过，这是新开的。",
+          "pinyin": "Méi lái guo, zhè shì xīn kāi de.",
+          "vi": "Chưa đến, đây là mới mở."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "我们进去看看吧。",
+          "pinyin": "Wǒmen jìnqu kànkan ba.",
+          "vi": "Chúng ta vào xem đi mẹ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好啊！你想买点儿什么？",
+          "pinyin": "Hǎo a! Nǐ xiǎng mǎi diǎnr shénme?",
+          "vi": "Được thôi! Con muốn mua gì?"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "我想买条裤子。",
+          "pinyin": "Wǒ xiǎng mǎi tiáo kùzi.",
+          "vi": "Con muốn mua một cái quần."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "没问题。",
+          "pinyin": "Méi wèntí.",
+          "vi": "Không vấn đề gì."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "刘小雪",
+          "zh": "妈妈，我想买这条白色的裤子。",
+          "pinyin": "Māma, wǒ xiǎng mǎi zhè tiáo báisè de kùzi.",
+          "vi": "Mẹ ơi, con muốn mua cái quần màu trắng này."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你有很多白色的衣服，为什么还买白色的？",
+          "pinyin": "Nǐ yǒu hěnduō báisè de yīfu, wèishénme hái mǎi báisè de?",
+          "vi": "Con có rất nhiều quần áo màu trắng rồi, tại sao còn mua màu trắng nữa?"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "因为我喜欢白色啊！",
+          "pinyin": "Yīnwèi wǒ xǐhuan báisè a!",
+          "vi": "Bởi vì con thích màu trắng mà!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我觉得这条白色的不太好看，你试试那条红色的吧。",
+          "pinyin": "Wǒ juéde zhè tiáo báisè de bú tài hǎokàn, nǐ shìshi nà tiáo hóngsè de ba.",
+          "vi": "Mẹ thấy cái màu trắng này không được đẹp lắm, con thử cái màu đỏ kia đi."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "我没穿过红色的，红色的好看吗？",
+          "pinyin": "Wǒ méi chuān guo hóngsè de, hóngsè de hǎokàn ma?",
+          "vi": "Con chưa mặc màu đỏ bao giờ, màu đỏ có đẹp không ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "就是因为没穿过，所以要试试啊！",
+          "pinyin": "Jiù shì yīnwèi méi chuān guo, suǒyǐ yào shìshi a!",
+          "vi": "Chính vì chưa mặc nên mới phải thử chứ!"
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "刘小雪",
+          "zh": "妈妈，我想买个新书包。",
+          "pinyin": "Māma, wǒ xiǎng mǎi ge xīn shūbāo.",
+          "vi": "Mẹ ơi, con muốn mua một cái cặp sách mới."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好，那边卖书包，我们过去看看吧。",
+          "pinyin": "Hǎo, nàbiān mài shūbāo, wǒmen guòqu kànkan ba.",
+          "vi": "Được, đằng kia bán cặp sách, chúng ta qua xem đi."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "这么多漂亮的书包！",
+          "pinyin": "Zhème duō piàoliang de shūbāo!",
+          "vi": "Nhiều cặp sách đẹp quá!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "红色的、绿色的、黑色的，你想买哪个？",
+          "pinyin": "Hóngsè de, lǜsè de, hēisè de, nǐ xiǎng mǎi nǎge?",
+          "vi": "Màu đỏ, màu xanh, màu đen, con muốn mua cái nào?"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "绿色的吧。",
+          "pinyin": "Lǜsè de ba.",
+          "vi": "Màu xanh đi mẹ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "不错，我也觉得绿色的更好看。",
+          "pinyin": "Búcuò, wǒ yě juéde lǜsè de gèng hǎokàn.",
+          "vi": "Không tệ, mẹ cũng thấy màu xanh đẹp hơn."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "我和妈妈去了一家商场。因为是新开的，所以这几天东西很便宜。商场里的衣服颜色很多。我没穿过红色的裤子，妈妈让我试了试，我觉得我穿红色的也很好看。",
+          "pinyin": "Wǒ hé māma qùle yī jiā shāngchǎng. Yīnwèi shì xīn kāi de, suǒyǐ zhè jǐ tiān dōngxi hěn piányi. Shāngchǎng lǐ de yīfu yánsè hěnduō. Wǒ méi chuān guo hóngsè de kùzi, māma ràng wǒ shìle shì, wǒ juéde wǒ chuān hóngsè de yě hěn hǎokàn.",
+          "vi": "Con và mẹ đã đến một trung tâm thương mại. Vì là mới mở nên mấy ngày nay đồ rất rẻ. Quần áo trong trung tâm có nhiều màu sắc. Con chưa mặc quần màu đỏ bao giờ, mẹ bảo con thử, con thấy mình mặc màu đỏ cũng rất đẹp."
+        }
+      ]
+    }
+  ]
+}

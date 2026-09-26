@@ -1,0 +1,426 @@
+{
+	"title": "HSK3 - Sách bài tập",
+	"lesson": 4,
+	"lesson_title": "这家宾馆跟别的都不一样",
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听对话，选择最匹配的图片。每题听两次。\nCâu 1–3: Nghe và chọn hình phù hợp. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 1,
+							"answer": "C",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"answer": "B",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"answer": "A",
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择正确答案。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 4,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "第一次"
+								},
+								{
+									"label": "B",
+									"text": "第二次"
+								},
+								{
+									"label": "C",
+									"text": "第三次"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "三点"
+								},
+								{
+									"label": "B",
+									"text": "四点"
+								},
+								{
+									"label": "C",
+									"text": "五点一刻"
+								}
+							]
+						},
+						{
+							"number": 6,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "床很舒服"
+								},
+								{
+									"label": "B",
+									"text": "房间不大"
+								},
+								{
+									"label": "C",
+									"text": "不太干净"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听一段话，选择正确答案。每题听两次。\nCâu 7–10: Nghe đoạn thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 7,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "吃羊肉"
+								},
+								{
+									"label": "B",
+									"text": "去海边"
+								},
+								{
+									"label": "C",
+									"text": "看月亮"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "车坏了"
+								},
+								{
+									"label": "B",
+									"text": "走错路了"
+								},
+								{
+									"label": "C",
+									"text": "飞机晚点了"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"answer": "B",
+							"options": [
+								{
+									"label": "A",
+									"text": "看见草原了"
+								},
+								{
+									"label": "B",
+									"text": "看见大海了"
+								},
+								{
+									"label": "C",
+									"text": "拍了很多照片"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "相机坏了"
+								},
+								{
+									"label": "B",
+									"text": "照片不好看"
+								},
+								{
+									"label": "C",
+									"text": "相机不见了"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—15题：匹配句子。\nCâu 11–15: Nối câu.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{ "label": "A", "text": "我还在选宾馆呢，你先休息吧。" },
+						{ "label": "B", "text": "您好，不好意思，让您久等了。" },
+						{ "label": "C", "text": "别着急，过几个月，你就什么都会了。" },
+						{ "label": "D", "text": "我也特别喜欢这里，下次假期我还要来。" },
+						{ "label": "E", "text": "当然。我们先坐公交车，然后换地铁。" },
+						{ "label": "F", "text": "我没带出来，一直在宾馆的房间里。" }
+					],
+					"questions": [
+						{
+							"number": 11,
+							"answer": "F",
+							"question": "你的相机在哪儿？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 12,
+							"answer": "A",
+							"question": "你为什么还不睡觉？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 13,
+							"answer": "B",
+							"question": "欢迎您来北京，我是您的司机小王。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 14,
+							"answer": "D",
+							"question": "这里真是太好玩儿了。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 15,
+							"answer": "C",
+							"question": "除了“谢谢”以外，别的我一点儿都不会说。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第16—20题：选词填空。\nCâu 16–20: Chọn từ điền vào chỗ trống.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "别的"
+						},
+						{
+							"label": "B",
+							"text": "一样"
+						},
+						{
+							"label": "C",
+							"text": "一直"
+						},
+						{
+							"label": "D",
+							"text": "一定"
+						},
+						{
+							"label": "E",
+							"text": "住"
+						},
+						{
+							"label": "F",
+							"text": "特别"
+						}
+					],
+					"questions": [
+						{
+							"number": 16,
+							"answer": "C",
+							"sentence": "小丽想去草原看月亮、吃羊肉，但是（ ）没有时间去。"
+						},
+						{
+							"number": 17,
+							"answer": "B",
+							"sentence": "我和姐姐都喜欢大海，但是妹妹跟我们不（ ），她喜欢草原。"
+						},
+						{
+							"number": 18,
+							"answer": "A",
+							"sentence": "我今天不舒服，不想吃这个，还有（ ）吗？"
+						},
+						{
+							"number": 19,
+							"answer": "D",
+							"sentence": "A：你要一个人开车去旅游吗？\nB：对，我一个人去，这次（ ）没问题。"
+						},
+						{
+							"number": 20,
+							"answer": "F",
+							"sentence": "A：昨天住的那家宾馆很（ ），服务也很好，你觉得呢？\nB：我也觉得不错，房间又大又舒服。"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第21—24题：选择正确答案。\nCâu 21–24: Đọc và chọn đáp án đúng.",
+					"embedded_example_image": true,
+					"shared_passage": "23–24\n\n我们一家人一起旅游的时候，最大的问题就是选宾馆。我觉得住的宾馆一定要去哪儿都方便。我妻子希望房间和床都大一些，休息的时候舒服点儿。儿子和女儿说：\"最重要的是宾馆的早饭要好吃。\"怎么才能选到大家都满意的宾馆呢？",
+					"shared_passage_start": 23,
+					"questions": [
+						{
+							"number": 21,
+							"answer": "C",
+							"sentence": "小王要去国外旅游，但是飞机晚点了，他在机场等了六个小时，飞机才起飞。",
+							"question": "关于小王，可以知道什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "要回中国"
+								},
+								{
+									"label": "B",
+									"text": "坐了六小时飞机"
+								},
+								{
+									"label": "C",
+									"text": "在机场等了六小时"
+								}
+							]
+						},
+						{
+							"number": 22,
+							"answer": "A",
+							"sentence": "这个假期我们去中国旅游了，除了北京以外，还去了上海和西安。",
+							"question": "他们假期：",
+							"options": [
+								{
+									"label": "A",
+									"text": "去了上海"
+								},
+								{
+									"label": "B",
+									"text": "只去了北京"
+								},
+								{
+									"label": "C",
+									"text": "哪儿都没去"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "A",
+							"question": "谁希望选一个房间大的宾馆？",
+							"options": [
+								{
+									"label": "A",
+									"text": "妻子"
+								},
+								{
+									"label": "B",
+									"text": "女儿"
+								},
+								{
+									"label": "C",
+									"text": "儿子"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "C",
+							"question": "儿子和女儿觉得宾馆最重要的是什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "舒服的床"
+								},
+								{
+									"label": "B",
+									"text": "大的房间"
+								},
+								{
+									"label": "C",
+									"text": "好吃的早饭"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据拼音写汉字。\nCâu 25–27: Viết chữ Hán theo pinyin.",
+					"embedded_example_image": true,
+					"questions": [
+						{
+							"number": 25,
+							"answer": "海",
+							"type": "writing_input",
+							"sentence": "今天的天气太热了，咱们下午去（ ）边玩吧。",
+							"prompt_pinyin": "hǎi"
+						},
+						{
+							"number": 26,
+							"answer": "定",
+							"type": "writing_input",
+							"sentence": "这个假期我一（ ）要去草原骑马。",
+							"prompt_pinyin": "dìng"
+						},
+						{
+							"number": 27,
+							"answer": "别",
+							"type": "writing_input",
+							"sentence": "昨天住的那家宾馆很特（ ），服务也很好。",
+							"prompt_pinyin": "bié"
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：看图，用词造句。\nCâu 28–30: Nhìn hình và dùng từ gợi ý đặt câu.",
+					"questions": [
+						{
+							"number": 28,
+							"answer": "这个地方特别漂亮。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 特别",
+							"accepted_answers": ["这里的风景特别美。"]
+						},
+						{
+							"number": 29,
+							"answer": "他一直在飞机上睡觉。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 一直",
+							"accepted_answers": ["他坐飞机时一直在睡觉。"]
+						},
+						{
+							"number": 30,
+							"answer": "她先收拾行李。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 先",
+							"accepted_answers": ["她先把行李收拾好了。"]
+						}
+					]
+				}
+			]
+		}
+	]
+}

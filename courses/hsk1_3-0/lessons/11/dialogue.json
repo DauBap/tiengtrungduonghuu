@@ -1,0 +1,110 @@
+{
+  "lesson": 11,
+  "title": "我读大学呢",
+  "title_pinyin": "Wǒ dú dàxué ne",
+  "title_vi": "Tôi đang học đại học",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一飞",
+          "zh": "喂，李文，你什么时候能到饭店？",
+          "pinyin": "Wèi, Lǐ Wén, nǐ shénme shíhou néng dào fàndiàn?",
+          "vi": "A lô, Lý Văn, khi nào em có thể đến nhà hàng?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "还不知道，正在找呢。它是不是在超市后边？",
+          "pinyin": "Hái bù zhīdào, zhèngzài zhǎo ne. Tā shì bú shì zài chāoshì hòubian?",
+          "vi": "Vẫn chưa biết, đang tìm đây. Nó có phải ở phía sau siêu thị không?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "是的。你开车没开车？",
+          "pinyin": "Shì de. Nǐ kāichē méi kāichē?",
+          "vi": "Đúng rồi. Em lái xe chưa?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "我没开车，坐车呢。",
+          "pinyin": "Wǒ méi kāichē, zuòchē ne.",
+          "vi": "Em không lái xe, đang ngồi xe (taxi)."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一飞",
+          "zh": "你还在读大学吗？",
+          "pinyin": "Nǐ hái zài dú dàxué ma?",
+          "vi": "Em vẫn còn học đại học à?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "对，我读大学呢，还是大学生。",
+          "pinyin": "Duì, wǒ dú dàxué ne, háishì dàxuéshēng.",
+          "vi": "Vâng, em đang học đại học, vẫn là sinh viên đại học."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "你们学习忙不忙？",
+          "pinyin": "Nǐmen xuéxí máng bù máng?",
+          "vi": "Các em học có bận không?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "非常忙，我学医，我们的课很多。",
+          "pinyin": "Fēicháng máng, wǒ xué yī, wǒmen de kè hěnduō.",
+          "vi": "Rất bận, em học y, bọn em có nhiều tiết học."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "弟弟起床没起床呢？",
+          "pinyin": "Dìdi qǐchuáng méi qǐchuáng ne?",
+          "vi": "Em trai dậy chưa?"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "没起床呢，还在睡觉。",
+          "pinyin": "Méi qǐchuáng ne, hái zài shuìjiào.",
+          "vi": "Vẫn chưa dậy, còn đang ngủ."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "还睡呢？他今天去不去那里？",
+          "pinyin": "Hái shuì ne? Tā jīntiān qù bú qù nàli?",
+          "vi": "Vẫn ngủ à? Hôm nay nó có đi đến đó không?"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "去哪里？",
+          "pinyin": "Qù nǎli?",
+          "vi": "Đi đâu ạ?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "去超市。",
+          "pinyin": "Qù chāoshì.",
+          "vi": "Đi siêu thị."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "我昨天问他，他对我说，他不去，他今天要和小朋友玩。",
+          "pinyin": "Wǒ zuótiān wèn tā, tā duì wǒ shuō, tā bú qù, tā jīntiān yào hé xiǎopéngyou wán.",
+          "vi": "Hôm qua con hỏi em ấy, em ấy nói với con là không đi, hôm nay em ấy muốn đi chơi với các bạn."
+        }
+      ]
+    }
+  ]
+}

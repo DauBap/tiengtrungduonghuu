@@ -1,0 +1,311 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 11,
+  "label": "Bài 11",
+  "title": "闹钟的危害",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "闹钟",
+      "pinyin": "nàozhōng",
+      "adj": 2,
+      "vi": "đồng hồ báo thức"
+    },
+    {
+      "pos": 2,
+      "hanzi": "危害",
+      "pinyin": "wēihài",
+      "adj": 4,
+      "vi": "gây nguy hại, làm hại"
+    },
+    {
+      "pos": 3,
+      "hanzi": "人类",
+      "pinyin": "rénlèi",
+      "adj": 2,
+      "vi": "loài người"
+    },
+    {
+      "pos": 4,
+      "hanzi": "机制",
+      "pinyin": "jīzhì",
+      "adj": 2,
+      "vi": "cơ chế"
+    },
+    {
+      "pos": 5,
+      "hanzi": "生物",
+      "pinyin": "shēngwù",
+      "adj": 2,
+      "vi": "sinh vật"
+    },
+    {
+      "pos": 6,
+      "hanzi": "规律",
+      "pinyin": "guīlǜ",
+      "adj": [
+        2,
+        6
+      ],
+      "vi": "quy luật; đều đều, có nhịp điệu"
+    },
+    {
+      "pos": 7,
+      "hanzi": "光线",
+      "pinyin": "guāngxiàn",
+      "adj": 2,
+      "vi": "ánh sáng, tia sáng"
+    },
+    {
+      "pos": 8,
+      "hanzi": "必要",
+      "pinyin": "bìyào",
+      "adj": 6,
+      "vi": "cần thiết, thiết yếu"
+    },
+    {
+      "pos": 9,
+      "hanzi": "过渡",
+      "pinyin": "guòdù",
+      "adj": 4,
+      "vi": "quá độ, chuyển tiếp"
+    },
+    {
+      "pos": 10,
+      "hanzi": "浅",
+      "pinyin": "qiǎn",
+      "adj": 6,
+      "vi": "nông, cạn"
+    },
+    {
+      "pos": 11,
+      "hanzi": "现代",
+      "pinyin": "xiàndài",
+      "adj": [
+        2,
+        6
+      ],
+      "vi": "thời đại ngày nay; hiện đại"
+    },
+    {
+      "pos": 12,
+      "hanzi": "享受",
+      "pinyin": "xiǎngshòu",
+      "adj": 4,
+      "vi": "hưởng thụ"
+    },
+    {
+      "pos": 13,
+      "hanzi": "用途",
+      "pinyin": "yòngtú",
+      "adj": 2,
+      "vi": "công dụng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "实验",
+      "pinyin": "shíyàn",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "thực nghiệm; công việc thực nghiệm"
+    },
+    {
+      "pos": 15,
+      "hanzi": "铃",
+      "pinyin": "líng",
+      "adj": 2,
+      "vi": "cái chuông"
+    },
+    {
+      "pos": 16,
+      "hanzi": "所",
+      "pinyin": "suǒ",
+      "adj": 11,
+      "vi": "(được dùng trước động từ của kết cấu chủ vị làm định ngữ, từ trung tâm là đối tượng chịu sự chi phối của hành động) mà"
+    },
+    {
+      "pos": 17,
+      "hanzi": "状态",
+      "pinyin": "zhuàngtài",
+      "adj": 2,
+      "vi": "trạng thái, tình trạng"
+    },
+    {
+      "pos": 18,
+      "hanzi": "清醒",
+      "pinyin": "qīngxǐng",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "tỉnh táo; tỉnh lại"
+    },
+    {
+      "pos": 19,
+      "hanzi": "呼吸",
+      "pinyin": "hūxī",
+      "adj": 4,
+      "vi": "hít thở"
+    },
+    {
+      "pos": 20,
+      "hanzi": "心理",
+      "pinyin": "xīnlǐ",
+      "adj": 2,
+      "vi": "tâm lý"
+    },
+    {
+      "pos": 21,
+      "hanzi": "慌（张）",
+      "pinyin": "huāng(zhāng)",
+      "adj": 6,
+      "vi": "luống cuống, bối rối"
+    },
+    {
+      "pos": 22,
+      "hanzi": "情绪",
+      "pinyin": "qíngxù",
+      "adj": 2,
+      "vi": "tâm trạng, tinh thần"
+    },
+    {
+      "pos": 23,
+      "hanzi": "低落",
+      "pinyin": "dīluò",
+      "adj": 6,
+      "vi": "suy nhược, ủ rũ"
+    },
+    {
+      "pos": 24,
+      "hanzi": "记忆",
+      "pinyin": "jìyì",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "nhớ; ký ức"
+    },
+    {
+      "pos": 25,
+      "hanzi": "计算",
+      "pinyin": "jìsuàn",
+      "adj": 4,
+      "vi": "tính toán"
+    },
+    {
+      "pos": 26,
+      "hanzi": "相当",
+      "pinyin": "xiāngdāng",
+      "adj": 4,
+      "vi": "tương đương với, ngang nhau"
+    },
+    {
+      "pos": 27,
+      "hanzi": "持续",
+      "pinyin": "chíxù",
+      "adj": 4,
+      "vi": "kéo dài, duy trì lâu dài"
+    },
+    {
+      "pos": 28,
+      "hanzi": "数",
+      "pinyin": "shù",
+      "adj": 21,
+      "vi": "vài, mấy"
+    },
+    {
+      "pos": 29,
+      "hanzi": "失眠",
+      "pinyin": "shīmián",
+      "adj": 4,
+      "vi": "mất ngủ"
+    },
+    {
+      "pos": 30,
+      "hanzi": "精神",
+      "pinyin": "jīngshén",
+      "adj": [
+        2,
+        6
+      ],
+      "vi": "tinh thần; sởi nổi, hoạt bát"
+    },
+    {
+      "pos": 31,
+      "hanzi": "专家",
+      "pinyin": "zhuānjiā",
+      "adj": 2,
+      "vi": "chuyên gia"
+    },
+    {
+      "pos": 32,
+      "hanzi": "采用",
+      "pinyin": "cǎiyòng",
+      "adj": 4,
+      "vi": "chọn dùng, áp dụng"
+    },
+    {
+      "pos": 33,
+      "hanzi": "柔和",
+      "pinyin": "róuhé",
+      "adj": 6,
+      "vi": "êm dịu"
+    },
+    {
+      "pos": 34,
+      "hanzi": "愿望",
+      "pinyin": "yuànwàng",
+      "adj": 2,
+      "vi": "ước muốn, điều mong muốn"
+    },
+    {
+      "pos": 35,
+      "hanzi": "窗帘",
+      "pinyin": "chuānglián",
+      "adj": 2,
+      "vi": "rèm cửa sổ"
+    },
+    {
+      "pos": 36,
+      "hanzi": "市场",
+      "pinyin": "shìchǎng",
+      "adj": 2,
+      "vi": "thị trường, chợ"
+    },
+    {
+      "pos": 37,
+      "hanzi": "产品",
+      "pinyin": "chǎnpǐn",
+      "adj": 2,
+      "vi": "sản phẩm"
+    },
+    {
+      "pos": 38,
+      "hanzi": "模仿",
+      "pinyin": "mófǎng",
+      "adj": 4,
+      "vi": "mô phỏng, bắt chước"
+    },
+    {
+      "pos": 39,
+      "hanzi": "避免",
+      "pinyin": "bìmiǎn",
+      "adj": 4,
+      "vi": "tránh, ngăn ngừa"
+    },
+    {
+      "pos": 40,
+      "hanzi": "传统",
+      "pinyin": "chuántǒng",
+      "adj": [
+        2,
+        6
+      ],
+      "vi": "truyền thống; (thuộc) truyền thống"
+    }
+  ]
+}

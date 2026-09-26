@@ -1,0 +1,1680 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK 2 (3.0)",
+  "exam_tab": {
+    "title": "Thi tổng hợp",
+    "vocabularySource": "lesson.data",
+    "lessonSelection": "Học viên chọn một hoặc nhiều bài học trước khi bắt đầu thi.",
+    "directions": [
+      {
+        "id": "zh2vi",
+        "label": "Trung → Việt"
+      },
+      {
+        "id": "vi2zh",
+        "label": "Việt → Trung"
+      },
+      {
+        "id": "mixed",
+        "label": "Hỗn hợp"
+      }
+    ],
+    "questionLength": {
+      "selectorShownWhenSelectedVocabularyCountAtLeast": 20,
+      "short": "floor(totalVocabulary / 3)",
+      "medium": "floor(totalVocabulary * 2 / 3)",
+      "full": "totalVocabulary"
+    },
+    "note": "Câu hỏi và phương án nhiễu được tạo ngẫu nhiên khi thi; bản xuất lưu từ vựng nguồn, không có bộ đề/đáp án cố định."
+  },
+  "lessons": [
+    {
+      "id": 1,
+      "title": "她请我们吃了北京烤鸭",
+      "short_vi": "Gặp gỡ, đón tiếp bạn bè tại sân bay; cảm ơn, xin lỗi; nhờ vả giúp đỡ; trải nghiệm ẩm thực Bắc Kinh",
+      "vocabulary_count": 15,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "就",
+          "pinyin": "jiù",
+          "adj": 18,
+          "vi": "Thì, liền, ngay, đã"
+        },
+        {
+          "pos": 2,
+          "hanzi": "给",
+          "pinyin": "gěi",
+          "adj": 13,
+          "vi": "cho"
+        },
+        {
+          "pos": 3,
+          "hanzi": "让",
+          "pinyin": "ràng",
+          "adj": 4,
+          "vi": "kêu, bảo"
+        },
+        {
+          "pos": 4,
+          "hanzi": "接",
+          "pinyin": "jiē",
+          "adj": 4,
+          "vi": "đón"
+        },
+        {
+          "pos": 5,
+          "hanzi": "次",
+          "pinyin": "cì",
+          "adj": 8,
+          "vi": "lần"
+        },
+        {
+          "pos": 6,
+          "hanzi": "旅游",
+          "pinyin": "lǚ yóu",
+          "adj": 4,
+          "vi": "du lịch"
+        },
+        {
+          "pos": 7,
+          "hanzi": "帮忙",
+          "pinyin": "bāngmáng",
+          "adj": 4,
+          "vi": "giúp, giúp đỡ"
+        },
+        {
+          "pos": 8,
+          "hanzi": "不好意思",
+          "pinyin": "bù hǎo  yì si",
+          "adj": 12,
+          "vi": "thật ngại quá, xin lỗi"
+        },
+        {
+          "pos": 9,
+          "hanzi": "已经",
+          "pinyin": "yǐ jīng",
+          "adj": 18,
+          "vi": "đã"
+        },
+        {
+          "pos": 10,
+          "hanzi": "那",
+          "pinyin": "nà",
+          "adj": 1,
+          "vi": "thế thì, vậy thì"
+        },
+        {
+          "pos": 11,
+          "hanzi": "介绍",
+          "pinyin": "jiè shào",
+          "adj": 4,
+          "vi": "Giới thiệu"
+        },
+        {
+          "pos": 12,
+          "hanzi": "有时",
+          "pinyin": "yǒu  shí",
+          "adj": 18,
+          "vi": "Có lúc, thỉnh thoảng"
+        },
+        {
+          "pos": 13,
+          "hanzi": "懂",
+          "pinyin": "dǒng",
+          "adj": 4,
+          "vi": "Hiểu, biết"
+        },
+        {
+          "pos": 14,
+          "hanzi": "意思",
+          "pinyin": "yì si",
+          "adj": 2,
+          "vi": "Ý, nghĩa"
+        },
+        {
+          "pos": 15,
+          "hanzi": "北京烤鸭",
+          "pinyin": "běi jīng kǎo yā",
+          "adj": 2,
+          "vi": "Vịt quay Bắc Kinh"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "还是打车去北大吧",
+      "short_vi": "Hỏi đường, hỏi phương tiện đi lại; tham quan trường đại học; tìm hiểu về trường Đại học Bắc Kinh",
+      "vocabulary_count": 17,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "公交车",
+          "pinyin": "gōngjiāochē",
+          "adj": 2,
+          "vi": "Xe buýt"
+        },
+        {
+          "pos": 2,
+          "hanzi": "但",
+          "pinyin": "dàn",
+          "adj": [],
+          "vi": "Nhưng mà"
+        },
+        {
+          "pos": 3,
+          "hanzi": "车站",
+          "pinyin": "chē zhàn",
+          "adj": 2,
+          "vi": "Trạm xe, bến xe"
+        },
+        {
+          "pos": 4,
+          "hanzi": "远",
+          "pinyin": "yuǎn",
+          "adj": 6,
+          "vi": "Xa"
+        },
+        {
+          "pos": 5,
+          "hanzi": "打车",
+          "pinyin": "dǎ chē",
+          "adj": 4,
+          "vi": "Bắt taxi, gọi taxi"
+        },
+        {
+          "pos": 6,
+          "hanzi": "还是",
+          "pinyin": "hái shì",
+          "adj": 18,
+          "vi": "Hay là"
+        },
+        {
+          "pos": 7,
+          "hanzi": "北京大学",
+          "pinyin": "běijīng dàxué",
+          "adj": 3,
+          "vi": "Đại học Bắc Kinh"
+        },
+        {
+          "pos": 8,
+          "hanzi": "啊",
+          "pinyin": "a",
+          "adj": 11,
+          "vi": "dùng ở cuối câu để bày tỏ sự cảm kích, đồng ý..."
+        },
+        {
+          "pos": 9,
+          "hanzi": "万",
+          "pinyin": "wàn",
+          "adj": 21,
+          "vi": "Vạn"
+        },
+        {
+          "pos": 10,
+          "hanzi": "名",
+          "pinyin": "míng",
+          "adj": [
+            2,
+            8
+          ],
+          "vi": "dùng cho người, thứ hạng trong 1 cuộc thi, tên gọi"
+        },
+        {
+          "pos": 11,
+          "hanzi": "网上",
+          "pinyin": "wǎngshàng",
+          "adj": 2,
+          "vi": "Trên mạng"
+        },
+        {
+          "pos": 12,
+          "hanzi": "外国",
+          "pinyin": "wàiguó",
+          "adj": 2,
+          "vi": "Nước ngoài"
+        },
+        {
+          "pos": 13,
+          "hanzi": "间",
+          "pinyin": "jiān",
+          "adj": 8,
+          "vi": "Dùng cho căn phòng"
+        },
+        {
+          "pos": 14,
+          "hanzi": "教室",
+          "pinyin": "jiàoshì",
+          "adj": 2,
+          "vi": "Lớp học"
+        },
+        {
+          "pos": 15,
+          "hanzi": "票",
+          "pinyin": "piào",
+          "adj": 2,
+          "vi": "vé"
+        },
+        {
+          "pos": 16,
+          "hanzi": "别",
+          "pinyin": "bié",
+          "adj": 18,
+          "vi": "đừng"
+        },
+        {
+          "pos": 17,
+          "hanzi": "过来",
+          "pinyin": "guò lái",
+          "adj": 4,
+          "vi": "qua đây"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "我想西安旅游",
+      "short_vi": "Trò chuyện về công việc hàng ngày; bàn bạc kế hoạch du lịch; hỏi và trả lời về lý do lựa chọn địa điểm du lịch; giới thiệu về Tây An",
+      "vocabulary_count": 15,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "回来",
+          "pinyin": "huílái",
+          "adj": 4,
+          "vi": "quay lại, trở về"
+        },
+        {
+          "pos": 2,
+          "hanzi": "这么",
+          "pinyin": "zhème",
+          "adj": 1,
+          "vi": "như thế"
+        },
+        {
+          "pos": 3,
+          "hanzi": "完",
+          "pinyin": "wán",
+          "adj": 4,
+          "vi": "xong"
+        },
+        {
+          "pos": 4,
+          "hanzi": "一起",
+          "pinyin": "yìqǐ",
+          "adj": 18,
+          "vi": "cùng nhau"
+        },
+        {
+          "pos": 5,
+          "hanzi": "出去",
+          "pinyin": "chūqù",
+          "adj": 4,
+          "vi": "ra ngoài"
+        },
+        {
+          "pos": 6,
+          "hanzi": "洗",
+          "pinyin": "Xǐ",
+          "adj": 4,
+          "vi": "rửa"
+        },
+        {
+          "pos": 7,
+          "hanzi": "自己",
+          "pinyin": "Zìjǐ",
+          "adj": 1,
+          "vi": "tự mình"
+        },
+        {
+          "pos": 8,
+          "hanzi": "拿",
+          "pinyin": "Ná",
+          "adj": 4,
+          "vi": "lấy, cầm"
+        },
+        {
+          "pos": 9,
+          "hanzi": "手",
+          "pinyin": "Shǒu",
+          "adj": 2,
+          "vi": "tay"
+        },
+        {
+          "pos": 10,
+          "hanzi": "为什么",
+          "pinyin": "Wèishénme",
+          "adj": 1,
+          "vi": "tại sao"
+        },
+        {
+          "pos": 11,
+          "hanzi": "不错",
+          "pinyin": "Búcuò",
+          "adj": 6,
+          "vi": "không tệ, rất được"
+        },
+        {
+          "pos": 12,
+          "hanzi": "送",
+          "pinyin": "sòng",
+          "adj": 4,
+          "vi": "Đưa ai đó đi đâu; tặng (quà)"
+        },
+        {
+          "pos": 13,
+          "hanzi": "回去",
+          "pinyin": "huí qù",
+          "adj": 4,
+          "vi": "Quay trở về"
+        },
+        {
+          "pos": 14,
+          "hanzi": "每",
+          "pinyin": "Měi",
+          "adj": 1,
+          "vi": "mỗi"
+        },
+        {
+          "pos": 15,
+          "hanzi": "累",
+          "pinyin": "Lèi",
+          "adj": 6,
+          "vi": "mệt"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "你穿红色的很好看",
+      "short_vi": "Đi mua sắm, chọn quần áo; tư vấn và nhận xét về màu sắc, kiểu dáng; hỏi về trải nghiệm đã từng làm gì",
+      "vocabulary_count": 16,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "过",
+          "pinyin": "Guo",
+          "adj": [],
+          "vi": "Qua(đứng sau V để biểu thị hành động trong quá khứ )"
+        },
+        {
+          "pos": 2,
+          "hanzi": "商场",
+          "pinyin": "Shāngchǎng",
+          "adj": 2,
+          "vi": "Trung tâm thương mại"
+        },
+        {
+          "pos": 3,
+          "hanzi": "进去",
+          "pinyin": "Jìnqù",
+          "adj": 4,
+          "vi": "Đi vào"
+        },
+        {
+          "pos": 4,
+          "hanzi": "条",
+          "pinyin": "Tiáo",
+          "adj": 8,
+          "vi": "Lượng từ dành cho vật dài, hẹp, mỏng, uốn lượn"
+        },
+        {
+          "pos": 5,
+          "hanzi": "裤子",
+          "pinyin": "Kùzi",
+          "adj": 2,
+          "vi": "Quần bò"
+        },
+        {
+          "pos": 6,
+          "hanzi": "白色",
+          "pinyin": "Báisè",
+          "adj": 2,
+          "vi": "Màu trắng"
+        },
+        {
+          "pos": 7,
+          "hanzi": "因为",
+          "pinyin": "Yīnwèi",
+          "adj": [
+            10,
+            13
+          ],
+          "vi": "Bởi vì"
+        },
+        {
+          "pos": 8,
+          "hanzi": "试",
+          "pinyin": "Shì",
+          "adj": 4,
+          "vi": "thử"
+        },
+        {
+          "pos": 9,
+          "hanzi": "红色",
+          "pinyin": "Hóngsè",
+          "adj": 2,
+          "vi": "Màu đỏ"
+        },
+        {
+          "pos": 10,
+          "hanzi": "所以",
+          "pinyin": "Suǒyǐ",
+          "adj": [
+            10,
+            13
+          ],
+          "vi": "Vì thế, cho nên"
+        },
+        {
+          "pos": 11,
+          "hanzi": "书包",
+          "pinyin": "Shūbāo",
+          "adj": 2,
+          "vi": "Cặp sách"
+        },
+        {
+          "pos": 12,
+          "hanzi": "过去",
+          "pinyin": "Guòqù",
+          "adj": 4,
+          "vi": "Quá khứ, đi qua"
+        },
+        {
+          "pos": 13,
+          "hanzi": "绿色",
+          "pinyin": "Lǜsè",
+          "adj": 2,
+          "vi": "Màu xanh lá"
+        },
+        {
+          "pos": 14,
+          "hanzi": "黑色",
+          "pinyin": "Hēisè",
+          "adj": 2,
+          "vi": "Màu đen"
+        },
+        {
+          "pos": 15,
+          "hanzi": "更",
+          "pinyin": "Gèng",
+          "adj": 18,
+          "vi": "hơn"
+        },
+        {
+          "pos": 16,
+          "hanzi": "颜色",
+          "pinyin": "Yán sè",
+          "adj": 2,
+          "vi": "Màu sắc"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "第一次去中国朋友家",
+      "short_vi": "Làm khách lần đầu đến nhà người Trung Quốc; chào hỏi người lớn tuổi; tặng quà và cách ứng xử khi đến nhà người khác",
+      "vocabulary_count": 18,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "快",
+          "pinyin": "kuài",
+          "adj": [
+            18,
+            6
+          ],
+          "vi": "Nhanh, mau lên"
+        },
+        {
+          "pos": 2,
+          "hanzi": "下来",
+          "pinyin": "xiàlái",
+          "adj": 4,
+          "vi": "Xuống đây"
+        },
+        {
+          "pos": 3,
+          "hanzi": "上来",
+          "pinyin": "shànglái",
+          "adj": 4,
+          "vi": "Lên đây"
+        },
+        {
+          "pos": 4,
+          "hanzi": "上去",
+          "pinyin": "shàngqù",
+          "adj": 4,
+          "vi": "Đi lên"
+        },
+        {
+          "pos": 5,
+          "hanzi": "下面",
+          "pinyin": "xiàmiàn",
+          "adj": 2,
+          "vi": "Phía dưới"
+        },
+        {
+          "pos": 6,
+          "hanzi": "面",
+          "pinyin": "miàn",
+          "adj": 9,
+          "vi": "Dùng để tạo danh từ chỉ phương hướng"
+        },
+        {
+          "pos": 7,
+          "hanzi": "等",
+          "pinyin": "děng",
+          "adj": 4,
+          "vi": "Đợi, chờ"
+        },
+        {
+          "pos": 8,
+          "hanzi": "一会儿",
+          "pinyin": "yíhuìr",
+          "adj": 7,
+          "vi": "Lát nữa, một lát"
+        },
+        {
+          "pos": 9,
+          "hanzi": "下去",
+          "pinyin": "xiàqù",
+          "adj": 4,
+          "vi": "Đi xuống"
+        },
+        {
+          "pos": 10,
+          "hanzi": "进来",
+          "pinyin": "Jìnlái",
+          "adj": 4,
+          "vi": "Vào đây"
+        },
+        {
+          "pos": 11,
+          "hanzi": "爷爷",
+          "pinyin": "Yéye",
+          "adj": 2,
+          "vi": "Ông nội"
+        },
+        {
+          "pos": 12,
+          "hanzi": "奶奶",
+          "pinyin": "Nǎinai",
+          "adj": 2,
+          "vi": "Bà nội"
+        },
+        {
+          "pos": 13,
+          "hanzi": "礼物",
+          "pinyin": "Lǐwù",
+          "adj": 2,
+          "vi": "Món quà"
+        },
+        {
+          "pos": 14,
+          "hanzi": "准备",
+          "pinyin": "Zhǔnbèi",
+          "adj": 4,
+          "vi": "Chuẩn bị"
+        },
+        {
+          "pos": 15,
+          "hanzi": "奶茶",
+          "pinyin": "Nǎichá",
+          "adj": 2,
+          "vi": "Trà sữa"
+        },
+        {
+          "pos": 16,
+          "hanzi": "跟",
+          "pinyin": "Gēn",
+          "adj": 13,
+          "vi": "Cùng, với"
+        },
+        {
+          "pos": 17,
+          "hanzi": "走",
+          "pinyin": "Zǒu",
+          "adj": 4,
+          "vi": "Đi  (bộ)"
+        },
+        {
+          "pos": 18,
+          "hanzi": "酒店",
+          "pinyin": "Jiǔdiàn",
+          "adj": 2,
+          "vi": "Khách sạn"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "小雪，生日快乐！",
+      "short_vi": "Chuẩn bị quà sinh nhật; tổ chức tiệc sinh nhật trong gia đình; hỏi và đáp về sở thích (vẽ, ăn uống...); tục lệ ăn mì trong ngày sinh nhật",
+      "vocabulary_count": 14,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "生日",
+          "pinyin": "Shēngrì",
+          "adj": 2,
+          "vi": "Sinh nhật"
+        },
+        {
+          "pos": 2,
+          "hanzi": "忘",
+          "pinyin": "Wàng",
+          "adj": 4,
+          "vi": "Quên"
+        },
+        {
+          "pos": 3,
+          "hanzi": "画",
+          "pinyin": "Huà",
+          "adj": [
+            4,
+            2
+          ],
+          "vi": "Vẽ; bức tranh, bức vẽ"
+        },
+        {
+          "pos": 4,
+          "hanzi": "画笔",
+          "pinyin": "Huàbǐ",
+          "adj": 2,
+          "vi": "Bút màu, cọ vẽ"
+        },
+        {
+          "pos": 5,
+          "hanzi": "蛋糕",
+          "pinyin": "Dàn gāo",
+          "adj": 2,
+          "vi": "Bánh kem"
+        },
+        {
+          "pos": 6,
+          "hanzi": "快乐",
+          "pinyin": "Kuàilè",
+          "adj": 6,
+          "vi": "Vui vẻ, hạnh phúc"
+        },
+        {
+          "pos": 7,
+          "hanzi": "打开",
+          "pinyin": "Dǎkāi",
+          "adj": 4,
+          "vi": "mở"
+        },
+        {
+          "pos": 8,
+          "hanzi": "长",
+          "pinyin": "Cháng",
+          "adj": 6,
+          "vi": "dài"
+        },
+        {
+          "pos": 9,
+          "hanzi": "鱼",
+          "pinyin": "Yú",
+          "adj": 2,
+          "vi": "cá"
+        },
+        {
+          "pos": 10,
+          "hanzi": "肉",
+          "pinyin": "Ròu",
+          "adj": 2,
+          "vi": "thịt"
+        },
+        {
+          "pos": 11,
+          "hanzi": "过",
+          "pinyin": "Guò",
+          "adj": 4,
+          "vi": "Đón, trải qua ( ngày lễ )"
+        },
+        {
+          "pos": 12,
+          "hanzi": "地",
+          "pinyin": "De",
+          "adj": 11,
+          "vi": "1 cách...( dùng với trạng từ/cụm trạng từ)"
+        },
+        {
+          "pos": 13,
+          "hanzi": "床",
+          "pinyin": "Chuáng",
+          "adj": 2,
+          "vi": "Cái giường"
+        },
+        {
+          "pos": 14,
+          "hanzi": "舒服",
+          "pinyin": "Shùfu",
+          "adj": 6,
+          "vi": "Thoải mái, dễ chịu"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "她篮球打得很好",
+      "short_vi": "Trò chuyện về sở thích thể thao; rủ bạn cùng chơi; đánh giá khả năng chơi thể thao (tốt, không tốt)",
+      "vocabulary_count": 15,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "从",
+          "pinyin": "Cóng",
+          "adj": 13,
+          "vi": "từ"
+        },
+        {
+          "pos": 2,
+          "hanzi": "往",
+          "pinyin": "Wǎng",
+          "adj": [
+            null,
+            13
+          ],
+          "vi": "Hướng tới, đi tới"
+        },
+        {
+          "pos": 3,
+          "hanzi": "跑",
+          "pinyin": "Pǎo",
+          "adj": 4,
+          "vi": "chạy"
+        },
+        {
+          "pos": 4,
+          "hanzi": "打",
+          "pinyin": "Dǎ",
+          "adj": 4,
+          "vi": "Chơi, đánh"
+        },
+        {
+          "pos": 5,
+          "hanzi": "篮球",
+          "pinyin": "Lánqiú",
+          "adj": 2,
+          "vi": "Bóng rổ"
+        },
+        {
+          "pos": 6,
+          "hanzi": "运动",
+          "pinyin": "Yùndòng",
+          "adj": [
+            4,
+            2
+          ],
+          "vi": "Vận động, thể thao"
+        },
+        {
+          "pos": 7,
+          "hanzi": "踢",
+          "pinyin": "Tī",
+          "adj": 4,
+          "vi": "đá"
+        },
+        {
+          "pos": 8,
+          "hanzi": "足球",
+          "pinyin": "Zúqiú",
+          "adj": 2,
+          "vi": "Bóng đá"
+        },
+        {
+          "pos": 9,
+          "hanzi": "球",
+          "pinyin": "Qiú",
+          "adj": 2,
+          "vi": "bóng"
+        },
+        {
+          "pos": 10,
+          "hanzi": "得",
+          "pinyin": "De",
+          "adj": 11,
+          "vi": "Đứng giữa V/ADJ và bổ ngữ của nó=> chỉ kết quả, mức độ"
+        },
+        {
+          "pos": 11,
+          "hanzi": "跑步",
+          "pinyin": "Pǎobù",
+          "adj": 4,
+          "vi": "Chạy bộ"
+        },
+        {
+          "pos": 12,
+          "hanzi": "游泳",
+          "pinyin": "Yóutǒng",
+          "adj": 4,
+          "vi": "Bơi lội"
+        },
+        {
+          "pos": 13,
+          "hanzi": "游",
+          "pinyin": "Yóu",
+          "adj": 4,
+          "vi": "bơi"
+        },
+        {
+          "pos": 14,
+          "hanzi": "爱好",
+          "pinyin": "Àihào",
+          "adj": [
+            4,
+            2
+          ],
+          "vi": "Sở thích / yêu thích"
+        },
+        {
+          "pos": 15,
+          "hanzi": "开始",
+          "pinyin": "Kāishǐ",
+          "adj": [
+            4,
+            2
+          ],
+          "vi": "Bắt đầu, sự bắt đầu"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "虽然你忘了，但是我记得",
+      "short_vi": "Đi mua sắm, xem đồng hồ; đi xem phim, mua vé; tổ chức sinh nhật bất ngờ cho vợ/chồng; văn hóa con số may mắn của người Trung Quốc",
+      "vocabulary_count": 16,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "手表",
+          "pinyin": "Shǒubiǎo",
+          "adj": 2,
+          "vi": "Đồng hồ đeo tay"
+        },
+        {
+          "pos": 2,
+          "hanzi": "左边",
+          "pinyin": "Zuǒbian",
+          "adj": 2,
+          "vi": "Bên trái"
+        },
+        {
+          "pos": 3,
+          "hanzi": "左",
+          "pinyin": "Zuǒ",
+          "adj": 2,
+          "vi": "trái"
+        },
+        {
+          "pos": 4,
+          "hanzi": "比",
+          "pinyin": "Bǐ",
+          "adj": [
+            13,
+            2,
+            4
+          ],
+          "vi": "hơn"
+        },
+        {
+          "pos": 5,
+          "hanzi": "右边",
+          "pinyin": "Yòubian",
+          "adj": 2,
+          "vi": "Bên phải"
+        },
+        {
+          "pos": 6,
+          "hanzi": "右",
+          "pinyin": "Yòu",
+          "adj": 2,
+          "vi": "Phải"
+        },
+        {
+          "pos": 7,
+          "hanzi": "记得",
+          "pinyin": "Jìde",
+          "adj": 4,
+          "vi": "nhớ"
+        },
+        {
+          "pos": 8,
+          "hanzi": "爱情片",
+          "pinyin": "Àiqíngpiàn",
+          "adj": 2,
+          "vi": "Phim tình cảm lãng mạn"
+        },
+        {
+          "pos": 9,
+          "hanzi": "有意思",
+          "pinyin": "Yǒu yìsi",
+          "adj": [
+            6,
+            4
+          ],
+          "vi": "Thú vị"
+        },
+        {
+          "pos": 10,
+          "hanzi": "点",
+          "pinyin": "Diǎn",
+          "adj": 4,
+          "vi": "Gọi (món)"
+        },
+        {
+          "pos": 11,
+          "hanzi": "虽然",
+          "pinyin": "Suīrán",
+          "adj": 10,
+          "vi": "Mặc dù"
+        },
+        {
+          "pos": 12,
+          "hanzi": "但是",
+          "pinyin": "Dànshì",
+          "adj": 10,
+          "vi": "nhưng"
+        },
+        {
+          "pos": 13,
+          "hanzi": "花",
+          "pinyin": "Huā",
+          "adj": 4,
+          "vi": "Dành, tốn"
+        },
+        {
+          "pos": 14,
+          "hanzi": "妻子",
+          "pinyin": "Qīzi",
+          "adj": 2,
+          "vi": "vợ"
+        },
+        {
+          "pos": 15,
+          "hanzi": "丈夫",
+          "pinyin": "Zhàngfu",
+          "adj": 2,
+          "vi": "chồng"
+        },
+        {
+          "pos": 16,
+          "hanzi": "饭馆",
+          "pinyin": "Fànguǎn",
+          "adj": 2,
+          "vi": "Nhà hàng"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "我去买杯奶茶",
+      "short_vi": "Mua sắm quần áo cho con; so sánh giá cả, kiểu dáng; hỏi và trả lời về khoảng cách địa điểm; gọi đồ uống tại quán (cà phê, trà sữa)",
+      "vocabulary_count": 13,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "坏",
+          "pinyin": "Huài",
+          "adj": 6,
+          "vi": "xấu, hỏng"
+        },
+        {
+          "pos": 2,
+          "hanzi": "旁边",
+          "pinyin": "Pángbiān",
+          "adj": 2,
+          "vi": "Bên cạnh"
+        },
+        {
+          "pos": 3,
+          "hanzi": "男孩儿",
+          "pinyin": "Nánháir",
+          "adj": 2,
+          "vi": "Cậu trai"
+        },
+        {
+          "pos": 4,
+          "hanzi": "这样",
+          "pinyin": "Zhèyàng",
+          "adj": 1,
+          "vi": "Như thế, như vậy"
+        },
+        {
+          "pos": 5,
+          "hanzi": "个子",
+          "pinyin": "Gèzi",
+          "adj": 2,
+          "vi": "Dáng người, chiều cao"
+        },
+        {
+          "pos": 6,
+          "hanzi": "那么",
+          "pinyin": "Nàme",
+          "adj": 1,
+          "vi": "Thế thì"
+        },
+        {
+          "pos": 7,
+          "hanzi": "高",
+          "pinyin": "Gāo",
+          "adj": 6,
+          "vi": "cao"
+        },
+        {
+          "pos": 8,
+          "hanzi": "门口",
+          "pinyin": "Ménkǒu",
+          "adj": 2,
+          "vi": "Trước cửa, lối ra vào"
+        },
+        {
+          "pos": 9,
+          "hanzi": "咖啡",
+          "pinyin": "Kāfēi",
+          "adj": 2,
+          "vi": "Cà phê"
+        },
+        {
+          "pos": 10,
+          "hanzi": "离",
+          "pinyin": "Lí",
+          "adj": 4,
+          "vi": "cách"
+        },
+        {
+          "pos": 11,
+          "hanzi": "近",
+          "pinyin": "Jìn",
+          "adj": 6,
+          "vi": "gần"
+        },
+        {
+          "pos": 12,
+          "hanzi": "走路",
+          "pinyin": "Zǒulù",
+          "adj": 4,
+          "vi": "Đi bộ"
+        },
+        {
+          "pos": 13,
+          "hanzi": "周",
+          "pinyin": "Zhōu",
+          "adj": 2,
+          "vi": "tuần"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "就要考试了",
+      "short_vi": "Chuẩn bị đồ dùng học tập trước khi khai giảng; ôn tập và chuẩn bị cho kỳ thi; hỏi đáp về kết quả thi; trò chuyện về việc học hành",
+      "vocabulary_count": 14,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "开学",
+          "pinyin": "Kāixué",
+          "adj": 4,
+          "vi": "Khai giảng"
+        },
+        {
+          "pos": 2,
+          "hanzi": "门",
+          "pinyin": "Mén",
+          "adj": 2,
+          "vi": "Cái cửa"
+        },
+        {
+          "pos": 3,
+          "hanzi": "后面",
+          "pinyin": "Hòumiàn",
+          "adj": 2,
+          "vi": "Đằng sau"
+        },
+        {
+          "pos": 4,
+          "hanzi": "笔",
+          "pinyin": "Bǐ",
+          "adj": 2,
+          "vi": "Cái bút"
+        },
+        {
+          "pos": 5,
+          "hanzi": "帮",
+          "pinyin": "Bāng",
+          "adj": 4,
+          "vi": "giúp"
+        },
+        {
+          "pos": 6,
+          "hanzi": "考试",
+          "pinyin": "Kǎoshì",
+          "adj": [
+            null,
+            2,
+            4
+          ],
+          "vi": "Thi, kì thi"
+        },
+        {
+          "pos": 7,
+          "hanzi": "词",
+          "pinyin": "Cí",
+          "adj": 2,
+          "vi": "Từ"
+        },
+        {
+          "pos": 8,
+          "hanzi": "本子",
+          "pinyin": "Běnzi",
+          "adj": 4,
+          "vi": "Quyển vở"
+        },
+        {
+          "pos": 9,
+          "hanzi": "错",
+          "pinyin": "Cuò",
+          "adj": 6,
+          "vi": "Sai"
+        },
+        {
+          "pos": 10,
+          "hanzi": "题",
+          "pinyin": "Tí",
+          "adj": 2,
+          "vi": "Câu hỏi"
+        },
+        {
+          "pos": 11,
+          "hanzi": "还是",
+          "pinyin": "Háishì",
+          "adj": 10,
+          "vi": "Hay là"
+        },
+        {
+          "pos": 12,
+          "hanzi": "考",
+          "pinyin": "Kǎo",
+          "adj": 4,
+          "vi": "thi"
+        },
+        {
+          "pos": 13,
+          "hanzi": "快要",
+          "pinyin": "Kuàiyào",
+          "adj": 18,
+          "vi": "Sắp"
+        },
+        {
+          "pos": 14,
+          "hanzi": "笑",
+          "pinyin": "Xiào",
+          "adj": 4,
+          "vi": "cười"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "我最喜欢吃中国菜",
+      "short_vi": "Hỏi thăm sức khỏe; miêu tả triệu chứng bệnh (đau đầu, khó chịu); đi khám bệnh, mua thuốc; nói về món ăn yêu thích",
+      "vocabulary_count": 13,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "头",
+          "pinyin": "Tóu",
+          "adj": 2,
+          "vi": "Đầu"
+        },
+        {
+          "pos": 2,
+          "hanzi": "疼",
+          "pinyin": "Téng",
+          "adj": 6,
+          "vi": "Đau"
+        },
+        {
+          "pos": 3,
+          "hanzi": "经常",
+          "pinyin": "Jīngcháng",
+          "adj": 18,
+          "vi": "Thường xuyên"
+        },
+        {
+          "pos": 4,
+          "hanzi": "动",
+          "pinyin": "Dòng",
+          "adj": 4,
+          "vi": "Động, di chuyển"
+        },
+        {
+          "pos": 5,
+          "hanzi": "着",
+          "pinyin": "Zhe",
+          "adj": 11,
+          "vi": "Dùng sau V/adj để biểu thị trạng thái tiếp diễn của hành động"
+        },
+        {
+          "pos": 6,
+          "hanzi": "路上",
+          "pinyin": "Lùshang",
+          "adj": 2,
+          "vi": "Trên đường"
+        },
+        {
+          "pos": 7,
+          "hanzi": "慢",
+          "pinyin": "Màn",
+          "adj": 6,
+          "vi": "chậm"
+        },
+        {
+          "pos": 8,
+          "hanzi": "进",
+          "pinyin": "Jìn",
+          "adj": 4,
+          "vi": "vào"
+        },
+        {
+          "pos": 9,
+          "hanzi": "药",
+          "pinyin": "yào",
+          "adj": 2,
+          "vi": "Thuốc"
+        },
+        {
+          "pos": 10,
+          "hanzi": "身体",
+          "pinyin": "Shēntǐ",
+          "adj": 2,
+          "vi": "Cơ thể, sức khỏe"
+        },
+        {
+          "pos": 11,
+          "hanzi": "时",
+          "pinyin": "Shí",
+          "adj": 2,
+          "vi": "1 khoảng thời gian"
+        },
+        {
+          "pos": 12,
+          "hanzi": "最",
+          "pinyin": "Zuì",
+          "adj": 18,
+          "vi": "Nhất"
+        },
+        {
+          "pos": 13,
+          "hanzi": "药店",
+          "pinyin": "Yàodiàn",
+          "adj": 2,
+          "vi": "Hiệu thuốc"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "这里比北京冷多了",
+      "short_vi": "Gọi điện hỏi thăm; trò chuyện về thời tiết (nắng, mưa, tuyết); so sánh thời tiết giữa các nơi; rủ bạn cùng chạy bộ",
+      "vocabulary_count": 11,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "事情",
+          "pinyin": "Shìqing",
+          "adj": 2,
+          "vi": "Sự việc, chuyện"
+        },
+        {
+          "pos": 2,
+          "hanzi": "晴",
+          "pinyin": "Qíng",
+          "adj": 6,
+          "vi": "nắng"
+        },
+        {
+          "pos": 3,
+          "hanzi": "正",
+          "pinyin": "Zhèng",
+          "adj": 18,
+          "vi": "Biểu thị hành động đang diễn ra"
+        },
+        {
+          "pos": 4,
+          "hanzi": "外面",
+          "pinyin": "Wàimiàn",
+          "adj": 2,
+          "vi": "Bên ngoài"
+        },
+        {
+          "pos": 5,
+          "hanzi": "阴",
+          "pinyin": "Yīn",
+          "adj": 6,
+          "vi": "Trời có mây, âm u"
+        },
+        {
+          "pos": 6,
+          "hanzi": "从小",
+          "pinyin": "Cóngxiǎo",
+          "adj": 18,
+          "vi": "Từ nhỏ"
+        },
+        {
+          "pos": 7,
+          "hanzi": "地铁",
+          "pinyin": "Dìtiě",
+          "adj": 2,
+          "vi": "Tàu điện ngầm"
+        },
+        {
+          "pos": 8,
+          "hanzi": "楼",
+          "pinyin": "Lóu",
+          "adj": 2,
+          "vi": "Tòa nhà"
+        },
+        {
+          "pos": 9,
+          "hanzi": "站",
+          "pinyin": "Zhàn",
+          "adj": 2,
+          "vi": "Bến, trạm, ga"
+        },
+        {
+          "pos": 10,
+          "hanzi": "小时候",
+          "pinyin": "Xiǎoshíhou",
+          "adj": 2,
+          "vi": "Lúc nhỏ"
+        },
+        {
+          "pos": 11,
+          "hanzi": "好",
+          "pinyin": "Hǎo",
+          "adj": 18,
+          "vi": "Rất"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "我们爱上中文课",
+      "short_vi": "Trò chuyện về việc học tiếng Trung; bàn bạc chọn quà tặng cô giáo nhân dịp năm mới; thực hành viết chữ Hán; tặng quà bạn bè",
+      "vocabulary_count": 13,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "新年",
+          "pinyin": "Xīnnián",
+          "adj": 2,
+          "vi": "Năm mới"
+        },
+        {
+          "pos": 2,
+          "hanzi": "教",
+          "pinyin": "Jiāo",
+          "adj": 4,
+          "vi": "dạy"
+        },
+        {
+          "pos": 3,
+          "hanzi": "花",
+          "pinyin": "Huā",
+          "adj": 2,
+          "vi": "Bông hoa"
+        },
+        {
+          "pos": 4,
+          "hanzi": "希望",
+          "pinyin": "Xīwàng",
+          "adj": 4,
+          "vi": "Hi vọng"
+        },
+        {
+          "pos": 5,
+          "hanzi": "上面",
+          "pinyin": "Shàngmiàn",
+          "adj": 2,
+          "vi": "Phía trên ( bề mặt )"
+        },
+        {
+          "pos": 6,
+          "hanzi": "洗手间",
+          "pinyin": "Xǐshǒujiān",
+          "adj": 2,
+          "vi": "Nhà vệ sinh"
+        },
+        {
+          "pos": 7,
+          "hanzi": "里面",
+          "pinyin": "Lǐmiàn",
+          "adj": 2,
+          "vi": "Bên trong"
+        },
+        {
+          "pos": 8,
+          "hanzi": "笔",
+          "pinyin": "Bǐ",
+          "adj": 2,
+          "vi": "nét"
+        },
+        {
+          "pos": 9,
+          "hanzi": "可能",
+          "pinyin": "Kěnéng",
+          "adj": 4,
+          "vi": "Có lẽ, có thể"
+        },
+        {
+          "pos": 10,
+          "hanzi": "上网",
+          "pinyin": "Shàngwǎng",
+          "adj": 4,
+          "vi": "Lên mạng"
+        },
+        {
+          "pos": 11,
+          "hanzi": "那样",
+          "pinyin": "Nàyàng",
+          "adj": 1,
+          "vi": "Như vậy"
+        },
+        {
+          "pos": 12,
+          "hanzi": "告诉",
+          "pinyin": "Gàosu",
+          "adj": 4,
+          "vi": "Nói cho"
+        },
+        {
+          "pos": 13,
+          "hanzi": "班",
+          "pinyin": "Bān",
+          "adj": 2,
+          "vi": "lớp"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "一个人过年多没意思啊",
+      "short_vi": "Bạn trai bay từ Trung Quốc sang thăm bạn gái ở nước ngoài; giới thiệu bạn bè với nhau; thăm nhà và trò chuyện về cuộc sống hàng ngày; đón Tết cùng nhau",
+      "vocabulary_count": 10,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "站",
+          "pinyin": "zhàn",
+          "adj": 4,
+          "vi": "đứng"
+        },
+        {
+          "pos": 2,
+          "hanzi": "包",
+          "pinyin": "bāo",
+          "adj": [
+            2,
+            4
+          ],
+          "vi": "túi, bao / bao bọc"
+        },
+        {
+          "pos": 3,
+          "hanzi": "房子",
+          "pinyin": "fángzi",
+          "adj": 2,
+          "vi": "nhà, căn hộ"
+        },
+        {
+          "pos": 4,
+          "hanzi": "小孩儿",
+          "pinyin": "xiǎoháir",
+          "adj": 2,
+          "vi": "trẻ con"
+        },
+        {
+          "pos": 5,
+          "hanzi": "女孩儿",
+          "pinyin": "nǚháir",
+          "adj": 2,
+          "vi": "bé gái"
+        },
+        {
+          "pos": 6,
+          "hanzi": "跳舞",
+          "pinyin": "tiàowǔ",
+          "adj": 4,
+          "vi": "nhảy múa"
+        },
+        {
+          "pos": 7,
+          "hanzi": "眼睛",
+          "pinyin": "yǎnjing",
+          "adj": 2,
+          "vi": "mắt"
+        },
+        {
+          "pos": 8,
+          "hanzi": "姓",
+          "pinyin": "xìng",
+          "adj": [
+            4,
+            2
+          ],
+          "vi": "họ, mang họ"
+        },
+        {
+          "pos": 9,
+          "hanzi": "位",
+          "pinyin": "wèi",
+          "adj": 8,
+          "vi": "vị — lượng từ lịch sự dùng cho người"
+        },
+        {
+          "pos": 10,
+          "hanzi": "过年",
+          "pinyin": "guònián",
+          "adj": 4,
+          "vi": "đón năm mới, ăn Tết"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "我想再去一次中国",
+      "short_vi": "Làm bài thi và bàn về kế hoạch sau thi; nói về mong muốn đi du lịch Trung Quốc lần nữa; mua vé máy bay, đặt vé tham quan; chuẩn bị hành lý xuất ngoại",
+      "vocabulary_count": 12,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "姓名",
+          "pinyin": "Xìngmíng",
+          "adj": 2,
+          "vi": "Họ tên"
+        },
+        {
+          "pos": 2,
+          "hanzi": "出国",
+          "pinyin": "Chūguó",
+          "adj": 4,
+          "vi": "Đi nước ngoài"
+        },
+        {
+          "pos": 3,
+          "hanzi": "门票",
+          "pinyin": "Ménpiào",
+          "adj": 2,
+          "vi": "Vé vào"
+        },
+        {
+          "pos": 4,
+          "hanzi": "高中",
+          "pinyin": "Gāozhōng",
+          "adj": 2,
+          "vi": "Cấp 3"
+        },
+        {
+          "pos": 5,
+          "hanzi": "出门",
+          "pinyin": "Chūmén",
+          "adj": 4,
+          "vi": "Ra ngoài"
+        },
+        {
+          "pos": 6,
+          "hanzi": "路",
+          "pinyin": "Lù",
+          "adj": 2,
+          "vi": "Đường"
+        },
+        {
+          "pos": 7,
+          "hanzi": "颐和园",
+          "pinyin": "Yíhéyuán",
+          "adj": 2,
+          "vi": "Di hòa viên ( bắc kinh )"
+        },
+        {
+          "pos": 8,
+          "hanzi": "机场",
+          "pinyin": "Jīchǎng",
+          "adj": 2,
+          "vi": "Sân bay"
+        },
+        {
+          "pos": 9,
+          "hanzi": "机票",
+          "pinyin": "Jīpiào",
+          "adj": 2,
+          "vi": "Vé máy bay"
+        },
+        {
+          "pos": 10,
+          "hanzi": "飞",
+          "pinyin": "Fēi",
+          "adj": 4,
+          "vi": "bay"
+        },
+        {
+          "pos": 11,
+          "hanzi": "好像",
+          "pinyin": "Hǎoxiàng",
+          "adj": 4,
+          "vi": "Hình như, dường như"
+        },
+        {
+          "pos": 12,
+          "hanzi": "鸟",
+          "pinyin": "Niǎo",
+          "adj": 2,
+          "vi": "Con chim"
+        }
+      ]
+    }
+  ]
+}

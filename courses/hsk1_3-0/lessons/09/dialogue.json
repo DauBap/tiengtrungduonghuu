@@ -1,0 +1,110 @@
+{
+  "lesson": 9,
+  "title": "我明天上午在学校学习",
+  "title_pinyin": "Wǒ míngtiān shàngwǔ zài xuéxiào xuéxí",
+  "title_vi": "Sáng mai tôi học ở trường",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "学校前边有一家电影院。",
+          "pinyin": "Xuéxiào qiánbian yǒu yī jiā diànyǐngyuàn.",
+          "vi": "Phía trước trường học có một rạp chiếu phim."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "对。我们晚上去那个电影院看电影吧。",
+          "pinyin": "Duì. Wǒmen wǎnshang qù nàge diànyǐngyuàn kàn diànyǐng ba.",
+          "vi": "Đúng vậy. Tối chúng ta đến rạp chiếu phim đó xem phim nhé."
+        },
+        {
+          "speaker": "李文",
+          "zh": "好！我们七点在电影院外边见，好吗？",
+          "pinyin": "Hǎo! Wǒmen qī diǎn zài diànyǐngyuàn wàibian jiàn, hǎo ma?",
+          "vi": "Được! Chúng ta gặp nhau lúc 7 giờ ở bên ngoài rạp chiếu phim nhé, được không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好的，晚上七点见！",
+          "pinyin": "Hǎo de, wǎnshang qī diǎn jiàn!",
+          "vi": "Được thôi, tối 7 giờ gặp nhau nhé!"
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "椅子上有一本中文书，那是谁的书？",
+          "pinyin": "Yǐzi shàng yǒu yī běn Zhōngwén shū, nà shì shéi de shū?",
+          "vi": "Trên ghế có một quyển sách tiếng Trung, đó là sách của ai vậy?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "是我的书，谢谢。这是我的第二本中文书。",
+          "pinyin": "Shì wǒ de shū, xièxie. Zhè shì wǒ de dì-èr běn Zhōngwén shū.",
+          "vi": "Là sách của tôi, cảm ơn bạn. Đây là quyển sách tiếng Trung thứ hai của tôi."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "不客气。你明天上午在哪儿？",
+          "pinyin": "Bú kèqi. Nǐ míngtiān shàngwǔ zài nǎr?",
+          "vi": "Không có gì. Bạn sáng mai ở đâu?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我明天上午在学校学习。",
+          "pinyin": "Wǒ míngtiān shàngwǔ zài xuéxiào xuéxí.",
+          "vi": "Sáng mai tôi học ở trường."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "明天星期六，你做什么？",
+          "pinyin": "Míngtiān xīngqīliù, nǐ zuò shénme?",
+          "vi": "Ngày mai thứ Bảy rồi, bạn làm gì?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "我白天在家里读书，晚上和朋友们去外边唱歌。",
+          "pinyin": "Wǒ báitiān zài jiāli dúshū, wǎnshang hé péngyoumen qù wàibian chànggē.",
+          "vi": "Ban ngày tôi đọc sách ở nhà, tối ra ngoài hát với bạn bè."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你唱歌很好听。",
+          "pinyin": "Nǐ chànggē hěn hǎotīng.",
+          "vi": "Bạn hát rất hay."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "谢谢！您星期六做什么？",
+          "pinyin": "Xièxie! Nín xīngqīliù zuò shénme?",
+          "vi": "Cảm ơn chị! Thứ Bảy chị làm gì?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我在家里做饭、看电视，和孩子们、小狗玩。",
+          "pinyin": "Wǒ zài jiāli zuòfàn, kàn diànshì, hé háizimen, xiǎo gǒu wán.",
+          "vi": "Tôi ở nhà nấu ăn, xem ti vi, chơi với bọn trẻ và cún con."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "我也有一只小狗。",
+          "pinyin": "Wǒ yě yǒu yī zhī xiǎo gǒu.",
+          "vi": "Tôi cũng có một chú cún con."
+        }
+      ]
+    }
+  ]
+}

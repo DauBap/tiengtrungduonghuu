@@ -1,0 +1,115 @@
+{
+	"course_id": "hsk1_2",
+	"course_name": "HSK 1 (2.0)",
+
+	"id": 8,
+	"title": "我想喝茶",
+	"short_vi": "Diễn tả mong muốn ăn, uống, mua và hỏi giá tiền.",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "想",
+			"pinyin": "xiǎng",
+			"vi": "muốn, nhớ, nghĩ",
+			"adj": 4
+		},
+		{
+			"pos": 2,
+			"hanzi": "喝",
+			"pinyin": "hē",
+			"vi": "uống",
+			"adj": 4
+		},
+		{
+			"pos": 3,
+			"hanzi": "茶",
+			"pinyin": "chá",
+			"vi": "trà",
+			"adj": 2
+		},
+		{
+			"pos": 4,
+			"hanzi": "吃",
+			"pinyin": "chī",
+			"vi": "ăn",
+			"adj": 4
+		},
+		{
+			"pos": 5,
+			"hanzi": "米饭",
+			"pinyin": "mǐfàn",
+			"vi": "cơm (chín)",
+			"adj": 2
+		},
+		{
+			"pos": 6,
+			"hanzi": "下午",
+			"pinyin": "xiàwǔ",
+			"vi": "buổi chiều",
+			"adj": 2
+		},
+		{
+			"pos": 7,
+			"hanzi": "商店",
+			"pinyin": "shāngdiàn",
+			"vi": "cửa hàng",
+			"adj": 2
+		},
+		{
+			"pos": 8,
+			"hanzi": "买",
+			"pinyin": "mǎi",
+			"vi": "mua",
+			"adj": 4
+		},
+		{
+			"pos": 9,
+			"hanzi": "个",
+			"pinyin": "gè",
+			"vi": "cái (lượng từ chung)",
+			"adj": 8
+		},
+		{
+			"pos": 10,
+			"hanzi": "杯子",
+			"pinyin": "bēizi",
+			"vi": "cái cốc",
+			"adj": 2
+		},
+		{
+			"pos": 11,
+			"hanzi": "这",
+			"pinyin": "zhè",
+			"vi": "này",
+			"adj": 1
+		},
+		{
+			"pos": 12,
+			"hanzi": "多少",
+			"pinyin": "duōshao",
+			"vi": "bao nhiêu",
+			"adj": 1
+		},
+		{
+			"pos": 13,
+			"hanzi": "钱",
+			"pinyin": "qián",
+			"vi": "tiền",
+			"adj": 2
+		},
+		{
+			"pos": 14,
+			"hanzi": "块",
+			"pinyin": "kuài",
+			"vi": "đồng (đơn vị tiền TQ)",
+			"adj": 8
+		},
+		{
+			"pos": 15,
+			"hanzi": "那",
+			"pinyin": "nà",
+			"vi": "kia",
+			"adj": 1
+		}
+	]
+}

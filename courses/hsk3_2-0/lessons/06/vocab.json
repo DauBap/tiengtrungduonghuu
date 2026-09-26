@@ -1,0 +1,115 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 6,
+  "label": "Bài 6",
+  "title": "怎么突然找不到了？",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "眼镜",
+      "pinyin": "yǎnjìng",
+      "adj": 2,
+      "vi": "mắt kính"
+    },
+    {
+      "pos": 2,
+      "hanzi": "突然",
+      "pinyin": "tūrán",
+      "adj": 7,
+      "vi": "bỗng nhiên, bỗng dưng"
+    },
+    {
+      "pos": 3,
+      "hanzi": "离开",
+      "pinyin": "líkāi",
+      "adj": 4,
+      "vi": "rời khỏi, tách khỏi"
+    },
+    {
+      "pos": 4,
+      "hanzi": "清楚",
+      "pinyin": "qīngchu",
+      "adj": 6,
+      "vi": "rõ ràng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "刚才",
+      "pinyin": "gāngcái",
+      "adj": 2,
+      "vi": "húc nãy"
+    },
+    {
+      "pos": 6,
+      "hanzi": "帮忙",
+      "pinyin": "bāng máng",
+      "adj": 4,
+      "vi": "giúp, giúp đỡ"
+    },
+    {
+      "pos": 7,
+      "hanzi": "特别",
+      "pinyin": "tèbié",
+      "adj": 7,
+      "vi": "vô cùng, rất"
+    },
+    {
+      "pos": 8,
+      "hanzi": "讲",
+      "pinyin": "jiǎng",
+      "adj": 4,
+      "vi": "giải thích, nói"
+    },
+    {
+      "pos": 9,
+      "hanzi": "明白",
+      "pinyin": "míngbai",
+      "adj": 6,
+      "vi": "rõ ràng, dễ hiểu"
+    },
+    {
+      "pos": 10,
+      "hanzi": "锻炼",
+      "pinyin": "duànliàn",
+      "adj": 4,
+      "vi": "tập thể dục"
+    },
+    {
+      "pos": 11,
+      "hanzi": "音乐",
+      "pinyin": "yīnyuè",
+      "adj": 2,
+      "vi": "âm nhạc"
+    },
+    {
+      "pos": 12,
+      "hanzi": "公园",
+      "pinyin": "gōngyuán",
+      "adj": 2,
+      "vi": "công viên"
+    },
+    {
+      "pos": 13,
+      "hanzi": "聊天（儿）",
+      "pinyin": "liáo tiān (r)",
+      "adj": 4,
+      "vi": "tán gẫu"
+    },
+    {
+      "pos": 14,
+      "hanzi": "睡着",
+      "pinyin": "shuì zháo",
+      "adj": 4,
+      "vi": "ngủ được"
+    },
+    {
+      "pos": 15,
+      "hanzi": "更",
+      "pinyin": "gèng",
+      "adj": 7,
+      "vi": "càng, hơn nữa"
+    }
+  ]
+}

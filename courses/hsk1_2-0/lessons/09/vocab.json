@@ -1,0 +1,101 @@
+{
+	"course_id": "hsk1_2",
+	"course_name": "HSK 1 (2.0)",
+
+	"id": 9,
+	"title": "你儿子在哪儿工作？",
+	"short_vi": "Hỏi vị trí người hoặc vật. Hỏi nơi làm việc và nghề nghiệp.",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "小",
+			"pinyin": "xiǎo",
+			"vi": "nhỏ",
+			"adj": 6
+		},
+		{
+			"pos": 2,
+			"hanzi": "猫",
+			"pinyin": "māo",
+			"vi": "mèo",
+			"adj": 2
+		},
+		{
+			"pos": 3,
+			"hanzi": "在",
+			"pinyin": "zài",
+			"vi": "ở",
+			"adj": 4
+		},
+		{
+			"pos": 4,
+			"hanzi": "那儿",
+			"pinyin": "nàr",
+			"vi": "ở kia, chỗ kia",
+			"adj": 1
+		},
+		{
+			"pos": 5,
+			"hanzi": "狗",
+			"pinyin": "gǒu",
+			"vi": "chó",
+			"adj": 2
+		},
+		{
+			"pos": 6,
+			"hanzi": "椅子",
+			"pinyin": "yǐzi",
+			"vi": "ghế",
+			"adj": 2
+		},
+		{
+			"pos": 7,
+			"hanzi": "下面",
+			"pinyin": "xiàmiàn",
+			"vi": "phía dưới, bên dưới",
+			"adj": 2
+		},
+		{
+			"pos": 8,
+			"hanzi": "哪儿",
+			"pinyin": "nǎr",
+			"vi": "ở đâu",
+			"adj": 1
+		},
+		{
+			"pos": 9,
+			"hanzi": "工作",
+			"pinyin": "gōngzuò",
+			"vi": "công việc / làm việc",
+			"adj": 2
+		},
+		{
+			"pos": 10,
+			"hanzi": "儿子",
+			"pinyin": "érzi",
+			"vi": "con trai",
+			"adj": 2
+		},
+		{
+			"pos": 11,
+			"hanzi": "医院",
+			"pinyin": "yīyuàn",
+			"vi": "bệnh viện",
+			"adj": 2
+		},
+		{
+			"pos": 12,
+			"hanzi": "医生",
+			"pinyin": "yīshēng",
+			"vi": "bác sĩ",
+			"adj": 2
+		},
+		{
+			"pos": 13,
+			"hanzi": "爸爸",
+			"pinyin": "bàba",
+			"vi": "bố",
+			"adj": 2
+		}
+	]
+}

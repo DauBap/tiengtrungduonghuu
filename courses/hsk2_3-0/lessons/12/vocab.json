@@ -1,0 +1,87 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 12,
+  "label": "Bài 12",
+  "title": "这里比北京冷多了",
+  "short_vi": "Gọi điện hỏi thăm; trò chuyện về thời tiết (nắng, mưa, tuyết); so sánh thời tiết giữa các nơi; rủ bạn cùng chạy bộ",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "事情",
+      "pinyin": "Shìqing",
+      "adj": 2,
+      "vi": "Sự việc, chuyện"
+    },
+    {
+      "pos": 2,
+      "hanzi": "晴",
+      "pinyin": "Qíng",
+      "adj": 6,
+      "vi": "nắng"
+    },
+    {
+      "pos": 3,
+      "hanzi": "正",
+      "pinyin": "Zhèng",
+      "adj": 18,
+      "vi": "Biểu thị hành động đang diễn ra"
+    },
+    {
+      "pos": 4,
+      "hanzi": "外面",
+      "pinyin": "Wàimiàn",
+      "adj": 2,
+      "vi": "Bên ngoài"
+    },
+    {
+      "pos": 5,
+      "hanzi": "阴",
+      "pinyin": "Yīn",
+      "adj": 6,
+      "vi": "Trời có mây, âm u"
+    },
+    {
+      "pos": 6,
+      "hanzi": "从小",
+      "pinyin": "Cóngxiǎo",
+      "adj": 18,
+      "vi": "Từ nhỏ"
+    },
+    {
+      "pos": 7,
+      "hanzi": "地铁",
+      "pinyin": "Dìtiě",
+      "adj": 2,
+      "vi": "Tàu điện ngầm"
+    },
+    {
+      "pos": 8,
+      "hanzi": "楼",
+      "pinyin": "Lóu",
+      "adj": 2,
+      "vi": "Tòa nhà"
+    },
+    {
+      "pos": 9,
+      "hanzi": "站",
+      "pinyin": "Zhàn",
+      "adj": 2,
+      "vi": "Bến, trạm, ga"
+    },
+    {
+      "pos": 10,
+      "hanzi": "小时候",
+      "pinyin": "Xiǎoshíhou",
+      "adj": 2,
+      "vi": "Lúc nhỏ"
+    },
+    {
+      "pos": 11,
+      "hanzi": "好",
+      "pinyin": "Hǎo",
+      "adj": 18,
+      "vi": "Rất"
+    }
+  ]
+}

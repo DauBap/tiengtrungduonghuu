@@ -1,0 +1,256 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 17,
+  "label": "Bài 17",
+  "title": "在最美好的时刻离开",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "事物",
+      "pinyin": "shìwù",
+      "adj": 2,
+      "vi": "sự vật"
+    },
+    {
+      "pos": 2,
+      "hanzi": "高峰",
+      "pinyin": "gāofēng",
+      "adj": 2,
+      "vi": "đỉnh cao, cao điểm"
+    },
+    {
+      "pos": 3,
+      "hanzi": "终点",
+      "pinyin": "zhōngdiǎn",
+      "adj": 2,
+      "vi": "điểm cuối cùng, điểm kết thúc"
+    },
+    {
+      "pos": 4,
+      "hanzi": "迅速",
+      "pinyin": "xùnsù",
+      "adj": 6,
+      "vi": "nhanh chóng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "深刻",
+      "pinyin": "shēnkè",
+      "adj": 6,
+      "vi": "sâu sắc"
+    },
+    {
+      "pos": 6,
+      "hanzi": "戏剧",
+      "pinyin": "xìjù",
+      "adj": 2,
+      "vi": "kịch, vở tuồng"
+    },
+    {
+      "pos": 7,
+      "hanzi": "投入",
+      "pinyin": "tóurù",
+      "adj": [
+        4,
+        2,
+        6
+      ],
+      "vi": "dưa vào, bỏ vốn; kinh phí đầu tư; xuất thần"
+    },
+    {
+      "pos": 8,
+      "hanzi": "服装",
+      "pinyin": "fúzhuāng",
+      "adj": 2,
+      "vi": "trang phục"
+    },
+    {
+      "pos": 9,
+      "hanzi": "化妆",
+      "pinyin": "huà zhuāng",
+      "adj": 4,
+      "vi": "trang điểm"
+    },
+    {
+      "pos": 10,
+      "hanzi": "道具",
+      "pinyin": "dàojù",
+      "adj": 2,
+      "vi": "đạo cụ"
+    },
+    {
+      "pos": 11,
+      "hanzi": "美术",
+      "pinyin": "měishù",
+      "adj": 2,
+      "vi": "nghệ thuật tạo hình"
+    },
+    {
+      "pos": 12,
+      "hanzi": "以",
+      "pinyin": "yǐ",
+      "adj": 10,
+      "vi": "để, nhằm"
+    },
+    {
+      "pos": 13,
+      "hanzi": "良好",
+      "pinyin": "liánghǎo",
+      "adj": 6,
+      "vi": "tốt đẹp, tốt cố gắng, tranh thủ"
+    },
+    {
+      "pos": 14,
+      "hanzi": "争取",
+      "pinyin": "zhēngqǔ",
+      "adj": 4,
+      "vi": "cố gắng, tranh thủ, giành"
+    },
+    {
+      "pos": 15,
+      "hanzi": "忽视",
+      "pinyin": "hūshì",
+      "adj": 4,
+      "vi": "xem nhẹ, không chú ý"
+    },
+    {
+      "pos": 16,
+      "hanzi": "魅力",
+      "pinyin": "mèilì",
+      "adj": 2,
+      "vi": "sức hấp dẫn"
+    },
+    {
+      "pos": 17,
+      "hanzi": "糟糕",
+      "pinyin": "zāogāo",
+      "adj": 6,
+      "vi": "tồi tệ, hỏng bét"
+    },
+    {
+      "pos": 18,
+      "hanzi": "婚礼",
+      "pinyin": "hūnlǐ",
+      "adj": 2,
+      "vi": "lễ cưới"
+    },
+    {
+      "pos": 19,
+      "hanzi": "等于",
+      "pinyin": "děngyú",
+      "adj": 4,
+      "vi": "bằng"
+    },
+    {
+      "pos": 20,
+      "hanzi": "度过",
+      "pinyin": "dùguò",
+      "adj": 4,
+      "vi": "trải qua"
+    },
+    {
+      "pos": 21,
+      "hanzi": "平常",
+      "pinyin": "píngcháng",
+      "adj": [
+        6,
+        2
+      ],
+      "vi": "bình thường; ngày thường"
+    },
+    {
+      "pos": 22,
+      "hanzi": "依然",
+      "pinyin": "yīrán",
+      "adj": 7,
+      "vi": "vẫn, vẫn như cũ"
+    },
+    {
+      "pos": 23,
+      "hanzi": "推荐",
+      "pinyin": "tuījiàn",
+      "adj": 4,
+      "vi": "giới thiệu, tiến cử"
+    },
+    {
+      "pos": 24,
+      "hanzi": "淋漓尽致",
+      "pinyin": "línlí jìnzhì",
+      "adj": [
+        null,
+        2
+      ],
+      "vi": "tình tế, triệt để"
+    },
+    {
+      "pos": 25,
+      "hanzi": "评价",
+      "pinyin": "píngjià",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "đánh giá; sự đánh giá"
+    },
+    {
+      "pos": 26,
+      "hanzi": "烂",
+      "pinyin": "làn",
+      "adj": 6,
+      "vi": "dở, tệ, thồi rữa, rách nát"
+    },
+    {
+      "pos": 27,
+      "hanzi": "主持",
+      "pinyin": "zhǔchí",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "chủ trì; người chủ trì"
+    },
+    {
+      "pos": 28,
+      "hanzi": "运用",
+      "pinyin": "yùnyòng",
+      "adj": 4,
+      "vi": "vận dụng, áp dụng"
+    },
+    {
+      "pos": 29,
+      "hanzi": "开幕式",
+      "pinyin": "kāimùshì",
+      "adj": 2,
+      "vi": "lễ khai mạc"
+    },
+    {
+      "pos": 30,
+      "hanzi": "宁可",
+      "pinyin": "nìngkě",
+      "adj": 7,
+      "vi": "thà rằng, thà"
+    },
+    {
+      "pos": 31,
+      "hanzi": "集中",
+      "pinyin": "jízhōng",
+      "adj": [
+        4,
+        6
+      ],
+      "vi": "tập trung; chăm chú"
+    },
+    {
+      "pos": 32,
+      "hanzi": "体会",
+      "pinyin": "tǐhuì",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "hiểu rõ, nhận thức rõ; nhận thức"
+    }
+  ]
+}

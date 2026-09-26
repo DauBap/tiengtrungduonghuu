@@ -1,0 +1,302 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 4,
+  "label": "Bài 4",
+  "title": "子路背米",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "背",
+      "pinyin": "bēi",
+      "adj": 4,
+      "vi": "vác, cõng"
+    },
+    {
+      "pos": 2,
+      "hanzi": "从前",
+      "pinyin": "cóngqián",
+      "adj": 2,
+      "vi": "trước đây, ngày xưa"
+    },
+    {
+      "pos": 3,
+      "hanzi": "时期",
+      "pinyin": "shíqī",
+      "adj": 2,
+      "vi": "thời kỳ"
+    },
+    {
+      "pos": 4,
+      "hanzi": "流传",
+      "pinyin": "liúchuán",
+      "adj": 4,
+      "vi": "lưu truyền"
+    },
+    {
+      "pos": 5,
+      "hanzi": "至今",
+      "pinyin": "zhìjīn",
+      "adj": 7,
+      "vi": "đến nay, đến bây giờ"
+    },
+    {
+      "pos": 6,
+      "hanzi": "孝敬",
+      "pinyin": "xiàojìng",
+      "adj": 4,
+      "vi": "hiếu kính"
+    },
+    {
+      "pos": 7,
+      "hanzi": "农民",
+      "pinyin": "nóngmín",
+      "adj": 2,
+      "vi": "nông dân"
+    },
+    {
+      "pos": 8,
+      "hanzi": "战争",
+      "pinyin": "zhànzhēng",
+      "adj": 2,
+      "vi": "chiến tranh"
+    },
+    {
+      "pos": 9,
+      "hanzi": "满足",
+      "pinyin": "mǎnzú",
+      "adj": 4,
+      "vi": "thỏa mãn, cảm thấy hài lòng"
+    },
+    {
+      "pos": 10,
+      "hanzi": "惭愧",
+      "pinyin": "cánkuì",
+      "adj": 6,
+      "vi": "hổ thẹn"
+    },
+    {
+      "pos": 11,
+      "hanzi": "决心",
+      "pinyin": "juéxīn",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "quyết tâm; sự quyết tâm"
+    },
+    {
+      "pos": 12,
+      "hanzi": "委屈",
+      "pinyin": "wěiqu",
+      "adj": [
+        4,
+        6
+      ],
+      "vi": "để ai chịu thiệt thòi; tủi thân"
+    },
+    {
+      "pos": 13,
+      "hanzi": "打听",
+      "pinyin": "dǎtīng",
+      "adj": 4,
+      "vi": "hỏi thăm, nghe ngóng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "主人",
+      "pinyin": "zhǔrén",
+      "adj": 2,
+      "vi": "người chủ"
+    },
+    {
+      "pos": 15,
+      "hanzi": "结实",
+      "pinyin": "jiēshi",
+      "adj": 6,
+      "vi": "cường tráng, khỏe mạnh"
+    },
+    {
+      "pos": 16,
+      "hanzi": "勤奋",
+      "pinyin": "qínfèn",
+      "adj": 6,
+      "vi": "siêng năng, cần cù"
+    },
+    {
+      "pos": 17,
+      "hanzi": "银（子）",
+      "pinyin": "yín(zi)",
+      "adj": 2,
+      "vi": "bạc"
+    },
+    {
+      "pos": 18,
+      "hanzi": "老实",
+      "pinyin": "lǎoshi",
+      "adj": 6,
+      "vi": "trung thực, thật thà"
+    },
+    {
+      "pos": 19,
+      "hanzi": "镇",
+      "pinyin": "zhèn",
+      "adj": 2,
+      "vi": "thị trấn"
+    },
+    {
+      "pos": 20,
+      "hanzi": "后背",
+      "pinyin": "hòubèi",
+      "adj": 2,
+      "vi": "lưng (người)"
+    },
+    {
+      "pos": 21,
+      "hanzi": "滑",
+      "pinyin": "huá",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "trơn; trượt"
+    },
+    {
+      "pos": 22,
+      "hanzi": "甩",
+      "pinyin": "shuǎi",
+      "adj": 4,
+      "vi": "vung, quặng, ném"
+    },
+    {
+      "pos": 23,
+      "hanzi": "顶",
+      "pinyin": "dǐng",
+      "adj": 4,
+      "vi": "đi ngược"
+    },
+    {
+      "pos": 24,
+      "hanzi": "扶",
+      "pinyin": "fú",
+      "adj": 4,
+      "vi": "đỡ, vịn"
+    },
+    {
+      "pos": 25,
+      "hanzi": "不行",
+      "pinyin": "bùxíng",
+      "adj": 4,
+      "vi": "(chỉ mức độ, cường độ...) ghê gớm, kinh khủng, cực kỳ"
+    },
+    {
+      "pos": 26,
+      "hanzi": "团圆",
+      "pinyin": "tuányuán",
+      "adj": 4,
+      "vi": "sum họp, đoàn tụ"
+    },
+    {
+      "pos": 27,
+      "hanzi": "去世",
+      "pinyin": "qùshì",
+      "adj": 4,
+      "vi": "qua đời, từ trần"
+    },
+    {
+      "pos": 28,
+      "hanzi": "国君",
+      "pinyin": "guójūn",
+      "adj": 2,
+      "vi": "vua"
+    },
+    {
+      "pos": 29,
+      "hanzi": "本领",
+      "pinyin": "běnlǐng",
+      "adj": 2,
+      "vi": "bản lĩnh, năng lực"
+    },
+    {
+      "pos": 30,
+      "hanzi": "人才",
+      "pinyin": "réncái",
+      "adj": 2,
+      "vi": "người có tài"
+    },
+    {
+      "pos": 31,
+      "hanzi": "官",
+      "pinyin": "guān",
+      "adj": 2,
+      "vi": "quan"
+    },
+    {
+      "pos": 32,
+      "hanzi": "物质",
+      "pinyin": "wùzhì",
+      "adj": 2,
+      "vi": "vật chất"
+    },
+    {
+      "pos": 33,
+      "hanzi": "反而",
+      "pinyin": "fǎn'ér",
+      "adj": 7,
+      "vi": "trái lại, ngược lại"
+    },
+    {
+      "pos": 34,
+      "hanzi": "诚恳",
+      "pinyin": "chéngkěn",
+      "adj": 6,
+      "vi": "thành khẩn"
+    },
+    {
+      "pos": 35,
+      "hanzi": "成就",
+      "pinyin": "chéngjiù",
+      "adj": 2,
+      "vi": "thành tựu, thành quả"
+    },
+    {
+      "pos": 36,
+      "hanzi": "古代",
+      "pinyin": "gǔdài",
+      "adj": 2,
+      "vi": "ngày xưa"
+    },
+    {
+      "pos": 37,
+      "hanzi": "孝顺",
+      "pinyin": "xiàoshùn",
+      "adj": [
+        4,
+        6
+      ],
+      "vi": "thể hiện lòng hiếu thảo; hiếu thảo"
+    },
+    {
+      "pos": 38,
+      "hanzi": "美德",
+      "pinyin": "měidé",
+      "adj": 2,
+      "vi": "phẩm chất tốt"
+    },
+    {
+      "pos": 39,
+      "hanzi": "占",
+      "pinyin": "zhàn",
+      "adj": 4,
+      "vi": "chiếm, giữ"
+    },
+    {
+      "pos": 40,
+      "hanzi": "食物",
+      "pinyin": "shíwù",
+      "adj": 2,
+      "vi": "thức ăn"
+    }
+  ]
+}

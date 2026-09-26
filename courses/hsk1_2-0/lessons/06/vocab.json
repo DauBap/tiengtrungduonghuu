@@ -1,0 +1,94 @@
+{
+	"course_id": "hsk1_2",
+	"course_name": "HSK 1 (2.0)",
+
+	"id": 6,
+	"title": "我会说汉语",
+	"short_vi": "Nói về khả năng biết làm gì. Miêu tả món ăn. Hỏi cách đọc và viết.",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "会",
+			"pinyin": "huì",
+			"vi": "biết, có thể",
+			"adj": 5
+		},
+		{
+			"pos": 2,
+			"hanzi": "说",
+			"pinyin": "shuō",
+			"vi": "nói",
+			"adj": 4
+		},
+		{
+			"pos": 3,
+			"hanzi": "妈妈",
+			"pinyin": "māma",
+			"vi": "mẹ",
+			"adj": 2
+		},
+		{
+			"pos": 4,
+			"hanzi": "菜",
+			"pinyin": "cài",
+			"vi": "món ăn",
+			"adj": 2
+		},
+		{
+			"pos": 5,
+			"hanzi": "很",
+			"pinyin": "hěn",
+			"vi": "rất",
+			"adj": 7
+		},
+		{
+			"pos": 6,
+			"hanzi": "好吃",
+			"pinyin": "hǎochī",
+			"vi": "ngon (chỉ đồ ăn)",
+			"adj": 6
+		},
+		{
+			"pos": 7,
+			"hanzi": "做",
+			"pinyin": "zuò",
+			"vi": "làm, nấu",
+			"adj": 4
+		},
+		{
+			"pos": 8,
+			"hanzi": "写",
+			"pinyin": "xiě",
+			"vi": "viết",
+			"adj": 4
+		},
+		{
+			"pos": 9,
+			"hanzi": "汉字",
+			"pinyin": "Hànzì",
+			"vi": "chữ Hán",
+			"adj": 2
+		},
+		{
+			"pos": 10,
+			"hanzi": "字",
+			"pinyin": "zì",
+			"vi": "chữ",
+			"adj": 2
+		},
+		{
+			"pos": 11,
+			"hanzi": "怎么",
+			"pinyin": "zěnme",
+			"vi": "như thế nào",
+			"adj": 1
+		},
+		{
+			"pos": 12,
+			"hanzi": "读",
+			"pinyin": "dú",
+			"vi": "đọc",
+			"adj": 4
+		}
+	]
+}

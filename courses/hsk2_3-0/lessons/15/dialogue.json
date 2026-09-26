@@ -1,0 +1,170 @@
+{
+  "lesson": 15,
+  "title": "我想再去一次中国",
+  "title_pinyin": "Wǒ xiǎng zài qù yī cì Zhōngguó",
+  "title_vi": "Tôi muốn đi Trung Quốc thêm một lần nữa",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一飞",
+          "zh": "考试就要开始了，请大家写上姓名，写好后就可以做题了。",
+          "pinyin": "Kǎoshì jiù yào kāishǐ le, qǐng dàjiā xiě shàng xìngmíng, xiě hǎo hòu jiù kěyǐ zuò tí le.",
+          "vi": "Bài thi sắp bắt đầu rồi, mời mọi người viết họ tên, viết xong thì có thể làm bài."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "老师，我做完了。",
+          "pinyin": "Lǎoshī, wǒ zuò wán le.",
+          "vi": "Cô ơi, em làm xong rồi."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "老师，我也做完了。",
+          "pinyin": "Lǎoshī, wǒ yě zuò wán le.",
+          "vi": "Cô ơi, em cũng làm xong rồi."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "......对了，你们考完试想做什么？",
+          "pinyin": "Duìle, nǐmen kǎo wán shì xiǎng zuò shénme?",
+          "vi": "À đúng rồi, các em định làm gì sau khi thi xong?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我很想去中国，虽然去过一次，但是很想再去一次。",
+          "pinyin": "Wǒ hěn xiǎng qù Zhōngguó, suīrán qù guo yī cì, dànshì hěn xiǎng zài qù yī cì.",
+          "vi": "Em rất muốn đi Trung Quốc, tuy đã đi một lần nhưng vẫn rất muốn đi thêm một lần nữa."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "不错，到中国后你就可以经常说中文了。",
+          "pinyin": "Búcuò, dào Zhōngguó hòu nǐ jiù kěyǐ jīngcháng shuō Zhōngwén le.",
+          "vi": "Không tệ, đến Trung Quốc rồi em có thể thường xuyên nói tiếng Trung."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "考完试了，我现在可以出国旅游了。",
+          "pinyin": "Kǎo wán shì le, wǒ xiànzài kěyǐ chūguó lǚyóu le.",
+          "vi": "Thi xong rồi, bây giờ tôi có thể đi du lịch nước ngoài."
+        },
+        {
+          "speaker": "李文",
+          "zh": "你要去哪儿？",
+          "pinyin": "Nǐ yào qù nǎr?",
+          "vi": "Cậu định đi đâu?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我要再去一次北京。",
+          "pinyin": "Wǒ yào zài qù yī cì Běijīng.",
+          "vi": "Tôi định đi Bắc Kinh thêm một lần nữa."
+        },
+        {
+          "speaker": "李文",
+          "zh": "为什么还去北京？",
+          "pinyin": "Wèishénme hái qù Běijīng?",
+          "vi": "Tại sao còn đi Bắc Kinh?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "因为我想再吃一次烤鸭，再喝一次奶茶，再去北京大学看一次电影。",
+          "pinyin": "Yīnwèi wǒ xiǎng zài chī yī cì kǎoyā, zài hē yī cì nǎichá, zài qù Běijīng Dàxué kàn yī cì diànyǐng.",
+          "vi": "Vì tôi muốn ăn vịt quay thêm một lần nữa, uống trà sữa thêm một lần nữa, và đến Đại học Bắc Kinh xem phim thêm một lần nữa."
+        },
+        {
+          "speaker": "李文",
+          "zh": "你想做的事情很多啊！",
+          "pinyin": "Nǐ xiǎng zuò de shìqing hěnduō a!",
+          "vi": "Cậu muốn làm nhiều việc thật đấy!"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "是啊，你看，我还在网上买好颐和园的门票呢！",
+          "pinyin": "Shì a, nǐ kàn, wǒ hái zài wǎngshàng mǎi hǎo Yíhéyuán de ménpiào ne!",
+          "vi": "Đúng vậy, cậu xem, tôi còn mua vé vào Cung điện Mùa hè trên mạng rồi đây này!"
+        },
+        {
+          "speaker": "李文",
+          "zh": "我的高中同学就在颐和园上班，可以让他给你好好介绍介绍。",
+          "pinyin": "Wǒ de gāozhōng tóngxué jiù zài Yíhéyuán shàngbān, kěyǐ ràng tā gěi nǐ hǎohǎo jièshào jièshào.",
+          "vi": "Bạn học cấp ba của tôi làm việc ở Cung điện Mùa hè, có thể nhờ cậu ấy giới thiệu kỹ cho cậu."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "太好了！出门旅游，多个朋友多条路。",
+          "pinyin": "Tài hǎo le! Chūmén lǚyóu, duō ge péngyou duō tiáo lù.",
+          "vi": "Tuyệt quá! Đi du lịch, nhiều bạn bè thì nhiều đường."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "李文，你有一年没回国了吧？",
+          "pinyin": "Lǐ Wén, nǐ yǒu yī nián méi huí guó le ba?",
+          "vi": "Lý Văn, cậu đã một năm chưa về nước rồi phải không?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "不到一年。我六月的时候回去过一次。",
+          "pinyin": "Bú dào yī nián. Wǒ liù yuè de shíhou huíqu guo yī cì.",
+          "vi": "Chưa đến một năm. Tớ đã về một lần vào tháng Sáu."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我怎么忘了？还是我送你去机场呢。",
+          "pinyin": "Wǒ zěnme wàng le? Hái shì wǒ sòng nǐ qù jīchǎng ne.",
+          "vi": "Tôi sao lại quên mất nhỉ? Chính tôi đã tiễn cậu ra sân bay cơ mà."
+        },
+        {
+          "speaker": "李文",
+          "zh": "是啊。",
+          "pinyin": "Shì a.",
+          "vi": "Đúng vậy."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我记得你那次的机票很便宜。",
+          "pinyin": "Wǒ jìde nǐ nà cì de jīpiào hěn piányi.",
+          "vi": "Tôi nhớ vé máy bay lần đó của cậu rất rẻ."
+        },
+        {
+          "speaker": "李文",
+          "zh": "没错，可能因为那个时候去北京的人不多吧。",
+          "pinyin": "Méi cuò, kěnéng yīnwèi nàge shíhou qù Běijīng de rén bù duō ba.",
+          "vi": "Không sai, có lẽ vì lúc đó ít người đi Bắc Kinh."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "这次的机票虽然有点儿贵，但想到就要飞北京了，我还是很高兴的。",
+          "pinyin": "Zhè cì de jīpiào suīrán yǒudiǎnr guì, dàn xiǎng dào jiù yào fēi Běijīng le, wǒ háishì hěn gāoxìng de.",
+          "vi": "Lần này vé máy bay tuy hơi đắt, nhưng nghĩ đến sắp được bay đến Bắc Kinh, tôi vẫn rất vui."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "我六月的时候回过一次北京，现在有半年多没回去了，我有点儿想家。就要过年了，我要回家过年。家月这次也要去北京，我们都是星期五的飞机。家月说我们好像小鸟，一起飞到北京，再一起飞回这里。",
+          "pinyin": "Wǒ liù yuè de shíhou huí guo yī cì Běijīng, xiànzài yǒu bàn nián duō méi huíqu le, wǒ yǒudiǎnr xiǎng jiā. Jiù yào guò nián le, wǒ yào huí jiā guò nián. Jiāyuè zhè cì yě yào qù Běijīng, wǒmen dōu shì xīngqīwǔ de fēijī. Jiāyuè shuō wǒmen hǎoxiàng xiǎoniǎo, yīqǐ fēi dào Běijīng, zài yīqǐ fēi huí zhèlǐ.",
+          "vi": "Tôi đã về Bắc Kinh một lần vào tháng Sáu, bây giờ đã hơn nửa năm chưa về, tôi hơi nhớ nhà. Sắp đến Tết rồi, tôi phải về nhà ăn Tết. Lần này Gia Nguyệt cũng sẽ đến Bắc Kinh, chúng tôi đều đi máy bay thứ Sáu. Gia Nguyệt nói chúng tôi như những chú chim nhỏ, cùng bay đến Bắc Kinh, rồi lại cùng bay về đây."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "lesson": 3,
+  "title": "这个小区挺好的",
+  "title_pinyin": "Zhège xiǎoqū tǐng hǎo de",
+  "title_vi": "Khu phố này khá tốt",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "小雪的初中离家有点儿远, 咱们换一个近点儿的房子吧。",
+          "pinyin": "Xiǎoxuě de chūzhōng lí jiā yǒudiǎnr yuǎn, zánmen huàn yī gè jìn diǎnr de fángzi ba.",
+          "vi": "Trường cấp 2 của Tiểu Tuyết cách nhà hơi xa, chúng ta đổi sang nhà gần hơn một chút đi."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好啊, 我上网看看。你觉得这个小区怎么样?",
+          "pinyin": "Hǎo a, wǒ shàng wǎng kànkan. Nǐ juéde zhège xiǎoqū zěnmeyàng?",
+          "vi": "Được thôi, tôi lên mạng xem. Em thấy khu phố này thế nào?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "环境挺好的, 离地铁站还不远。",
+          "pinyin": "Huánjìng tǐng hǎo de, lí dìtiě zhàn hái bù yuǎn.",
+          "vi": "Môi trường khá tốt, lại không xa ga tàu điện ngầm."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "房子里面也不错, 空调和洗衣机都是新的。",
+          "pinyin": "Fángzi lǐmian yě búcuò, kōngtiáo hé xǐyījī dōu shì xīn de.",
+          "vi": "Bên trong nhà cũng không tệ, điều hòa và máy giặt đều mới."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "是不错, 但是我不喜欢住一层。",
+          "pinyin": "Shì búcuò, dànshì wǒ bù xǐhuan zhù yī céng.",
+          "vi": "Cũng không tệ, nhưng em không thích ở tầng một."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "这个一层带一个小花园, 我觉得咱们可以去看看。",
+          "pinyin": "Zhège yī céng dài yī gè xiǎo huāyuán, wǒ juéde zánmen kěyǐ qù kànkan.",
+          "vi": "Tầng một này có một khu vườn nhỏ, anh nghĩ chúng ta có thể đi xem thử."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "我今天早上来的时候, 灯还开着。",
+          "pinyin": "Wǒ jīntiān zǎoshang lái de shíhou, dēng hái kāizhe.",
+          "vi": "Sáng nay em đến lúc đèn còn đang bật."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我这几天忙坏了, 可能走的时候忘关了。",
+          "pinyin": "Wǒ zhè jǐ tiān máng huài le, kěnéng zǒu de shíhou wàng guān le.",
+          "vi": "Mấy ngày nay anh bận quá, có thể lúc đi quên tắt."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "冰箱不能用, 这些吃的东西放在哪儿?",
+          "pinyin": "Bīngxiāng bù néng yòng, zhèxiē chī de dōngxi fàng zài nǎr?",
+          "vi": "Tủ lạnh không dùng được, những đồ ăn này để ở đâu?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "不可能吧? 冰箱是新买的, 我来看看。",
+          "pinyin": "Bù kěnéng ba? Bīngxiāng shì xīn mǎi de, wǒ lái kànkan.",
+          "vi": "Không thể nào? Tủ lạnh mới mua mà, để anh xem."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "洗衣机也坏了吗?",
+          "pinyin": "Xǐyījī yě huài le ma?",
+          "vi": "Máy giặt cũng hỏng à?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "没坏, 但是卫生间没打扫好, 还不能洗衣服。",
+          "pinyin": "Méi huài, dànshì wèishēngjiān méi dǎsǎo hǎo, hái bù néng xǐ yīfu.",
+          "vi": "Không hỏng, nhưng nhà vệ sinh chưa dọn dẹp xong, chưa thể giặt quần áo."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "星期天我们真的能搬家吗?",
+          "pinyin": "Xīngqītiān wǒmen zhēn de néng bānjiā ma?",
+          "vi": "Chủ nhật chúng ta có thực sự có thể chuyển nhà không?"
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "这个月花了不少钱。",
+          "pinyin": "Zhège yuè huāle bù shǎo qián.",
+          "vi": "Tháng này tiêu không ít tiền."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "是的, 我们买了很多搬家时要用的东西。",
+          "pinyin": "Shì de, wǒmen mǎile hěnduō bānjiā shí yào yòng de dōngxi.",
+          "vi": "Đúng vậy, chúng ta mua nhiều đồ dùng khi chuyển nhà."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "咱们办张信用卡吧, 花钱可以慢慢还。听说中国银行的服务不错, 办了信用卡买东西还能便宜。",
+          "pinyin": "Zánmen bàn zhāng xìnyòngkǎ ba, huā qián kěyǐ mànmàn hái. Tīngshuō Zhōngguó Yínháng de fúwù búcuò, bànle xìnyòngkǎ mǎi dōngxi hái néng piányi.",
+          "vi": "Chúng ta làm một cái thẻ tín dụng đi, tiêu tiền có thể từ từ trả sau. Nghe nói Ngân hàng Trung Quốc phục vụ không tệ, làm thẻ tín dụng mua đồ còn được rẻ hơn."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好啊! 中国银行很近, 走路几分钟就能到。咱们什么时候去?",
+          "pinyin": "Hǎo a! Zhōngguó Yínháng hěn jìn, zǒulù jǐ fēnzhōng jiù néng dào. Zánmen shénme shíhou qù?",
+          "vi": "Được thôi! Ngân hàng Trung Quốc rất gần, đi bộ vài phút là tới. Chúng ta đi lúc nào?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "今天下午?",
+          "pinyin": "Jīntiān xiàwǔ?",
+          "vi": "Chiều nay?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我下午要去医院, 很晚才能回来。",
+          "pinyin": "Wǒ xiàwǔ yào qù yīyuàn, hěn wǎn cáinéng huílái.",
+          "vi": "Chiều anh phải đến bệnh viện, rất muộn mới về được."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "那我下午自己去吧。",
+          "pinyin": "Nà wǒ xiàwǔ zìjǐ qù ba.",
+          "vi": "Vậy chiều em tự đi."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "我觉得这个星期就能搬家。我明天去买一些纸箱, 很快就能准备好。搬家那天, 我想请几位朋友来帮忙, 最多一天就能搬完。",
+          "pinyin": "Wǒ juéde zhège xīngqī jiù néng bānjiā. Wǒ míngtiān qù mǎi yīxiē zhǐxiāng, hěn kuài jiù néng zhǔnbèi hǎo. Bānjiā nà tiān, wǒ xiǎng qǐng jǐ wèi péngyou lái bāngmáng, zuì duō yī tiān jiù néng bān wán.",
+          "vi": "Anh nghĩ tuần này là có thể chuyển nhà. Ngày mai anh đi mua ít thùng giấy, rất nhanh là chuẩn bị xong. Ngày chuyển nhà, anh muốn mời vài người bạn đến giúp, nhiều nhất một ngày là chuyển xong."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我觉得下个月才能搬家。这周开始准备, 下周去打扫新家, 这么多事情最少需要两个星期才能做完。搬家那天, 我们应该找一家搬家公司。",
+          "pinyin": "Wǒ juéde xià ge yuè cáinéng bānjiā. Zhè zhōu kāishǐ zhǔnbèi, xià zhōu qù dǎsǎo xīn jiā, zhème duō shìqing zuì shǎo xūyào liǎng gè xīngqī cáinéng zuò wán. Bānjiā nà tiān, wǒmen yīnggāi zhǎo yī jiā bānjiā gōngsī.",
+          "vi": "Em nghĩ sang tháng mới có thể chuyển. Tuần này bắt đầu chuẩn bị, tuần sau đến dọn dẹp nhà mới, nhiều việc như vậy ít nhất cần hai tuần mới làm xong. Ngày chuyển nhà, chúng ta nên tìm một công ty chuyển nhà."
+        }
+      ]
+    }
+  ]
+}

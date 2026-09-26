@@ -1,0 +1,243 @@
+import type { GrammarExercise, GrammarLesson } from "./types";
+
+type Row = {
+	id: string;
+	zh: string;
+	vi: string;
+	tokens: string[];
+	wrong: [string, string];
+	note: string;
+};
+const exercises = (prefix: string, rows: Row[]): GrammarExercise[] => [
+	{
+		id: `${prefix}-choice`,
+		title: "1. Chọn đáp án đúng",
+		type: "choice",
+		questions: rows.map((r, i) => {
+			const options: [string, string, string] =
+				i % 3 === 0
+					? [r.zh, ...r.wrong]
+					: i % 3 === 1
+						? [r.wrong[0], r.zh, r.wrong[1]]
+						: [...r.wrong, r.zh];
+			return {
+				id: `${r.id}c`,
+				prompt: `Chọn câu đúng: “${r.vi}”`,
+				answer: r.zh,
+				options,
+				completedSentence: r.zh,
+				meaning: r.vi,
+				explanation: r.note,
+				optionExplanations: Object.fromEntries(
+					options.map((o) => [
+						o,
+						o === r.zh ? `Đúng: ${r.note}` : "Sai: cấu trúc hoặc trật tự từ không phù hợp."
+					])
+				)
+			};
+		})
+	},
+	{
+		id: `${prefix}-arrange`,
+		title: "2. Sắp xếp từ thành câu",
+		type: "arrange",
+		questions: rows.map((r) => ({
+			id: `${r.id}a`,
+			prompt: r.vi,
+			answer: r.zh,
+			tokens: r.tokens,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	},
+	{
+		id: `${prefix}-translate`,
+		title: "3. Dịch Việt sang Trung",
+		type: "input",
+		questions: rows.map((r) => ({
+			id: `${r.id}t`,
+			prompt: r.vi,
+			answer: r.zh,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	}
+];
+
+export const hsk2Lesson10Grammar: GrammarLesson = {
+	title: "BÀI 10: 就要考试了",
+	points: [
+		{
+			id: "subject-predicate-predicate",
+			title: "Câu có cụm chủ vị làm vị ngữ",
+			explanation:
+				"Trong kiểu câu này, chủ ngữ lớn nêu chủ đề; phần vị ngữ phía sau là một cụm chủ–vị hoàn chỉnh để nhận xét hoặc hỏi về chủ đề đó. Chủ ngữ nhỏ thường có quan hệ sở hữu, bộ phận hoặc liên quan trực tiếp với chủ đề.",
+			formulas: ["Chủ đề + chủ ngữ nhỏ + vị ngữ", "Chủ đề + người/vật liên quan + động từ/tính từ"],
+			examples: [
+				{
+					chinese: "我的书包你看见了吗？",
+					vietnamese: "Cặp sách của tôi, bạn có nhìn thấy không?"
+				},
+				{ chinese: "这道题我做错了。", vietnamese: "Câu này, tôi làm sai rồi." }
+			],
+			notes: ["Không thêm giới từ thừa giữa chủ đề và cụm chủ–vị phía sau."],
+			exercises: exercises("h2l10-sp", [
+				{
+					id: "sp1",
+					zh: "我的书包你看见了吗",
+					vi: "Cặp sách của tôi, bạn có nhìn thấy không?",
+					tokens: ["看见了吗", "我的书包", "你"],
+					wrong: ["你我的书包看见了吗", "我的你书包看见了吗"],
+					note: "我的书包 là chủ đề; 你看见了吗 là cụm chủ–vị."
+				},
+				{
+					id: "sp2",
+					zh: "这道题我做错了",
+					vi: "Câu này, tôi làm sai rồi.",
+					tokens: ["我", "这道题", "做错了"],
+					wrong: ["我这道做错了题", "这道我题做错了"],
+					note: "这道题 là chủ đề; 我做错了 nhận xét về chủ đề."
+				},
+				{
+					id: "sp3",
+					zh: "那支笔你放在哪儿了",
+					vi: "Cây bút kia, bạn đặt ở đâu rồi?",
+					tokens: ["你", "放在哪儿了", "那支笔"],
+					wrong: ["你那支放在哪儿了笔", "那支你笔放在哪儿了"],
+					note: "那支笔 đứng đầu làm chủ đề."
+				},
+				{
+					id: "sp4",
+					zh: "这个词老师说错了",
+					vi: "Từ này, giáo viên đã nói sai.",
+					tokens: ["说错了", "老师", "这个词"],
+					wrong: ["老师这个说错了词", "这个老师词说错了"],
+					note: "老师说错了 là cụm chủ–vị làm vị ngữ."
+				},
+				{
+					id: "sp5",
+					zh: "门后面的本子你拿了吗",
+					vi: "Quyển vở sau cửa, bạn đã lấy chưa?",
+					tokens: ["你", "拿了吗", "门后面的本子"],
+					wrong: ["你门后面的拿了吗本子", "门后面的你本子拿了吗"],
+					note: "Cụm danh từ 门后面的本子 được nêu làm chủ đề."
+				}
+			])
+		},
+		{
+			id: "alternative-question",
+			title: "Câu hỏi lựa chọn với “还是”",
+			explanation:
+				"Câu hỏi lựa chọn đưa ra hai hoặc nhiều phương án và dùng “还是” nối các phương án. Người nghe chọn một phương án để trả lời; cuối câu thường không thêm “吗”.",
+			formulas: ["Phương án A + 还是 + phương án B？", "Chủ ngữ + động từ + A + 还是 + B？"],
+			examples: [
+				{
+					chinese: "是您准备考试还是我准备考试？",
+					vietnamese: "Là mẹ chuẩn bị thi hay con chuẩn bị thi?"
+				},
+				{ chinese: "你喝咖啡还是奶茶？", vietnamese: "Bạn uống cà phê hay trà sữa?" }
+			],
+			notes: ["Không dùng đồng thời “还是” lựa chọn và “吗” ở cuối câu hỏi thông thường."],
+			exercises: exercises("h2l10-alt", [
+				{
+					id: "aq1",
+					zh: "是您准备考试还是我准备考试",
+					vi: "Là mẹ chuẩn bị thi hay con chuẩn bị thi?",
+					tokens: ["我准备考试", "还是", "是您准备考试"],
+					wrong: ["是您还是准备考试我准备考试", "是您准备考试或者我准备考试吗"],
+					note: "还是 nối hai phương án hoàn chỉnh."
+				},
+				{
+					id: "aq2",
+					zh: "你喝咖啡还是奶茶",
+					vi: "Bạn uống cà phê hay trà sữa?",
+					tokens: ["奶茶", "喝", "还是", "你", "咖啡"],
+					wrong: ["你还是喝咖啡奶茶", "你喝咖啡还是奶茶吗"],
+					note: "Hai tân ngữ 咖啡 và 奶茶 được nối bằng 还是."
+				},
+				{
+					id: "aq3",
+					zh: "你今天考试还是明天考试",
+					vi: "Bạn thi hôm nay hay thi ngày mai?",
+					tokens: ["明天考试", "还是", "你", "今天考试"],
+					wrong: ["你还是今天考试明天考试", "你今天考试还是明天考试吗"],
+					note: "Hai phương án thời gian–hành động được nối bằng 还是."
+				},
+				{
+					id: "aq4",
+					zh: "这支笔是你的还是他的",
+					vi: "Cây bút này là của bạn hay của anh ấy?",
+					tokens: ["他的", "还是", "这支笔", "你的", "是"],
+					wrong: ["这支笔还是是你的他的", "这支笔是你的还是他的吗"],
+					note: "你的 và 他的 là hai phương án lựa chọn."
+				},
+				{
+					id: "aq5",
+					zh: "你帮我还是帮他",
+					vi: "Bạn giúp tôi hay giúp anh ấy?",
+					tokens: ["帮他", "还是", "你", "帮我"],
+					wrong: ["你还是帮我帮他", "你帮我还是帮他吗"],
+					note: "还是 nối hai cụm động từ 帮我 và 帮他."
+				}
+			])
+		},
+		{
+			id: "imminent-action",
+			title: "Cấu trúc “要/快/快要/就要……了” – Sắp xảy ra",
+			explanation:
+				"Các cấu trúc này biểu thị một sự việc sắp xảy ra. “了” đứng cuối câu để báo hiệu trạng thái mới sắp đến. Khi có thời gian cụ thể như 下星期, thường dùng “就要……了”.",
+			formulas: ["要/快/快要 + động từ + 了", "Thời gian cụ thể + 就要 + động từ + 了"],
+			examples: [
+				{ chinese: "饭菜快要做好了。", vietnamese: "Cơm sắp làm xong rồi." },
+				{ chinese: "我们下星期就要考试了。", vietnamese: "Tuần sau chúng tôi sắp thi rồi." }
+			],
+			notes: [
+				"“快要” thường không đi cùng mốc thời gian cụ thể ngay trước nó; với mốc cụ thể ưu tiên “就要”."
+			],
+			exercises: exercises("h2l10-soon", [
+				{
+					id: "im1",
+					zh: "饭菜快要做好了",
+					vi: "Cơm sắp làm xong rồi.",
+					tokens: ["做好", "饭菜", "了", "快要"],
+					wrong: ["饭菜快要了做好", "饭菜做好快要了"],
+					note: "快要 đứng trước động từ; 了 đứng cuối."
+				},
+				{
+					id: "im2",
+					zh: "我们下星期就要考试了",
+					vi: "Tuần sau chúng tôi sắp thi rồi.",
+					tokens: ["考试", "我们", "就要", "下星期", "了"],
+					wrong: ["我们下星期快要考试了", "我们就要下星期考试了"],
+					note: "Có mốc 下星期 nên dùng 下星期就要考试了."
+				},
+				{
+					id: "im3",
+					zh: "快开学了",
+					vi: "Sắp khai giảng rồi.",
+					tokens: ["开学", "了", "快"],
+					wrong: ["快了开学", "开学快了"],
+					note: "快 + động từ + 了."
+				},
+				{
+					id: "im4",
+					zh: "考试就要开始了",
+					vi: "Kỳ thi sắp bắt đầu rồi.",
+					tokens: ["开始", "考试", "了", "就要"],
+					wrong: ["考试就要了开始", "考试开始就要了"],
+					note: "就要 đứng trước 开始, 了 đứng cuối."
+				},
+				{
+					id: "im5",
+					zh: "她快要笑了",
+					vi: "Cô ấy sắp cười rồi.",
+					tokens: ["笑", "她", "快要", "了"],
+					wrong: ["她快要了笑", "她笑快要了"],
+					note: "快要 + 笑 + 了."
+				}
+			])
+		}
+	]
+};

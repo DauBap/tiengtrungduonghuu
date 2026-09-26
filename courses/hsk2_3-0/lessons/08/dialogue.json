@@ -1,0 +1,152 @@
+{
+  "lesson": 8,
+  "title": "虽然你忘了，但是我记得",
+  "title_pinyin": "Suīrán nǐ wàng le, dànshì wǒ jìde",
+  "title_vi": "Tuy em quên, nhưng anh nhớ",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "你看，这两块手表怎么样？",
+          "pinyin": "Nǐ kàn, zhè liǎng kuài shǒubiǎo zěnmeyàng?",
+          "vi": "Anh xem, hai cái đồng hồ đeo tay này thế nào?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "都不错！",
+          "pinyin": "Dōu búcuò!",
+          "vi": "Đều không tệ!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我喜欢左边这个。",
+          "pinyin": "Wǒ xǐhuan zuǒbian zhège.",
+          "vi": "Em thích cái bên trái này."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我也觉得左边的比右边的好看。",
+          "pinyin": "Wǒ yě juéde zuǒbian de bǐ yòubian de hǎokàn.",
+          "vi": "Anh cũng thấy cái bên trái đẹp hơn cái bên phải."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你看看要多少钱！",
+          "pinyin": "Nǐ kànkan yào duōshao qián!",
+          "vi": "Anh xem giá bao nhiêu!"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "真不便宜！八千八。",
+          "pinyin": "Zhēn bù piányi! Bāqiān bā.",
+          "vi": "Đúng là không rẻ! Tám nghìn tám."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "今天有不少电影，我们看个电影吧。",
+          "pinyin": "Jīntiān yǒu bù shǎo diànyǐng, wǒmen kàn ge diànyǐng ba.",
+          "vi": "Hôm nay có khá nhiều phim, chúng ta xem một bộ đi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好啊！我们看哪个？",
+          "pinyin": "Hǎo a! Wǒmen kàn nǎge?",
+          "vi": "Được thôi! Chúng ta xem phim nào?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我记得你喜欢看爱情片，我们看那个爱情片，怎么样？",
+          "pinyin": "Wǒ jìde nǐ xǐhuan kàn àiqíng piān, wǒmen kàn nàge àiqíng piān, zěnmeyàng?",
+          "vi": "Anh nhớ em thích xem phim tình cảm, chúng ta xem phim tình cảm kia, thế nào?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "还是看这个吧，我看网上说这个电影比那个爱情片更有意思。",
+          "pinyin": "Háishì kàn zhège ba, wǒ kàn wǎngshàng shuō zhège diànyǐng bǐ nàge àiqíng piān gèng yǒu yìsi.",
+          "vi": "Vẫn là xem cái này đi, em xem trên mạng nói phim này thú vị hơn phim tình cảm kia đấy."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好。我去买票。",
+          "pinyin": "Hǎo. Wǒ qù mǎi piào.",
+          "vi": "Được. Anh đi mua vé."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "到网上买吧，网上买比在这里买便宜。",
+          "pinyin": "Dào wǎngshàng mǎi ba, wǎngshàng mǎi bǐ zài zhèlǐ mǎi piányi.",
+          "vi": "Lên mạng mua đi, mua trên mạng rẻ hơn mua ở đây đấy."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "您好！就要这几个菜吧，谢谢！",
+          "pinyin": "Nín hǎo! Jiù yào zhè jǐ ge cài ba, xièxie!",
+          "vi": "Chào chị! Lấy mấy món này đi, cảm ơn chị!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "怎么点这么多菜？",
+          "pinyin": "Zěnme diǎn zhème duō cài?",
+          "vi": "Sao lại gọi nhiều món thế?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "你想想，今天是几月几号？",
+          "pinyin": "Nǐ xiǎngxiang, jīntiān shì jǐ yuè jǐ hào?",
+          "vi": "Em nghĩ xem, hôm nay là ngày mấy tháng mấy?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "8月27号。啊！我的生日！",
+          "pinyin": "Bā yuè èrshíqī hào. A! Wǒ de shēngrì!",
+          "vi": "Ngày 27 tháng 8. À! Sinh nhật của em!"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "生日快乐！虽然你忘了，但是我记得。看看这是什么？",
+          "pinyin": "Shēngrì kuàilè! Suīrán nǐ wàng le, dànshì wǒ jìde. Kànkan zhè shì shénme?",
+          "vi": "Sinh nhật vui vẻ! Tuy em quên, nhưng anh nhớ. Xem đây là gì nào?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "手表！吃饭、看电影、买手表，今天花了不少钱吧？",
+          "pinyin": "Shǒubiǎo! Chīfàn, kàn diànyǐng, mǎi shǒubiǎo, jīntiān huāle bù shǎo qián ba?",
+          "vi": "Đồng hồ đeo tay! Ăn cơm, xem phim, mua đồng hồ, hôm nay tiêu không ít tiền đúng không?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "虽然花了一些钱，但是我们过了一个快乐的生日。",
+          "pinyin": "Suīrán huāle yīxiē qián, dànshì wǒmen guòle yī ge kuàilè de shēngrì.",
+          "vi": "Tuy tiêu một số tiền, nhưng chúng ta đã có một sinh nhật vui vẻ."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "虽然妻子忘了今天是自己的生日，但是丈夫记得。丈夫请妻子去饭馆吃饭，去电影院看电影，还给妻子买了一块非常漂亮的手表。妻子觉得今天很快乐。",
+          "pinyin": "Suīrán qīzi wàng le jīntiān shì zìjǐ de shēngrì, dànshì zhàngfu jìde. Zhàngfu qǐng qīzi qù fànguǎn chīfàn, qù diànyǐngyuàn kàn diànyǐng, hái gěi qīzi mǎi le yī kuài fēicháng piàoliang de shǒubiǎo. Qīzi juéde jīntiān hěn kuàilè.",
+          "vi": "Tuy vợ quên hôm nay là sinh nhật của mình, nhưng chồng thì nhớ. Chồng mời vợ đi nhà hàng ăn cơm, đi rạp chiếu phim xem phim, còn mua cho vợ một chiếc đồng hồ đeo tay rất đẹp. Vợ cảm thấy hôm nay rất vui vẻ."
+        }
+      ]
+    }
+  ]
+}

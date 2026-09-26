@@ -1,0 +1,933 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+type Reasons = [string, string, string];
+
+const mc = (
+	id: string,
+	prompt: string,
+	answer: string,
+	options: [string, string, string],
+	meaning: string,
+	explanation: string,
+	formula: string,
+	reasons: Reasons,
+	completedSentence = answer
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	options,
+	meaning,
+	explanation,
+	formula,
+	completedSentence,
+	optionExplanations: Object.fromEntries(options.map((option, index) => [option, reasons[index]]))
+});
+
+const input = (
+	id: string,
+	prompt: string,
+	answer: string,
+	meaning: string,
+	explanation: string,
+	formula: string,
+	acceptedAnswers?: string[]
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	acceptedAnswers,
+	completedSentence: answer,
+	meaning,
+	explanation,
+	formula
+});
+
+const arrange = (
+	id: string,
+	prompt: string,
+	answer: string,
+	tokens: string[],
+	meaning: string,
+	explanation: string,
+	formula: string
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	tokens,
+	completedSentence: answer,
+	meaning,
+	explanation,
+	formula
+});
+
+const YOU = "Chủ ngữ + 有/没有 + tân ngữ";
+const NE = "A……，B + 呢？";
+const MEASURE = "Số từ + lượng từ + danh từ";
+
+const youChoice: GrammarQuestion[] = [
+	mc(
+		"y-c1",
+		"Chọn câu đúng: “Tôi có một anh trai.”",
+		"我有一个哥哥。",
+		["我有一个哥哥。", "我一个有哥哥。", "我没有一个哥哥。"],
+		"Tôi có một anh trai.",
+		"有 đứng sau chủ ngữ và trước tân ngữ.",
+		YOU,
+		["Đúng trật tự và đúng nghĩa.", "有 bị đặt sai vị trí.", "没有 làm câu thành phủ định."]
+	),
+	mc(
+		"y-c2",
+		"Chọn câu đúng: “Cô ấy không có em gái.”",
+		"她没有妹妹。",
+		["她不有妹妹。", "她没有妹妹。", "她有妹妹没有。"],
+		"Cô ấy không có em gái.",
+		"Phủ định của 有 là 没有.",
+		YOU,
+		["Không dùng 不有.", "Đúng cấu trúc phủ định.", "没有 không đặt cuối câu."]
+	),
+	mc(
+		"y-c3",
+		"Chọn câu đúng: “Gia đình tôi có năm người.”",
+		"我家有五口人。",
+		["我家五有口人。", "我家有口五人。", "我家有五口人。"],
+		"Gia đình tôi có năm người.",
+		"有 đứng trước cụm 五口人.",
+		"Chủ ngữ + 有 + số từ + 口 + 人",
+		["Sai trật tự của 有.", "Số từ phải đứng trước lượng từ.", "Đúng cấu trúc."]
+	),
+	mc(
+		"y-c4",
+		"Theo thông tin “他没有哥哥”, chọn câu đúng.",
+		"他没有哥哥。",
+		["他有哥哥。", "他没有哥哥。", "他没是哥哥。"],
+		"Anh ấy không có anh trai.",
+		"Ngữ cảnh yêu cầu câu phủ định với 没有.",
+		YOU,
+		["Trái thông tin đã cho.", "Đúng ngữ pháp và ngữ cảnh.", "没是 không phải phủ định của 有."]
+	),
+	mc(
+		"y-c5",
+		"Chọn câu hỏi đúng: “Bạn có con trai không?”",
+		"你有儿子吗？",
+		["你吗有儿子？", "你有儿子吗？", "你有吗儿子？"],
+		"Bạn có con trai không?",
+		"Thêm 吗 ở cuối câu có 有.",
+		"Chủ ngữ + 有 + tân ngữ + 吗？",
+		["吗 sai vị trí.", "Đúng cấu trúc câu hỏi.", "吗 không đứng giữa 有 và tân ngữ."]
+	),
+	mc(
+		"y-c6",
+		"Chọn câu đúng: “Chúng tôi có hai người con.”",
+		"我们有两个孩子。",
+		["我们两个有孩子。", "我们有两个孩子。", "我们没有两个孩子。"],
+		"Chúng tôi có hai người con.",
+		"有 đi trước cụm danh lượng 两个孩子.",
+		"Chủ ngữ + 有 + 两个 + danh từ",
+		["有 sai vị trí.", "Đúng ngữ pháp và nghĩa.", "没有 làm nghĩa thành phủ định."]
+	),
+	mc(
+		"y-c7",
+		"Chọn câu đúng: “Mẹ tôi không có con gái.”",
+		"我妈妈没有女儿。",
+		["我妈妈不有女儿。", "我妈妈女儿没有。", "我妈妈没有女儿。"],
+		"Mẹ tôi không có con gái.",
+		"Dùng 没有 trước tân ngữ 女儿.",
+		YOU,
+		["Không dùng 不有.", "Sai trật tự từ.", "Đúng cấu trúc phủ định."]
+	),
+	mc(
+		"y-c8",
+		"Chọn câu hỏi đúng: “Gia đình cô ấy có ba người phải không?”",
+		"她家有三口人吗？",
+		["她家有三口人吗？", "她家吗有三口人？", "她家有吗三口人？"],
+		"Gia đình cô ấy có ba người phải không?",
+		"吗 đứng cuối toàn bộ câu.",
+		"Chủ ngữ + 有 + tân ngữ + 吗？",
+		["Đúng vị trí của 吗.", "吗 không đứng trước 有.", "吗 không đứng trước cụm danh lượng."]
+	)
+];
+
+const youArrange = [
+	["y-a1", "Tôi có một anh trai.", "我有一个哥哥", ["哥哥", "一个", "有", "我"]],
+	["y-a2", "Cô ấy có hai em gái.", "她有两个妹妹", ["妹妹", "她", "两个", "有"]],
+	["y-a3", "Anh ấy không có anh trai.", "他没有哥哥", ["哥哥", "没有", "他"]],
+	["y-a4", "Gia đình tôi có năm người.", "我家有五口人", ["五", "人", "有", "我家", "口"]],
+	["y-a5", "Bạn có em gái không?", "你有妹妹吗", ["妹妹", "吗", "有", "你"]],
+	["y-a6", "Chúng tôi có hai người con.", "我们有两个孩子", ["孩子", "我们", "两个", "有"]],
+	["y-a7", "Bố tôi không có con gái.", "我爸爸没有女儿", ["女儿", "没有", "我爸爸"]],
+	[
+		"y-a8",
+		"Gia đình bạn có ba người phải không?",
+		"你家有三口人吗",
+		["三", "吗", "你家", "人", "有", "口"]
+	]
+].map(([id, meaning, answer, tokens]) =>
+	arrange(
+		id as string,
+		meaning as string,
+		answer as string,
+		tokens as string[],
+		meaning as string,
+		"Sắp xếp chủ ngữ trước 有/没有; 吗 nếu có phải đứng cuối.",
+		YOU
+	)
+);
+
+const youTranslate = [
+	["y-t1", "Tôi có một anh trai.", "我有一个哥哥"],
+	["y-t2", "Cô ấy có hai em gái.", "她有两个妹妹"],
+	["y-t3", "Anh ấy không có em gái.", "他没有妹妹"],
+	["y-t4", "Gia đình tôi có năm người.", "我家有五口人"],
+	["y-t5", "Bạn có anh trai không?", "你有哥哥吗"],
+	["y-t6", "Chúng tôi có hai người con.", "我们有两个孩子"],
+	["y-t7", "Mẹ tôi không có con trai.", "我妈妈没有儿子"],
+	["y-t8", "Gia đình cô ấy có ba người phải không?", "她家有三口人吗"]
+].map(([id, prompt, answer]) =>
+	input(
+		id,
+		prompt,
+		answer,
+		prompt,
+		"Dùng 有 cho sở hữu, 没有 cho phủ định và đặt 吗 cuối câu hỏi.",
+		YOU
+	)
+);
+
+const youNegative = [
+	["y-n1", "我有一个哥哥。", "我没有哥哥", "Tôi không có anh trai."],
+	["y-n2", "她有两个妹妹。", "她没有妹妹", "Cô ấy không có em gái."],
+	["y-n3", "他有儿子。", "他没有儿子", "Anh ấy không có con trai."],
+	["y-n4", "我家有五口人。", "我家没有五口人", "Gia đình tôi không có năm người."],
+	["y-n5", "你有女儿。", "你没有女儿", "Bạn không có con gái."],
+	["y-n6", "我们有孩子。", "我们没有孩子", "Chúng tôi không có con."],
+	["y-n7", "她家有三口人。", "她家没有三口人", "Gia đình cô ấy không có ba người."],
+	["y-n8", "我爸爸有哥哥。", "我爸爸没有哥哥", "Bố tôi không có anh trai."]
+].map(([id, prompt, answer, meaning]) =>
+	input(
+		id,
+		`Chuyển sang phủ định: ${prompt}`,
+		answer,
+		meaning,
+		"Thay 有 bằng 没有; không dùng 不有.",
+		YOU
+	)
+);
+
+const numberConfigs: Array<[string, string, [string, string, string]]> = [
+	["0", "零", ["零", "十", "一"]],
+	["2", "二", ["两", "二", "十二"]],
+	["10", "十", ["一十", "十", "十一"]],
+	["11", "十一", ["一十一", "十一", "一十"]],
+	["15", "十五", ["五十", "十五", "一五"]],
+	["20", "二十", ["十二", "二十", "两十"]],
+	["25", "二十五", ["五十二", "二十五", "二五十"]],
+	["48", "四十八", ["八十四", "四十八", "四八十"]],
+	["99", "九十九", ["九九十", "九十九", "十九九"]],
+	["100", "一百", ["百一", "一千", "一百"]]
+];
+
+const numberRead = numberConfigs.map(([arabic, hanzi, options], index) =>
+	mc(
+		`num-r${index + 1}`,
+		`Số ${arabic} đọc thế nào?`,
+		hanzi,
+		options,
+		`${arabic}: ${hanzi}`,
+		"Đọc theo giá trị hàng chục/hàng đơn vị; 100 đọc là 一百.",
+		"Hàng chục + 十 + hàng đơn vị",
+		options.map((o) =>
+			o === hanzi ? "Đúng cách đọc." : "Sai vị trí hoặc sai giá trị hàng."
+		) as Reasons
+	)
+);
+
+const numberRecognize = numberConfigs.map(([arabic, hanzi], index) => {
+	const wrong1 =
+		index % 2 === 0 ? String(Number(arabic) + 10) : String(Math.max(0, Number(arabic) - 1));
+	const wrong2 = arabic === "100" ? "1000" : String(Number(arabic) + 1);
+	const options = (
+		index % 3 === 0
+			? [arabic, wrong1, wrong2]
+			: index % 3 === 1
+				? [wrong1, arabic, wrong2]
+				: [wrong1, wrong2, arabic]
+	) as [string, string, string];
+	return mc(
+		`num-c${index + 1}`,
+		`“${hanzi}” là số nào?`,
+		arabic,
+		options,
+		`${hanzi}: ${arabic}`,
+		"Xác định đúng hàng chục và hàng đơn vị.",
+		"Số hàng chục + 十 + số hàng đơn vị",
+		options.map((o) => (o === arabic ? "Đúng giá trị." : "Không khớp giá trị chữ Hán.")) as Reasons,
+		`${hanzi} = ${arabic}`
+	);
+});
+
+const numberWriteData = [
+	["num-w1", "6", "六"],
+	["num-w2", "12", "十二"],
+	["num-w3", "19", "十九"],
+	["num-w4", "30", "三十"],
+	["num-w5", "42", "四十二"],
+	["num-w6", "57", "五十七"],
+	["num-w7", "68", "六十八"],
+	["num-w8", "80", "八十"],
+	["num-w9", "100", "一百"],
+	["num-w10", "1.000", "一千"]
+];
+const numberWrite = numberWriteData.map(([id, number, answer]) =>
+	input(
+		id,
+		`Viết số ${number} bằng chữ Hán.`,
+		answer,
+		`${number}: ${answer}`,
+		"Viết theo thứ tự từ hàng lớn đến hàng nhỏ.",
+		"Hàng chục + 十 + hàng đơn vị"
+	)
+);
+
+const numberArrangeData: Array<[string, string, string[]]> = [
+	["十一", "11", ["一", "十"]],
+	["十六", "16", ["六", "十"]],
+	["二十", "20", ["十", "二"]],
+	["二十三", "23", ["三", "十", "二"]],
+	["三十五", "35", ["五", "三", "十"]],
+	["四十八", "48", ["八", "十", "四"]],
+	["六十", "60", ["十", "六"]],
+	["七十二", "72", ["二", "七", "十"]],
+	["九十九", "99", ["九", "十", "九"]],
+	["一千", "1.000", ["千", "一"]]
+];
+const numberArrange = numberArrangeData.map(([answer, number, tokens], index) =>
+	arrange(
+		`num-a${index + 1}`,
+		`Sắp xếp thành số ${number}.`,
+		answer,
+		tokens,
+		`${number}: ${answer}`,
+		"Đặt chữ số hàng chục trước 十, rồi đến hàng đơn vị.",
+		"Hàng chục + 十 + hàng đơn vị"
+	)
+);
+
+const neChoice: GrammarQuestion[] = [
+	mc(
+		"ne-c1",
+		"我是越南人，___？ — “Còn bạn thì sao?”",
+		"你呢",
+		["你呢", "呢你", "你吗"],
+		"Tôi là người Việt Nam, còn bạn?",
+		"你呢 hỏi lại về người nghe.",
+		NE,
+		["Đúng ngữ cảnh.", "呢 sai vị trí.", "吗 tạo câu hỏi có/không, không phải hỏi lại."]
+	),
+	mc(
+		"ne-c2",
+		"我有一个哥哥，___？ — “Còn cô ấy thì sao?”",
+		"她呢",
+		["她吗", "她呢", "呢她"],
+		"Tôi có một anh trai, còn cô ấy?",
+		"呢 đứng sau đối tượng được hỏi lại.",
+		NE,
+		["吗 không phù hợp.", "Đúng cấu trúc.", "呢 không đứng trước 她."]
+	),
+	mc(
+		"ne-c3",
+		"她是老师，___？ — “Còn anh ấy thì sao?”",
+		"他呢",
+		["呢他", "他吗", "他呢"],
+		"Cô ấy là giáo viên, còn anh ấy?",
+		"他呢 lược bỏ nội dung đã biết.",
+		NE,
+		["Sai vị trí.", "Sai trợ từ.", "Đúng."]
+	),
+	mc(
+		"ne-c4",
+		"我家有五口人，___？ — “Còn gia đình bạn?”",
+		"你家呢",
+		["你家呢", "呢你家", "你呢家"],
+		"Gia đình tôi có năm người, còn gia đình bạn?",
+		"呢 đứng cuối cụm 你家.",
+		NE,
+		["Đúng.", "呢 sai vị trí.", "呢 chen sai vào cụm danh từ."]
+	),
+	mc(
+		"ne-c5",
+		"他有妹妹，___？ — “Còn bạn?”",
+		"你呢",
+		["你吗", "你呢", "呢你"],
+		"Anh ấy có em gái, còn bạn?",
+		"Dùng 你呢 để hỏi lại cùng chủ đề.",
+		NE,
+		["吗 không mang nghĩa hỏi lại.", "Đúng.", "Trật tự sai."]
+	),
+	mc(
+		"ne-c6",
+		"我是学生，___？ — “Còn Mary?”",
+		"玛丽呢",
+		["玛丽呢", "呢玛丽", "玛丽的"],
+		"Tôi là học sinh, còn Mary?",
+		"呢 đứng sau tên người.",
+		NE,
+		["Đúng.", "呢 sai vị trí.", "的 là trợ từ kết cấu."]
+	),
+	mc(
+		"ne-c7",
+		"她有女儿，___？ — “Còn anh ấy?”",
+		"他呢",
+		["他的吗", "呢他", "他呢"],
+		"Cô ấy có con gái, còn anh ấy?",
+		"Dùng 他呢 để hỏi lại.",
+		NE,
+		["Sai cấu trúc.", "Sai vị trí.", "Đúng."]
+	),
+	mc(
+		"ne-c8",
+		"你家有三口人，我家___？ — Chọn phần hỏi lại đúng.",
+		"呢",
+		["吗", "的", "呢"],
+		"Gia đình bạn có ba người, còn gia đình tôi?",
+		"我家呢 là phần hỏi lại hoàn chỉnh.",
+		NE,
+		[
+			"吗 không dùng cho kiểu hỏi lại này.",
+			"的 không phải trợ từ hỏi.",
+			"Đúng vị trí và chức năng."
+		],
+		"你家有三口人，我家呢？"
+	)
+];
+
+const nePosition: GrammarQuestion[] = [
+	mc(
+		"ne-p1",
+		"Chọn câu đặt 呢 đúng vị trí.",
+		"我是越南人，你呢？",
+		["我是越南人，呢你？", "我是越南人，你呢？", "我呢是越南人，你？"],
+		"Tôi là người Việt Nam, còn bạn?",
+		"呢 đứng cuối phần hỏi lại 你呢.",
+		NE,
+		["呢 đứng trước đối tượng.", "Đúng.", "呢 chen vào câu trần thuật."]
+	),
+	mc(
+		"ne-p2",
+		"Chọn câu đặt 呢 đúng vị trí.",
+		"她是老师，他呢？",
+		["她是老师，呢他？", "她呢是老师，他？", "她是老师，他呢？"],
+		"Cô ấy là giáo viên, còn anh ấy?",
+		"呢 theo sau 他.",
+		NE,
+		["Sai vị trí.", "Sai vị trí.", "Đúng."]
+	),
+	mc(
+		"ne-p3",
+		"Chọn câu đặt 呢 đúng vị trí.",
+		"我有哥哥，你呢？",
+		["我有哥哥，你呢？", "我有呢哥哥，你？", "我有哥哥，呢你？"],
+		"Tôi có anh trai, còn bạn?",
+		"呢 đặt cuối vế hỏi lại.",
+		NE,
+		["Đúng.", "呢 chen giữa 有 và tân ngữ.", "呢 đứng trước 你."]
+	),
+	mc(
+		"ne-p4",
+		"Chọn câu đặt 呢 đúng vị trí.",
+		"我家有五口人，你家呢？",
+		["我家有五口人，呢你家？", "我家有五口人，你呢家？", "我家有五口人，你家呢？"],
+		"Gia đình tôi có năm người, còn gia đình bạn?",
+		"呢 đứng sau toàn bộ cụm 你家.",
+		NE,
+		["Sai vị trí.", "Phá vỡ cụm 你家.", "Đúng."]
+	),
+	mc(
+		"ne-p5",
+		"Chọn câu đặt 呢 đúng vị trí.",
+		"他有妹妹，她呢？",
+		["他有妹妹，她呢？", "他有妹妹，呢她？", "他呢有妹妹，她？"],
+		"Anh ấy có em gái, còn cô ấy?",
+		"呢 đứng cuối vế 她呢.",
+		NE,
+		["Đúng.", "Sai vị trí.", "呢 đặt vào vế nêu thông tin."]
+	),
+	mc(
+		"ne-p6",
+		"Chọn câu đặt 呢 đúng vị trí.",
+		"我是学生，玛丽呢？",
+		["我是学生，呢玛丽？", "我呢是学生，玛丽？", "我是学生，玛丽呢？"],
+		"Tôi là học sinh, còn Mary?",
+		"Tên người + 呢 tạo phần hỏi lại.",
+		NE,
+		["Sai vị trí.", "Sai vị trí.", "Đúng."]
+	),
+	mc(
+		"ne-p7",
+		"Chọn câu đặt 呢 đúng vị trí.",
+		"她有儿子，你呢？",
+		["她有儿子，你吗？", "她有儿子，你呢？", "她有呢儿子，你？"],
+		"Cô ấy có con trai, còn bạn?",
+		"呢 dùng để hỏi lại cùng chủ đề.",
+		NE,
+		["吗 sai chức năng.", "Đúng.", "呢 chen sai trong vế đầu."]
+	),
+	mc(
+		"ne-p8",
+		"Chọn câu đặt 呢 đúng vị trí.",
+		"他是中国人，她呢？",
+		["他是中国人，她呢？", "他是中国人，呢她？", "他是呢中国人，她？"],
+		"Anh ấy là người Trung Quốc, còn cô ấy?",
+		"呢 theo sau 她 ở cuối.",
+		NE,
+		["Đúng.", "Sai trật tự.", "呢 chen sai giữa 是 và danh từ."]
+	)
+];
+
+const neArrangeData = [
+	["我是越南人，你呢", ["呢", "你", "我是越南人"]],
+	["她是老师，他呢", ["他", "她是老师", "呢"]],
+	["我有哥哥，你呢", ["你", "我有哥哥", "呢"]],
+	["我家有五口人，你家呢", ["你家", "呢", "我家有五口人"]],
+	["他有妹妹，她呢", ["她", "呢", "他有妹妹"]],
+	["我是学生，玛丽呢", ["玛丽", "我是学生", "呢"]],
+	["她有女儿，你呢", ["呢", "她有女儿", "你"]],
+	["他是中国人，我呢", ["我", "呢", "他是中国人"]]
+];
+const neArrange = neArrangeData.map(([answer, tokens], index) =>
+	arrange(
+		`ne-a${index + 1}`,
+		`Sắp xếp: ${answer}`,
+		answer as string,
+		tokens as string[],
+		answer as string,
+		"Đặt thông tin đã nêu trước; đối tượng hỏi lại + 呢 ở cuối.",
+		NE
+	)
+);
+const neTranslateData = [
+	["Tôi là người Việt Nam, còn bạn?", "我是越南人，你呢"],
+	["Cô ấy là giáo viên, còn anh ấy?", "她是老师，他呢"],
+	["Tôi có một anh trai, còn bạn?", "我有一个哥哥，你呢"],
+	["Gia đình tôi có năm người, còn gia đình bạn?", "我家有五口人，你家呢"],
+	["Anh ấy có em gái, còn cô ấy?", "他有妹妹，她呢"],
+	["Tôi là học sinh, còn Mary?", "我是学生，玛丽呢"],
+	["Cô ấy có con gái, còn bạn?", "她有女儿，你呢"],
+	["Anh ấy là người Trung Quốc, còn tôi?", "他是中国人，我呢"]
+];
+const neTranslate = neTranslateData.map(([prompt, answer], index) =>
+	input(
+		`ne-t${index + 1}`,
+		prompt,
+		answer,
+		prompt,
+		"Dùng 呢 sau người hoặc sự vật được hỏi lại.",
+		NE
+	)
+);
+
+const measureChoice: GrammarQuestion[] = [
+	mc(
+		"m-c1",
+		"Chọn câu đúng: “Gia đình tôi có năm người.”",
+		"我家有五口人。",
+		["我家有五个人。", "我家有五口人。", "我家有口五人。"],
+		"Gia đình tôi có năm người.",
+		"Khi đếm thành viên gia đình dùng 口.",
+		"Số từ + 口 + 人",
+		[
+			"个 không phải đáp án mục tiêu khi đếm thành viên gia đình.",
+			"Đúng.",
+			"Số phải đứng trước lượng từ."
+		]
+	),
+	mc(
+		"m-c2",
+		"Chọn cụm đúng: “hai em gái”.",
+		"两个妹妹",
+		["二妹妹", "个两妹妹", "两个妹妹"],
+		"Hai em gái.",
+		"Số 2 trước lượng từ dùng 两; 个 đứng trước danh từ.",
+		MEASURE,
+		["Thiếu lượng từ.", "Số và lượng từ đảo vị trí.", "Đúng."]
+	),
+	mc(
+		"m-c3",
+		"Chọn cụm đúng: “một anh trai”.",
+		"一个哥哥",
+		["一个哥哥", "一哥哥", "个一哥哥"],
+		"Một anh trai.",
+		"一 + 个 + 哥哥.",
+		MEASURE,
+		["Đúng.", "Thiếu 个.", "个 và 一 đảo vị trí."]
+	),
+	mc(
+		"m-c4",
+		"Chọn câu đúng: “Gia đình cô ấy có ba người.”",
+		"她家有三口人。",
+		["她家有三个口人。", "她家有三人。", "她家有三口人。"],
+		"Gia đình cô ấy có ba người.",
+		"Dùng 三口人 cho số thành viên gia đình.",
+		"Chủ ngữ + 有 + số từ + 口 + 人",
+		["Thừa 个.", "Thiếu lượng từ trong mẫu đang học.", "Đúng."]
+	),
+	mc(
+		"m-c5",
+		"Chọn cụm đúng: “ba học sinh”.",
+		"三个学生",
+		["三口学生", "三个学生", "三学生"],
+		"Ba học sinh.",
+		"Đếm học sinh bằng 个 trong phạm vi bài.",
+		MEASURE,
+		["口 dùng cho thành viên gia đình.", "Đúng.", "Thiếu lượng từ."]
+	),
+	mc(
+		"m-c6",
+		"Chọn câu hỏi đúng: “Gia đình bạn có mấy người?”",
+		"你家有几口人？",
+		["你家有几口人？", "你家有几个口人？", "你家有口几人？"],
+		"Gia đình bạn có mấy người?",
+		"几 đứng trước 口; 口 đứng trước 人.",
+		"几 + 口 + 人",
+		["Đúng.", "Thừa 个.", "几 sai vị trí."]
+	),
+	mc(
+		"m-c7",
+		"Chọn cụm đúng: “hai người con”.",
+		"两个孩子",
+		["两口孩子", "两孩子", "两个孩子"],
+		"Hai người con.",
+		"孩子 dùng với lượng từ 个.",
+		MEASURE,
+		["口 chỉ số thành viên khi đi với 人.", "Thiếu lượng từ.", "Đúng."]
+	),
+	mc(
+		"m-c8",
+		"Chọn câu đúng: “Tôi có một con trai.”",
+		"我有一个儿子。",
+		["我有一儿子。", "我有一个儿子。", "我一个有儿子。"],
+		"Tôi có một con trai.",
+		"一个儿子 là cụm danh lượng làm tân ngữ của 有.",
+		"Chủ ngữ + 有 + số từ + 个 + danh từ",
+		["Thiếu 个.", "Đúng.", "有 sai vị trí."]
+	)
+];
+
+const measurePhrase: GrammarQuestion[] = [
+	mc(
+		"m-p1",
+		"Chọn cụm danh lượng đúng: “một người”.",
+		"一个人",
+		["一人个", "一个人", "个一人"],
+		"Một người.",
+		"个 đứng giữa số và danh từ.",
+		MEASURE,
+		["Sai trật tự.", "Đúng.", "Sai trật tự."]
+	),
+	mc(
+		"m-p2",
+		"Chọn cụm đúng: “hai người con gái”.",
+		"两个女儿",
+		["两个女儿", "二女儿个", "两口女儿"],
+		"Hai người con gái.",
+		"Dùng 两个 trước 女儿.",
+		MEASURE,
+		["Đúng.", "Sai số và vị trí lượng từ.", "Sai lượng từ."]
+	),
+	mc(
+		"m-p3",
+		"Chọn cụm chỉ “bốn thành viên gia đình”.",
+		"四口人",
+		["四个人", "口四人", "四口人"],
+		"Bốn thành viên gia đình.",
+		"Dùng 口 để đếm thành viên gia đình.",
+		"Số từ + 口 + 人",
+		["Không phải lượng từ mục tiêu của ngữ cảnh gia đình.", "Sai trật tự.", "Đúng."]
+	),
+	mc(
+		"m-p4",
+		"Chọn cụm đúng: “ba người bạn”.",
+		"三个朋友",
+		["三朋友", "三个朋友", "三口朋友"],
+		"Ba người bạn.",
+		"朋友 dùng 个 trong phạm vi bài.",
+		MEASURE,
+		["Thiếu lượng từ.", "Đúng.", "口 dùng sai."]
+	),
+	mc(
+		"m-p5",
+		"Chọn cụm đúng: “một người con trai”.",
+		"一个儿子",
+		["一个儿子", "一口儿子", "个一儿子"],
+		"Một người con trai.",
+		"儿子 dùng 个.",
+		MEASURE,
+		["Đúng.", "口 không dùng trực tiếp với 儿子 ở đây.", "Sai trật tự."]
+	),
+	mc(
+		"m-p6",
+		"Chọn cụm đúng: “hai học sinh”.",
+		"两个学生",
+		["二个学生", "两个学生", "两学生"],
+		"Hai học sinh.",
+		"Trước lượng từ 个 dùng 两.",
+		MEASURE,
+		["Trong mẫu này ưu tiên 两 trước lượng từ.", "Đúng.", "Thiếu lượng từ."]
+	),
+	mc(
+		"m-p7",
+		"Chọn cụm đúng: “sáu thành viên gia đình”.",
+		"六口人",
+		["六口人", "六个人", "口六人"],
+		"Sáu thành viên gia đình.",
+		"Ngữ cảnh gia đình dùng 口.",
+		"Số từ + 口 + 人",
+		["Đúng.", "Không dùng 个 khi bài kiểm tra riêng 口.", "Sai trật tự."]
+	),
+	mc(
+		"m-p8",
+		"Chọn cụm đúng: “một em gái”.",
+		"一个妹妹",
+		["一妹妹", "个一妹妹", "一个妹妹"],
+		"Một em gái.",
+		"一 + 个 + 妹妹.",
+		MEASURE,
+		["Thiếu lượng từ.", "Sai trật tự.", "Đúng."]
+	)
+];
+
+const measureArrangeData = [
+	["一个哥哥", "Một anh trai", ["哥哥", "一", "个"]],
+	["两个妹妹", "Hai em gái", ["妹妹", "个", "两"]],
+	["三个学生", "Ba học sinh", ["学生", "三", "个"]],
+	["我家有五口人", "Gia đình tôi có năm người", ["人", "我家", "五", "有", "口"]],
+	["她家有三口人", "Gia đình cô ấy có ba người", ["三", "她家", "人", "口", "有"]],
+	["你家有几口人", "Gia đình bạn có mấy người", ["人", "几", "你家", "有", "口"]],
+	["我有两个孩子", "Tôi có hai người con", ["两个", "我", "孩子", "有"]],
+	["她有一个女儿", "Cô ấy có một con gái", ["女儿", "有", "她", "一个"]]
+];
+const measureArrange = measureArrangeData.map(([answer, meaning, tokens], index) =>
+	arrange(
+		`m-a${index + 1}`,
+		`Sắp xếp: ${meaning}`,
+		answer as string,
+		tokens as string[],
+		meaning as string,
+		"Số đứng trước lượng từ; lượng từ đứng trước danh từ.",
+		MEASURE
+	)
+);
+const measureTranslateData = [
+	["Một người.", "一个人"],
+	["Hai em gái.", "两个妹妹"],
+	["Ba học sinh.", "三个学生"],
+	["Gia đình tôi có năm người.", "我家有五口人"],
+	["Gia đình cô ấy có ba người.", "她家有三口人"],
+	["Gia đình bạn có mấy người?", "你家有几口人"],
+	["Tôi có hai người con.", "我有两个孩子"],
+	["Cô ấy có một con gái.", "她有一个女儿"]
+];
+const measureTranslate = measureTranslateData.map(([prompt, answer], index) =>
+	input(
+		`m-t${index + 1}`,
+		prompt,
+		answer,
+		prompt,
+		"Chọn 个 cho người/danh từ thông dụng và 口 cho số thành viên gia đình.",
+		MEASURE
+	)
+);
+
+export const hsk1Lesson4Grammar: GrammarLesson = {
+	title: "BÀI 4: GIA ĐÌNH VÀ SỐ LƯỢNG",
+	points: [
+		{
+			id: "you",
+			title: "“有”字句（1）– Câu chữ “有”: sở hữu",
+			explanation: "“有” biểu thị người hoặc sự vật nào đó có, sở hữu một người hoặc vật khác.",
+			formulas: [
+				"Khẳng định: Chủ ngữ + 有 + tân ngữ",
+				"Phủ định: Chủ ngữ + 没有 + tân ngữ",
+				"Nghi vấn: Chủ ngữ + 有 + tân ngữ + 吗？"
+			],
+			examples: [
+				{ chinese: "我有一个哥哥。", vietnamese: "Tôi có một anh trai." },
+				{ chinese: "她有两个妹妹。", vietnamese: "Cô ấy có hai em gái." },
+				{ chinese: "我家有五口人。", vietnamese: "Gia đình tôi có năm người." },
+				{ chinese: "我没有哥哥。", vietnamese: "Tôi không có anh trai." },
+				{ chinese: "你有哥哥吗？", vietnamese: "Bạn có anh trai không?" }
+			],
+			notes: [
+				"Phủ định của “有” là “没有”; không nói “不有” hoặc “没是”.",
+				"Trong câu hỏi với “吗”, “吗” đặt ở cuối câu."
+			],
+			exercises: [
+				{
+					id: "you-choice",
+					title: "1. Chọn câu hoặc đáp án đúng",
+					type: "choice",
+					questions: youChoice
+				},
+				{
+					id: "you-arrange",
+					title: "2. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: youArrange
+				},
+				{
+					id: "you-translate",
+					title: "3. Dịch Việt sang Trung",
+					type: "input",
+					questions: youTranslate
+				},
+				{
+					id: "you-negative",
+					title: "4. Chuyển câu khẳng định sang phủ định",
+					type: "input",
+					questions: youNegative
+				}
+			]
+		},
+		{
+			id: "numbers",
+			title: "数字的表达 – Cách diễn đạt số",
+			explanation: "Cách đọc và viết số từ 0 đến 100, cùng số 1.000, theo giá trị từng hàng.",
+			formulas: [
+				"11–19: 十 + số hàng đơn vị",
+				"Số tròn chục: số hàng chục + 十",
+				"21–99: số hàng chục + 十 + số hàng đơn vị",
+				"100: 一百 · 1.000: 一千"
+			],
+			examples: [
+				{ chinese: "十一、十二、十九", vietnamese: "11, 12, 19" },
+				{ chinese: "二十、五十、九十", vietnamese: "20, 50, 90" },
+				{ chinese: "二十一、三十五、九十九", vietnamese: "21, 35, 99" },
+				{ chinese: "一百、一千", vietnamese: "100, 1.000" }
+			],
+			notes: [
+				"Khi đọc số độc lập trong phạm vi bài này, dùng 二 cho số 2: 二、十二、二十、二十二."
+			],
+			exercises: [
+				{
+					id: "number-read",
+					title: "1. Nhìn số và chọn cách đọc đúng",
+					type: "choice",
+					questions: numberRead
+				},
+				{
+					id: "number-recognize",
+					title: "2. Nhìn chữ Hán và chọn số đúng",
+					type: "choice",
+					questions: numberRecognize
+				},
+				{
+					id: "number-write",
+					title: "3. Viết số bằng chữ Hán",
+					type: "input",
+					questions: numberWrite
+				},
+				{
+					id: "number-arrange",
+					title: "4. Sắp xếp thành số đúng",
+					type: "arrange",
+					questions: numberArrange
+				}
+			]
+		},
+		{
+			id: "ne",
+			title: "语气助词“呢”（1）– Trợ từ ngữ khí “呢”",
+			explanation:
+				"“呢” đặt cuối phần hỏi lại về người hoặc sự vật đã được đề cập trước đó, mang nghĩa “còn… thì sao?”.",
+			formulas: ["A……，B + 呢？"],
+			examples: [
+				{ chinese: "我是越南人，你呢？", vietnamese: "Tôi là người Việt Nam, còn bạn?" },
+				{ chinese: "我有一个哥哥，你呢？", vietnamese: "Tôi có một anh trai, còn bạn?" },
+				{ chinese: "她是老师，他呢？", vietnamese: "Cô ấy là giáo viên, còn anh ấy?" },
+				{
+					chinese: "我家有五口人，你家呢？",
+					vietnamese: "Gia đình tôi có năm người, còn gia đình bạn?"
+				}
+			],
+			notes: [
+				"“呢” đứng cuối phần hỏi lại.",
+				"Không thay “呢” bằng “的” và không đặt “呢” tùy ý giữa câu."
+			],
+			exercises: [
+				{
+					id: "ne-choice",
+					title: "1. Chọn câu hỏi lại phù hợp",
+					type: "choice",
+					questions: neChoice
+				},
+				{
+					id: "ne-position",
+					title: "2. Chọn vị trí đúng của “呢”",
+					type: "choice",
+					questions: nePosition
+				},
+				{
+					id: "ne-arrange",
+					title: "3. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: neArrange
+				},
+				{
+					id: "ne-translate",
+					title: "4. Dịch Việt sang Trung",
+					type: "input",
+					questions: neTranslate
+				}
+			]
+		},
+		{
+			id: "measure",
+			title: "名量词和名量结构 – Danh lượng từ và cấu trúc danh lượng",
+			explanation:
+				"Trong tiếng Trung, sau số từ thường phải có lượng từ trước danh từ. Bài này dùng “个” với người/danh từ thông dụng và “口” để đếm thành viên gia đình.",
+			formulas: [
+				"Số từ + lượng từ + danh từ",
+				"个: 一个人、两个妹妹、三个学生",
+				"口: 三口人、五口人、几口人"
+			],
+			examples: [
+				{ chinese: "一个人", vietnamese: "Một người." },
+				{ chinese: "两个妹妹", vietnamese: "Hai em gái." },
+				{ chinese: "我家有三口人。", vietnamese: "Gia đình tôi có ba người." },
+				{ chinese: "你家有几口人？", vietnamese: "Gia đình bạn có mấy người?" }
+			],
+			notes: [
+				"Trong mẫu cơ bản dùng 三个人, không dùng 三人.",
+				"Đếm thành viên gia đình dùng 口: 五口人.",
+				"Số 2 trước lượng từ ưu tiên dùng 两: 两个、两口人."
+			],
+			exercises: [
+				{
+					id: "measure-choice",
+					title: "1. Chọn lượng từ hoặc câu đúng",
+					type: "choice",
+					questions: measureChoice
+				},
+				{
+					id: "measure-phrase",
+					title: "2. Chọn cụm danh lượng đúng",
+					type: "choice",
+					questions: measurePhrase
+				},
+				{
+					id: "measure-arrange",
+					title: "3. Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: measureArrange
+				},
+				{
+					id: "measure-translate",
+					title: "4. Dịch Việt sang Trung",
+					type: "input",
+					questions: measureTranslate
+				}
+			]
+		}
+	]
+};

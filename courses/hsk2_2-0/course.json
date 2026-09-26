@@ -1,0 +1,13 @@
+{
+  "id": "hsk2_2-0",
+  "name": "HSK 2 (2.0)",
+  "lessonsPath": "lessons",
+  "contentFolders": [
+    "vocab",
+    "dialogue",
+    "grammar",
+    "workbook",
+    "listening",
+    "media"
+  ]
+}

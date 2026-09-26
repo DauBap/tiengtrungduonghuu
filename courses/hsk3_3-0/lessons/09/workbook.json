@@ -1,0 +1,444 @@
+{
+	"title": "HSK3 - Sách bài tập",
+	"lesson": 9,
+	"lesson_title": "打不好没关系",
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听对话，选择最匹配的图片。每题听两次。\nCâu 1–3: Nghe và chọn hình phù hợp. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 1,
+							"answer": "C",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"answer": "A",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"answer": "B",
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择正确答案。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 4,
+							"answer": "B",
+							"options": [
+								{
+									"label": "A",
+									"text": "球踢得不好"
+								},
+								{
+									"label": "B",
+									"text": "没看完比赛"
+								},
+								{
+									"label": "C",
+									"text": "现在很着急"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "去旅游了"
+								},
+								{
+									"label": "B",
+									"text": "在公司工作"
+								},
+								{
+									"label": "C",
+									"text": "出国比赛了"
+								}
+							]
+						},
+						{
+							"number": 6,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "注意打球"
+								},
+								{
+									"label": "B",
+									"text": "别去比赛了"
+								},
+								{
+									"label": "C",
+									"text": "现在多练习"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听一段话，选择正确答案。每题听两次。\nCâu 7–10: Nghe đoạn thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 7,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "跑步"
+								},
+								{
+									"label": "B",
+									"text": "参加比赛"
+								},
+								{
+									"label": "C",
+									"text": "看奥运会"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "练唱歌"
+								},
+								{
+									"label": "B",
+									"text": "打网球"
+								},
+								{
+									"label": "C",
+									"text": "参加唱歌比赛"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "运动"
+								},
+								{
+									"label": "B",
+									"text": "去商场"
+								},
+								{
+									"label": "C",
+									"text": "参加比赛"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "爱唱歌跳舞"
+								},
+								{
+									"label": "B",
+									"text": "不喜欢运动"
+								},
+								{
+									"label": "C",
+									"text": "喜欢参加比赛"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—15题：匹配句子。\nCâu 11–15: Nối câu.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "我有点儿不舒服，就先回来了。"
+						},
+						{
+							"label": "B",
+							"text": "晚上还要开车呢，来杯饮料吧。"
+						},
+						{
+							"label": "C",
+							"text": "他搬家了，现在住的地方离公司很远。"
+						},
+						{
+							"label": "D",
+							"text": "真的吗？那我多做一些练习，希望能考好。"
+						},
+						{
+							"label": "E",
+							"text": "当然。我们先坐公交车，然后换地铁。"
+						},
+						{
+							"label": "F",
+							"text": "是啊，从南边走到北边要一个小时呢。"
+						}
+					],
+					"questions": [
+						{
+							"number": 11,
+							"answer": "F",
+							"question": "你们的校园真大啊！",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 12,
+							"answer": "A",
+							"question": "大家都去上体育课了，你怎么没去？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 13,
+							"answer": "C",
+							"question": "小李最近经常迟到，你知道怎么回事吗？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 14,
+							"answer": "B",
+							"question": "菜点好了，你想喝点儿什么？来瓶啤酒？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 15,
+							"answer": "D",
+							"question": "如果你这次考试能得到好成绩，我就送你一个相机。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第16—20题：选词填空。\nCâu 16–20: Chọn từ điền vào chỗ trống.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "卡"
+						},
+						{
+							"label": "B",
+							"text": "只是"
+						},
+						{
+							"label": "C",
+							"text": "网球"
+						},
+						{
+							"label": "D",
+							"text": "练习"
+						},
+						{
+							"label": "E",
+							"text": "鞋"
+						},
+						{
+							"label": "F",
+							"text": "运动会"
+						}
+					],
+					"questions": [
+						{
+							"number": 16,
+							"answer": "F",
+							"sentence": "老师让我们参加完（ ）回教室。"
+						},
+						{
+							"number": 17,
+							"answer": "B",
+							"sentence": "我听得懂中国人说话，（ ）看不懂汉字。"
+						},
+						{
+							"number": 18,
+							"answer": "D",
+							"sentence": "很多事情都是这样：（ ）得越多，得到的成绩就会越好。"
+						},
+						{
+							"number": 19,
+							"answer": "C",
+							"sentence": "A：你会打（ ）吗？\nB：我不会打，但是我经常去看比赛。"
+						},
+						{
+							"number": 20,
+							"answer": "A",
+							"sentence": "A：张老师，还您公交（ ），谢谢您。\nB：别客气。我有两张，如果以后忘带了，就告诉我。"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第21—24题：选择正确答案。\nCâu 21–24: Đọc và chọn đáp án đúng.",
+					"embedded_example_image": true,
+					"shared_passage": "23–24\n\n为了参加唱歌比赛，妹妹准备了一个多月，每天晚饭后都给我们唱一个小时，我们觉得她唱得好极了。比赛那天，妹妹穿上漂亮的衣服，高高兴兴地去了。晚上我下课回到家，发现妹妹难过得很，我以为她没有得到好成绩，没想到她告诉我，她记错时间了，她到的时候，比赛早就结束了。",
+					"shared_passage_start": 23,
+					"questions": [
+						{
+							"number": 21,
+							"answer": "C",
+							"sentence": "儿子最近天天上网看电影，影响了学习成绩，我和妻子都很着急。",
+							"question": "关于儿子，可以知道什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "很着急"
+								},
+								{
+									"label": "B",
+									"text": "不喜欢看电影"
+								},
+								{
+									"label": "C",
+									"text": "最近总是上网"
+								}
+							]
+						},
+						{
+							"number": 22,
+							"answer": "A",
+							"sentence": "大家注意，山路越来越难走，都小心一点儿。大家可以穿上大衣，因为越高越冷，别感冒了。",
+							"question": "他们在做什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "爬山"
+								},
+								{
+									"label": "B",
+									"text": "看病"
+								},
+								{
+									"label": "C",
+									"text": "买大衣"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "C",
+							"question": "关于妹妹，可以知道什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "没有漂亮的衣服"
+								},
+								{
+									"label": "B",
+									"text": "没时间准备比赛"
+								},
+								{
+									"label": "C",
+									"text": "每天在家练习唱歌"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "B",
+							"question": "妹妹为什么很难过？",
+							"options": [
+								{
+									"label": "A",
+									"text": "她唱错了"
+								},
+								{
+									"label": "B",
+									"text": "比赛迟到了"
+								},
+								{
+									"label": "C",
+									"text": "比赛成绩不好"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据拼音写汉字。\nCâu 25–27: Viết chữ Hán theo pinyin.",
+					"embedded_example_image": true,
+					"questions": [
+						{
+							"number": 25,
+							"answer": "主",
+							"type": "writing_input",
+							"sentence": "这本书（ ）要介绍了中国人的姓名。",
+							"prompt_pinyin": "zhǔ"
+						},
+						{
+							"number": 26,
+							"answer": "参",
+							"type": "writing_input",
+							"sentence": "你感冒好了吗？会不会影响你（ ）加比赛？",
+							"prompt_pinyin": "cān"
+						},
+						{
+							"number": 27,
+							"answer": "世",
+							"type": "writing_input",
+							"sentence": "（ ）界很大，很多人都想走出去看看。",
+							"prompt_pinyin": "shì"
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：看图，用词造句。\nCâu 28–30: Nhìn hình và dùng từ gợi ý đặt câu.",
+					"questions": [
+						{
+							"number": 28,
+							"answer": "他们在校园里看比赛。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 校园",
+							"accepted_answers": ["校园里有很多学生。"]
+						},
+						{
+							"number": 29,
+							"answer": "她正在练习打网球。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 练习",
+							"accepted_answers": ["她在练习网球。"]
+						},
+						{
+							"number": 30,
+							"answer": "学校正在举行运动会。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 运动会",
+							"accepted_answers": ["他们正在参加运动会。"]
+						}
+					]
+				}
+			]
+		}
+	]
+}

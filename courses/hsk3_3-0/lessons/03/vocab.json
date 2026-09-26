@@ -1,0 +1,195 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 3,
+  "label": "Bài 3",
+  "title": "这个小区挺好的",
+  "short_vi": "Tìm nhà, đổi nhà; đánh giá về môi trường sống (vị trí, tiện nghi, khu vườn); bàn bạc chuyển nhà; chuẩn bị đồ đạc; làm thẻ tín dụng tại ngân hàng",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "初中",
+      "pinyin": "chūzhōng",
+      "adj": 2,
+      "vi": "(Cấp 2)"
+    },
+    {
+      "pos": 2,
+      "hanzi": "咱们",
+      "pinyin": "zánmen",
+      "adj": 1,
+      "vi": "Chúng ta, chúng mình"
+    },
+    {
+      "pos": 3,
+      "hanzi": "换",
+      "pinyin": "huàn",
+      "adj": 4,
+      "vi": "Đổi, thay đổi"
+    },
+    {
+      "pos": 4,
+      "hanzi": "房子",
+      "pinyin": "fángzi",
+      "adj": 2,
+      "vi": "Nhà, ngôi nhà"
+    },
+    {
+      "pos": 5,
+      "hanzi": "小区",
+      "pinyin": "xiǎoqū",
+      "adj": 2,
+      "vi": "Khu dân cư, tiểu khu"
+    },
+    {
+      "pos": 6,
+      "hanzi": "环境",
+      "pinyin": "huánjìng",
+      "adj": 2,
+      "vi": "Môi trường, xung quanh"
+    },
+    {
+      "pos": 7,
+      "hanzi": "挺",
+      "pinyin": "tǐng",
+      "adj": 18,
+      "vi": "Khá, rất"
+    },
+    {
+      "pos": 8,
+      "hanzi": "空调",
+      "pinyin": "kōngtiáo",
+      "adj": 2,
+      "vi": "Máy điều hòa"
+    },
+    {
+      "pos": 9,
+      "hanzi": "洗衣机",
+      "pinyin": "xǐyījī",
+      "adj": 2,
+      "vi": "Máy giặt"
+    },
+    {
+      "pos": 10,
+      "hanzi": "层",
+      "pinyin": "céng",
+      "adj": 8,
+      "vi": "Tầng (lượng từ)"
+    },
+    {
+      "pos": 11,
+      "hanzi": "花园",
+      "pinyin": "huāyuán",
+      "adj": 2,
+      "vi": "Vườn hoa"
+    },
+    {
+      "pos": 12,
+      "hanzi": "灯",
+      "pinyin": "dēng",
+      "adj": 2,
+      "vi": "Đèn"
+    },
+    {
+      "pos": 13,
+      "hanzi": "关",
+      "pinyin": "guān",
+      "adj": 4,
+      "vi": "Đóng, tắt"
+    },
+    {
+      "pos": 14,
+      "hanzi": "冰箱",
+      "pinyin": "bīngxiāng",
+      "adj": 2,
+      "vi": "Tủ lạnh"
+    },
+    {
+      "pos": 15,
+      "hanzi": "卫生间",
+      "pinyin": "wèishēngjiān",
+      "adj": 2,
+      "vi": "Nhà vệ sinh, phòng tắm"
+    },
+    {
+      "pos": 16,
+      "hanzi": "打扫",
+      "pinyin": "dǎsǎo",
+      "adj": 4,
+      "vi": "Quét dọn, dọn dẹp"
+    },
+    {
+      "pos": 17,
+      "hanzi": "搬家",
+      "pinyin": "bānjiā",
+      "adj": 4,
+      "vi": "Chuyển nhà"
+    },
+    {
+      "pos": 18,
+      "hanzi": "办",
+      "pinyin": "bàn",
+      "adj": 4,
+      "vi": "Làm, giải quyết"
+    },
+    {
+      "pos": 19,
+      "hanzi": "信用卡",
+      "pinyin": "xìnyòngkǎ",
+      "adj": 2,
+      "vi": "Thẻ tín dụng"
+    },
+    {
+      "pos": 20,
+      "hanzi": "还",
+      "pinyin": "huán",
+      "adj": 4,
+      "vi": "Trả lại"
+    },
+    {
+      "pos": 21,
+      "hanzi": "听说",
+      "pinyin": "tīngshuō",
+      "adj": 4,
+      "vi": "Nghe nói"
+    },
+    {
+      "pos": 22,
+      "hanzi": "银行",
+      "pinyin": "yínháng",
+      "adj": 2,
+      "vi": "Ngân hàng"
+    },
+    {
+      "pos": 23,
+      "hanzi": "才",
+      "pinyin": "cái",
+      "adj": 18,
+      "vi": "Mới, chỉ"
+    },
+    {
+      "pos": 24,
+      "hanzi": "纸",
+      "pinyin": "zhǐ",
+      "adj": 2,
+      "vi": "Giấy"
+    },
+    {
+      "pos": 25,
+      "hanzi": "搬",
+      "pinyin": "bān",
+      "adj": 4,
+      "vi": "Chuyển"
+    },
+    {
+      "pos": 26,
+      "hanzi": "需要",
+      "pinyin": "xūyào",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "Cần, cần phải"
+    }
+  ]
+}

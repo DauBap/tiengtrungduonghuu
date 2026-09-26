@@ -1,0 +1,122 @@
+{
+  "course_id": "hsk1_2",
+  "course_name": "HSK 1 (2.0",
+  "id": 12,
+  "label": "Bài 12",
+  "title": "明天天气怎么样？",
+  "short_vi": "Hỏi đáp về thời tiết. Hỏi thăm sức khỏe và lời khuyên ăn uống.",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "天气",
+      "pinyin": "tiānqì",
+      "adj": 2,
+      "vi": "thời tiết"
+    },
+    {
+      "pos": 2,
+      "hanzi": "怎么样",
+      "pinyin": "zěnmeyàng",
+      "adj": 1,
+      "vi": "thế nào"
+    },
+    {
+      "pos": 3,
+      "hanzi": "太",
+      "pinyin": "tài",
+      "adj": 7,
+      "vi": "quá"
+    },
+    {
+      "pos": 4,
+      "hanzi": "太...了",
+      "pinyin": "tài...le",
+      "adj": [],
+      "vi": "quá ... rồi"
+    },
+    {
+      "pos": 5,
+      "hanzi": "热",
+      "pinyin": "rè",
+      "adj": 6,
+      "vi": "nóng"
+    },
+    {
+      "pos": 6,
+      "hanzi": "冷",
+      "pinyin": "lěng",
+      "adj": 6,
+      "vi": "lạnh"
+    },
+    {
+      "pos": 7,
+      "hanzi": "下雨",
+      "pinyin": "xiàyǔ",
+      "adj": 4,
+      "vi": "mưa"
+    },
+    {
+      "pos": 8,
+      "hanzi": "下",
+      "pinyin": "xià",
+      "adj": 4,
+      "vi": "rơi"
+    },
+    {
+      "pos": 9,
+      "hanzi": "雨",
+      "pinyin": "yǔ",
+      "adj": 2,
+      "vi": "mưa"
+    },
+    {
+      "pos": 10,
+      "hanzi": "小姐",
+      "pinyin": "xiǎojiě",
+      "adj": 2,
+      "vi": "cô"
+    },
+    {
+      "pos": 11,
+      "hanzi": "来",
+      "pinyin": "lái",
+      "adj": 4,
+      "vi": "đến"
+    },
+    {
+      "pos": 12,
+      "hanzi": "身体",
+      "pinyin": "shēntǐ",
+      "adj": 2,
+      "vi": "cơ thể"
+    },
+    {
+      "pos": 13,
+      "hanzi": "爱",
+      "pinyin": "ài",
+      "adj": 4,
+      "vi": "yêu"
+    },
+    {
+      "pos": 14,
+      "hanzi": "些",
+      "pinyin": "xiē",
+      "adj": 8,
+      "vi": "một vài"
+    },
+    {
+      "pos": 15,
+      "hanzi": "水果",
+      "pinyin": "shuǐguǒ",
+      "adj": 2,
+      "vi": "trái cây"
+    },
+    {
+      "pos": 16,
+      "hanzi": "水",
+      "pinyin": "shuǐ",
+      "adj": 2,
+      "vi": "nước"
+    }
+  ]
+}

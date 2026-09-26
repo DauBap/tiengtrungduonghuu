@@ -1,0 +1,80 @@
+{
+	"course_id": "hsk1_2",
+	"course_name": "HSK 1 (2.0)",
+
+	"id": 4,
+	"title": "她是我的汉语老师",
+	"short_vi": "Giới thiệu người khác. Hỏi ai và quốc tịch.",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "她",
+			"pinyin": "tā",
+			"vi": "cô ấy",
+			"adj": 1
+		},
+		{
+			"pos": 2,
+			"hanzi": "谁",
+			"pinyin": "shéi",
+			"vi": "ai",
+			"adj": 1
+		},
+		{
+			"pos": 3,
+			"hanzi": "的",
+			"pinyin": "de",
+			"vi": "trợ từ sở hữu",
+			"adj": 11
+		},
+		{
+			"pos": 4,
+			"hanzi": "汉语",
+			"pinyin": "Hànyǔ",
+			"vi": "tiếng Hán",
+			"adj": 2
+		},
+		{
+			"pos": 5,
+			"hanzi": "哪",
+			"pinyin": "nǎ",
+			"vi": "nào",
+			"adj": 1
+		},
+		{
+			"pos": 6,
+			"hanzi": "国",
+			"pinyin": "guó",
+			"vi": "nước",
+			"adj": 2
+		},
+		{
+			"pos": 7,
+			"hanzi": "呢",
+			"pinyin": "ne",
+			"vi": "trợ từ nghi vấn",
+			"adj": 11
+		},
+		{
+			"pos": 8,
+			"hanzi": "他",
+			"pinyin": "tā",
+			"vi": "anh ấy",
+			"adj": 1
+		},
+		{
+			"pos": 9,
+			"hanzi": "同学",
+			"pinyin": "tóngxué",
+			"vi": "bạn học",
+			"adj": 2
+		},
+		{
+			"pos": 10,
+			"hanzi": "朋友",
+			"pinyin": "péngyou",
+			"vi": "bạn bè",
+			"adj": 2
+		}
+	]
+}

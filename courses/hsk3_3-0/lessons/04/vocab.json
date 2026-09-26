@@ -1,0 +1,202 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 4,
+  "label": "Bài 4",
+  "title": "这家宾馆跟别的都不一样",
+  "short_vi": "Lên kế hoạch cho kỳ nghỉ; chọn điểm du lịch (biển, thảo nguyên); đặt vé máy bay, khách sạn; gặp tài xế tại sân bay; giới thiệu về khách sạn đặc biệt",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "假期",
+      "pinyin": "jiàqī",
+      "adj": 2,
+      "vi": "kỳ nghỉ"
+    },
+    {
+      "pos": 2,
+      "hanzi": "海",
+      "pinyin": "hǎi",
+      "adj": 2,
+      "vi": "biển"
+    },
+    {
+      "pos": 3,
+      "hanzi": "草原",
+      "pinyin": "cǎoyuán",
+      "adj": 2,
+      "vi": "thảo nguyên"
+    },
+    {
+      "pos": 4,
+      "hanzi": "主意",
+      "pinyin": "zhǔyi",
+      "adj": 2,
+      "vi": "ý kiến; ý tưởng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "骑",
+      "pinyin": "qí",
+      "adj": 4,
+      "vi": "cưỡi (ngựa, xe đạp...)"
+    },
+    {
+      "pos": 6,
+      "hanzi": "马",
+      "pinyin": "mǎ",
+      "adj": 2,
+      "vi": "con ngựa"
+    },
+    {
+      "pos": 7,
+      "hanzi": "羊",
+      "pinyin": "yáng",
+      "adj": 2,
+      "vi": "con cừu; con dê"
+    },
+    {
+      "pos": 8,
+      "hanzi": "月亮",
+      "pinyin": "yuèliang",
+      "adj": 2,
+      "vi": "mặt trăng"
+    },
+    {
+      "pos": 9,
+      "hanzi": "一定",
+      "pinyin": "yídìng",
+      "adj": 18,
+      "vi": "chắc chắn; nhất định"
+    },
+    {
+      "pos": 10,
+      "hanzi": "刻",
+      "pinyin": "kè",
+      "adj": 8,
+      "vi": "Khắc (15 phút)"
+    },
+    {
+      "pos": 11,
+      "hanzi": "起飞",
+      "pinyin": "qǐfēi",
+      "adj": 4,
+      "vi": "Cất cánh"
+    },
+    {
+      "pos": 12,
+      "hanzi": "宾馆",
+      "pinyin": "bīnguǎn",
+      "adj": 2,
+      "vi": "Khách sạn"
+    },
+    {
+      "pos": 13,
+      "hanzi": "特别",
+      "pinyin": "tèbié",
+      "adj": [
+        6,
+        18
+      ],
+      "vi": "Đặc biệt"
+    },
+    {
+      "pos": 14,
+      "hanzi": "别的",
+      "pinyin": "biéde",
+      "adj": 1,
+      "vi": "Cái khác, khác"
+    },
+    {
+      "pos": 15,
+      "hanzi": "一样",
+      "pinyin": "yíyàng",
+      "adj": 6,
+      "vi": "Giống nhau"
+    },
+    {
+      "pos": 16,
+      "hanzi": "牛",
+      "pinyin": "niú",
+      "adj": 2,
+      "vi": "Con bò"
+    },
+    {
+      "pos": 17,
+      "hanzi": "相机",
+      "pinyin": "xiàngjī",
+      "adj": 2,
+      "vi": "Máy ảnh"
+    },
+    {
+      "pos": 18,
+      "hanzi": "欢迎",
+      "pinyin": "huānyíng",
+      "adj": 4,
+      "vi": "hoan nghênh, chào mừng"
+    },
+    {
+      "pos": 19,
+      "hanzi": "司机",
+      "pinyin": "sījī",
+      "adj": 2,
+      "vi": "tài xế, lái xe"
+    },
+    {
+      "pos": 20,
+      "hanzi": "晚点",
+      "pinyin": "wǎndiǎn",
+      "adj": 4,
+      "vi": "muộn, trễ (giờ tàu, xe, máy bay...)"
+    },
+    {
+      "pos": 21,
+      "hanzi": "久",
+      "pinyin": "jiǔ",
+      "adj": 6,
+      "vi": "lâu"
+    },
+    {
+      "pos": 22,
+      "hanzi": "除了",
+      "pinyin": "chúle",
+      "adj": 13,
+      "vi": "ngoài... ra; trừ... ra"
+    },
+    {
+      "pos": 23,
+      "hanzi": "以外",
+      "pinyin": "yǐwài",
+      "adj": 2,
+      "vi": "ngoài; ngoại trừ"
+    },
+    {
+      "pos": 24,
+      "hanzi": "先",
+      "pinyin": "xiān",
+      "adj": 18,
+      "vi": "trước, đầu tiên"
+    },
+    {
+      "pos": 25,
+      "hanzi": "一直",
+      "pinyin": "yìzhí",
+      "adj": 18,
+      "vi": "luôn luôn, suốt"
+    },
+    {
+      "pos": 26,
+      "hanzi": "干净",
+      "pinyin": "gānjìng",
+      "adj": 6,
+      "vi": "sạch sẽ"
+    },
+    {
+      "pos": 27,
+      "hanzi": "满意",
+      "pinyin": "mǎnyì",
+      "adj": 4,
+      "vi": "hài lòng, mãn nguyện"
+    }
+  ]
+}

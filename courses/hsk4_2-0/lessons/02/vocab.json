@@ -1,0 +1,223 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 2,
+  "label": "Bài 2",
+  "title": "真正的朋友",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "适应",
+      "pinyin": "shìyìng",
+      "adj": 4,
+      "vi": "thích nghi"
+    },
+    {
+      "pos": 2,
+      "hanzi": "交",
+      "pinyin": "jiāo",
+      "adj": 4,
+      "vi": "kết giao"
+    },
+    {
+      "pos": 3,
+      "hanzi": "平时",
+      "pinyin": "píngshí",
+      "adj": 2,
+      "vi": "lúc thường, ngày thường"
+    },
+    {
+      "pos": 4,
+      "hanzi": "逛",
+      "pinyin": "guàng",
+      "adj": 4,
+      "vi": "đi dạo"
+    },
+    {
+      "pos": 5,
+      "hanzi": "短信",
+      "pinyin": "duǎnxìn",
+      "adj": 2,
+      "vi": "tin nhắn"
+    },
+    {
+      "pos": 6,
+      "hanzi": "正好",
+      "pinyin": "zhènghǎo",
+      "adj": 7,
+      "vi": "đúng lúc, được dịp, gặp dịp"
+    },
+    {
+      "pos": 7,
+      "hanzi": "聚会",
+      "pinyin": "jùhuì",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "gặp gỡ; cuộc họp mặt"
+    },
+    {
+      "pos": 8,
+      "hanzi": "联系",
+      "pinyin": "liánxì",
+      "adj": 4,
+      "vi": "liên hệ"
+    },
+    {
+      "pos": 9,
+      "hanzi": "差不多",
+      "pinyin": "chàbuduō",
+      "adj": 7,
+      "vi": "gần như, hầu như"
+    },
+    {
+      "pos": 10,
+      "hanzi": "专门",
+      "pinyin": "zhuānmén",
+      "adj": 7,
+      "vi": "đặc biệt, riêng biệt"
+    },
+    {
+      "pos": 11,
+      "hanzi": "毕业",
+      "pinyin": "bì yè",
+      "adj": 4,
+      "vi": "tốt nghiệp"
+    },
+    {
+      "pos": 12,
+      "hanzi": "麻烦",
+      "pinyin": "máfan",
+      "adj": 4,
+      "vi": "làm phiền"
+    },
+    {
+      "pos": 13,
+      "hanzi": "好像",
+      "pinyin": "hǎoxiàng",
+      "adj": 7,
+      "vi": "giống như, dường như"
+    },
+    {
+      "pos": 14,
+      "hanzi": "重新",
+      "pinyin": "chóngxīn",
+      "adj": 7,
+      "vi": "lần nữa, lại một lần nữa"
+    },
+    {
+      "pos": 15,
+      "hanzi": "尽管",
+      "pinyin": "jǐnguǎn",
+      "adj": 10,
+      "vi": "cho dù, mặc dù"
+    },
+    {
+      "pos": 16,
+      "hanzi": "真正",
+      "pinyin": "zhēnzhèng",
+      "adj": 6,
+      "vi": "chân chính, thật sự"
+    },
+    {
+      "pos": 17,
+      "hanzi": "友谊",
+      "pinyin": "yǒuyì",
+      "adj": 2,
+      "vi": "tình bạn"
+    },
+    {
+      "pos": 18,
+      "hanzi": "丰富",
+      "pinyin": "fēngfù",
+      "adj": 4,
+      "vi": "làm phong phú"
+    },
+    {
+      "pos": 19,
+      "hanzi": "无聊",
+      "pinyin": "wúliáo",
+      "adj": 6,
+      "vi": "vô vị, nhàm chán"
+    },
+    {
+      "pos": 20,
+      "hanzi": "讨厌",
+      "pinyin": "tǎoyàn",
+      "adj": 4,
+      "vi": "ghét, không thích"
+    },
+    {
+      "pos": 21,
+      "hanzi": "却",
+      "pinyin": "què",
+      "adj": 7,
+      "vi": "lại, nhưng mà"
+    },
+    {
+      "pos": 22,
+      "hanzi": "周围",
+      "pinyin": "zhōuwéi",
+      "adj": 2,
+      "vi": "xung quanh"
+    },
+    {
+      "pos": 23,
+      "hanzi": "交流",
+      "pinyin": "jiāoliú",
+      "adj": 4,
+      "vi": "giao lưu, trao đổi"
+    },
+    {
+      "pos": 24,
+      "hanzi": "理解",
+      "pinyin": "lǐjiě",
+      "adj": 4,
+      "vi": "hiểu"
+    },
+    {
+      "pos": 25,
+      "hanzi": "镜子",
+      "pinyin": "jìngzi",
+      "adj": 2,
+      "vi": "gương, gương soi"
+    },
+    {
+      "pos": 26,
+      "hanzi": "而",
+      "pinyin": "ér",
+      "adj": 10,
+      "vi": "(chỉ sự tương phản) trong khi đó, mà"
+    },
+    {
+      "pos": 27,
+      "hanzi": "当",
+      "pinyin": "dāng",
+      "adj": 13,
+      "vi": "khi"
+    },
+    {
+      "pos": 28,
+      "hanzi": "困难",
+      "pinyin": "kùnnan",
+      "adj": 2,
+      "vi": "khó khăn"
+    },
+    {
+      "pos": 29,
+      "hanzi": "及时",
+      "pinyin": "jíshí",
+      "adj": 7,
+      "vi": "đúng lúc, kịp thời"
+    },
+    {
+      "pos": 30,
+      "hanzi": "陪",
+      "pinyin": "péi",
+      "adj": 4,
+      "vi": "đi cùng, ở bên cạnh"
+    }
+  ]
+}

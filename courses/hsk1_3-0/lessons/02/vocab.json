@@ -1,0 +1,115 @@
+{
+	"course_id": "hsk1_3-0",
+	"course_name": "HSK 1 (3.0)",
+	"id": 2,
+	"label": "Bài 2",
+	"title": "我叫李文",
+	"short_vi": "Tự giới thiệu tên, hỏi tên, xin lỗi và đáp lại ",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "请问",
+			"pinyin": "qǐngwèn",
+			"adj": 4,
+			"vi": "cho hỏi, xin hỏi"
+		},
+		{
+			"pos": 2,
+			"hanzi": "你",
+			"pinyin": "nǐ",
+			"adj": 1,
+			"vi": "bạn, cậu"
+		},
+		{
+			"pos": 3,
+			"hanzi": "叫",
+			"pinyin": "jiào",
+			"adj": 4,
+			"vi": "gọi/ tên gọi"
+		},
+		{
+			"pos": 4,
+			"hanzi": "什么",
+			"pinyin": "shénme",
+			"adj": [],
+			"vi": "cái gì (từ để hỏi)"
+		},
+		{
+			"pos": 5,
+			"hanzi": "名字",
+			"pinyin": "míngzi",
+			"adj": 2,
+			"vi": "Tên"
+		},
+		{
+			"pos": 6,
+			"hanzi": "我",
+			"pinyin": "wǒ",
+			"adj": 1,
+			"vi": "tôi, tớ, mình"
+		},
+		{
+			"pos": 7,
+			"hanzi": "不",
+			"pinyin": "bù",
+			"adj": 7,
+			"vi": "không, chả, chẳng (phủ định)"
+		},
+		{
+			"pos": 8,
+			"hanzi": "是",
+			"pinyin": "shì",
+			"adj": 6,
+			"vi": "thì, là,..."
+		},
+		{
+			"pos": 9,
+			"hanzi": "对不起",
+			"pinyin": "duìbuqǐ",
+			"adj": 4,
+			"vi": "Xin lỗi"
+		},
+		{
+			"pos": 10,
+			"hanzi": "没关系",
+			"pinyin": "méi ɡuānxi",
+			"adj": [],
+			"vi": "không sao, không vấn đề gì"
+		},
+		{
+			"pos": 11,
+			"hanzi": "没事",
+			"pinyin": "méishì",
+			"adj": 4,
+			"vi": "không sao, ko việc gì"
+		},
+		{
+			"pos": 12,
+			"hanzi": "很",
+			"pinyin": "hěn",
+			"adj": 7,
+			"vi": "rất, quá, hết sức"
+		},
+		{
+			"pos": 13,
+			"hanzi": "高兴",
+			"pinyin": "ɡāoxìnɡ",
+			"adj": 6,
+			"vi": "vui, vui vẻ"
+		},
+		{
+			"pos": 14,
+			"hanzi": "认识",
+			"pinyin": "rènshi",
+			"adj": 4,
+			"vi": "quen biết, nhận biết"
+		},
+		{
+			"pos": 15,
+			"hanzi": "也",
+			"pinyin": "yě",
+			"adj": 7,
+			"vi": "cũng, cũng vậy"
+		}
+	]
+}

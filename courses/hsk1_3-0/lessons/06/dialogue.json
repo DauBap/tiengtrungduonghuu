@@ -1,0 +1,110 @@
+{
+  "lesson": 6,
+  "title": "你的手机号是多少？",
+  "title_pinyin": "Nǐ de shǒujī hào shì duōshao?",
+  "title_vi": "Số điện thoại của bạn là bao nhiêu?",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "家月，你的手机号是多少？",
+          "pinyin": "Jiāyuè, nǐ de shǒujī hào shì duōshao?",
+          "vi": "Gia Nguyệt, số điện thoại của bạn là bao nhiêu?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我的手机号是+33 601493190。",
+          "pinyin": "Wǒ de shǒujī hào shì +33 liù líng yī sì jiǔ sān yī jiǔ líng.",
+          "vi": "Số điện thoại của mình là +33 601493190."
+        },
+        {
+          "speaker": "李文",
+          "zh": "我的手机号是+86 13552721160。",
+          "pinyin": "Wǒ de shǒujī hào shì +86 yāo sān wǔ wǔ èr qī yāo yāo liù líng.",
+          "vi": "Số của mình là +86 13552721160."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好的。",
+          "pinyin": "Hǎo de.",
+          "vi": "Ừ."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "陈天中",
+          "zh": "家月，明天你去哪儿？",
+          "pinyin": "Jiāyuè, míngtiān nǐ qù nǎr?",
+          "vi": "Gia Nguyệt, ngày mai bạn đi đâu?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我想去超市买东西。",
+          "pinyin": "Wǒ xiǎng qù chāoshì mǎi dōngxi.",
+          "vi": "Tôi muốn đi siêu thị mua đồ."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "你去超市买什么？",
+          "pinyin": "Nǐ qù chāoshì mǎi shénme?",
+          "vi": "Bạn đi siêu thị mua gì?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我想买些牛奶。",
+          "pinyin": "Wǒ xiǎng mǎi xiē niúnǎi.",
+          "vi": "Tôi muốn mua ít sữa."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "星期天我们去哪儿吃晚饭？",
+          "pinyin": "Xīngqītiān wǒmen qù nǎr chī wǎnfàn?",
+          "vi": "Chủ nhật chúng ta đi đâu ăn tối?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我还想去西安饭店。",
+          "pinyin": "Wǒ hái xiǎng qù Xī'ān Fàndiàn.",
+          "vi": "Tôi vẫn muốn đi nhà hàng Tây An."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "那边的包子非常好吃，我想吃包子。",
+          "pinyin": "Nàbiān de bāozi fēicháng hǎochī, wǒ xiǎng chī bāozi.",
+          "vi": "Bánh bao bên đó rất ngon, con muốn ăn bánh bao."
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "妈妈，我想吃米饭，不想吃包子。",
+          "pinyin": "Māma, wǒ xiǎng chī mǐfàn, bù xiǎng chī bāozi.",
+          "vi": "Mẹ ơi, con muốn ăn cơm, không muốn ăn bánh bao."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好的。我们怎么去？",
+          "pinyin": "Hǎo de. Wǒmen zěnme qù?",
+          "vi": "Được rồi. Chúng ta đi bằng cách nào?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "坐出租车去。",
+          "pinyin": "Zuò chūzūchē qù.",
+          "vi": "Đi taxi đi."
+        }
+      ]
+    }
+  ]
+}

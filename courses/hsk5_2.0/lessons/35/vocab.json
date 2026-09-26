@@ -1,0 +1,248 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 35,
+  "label": "Bài 35",
+  "title": "植物会出汗",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "炎热",
+      "pinyin": "yánrè",
+      "adj": 6,
+      "vi": "nóng bức"
+    },
+    {
+      "pos": 2,
+      "hanzi": "歇",
+      "pinyin": "xiē",
+      "adj": 4,
+      "vi": "nghỉ ngơi"
+    },
+    {
+      "pos": 3,
+      "hanzi": "开水",
+      "pinyin": "kāishuǐ",
+      "adj": 2,
+      "vi": "nước sôi"
+    },
+    {
+      "pos": 4,
+      "hanzi": "冰激凌",
+      "pinyin": "bīngjīlíng",
+      "adj": 2,
+      "vi": "kem"
+    },
+    {
+      "pos": 5,
+      "hanzi": "肌肉",
+      "pinyin": "jīròu",
+      "adj": 2,
+      "vi": "bắp thịt, cơ"
+    },
+    {
+      "pos": 6,
+      "hanzi": "恢复",
+      "pinyin": "huīfù",
+      "adj": 4,
+      "vi": "phục hồi, lấy lại"
+    },
+    {
+      "pos": 7,
+      "hanzi": "湿润",
+      "pinyin": "shīrùn",
+      "adj": 6,
+      "vi": "ẩm ướt"
+    },
+    {
+      "pos": 8,
+      "hanzi": "荫凉",
+      "pinyin": "yīnliáng",
+      "adj": 6,
+      "vi": "rám mát"
+    },
+    {
+      "pos": 9,
+      "hanzi": "指挥",
+      "pinyin": "zhǐhuī",
+      "adj": 4,
+      "vi": "chỉ huy, điều khiển, ra lệnh"
+    },
+    {
+      "pos": 10,
+      "hanzi": "赶快",
+      "pinyin": "gǎnkuài",
+      "adj": 7,
+      "vi": "mau mau, nhanh"
+    },
+    {
+      "pos": 11,
+      "hanzi": "汗腺",
+      "pinyin": "hànxiàn",
+      "adj": 2,
+      "vi": "tuyến mồ hôi"
+    },
+    {
+      "pos": 12,
+      "hanzi": "毛孔",
+      "pinyin": "máokǒng",
+      "adj": 2,
+      "vi": "lỗ chân lông"
+    },
+    {
+      "pos": 13,
+      "hanzi": "冒",
+      "pinyin": "mào",
+      "adj": 4,
+      "vi": "bốc lên, toát ra, phả ra"
+    },
+    {
+      "pos": 14,
+      "hanzi": "片",
+      "pinyin": "piàn",
+      "adj": 2,
+      "vi": "tấm, mảnh"
+    },
+    {
+      "pos": 15,
+      "hanzi": "常识",
+      "pinyin": "chángshí",
+      "adj": 2,
+      "vi": "kiến thức thông thường"
+    },
+    {
+      "pos": 16,
+      "hanzi": "根",
+      "pinyin": "gēn",
+      "adj": 2,
+      "vi": "rễ cây"
+    },
+    {
+      "pos": 17,
+      "hanzi": "吸收",
+      "pinyin": "xīshōu",
+      "adj": 4,
+      "vi": "hấp thu, hút"
+    },
+    {
+      "pos": 18,
+      "hanzi": "控制",
+      "pinyin": "kòngzhì",
+      "adj": 4,
+      "vi": "kiểm soát, điều khiển"
+    },
+    {
+      "pos": 19,
+      "hanzi": "成分",
+      "pinyin": "chéngfèn",
+      "adj": 2,
+      "vi": "thành phần"
+    },
+    {
+      "pos": 20,
+      "hanzi": "梢",
+      "pinyin": "shāo",
+      "adj": 2,
+      "vi": "ngọn (cây)"
+    },
+    {
+      "pos": 21,
+      "hanzi": "管子",
+      "pinyin": "guǎnzi",
+      "adj": 2,
+      "vi": "ống, ống dẫn"
+    },
+    {
+      "pos": 22,
+      "hanzi": "玻璃",
+      "pinyin": "bōli",
+      "adj": 2,
+      "vi": "pha-lê, thủy tinh, kính"
+    },
+    {
+      "pos": 23,
+      "hanzi": "测验",
+      "pinyin": "cèyàn",
+      "adj": 4,
+      "vi": "kiểm tra"
+    },
+    {
+      "pos": 24,
+      "hanzi": "根本",
+      "pinyin": "gēnběn",
+      "adj": 7,
+      "vi": "(thường được dùng trong câu phủ định) tuyệt nhiên, không hề"
+    },
+    {
+      "pos": 25,
+      "hanzi": "枝干",
+      "pinyin": "zhīgàn",
+      "adj": 2,
+      "vi": "cành cây"
+    },
+    {
+      "pos": 26,
+      "hanzi": "释放",
+      "pinyin": "shìfàng",
+      "adj": 4,
+      "vi": "phóng thích, tỏa ra"
+    },
+    {
+      "pos": 27,
+      "hanzi": "自动",
+      "pinyin": "zìdòng",
+      "adj": 7,
+      "vi": "tự động, tự"
+    },
+    {
+      "pos": 28,
+      "hanzi": "补充",
+      "pinyin": "bǔchōng",
+      "adj": 4,
+      "vi": "cung cấp thêm, bổ sung"
+    },
+    {
+      "pos": 29,
+      "hanzi": "蒸腾",
+      "pinyin": "zhēngténg",
+      "adj": 4,
+      "vi": "bốc hơi"
+    },
+    {
+      "pos": 30,
+      "hanzi": "特殊",
+      "pinyin": "tèshū",
+      "adj": 6,
+      "vi": "đặc biệt, đặc thù"
+    },
+    {
+      "pos": 31,
+      "hanzi": "内部",
+      "pinyin": "nèibù",
+      "adj": 2,
+      "vi": "nội bộ, bên trong"
+    },
+    {
+      "pos": 32,
+      "hanzi": "系统",
+      "pinyin": "xìtǒng",
+      "adj": 2,
+      "vi": "hệ thống"
+    },
+    {
+      "pos": 33,
+      "hanzi": "状况",
+      "pinyin": "zhuàngkuàng",
+      "adj": 2,
+      "vi": "tình hình, tình trạng"
+    },
+    {
+      "pos": 34,
+      "hanzi": "秩序",
+      "pinyin": "zhìxù",
+      "adj": 2,
+      "vi": "trật tự"
+    }
+  ]
+}

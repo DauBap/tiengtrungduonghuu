@@ -1,0 +1,80 @@
+{
+	"course_id": "hsk1_2",
+	"course_name": "HSK 1 (2.0)",
+
+	"id": 5,
+	"title": "你家有几口人？",
+	"short_vi": "Hỏi số người trong gia đình. Hỏi và trả lời về tuổi, số đếm.",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "家",
+			"pinyin": "jiā",
+			"vi": "nhà",
+			"adj": 2
+		},
+		{
+			"pos": 2,
+			"hanzi": "有",
+			"pinyin": "yǒu",
+			"vi": "có",
+			"adj": 4
+		},
+		{
+			"pos": 3,
+			"hanzi": "口",
+			"pinyin": "kǒu",
+			"vi": "lượng từ cho người trong nhà",
+			"adj": 8
+		},
+		{
+			"pos": 4,
+			"hanzi": "女儿",
+			"pinyin": "nǚ'ér",
+			"vi": "con gái",
+			"adj": 2
+		},
+		{
+			"pos": 5,
+			"hanzi": "几",
+			"pinyin": "jǐ",
+			"vi": "mấy",
+			"adj": 1
+		},
+		{
+			"pos": 6,
+			"hanzi": "岁",
+			"pinyin": "suì",
+			"vi": "tuổi",
+			"adj": 2
+		},
+		{
+			"pos": 7,
+			"hanzi": "了",
+			"pinyin": "le",
+			"vi": "rồi",
+			"adj": 11
+		},
+		{
+			"pos": 8,
+			"hanzi": "今年",
+			"pinyin": "jīnnián",
+			"vi": "năm nay",
+			"adj": 2
+		},
+		{
+			"pos": 9,
+			"hanzi": "多",
+			"pinyin": "duō",
+			"vi": "nhiều / bao nhiêu",
+			"adj": 1
+		},
+		{
+			"pos": 10,
+			"hanzi": "大",
+			"pinyin": "dà",
+			"vi": "to / lớn",
+			"adj": 6
+		}
+	]
+}

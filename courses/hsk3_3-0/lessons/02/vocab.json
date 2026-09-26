@@ -1,0 +1,212 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 2,
+  "label": "Bài 2",
+  "title": "你们想吃什么就点什么",
+  "short_vi": "Gọi món tại nhà hàng; hỏi về sở thích ăn uống; giới thiệu món ăn Trung Quốc; gọi đồ ăn giao tận nơi; nói về thói quen ăn uống hàng ngày",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "菜单",
+      "pinyin": "càidān",
+      "adj": 2,
+      "vi": "Thực đơn"
+    },
+    {
+      "pos": 2,
+      "hanzi": "又",
+      "pinyin": "yòu",
+      "adj": 18,
+      "vi": "Lại, vừa... vừa..."
+    },
+    {
+      "pos": 3,
+      "hanzi": "饿",
+      "pinyin": "è",
+      "adj": 6,
+      "vi": "Đói"
+    },
+    {
+      "pos": 4,
+      "hanzi": "渴",
+      "pinyin": "kě",
+      "adj": 6,
+      "vi": "Khát"
+    },
+    {
+      "pos": 5,
+      "hanzi": "客气",
+      "pinyin": "kèqi",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "Khách sáo, lịch sự"
+    },
+    {
+      "pos": 6,
+      "hanzi": "饮料",
+      "pinyin": "yǐnliào",
+      "adj": 2,
+      "vi": "Đồ uống"
+    },
+    {
+      "pos": 7,
+      "hanzi": "好久",
+      "pinyin": "hǎojiǔ",
+      "adj": 6,
+      "vi": "Rất lâu"
+    },
+    {
+      "pos": 8,
+      "hanzi": "服务",
+      "pinyin": "fúwù",
+      "adj": 4,
+      "vi": "Phục vụ"
+    },
+    {
+      "pos": 9,
+      "hanzi": "员",
+      "pinyin": "yuán",
+      "adj": 20,
+      "vi": "Nhân viên (hậu tố ）"
+    },
+    {
+      "pos": 10,
+      "hanzi": "双",
+      "pinyin": "shuāng",
+      "adj": 8,
+      "vi": "Đôi, cặp"
+    },
+    {
+      "pos": 11,
+      "hanzi": "筷子",
+      "pinyin": "kuàizi",
+      "adj": 2,
+      "vi": "Đũa"
+    },
+    {
+      "pos": 12,
+      "hanzi": "勺子",
+      "pinyin": "sháozi",
+      "adj": 2,
+      "vi": "Thìa, muỗng"
+    },
+    {
+      "pos": 13,
+      "hanzi": "碗",
+      "pinyin": "wǎn",
+      "adj": 2,
+      "vi": "Bát, chén"
+    },
+    {
+      "pos": 14,
+      "hanzi": "马上",
+      "pinyin": "mǎshàng",
+      "adj": 18,
+      "vi": "Ngay lập tức"
+    },
+    {
+      "pos": 15,
+      "hanzi": "热情",
+      "pinyin": "rèqíng",
+      "adj": 6,
+      "vi": "Nhiệt tình"
+    },
+    {
+      "pos": 16,
+      "hanzi": "尝",
+      "pinyin": "cháng",
+      "adj": 4,
+      "vi": "Nếm"
+    },
+    {
+      "pos": 17,
+      "hanzi": "记",
+      "pinyin": "jì",
+      "adj": 4,
+      "vi": "Nhớ, ghi nhớ"
+    },
+    {
+      "pos": 18,
+      "hanzi": "用",
+      "pinyin": "yòng",
+      "adj": 4,
+      "vi": "Dùng"
+    },
+    {
+      "pos": 19,
+      "hanzi": "鸡",
+      "pinyin": "jī",
+      "adj": 2,
+      "vi": "Gà"
+    },
+    {
+      "pos": 20,
+      "hanzi": "张",
+      "pinyin": "zhāng",
+      "adj": 8,
+      "vi": "Tờ, tấm (lượng từ)"
+    },
+    {
+      "pos": 21,
+      "hanzi": "不用",
+      "pinyin": "búyòng",
+      "adj": 18,
+      "vi": "Không cần"
+    },
+    {
+      "pos": 22,
+      "hanzi": "选",
+      "pinyin": "xuǎn",
+      "adj": 4,
+      "vi": "Chọn"
+    },
+    {
+      "pos": 23,
+      "hanzi": "外卖",
+      "pinyin": "wàimài",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "Đồ mang về"
+    },
+    {
+      "pos": 24,
+      "hanzi": "方便",
+      "pinyin": "fāngbiàn",
+      "adj": 6,
+      "vi": "Thuận tiện"
+    },
+    {
+      "pos": 25,
+      "hanzi": "蛋糕",
+      "pinyin": "dàngāo",
+      "adj": 2,
+      "vi": "Bánh kem, bánh ngọt"
+    },
+    {
+      "pos": 26,
+      "hanzi": "只",
+      "pinyin": "zhǐ",
+      "adj": 18,
+      "vi": "Chỉ, chỉ có"
+    },
+    {
+      "pos": 27,
+      "hanzi": "方便面",
+      "pinyin": "fāngbiànmiàn",
+      "adj": 2,
+      "vi": "Mì ăn liền"
+    },
+    {
+      "pos": 28,
+      "hanzi": "简单",
+      "pinyin": "jiǎndān",
+      "adj": 6,
+      "vi": "Đơn giản"
+    }
+  ]
+}

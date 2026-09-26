@@ -1,0 +1,118 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 1,
+  "label": "Bài 1 ",
+  "title": "周末你有什么打算",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "周末",
+      "pinyin": "zhōumò",
+      "adj": 2,
+      "vi": "cuối tuần"
+    },
+    {
+      "pos": 2,
+      "hanzi": "打算",
+      "pinyin": "dǎsuàn",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "kế hoạch; dự định"
+    },
+    {
+      "pos": 3,
+      "hanzi": "啊",
+      "pinyin": "a",
+      "adj": 11,
+      "vi": "được dùng ở cuối câu để khẳng định hay biện minh cho điều gì"
+    },
+    {
+      "pos": 4,
+      "hanzi": "跟",
+      "pinyin": "gēn",
+      "adj": 13,
+      "vi": "cùng, với"
+    },
+    {
+      "pos": 5,
+      "hanzi": "一直",
+      "pinyin": "yīzhí",
+      "adj": 7,
+      "vi": "suốt, liên tục"
+    },
+    {
+      "pos": 6,
+      "hanzi": "游戏",
+      "pinyin": "yóuxì",
+      "adj": 2,
+      "vi": "trò chơi"
+    },
+    {
+      "pos": 7,
+      "hanzi": "作业",
+      "pinyin": "zuòyè",
+      "adj": 2,
+      "vi": "bài tập về nhà"
+    },
+    {
+      "pos": 8,
+      "hanzi": "着急",
+      "pinyin": "zháojí",
+      "adj": 6,
+      "vi": "lo lắng"
+    },
+    {
+      "pos": 9,
+      "hanzi": "复习",
+      "pinyin": "fùxí",
+      "adj": 4,
+      "vi": "ôn tập"
+    },
+    {
+      "pos": 10,
+      "hanzi": "南（方）",
+      "pinyin": "nán(fāng)",
+      "adj": 2,
+      "vi": "phía nam, miền nam"
+    },
+    {
+      "pos": 11,
+      "hanzi": "北方",
+      "pinyin": "běifāng",
+      "adj": 2,
+      "vi": "phía bắc, miền bắc"
+    },
+    {
+      "pos": 12,
+      "hanzi": "面包",
+      "pinyin": "miànbāo",
+      "adj": 2,
+      "vi": "bánh mì"
+    },
+    {
+      "pos": 13,
+      "hanzi": "带",
+      "pinyin": "dài",
+      "adj": 4,
+      "vi": "mang theo"
+    },
+    {
+      "pos": 14,
+      "hanzi": "地图",
+      "pinyin": "dìtú",
+      "adj": 2,
+      "vi": "bản đồ"
+    },
+    {
+      "pos": 15,
+      "hanzi": "搬",
+      "pinyin": "bān",
+      "adj": 4,
+      "vi": "dọn, dời"
+    }
+  ]
+}

@@ -1,0 +1,324 @@
+{
+	"title": "HSK1 - Sách bài tập",
+	"lesson": 12,
+	"lesson_title": "昨天下雪了",
+	"lesson_pinyin": "Zuótiān xià xuě le",
+	"lesson_meaning": "Hôm qua tuyết rơi rồi",
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听短语，选择正确图片。每题听两次。\nCâu 1–3: Nghe và chọn hình ảnh phù hợp.",
+					"example": {
+						"question": "三个苹果",
+						"pinyin": "sān gè píngguǒ",
+						"meaning": "ba quả táo",
+						"correct_label": "C",
+						"options": ["A", "B", "C"]
+					},
+					"questions": [
+						{ "number": 1, "answer": "A", "options": ["A", "B", "C"] },
+						{ "number": 2, "answer": "C", "options": ["A", "B", "C"] },
+						{ "number": 3, "answer": "B", "options": ["A", "B", "C"] }
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—5题：听问题，选择正确回答。每题听两次。\nCâu 4–5: Nghe câu hỏi, chọn câu trả lời đúng.",
+					"example": {
+						"question": "今天天气怎么样？",
+						"pinyin": "Jīntiān tiānqì zěnmeyàng?",
+						"meaning": "Hôm nay thời tiết thế nào?",
+						"correct_label": "A",
+						"options": [
+							{ "label": "A", "text": "非常热", "pinyin": "fēicháng rè", "meaning": "rất nóng" },
+							{
+								"label": "B",
+								"text": "很好听",
+								"pinyin": "hěn hǎotīng",
+								"meaning": "nghe rất hay"
+							},
+							{
+								"label": "C",
+								"text": "在喝水",
+								"pinyin": "zài hē shuǐ",
+								"meaning": "đang uống nước"
+							}
+						]
+					},
+					"questions": [
+						{
+							"number": 4,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "在吃药",
+									"pinyin": "zài chī yào",
+									"meaning": "đang uống thuốc"
+								},
+								{
+									"label": "B",
+									"text": "有点儿",
+									"pinyin": "yǒudiǎnr",
+									"meaning": "hơi, có một chút"
+								},
+								{
+									"label": "C",
+									"text": "不太好",
+									"pinyin": "bú tài hǎo",
+									"meaning": "không được khỏe lắm"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"answer": "B",
+							"options": [
+								{
+									"label": "A",
+									"text": "下雪了",
+									"pinyin": "xià xuě le",
+									"meaning": "tuyết rơi rồi"
+								},
+								{ "label": "B", "text": "太热了", "pinyin": "tài rè le", "meaning": "nóng quá" },
+								{
+									"label": "C",
+									"text": "不喝水",
+									"pinyin": "bù hē shuǐ",
+									"meaning": "không uống nước"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第6—8题：听对话，选择最匹配的图片。每题听两次。\nCâu 6–8: Nghe hội thoại và chọn hình phù hợp.",
+					"hide_example_image": true,
+					"example": {
+						"correct_label": "A",
+						"speakers": [
+							{ "gender": "nữ", "text": "你好！", "pinyin": "Nǐ hǎo!", "meaning": "Xin chào!" },
+							{
+								"gender": "nam",
+								"text": "你好！很高兴认识你。",
+								"pinyin": "Nǐ hǎo! Hěn gāoxìng rènshi nǐ.",
+								"meaning": "Xin chào! Rất vui được gặp bạn."
+							}
+						]
+					},
+					"questions": [
+						{ "number": 6, "answer": "D", "options": ["A", "B", "C", "D"] },
+						{ "number": 7, "answer": "C", "options": ["A", "B", "C", "D"] },
+						{ "number": 8, "answer": "B", "options": ["A", "B", "C", "D"] }
+					]
+				},
+				{
+					"part": "第四部分 - Phần 4",
+					"description": "第9—10题：听句子和问题，选择正确答案。每题听两次。\nCâu 9–10: Nghe và chọn đáp án đúng.",
+					"example": {
+						"sentence": "下午我去超市，我想买一些水果。",
+						"pinyin": "Xiàwǔ wǒ qù chāoshì, wǒ xiǎng mǎi yìxiē shuǐguǒ.",
+						"meaning": "Buổi chiều tôi đi siêu thị, tôi muốn mua một ít trái cây.",
+						"question": "说话人下午去哪里？",
+						"question_pinyin": "Shuōhuàrén xiàwǔ qù nǎlǐ?",
+						"question_meaning": "Buổi chiều người nói đi đâu?",
+						"correct_label": "A",
+						"options": [
+							{ "label": "A", "text": "超市", "pinyin": "chāoshì" },
+							{ "label": "B", "text": "医院", "pinyin": "yīyuàn" },
+							{ "label": "C", "text": "学校", "pinyin": "xuéxiào" }
+						]
+					},
+					"questions": [
+						{
+							"number": 9,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "看医生",
+									"pinyin": "kàn yīshēng",
+									"meaning": "đi khám bác sĩ"
+								},
+								{ "label": "B", "text": "看朋友", "pinyin": "kàn péngyou", "meaning": "thăm bạn" },
+								{
+									"label": "C",
+									"text": "看病人",
+									"pinyin": "kàn bìngrén",
+									"meaning": "thăm người bệnh"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"answer": "B",
+							"options": [
+								{ "label": "A", "text": "工作", "pinyin": "gōngzuò", "meaning": "làm việc" },
+								{ "label": "B", "text": "休息", "pinyin": "xiūxi", "meaning": "nghỉ ngơi" },
+								{ "label": "C", "text": "读书", "pinyin": "dúshū", "meaning": "đọc sách" }
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—13题：选择与句子最匹配的图片。\nCâu 11–13: Chọn hình ảnh phù hợp nhất với câu.",
+					"embedded_example_image": true,
+					"example": {
+						"sentence": "我很喜欢这本书。",
+						"pinyin": "Wǒ hěn xǐhuan zhè běn shū.",
+						"meaning": "Tôi rất thích cuốn sách này.",
+						"correct_label": "A",
+						"options": ["A", "B", "C", "D"]
+					},
+					"questions": [
+						{
+							"number": 11,
+							"answer": "D",
+							"sentence": "我女儿生病了。",
+							"pinyin": "Wǒ nǚ'ér shēngbìng le.",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 12,
+							"answer": "B",
+							"sentence": "今天天不太好，下雪了。",
+							"pinyin": "Jīntiān tiān bú tài hǎo, xià xuě le.",
+							"options": ["A", "B", "C", "D"]
+						},
+						{
+							"number": 13,
+							"answer": "C",
+							"sentence": "12:00了，你们怎么还在看电视？",
+							"pinyin": "Shí'èr diǎn le, nǐmen zěnme hái zài kàn diànshì?",
+							"options": ["A", "B", "C", "D"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第14—16题：匹配句子。\nCâu 14–16: Nối câu.",
+					"hide_images": true,
+					"options_pool": [
+						{ "label": "A", "text": "热水。", "pinyin": "Rè shuǐ." },
+						{ "label": "B", "text": "我病了。", "pinyin": "Wǒ bìng le." },
+						{ "label": "C", "text": "对。", "pinyin": "Duì." },
+						{ "label": "D", "text": "好的，谢谢！", "pinyin": "Hǎo de, xièxie!" }
+					],
+					"example": {
+						"question": "你喝水吗？",
+						"pinyin": "Nǐ hē shuǐ ma?",
+						"meaning": "Bạn có uống nước không?",
+						"correct_label": "D"
+					},
+					"questions": [
+						{ "number": 14, "answer": "B", "question": "你怎么了？", "pinyin": "Nǐ zěnme le?" },
+						{
+							"number": 15,
+							"answer": "A",
+							"question": "你想喝点儿什么？",
+							"pinyin": "Nǐ xiǎng hē diǎnr shénme?"
+						},
+						{ "number": 16, "answer": "C", "question": "你开车了？", "pinyin": "Nǐ kāichē le?" }
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第17—18题：选词填空。\nCâu 17–18: Chọn từ thích hợp điền vào chỗ trống.",
+					"hide_images": true,
+					"vocabulary": [
+						{ "word": "冷", "pinyin": "lěng" },
+						{ "word": "生病", "pinyin": "shēngbìng" },
+						{ "word": "名字", "pinyin": "míngzi" }
+					],
+					"example": {
+						"sentence": "你叫什么（ ）？",
+						"pinyin": "Nǐ jiào shénme ( )?",
+						"meaning": "Bạn tên là gì?",
+						"correct_label": "C"
+					},
+					"questions": [
+						{
+							"number": 17,
+							"answer": "B",
+							"sentence": "他（ ）了，没来上班。",
+							"pinyin": "Tā ( ) le, méi lái shàngbān.",
+							"options": [
+								{ "label": "A", "word": "冷", "pinyin": "lěng" },
+								{ "label": "B", "word": "生病", "pinyin": "shēngbìng" },
+								{ "label": "C", "word": "名字", "pinyin": "míngzi" }
+							]
+						},
+						{
+							"number": 18,
+							"answer": "A",
+							"sentence": "男：外边雨大吗？\n女：很大，我觉得有点儿（ ）。",
+							"pinyin": "Nán: Wàibian yǔ dà ma?\nNǚ: Hěn dà, wǒ juéde yǒudiǎnr ( ).",
+							"options": [
+								{ "label": "A", "word": "冷", "pinyin": "lěng" },
+								{ "label": "B", "word": "生病", "pinyin": "shēngbìng" },
+								{ "label": "C", "word": "名字", "pinyin": "míngzi" }
+							]
+						}
+					]
+				},
+				{
+					"part": "第四部分 - Phần 4",
+					"description": "第19—20题：选择正确答案。\nCâu 19–20: Chọn đáp án đúng.",
+					"hide_images": true,
+					"example": {
+						"sentence": "请问现在几点了？",
+						"pinyin": "Qǐngwèn xiànzài jǐ diǎn le?",
+						"meaning": "Xin hỏi bây giờ là mấy giờ rồi?",
+						"question": "说话人想知道什么？",
+						"question_pinyin": "Shuōhuàrén xiǎng zhīdào shénme?",
+						"question_meaning": "Người nói muốn biết điều gì?",
+						"correct_label": "A",
+						"options": [
+							{ "label": "A", "text": "时间", "pinyin": "shíjiān" },
+							{ "label": "B", "text": "名字", "pinyin": "míngzi" },
+							{ "label": "C", "text": "房间号", "pinyin": "fángjiānhào" }
+						]
+					},
+					"questions": [
+						{
+							"number": 19,
+							"answer": "A",
+							"sentence": "昨天的天气很好，我和朋友们去外边玩了。",
+							"pinyin": "Zuótiān de tiānqì hěn hǎo, wǒ hé péngyoumen qù wàibian wán le.",
+							"question": "说话人觉得昨天：",
+							"question_pinyin": "Shuōhuàrén juéde zuótiān:",
+							"options": [
+								{ "label": "A", "text": "天气好", "pinyin": "tiānqì hǎo" },
+								{ "label": "B", "text": "雨不大", "pinyin": "yǔ bú dà" },
+								{ "label": "C", "text": "有点儿冷", "pinyin": "yǒudiǎnr lěng" }
+							]
+						},
+						{
+							"number": 20,
+							"answer": "A",
+							"sentence": "老张去看病，医生说他要吃三天药。",
+							"pinyin": "Lǎo Zhāng qù kànbìng, yīshēng shuō tā yào chī sān tiān yào.",
+							"question": "医生说老张：",
+							"question_pinyin": "Yīshēng shuō Lǎo Zhāng:",
+							"options": [
+								{ "label": "A", "text": "要吃药", "pinyin": "yào chī yào" },
+								{ "label": "B", "text": "要多睡觉", "pinyin": "yào duō shuìjiào" },
+								{ "label": "C", "text": "要多喝水", "pinyin": "yào duō hē shuǐ" }
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

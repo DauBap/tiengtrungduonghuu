@@ -1,0 +1,220 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 11,
+  "label": "Bài 11",
+  "title": "用心发现世界",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "流利",
+      "pinyin": "liúlì",
+      "adj": 6,
+      "vi": "lưu loát, trôi chảy"
+    },
+    {
+      "pos": 2,
+      "hanzi": "厉害",
+      "pinyin": "lìhai",
+      "adj": 6,
+      "vi": "lợi hại"
+    },
+    {
+      "pos": 3,
+      "hanzi": "语法",
+      "pinyin": "yǔfǎ",
+      "adj": 2,
+      "vi": "ngữ pháp"
+    },
+    {
+      "pos": 4,
+      "hanzi": "准确",
+      "pinyin": "zhǔnquè",
+      "adj": 6,
+      "vi": "chính xác, đúng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "词语",
+      "pinyin": "cíyǔ",
+      "adj": 2,
+      "vi": "từ ngữ, cách diễn đạt"
+    },
+    {
+      "pos": 6,
+      "hanzi": "连",
+      "pinyin": "lián",
+      "adj": 13,
+      "vi": "ngay cả"
+    },
+    {
+      "pos": 7,
+      "hanzi": "阅读",
+      "pinyin": "yuèdú",
+      "adj": 4,
+      "vi": "đọc"
+    },
+    {
+      "pos": 8,
+      "hanzi": "来得及",
+      "pinyin": "láidejí",
+      "adj": 4,
+      "vi": "kịp, còn kịp"
+    },
+    {
+      "pos": 9,
+      "hanzi": "复杂",
+      "pinyin": "fùzá",
+      "adj": 6,
+      "vi": "phức tạp, rắc rối"
+    },
+    {
+      "pos": 10,
+      "hanzi": "只好",
+      "pinyin": "zhǐhǎo",
+      "adj": 7,
+      "vi": "đành phải, buộc phải"
+    },
+    {
+      "pos": 11,
+      "hanzi": "填空",
+      "pinyin": "tián kòng",
+      "adj": 4,
+      "vi": "vào chỗ trống"
+    },
+    {
+      "pos": 12,
+      "hanzi": "猜",
+      "pinyin": "cāi",
+      "adj": 4,
+      "vi": "đoán"
+    },
+    {
+      "pos": 13,
+      "hanzi": "否则",
+      "pinyin": "fǒuzé",
+      "adj": 10,
+      "vi": "nếu không thì, bằng không"
+    },
+    {
+      "pos": 14,
+      "hanzi": "客厅",
+      "pinyin": "kètīng",
+      "adj": 2,
+      "vi": "phòng khách"
+    },
+    {
+      "pos": 15,
+      "hanzi": "无论",
+      "pinyin": "wúlùn",
+      "adj": 10,
+      "vi": "bất kể"
+    },
+    {
+      "pos": 16,
+      "hanzi": "杂志",
+      "pinyin": "zázhì",
+      "adj": 2,
+      "vi": "tạp chí"
+    },
+    {
+      "pos": 17,
+      "hanzi": "著名",
+      "pinyin": "zhùmíng",
+      "adj": 6,
+      "vi": "nổi tiếng"
+    },
+    {
+      "pos": 18,
+      "hanzi": "页",
+      "pinyin": "yè",
+      "adj": 8,
+      "vi": "trang"
+    },
+    {
+      "pos": 19,
+      "hanzi": "增加",
+      "pinyin": "zēngjiā",
+      "adj": 4,
+      "vi": "tăng thêm"
+    },
+    {
+      "pos": 20,
+      "hanzi": "文章",
+      "pinyin": "wénzhāng",
+      "adj": 2,
+      "vi": "bài văn, bài báo"
+    },
+    {
+      "pos": 21,
+      "hanzi": "之",
+      "pinyin": "zhī",
+      "adj": 11,
+      "vi": "dùng để nối từ bổ nghĩa và từ được bổ nghĩa"
+    },
+    {
+      "pos": 22,
+      "hanzi": "内容",
+      "pinyin": "nèiróng",
+      "adj": 2,
+      "vi": "nội dung"
+    },
+    {
+      "pos": 23,
+      "hanzi": "然而",
+      "pinyin": "rán'ér",
+      "adj": 10,
+      "vi": "nhưng, song"
+    },
+    {
+      "pos": 24,
+      "hanzi": "看法",
+      "pinyin": "kànfǎ",
+      "adj": 2,
+      "vi": "quan điểm, cách nhìn"
+    },
+    {
+      "pos": 25,
+      "hanzi": "相同",
+      "pinyin": "xiāngtóng",
+      "adj": 6,
+      "vi": "giống nhau, như nhau"
+    },
+    {
+      "pos": 26,
+      "hanzi": "顺序",
+      "pinyin": "shùnxù",
+      "adj": 2,
+      "vi": "trật tự, thứ tự"
+    },
+    {
+      "pos": 27,
+      "hanzi": "表示",
+      "pinyin": "biǎoshì",
+      "adj": 4,
+      "vi": "có ý nghĩa, biểu thị"
+    },
+    {
+      "pos": 28,
+      "hanzi": "养成",
+      "pinyin": "yǎngchéng",
+      "adj": 4,
+      "vi": "hình thành/tạo (thói quen)"
+    },
+    {
+      "pos": 29,
+      "hanzi": "同时",
+      "pinyin": "tóngshí",
+      "adj": 10,
+      "vi": "đồng thời, hơn nữa"
+    },
+    {
+      "pos": 30,
+      "hanzi": "精彩",
+      "pinyin": "jīngcǎi",
+      "adj": 6,
+      "vi": "tuyệt vời, xuất sắc"
+    }
+  ]
+}

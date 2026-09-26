@@ -1,0 +1,426 @@
+{
+	"title": "HSK3 - Sách bài tập",
+	"lesson": 16,
+	"lesson_title": "我听说有的熊猫出国了",
+	"grading_pending": true,
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听对话，选择最匹配的图片。每题听两次。\nCâu 1–3: Nghe và chọn hình phù hợp. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 1,
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择正确答案。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 4,
+							"options": [
+								{
+									"label": "A",
+									"text": "初中"
+								},
+								{
+									"label": "B",
+									"text": "高中"
+								},
+								{
+									"label": "C",
+									"text": "大学"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"options": [
+								{
+									"label": "A",
+									"text": "不喜欢猫"
+								},
+								{
+									"label": "B",
+									"text": "没时间照顾它们"
+								},
+								{
+									"label": "C",
+									"text": "她在小猫咖啡馆工作"
+								}
+							]
+						},
+						{
+							"number": 6,
+							"options": [
+								{
+									"label": "A",
+									"text": "不安全"
+								},
+								{
+									"label": "B",
+									"text": "天气不好"
+								},
+								{
+									"label": "C",
+									"text": "动物太少"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听一段话，选择正确答案。每题听两次。\nCâu 7–10: Nghe đoạn thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 7,
+							"options": [
+								{
+									"label": "A",
+									"text": "不喜欢小动物"
+								},
+								{
+									"label": "B",
+									"text": "对动物很了解"
+								},
+								{
+									"label": "C",
+									"text": "在动物园工作"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"options": [
+								{
+									"label": "A",
+									"text": "非常可爱"
+								},
+								{
+									"label": "B",
+									"text": "吃得很少"
+								},
+								{
+									"label": "C",
+									"text": "不喜欢爬树"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"options": [
+								{
+									"label": "A",
+									"text": "只能住在中国"
+								},
+								{
+									"label": "B",
+									"text": "去过很多地方"
+								},
+								{
+									"label": "C",
+									"text": "喜欢它的人不多"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"options": [
+								{
+									"label": "A",
+									"text": "一年多"
+								},
+								{
+									"label": "B",
+									"text": "十多年"
+								},
+								{
+									"label": "C",
+									"text": "二十年"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—15题：匹配句子。\nCâu 11–15: Nối câu.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "一般来说，它吃饱了的话就睡觉了。"
+						},
+						{
+							"label": "B",
+							"text": "医院就在前面那条街上，带它去看看吧。"
+						},
+						{
+							"label": "C",
+							"text": "不是，这是我去中国西南看大熊猫的时候照的。"
+						},
+						{
+							"label": "D",
+							"text": "它一边动一边听，它能听见我们听不见的声音。"
+						},
+						{
+							"label": "E",
+							"text": "当然。我们先坐公交车，然后换地铁。"
+						},
+						{
+							"label": "F",
+							"text": "公园和动物园我都想去。"
+						}
+					],
+					"questions": [
+						{
+							"number": 11,
+							"answer": "C",
+							"question": "这张照片是在北京动物园照的吗？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 12,
+							"answer": "A",
+							"question": "你怎么知道它还想吃东西？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 13,
+							"answer": "B",
+							"question": "它看上去有点儿奇怪，半天没动了。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 14,
+							"answer": "F",
+							"question": "这个周末你想去哪儿玩？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 15,
+							"answer": "D",
+							"question": "这只小狗真可爱，它的耳朵为什么一直动？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第16—20题：选词填空。\nCâu 16–20: Chọn từ điền vào chỗ trống.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "其实"
+						},
+						{
+							"label": "B",
+							"text": "好像"
+						},
+						{
+							"label": "C",
+							"text": "关于"
+						},
+						{
+							"label": "D",
+							"text": "认得"
+						},
+						{
+							"label": "E",
+							"text": "鞋"
+						},
+						{
+							"label": "F",
+							"text": "身边"
+						}
+					],
+					"questions": [
+						{
+							"number": 16,
+							"answer": "A",
+							"sentence": "大家都以为他的工作不累，（ ）他每天早上五点多就起床，去照顾这些小动物。"
+						},
+						{
+							"number": 17,
+							"answer": "C",
+							"sentence": "我看了一个（ ）大熊猫的节目，现在非常想去动物园看大熊猫。"
+						},
+						{
+							"number": 18,
+							"answer": "F",
+							"sentence": "虽然我不能每天在它（ ），但是一有时间我就回家看它。"
+						},
+						{
+							"number": 19,
+							"answer": "B",
+							"sentence": "A：前面那只猫（ ）你家的猫。\nB：不是，那是我邻居的猫。"
+						},
+						{
+							"number": 20,
+							"answer": "D",
+							"sentence": "A：你家的狗看见你以后为什么一直叫？\nB：我离开家时间太久了，它已经不（ ）我了。"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第21—24题：选择正确答案。\nCâu 21–24: Đọc và chọn đáp án đúng.",
+					"embedded_example_image": true,
+					"shared_passage": "23–24\n\n丽丽发现她的小猫好像生病了，它一直在沙发上，不吃东西也不愿意动。丽丽很担心，决定带它去家附近的动物医院看看。到了医院门口，她才知道医院冬天比夏天早关门一个小时，现在医生都下班了。丽丽只能先把小猫带回家照顾，明天早上再带它去看医生。",
+					"shared_passage_start": 23,
+					"questions": [
+						{
+							"number": 21,
+							"answer": "C",
+							"sentence": "这几只小鸟现在什么都不会做，只会张着嘴等吃的，差不多一个星期以后才能用眼睛看这个世界。",
+							"question": "小鸟现在怎么样？",
+							"options": [
+								{
+									"label": "A",
+									"text": "会自己找吃的"
+								},
+								{
+									"label": "B",
+									"text": "能看清楚东西"
+								},
+								{
+									"label": "C",
+									"text": "只会等着吃东西"
+								}
+							]
+						},
+						{
+							"number": 22,
+							"answer": "C",
+							"sentence": "这种鱼很奇怪，嘴像鸟一样，长长的，还有两只大大的眼睛，它在水里游的时候，一会儿快一会儿慢，好像在做游戏。",
+							"question": "这种鱼：",
+							"options": [
+								{
+									"label": "A",
+									"text": "喜欢做游戏"
+								},
+								{
+									"label": "B",
+									"text": "游得一直很快"
+								},
+								{
+									"label": "C",
+									"text": "看起来很奇怪"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "C",
+							"question": "丽丽带小猫去医院时，发现：",
+							"options": [
+								{
+									"label": "A",
+									"text": "医生很忙"
+								},
+								{
+									"label": "B",
+									"text": "小猫病好了"
+								},
+								{
+									"label": "C",
+									"text": "医院关门了"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "B",
+							"question": "丽丽什么时候再带小猫去医院？",
+							"options": [
+								{
+									"label": "A",
+									"text": "今天晚上"
+								},
+								{
+									"label": "B",
+									"text": "明天早上"
+								},
+								{
+									"label": "C",
+									"text": "明天中午"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据拼音写汉字。\nCâu 25–27: Viết chữ Hán theo pinyin.",
+					"embedded_example_image": true,
+					"questions": [
+						{
+							"number": 25,
+							"type": "writing_input",
+							"sentence": "它已经吃（ ）了，现在在我脚边睡觉呢。",
+							"prompt_pinyin": "bǎo"
+						},
+						{
+							"number": 26,
+							"type": "writing_input",
+							"sentence": "我妹妹从小就喜欢小动（ ），她一直想养一条小狗。",
+							"prompt_pinyin": "wù"
+						},
+						{
+							"number": 27,
+							"type": "writing_input",
+							"sentence": "这只小鸟一直（ ）着嘴，等着吃东西。",
+							"prompt_pinyin": "zhāng"
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：看图，用词造句。\nCâu 28–30: Nhìn hình và dùng từ gợi ý đặt câu.",
+					"questions": [
+						{
+							"number": 28,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: （ ）脏"
+						},
+						{
+							"number": 29,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 脸"
+						},
+						{
+							"number": 30,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 照顾"
+						}
+					]
+				}
+			]
+		}
+	]
+}

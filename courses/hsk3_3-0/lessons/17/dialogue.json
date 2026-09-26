@@ -1,0 +1,164 @@
+{
+  "lesson": 17,
+  "title": "我要多向认真的人学习",
+  "title_pinyin": "Wǒ yào duō xiàng rènzhēn de rén xuéxí",
+  "title_vi": "Tôi phải học hỏi nhiều hơn từ người cẩn thận",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "刘小雪",
+          "zh": "别再向前走了, 李老师的办公室已经到了。",
+          "pinyin": "Bié zài xiàng qián zǒu le, Lǐ lǎoshī de bàngōngshì yǐjīng dào le.",
+          "vi": "Đừng đi về phía trước nữa, văn phòng của cô Lý đã đến rồi."
+        },
+        {
+          "speaker": "同学",
+          "zh": "你进去吧, 我在楼梯那儿等你。我害怕见李老师。",
+          "pinyin": "Nǐ jìnqu ba, wǒ zài lóutī nàr děng nǐ. Wǒ hàipà jiàn Lǐ lǎoshī.",
+          "vi": "Bạn vào đi, mình đợi bạn ở cầu thang. Mình sợ gặp cô Lý."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "怎么回事?",
+          "pinyin": "Zěnme huí shì?",
+          "vi": "Làm sao thế?"
+        },
+        {
+          "speaker": "同学",
+          "zh": "最近我做错了好几件事, 我怕李老师生气。",
+          "pinyin": "Zuìjìn wǒ zuò cuòle hǎo jǐ jiàn shì, wǒ pà Lǐ lǎoshī shēngqì.",
+          "vi": "Gần đây mình làm sai mấy việc, mình sợ cô Lý giận."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "你想多了, 做错事情是很常见的。",
+          "pinyin": "Nǐ xiǎng duō le, zuò cuò shìqing shì hěn chángjiàn de.",
+          "vi": "Bạn nghĩ nhiều quá rồi, làm sai việc là rất bình thường."
+        },
+        {
+          "speaker": "同学",
+          "zh": "我把简单的事情做错了, 李老师一定觉得我不认真。",
+          "pinyin": "Wǒ bǎ jiǎndān de shìqing zuò cuò le, Lǐ lǎoshī yīdìng juéde wǒ bú rènzhēn.",
+          "vi": "Mình làm sai việc đơn giản, cô Lý nhất định thấy mình không cẩn thận."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "有的人虽然很聪明, 但是会在简单的事情中出错, 因为他们认为事情简单, 就不会认真去做了。",
+          "pinyin": "Yǒu de rén suīrán hěn cōngmíng, dànshì huì zài jiǎndān de shìqing zhōng chūcuò, yīnwèi tāmen rènwéi shìqing jiǎndān, jiù bú huì rènzhēn qù zuò le.",
+          "vi": "Có người tuy rất thông minh, nhưng lại mắc sai lầm trong những việc đơn giản, vì họ cho rằng việc đơn giản thì sẽ không làm một cách nghiêm túc."
+        },
+        {
+          "speaker": "同学",
+          "zh": "你说的就是我, 以后我要多向认真的人学习。",
+          "pinyin": "Nǐ shuō de jiù shì wǒ, yǐhòu wǒ yào duō xiàng rènzhēn de rén xuéxí.",
+          "vi": "Bạn nói đúng là mình, sau này mình phải học hỏi nhiều hơn từ những người cẩn thận."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "太阳从西边出来了? 这几天怎么总是在图书馆看见你?",
+          "pinyin": "Tàiyáng cóng xībiān chūlái le? Zhè jǐ tiān zěnme zǒngshì zài túshūguǎn kànjiàn nǐ?",
+          "vi": "Mặt trời mọc từ phía tây rồi à? Mấy ngày nay sao cứ thấy cậu ở thư viện thế?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "这有什么奇怪的? 我是来学习的。",
+          "pinyin": "Zhè yǒu shénme qíguài de? Wǒ shì lái xuéxí de.",
+          "vi": "Có gì lạ đâu? Tôi đến học mà."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "你怎么还来图书馆学习? 同学们都在到处找工作呢。",
+          "pinyin": "Nǐ zěnme hái lái túshūguǎn xuéxí? Tóngxuémen dōu zài dàochù zhǎo gōngzuò ne.",
+          "vi": "Sao cậu vẫn đến thư viện học thế? Các bạn đều đang tìm việc làm khắp nơi đấy."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我不想现在就工作, 还想继续学习, 我爸妈也同意。可我没想好学什么, 所以来图书馆看看。",
+          "pinyin": "Wǒ bù xiǎng xiànzài jiù gōngzuò, hái xiǎng jìxù xuéxí, wǒ bà mā yě tóngyì. Kě wǒ méi xiǎng hǎo xué shénme, suǒyǐ lái túshūguǎn kànkan.",
+          "vi": "Tôi không muốn đi làm ngay, vẫn muốn tiếp tục học, bố mẹ tôi cũng đồng ý. Nhưng tôi chưa nghĩ ra học gì, nên đến thư viện xem."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "你不是喜欢玩电脑吗? 你可以去看看跟电脑有关系的书。",
+          "pinyin": "Nǐ bú shì xǐhuan wán diànnǎo ma? Nǐ kěyǐ qù kànkan gēn diànnǎo yǒu guānxi de shū.",
+          "vi": "Cậu không phải thích chơi máy tính à? Cậu có thể xem những sách liên quan đến máy tính."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "你说得对, 我记得那个屋子里有些跟电脑有关的书, 我去找找。",
+          "pinyin": "Nǐ shuō de duì, wǒ jìde nàge wūzi lǐ yǒuxiē gēn diànnǎo yǒuguān de shū, wǒ qù zhǎozhao.",
+          "vi": "Cậu nói đúng, tôi nhớ trong căn phòng đó có một số sách về máy tính, tôi đi tìm."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "天中, 你的手机怎么关机了?",
+          "pinyin": "Tiānzhōng, nǐ de shǒujī zěnme guānjī le?",
+          "vi": "Thiên Trung, điện thoại của cậu sao lại tắt máy rồi?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我的手机没电了。你找我有事吗?",
+          "pinyin": "Wǒ de shǒujī méi diàn le. Nǐ zhǎo wǒ yǒu shì ma?",
+          "vi": "Điện thoại của tôi hết pin rồi. Cậu tìm tôi có việc à?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "前天我看见家月了, 她告诉我你打算继续留学?",
+          "pinyin": "Qiántiān wǒ kànjiàn Jiāyuè le, tā gàosu wǒ nǐ dǎsuàn jìxù liúxué?",
+          "vi": "Hôm kia tớ gặp Gia Nguyệt, cậu ấy nói với tớ cậu định tiếp tục du học?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "是, 可是我还没想好学什么, 更没想好去哪个国家。",
+          "pinyin": "Shì, kěshì wǒ hái méi xiǎng hǎo xué shénme, gèng méi xiǎng hǎo qù nǎge guójiā.",
+          "vi": "Đúng, nhưng tôi chưa nghĩ ra học gì, càng chưa nghĩ ra đi nước nào."
+        },
+        {
+          "speaker": "李文",
+          "zh": "你可以去中国学中文啊。比如可以去北京、上海这样的大城市, 那里有很多好大学, 也有很多留学生。",
+          "pinyin": "Nǐ kěyǐ qù Zhōngguó xué Zhōngwén a. Bǐrú kěyǐ qù Běijīng, Shànghǎi zhèyàng de dà chéngshì, nàli yǒu hěnduō hǎo dàxué, yě yǒu hěnduō liúxuéshēng.",
+          "vi": "Cậu có thể đến Trung Quốc học tiếng Trung. Ví dụ như có thể đến Bắc Kinh, Thượng Hải, những thành phố lớn thế này, ở đó có nhiều trường đại học tốt, cũng có nhiều du học sinh."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "好, 那我上网查一查。",
+          "pinyin": "Hǎo, nà wǒ shàng wǎng chá yī chá.",
+          "vi": "Được, vậy tôi lên mạng tra thử."
+        },
+        {
+          "speaker": "李文",
+          "zh": "我给你介绍几个有用的网站。",
+          "pinyin": "Wǒ gěi nǐ jièshào jǐ gè yǒuyòng de wǎngzhàn.",
+          "vi": "Tớ giới thiệu cho cậu mấy trang web hữu ích."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "大学生活马上就要结束了, 我最近经常被问到一个问题——'你以后想做什么', 这个问题真不容易回答。我也问了几个同学, 大家选择的方向都不同。有的想继续在学校学习, 有的打算出国留学, 还有的决定先找工作。我认为只有想清楚自己真正喜欢什么, 才能做出最合适的选择。对我来说, 想清楚'真正喜欢什么'是个难题。",
+          "pinyin": "Dàxué shēnghuó mǎshàng jiù yào jiéshù le, wǒ zuìjìn jīngcháng bèi wèn dào yī gè wèntí——'nǐ yǐhòu xiǎng zuò shénme', zhège wèntí zhēn bù róngyì huídá. Wǒ yě wènle jǐ gè tóngxué, dàjiā xuǎnzé de fāngxiàng dōu bùtóng. Yǒu de xiǎng jìxù zài xuéxiào xuéxí, yǒu de dǎsuàn chūguó liúxué, hái yǒu de juédìng xiān zhǎo gōngzuò. Wǒ rènwéi zhǐyǒu xiǎng qīngchu zìjǐ zhēnzhèng xǐhuan shénme, cáinéng zuòchū zuì héshì de xuǎnzé. Duì wǒ lái shuō, xiǎng qīngchu 'zhēnzhèng xǐhuan shénme' shì gè nántí.",
+          "vi": "Cuộc sống đại học sắp kết thúc rồi, gần đây tôi thường bị hỏi một câu — 'sau này cậu muốn làm gì', câu hỏi này thực sự không dễ trả lời. Tôi cũng đã hỏi mấy bạn học, hướng chọn của mỗi người đều khác nhau. Có người muốn tiếp tục học ở trường, có người dự định du học, còn có người quyết định đi làm trước. Tôi cho rằng chỉ khi nghĩ rõ mình thực sự thích gì, mới có thể đưa ra lựa chọn phù hợp nhất. Đối với tôi, nghĩ rõ 'thực sự thích gì' là một vấn đề khó."
+        }
+      ]
+    }
+  ]
+}

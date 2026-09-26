@@ -1,0 +1,86 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 14,
+  "label": "Bài 14",
+  "title": "一个人过年多没意思啊",
+  "short_vi": "Bạn trai bay từ Trung Quốc sang thăm bạn gái ở nước ngoài; giới thiệu bạn bè với nhau; thăm nhà và trò chuyện về cuộc sống hàng ngày; đón Tết cùng nhau",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "站",
+      "pinyin": "zhàn",
+      "adj": 4,
+      "vi": "đứng"
+    },
+    {
+      "pos": 2,
+      "hanzi": "包",
+      "pinyin": "bāo",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "túi, bao / bao bọc"
+    },
+    {
+      "pos": 3,
+      "hanzi": "房子",
+      "pinyin": "fángzi",
+      "adj": 2,
+      "vi": "nhà, căn hộ"
+    },
+    {
+      "pos": 4,
+      "hanzi": "小孩儿",
+      "pinyin": "xiǎoháir",
+      "adj": 2,
+      "vi": "trẻ con"
+    },
+    {
+      "pos": 5,
+      "hanzi": "女孩儿",
+      "pinyin": "nǚháir",
+      "adj": 2,
+      "vi": "bé gái"
+    },
+    {
+      "pos": 6,
+      "hanzi": "跳舞",
+      "pinyin": "tiàowǔ",
+      "adj": 4,
+      "vi": "nhảy múa"
+    },
+    {
+      "pos": 7,
+      "hanzi": "眼睛",
+      "pinyin": "yǎnjing",
+      "adj": 2,
+      "vi": "mắt"
+    },
+    {
+      "pos": 8,
+      "hanzi": "姓",
+      "pinyin": "xìng",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "họ, mang họ"
+    },
+    {
+      "pos": 9,
+      "hanzi": "位",
+      "pinyin": "wèi",
+      "adj": 8,
+      "vi": "vị — lượng từ lịch sự dùng cho người"
+    },
+    {
+      "pos": 10,
+      "hanzi": "过年",
+      "pinyin": "guònián",
+      "adj": 4,
+      "vi": "đón năm mới, ăn Tết"
+    }
+  ]
+}

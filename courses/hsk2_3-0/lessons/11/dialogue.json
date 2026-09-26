@@ -1,0 +1,170 @@
+{
+  "lesson": 11,
+  "title": "我最喜欢吃中国菜",
+  "title_pinyin": "Wǒ zuì xǐhuan chī Zhōngguó cài",
+  "title_vi": "Tôi thích ăn đồ Trung Quốc nhất",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一飞",
+          "zh": "家月，都下课了，你怎么还不回家？",
+          "pinyin": "Jiāyuè, dōu xiàkè le, nǐ zěnme hái bù huí jiā?",
+          "vi": "Gia Nguyệt, tan học rồi mà sao bạn chưa về nhà?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我头疼，不太舒服。",
+          "pinyin": "Wǒ tóuténg, bú tài shūfu.",
+          "vi": "Em bị đau đầu, không được khỏe lắm."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "你这几天经常头疼，去医院看看吧。",
+          "pinyin": "Nǐ zhè jǐ tiān jīngcháng tóuténg, qù yīyuàn kànkan ba.",
+          "vi": "Mấy ngày nay em thường xuyên đau đầu, đi bệnh viện khám xem."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我想休息一下，现在不能动，一动就疼。",
+          "pinyin": "Wǒ xiǎng xiūxi yíxià, xiànzài bù néng dòng, yī dòng jiù téng.",
+          "vi": "Em muốn nghỉ một chút, bây giờ không thể di chuyển được, cử động một cái là đau."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "那你在这儿坐着，我去开车，一会儿送你去医院。",
+          "pinyin": "Nà nǐ zài zhèr zuòzhe, wǒ qù kāichē, yīhuìr sòng nǐ qù yīyuàn.",
+          "vi": "Vậy em ngồi đây, cô đi lấy xe, một lát đưa em đến bệnh viện."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "谢谢王老师。",
+          "pinyin": "Xièxie Wáng lǎoshī.",
+          "vi": "Cảm ơn cô Vương."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一飞",
+          "zh": "现在路上车多，还下着雪，我开慢一点儿。",
+          "pinyin": "Xiànzài lùshàng chē duō, hái xiàzhe xuě, wǒ kāi màn yìdiǎnr.",
+          "vi": "Đường bây giờ xe đông, lại đang có tuyết rơi, cô đi chậm một chút."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "没问题，现在头没那么疼了。",
+          "pinyin": "Méi wèntí, xiànzài tóu méi nàme téng le.",
+          "vi": "Không sao ạ, bây giờ đầu không đau đến thế nữa."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "好。李文来电话了，你帮我接一下。",
+          "pinyin": "Hǎo. Lǐ Wén lái diànhuà le, nǐ bāng wǒ jiē yíxià.",
+          "vi": "Tốt. Lý Văn gọi đến rồi, em giúp cô nghe máy nhé."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "喂，李文。王老师开着车呢，你找她有事吗？",
+          "pinyin": "Wèi, Lǐ Wén. Wáng lǎoshī kāizhe chē ne, nǐ zhǎo tā yǒu shì ma?",
+          "vi": "A lô, Lý Văn. Cô Vương đang lái xe đấy, cậu tìm cô có việc gì không?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "没什么事。今天雪这么大，你们开车去哪儿啊？",
+          "pinyin": "Méi shénme shì. Jīntiān xuě zhème dà, nǐmen kāichē qù nǎr a?",
+          "vi": "Không có việc gì. Hôm nay tuyết to thế này, các cô lái xe đi đâu đấy?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "去医院，我头有点儿疼。",
+          "pinyin": "Qù yīyuàn, wǒ tóu yǒudiǎnr téng.",
+          "vi": "Đi bệnh viện, tớ hơi đau đầu."
+        },
+        {
+          "speaker": "李文",
+          "zh": "那我一会儿去看看你。",
+          "pinyin": "Nà wǒ yīhuìr qù kànkan nǐ.",
+          "vi": "Vậy một lát tớ sang thăm cậu."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "李文，快请进！",
+          "pinyin": "Lǐ Wén, kuài qǐng jìn!",
+          "vi": "Lý Văn, mời mau vào!"
+        },
+        {
+          "speaker": "李文",
+          "zh": "家月，你怎么样了？头还疼吗？",
+          "pinyin": "Jiāyuè, nǐ zěnmeyàng le? Tóu hái téng ma?",
+          "vi": "Gia Nguyệt, cậu thế nào rồi? Đầu còn đau không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "不那么疼了。医生开了一些药，吃完就好多了。",
+          "pinyin": "Bù nàme téng le. Yīshēng kāile yīxiē yào, chī wán jiù hǎo duō le.",
+          "vi": "Không đau như thế nữa. Bác sĩ kê một ít thuốc, uống xong đã đỡ nhiều rồi."
+        },
+        {
+          "speaker": "李文",
+          "zh": "那就好！",
+          "pinyin": "Nà jiù hǎo!",
+          "vi": "Vậy thì tốt quá!"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "家月，你想不想吃点儿东西？",
+          "pinyin": "Jiāyuè, nǐ xiǎng bù xiǎng chī diǎnr dōngxi?",
+          "vi": "Gia Nguyệt, em có muốn ăn chút gì không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "吃点儿吧，身体不舒服时更要好好吃饭。",
+          "pinyin": "Chī diǎnr ba, shēntǐ bù shūfu shí gèng yào hǎohǎo chīfàn.",
+          "vi": "Ăn một chút đi ạ, lúc cơ thể không khỏe thì càng phải ăn uống đầy đủ."
+        },
+        {
+          "speaker": "李文",
+          "zh": "吃点儿什么呢？",
+          "pinyin": "Chī diǎnr shénme ne?",
+          "vi": "Ăn gì nhỉ?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "你最喜欢吃中国菜，我做几个中国菜吧。",
+          "pinyin": "Nǐ zuì xǐhuan chī Zhōngguó cài, wǒ zuò jǐ ge Zhōngguó cài ba.",
+          "vi": "Em thích ăn đồ Trung Quốc nhất, cô làm vài món đồ Trung Quốc nhé."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好的，谢谢王老师。",
+          "pinyin": "Hǎo de, xièxie Wáng lǎoshī.",
+          "vi": "Vâng ạ, cảm ơn cô Vương."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "我这几天经常头疼，从药店买了点儿药，没去医院。今天下课后，王老师看我不舒服，就送我去医院了。从医院回来，李文也来看我了。现在他们都回去了，我也要睡觉了。",
+          "pinyin": "Wǒ zhè jǐ tiān jīngcháng tóuténg, cóng yàodiàn mǎile diǎnr yào, méi qù yīyuàn. Jīntiān xiàkè hòu, Wáng lǎoshī kàn wǒ bù shūfu, jiù sòng wǒ qù yīyuàn le. Cóng yīyuàn huílái, Lǐ Wén yě lái kàn wǒ le. Xiànzài tāmen dōu huíqu le, wǒ yě yào shuìjiào le.",
+          "vi": "Mấy ngày nay tôi thường xuyên đau đầu, mua một ít thuốc ở hiệu thuốc, không đến bệnh viện. Hôm nay sau khi tan học, cô Vương thấy tôi không khỏe, liền đưa tôi đến bệnh viện. Từ bệnh viện về, Lý Văn cũng đến thăm tôi. Bây giờ họ đều về rồi, tôi cũng phải đi ngủ."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 12,
+  "label": "Bài 12",
+  "title": "用心发现世界",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "规定",
+      "pinyin": "guīdìng",
+      "adj": 2,
+      "vi": "quy định"
+    },
+    {
+      "pos": 2,
+      "hanzi": "死",
+      "pinyin": "sǐ",
+      "adj": 6,
+      "vi": "cố định, cứng nhắc"
+    },
+    {
+      "pos": 3,
+      "hanzi": "可惜",
+      "pinyin": "kěxī",
+      "adj": 6,
+      "vi": "đáng tiếc"
+    },
+    {
+      "pos": 4,
+      "hanzi": "全部",
+      "pinyin": "quánbù",
+      "adj": 2,
+      "vi": "toàn bộ, tất cả"
+    },
+    {
+      "pos": 5,
+      "hanzi": "也许",
+      "pinyin": "yěxǔ",
+      "adj": 7,
+      "vi": "có lẽ, may ra"
+    },
+    {
+      "pos": 6,
+      "hanzi": "商量",
+      "pinyin": "shāngliáng",
+      "adj": 4,
+      "vi": "thương lượng, bàn bạc"
+    },
+    {
+      "pos": 7,
+      "hanzi": "并且",
+      "pinyin": "bìngqiě",
+      "adj": 10,
+      "vi": "đồng thời, và"
+    },
+    {
+      "pos": 8,
+      "hanzi": "盐",
+      "pinyin": "yán",
+      "adj": 2,
+      "vi": "muối"
+    },
+    {
+      "pos": 9,
+      "hanzi": "勺(子)",
+      "pinyin": "sháo(zi)",
+      "adj": 2,
+      "vi": "cái muối, cái thìa"
+    },
+    {
+      "pos": 10,
+      "hanzi": "保护",
+      "pinyin": "bǎohù",
+      "adj": 4,
+      "vi": "bảo vệ"
+    },
+    {
+      "pos": 11,
+      "hanzi": "作用",
+      "pinyin": "zuòyòng",
+      "adj": 2,
+      "vi": "tác dụng"
+    },
+    {
+      "pos": 12,
+      "hanzi": "无法",
+      "pinyin": "wúfǎ",
+      "adj": 4,
+      "vi": "không thể, không có cách gì"
+    },
+    {
+      "pos": 13,
+      "hanzi": "节",
+      "pinyin": "jié",
+      "adj": 8,
+      "vi": "tiết (học)"
+    },
+    {
+      "pos": 14,
+      "hanzi": "详细",
+      "pinyin": "xiángxì",
+      "adj": 6,
+      "vi": "chi tiết, tỉ mỉ"
+    },
+    {
+      "pos": 15,
+      "hanzi": "解释",
+      "pinyin": "jiěshì",
+      "adj": 4,
+      "vi": "giải thích"
+    },
+    {
+      "pos": 16,
+      "hanzi": "对于",
+      "pinyin": "duìyú",
+      "adj": 13,
+      "vi": "đối với"
+    },
+    {
+      "pos": 17,
+      "hanzi": "叶子",
+      "pinyin": "yèzi",
+      "adj": 2,
+      "vi": "lá cây"
+    },
+    {
+      "pos": 18,
+      "hanzi": "教育",
+      "pinyin": "jiàoyù",
+      "adj": 4,
+      "vi": "giáo dục, dạy dỗ"
+    },
+    {
+      "pos": 19,
+      "hanzi": "使用",
+      "pinyin": "shǐyòng",
+      "adj": 4,
+      "vi": "sử dụng"
+    },
+    {
+      "pos": 20,
+      "hanzi": "语言",
+      "pinyin": "yǔyán",
+      "adj": 2,
+      "vi": "ngôn ngữ"
+    },
+    {
+      "pos": 21,
+      "hanzi": "直接",
+      "pinyin": "zhíjiē",
+      "adj": 6,
+      "vi": "trực tiếp, thẳng"
+    },
+    {
+      "pos": 22,
+      "hanzi": "引起",
+      "pinyin": "yǐnqǐ",
+      "adj": 4,
+      "vi": "gây ra, dẫn đến"
+    },
+    {
+      "pos": 23,
+      "hanzi": "误会",
+      "pinyin": "wùhuì",
+      "adj": 2,
+      "vi": "sự hiểu lầm"
+    },
+    {
+      "pos": 24,
+      "hanzi": "友好",
+      "pinyin": "yǒuhǎo",
+      "adj": 6,
+      "vi": "thân thiện"
+    },
+    {
+      "pos": 25,
+      "hanzi": "事半功倍",
+      "pinyin": "shì bàn gōng bèi",
+      "adj": 7,
+      "vi": "làm chơi ăn thật"
+    },
+    {
+      "pos": 26,
+      "hanzi": "节约",
+      "pinyin": "jiéyuē",
+      "adj": 4,
+      "vi": "tiết kiệm"
+    },
+    {
+      "pos": 27,
+      "hanzi": "力气",
+      "pinyin": "lìqi",
+      "adj": 2,
+      "vi": "sức lực, hơi sức"
+    },
+    {
+      "pos": 28,
+      "hanzi": "相反",
+      "pinyin": "xiāngfǎn",
+      "adj": 10,
+      "vi": "trái lại, ngược lại"
+    },
+    {
+      "pos": 29,
+      "hanzi": "任务",
+      "pinyin": "rènwu",
+      "adj": 2,
+      "vi": "nhiệm vụ"
+    },
+    {
+      "pos": 30,
+      "hanzi": "意见",
+      "pinyin": "yìjiàn",
+      "adj": 2,
+      "vi": "ý kiến"
+    },
+    {
+      "pos": 31,
+      "hanzi": "仔细",
+      "pinyin": "zǐxì",
+      "adj": 6,
+      "vi": "thận trọng, kỹ lưỡng"
+    },
+    {
+      "pos": 32,
+      "hanzi": "达到",
+      "pinyin": "dádào",
+      "adj": 4,
+      "vi": "đạt được"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "lesson": 3,
+  "title": "我想去西安旅游",
+  "title_pinyin": "Wǒ xiǎng qù Xī'ān lǚyóu",
+  "title_vi": "Tôi muốn đi du lịch Tây An",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "今天回来这么晚啊！",
+          "pinyin": "Jīntiān huílái zhème wǎn a!",
+          "vi": "Hôm nay về muộn thế đấy!"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "工作太多了，下班的时候没做完。",
+          "pinyin": "Gōngzuò tài duō le, xiàbān de shíhou méi zuò wán.",
+          "vi": "Công việc nhiều quá, lúc tan làm chưa làm xong."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "菜都做好了，过来吃饭吧。",
+          "pinyin": "Cài dōu zuò hǎo le, guòlái chīfàn ba.",
+          "vi": "Cơm canh đều đã làm xong rồi, qua ăn cơm đi."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我想休息一下，喝杯水。",
+          "pinyin": "Wǒ xiǎng xiūxi yíxià, hē bēi shuǐ.",
+          "vi": "Tôi muốn nghỉ một chút, uống cốc nước."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好的。",
+          "pinyin": "Hǎo de.",
+          "vi": "Được thôi."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "我们找个时间去旅游，怎么样？",
+          "pinyin": "Wǒmen zhǎo ge shíjiān qù lǚyóu, zěnmeyàng?",
+          "vi": "Chúng ta tìm thời gian đi du lịch, thế nào?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好啊，我也很想一起出去玩。",
+          "pinyin": "Hǎo a, wǒ yě hěn xiǎng yīqǐ chūqù wán.",
+          "vi": "Được đấy, tôi cũng rất muốn cùng đi chơi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你想去哪儿？",
+          "pinyin": "Nǐ xiǎng qù nǎr?",
+          "vi": "Anh muốn đi đâu?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我还没想好呢。",
+          "pinyin": "Wǒ hái méi xiǎng hǎo ne.",
+          "vi": "Tôi vẫn chưa nghĩ kỹ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "那你再想一想，你想好了，我来买票。",
+          "pinyin": "Nà nǐ zài xiǎng yī xiǎng, nǐ xiǎng hǎo le, wǒ lái mǎi piào.",
+          "vi": "Vậy anh suy nghĩ thêm đi, nghĩ kỹ rồi, em mua vé cho."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "吃个苹果吧，我都洗好了。",
+          "pinyin": "Chī ge píngguǒ ba, wǒ dōu xǐ hǎo le.",
+          "vi": "Ăn quả táo đi, tôi đều rửa sạch rồi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好的。",
+          "pinyin": "Hǎo de.",
+          "vi": "Vâng."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "就在桌子上，你自己拿。",
+          "pinyin": "Jiù zài zhuōzi shàng, nǐ zìjǐ ná.",
+          "vi": "Ở ngay trên bàn, em tự lấy nhé."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我去洗洗手。对了，我们去西安旅游，怎么样？",
+          "pinyin": "Wǒ qù xǐxi shǒu. Duìle, wǒmen qù Xī'ān lǚyóu, zěnmeyàng?",
+          "vi": "Em đi rửa tay đã. À này, chúng ta đi Tây An du lịch, thế nào?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "为什么想去西安？",
+          "pinyin": "Wèishénme xiǎng qù Xī'ān?",
+          "vi": "Tại sao lại muốn đi Tây An?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我看了看网上的介绍，这个时候去西安很不错！",
+          "pinyin": "Wǒ kànle kàn wǎngshàng de jièshào, zhège shíhou qù Xī'ān hěn búcuò!",
+          "vi": "Em xem giới thiệu trên mạng, thời điểm này đi Tây An rất tuyệt!"
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "早上，刘明开车送孩子去学校，送完孩子回家后，医院就来电话了，让他回去上班。我觉得他这个月每天都很累，真想让他休息休息。",
+          "pinyin": "Zǎoshang, Liú Míng kāichē sòng háizi qù xuéxiào, sòng wán háizi huí jiā hòu, yīyuàn jiù lái diànhuà le, ràng tā huíqu shàngbān. Wǒ juéde tā zhège yuè měitiān dōu hěn lèi, zhēn xiǎng ràng tā xiūxi xiūxi.",
+          "vi": "Buổi sáng, Lưu Minh lái xe đưa con đến trường, đưa con xong về nhà thì bệnh viện gọi điện, bảo anh ấy quay lại làm việc. Tôi thấy tháng này ngày nào anh ấy cũng rất mệt, thực sự muốn để anh ấy nghỉ ngơi một chút."
+        }
+      ]
+    }
+  ]
+}

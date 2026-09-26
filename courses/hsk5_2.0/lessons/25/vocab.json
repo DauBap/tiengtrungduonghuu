@@ -1,0 +1,293 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 25,
+  "label": "Bài 25",
+  "title": "给自己加满水",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "返航",
+      "pinyin": "fǎnháng",
+      "adj": 4,
+      "vi": "trở về địa điểm xuất phát (tàu thuyền, máy bay...)"
+    },
+    {
+      "pos": 2,
+      "hanzi": "恶劣",
+      "pinyin": "èliè",
+      "adj": 6,
+      "vi": "tồi tệ, rất xấu"
+    },
+    {
+      "pos": 3,
+      "hanzi": "可怕",
+      "pinyin": "kèpà",
+      "adj": 6,
+      "vi": "đáng sợ, khủng khiếp"
+    },
+    {
+      "pos": 4,
+      "hanzi": "风浪",
+      "pinyin": "fēnglàng",
+      "adj": 2,
+      "vi": "sóng gió"
+    },
+    {
+      "pos": 5,
+      "hanzi": "慌张",
+      "pinyin": "huāngzhāng",
+      "adj": 6,
+      "vi": "luống cuống, hoảng hốt"
+    },
+    {
+      "pos": 6,
+      "hanzi": "舱",
+      "pinyin": "cāng",
+      "adj": 2,
+      "vi": "khoang, buồng"
+    },
+    {
+      "pos": 7,
+      "hanzi": "使劲（儿）",
+      "pinyin": "shǐ jìn(r)",
+      "adj": 4,
+      "vi": "cố gắng, gắng sức"
+    },
+    {
+      "pos": 8,
+      "hanzi": "朝",
+      "pinyin": "cháo",
+      "adj": 13,
+      "vi": "về phía, hướng về"
+    },
+    {
+      "pos": 9,
+      "hanzi": "简直",
+      "pinyin": "jiǎnzhí",
+      "adj": 7,
+      "vi": "quả là, thật là"
+    },
+    {
+      "pos": 10,
+      "hanzi": "沉",
+      "pinyin": "chén",
+      "adj": 4,
+      "vi": "chìm, lặn"
+    },
+    {
+      "pos": 11,
+      "hanzi": "严肃",
+      "pinyin": "yánsù",
+      "adj": 6,
+      "vi": "nghiêm túc, nghiêm nghị, trang nghiêm"
+    },
+    {
+      "pos": 12,
+      "hanzi": "猛烈",
+      "pinyin": "měngliè",
+      "adj": 6,
+      "vi": "mạnh, dữ dội"
+    },
+    {
+      "pos": 13,
+      "hanzi": "狂",
+      "pinyin": "kuáng",
+      "adj": 6,
+      "vi": "mạnh, điên cuồng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "威胁",
+      "pinyin": "wēixié",
+      "adj": 4,
+      "vi": "uy hiếp, đe dọa"
+    },
+    {
+      "pos": 15,
+      "hanzi": "平衡",
+      "pinyin": "pínghéng",
+      "adj": 6,
+      "vi": "thăng bằng"
+    },
+    {
+      "pos": 16,
+      "hanzi": "吨",
+      "pinyin": "dūn",
+      "adj": 8,
+      "vi": "tấn"
+    },
+    {
+      "pos": 17,
+      "hanzi": "钢铁",
+      "pinyin": "gāngtiě",
+      "adj": 2,
+      "vi": "sắt thép"
+    },
+    {
+      "pos": 18,
+      "hanzi": "根基",
+      "pinyin": "gēnjī",
+      "adj": 2,
+      "vi": "nền tảng, nền móng"
+    },
+    {
+      "pos": 19,
+      "hanzi": "重量",
+      "pinyin": "zhòngliàng",
+      "adj": 2,
+      "vi": "trọng lượng"
+    },
+    {
+      "pos": 20,
+      "hanzi": "相似",
+      "pinyin": "xiāngsì",
+      "adj": 6,
+      "vi": "tương tự, giống nhau"
+    },
+    {
+      "pos": 21,
+      "hanzi": "风景",
+      "pinyin": "fēngjǐng",
+      "adj": 2,
+      "vi": "phong cảnh, cảnh vật"
+    },
+    {
+      "pos": 22,
+      "hanzi": "窄",
+      "pinyin": "zhǎi",
+      "adj": 6,
+      "vi": "chật, hẹp"
+    },
+    {
+      "pos": 23,
+      "hanzi": "万丈",
+      "pinyin": "wànzhǎng",
+      "adj": [
+        null,
+        2
+      ],
+      "vi": "cao ngất, muôn trượng"
+    },
+    {
+      "pos": 24,
+      "hanzi": "深渊",
+      "pinyin": "shēnyuān",
+      "adj": 2,
+      "vi": "vực sâu, vực thẳm"
+    },
+    {
+      "pos": 25,
+      "hanzi": "游览",
+      "pinyin": "yóulǎn",
+      "adj": 4,
+      "vi": "tham quan, dạo chơi"
+    },
+    {
+      "pos": 26,
+      "hanzi": "发抖",
+      "pinyin": "fādǒu",
+      "adj": 4,
+      "vi": "run, run rẩy"
+    },
+    {
+      "pos": 27,
+      "hanzi": "负重",
+      "pinyin": "fùzhòng",
+      "adj": 4,
+      "vi": "vác nặng"
+    },
+    {
+      "pos": 28,
+      "hanzi": "摔倒",
+      "pinyin": "shuāidǎo",
+      "adj": 4,
+      "vi": "ngã, té, rơi xuống"
+    },
+    {
+      "pos": 29,
+      "hanzi": "妇女",
+      "pinyin": "fùnǚ",
+      "adj": 2,
+      "vi": "phụ nữ"
+    },
+    {
+      "pos": 30,
+      "hanzi": "起",
+      "pinyin": "qǐ",
+      "adj": 8,
+      "vi": "vụ (việc)"
+    },
+    {
+      "pos": 31,
+      "hanzi": "丝毫",
+      "pinyin": "sīháo",
+      "adj": 6,
+      "vi": "chút nào, tí nào"
+    },
+    {
+      "pos": 32,
+      "hanzi": "滚",
+      "pinyin": "gǔn",
+      "adj": 4,
+      "vi": "lăn, lộn"
+    },
+    {
+      "pos": 33,
+      "hanzi": "风险",
+      "pinyin": "fēngxiǎn",
+      "adj": 2,
+      "vi": "sự mạo hiểm, sự nguy hiểm"
+    },
+    {
+      "pos": 34,
+      "hanzi": "谨慎",
+      "pinyin": "jǐnshèn",
+      "adj": 6,
+      "vi": "cẩn thận, thận trọng"
+    },
+    {
+      "pos": 35,
+      "hanzi": "效应",
+      "pinyin": "xiàoying",
+      "adj": 2,
+      "vi": "tác động, ảnh hưởng, hiệu ứng"
+    },
+    {
+      "pos": 36,
+      "hanzi": "胸",
+      "pinyin": "xiōng",
+      "adj": 2,
+      "vi": "ngực, lồng"
+    },
+    {
+      "pos": 37,
+      "hanzi": "承受",
+      "pinyin": "chéngshòu",
+      "adj": 4,
+      "vi": "chịu đựng, chấp nhận"
+    },
+    {
+      "pos": 38,
+      "hanzi": "和尚",
+      "pinyin": "héshang",
+      "adj": 2,
+      "vi": "hòa thượng"
+    },
+    {
+      "pos": 39,
+      "hanzi": "钟",
+      "pinyin": "zhōng",
+      "adj": 2,
+      "vi": "chuông"
+    },
+    {
+      "pos": 40,
+      "hanzi": "彻底",
+      "pinyin": "chèdǐ",
+      "adj": 6,
+      "vi": "triệt để, hoàn toàn"
+    }
+  ]
+}

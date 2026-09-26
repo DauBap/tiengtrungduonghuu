@@ -1,0 +1,269 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 36,
+  "label": "Bài 36",
+  "title": "老舍与养花",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "养",
+      "pinyin": "yǎng",
+      "adj": 4,
+      "vi": "nuôi, trồng"
+    },
+    {
+      "pos": 2,
+      "hanzi": "除非",
+      "pinyin": "chúfēi",
+      "adj": 10,
+      "vi": "trừ phi, chỉ với điều kiện là"
+    },
+    {
+      "pos": 3,
+      "hanzi": "奋斗",
+      "pinyin": "fèndòu",
+      "adj": 4,
+      "vi": "phấn đấu, cố gắng"
+    },
+    {
+      "pos": 4,
+      "hanzi": "乐趣",
+      "pinyin": "lèqù",
+      "adj": 2,
+      "vi": "niềm vui"
+    },
+    {
+      "pos": 5,
+      "hanzi": "在乎",
+      "pinyin": "zàihu",
+      "adj": 4,
+      "vi": "để ý đến, quan tâm đến"
+    },
+    {
+      "pos": 6,
+      "hanzi": "朵",
+      "pinyin": "duǒ",
+      "adj": 8,
+      "vi": "đóa, đám"
+    },
+    {
+      "pos": 7,
+      "hanzi": "剪刀",
+      "pinyin": "jiǎndāo",
+      "adj": 2,
+      "vi": "cái kéo"
+    },
+    {
+      "pos": 8,
+      "hanzi": "捡",
+      "pinyin": "jiǎn",
+      "adj": 4,
+      "vi": "nhặt, lượm"
+    },
+    {
+      "pos": 9,
+      "hanzi": "装饰",
+      "pinyin": "zhuāngshì",
+      "adj": 2,
+      "vi": "sự trang hoàng, đồ trang trí"
+    },
+    {
+      "pos": 10,
+      "hanzi": "结合",
+      "pinyin": "jiéhé",
+      "adj": 4,
+      "vi": "kết hợp"
+    },
+    {
+      "pos": 11,
+      "hanzi": "暴雨",
+      "pinyin": "bàoyǔ",
+      "adj": 2,
+      "vi": "mưa xối xả"
+    },
+    {
+      "pos": 12,
+      "hanzi": "紧急",
+      "pinyin": "jǐnjí",
+      "adj": 6,
+      "vi": "khẩn cấp, cấp bách"
+    },
+    {
+      "pos": 13,
+      "hanzi": "劳驾",
+      "pinyin": "láo jià",
+      "adj": 4,
+      "vi": "làm phiền, cảm phiền"
+    },
+    {
+      "pos": 14,
+      "hanzi": "抢救",
+      "pinyin": "qiǎngjiù",
+      "adj": 4,
+      "vi": "cứu"
+    },
+    {
+      "pos": 15,
+      "hanzi": "腰",
+      "pinyin": "yāo",
+      "adj": 2,
+      "vi": "eo, chỗ thắt lưng"
+    },
+    {
+      "pos": 16,
+      "hanzi": "直",
+      "pinyin": "zhí",
+      "adj": 7,
+      "vi": "không ngừng, liên tục"
+    },
+    {
+      "pos": 17,
+      "hanzi": "不然",
+      "pinyin": "bùrán",
+      "adj": 10,
+      "vi": "nếu không thì"
+    },
+    {
+      "pos": 18,
+      "hanzi": "回报",
+      "pinyin": "huíbào",
+      "adj": 4,
+      "vi": "báo đáp, đền đáp"
+    },
+    {
+      "pos": 19,
+      "hanzi": "真理",
+      "pinyin": "zhēnlǐ",
+      "adj": 2,
+      "vi": "chân lý"
+    },
+    {
+      "pos": 20,
+      "hanzi": "浇",
+      "pinyin": "jiāo",
+      "adj": 4,
+      "vi": "tưới, đội, đổ"
+    },
+    {
+      "pos": 21,
+      "hanzi": "潮湿",
+      "pinyin": "cháoshī",
+      "adj": 6,
+      "vi": "ẩm ướt, ẩm thấp, ướt"
+    },
+    {
+      "pos": 22,
+      "hanzi": "施肥",
+      "pinyin": "shī féi",
+      "adj": 4,
+      "vi": "bón phân"
+    },
+    {
+      "pos": 23,
+      "hanzi": "熟练",
+      "pinyin": "shúliàn",
+      "adj": 6,
+      "vi": "thuần thục, thông thạo"
+    },
+    {
+      "pos": 24,
+      "hanzi": "应付",
+      "pinyin": "yìngfu",
+      "adj": 4,
+      "vi": "ứng phó, đối phó"
+    },
+    {
+      "pos": 25,
+      "hanzi": "鲜艳",
+      "pinyin": "xiānyàn",
+      "adj": 6,
+      "vi": "tươi đẹp"
+    },
+    {
+      "pos": 26,
+      "hanzi": "自豪",
+      "pinyin": "zìháo",
+      "adj": 6,
+      "vi": "tự hào, hãnh diện"
+    },
+    {
+      "pos": 27,
+      "hanzi": "吹",
+      "pinyin": "chuī",
+      "adj": 4,
+      "vi": "khoe khoang, khoác lác"
+    },
+    {
+      "pos": 28,
+      "hanzi": "爱心",
+      "pinyin": "àixīn",
+      "adj": 2,
+      "vi": "lòng yêu thương, lòng trắc ẩn"
+    },
+    {
+      "pos": 29,
+      "hanzi": "分享",
+      "pinyin": "fēnxiǎng",
+      "adj": 4,
+      "vi": "chia sẻ"
+    },
+    {
+      "pos": 30,
+      "hanzi": "昙花",
+      "pinyin": "tánhuā",
+      "adj": 2,
+      "vi": "hoa quỳnh"
+    },
+    {
+      "pos": 31,
+      "hanzi": "庆祝",
+      "pinyin": "qìngzhù",
+      "adj": 4,
+      "vi": "chúc mừng"
+    },
+    {
+      "pos": 32,
+      "hanzi": "保留",
+      "pinyin": "bǎoliú",
+      "adj": 4,
+      "vi": "giữ lại, để lại, bảo tồn"
+    },
+    {
+      "pos": 33,
+      "hanzi": "菊花",
+      "pinyin": "júhuā",
+      "adj": 2,
+      "vi": "cây hoa cúc, hoa cúc"
+    },
+    {
+      "pos": 34,
+      "hanzi": "砸",
+      "pinyin": "zá",
+      "adj": 4,
+      "vi": "đè nát, đè bẹp, đập"
+    },
+    {
+      "pos": 35,
+      "hanzi": "悲（伤）",
+      "pinyin": "bēi(shāng)",
+      "adj": 6,
+      "vi": "đau khổ, buồn phiền"
+    },
+    {
+      "pos": 36,
+      "hanzi": "反正",
+      "pinyin": "fǎnzhèng",
+      "adj": 7,
+      "vi": "(được dùng để chỉ kết quả như nhau bất chấp các tình huống khác nhau) dù sao cũng, dù thế nào đi nữa (cũng)"
+    },
+    {
+      "pos": 37,
+      "hanzi": "热爱",
+      "pinyin": "rè'ài",
+      "adj": 4,
+      "vi": "yêu tha thiết"
+    }
+  ]
+}

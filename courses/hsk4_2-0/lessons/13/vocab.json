@@ -1,0 +1,234 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 13,
+  "label": "Bài 13",
+  "title": "喝着茶看京剧",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "京剧",
+      "pinyin": "jīngjù",
+      "adj": 2,
+      "vi": "Kinh kịch"
+    },
+    {
+      "pos": 2,
+      "hanzi": "演员",
+      "pinyin": "yǎnyuán",
+      "adj": 2,
+      "vi": "diễn viên"
+    },
+    {
+      "pos": 3,
+      "hanzi": "观众",
+      "pinyin": "guānzhòng",
+      "adj": 2,
+      "vi": "khán giả"
+    },
+    {
+      "pos": 4,
+      "hanzi": "厚",
+      "pinyin": "hòu",
+      "adj": 6,
+      "vi": "dày, sâu nặng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "演出",
+      "pinyin": "yǎnchū",
+      "adj": 4,
+      "vi": "biểu diễn"
+    },
+    {
+      "pos": 6,
+      "hanzi": "大概",
+      "pinyin": "dàgài",
+      "adj": 7,
+      "vi": "khoảng chừng, có lẽ"
+    },
+    {
+      "pos": 7,
+      "hanzi": "来自",
+      "pinyin": "láizì",
+      "adj": 4,
+      "vi": "đến từ"
+    },
+    {
+      "pos": 8,
+      "hanzi": "遍",
+      "pinyin": "biàn",
+      "adj": 8,
+      "vi": "(hành động từ đầu đến cuối) lần, lượt"
+    },
+    {
+      "pos": 9,
+      "hanzi": "偶尔",
+      "pinyin": "ǒu'ěr",
+      "adj": 7,
+      "vi": "thỉnh thoảng"
+    },
+    {
+      "pos": 10,
+      "hanzi": "吃惊",
+      "pinyin": "chī jīng",
+      "adj": 4,
+      "vi": "kinh ngạc"
+    },
+    {
+      "pos": 11,
+      "hanzi": "基础",
+      "pinyin": "jīchǔ",
+      "adj": 2,
+      "vi": "nền tảng, căn bản"
+    },
+    {
+      "pos": 12,
+      "hanzi": "表演",
+      "pinyin": "biǎoyǎn",
+      "adj": 4,
+      "vi": "biểu diễn, trình diễn"
+    },
+    {
+      "pos": 13,
+      "hanzi": "正常",
+      "pinyin": "zhèngcháng",
+      "adj": 6,
+      "vi": "bình thường, thông thường"
+    },
+    {
+      "pos": 14,
+      "hanzi": "申请",
+      "pinyin": "shēnqǐng",
+      "adj": 4,
+      "vi": "xin"
+    },
+    {
+      "pos": 15,
+      "hanzi": "有趣",
+      "pinyin": "yǒuqù",
+      "adj": 6,
+      "vi": "thú vị, lý thú"
+    },
+    {
+      "pos": 16,
+      "hanzi": "开心",
+      "pinyin": "kāixīn",
+      "adj": 6,
+      "vi": "vui vẻ"
+    },
+    {
+      "pos": 17,
+      "hanzi": "继续",
+      "pinyin": "jìxù",
+      "adj": 4,
+      "vi": "tiếp tục"
+    },
+    {
+      "pos": 18,
+      "hanzi": "由",
+      "pinyin": "yóu",
+      "adj": 13,
+      "vi": "do"
+    },
+    {
+      "pos": 19,
+      "hanzi": "讨论",
+      "pinyin": "tǎolùn",
+      "adj": 4,
+      "vi": "thảo luận, bàn bạc"
+    },
+    {
+      "pos": 20,
+      "hanzi": "大约",
+      "pinyin": "dàyuē",
+      "adj": 7,
+      "vi": "khoảng chừng, ước chừng"
+    },
+    {
+      "pos": 21,
+      "hanzi": "餐厅",
+      "pinyin": "cāntīng",
+      "adj": 2,
+      "vi": "nhà hàng"
+    },
+    {
+      "pos": 22,
+      "hanzi": "纸袋",
+      "pinyin": "zhǐdài",
+      "adj": 2,
+      "vi": "túi giấy"
+    },
+    {
+      "pos": 23,
+      "hanzi": "互联网",
+      "pinyin": "hùliánwǎng",
+      "adj": 2,
+      "vi": "mạng Internet"
+    },
+    {
+      "pos": 24,
+      "hanzi": "进行",
+      "pinyin": "jìnxíng",
+      "adj": 4,
+      "vi": "tiến hành, thực hiện"
+    },
+    {
+      "pos": 25,
+      "hanzi": "错误",
+      "pinyin": "cuòwù",
+      "adj": 6,
+      "vi": "sai"
+    },
+    {
+      "pos": 26,
+      "hanzi": "随着",
+      "pinyin": "suízhe",
+      "adj": 13,
+      "vi": "cùng với"
+    },
+    {
+      "pos": 27,
+      "hanzi": "十分",
+      "pinyin": "shífēn",
+      "adj": 7,
+      "vi": "rất, vô cùng"
+    },
+    {
+      "pos": 28,
+      "hanzi": "普遍",
+      "pinyin": "pǔbiàn",
+      "adj": 6,
+      "vi": "phổ biến"
+    },
+    {
+      "pos": 29,
+      "hanzi": "部分",
+      "pinyin": "bùfen",
+      "adj": 2,
+      "vi": "phần, bộ phận"
+    },
+    {
+      "pos": 30,
+      "hanzi": "稍微",
+      "pinyin": "shāowēi",
+      "adj": 7,
+      "vi": "hơi"
+    },
+    {
+      "pos": 31,
+      "hanzi": "苦",
+      "pinyin": "kǔ",
+      "adj": 6,
+      "vi": "đắng"
+    },
+    {
+      "pos": 32,
+      "hanzi": "省",
+      "pinyin": "shěng",
+      "adj": 2,
+      "vi": "tỉnh"
+    }
+  ]
+}

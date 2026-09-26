@@ -1,0 +1,243 @@
+import type { GrammarExercise, GrammarLesson } from "./types";
+
+type Row = {
+	id: string;
+	zh: string;
+	vi: string;
+	tokens: string[];
+	wrong: [string, string];
+	note: string;
+};
+const exercises = (prefix: string, rows: Row[]): GrammarExercise[] => [
+	{
+		id: `${prefix}-choice`,
+		title: "1. Chọn đáp án đúng",
+		type: "choice",
+		questions: rows.map((r, i) => {
+			const options: [string, string, string] =
+				i % 3 === 0
+					? [r.zh, ...r.wrong]
+					: i % 3 === 1
+						? [r.wrong[0], r.zh, r.wrong[1]]
+						: [...r.wrong, r.zh];
+			return {
+				id: `${r.id}c`,
+				prompt: `Chọn câu đúng: “${r.vi}”`,
+				answer: r.zh,
+				options,
+				completedSentence: r.zh,
+				meaning: r.vi,
+				explanation: r.note,
+				optionExplanations: Object.fromEntries(
+					options.map((o) => [
+						o,
+						o === r.zh
+							? `Đúng: ${r.note}`
+							: "Sai: vị trí tân ngữ hoặc thành phần chênh lệch không đúng."
+					])
+				)
+			};
+		})
+	},
+	{
+		id: `${prefix}-arrange`,
+		title: "2. Sắp xếp từ thành câu",
+		type: "arrange",
+		questions: rows.map((r) => ({
+			id: `${r.id}a`,
+			prompt: r.vi,
+			answer: r.zh,
+			tokens: r.tokens,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	},
+	{
+		id: `${prefix}-translate`,
+		title: "3. Dịch Việt sang Trung",
+		type: "input",
+		questions: rows.map((r) => ({
+			id: `${r.id}t`,
+			prompt: r.vi,
+			answer: r.zh,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	}
+];
+
+export const hsk2Lesson13Grammar: GrammarLesson = {
+	title: "BÀI 13: 我们爱上中文课",
+	points: [
+		{
+			id: "double-object-gei",
+			title: "Câu có hai tân ngữ (2) – Động từ + 给 + người + vật",
+			explanation:
+				"Với các động từ như 拿、送、卖, “给” dẫn người nhận. Tân ngữ chỉ người đứng trước, tân ngữ chỉ vật đứng sau.",
+			formulas: [
+				"Chủ ngữ + 拿/送/卖 + 给 + người + vật",
+				"Động từ + 给 + tân ngữ người + tân ngữ vật"
+			],
+			examples: [
+				{ chinese: "就送给她花吧。", vietnamese: "Cứ tặng hoa cho cô ấy đi." },
+				{ chinese: "请拿给我那支笔。", vietnamese: "Hãy đưa cho tôi cây bút kia." }
+			],
+			notes: ["Sau 给 phải là người nhận; vật được đưa, tặng hoặc bán đứng sau người nhận."],
+			exercises: exercises("h2l13-double", [
+				{
+					id: "d1",
+					zh: "就送给她花吧",
+					vi: "Cứ tặng hoa cho cô ấy đi.",
+					tokens: ["花", "送", "吧", "她", "就", "给"],
+					wrong: ["就送给花她吧", "就给送她花吧"],
+					note: "送给 + người 她 + vật 花."
+				},
+				{
+					id: "d2",
+					zh: "请拿给我那支笔",
+					vi: "Hãy đưa cho tôi cây bút kia.",
+					tokens: ["那支笔", "拿", "请", "我", "给"],
+					wrong: ["请拿给那支笔我", "请给拿我那支笔"],
+					note: "拿给 + người 我 + vật 那支笔."
+				},
+				{
+					id: "d3",
+					zh: "他卖给我一本书",
+					vi: "Anh ấy bán cho tôi một quyển sách.",
+					tokens: ["我", "一本书", "他", "卖", "给"],
+					wrong: ["他卖给一本书我", "他给卖我一本书"],
+					note: "卖给 + người 我 + vật 一本书."
+				},
+				{
+					id: "d4",
+					zh: "我送给老师一束花",
+					vi: "Tôi tặng giáo viên một bó hoa.",
+					tokens: ["一束花", "老师", "给", "我", "送"],
+					wrong: ["我送给一束花老师", "我给送老师一束花"],
+					note: "老师 là người nhận; 一束花 là vật."
+				},
+				{
+					id: "d5",
+					zh: "请拿给他这个本子",
+					vi: "Hãy đưa cho anh ấy quyển vở này.",
+					tokens: ["他", "这个本子", "请", "给", "拿"],
+					wrong: ["请拿给这个本子他", "请给拿他这个本子"],
+					note: "Tân ngữ người 他 đứng trước tân ngữ vật."
+				}
+			])
+		},
+		{
+			id: "exact-difference",
+			title: "Câu so sánh (7) – Chỉ mức chênh lệch cụ thể",
+			explanation:
+				"Sau tính từ trong câu so sánh với “比” có thể thêm cụm số lượng để nói rõ chênh lệch bao nhiêu. Với một số câu thay đổi số lượng, thường dùng “多了/少了 + số lượng”.",
+			formulas: ["A + 比 + B + tính từ + số lượng", "A + 比 + B + 多/少 + 了 + số lượng"],
+			examples: [
+				{ chinese: "今天的词比昨天多了十个。", vietnamese: "Từ hôm nay nhiều hơn hôm qua 10 từ." },
+				{ chinese: "他比我高十厘米。", vietnamese: "Anh ấy cao hơn tôi 10 xentimét." }
+			],
+			notes: ["Cụm số lượng cụ thể đứng sau tính từ, không đặt trước tính từ."],
+			exercises: exercises("h2l13-exact", [
+				{
+					id: "e1",
+					zh: "今天的词比昨天多了十个",
+					vi: "Từ hôm nay nhiều hơn hôm qua 10 từ.",
+					tokens: ["多了", "昨天", "十个", "今天的词", "比"],
+					wrong: ["今天的词比昨天十个多了", "今天的词十个比昨天多了"],
+					note: "多了 + 十个 đứng sau hai đối tượng so sánh."
+				},
+				{
+					id: "e2",
+					zh: "他比我高十厘米",
+					vi: "Anh ấy cao hơn tôi 10 xentimét.",
+					tokens: ["我", "十厘米", "他", "比", "高"],
+					wrong: ["他比我十厘米高", "他十厘米比我高"],
+					note: "Cụm chênh lệch 十厘米 đứng sau 高."
+				},
+				{
+					id: "e3",
+					zh: "这个班比那个班多五个人",
+					vi: "Lớp này nhiều hơn lớp kia 5 người.",
+					tokens: ["五个人", "那个班", "这个班", "多", "比"],
+					wrong: ["这个班比那个班五个人多", "这个班五个人比那个班多"],
+					note: "多 + 五个人 biểu thị chênh lệch cụ thể."
+				},
+				{
+					id: "e4",
+					zh: "今天比昨天冷五度",
+					vi: "Hôm nay lạnh hơn hôm qua 5 độ.",
+					tokens: ["冷", "比", "昨天", "五度", "今天"],
+					wrong: ["今天比昨天五度冷", "今天五度比昨天冷"],
+					note: "五度 đứng sau tính từ 冷."
+				},
+				{
+					id: "e5",
+					zh: "这座楼比那座高二十米",
+					vi: "Tòa nhà này cao hơn tòa kia 20 mét.",
+					tokens: ["二十米", "高", "那座", "比", "这座楼"],
+					wrong: ["这座楼比那座二十米高", "这座楼二十米比那座高"],
+					note: "二十米 là mức chênh lệch, đứng sau 高."
+				}
+			])
+		},
+		{
+			id: "small-difference",
+			title: "Câu so sánh (8) – Chênh lệch nhỏ với “一点儿/一些”",
+			explanation:
+				"“一点儿” hoặc “一些” đặt sau tính từ để biểu thị mức chênh lệch nhỏ. “一点儿” thường nhấn một chút; “一些” có nghĩa rộng hơn là một ít.",
+			formulas: ["A + 比 + B + tính từ + 一点儿", "A + 比 + B + tính từ + 一些"],
+			examples: [
+				{
+					chinese: "这个本子比那个贵一点儿。",
+					vietnamese: "Quyển vở này đắt hơn quyển kia một chút."
+				},
+				{ chinese: "今天比昨天冷一些。", vietnamese: "Hôm nay lạnh hơn hôm qua một chút." }
+			],
+			notes: ["一点儿/一些 đứng sau tính từ, không chen giữa “比” và đối tượng B."],
+			exercises: exercises("h2l13-small", [
+				{
+					id: "s1",
+					zh: "这个本子比那个贵一点儿",
+					vi: "Quyển vở này đắt hơn quyển kia một chút.",
+					tokens: ["贵", "一点儿", "那个", "这个本子", "比"],
+					wrong: ["这个本子比那个一点儿贵", "这个本子一点儿比那个贵"],
+					note: "贵 + 一点儿 đứng cuối câu."
+				},
+				{
+					id: "s2",
+					zh: "今天比昨天冷一些",
+					vi: "Hôm nay lạnh hơn hôm qua một chút.",
+					tokens: ["昨天", "冷", "一些", "今天", "比"],
+					wrong: ["今天比昨天一些冷", "今天一些比昨天冷"],
+					note: "冷 + 一些 biểu thị chênh lệch nhỏ."
+				},
+				{
+					id: "s3",
+					zh: "这个班比那个班大一点儿",
+					vi: "Lớp này lớn hơn lớp kia một chút.",
+					tokens: ["大", "那个班", "一点儿", "比", "这个班"],
+					wrong: ["这个班比那个班一点儿大", "这个班一点儿比那个班大"],
+					note: "一点儿 đứng sau tính từ 大."
+				},
+				{
+					id: "s4",
+					zh: "这支笔比那支长一些",
+					vi: "Cây bút này dài hơn cây kia một chút.",
+					tokens: ["比", "一些", "那支", "长", "这支笔"],
+					wrong: ["这支笔比那支一些长", "这支笔一些比那支长"],
+					note: "长 + 一些."
+				},
+				{
+					id: "s5",
+					zh: "今天的词比昨天难一点儿",
+					vi: "Từ hôm nay khó hơn hôm qua một chút.",
+					tokens: ["难", "昨天", "比", "一点儿", "今天的词"],
+					wrong: ["今天的词比昨天一点儿难", "今天的词一点儿比昨天难"],
+					note: "难 + 一点儿 đứng sau cấu trúc A 比 B."
+				}
+			])
+		}
+	]
+};

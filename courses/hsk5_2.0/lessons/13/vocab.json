@@ -1,0 +1,274 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 13,
+  "label": "Bài 13",
+  "title": " 锯掉生活的\"筐底\"",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "锯（子）",
+      "pinyin": "jù(zi)",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "cưa; cái cưa"
+    },
+    {
+      "pos": 2,
+      "hanzi": "筐",
+      "pinyin": "kuāng",
+      "adj": 2,
+      "vi": "giỏ, sọt"
+    },
+    {
+      "pos": 3,
+      "hanzi": "训练",
+      "pinyin": "xùnliàn",
+      "adj": 4,
+      "vi": "huấn luyện"
+    },
+    {
+      "pos": 4,
+      "hanzi": "缺乏",
+      "pinyin": "quēfá",
+      "adj": 4,
+      "vi": "thiếu, không đủ"
+    },
+    {
+      "pos": 5,
+      "hanzi": "项目",
+      "pinyin": "xiàngmù",
+      "adj": 2,
+      "vi": "hạng mục"
+    },
+    {
+      "pos": 6,
+      "hanzi": "桃",
+      "pinyin": "táo",
+      "adj": 2,
+      "vi": "(trái) đào"
+    },
+    {
+      "pos": 7,
+      "hanzi": "装",
+      "pinyin": "zhuāng",
+      "adj": 4,
+      "vi": "đựng, để vào"
+    },
+    {
+      "pos": 8,
+      "hanzi": "启发",
+      "pinyin": "qǐfā",
+      "adj": 4,
+      "vi": "gợi ý"
+    },
+    {
+      "pos": 9,
+      "hanzi": "安装",
+      "pinyin": "ānzhuāng",
+      "adj": 4,
+      "vi": "lắp đặt, gắn"
+    },
+    {
+      "pos": 10,
+      "hanzi": "栏杆",
+      "pinyin": "lángān",
+      "adj": 2,
+      "vi": "hàng lan can"
+    },
+    {
+      "pos": 11,
+      "hanzi": "甲",
+      "pinyin": "jiǎ",
+      "adj": 2,
+      "vi": "người (đội) thứ nhất"
+    },
+    {
+      "pos": 12,
+      "hanzi": "乙",
+      "pinyin": "yǐ",
+      "adj": 2,
+      "vi": "người (đội) thứ hai"
+    },
+    {
+      "pos": 13,
+      "hanzi": "工具",
+      "pinyin": "gōngjù",
+      "adj": 2,
+      "vi": "công cụ"
+    },
+    {
+      "pos": 14,
+      "hanzi": "投篮",
+      "pinyin": "tóu lán",
+      "adj": 4,
+      "vi": "ném bóng vào rổ"
+    },
+    {
+      "pos": 15,
+      "hanzi": "踩",
+      "pinyin": "cǎi",
+      "adj": 4,
+      "vi": "giẫm, đạp"
+    },
+    {
+      "pos": 16,
+      "hanzi": "一再",
+      "pinyin": "yízài",
+      "adj": 7,
+      "vi": "nhiều lần, hết lần này đến lần khác"
+    },
+    {
+      "pos": 17,
+      "hanzi": "重复",
+      "pinyin": "chóngfù",
+      "adj": 4,
+      "vi": "lặp lại"
+    },
+    {
+      "pos": 18,
+      "hanzi": "断断续续",
+      "pinyin": "duànduàn xùxù",
+      "adj": 6,
+      "vi": "không liên tục, gián đoạn"
+    },
+    {
+      "pos": 19,
+      "hanzi": "激烈",
+      "pinyin": "jīliè",
+      "adj": 6,
+      "vi": "kịch liệt, sôi nổi"
+    },
+    {
+      "pos": 20,
+      "hanzi": "气氛",
+      "pinyin": "qìfēn",
+      "adj": 2,
+      "vi": "bầu không khí"
+    },
+    {
+      "pos": 21,
+      "hanzi": "何况",
+      "pinyin": "hékuàng",
+      "adj": 10,
+      "vi": "huống hồ, huống chi"
+    },
+    {
+      "pos": 22,
+      "hanzi": "球迷",
+      "pinyin": "qiúmí",
+      "adj": 2,
+      "vi": "người mê bóng"
+    },
+    {
+      "pos": 23,
+      "hanzi": "工程师",
+      "pinyin": "gōngchéngshī",
+      "adj": 2,
+      "vi": "kỹ sư"
+    },
+    {
+      "pos": 24,
+      "hanzi": "机器",
+      "pinyin": "jīqì",
+      "adj": 2,
+      "vi": "máy móc"
+    },
+    {
+      "pos": 25,
+      "hanzi": "幼儿园",
+      "pinyin": "yòu'éryuán",
+      "adj": 2,
+      "vi": "nhà trẻ"
+    },
+    {
+      "pos": 26,
+      "hanzi": "好奇",
+      "pinyin": "hàoqí",
+      "adj": 6,
+      "vi": "hiếu kỳ, tò mò"
+    },
+    {
+      "pos": 27,
+      "hanzi": "何必",
+      "pinyin": "hébì",
+      "adj": 7,
+      "vi": "(chỉ sự không cần) hà tất, cần gì"
+    },
+    {
+      "pos": 28,
+      "hanzi": "多亏",
+      "pinyin": "duōkuī",
+      "adj": 4,
+      "vi": "may mà (có), nhờ có"
+    },
+    {
+      "pos": 29,
+      "hanzi": "连忙",
+      "pinyin": "liánmáng",
+      "adj": 7,
+      "vi": "ngay lập tức"
+    },
+    {
+      "pos": 30,
+      "hanzi": "瞧",
+      "pinyin": "qiáo",
+      "adj": 4,
+      "vi": "nhìn"
+    },
+    {
+      "pos": 31,
+      "hanzi": "困扰",
+      "pinyin": "kùnrǎo",
+      "adj": 4,
+      "vi": "làm phiền, gây rối"
+    },
+    {
+      "pos": 32,
+      "hanzi": "思维",
+      "pinyin": "sīwéi",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "tư duy; suy nghĩ"
+    },
+    {
+      "pos": 33,
+      "hanzi": "呆",
+      "pinyin": "dāi",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "đần độn, ngu ngốc; nán lại, ở lại"
+    },
+    {
+      "pos": 34,
+      "hanzi": "造成",
+      "pinyin": "zàochéng",
+      "adj": 4,
+      "vi": "tạo thành, gây ra"
+    },
+    {
+      "pos": 35,
+      "hanzi": "仿佛",
+      "pinyin": "fǎngfú",
+      "adj": [
+        7,
+        4
+      ],
+      "vi": "dường như; giống như"
+    },
+    {
+      "pos": 36,
+      "hanzi": "阻碍",
+      "pinyin": "zǔ'ài",
+      "adj": 4,
+      "vi": "ngăn cản, cản trở"
+    }
+  ]
+}

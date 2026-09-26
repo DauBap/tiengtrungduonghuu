@@ -1,0 +1,202 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 5,
+  "label": "Bài 5",
+  "title": "这样的照片才好看",
+  "short_vi": "Bàn về sở thích chụp ảnh; rủ nhau đi leo núi; nhận xét ảnh đẹp/xấu; so sánh trình độ chụp ảnh; tặng vé xem hòa nhạc",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "总是",
+      "pinyin": "zǒngshì",
+      "adj": 18,
+      "vi": "Luôn luôn"
+    },
+    {
+      "pos": 2,
+      "hanzi": "终于",
+      "pinyin": "zhōngyú",
+      "adj": 18,
+      "vi": "Cuối cùng"
+    },
+    {
+      "pos": 3,
+      "hanzi": "爬",
+      "pinyin": "pá",
+      "adj": 4,
+      "vi": "Leo, trèo"
+    },
+    {
+      "pos": 4,
+      "hanzi": "山",
+      "pinyin": "shān",
+      "adj": 2,
+      "vi": "Núi, ngọn đồi"
+    },
+    {
+      "pos": 5,
+      "hanzi": "锻炼",
+      "pinyin": "duànliàn",
+      "adj": 4,
+      "vi": "Tập thể dục, rèn luyện"
+    },
+    {
+      "pos": 6,
+      "hanzi": "照",
+      "pinyin": "zhào",
+      "adj": 4,
+      "vi": "Chụp (ảnh), soi"
+    },
+    {
+      "pos": 7,
+      "hanzi": "鞋",
+      "pinyin": "xié",
+      "adj": 2,
+      "vi": "Giày"
+    },
+    {
+      "pos": 8,
+      "hanzi": "大衣",
+      "pinyin": "dàyī",
+      "adj": 2,
+      "vi": "Áo khoác, áo choàng"
+    },
+    {
+      "pos": 9,
+      "hanzi": "拍照",
+      "pinyin": "pāizhào",
+      "adj": 4,
+      "vi": "Chụp ảnh"
+    },
+    {
+      "pos": 10,
+      "hanzi": "感兴趣",
+      "pinyin": "gǎn xìngqù",
+      "adj": 4,
+      "vi": "Cảm thấy thú vị, quan tâm"
+    },
+    {
+      "pos": 11,
+      "hanzi": "照相",
+      "pinyin": "zhàoxiàng",
+      "adj": 4,
+      "vi": "Chụp ảnh"
+    },
+    {
+      "pos": 12,
+      "hanzi": "难看",
+      "pinyin": "nánkàn",
+      "adj": 6,
+      "vi": "Khó nhìn, xấu"
+    },
+    {
+      "pos": 13,
+      "hanzi": "比较",
+      "pinyin": "bǐjiào",
+      "adj": [
+        4,
+        18
+      ],
+      "vi": "So sánh / tương đối, khá"
+    },
+    {
+      "pos": 14,
+      "hanzi": "水平",
+      "pinyin": "shuǐpíng",
+      "adj": 2,
+      "vi": "Trình độ"
+    },
+    {
+      "pos": 15,
+      "hanzi": "太阳",
+      "pinyin": "tàiyáng",
+      "adj": 2,
+      "vi": "Mặt trời"
+    },
+    {
+      "pos": 16,
+      "hanzi": "树",
+      "pinyin": "shù",
+      "adj": 2,
+      "vi": "Cây"
+    },
+    {
+      "pos": 17,
+      "hanzi": "干",
+      "pinyin": "gàn",
+      "adj": 4,
+      "vi": "Làm"
+    },
+    {
+      "pos": 18,
+      "hanzi": "电",
+      "pinyin": "diàn",
+      "adj": 2,
+      "vi": "Điện"
+    },
+    {
+      "pos": 19,
+      "hanzi": "收到",
+      "pinyin": "shōudào",
+      "adj": 4,
+      "vi": "Nhận được"
+    },
+    {
+      "pos": 20,
+      "hanzi": "封",
+      "pinyin": "fēng",
+      "adj": 8,
+      "vi": "Bức, (lượng từ cho thư, bưu kiện)"
+    },
+    {
+      "pos": 21,
+      "hanzi": "邮件",
+      "pinyin": "yóujiàn",
+      "adj": 2,
+      "vi": "Thư điện tử, email"
+    },
+    {
+      "pos": 22,
+      "hanzi": "难过",
+      "pinyin": "nánguò",
+      "adj": 6,
+      "vi": "Buồn bã, khó qua"
+    },
+    {
+      "pos": 23,
+      "hanzi": "哈哈",
+      "pinyin": "hāhā",
+      "adj": 12,
+      "vi": "Ha ha (tiếng cười)"
+    },
+    {
+      "pos": 24,
+      "hanzi": "音乐",
+      "pinyin": "yīnyuè",
+      "adj": 2,
+      "vi": "Âm nhạc"
+    },
+    {
+      "pos": 25,
+      "hanzi": "兴趣",
+      "pinyin": "xìngqù",
+      "adj": 2,
+      "vi": "Hứng thú, sở thích"
+    },
+    {
+      "pos": 26,
+      "hanzi": "会",
+      "pinyin": "huì",
+      "adj": 2,
+      "vi": "Buổi tụ tập, bữa tiệc"
+    },
+    {
+      "pos": 27,
+      "hanzi": "结束",
+      "pinyin": "jiéshù",
+      "adj": 4,
+      "vi": "Kết thúc"
+    }
+  ]
+}

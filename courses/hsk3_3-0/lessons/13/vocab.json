@@ -1,0 +1,199 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 13,
+  "label": "Bài 13",
+  "title": "我的新邻居来自英国",
+  "short_vi": "Mời đồng nghiệp ăn cơm; giới thiệu sự khác biệt giữa ẩm thực miền Bắc và miền Nam; chuẩn bị tiệc sinh nhật cho con; tặng quà (bảng vẽ, bút màu); làm quen với hàng xóm người nước ngoài",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "请客",
+      "pinyin": "qǐngkè",
+      "adj": 4,
+      "vi": "mời khách"
+    },
+    {
+      "pos": 2,
+      "hanzi": "南方",
+      "pinyin": "nánfāng",
+      "adj": 2,
+      "vi": "phía nam"
+    },
+    {
+      "pos": 3,
+      "hanzi": "北方",
+      "pinyin": "běifāng",
+      "adj": 2,
+      "vi": "phía bắc"
+    },
+    {
+      "pos": 4,
+      "hanzi": "做法",
+      "pinyin": "zuòfǎ",
+      "adj": 2,
+      "vi": "cách làm"
+    },
+    {
+      "pos": 5,
+      "hanzi": "不同",
+      "pinyin": "bùtóng",
+      "adj": 6,
+      "vi": "khác nhau, không giống nhau"
+    },
+    {
+      "pos": 6,
+      "hanzi": "加",
+      "pinyin": "jiā",
+      "adj": 4,
+      "vi": "thêm"
+    },
+    {
+      "pos": 7,
+      "hanzi": "的话",
+      "pinyin": "dehuà",
+      "adj": 11,
+      "vi": "sử dụng ở cuối mệnh đề (biểu thị sự giả thiết)"
+    },
+    {
+      "pos": 8,
+      "hanzi": "做客",
+      "pinyin": "zuòkè",
+      "adj": 4,
+      "vi": "làm khách"
+    },
+    {
+      "pos": 9,
+      "hanzi": "邻居",
+      "pinyin": "línjū",
+      "adj": 2,
+      "vi": "láng giềng, hàng xóm"
+    },
+    {
+      "pos": 10,
+      "hanzi": "放心",
+      "pinyin": "fàngxīn",
+      "adj": 4,
+      "vi": "yên tâm"
+    },
+    {
+      "pos": 11,
+      "hanzi": "酒",
+      "pinyin": "jiǔ",
+      "adj": 2,
+      "vi": "rượu"
+    },
+    {
+      "pos": 12,
+      "hanzi": "放",
+      "pinyin": "fàng",
+      "adj": 4,
+      "vi": "đặt, để "
+    },
+    {
+      "pos": 13,
+      "hanzi": "客人",
+      "pinyin": "kèrén",
+      "adj": 2,
+      "vi": "khách hàng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "晚会",
+      "pinyin": "wǎnhuì",
+      "adj": 2,
+      "vi": "dạ hội, dạ tiệc, tiệc tối"
+    },
+    {
+      "pos": 15,
+      "hanzi": "礼物",
+      "pinyin": "lǐwù",
+      "adj": 2,
+      "vi": "quà, món quà"
+    },
+    {
+      "pos": 16,
+      "hanzi": "画家",
+      "pinyin": "huàjiā",
+      "adj": 2,
+      "vi": "họa sĩ"
+    },
+    {
+      "pos": 17,
+      "hanzi": "盘子",
+      "pinyin": "pánzi",
+      "adj": 2,
+      "vi": "đĩa"
+    },
+    {
+      "pos": 18,
+      "hanzi": "一边",
+      "pinyin": "yìbiān",
+      "adj": 18,
+      "vi": "vừa..."
+    },
+    {
+      "pos": 19,
+      "hanzi": "聊天儿",
+      "pinyin": "liáotiānr",
+      "adj": 4,
+      "vi": "nói chuyện, trò chuyện"
+    },
+    {
+      "pos": 20,
+      "hanzi": "来自",
+      "pinyin": "láizì",
+      "adj": 4,
+      "vi": "đến từ"
+    },
+    {
+      "pos": 21,
+      "hanzi": "夫妻",
+      "pinyin": "fūqī",
+      "adj": 2,
+      "vi": "vợ chồng"
+    },
+    {
+      "pos": 22,
+      "hanzi": "直到",
+      "pinyin": "zhídào",
+      "adj": 4,
+      "vi": "mãi đến, cho đến"
+    },
+    {
+      "pos": 23,
+      "hanzi": "地图",
+      "pinyin": "dìtú",
+      "adj": 2,
+      "vi": "bản đồ"
+    },
+    {
+      "pos": 24,
+      "hanzi": "点",
+      "pinyin": "diǎn",
+      "adj": 2,
+      "vi": "điểm, vết chấm"
+    },
+    {
+      "pos": 25,
+      "hanzi": "感到",
+      "pinyin": "gǎndào",
+      "adj": 4,
+      "vi": "cảm thấy"
+    },
+    {
+      "pos": 26,
+      "hanzi": "东方",
+      "pinyin": "dōngfāng",
+      "adj": 2,
+      "vi": "phương đông"
+    },
+    {
+      "pos": 27,
+      "hanzi": "文化",
+      "pinyin": "wénhuà",
+      "adj": 2,
+      "vi": "văn hóa"
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 5,
+  "label": "Bài 5",
+  "title": "第一次去中国朋友家",
+  "short_vi": "Làm khách lần đầu đến nhà người Trung Quốc; chào hỏi người lớn tuổi; tặng quà và cách ứng xử khi đến nhà người khác",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "快",
+      "pinyin": "kuài",
+      "adj": [
+        18,
+        6
+      ],
+      "vi": "Nhanh, mau lên"
+    },
+    {
+      "pos": 2,
+      "hanzi": "下来",
+      "pinyin": "xiàlái",
+      "adj": 4,
+      "vi": "Xuống đây"
+    },
+    {
+      "pos": 3,
+      "hanzi": "上来",
+      "pinyin": "shànglái",
+      "adj": 4,
+      "vi": "Lên đây"
+    },
+    {
+      "pos": 4,
+      "hanzi": "上去",
+      "pinyin": "shàngqù",
+      "adj": 4,
+      "vi": "Đi lên"
+    },
+    {
+      "pos": 5,
+      "hanzi": "下面",
+      "pinyin": "xiàmiàn",
+      "adj": 2,
+      "vi": "Phía dưới"
+    },
+    {
+      "pos": 6,
+      "hanzi": "面",
+      "pinyin": "miàn",
+      "adj": 9,
+      "vi": "Dùng để tạo danh từ chỉ phương hướng"
+    },
+    {
+      "pos": 7,
+      "hanzi": "等",
+      "pinyin": "děng",
+      "adj": 4,
+      "vi": "Đợi, chờ"
+    },
+    {
+      "pos": 8,
+      "hanzi": "一会儿",
+      "pinyin": "yíhuìr",
+      "adj": 7,
+      "vi": "Lát nữa, một lát"
+    },
+    {
+      "pos": 9,
+      "hanzi": "下去",
+      "pinyin": "xiàqù",
+      "adj": 4,
+      "vi": "Đi xuống"
+    },
+    {
+      "pos": 10,
+      "hanzi": "进来",
+      "pinyin": "Jìnlái",
+      "adj": 4,
+      "vi": "Vào đây"
+    },
+    {
+      "pos": 11,
+      "hanzi": "爷爷",
+      "pinyin": "Yéye",
+      "adj": 2,
+      "vi": "Ông nội"
+    },
+    {
+      "pos": 12,
+      "hanzi": "奶奶",
+      "pinyin": "Nǎinai",
+      "adj": 2,
+      "vi": "Bà nội"
+    },
+    {
+      "pos": 13,
+      "hanzi": "礼物",
+      "pinyin": "Lǐwù",
+      "adj": 2,
+      "vi": "Món quà"
+    },
+    {
+      "pos": 14,
+      "hanzi": "准备",
+      "pinyin": "Zhǔnbèi",
+      "adj": 4,
+      "vi": "Chuẩn bị"
+    },
+    {
+      "pos": 15,
+      "hanzi": "奶茶",
+      "pinyin": "Nǎichá",
+      "adj": 2,
+      "vi": "Trà sữa"
+    },
+    {
+      "pos": 16,
+      "hanzi": "跟",
+      "pinyin": "Gēn",
+      "adj": 13,
+      "vi": "Cùng, với"
+    },
+    {
+      "pos": 17,
+      "hanzi": "走",
+      "pinyin": "Zǒu",
+      "adj": 4,
+      "vi": "Đi  (bộ)"
+    },
+    {
+      "pos": 18,
+      "hanzi": "酒店",
+      "pinyin": "Jiǔdiàn",
+      "adj": 2,
+      "vi": "Khách sạn"
+    }
+  ]
+}

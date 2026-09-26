@@ -1,0 +1,202 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 11,
+  "label": "Bài 11",
+  "title": "看来我没办法解决这个问题",
+  "short_vi": "Thảo luận công việc, lịch họp; chuẩn bị thiết bị cho cuộc họp (máy tính, kết nối âm thanh); bàn về vấn đề nghỉ phép, đồng nghiệp vắng mặt; suy nghĩ về việc cân bằng giữa công việc và gia đình",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "会议",
+      "pinyin": "huìyì",
+      "adj": 2,
+      "vi": "cuộc họp, hội nghị"
+    },
+    {
+      "pos": 2,
+      "hanzi": "经理",
+      "pinyin": "jīnglǐ",
+      "adj": 2,
+      "vi": "giám đốc, quản lý"
+    },
+    {
+      "pos": 3,
+      "hanzi": "开会",
+      "pinyin": "kāihuì",
+      "adj": 4,
+      "vi": "họp, mở cuộc họp"
+    },
+    {
+      "pos": 4,
+      "hanzi": "后天",
+      "pinyin": "hòutiān",
+      "adj": 2,
+      "vi": "ngày kia"
+    },
+    {
+      "pos": 5,
+      "hanzi": "地点",
+      "pinyin": "dìdiǎn",
+      "adj": 2,
+      "vi": "địa điểm"
+    },
+    {
+      "pos": 6,
+      "hanzi": "室",
+      "pinyin": "shì",
+      "adj": 2,
+      "vi": "phòng"
+    },
+    {
+      "pos": 7,
+      "hanzi": "发",
+      "pinyin": "fā",
+      "adj": 4,
+      "vi": "gửi (tin nhắn, email...)"
+    },
+    {
+      "pos": 8,
+      "hanzi": "笔记本（电脑）",
+      "pinyin": "bǐjìběn (diànnǎo)",
+      "adj": 2,
+      "vi": "máy tính xách tay (laptop)"
+    },
+    {
+      "pos": 9,
+      "hanzi": "或者",
+      "pinyin": "huòzhě",
+      "adj": 10,
+      "vi": "hoặc, hoặc là"
+    },
+    {
+      "pos": 10,
+      "hanzi": "声音",
+      "pinyin": "shēngyīn",
+      "adj": 2,
+      "vi": "âm thanh, tiếng động"
+    },
+    {
+      "pos": 11,
+      "hanzi": "看来",
+      "pinyin": "kànlái",
+      "adj": 4,
+      "vi": "xem ra, có vẻ như"
+    },
+    {
+      "pos": 12,
+      "hanzi": "办法",
+      "pinyin": "bànfǎ",
+      "adj": 2,
+      "vi": "cách, phương pháp"
+    },
+    {
+      "pos": 13,
+      "hanzi": "解决",
+      "pinyin": "jiějué",
+      "adj": 4,
+      "vi": "giải quyết"
+    },
+    {
+      "pos": 14,
+      "hanzi": "只能",
+      "pinyin": "zhǐ néng",
+      "adj": 7,
+      "vi": "chỉ có thể"
+    },
+    {
+      "pos": 15,
+      "hanzi": "别人",
+      "pinyin": "biérén",
+      "adj": 1,
+      "vi": "người khác"
+    },
+    {
+      "pos": 16,
+      "hanzi": "请假",
+      "pinyin": "qǐngjià",
+      "adj": 4,
+      "vi": "xin nghỉ (phép)"
+    },
+    {
+      "pos": 17,
+      "hanzi": "同事",
+      "pinyin": "tóngshì",
+      "adj": 2,
+      "vi": "đồng nghiệp"
+    },
+    {
+      "pos": 18,
+      "hanzi": "休假",
+      "pinyin": "xiūjià",
+      "adj": 4,
+      "vi": "nghỉ lễ, nghỉ kỳ nghỉ"
+    },
+    {
+      "pos": 19,
+      "hanzi": "怕",
+      "pinyin": "pà",
+      "adj": 4,
+      "vi": "sợ, e là"
+    },
+    {
+      "pos": 20,
+      "hanzi": "邮箱",
+      "pinyin": "yóuxiāng",
+      "adj": 2,
+      "vi": "hòm thư, địa chỉ email"
+    },
+    {
+      "pos": 21,
+      "hanzi": "愿意",
+      "pinyin": "yuànyì",
+      "adj": 11,
+      "vi": "bằng lòng, mong muốn"
+    },
+    {
+      "pos": 22,
+      "hanzi": "城市",
+      "pinyin": "chéngshì",
+      "adj": 2,
+      "vi": "thành phố"
+    },
+    {
+      "pos": 23,
+      "hanzi": "离开",
+      "pinyin": "líkāi",
+      "adj": 4,
+      "vi": "rời khỏi, rời đi"
+    },
+    {
+      "pos": 24,
+      "hanzi": "机会",
+      "pinyin": "jīhuì",
+      "adj": 2,
+      "vi": "cơ hội"
+    },
+    {
+      "pos": 25,
+      "hanzi": "生活",
+      "pinyin": "shēnghuó",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "cuộc sống; sinh sống"
+    },
+    {
+      "pos": 26,
+      "hanzi": "为",
+      "pinyin": "wèi",
+      "adj": 13,
+      "vi": "cho, vì"
+    },
+    {
+      "pos": 27,
+      "hanzi": "或",
+      "pinyin": "huò",
+      "adj": 10,
+      "vi": "hoặc, hay là"
+    }
+  ]
+}

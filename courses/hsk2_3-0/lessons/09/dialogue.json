@@ -1,0 +1,152 @@
+{
+  "lesson": 9,
+  "title": "我去买杯奶茶",
+  "title_pinyin": "Wǒ qù mǎi bēi nǎichá",
+  "title_vi": "Tôi đi mua cốc trà sữa",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "儿子的裤子坏了，我们给他买条新的吧。",
+          "pinyin": "Érzi de kùzi huài le, wǒmen gěi tā mǎi tiáo xīn de ba.",
+          "vi": "Quần của con trai hỏng rồi, chúng ta mua cho nó cái mới đi."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好啊。",
+          "pinyin": "Hǎo a.",
+          "vi": "Được thôi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你看这条黑色的怎么样？",
+          "pinyin": "Nǐ kàn zhè tiáo hēisè de zěnmeyàng?",
+          "vi": "Anh xem cái quần màu đen này thế nào?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "没有你上次买的那条好看。",
+          "pinyin": "Méi yǒu nǐ shàng cì mǎi de nà tiáo hǎokàn.",
+          "vi": "Không đẹp bằng cái lần trước em mua."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "旁边那个男孩儿就穿了这样的裤子，我觉得很好看啊！",
+          "pinyin": "Pángbiān nàge nánháir jiù chuānle zhèyàng de kùzi, wǒ juéde hěn hǎokàn a!",
+          "vi": "Cậu bé bên cạnh mặc đúng kiểu quần này, em thấy rất đẹp mà!"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "儿子的个子没有他那么高，穿上就不会太好看。",
+          "pinyin": "Érzi de gèzi méiyǒu tā nàme gāo, chuān shàng jiù bú huì tài hǎokàn.",
+          "vi": "Con trai mình không cao bằng cậu bé đó, mặc vào sẽ không đẹp lắm."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好吧，我们再去那边看看。",
+          "pinyin": "Hǎo ba, wǒmen zài qù nàbian kànkan.",
+          "vi": "Thôi được, chúng ta sang bên kia xem thử."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "门口有家奶茶店。你想喝杯奶茶吗？",
+          "pinyin": "Ménkǒu yǒu jiā nǎichá diàn. Nǐ xiǎng hē bēi nǎichá ma?",
+          "vi": "Cửa ra vào có một quán trà sữa. Anh có muốn uống cốc trà sữa không?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "我想喝咖啡，还是去咖啡店吧。",
+          "pinyin": "Wǒ xiǎng hē kāfēi, háishì qù kāfēi diàn ba.",
+          "vi": "Anh muốn uống cà phê, vẫn là đến quán cà phê đi."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "咖啡店离这儿有点儿远。",
+          "pinyin": "Kāfēi diàn lí zhèr yǒudiǎnr yuǎn.",
+          "vi": "Quán cà phê cách đây hơi xa."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "没关系，那家店的咖啡很好喝。",
+          "pinyin": "Méi guānxi, nà jiā diàn de kāfēi hěn hǎohē.",
+          "vi": "Không sao, cà phê của quán đó rất ngon."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "那你等一下，我去买杯奶茶。",
+          "pinyin": "Nà nǐ děng yíxià, wǒ qù mǎi bēi nǎichá.",
+          "vi": "Vậy anh đợi một chút, em đi mua cốc trà sữa."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "你不想喝咖啡吗？",
+          "pinyin": "Nǐ bù xiǎng hē kāfēi ma?",
+          "vi": "Em không muốn uống cà phê à?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "喝了咖啡，晚上就别想睡觉了。",
+          "pinyin": "Hēle kāfēi, wǎnshang jiù bié xiǎng shuìjiào le.",
+          "vi": "Uống cà phê xong, tối đừng hòng ngủ được."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "我们打车回去吧。",
+          "pinyin": "Wǒmen dǎchē huíqu ba.",
+          "vi": "Chúng ta bắt taxi về nhé."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "这里离家很近，还是走路吧。",
+          "pinyin": "Zhèlǐ lí jiā hěn jìn, háishì zǒulù ba.",
+          "vi": "Chỗ này gần nhà, vẫn là đi bộ đi."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "要走多长时间？",
+          "pinyin": "Yào zǒu duō cháng shíjiān?",
+          "vi": "Đi bộ mất bao lâu?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "走半个多小时就到了。",
+          "pinyin": "Zǒu bàn ge duō xiǎoshí jiù dào le.",
+          "vi": "Đi bộ hơn nửa tiếng là đến."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "好的。每天上下班都坐车，今天运动运动吧。",
+          "pinyin": "Hǎo de. Měitiān shàngxiàbān dōu zuòchē, jīntiān yùndòng yùndòng ba.",
+          "vi": "Được. Ngày nào đi làm về cũng ngồi xe, hôm nay vận động một chút đi."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "这周刘明休息，我下班后跟他去了一家商店。商店里边的衣服没有大商场里的好看。我们没有买到喜欢的衣服，从商店出来就到咖啡店坐了坐。因为想运动运动，所以喝完东西，我们就走回家了。",
+          "pinyin": "Zhè zhōu Liú Míng xiūxi, wǒ xiàbān hòu gēn tā qùle yī jiā shāngdiàn. Shāngdiàn lǐbian de yīfu méiyǒu dà shāngchǎng lǐ de hǎokàn. Wǒmen méiyǒu mǎi dào xǐhuan de yīfu, cóng shāngdiàn chūlái jiù dào kāfēi diàn zuòle zuò. Yīnwèi xiǎng yùndòng yùndòng, suǒyǐ hē wán dōngxi, wǒmen jiù zǒu huí jiā le.",
+          "vi": "Tuần này Lưu Minh nghỉ, tan làm tôi đi cùng anh ấy đến một cửa hàng. Quần áo trong cửa hàng không đẹp bằng trong trung tâm thương mại lớn. Chúng tôi không mua được quần áo ưng ý, từ cửa hàng đi ra thì đến quán cà phê ngồi một lúc. Vì muốn vận động nên uống đồ uống xong, chúng tôi đi bộ về nhà."
+        }
+      ]
+    }
+  ]
+}

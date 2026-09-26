@@ -1,0 +1,426 @@
+{
+	"title": "HSK3 - Sách bài tập",
+	"lesson": 11,
+	"lesson_title": "看来我没办法解决这个问题",
+	"grading_pending": true,
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听对话，选择最匹配的图片。每题听两次。\nCâu 1–3: Nghe và chọn hình phù hợp. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 1,
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择正确答案。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 4,
+							"options": [
+								{
+									"label": "A",
+									"text": "参加比赛"
+								},
+								{
+									"label": "B",
+									"text": "听音乐会"
+								},
+								{
+									"label": "C",
+									"text": "问别人事情"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"options": [
+								{
+									"label": "A",
+									"text": "他生病了"
+								},
+								{
+									"label": "B",
+									"text": "他今天结婚"
+								},
+								{
+									"label": "C",
+									"text": "他姐姐结婚"
+								}
+							]
+						},
+						{
+							"number": 6,
+							"options": [
+								{
+									"label": "A",
+									"text": "换手机"
+								},
+								{
+									"label": "B",
+									"text": "买电脑"
+								},
+								{
+									"label": "C",
+									"text": "买手机"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听一段话，选择正确答案。每题听两次。\nCâu 7–10: Nghe đoạn thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 7,
+							"options": [
+								{
+									"label": "A",
+									"text": "还没结婚"
+								},
+								{
+									"label": "B",
+									"text": "非常想结婚"
+								},
+								{
+									"label": "C",
+									"text": "对自己不满意"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"options": [
+								{
+									"label": "A",
+									"text": "离开公司"
+								},
+								{
+									"label": "B",
+									"text": "参加会议"
+								},
+								{
+									"label": "C",
+									"text": "跟朋友喝茶"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"options": [
+								{
+									"label": "A",
+									"text": "睡前常看电影"
+								},
+								{
+									"label": "B",
+									"text": "每天很早睡觉"
+								},
+								{
+									"label": "C",
+									"text": "觉得上网挺累的"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"options": [
+								{
+									"label": "A",
+									"text": "要请假"
+								},
+								{
+									"label": "B",
+									"text": "要去医院"
+								},
+								{
+									"label": "C",
+									"text": "想去看电影"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—15题：匹配句子。\nCâu 11–15: Nối câu.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "对我来说，开心最重要。"
+						},
+						{
+							"label": "B",
+							"text": "我想我会把他们接到我这儿。"
+						},
+						{
+							"label": "C",
+							"text": "啊，不好意思，那应该在哪儿开会？"
+						},
+						{
+							"label": "D",
+							"text": "是的，生活很方便，环境也不错，我很满意。"
+						},
+						{
+							"label": "E",
+							"text": "当然。我们先坐公交车，然后换地铁。"
+						},
+						{
+							"label": "F",
+							"text": "901室或902室都行，现在里面都有我的同事。"
+						}
+					],
+					"questions": [
+						{
+							"number": 11,
+							"answer": "C",
+							"question": "小王，你把会议地点写错了。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 12,
+							"answer": "D",
+							"question": "看来你很喜欢这个小区。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 13,
+							"answer": "F",
+							"question": "请问，我把笔记本送到哪儿？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 14,
+							"answer": "A",
+							"question": "你找工作的时候，最关心什么？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 15,
+							"answer": "B",
+							"question": "你会为家人离开这里，回到他们住的城市吗？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第16—20题：选词填空。\nCâu 16–20: Chọn từ điền vào chỗ trống.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "城市"
+						},
+						{
+							"label": "B",
+							"text": "邮箱"
+						},
+						{
+							"label": "C",
+							"text": "机会"
+						},
+						{
+							"label": "D",
+							"text": "办法"
+						},
+						{
+							"label": "E",
+							"text": "鞋"
+						},
+						{
+							"label": "F",
+							"text": "后天"
+						}
+					],
+					"questions": [
+						{
+							"number": 16,
+							"answer": "C",
+							"sentence": "我今天得到了一个去上海工作的（ ），特别开心。"
+						},
+						{
+							"number": 17,
+							"answer": "F",
+							"sentence": "我（ ）就休假了，这两天做不完这个工作，您还是让别人做吧。"
+						},
+						{
+							"number": 18,
+							"answer": "B",
+							"sentence": "他们都收到公司发的邮件了，我的（ ）里怎么没有？"
+						},
+						{
+							"number": 19,
+							"answer": "A",
+							"sentence": "A：你去过哪些（ ）？\nB：我才来中国三个星期，除了北京，哪儿都没去过。"
+						},
+						{
+							"number": 20,
+							"answer": "D",
+							"sentence": "A：会议室的电脑坏了，你有什么（ ）吗？\nB：我去拿办公室的笔记本电脑吧，看看能不能接上。"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第21—24题：选择正确答案。\nCâu 21–24: Đọc và chọn đáp án đúng.",
+					"embedded_example_image": true,
+					"shared_passage": "23–24\n\n请大家安静一下，听我说。我们明天早上七点在宾馆门口见，一起坐汽车去高铁站。大家今晚就把行李准备好，明早离开前一定要再认真检查一下，别忘了自己的东西。我会为大家准备好早饭，明天六点带过来。大家可以在宾馆里吃，或者到了高铁站再吃，但是不能在汽车上吃。",
+					"shared_passage_start": 23,
+					"questions": [
+						{
+							"number": 21,
+							"answer": "C",
+							"sentence": "我最愿意教小学生，因为孩子的世界很简单，跟他们在一起，我觉得自己年轻了很多。",
+							"question": "他为什么喜欢教小孩子？",
+							"options": [
+								{
+									"label": "A",
+									"text": "他现在很年轻"
+								},
+								{
+									"label": "B",
+									"text": "教的东西很简单"
+								},
+								{
+									"label": "C",
+									"text": "孩子的世界很简单"
+								}
+							]
+						},
+						{
+							"number": 22,
+							"answer": "C",
+							"sentence": "今天会议上经理说的那两个办法，虽然同事们都觉得第一个好，但我觉得第二个更好，因为它能更快地解决问题。",
+							"question": "关于第二个办法，可以知道什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "同事们觉得好"
+								},
+								{
+									"label": "B",
+									"text": "不能解决问题"
+								},
+								{
+									"label": "C",
+									"text": "能更快解决问题"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "A",
+							"question": "大家应该什么时候把行李准备好？",
+							"options": [
+								{
+									"label": "A",
+									"text": "今天晚上"
+								},
+								{
+									"label": "B",
+									"text": "明早6:00"
+								},
+								{
+									"label": "C",
+									"text": "明早7:00"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "B",
+							"question": "大家不能在哪儿吃早饭？",
+							"options": [
+								{
+									"label": "A",
+									"text": "宾馆里"
+								},
+								{
+									"label": "B",
+									"text": "汽车上"
+								},
+								{
+									"label": "C",
+									"text": "高铁站里"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据拼音写汉字。\nCâu 25–27: Viết chữ Hán theo pinyin.",
+					"embedded_example_image": true,
+					"questions": [
+						{
+							"number": 25,
+							"type": "writing_input",
+							"sentence": "你说话（ ）音大一点儿好吗？我听不清楚。",
+							"prompt_pinyin": "shēng"
+						},
+						{
+							"number": 26,
+							"type": "writing_input",
+							"sentence": "不好意思，我不太舒服，想请（ ）回去休息一下。",
+							"prompt_pinyin": "jià"
+						},
+						{
+							"number": 27,
+							"type": "writing_input",
+							"sentence": "张经理，我（ ）您不在市里，给您打个电话，问一下您在哪儿。",
+							"prompt_pinyin": "pà"
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：看图，用词造句。\nCâu 28–30: Nhìn hình và dùng từ gợi ý đặt câu.",
+					"questions": [
+						{
+							"number": 28,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 城市"
+						},
+						{
+							"number": 29,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 声音"
+						},
+						{
+							"number": 30,
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 笔记本（电脑）"
+						}
+					]
+				}
+			]
+		}
+	]
+}

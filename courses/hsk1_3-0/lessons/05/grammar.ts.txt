@@ -1,0 +1,156 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const explanation = "Câu đúng cần giữ nguyên ý nghĩa và trật tự từ của cấu trúc đã học.";
+const input = (
+	id: string,
+	prompt: string,
+	answer: string,
+	acceptedAnswers: string[] = [],
+	image?: string,
+	imageAlt?: string
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	acceptedAnswers,
+	image,
+	imageAlt,
+	explanation,
+	formula: "Đối chiếu theo công thức của điểm ngữ pháp."
+});
+const arrange = (id: string, tokens: string[], answer: string): GrammarQuestion => ({
+	id,
+	prompt: "Sắp xếp các thẻ từ thành câu đúng.",
+	tokens,
+	answer,
+	explanation,
+	formula: "Chọn từng thẻ theo đúng trật tự câu."
+});
+const choice = (
+	id: string,
+	answer: string,
+	options: [string, string, string],
+	image: string,
+	imageAlt: string
+): GrammarQuestion => ({
+	id,
+	prompt: "Chọn câu tiếng Trung phù hợp với hình.",
+	answer,
+	options,
+	image,
+	imageAlt,
+	explanation,
+	formula: "Quan sát chi tiết trong hình và chọn đúng một câu."
+});
+const img = (name: string) => `/images/grammar/lesson5/${name}.svg`;
+
+const pictures: GrammarQuestion[] = [
+	choice("l5-p1", "2026年9月8号，星期二。", ["2026年9月8号，星期二。", "2026年8月9号，星期二。", "2026年9月8号，星期三。"], img("calendar-2026-09-08"), "Lịch ngày 8 tháng 9 năm 2026, thứ Ba"),
+	choice("l5-p2", "今天5月10号。", ["今天5月10号。", "今天10月5号。", "今天5月5号。"], img("calendar-may-10"), "Lịch hôm nay ngày 10 tháng 5"),
+	choice("l5-p3", "今天星期五。", ["今天星期五。", "今天星期四。", "今天星期六。"], img("calendar-friday"), "Lịch hôm nay là thứ Sáu"),
+	choice("l5-p4", "我妹妹12岁。", ["我妹妹12岁。", "我姐姐12岁。", "我妹妹20岁。"], img("sister-age-12"), "Em gái 12 tuổi"),
+	choice("l5-p5", "妈妈会做面条儿。", ["妈妈会做面条儿。", "妈妈不会做面条儿。", "妈妈会做饺子。"], img("mother-noodles"), "Mẹ biết làm mì, có dấu xác nhận"),
+	choice("l5-p6", "我不会做饺子。", ["我不会做饺子。", "我会做饺子。", "我不会做面条儿。"], img("cannot-dumplings"), "Nhân vật không biết làm sủi cảo, có dấu phủ định"),
+	choice("l5-p7", "姐姐会做饺子。", ["姐姐会做饺子。", "妹妹会做饺子。", "姐姐不会做饺子。"], img("sister-dumplings"), "Chị gái biết làm sủi cảo, có dấu xác nhận"),
+	choice("l5-p8", "王老师会做中国菜。", ["王老师会做中国菜。", "王老师不会做中国菜。", "王老师会做法国菜。"], img("teacher-wang-cooks"), "Cô Vương biết nấu món Trung Quốc, có dấu xác nhận")
+];
+
+const arrangements: GrammarQuestion[] = [
+	arrange("l5-a1", ["8号", "今天", "9月"], "今天9月8号。"),
+	arrange("l5-a2", ["星期一", "今天"], "今天星期一。"),
+	arrange("l5-a3", ["星期二", "25号", "2026年", "8月"], "2026年8月25号，星期二。"),
+	arrange("l5-a4", ["12岁", "我妹妹", "今年"], "我妹妹今年12岁。"),
+	arrange("l5-a5", ["20岁", "我哥哥"], "我哥哥20岁。"),
+	arrange("l5-a6", ["做饭", "会", "我"], "我会做饭。"),
+	arrange("l5-a7", ["做面条儿", "妈妈", "会"], "妈妈会做面条儿。"),
+	arrange("l5-a8", ["做饺子", "不会", "姐姐"], "姐姐不会做饺子。"),
+	arrange("l5-a9", ["做饭", "吗", "你", "会"], "你会做饭吗？"),
+	arrange("l5-a10", ["中国菜", "做", "王老师", "会"], "王老师会做中国菜。")
+];
+
+const translations: GrammarQuestion[] = [
+	input("l5-t1", "Hôm nay là ngày 8 tháng 9.", "今天9月8号。"),
+	input("l5-t2", "Hôm nay là thứ Tư.", "今天星期三。"),
+	input("l5-t3", "Ngày 25 tháng 8 năm 2026, thứ Ba.", "2026年8月25号，星期二。"),
+	input("l5-t4", "Năm nay em gái tôi 12 tuổi.", "我妹妹今年12岁。"),
+	input("l5-t5", "Anh trai tôi 20 tuổi.", "我哥哥20岁。"),
+	input("l5-t6", "Tôi biết nấu ăn.", "我会做饭。"),
+	input("l5-t7", "Mẹ biết làm mì.", "妈妈会做面条儿。"),
+	input("l5-t8", "Chị gái biết làm sủi cảo.", "姐姐会做饺子。"),
+	input("l5-t9", "Tôi không biết làm mì.", "我不会做面条儿。"),
+	input("l5-t10", "Bạn biết nấu ăn không?", "你会做饭吗？")
+];
+
+export const hsk1Lesson5Grammar: GrammarLesson = {
+	title: "Bài 5: 今天我休息",
+	variant: "hsk1-3-0-lesson5",
+	points: [
+		{
+			id: "time",
+			title: "Cách diễn đạt thời gian (1)",
+			explanation:
+				"Tiếng Trung sắp xếp thời gian từ đơn vị lớn đến đơn vị nhỏ. 年 là năm; 月 là tháng; 号 là ngày thường dùng trong giao tiếp; 日 là ngày thường dùng trong văn viết hoặc trường hợp trang trọng; 星期一～星期日/星期天 là thứ Hai đến Chủ nhật.",
+			formulas: ["Năm → Tháng → Ngày → Thứ"],
+			examples: [
+				{ chinese: "2026年8月25号，星期二。", vietnamese: "Ngày 25 tháng 8 năm 2026, thứ Ba." },
+				{ chinese: "今天9月8号。", vietnamese: "Hôm nay là ngày 8 tháng 9." },
+				{ chinese: "今天星期五。", vietnamese: "Hôm nay là thứ Sáu." }
+			],
+			notes: ["Đúng: 2026年8月25号", "Sai: 25号8月2026年"],
+			exercises: [
+				{
+					id: "l5-picture",
+					title: "Bài tập 1: Nhìn hình và chọn câu đúng",
+					type: "choice",
+					questions: pictures
+				}
+			]
+		},
+		{
+			id: "noun-predicate",
+			title: "Câu vị ngữ danh từ",
+			explanation:
+				"Vị ngữ có thể là danh từ hoặc cụm danh từ chỉ ngày tháng, thứ và tuổi tác. Trong các câu này thường không cần dùng 是.",
+			formulas: ["Chủ ngữ + Danh từ hoặc cụm danh từ"],
+			examples: [
+				{ chinese: "今天9月8号。", vietnamese: "Hôm nay là ngày 8 tháng 9." },
+				{ chinese: "今天星期一。", vietnamese: "Hôm nay là thứ Hai." },
+				{ chinese: "我妹妹12岁。", vietnamese: "Em gái tôi 12 tuổi." },
+				{ chinese: "王老师今年20岁。", vietnamese: "Năm nay cô Vương 20 tuổi." }
+			],
+			notes: ["Tự nhiên: 今天9月8号。", "Không nên dùng: 今天是9月8号。"],
+			exercises: [
+				{
+					id: "l5-arrange",
+					title: "Bài tập 2: Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: arrangements
+				}
+			]
+		},
+		{
+			id: "hui",
+			title: "Động từ năng nguyện 会",
+			explanation: "会 đứng trước động từ, diễn tả biết thực hiện một hành động nhờ học tập.",
+			formulas: [
+				"Khẳng định: Chủ ngữ + 会 + Động từ + Tân ngữ",
+				"Phủ định: Chủ ngữ + 不会 + Động từ + Tân ngữ",
+				"Nghi vấn: Chủ ngữ + 会 + Động từ + Tân ngữ + 吗？"
+			],
+			examples: [
+				{ chinese: "我会做饭。", vietnamese: "Tôi biết nấu ăn." },
+				{ chinese: "妈妈会做面条儿。", vietnamese: "Mẹ biết làm mì." },
+				{ chinese: "我不会做饺子。", vietnamese: "Tôi không biết làm sủi cảo." },
+				{ chinese: "你会做饭吗？", vietnamese: "Bạn biết nấu ăn không?" }
+			],
+			exercises: [
+				{
+					id: "l5-translate",
+					title: "Bài tập 3: Dịch sang tiếng Trung",
+					type: "input",
+					questions: translations
+				}
+			]
+		}
+	]
+};

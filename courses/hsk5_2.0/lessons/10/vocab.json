@@ -1,0 +1,277 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 10,
+  "label": "Bài 10",
+  "title": "争论的奇迹",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "争论",
+      "pinyin": "zhēnglùn",
+      "adj": 4,
+      "vi": "tranh luận"
+    },
+    {
+      "pos": 2,
+      "hanzi": "奇迹",
+      "pinyin": "qíjī",
+      "adj": 2,
+      "vi": "kỳ tích"
+    },
+    {
+      "pos": 3,
+      "hanzi": "围绕",
+      "pinyin": "wéirào",
+      "adj": 4,
+      "vi": "xoay quanh"
+    },
+    {
+      "pos": 4,
+      "hanzi": "奔跑",
+      "pinyin": "bēnpǎo",
+      "adj": 4,
+      "vi": "chạy nhanh"
+    },
+    {
+      "pos": 5,
+      "hanzi": "蹄（子）",
+      "pinyin": "tí(zi)",
+      "adj": 2,
+      "vi": "móng guốc"
+    },
+    {
+      "pos": 6,
+      "hanzi": "辩论",
+      "pinyin": "biànlùn",
+      "adj": 4,
+      "vi": "biện luận, tranh luận"
+    },
+    {
+      "pos": 7,
+      "hanzi": "青蛙",
+      "pinyin": "qīngwā",
+      "adj": 2,
+      "vi": "ếch, nhái"
+    },
+    {
+      "pos": 8,
+      "hanzi": "啦",
+      "pinyin": "la",
+      "adj": 11,
+      "vi": "(là hợp âm của 了(le) và 啊(a), biểu thị sự cảm thán, sự chất vấn...) đấy, à, nhé"
+    },
+    {
+      "pos": 9,
+      "hanzi": "始终",
+      "pinyin": "shǐzhōng",
+      "adj": 7,
+      "vi": "từ đầu đến cuối"
+    },
+    {
+      "pos": 10,
+      "hanzi": "脖子",
+      "pinyin": "bózi",
+      "adj": 2,
+      "vi": "(cái) cổ"
+    },
+    {
+      "pos": 11,
+      "hanzi": "说服",
+      "pinyin": "shuōfú",
+      "adj": 4,
+      "vi": "thuyết phục"
+    },
+    {
+      "pos": 12,
+      "hanzi": "摄影师",
+      "pinyin": "shèyǐngshī",
+      "adj": 2,
+      "vi": "nhà nhiếp ảnh"
+    },
+    {
+      "pos": 13,
+      "hanzi": "毕竟",
+      "pinyin": "bìjìng",
+      "adj": 7,
+      "vi": "rốt cuộc, cuối cùng, suy cho cùng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "操场",
+      "pinyin": "cāochǎng",
+      "adj": 2,
+      "vi": "sân thể thao, bãi tập"
+    },
+    {
+      "pos": 15,
+      "hanzi": "洞",
+      "pinyin": "dòng",
+      "adj": 2,
+      "vi": "hốc, lỗ"
+    },
+    {
+      "pos": 16,
+      "hanzi": "插",
+      "pinyin": "chā",
+      "adj": 4,
+      "vi": "cắm (vào)"
+    },
+    {
+      "pos": 17,
+      "hanzi": "棍",
+      "pinyin": "gùn",
+      "adj": 2,
+      "vi": "gậy"
+    },
+    {
+      "pos": 18,
+      "hanzi": "系",
+      "pinyin": "jì",
+      "adj": 4,
+      "vi": "cột, buộc"
+    },
+    {
+      "pos": 19,
+      "hanzi": "匹",
+      "pinyin": "pǐ",
+      "adj": 8,
+      "vi": "(được dùng cho ngựa) con"
+    },
+    {
+      "pos": 20,
+      "hanzi": "拦",
+      "pinyin": "lán",
+      "adj": 4,
+      "vi": "chặn, cản"
+    },
+    {
+      "pos": 21,
+      "hanzi": "拍",
+      "pinyin": "pāi",
+      "adj": 4,
+      "vi": "quay (phim), chụp (ảnh)"
+    },
+    {
+      "pos": 22,
+      "hanzi": "差距",
+      "pinyin": "chājù",
+      "adj": 2,
+      "vi": "sự chênh lệch, sự khác nhau"
+    },
+    {
+      "pos": 23,
+      "hanzi": "显示",
+      "pinyin": "xiǎnshì",
+      "adj": 4,
+      "vi": "thể hiện, cho thấy"
+    },
+    {
+      "pos": 24,
+      "hanzi": "意识",
+      "pinyin": "yìshi",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "ý thức; nhận thức rõ"
+    },
+    {
+      "pos": 25,
+      "hanzi": "试验",
+      "pinyin": "shìyàn",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "sự thử nghiệm; thử nghiệm"
+    },
+    {
+      "pos": 26,
+      "hanzi": "逐渐",
+      "pinyin": "zhújiàn",
+      "adj": 7,
+      "vi": "dần dần"
+    },
+    {
+      "pos": 27,
+      "hanzi": "改进",
+      "pinyin": "gǎijìn",
+      "adj": 4,
+      "vi": "cải thiện, cải tiến"
+    },
+    {
+      "pos": 28,
+      "hanzi": "成熟",
+      "pinyin": "chéngshú",
+      "adj": [
+        4,
+        6
+      ],
+      "vi": "chín muồi; hoàn thiện"
+    },
+    {
+      "pos": 29,
+      "hanzi": "兄弟",
+      "pinyin": "xiōngdì",
+      "adj": 2,
+      "vi": "anh em"
+    },
+    {
+      "pos": 30,
+      "hanzi": "播放",
+      "pinyin": "bōfàng",
+      "adj": 4,
+      "vi": "phát sóng, chiếu"
+    },
+    {
+      "pos": 31,
+      "hanzi": "纪念",
+      "pinyin": "jìniàn",
+      "adj": 4,
+      "vi": "kỷ niệm, tưởng niệm"
+    },
+    {
+      "pos": 32,
+      "hanzi": "导演",
+      "pinyin": "dǎoyǎn",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "nhà đạo diễn; đạo diễn"
+    },
+    {
+      "pos": 33,
+      "hanzi": "瞬间",
+      "pinyin": "shùnjiān",
+      "adj": 2,
+      "vi": "chốc lát, khoảnh khắc"
+    },
+    {
+      "pos": 34,
+      "hanzi": "请求",
+      "pinyin": "qǐngqiú",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "yêu cầu, đề nghị; lời thỉnh cầu"
+    },
+    {
+      "pos": 35,
+      "hanzi": "或许",
+      "pinyin": "huòxǔ",
+      "adj": 7,
+      "vi": "có lẽ, có thể"
+    },
+    {
+      "pos": 36,
+      "hanzi": "重大",
+      "pinyin": "zhòngdà",
+      "adj": 6,
+      "vi": "trọng đại, to lớn"
+    }
+  ]
+}

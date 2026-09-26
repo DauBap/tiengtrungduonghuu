@@ -1,0 +1,202 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 1,
+  "label": "Bài 1",
+  "title": "我们去机场接你们",
+  "short_vi": "Đón người tại sân bay; miêu tả ngoại hình (cao, gầy, tóc ngắn, mặc áo đen); tìm kiếm hành lý thất lạc; hỏi đường, nhờ giúp đỡ tại quầy dịch vụ",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "以为",
+      "pinyin": "yǐwéi",
+      "adj": 4,
+      "vi": "Cho rằng"
+    },
+    {
+      "pos": 2,
+      "hanzi": "像",
+      "pinyin": "xiàng",
+      "adj": 4,
+      "vi": "Giống"
+    },
+    {
+      "pos": 3,
+      "hanzi": "长",
+      "pinyin": "zhǎng",
+      "adj": 4,
+      "vi": "Lớn, lớn lên"
+    },
+    {
+      "pos": 4,
+      "hanzi": "身高",
+      "pinyin": "shēngāo",
+      "adj": 4,
+      "vi": "Chiều cao"
+    },
+    {
+      "pos": 5,
+      "hanzi": "米",
+      "pinyin": "mǐ",
+      "adj": 8,
+      "vi": "Mét"
+    },
+    {
+      "pos": 6,
+      "hanzi": "瘦",
+      "pinyin": "shòu",
+      "adj": 6,
+      "vi": "Gầy"
+    },
+    {
+      "pos": 7,
+      "hanzi": "接",
+      "pinyin": "jiē",
+      "adj": 4,
+      "vi": "đón"
+    },
+    {
+      "pos": 8,
+      "hanzi": "行李",
+      "pinyin": "xíngli",
+      "adj": 2,
+      "vi": "Hành lý"
+    },
+    {
+      "pos": 9,
+      "hanzi": "丢",
+      "pinyin": "diū",
+      "adj": 4,
+      "vi": "Mất, thất lạc"
+    },
+    {
+      "pos": 10,
+      "hanzi": "箱子",
+      "pinyin": "xiāngzi",
+      "adj": 2,
+      "vi": "Rương, hòm, vali"
+    },
+    {
+      "pos": 11,
+      "hanzi": "号码",
+      "pinyin": "hàomǎ",
+      "adj": 2,
+      "vi": "Số, số hiệu"
+    },
+    {
+      "pos": 12,
+      "hanzi": "好像",
+      "pinyin": "hǎoxiàng",
+      "adj": 18,
+      "vi": "Hình như, dường như"
+    },
+    {
+      "pos": 13,
+      "hanzi": "重要",
+      "pinyin": "zhòngyào",
+      "adj": 6,
+      "vi": "Quan trọng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "着急",
+      "pinyin": "zháojí",
+      "adj": 6,
+      "vi": "Lo lắng, sốt ruột"
+    },
+    {
+      "pos": 15,
+      "hanzi": "护照",
+      "pinyin": "hùzhào",
+      "adj": 2,
+      "vi": "Hộ chiếu"
+    },
+    {
+      "pos": 16,
+      "hanzi": "服务台",
+      "pinyin": "fúwùtái",
+      "adj": 2,
+      "vi": "Quầy phục vụ"
+    },
+    {
+      "pos": 17,
+      "hanzi": "应该",
+      "pinyin": "yīnggāi",
+      "adj": [
+        null,
+        11
+      ],
+      "vi": "Nên"
+    },
+    {
+      "pos": 18,
+      "hanzi": "站",
+      "pinyin": "zhàn",
+      "adj": 4,
+      "vi": "Đứng"
+    },
+    {
+      "pos": 19,
+      "hanzi": "中间",
+      "pinyin": "zhōngjiān",
+      "adj": 2,
+      "vi": "Ở giữa"
+    },
+    {
+      "pos": 20,
+      "hanzi": "短",
+      "pinyin": "duǎn",
+      "adj": 6,
+      "vi": "Ngắn"
+    },
+    {
+      "pos": 21,
+      "hanzi": "头发",
+      "pinyin": "tóufa",
+      "adj": 2,
+      "vi": "Tóc"
+    },
+    {
+      "pos": 22,
+      "hanzi": "年轻",
+      "pinyin": "niánqīng",
+      "adj": 6,
+      "vi": "Trẻ trung"
+    },
+    {
+      "pos": 23,
+      "hanzi": "发现",
+      "pinyin": "fāxiàn",
+      "adj": 4,
+      "vi": "phát hiện, tìm thấy"
+    },
+    {
+      "pos": 24,
+      "hanzi": "不见",
+      "pinyin": "bújiàn",
+      "adj": 4,
+      "vi": "biến mất, thất lạc"
+    },
+    {
+      "pos": 25,
+      "hanzi": "带",
+      "pinyin": "dài",
+      "adj": 4,
+      "vi": "mang, đem theo"
+    },
+    {
+      "pos": 26,
+      "hanzi": "帮助",
+      "pinyin": "bāngzhù",
+      "adj": 4,
+      "vi": "giúp đỡ"
+    },
+    {
+      "pos": 27,
+      "hanzi": "照片",
+      "pinyin": "zhàopiàn",
+      "adj": 2,
+      "vi": "bức ảnh"
+    }
+  ]
+}

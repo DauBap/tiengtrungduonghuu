@@ -1,0 +1,101 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 11,
+  "label": "Bài 11",
+  "title": "我最喜欢吃中国菜",
+  "short_vi": "Hỏi thăm sức khỏe; miêu tả triệu chứng bệnh (đau đầu, khó chịu); đi khám bệnh, mua thuốc; nói về món ăn yêu thích",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "头",
+      "pinyin": "Tóu",
+      "adj": 2,
+      "vi": "Đầu"
+    },
+    {
+      "pos": 2,
+      "hanzi": "疼",
+      "pinyin": "Téng",
+      "adj": 6,
+      "vi": "Đau"
+    },
+    {
+      "pos": 3,
+      "hanzi": "经常",
+      "pinyin": "Jīngcháng",
+      "adj": 18,
+      "vi": "Thường xuyên"
+    },
+    {
+      "pos": 4,
+      "hanzi": "动",
+      "pinyin": "Dòng",
+      "adj": 4,
+      "vi": "Động, di chuyển"
+    },
+    {
+      "pos": 5,
+      "hanzi": "着",
+      "pinyin": "Zhe",
+      "adj": 11,
+      "vi": "Dùng sau V/adj để biểu thị trạng thái tiếp diễn của hành động"
+    },
+    {
+      "pos": 6,
+      "hanzi": "路上",
+      "pinyin": "Lùshang",
+      "adj": 2,
+      "vi": "Trên đường"
+    },
+    {
+      "pos": 7,
+      "hanzi": "慢",
+      "pinyin": "Màn",
+      "adj": 6,
+      "vi": "chậm"
+    },
+    {
+      "pos": 8,
+      "hanzi": "进",
+      "pinyin": "Jìn",
+      "adj": 4,
+      "vi": "vào"
+    },
+    {
+      "pos": 9,
+      "hanzi": "药",
+      "pinyin": "yào",
+      "adj": 2,
+      "vi": "Thuốc"
+    },
+    {
+      "pos": 10,
+      "hanzi": "身体",
+      "pinyin": "Shēntǐ",
+      "adj": 2,
+      "vi": "Cơ thể, sức khỏe"
+    },
+    {
+      "pos": 11,
+      "hanzi": "时",
+      "pinyin": "Shí",
+      "adj": 2,
+      "vi": "1 khoảng thời gian"
+    },
+    {
+      "pos": 12,
+      "hanzi": "最",
+      "pinyin": "Zuì",
+      "adj": 18,
+      "vi": "Nhất"
+    },
+    {
+      "pos": 13,
+      "hanzi": "药店",
+      "pinyin": "Yàodiàn",
+      "adj": 2,
+      "vi": "Hiệu thuốc"
+    }
+  ]
+}

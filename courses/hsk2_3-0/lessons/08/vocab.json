@@ -1,0 +1,129 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 8,
+  "label": "Bài 8",
+  "title": "虽然你忘了，但是我记得",
+  "short_vi": "Đi mua sắm, xem đồng hồ; đi xem phim, mua vé; tổ chức sinh nhật bất ngờ cho vợ/chồng; văn hóa con số may mắn của người Trung Quốc",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "手表",
+      "pinyin": "Shǒubiǎo",
+      "adj": 2,
+      "vi": "Đồng hồ đeo tay"
+    },
+    {
+      "pos": 2,
+      "hanzi": "左边",
+      "pinyin": "Zuǒbian",
+      "adj": 2,
+      "vi": "Bên trái"
+    },
+    {
+      "pos": 3,
+      "hanzi": "左",
+      "pinyin": "Zuǒ",
+      "adj": 2,
+      "vi": "trái"
+    },
+    {
+      "pos": 4,
+      "hanzi": "比",
+      "pinyin": "Bǐ",
+      "adj": [
+        13,
+        2,
+        4
+      ],
+      "vi": "hơn"
+    },
+    {
+      "pos": 5,
+      "hanzi": "右边",
+      "pinyin": "Yòubian",
+      "adj": 2,
+      "vi": "Bên phải"
+    },
+    {
+      "pos": 6,
+      "hanzi": "右",
+      "pinyin": "Yòu",
+      "adj": 2,
+      "vi": "Phải"
+    },
+    {
+      "pos": 7,
+      "hanzi": "记得",
+      "pinyin": "Jìde",
+      "adj": 4,
+      "vi": "nhớ"
+    },
+    {
+      "pos": 8,
+      "hanzi": "爱情片",
+      "pinyin": "Àiqíngpiàn",
+      "adj": 2,
+      "vi": "Phim tình cảm lãng mạn"
+    },
+    {
+      "pos": 9,
+      "hanzi": "有意思",
+      "pinyin": "Yǒu yìsi",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "Thú vị"
+    },
+    {
+      "pos": 10,
+      "hanzi": "点",
+      "pinyin": "Diǎn",
+      "adj": 4,
+      "vi": "Gọi (món)"
+    },
+    {
+      "pos": 11,
+      "hanzi": "虽然",
+      "pinyin": "Suīrán",
+      "adj": 10,
+      "vi": "Mặc dù"
+    },
+    {
+      "pos": 12,
+      "hanzi": "但是",
+      "pinyin": "Dànshì",
+      "adj": 10,
+      "vi": "nhưng"
+    },
+    {
+      "pos": 13,
+      "hanzi": "花",
+      "pinyin": "Huā",
+      "adj": 4,
+      "vi": "Dành, tốn"
+    },
+    {
+      "pos": 14,
+      "hanzi": "妻子",
+      "pinyin": "Qīzi",
+      "adj": 2,
+      "vi": "vợ"
+    },
+    {
+      "pos": 15,
+      "hanzi": "丈夫",
+      "pinyin": "Zhàngfu",
+      "adj": 2,
+      "vi": "chồng"
+    },
+    {
+      "pos": 16,
+      "hanzi": "饭馆",
+      "pinyin": "Fànguǎn",
+      "adj": 2,
+      "vi": "Nhà hàng"
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+{
+	"course_id": "hsk1_3-0",
+	"course_name": "HSK 1 (3.0)",
+	"id": 3,
+	"label": "Bài 3",
+	"title": "我是中国人",
+	"short_vi": "Hỏi và trả lời về quốc tịch, nghề nghiệp, mối quan hệ",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "人",
+			"pinyin": "rén",
+			"adj": 2,
+			"vi": "người, con người"
+		},
+		{
+			"pos": 2,
+
+			"hanzi": "的",
+			"pinyin": "de",
+			"adj": 11,
+			"vi": "của (chỉ sở hữu)"
+		},
+		{
+			"pos": 3,
+			"hanzi": "中国",
+			"pinyin": "Zhōnɡɡuó",
+			"adj": 2,
+			"vi": "Trung Quốc"
+		},
+		{
+			"pos": 4,
+			"hanzi": "法国",
+			"pinyin": "Fǎɡuó",
+			"adj": 2,
+			"vi": "Nước Pháp"
+		},
+		{
+			"pos": 5,
+			"hanzi": "中文",
+			"pinyin": "Zhōngwén",
+			"adj": 2,
+			"vi": "Tiếng Trung"
+		},
+		{
+			"pos": 6,
+			"hanzi": "这",
+			"pinyin": "zhè",
+			"adj": 1,
+			"vi": "đây, này"
+		},
+		{
+			"pos": 7,
+			"hanzi": "谁",
+			"pinyin": "shéi/shuí",
+			"adj": 1,
+			"vi": "ai (dùng để hỏi)"
+		},
+		{
+			"pos": 8,
+			"hanzi": "女朋友",
+			"pinyin": "nǚpénɡyou",
+			"adj": 2,
+			"vi": "bạn gái"
+		},
+		{
+			"pos": 9,
+			"hanzi": "哪",
+			"pinyin": "nǎ",
+			"adj": 1,
+			"vi": "nào, cái gì, ở đâu (dùng để hỏi)"
+		},
+		{
+			"pos": 10,
+			"hanzi": "国",
+			"pinyin": "guó",
+			"adj": 2,
+			"vi": "quốc gia, đất nước"
+		},
+		{
+			"pos": 11,
+			"hanzi": "她",
+			"pinyin": "tā",
+			"adj": 1,
+			"vi": "cô ấy, chị ấy"
+		},
+		{
+			"pos": 12,
+			"hanzi": "泰国",
+			"pinyin": "Tàiɡuó",
+			"adj": 2,
+			"vi": "Thái Lan"
+		},
+		{
+			"pos": 13,
+			"hanzi": "喂",
+			"pinyin": "wèi",
+			"adj": 16,
+			"vi": "alo (gọi điện), ê, này"
+		},
+		{
+			"pos": 14,
+			"hanzi": "姐姐",
+			"pinyin": "jiějie",
+			"adj": 2,
+			"vi": "chị gái"
+		},
+		{
+			"pos": 15,
+			"hanzi": "工作",
+			"pinyin": "gōngzuò",
+			"adj": 2,
+			"vi": "công việc"
+		},
+		{
+			"pos": 16,
+			"hanzi": "还",
+			"pinyin": "hái",
+			"adj": 7,
+			"vi": "vấn"
+		},
+		{
+			"pos": 17,
+			"hanzi": "忙",
+			"pinyin": "máng",
+			"adj": 6,
+			"vi": "bận"
+		},
+		{
+			"pos": 18,
+			"hanzi": "吗",
+			"pinyin": "ma",
+			"adj": 11,
+			"vi": "đứng cuối câu dùng để hỏi"
+		},
+		{
+			"pos": 19,
+			"hanzi": "对",
+			"pinyin": "duì",
+			"adj": 6,
+			"vi": "đúng, phải"
+		},
+		{
+			"pos": 20,
+			"hanzi": "太",
+			"pinyin": "tài",
+			"adj": 11,
+			"vi": "quá, rất, lắm"
+		},
+		{
+			"pos": 21,
+			"hanzi": "我们",
+			"pinyin": "wǒmen",
+			"adj": 1,
+			"vi": "chúng tôi, chúng mình"
+		},
+		{
+			"pos": 22,
+			"hanzi": "想",
+			"pinyin": "xiǎng",
+			"adj": 4,
+			"vi": "muốn; nghĩ; nhớ"
+		}
+	]
+}

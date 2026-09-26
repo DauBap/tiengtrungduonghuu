@@ -1,0 +1,83 @@
+{
+  "course_id": "hsk1_2",
+  "course_name": "HSK 1(2.0)",
+  "id": 13,
+  "label": "Bài 13",
+  "title": "他在学做中国菜呢",
+  "short_vi": "Hỏi và trả lời việc đang làm. Nói về sở thích. Gọi điện thoại và đọc số.",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "喂",
+      "pinyin": "wèi",
+      "adj": 16,
+      "vi": "alo (dùng khi gọi điện)"
+    },
+    {
+      "pos": 2,
+      "hanzi": "也",
+      "pinyin": "yě",
+      "adj": 7,
+      "vi": "cũng"
+    },
+    {
+      "pos": 3,
+      "hanzi": "学习",
+      "pinyin": "xuéxí",
+      "adj": 4,
+      "vi": "học tập"
+    },
+    {
+      "pos": 4,
+      "hanzi": "上午",
+      "pinyin": "shàngwǔ",
+      "adj": 2,
+      "vi": "buổi sáng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "睡觉",
+      "pinyin": "shuìjiào",
+      "adj": 4,
+      "vi": "ngủ"
+    },
+    {
+      "pos": 6,
+      "hanzi": "电视",
+      "pinyin": "diànshì",
+      "adj": 2,
+      "vi": "tivi"
+    },
+    {
+      "pos": 7,
+      "hanzi": "喜欢",
+      "pinyin": "xǐhuan",
+      "adj": 4,
+      "vi": "thích"
+    },
+    {
+      "pos": 8,
+      "hanzi": "给",
+      "pinyin": "gěi",
+      "adj": [
+        4,
+        13
+      ],
+      "vi": "cho"
+    },
+    {
+      "pos": 9,
+      "hanzi": "打电话",
+      "pinyin": "dǎ diànhuà",
+      "adj": 4,
+      "vi": "gọi điện thoại"
+    },
+    {
+      "pos": 10,
+      "hanzi": "吧",
+      "pinyin": "ba",
+      "adj": 15,
+      "vi": "Trợ từ ngữ khí"
+    }
+  ]
+}

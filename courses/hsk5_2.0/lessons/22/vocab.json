@@ -1,0 +1,257 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 22,
+  "label": "Bài 22",
+  "title": " 阅读与思考",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "过分",
+      "pinyin": "guòfèn",
+      "adj": 6,
+      "vi": "quá đáng, quá mức"
+    },
+    {
+      "pos": 2,
+      "hanzi": "强调",
+      "pinyin": "qiángdiào",
+      "adj": 4,
+      "vi": "nhấn mạnh"
+    },
+    {
+      "pos": 3,
+      "hanzi": "作文",
+      "pinyin": "zuòwén",
+      "adj": 2,
+      "vi": "bài làm văn"
+    },
+    {
+      "pos": 4,
+      "hanzi": "观点",
+      "pinyin": "guāndiǎn",
+      "adj": 2,
+      "vi": "quan điểm"
+    },
+    {
+      "pos": 5,
+      "hanzi": "客观",
+      "pinyin": "kèguān",
+      "adj": 6,
+      "vi": "khách quan"
+    },
+    {
+      "pos": 6,
+      "hanzi": "全面",
+      "pinyin": "quánmiàn",
+      "adj": 6,
+      "vi": "toàn diện, mọi mặt"
+    },
+    {
+      "pos": 7,
+      "hanzi": "转变",
+      "pinyin": "zhuǎnbiàn",
+      "adj": 4,
+      "vi": "thay đổi"
+    },
+    {
+      "pos": 8,
+      "hanzi": "观念",
+      "pinyin": "guānniàn",
+      "adj": 2,
+      "vi": "quan niệm, tư tưởng"
+    },
+    {
+      "pos": 9,
+      "hanzi": "火柴",
+      "pinyin": "huǒchái",
+      "adj": 2,
+      "vi": "diêm quẹt"
+    },
+    {
+      "pos": 10,
+      "hanzi": "灰",
+      "pinyin": "huī",
+      "adj": [
+        2,
+        6
+      ],
+      "vi": "tro; xám"
+    },
+    {
+      "pos": 11,
+      "hanzi": "一旦",
+      "pinyin": "yídàn",
+      "adj": 7,
+      "vi": "một khi"
+    },
+    {
+      "pos": 12,
+      "hanzi": "王宫",
+      "pinyin": "wánggōng",
+      "adj": 2,
+      "vi": "hoàng cung"
+    },
+    {
+      "pos": 13,
+      "hanzi": "王子",
+      "pinyin": "wángzǐ",
+      "adj": 2,
+      "vi": "hoàng tử"
+    },
+    {
+      "pos": 14,
+      "hanzi": "属于",
+      "pinyin": "shǔyú",
+      "adj": 4,
+      "vi": "thuộc về"
+    },
+    {
+      "pos": 15,
+      "hanzi": "对待",
+      "pinyin": "duìdài",
+      "adj": 4,
+      "vi": "đối xử"
+    },
+    {
+      "pos": 16,
+      "hanzi": "交换",
+      "pinyin": "jiāohuàn",
+      "adj": 4,
+      "vi": "trao đổi"
+    },
+    {
+      "pos": 17,
+      "hanzi": "拥有",
+      "pinyin": "yōngyǒu",
+      "adj": 4,
+      "vi": "có"
+    },
+    {
+      "pos": 18,
+      "hanzi": "巨大",
+      "pinyin": "jùdà",
+      "adj": 6,
+      "vi": "to lớn"
+    },
+    {
+      "pos": 19,
+      "hanzi": "承认",
+      "pinyin": "chéngrèn",
+      "adj": 4,
+      "vi": "thừa nhận, chấp nhận"
+    },
+    {
+      "pos": 20,
+      "hanzi": "人性",
+      "pinyin": "rénxìng",
+      "adj": 2,
+      "vi": "bản tính của con người"
+    },
+    {
+      "pos": 21,
+      "hanzi": "完美",
+      "pinyin": "wánměi",
+      "adj": 6,
+      "vi": "hoàn hảo, hoàn mỹ"
+    },
+    {
+      "pos": 22,
+      "hanzi": "难免",
+      "pinyin": "nánmiǎn",
+      "adj": 6,
+      "vi": "khó tránh"
+    },
+    {
+      "pos": 23,
+      "hanzi": "疼爱",
+      "pinyin": "téng'ài",
+      "adj": 4,
+      "vi": "thương yêu"
+    },
+    {
+      "pos": 24,
+      "hanzi": "平等",
+      "pinyin": "píngděng",
+      "adj": 6,
+      "vi": "bình đẳng, công bằng"
+    },
+    {
+      "pos": 25,
+      "hanzi": "自私",
+      "pinyin": "zìsī",
+      "adj": 6,
+      "vi": "ích kỷ"
+    },
+    {
+      "pos": 26,
+      "hanzi": "倾向",
+      "pinyin": "qīngxiàng",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "nghieng về; khuynh hướng"
+    },
+    {
+      "pos": 27,
+      "hanzi": "理由",
+      "pinyin": "lǐyóu",
+      "adj": 2,
+      "vi": "lý do"
+    },
+    {
+      "pos": 28,
+      "hanzi": "道德",
+      "pinyin": "dàodé",
+      "adj": 2,
+      "vi": "đạo đức"
+    },
+    {
+      "pos": 29,
+      "hanzi": "自从",
+      "pinyin": "zìcóng",
+      "adj": 13,
+      "vi": "từ lúc"
+    },
+    {
+      "pos": 30,
+      "hanzi": "童话",
+      "pinyin": "tónghuà",
+      "adj": 2,
+      "vi": "truyện hư cấu"
+    },
+    {
+      "pos": 31,
+      "hanzi": "价值",
+      "pinyin": "jiàzhí",
+      "adj": 2,
+      "vi": "giá trị"
+    },
+    {
+      "pos": 32,
+      "hanzi": "单纯",
+      "pinyin": "dānchún",
+      "adj": 6,
+      "vi": "đơn thuần, đơn giản, chỉ"
+    },
+    {
+      "pos": 33,
+      "hanzi": "主张",
+      "pinyin": "zhǔzhāng",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "cho là, tán thành; chủ trương"
+    },
+    {
+      "pos": 34,
+      "hanzi": "知感",
+      "pinyin": "zhīgǎn",
+      "adj": 2,
+      "vi": "tri giác"
+    }
+  ]
+}

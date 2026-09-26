@@ -1,0 +1,146 @@
+{
+  "lesson": 1,
+  "title": "她请我们吃了北京烤鸭",
+  "title_pinyin": "Tā qǐng wǒmen chīle Běijīng kǎoyā",
+  "title_vi": "Cô ấy đã mời chúng tôi ăn vịt quay Bắc Kinh",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "请问，您是王一飞老师的姐姐吗？",
+          "pinyin": "Qǐngwèn, nín shì Wáng Yīfēi lǎoshī de jiějie ma?",
+          "vi": "Xin hỏi, chị có phải là chị gái của cô giáo Vương Nhất Phi không ạ?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "是的，你们就是她的学生吧？",
+          "pinyin": "Shì de, nǐmen jiù shì tā de xuéshēng ba?",
+          "vi": "Đúng vậy, các em chính là học sinh của em ấy phải không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "对。我是白家月，她是安妮。",
+          "pinyin": "Duì. Wǒ shì Bái Jiāyuè, tā shì Ānnī.",
+          "vi": "Vâng. Em là Bạch Gia Nguyệt, còn bạn ấy là Annie."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你们好，我叫王一雪。一飞给我打电话了，让我来接你们。",
+          "pinyin": "Nǐmen hǎo, wǒ jiào Wáng Yīxuě. Yīfēi gěi wǒ dǎ diànhuà le, ràng wǒ lái jiē nǐmen.",
+          "vi": "Chào các em, chị tên là Vương Nhất Tuyết. Nhất Phi đã gọi điện cho chị, bảo chị ra đón các em."
+        },
+        {
+          "speaker": "白家月、安妮",
+          "zh": "谢谢您。",
+          "pinyin": "Xièxie nín.",
+          "vi": "Cảm ơn chị ạ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "不客气。",
+          "pinyin": "Bú kèqi.",
+          "vi": "Không có gì."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "你们是第一次来北京吗？",
+          "pinyin": "Nǐmen shì dì-yī cì lái Běijīng ma?",
+          "vi": "Các em là lần đầu tiên đến Bắc Kinh phải không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "是的，我们都是第一次来。",
+          "pinyin": "Shì de, wǒmen dōu shì dì-yī cì lái.",
+          "vi": "Vâng, chúng em đều là lần đầu tiên đến ạ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你们是来学中文的吗？",
+          "pinyin": "Nǐmen shì lái xué Zhōngwén de ma?",
+          "vi": "Các em đến để học tiếng Trung phải không?"
+        },
+        {
+          "speaker": "安妮",
+          "zh": "不是，我们是来旅游的。",
+          "pinyin": "Bú shì, wǒmen shì lái lǚyóu de.",
+          "vi": "Không ạ, chúng em đến du lịch ạ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我这几天都不忙，你们有事就找我。",
+          "pinyin": "Wǒ zhè jǐ tiān dōu bù máng, nǐmen yǒu shì jiù zhǎo wǒ.",
+          "vi": "Mấy ngày nay chị đều không bận, các em có việc gì thì tìm chị nhé."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好的，谢谢您。",
+          "pinyin": "Hǎo de, xièxie nín.",
+          "vi": "Vâng ạ, cảm ơn chị."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "陈天中",
+          "zh": "喂，家月，你明天有时间吗？我想请你帮个忙。",
+          "pinyin": "Wèi, Jiāyuè, nǐ míngtiān yǒu shíjiān ma? Wǒ xiǎng qǐng nǐ bāng ge máng.",
+          "vi": "A lô, Gia Nguyệt, ngày mai bạn có thời gian không? Tôi muốn nhờ bạn giúp một việc."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "不好意思，天中。我已经到北京了。",
+          "pinyin": "Bù hǎoyìsi, Tiānzhōng. Wǒ yǐjīng dào Běijīng le.",
+          "vi": "Xin lỗi nhé, Thiên Trung. Tớ đã đến Bắc Kinh rồi."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "你是什么时候到的？",
+          "pinyin": "Nǐ shì shénme shíhou dào de?",
+          "vi": "Cậu đến lúc nào vậy?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我是今天早上到的。你有事可以叫李文帮忙，他还在学校呢。",
+          "pinyin": "Wǒ shì jīntiān zǎoshang dào de. Nǐ yǒu shì kěyǐ jiào Lǐ Wén bāngmáng, tā hái zài xuéxiào ne.",
+          "vi": "Tớ đến sáng nay. Cậu có việc có thể nhờ Lý Văn giúp, cậu ấy vẫn ở trường mà."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "好的，那我给他打个电话。",
+          "pinyin": "Hǎo de, nà wǒ gěi tā dǎ ge diànhuà.",
+          "vi": "Được rồi, vậy tôi gọi điện cho cậu ấy."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好，再见！",
+          "pinyin": "Hǎo, zàijiàn!",
+          "vi": "Ừ, tạm biệt nhé!"
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "王老师，我们已经到北京了，是您姐姐来接的我们。她请我们吃了北京烤鸭，还给我们介绍了很多东西。我们的中文不太好，有时不太懂她的意思。",
+          "pinyin": "Wáng lǎoshī, wǒmen yǐjīng dào Běijīng le, shì nín jiějie lái jiē de wǒmen. Tā qǐng wǒmen chīle Běijīng kǎoyā, hái gěi wǒmen jièshào le hěnduō dōngxi. Wǒmen de Zhōngwén bú tài hǎo, yǒushí bú tài dǒng tā de yìsi.",
+          "vi": "Thưa cô Vương, chúng em đã đến Bắc Kinh rồi ạ, chị gái của cô đã ra đón chúng em. Chị ấy mời chúng em ăn vịt quay Bắc Kinh và giới thiệu cho chúng em rất nhiều thứ. Tiếng Trung của chúng em không được tốt lắm, có lúc không hiểu hết ý chị ấy."
+        }
+      ]
+    }
+  ]
+}

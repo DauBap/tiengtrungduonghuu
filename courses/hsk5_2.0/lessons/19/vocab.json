@@ -1,0 +1,327 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 19,
+  "label": "Bài 19",
+  "title": "家乡的萝卜饼",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "家乡",
+      "pinyin": "jiāxiāng",
+      "adj": 2,
+      "vi": "quê nhà, quê hương"
+    },
+    {
+      "pos": 2,
+      "hanzi": "萝卜",
+      "pinyin": "luóbo",
+      "adj": 2,
+      "vi": "cây củ cải, củ cải"
+    },
+    {
+      "pos": 3,
+      "hanzi": "怀念",
+      "pinyin": "huáiniàn",
+      "adj": 4,
+      "vi": "tưởng nhớ, nhớ"
+    },
+    {
+      "pos": 4,
+      "hanzi": "色彩",
+      "pinyin": "sècǎi",
+      "adj": 2,
+      "vi": "màu sắc, sắc thái"
+    },
+    {
+      "pos": 5,
+      "hanzi": "想念",
+      "pinyin": "xiǎngniàn",
+      "adj": 4,
+      "vi": "nhớ"
+    },
+    {
+      "pos": 6,
+      "hanzi": "青",
+      "pinyin": "qīng",
+      "adj": 6,
+      "vi": "xanh"
+    },
+    {
+      "pos": 7,
+      "hanzi": "紫",
+      "pinyin": "zǐ",
+      "adj": 6,
+      "vi": "tím"
+    },
+    {
+      "pos": 8,
+      "hanzi": "赏心悦目",
+      "pinyin": "shǎngxīn-yuèmù",
+      "adj": [
+        null,
+        12
+      ],
+      "vi": "sướng mắt đẹp lòng"
+    },
+    {
+      "pos": 9,
+      "hanzi": "般",
+      "pinyin": "bān",
+      "adj": 11,
+      "vi": "giống nhau, tựa như"
+    },
+    {
+      "pos": 10,
+      "hanzi": "清淡",
+      "pinyin": "qīngdàn",
+      "adj": 6,
+      "vi": "nhẹ, dễ tiêu"
+    },
+    {
+      "pos": 11,
+      "hanzi": "可口",
+      "pinyin": "kěkǒu",
+      "adj": 6,
+      "vi": "ngon"
+    },
+    {
+      "pos": 12,
+      "hanzi": "夸",
+      "pinyin": "kuā",
+      "adj": 4,
+      "vi": "khen ngợi"
+    },
+    {
+      "pos": 13,
+      "hanzi": "橘子",
+      "pinyin": "júzi",
+      "adj": 2,
+      "vi": "quả quýt"
+    },
+    {
+      "pos": 14,
+      "hanzi": "梨",
+      "pinyin": "lí",
+      "adj": 2,
+      "vi": "quả lê"
+    },
+    {
+      "pos": 15,
+      "hanzi": "炒",
+      "pinyin": "chǎo",
+      "adj": 4,
+      "vi": "xào, rang"
+    },
+    {
+      "pos": 16,
+      "hanzi": "煮",
+      "pinyin": "zhǔ",
+      "adj": 4,
+      "vi": "nấu, đun, luộc"
+    },
+    {
+      "pos": 17,
+      "hanzi": "油炸",
+      "pinyin": "yóuzhá",
+      "adj": 4,
+      "vi": "chiên bằng cách cho nhiều dầu"
+    },
+    {
+      "pos": 18,
+      "hanzi": "切",
+      "pinyin": "qiē",
+      "adj": 4,
+      "vi": "cắt, xắt"
+    },
+    {
+      "pos": 19,
+      "hanzi": "丝",
+      "pinyin": "sī",
+      "adj": 2,
+      "vi": "sợi"
+    },
+    {
+      "pos": 20,
+      "hanzi": "搅拌",
+      "pinyin": "jiǎobàn",
+      "adj": 4,
+      "vi": "khuấy, trộn"
+    },
+    {
+      "pos": 21,
+      "hanzi": "均匀",
+      "pinyin": "jūnyún",
+      "adj": 6,
+      "vi": "đều đặn, đều"
+    },
+    {
+      "pos": 22,
+      "hanzi": "原料",
+      "pinyin": "yuánliào",
+      "adj": 2,
+      "vi": "nguyên liệu"
+    },
+    {
+      "pos": 23,
+      "hanzi": "擀",
+      "pinyin": "gǎn",
+      "adj": 4,
+      "vi": "cán, nghiền"
+    },
+    {
+      "pos": 24,
+      "hanzi": "薄",
+      "pinyin": "báo",
+      "adj": 6,
+      "vi": "mỏng"
+    },
+    {
+      "pos": 25,
+      "hanzi": "折叠",
+      "pinyin": "zhédiě",
+      "adj": 4,
+      "vi": "gấp, xếp"
+    },
+    {
+      "pos": 26,
+      "hanzi": "透明",
+      "pinyin": "tòumíng",
+      "adj": 6,
+      "vi": "trong suốt"
+    },
+    {
+      "pos": 27,
+      "hanzi": "淋",
+      "pinyin": "lín",
+      "adj": 4,
+      "vi": "rải, rưới, đổ vào"
+    },
+    {
+      "pos": 28,
+      "hanzi": "圈",
+      "pinyin": "quān",
+      "adj": 2,
+      "vi": "vòng"
+    },
+    {
+      "pos": 29,
+      "hanzi": "烫",
+      "pinyin": "tàng",
+      "adj": [
+        4,
+        6
+      ],
+      "vi": "làm bỏng, hâm, ủi; nóng"
+    },
+    {
+      "pos": 30,
+      "hanzi": "盖",
+      "pinyin": "gài",
+      "adj": [
+        4,
+        2
+      ],
+      "vi": "đậy; nắp"
+    },
+    {
+      "pos": 31,
+      "hanzi": "预防",
+      "pinyin": "yùfáng",
+      "adj": 4,
+      "vi": "đề phòng, ngăn ngừa"
+    },
+    {
+      "pos": 32,
+      "hanzi": "糊",
+      "pinyin": "hú",
+      "adj": 4,
+      "vi": "khét, cháy"
+    },
+    {
+      "pos": 33,
+      "hanzi": "文火",
+      "pinyin": "wénhuǒ",
+      "adj": 2,
+      "vi": "lửa nhỏ, lửa riu riu"
+    },
+    {
+      "pos": 34,
+      "hanzi": "闻",
+      "pinyin": "wén",
+      "adj": 4,
+      "vi": "ngửi"
+    },
+    {
+      "pos": 35,
+      "hanzi": "趁",
+      "pinyin": "chèn",
+      "adj": 13,
+      "vi": "nhân (lúc), thừa (dịp)"
+    },
+    {
+      "pos": 36,
+      "hanzi": "口味",
+      "pinyin": "kǒuwèi",
+      "adj": 2,
+      "vi": "mùi vị, hương vị"
+    },
+    {
+      "pos": 37,
+      "hanzi": "少许",
+      "pinyin": "shǎoxǔ",
+      "adj": 6,
+      "vi": "một chút"
+    },
+    {
+      "pos": 38,
+      "hanzi": "酱油",
+      "pinyin": "jiàngyóu",
+      "adj": 2,
+      "vi": "nước tương"
+    },
+    {
+      "pos": 39,
+      "hanzi": "醋",
+      "pinyin": "cù",
+      "adj": 2,
+      "vi": "giấm"
+    },
+    {
+      "pos": 40,
+      "hanzi": "焦",
+      "pinyin": "jiāo",
+      "adj": 6,
+      "vi": "bị cháy"
+    },
+    {
+      "pos": 41,
+      "hanzi": "嫩",
+      "pinyin": "nèn",
+      "adj": 6,
+      "vi": "mềm"
+    },
+    {
+      "pos": 42,
+      "hanzi": "特色",
+      "pinyin": "tèsè",
+      "adj": 2,
+      "vi": "đặc điểm, đặc trưng"
+    },
+    {
+      "pos": 43,
+      "hanzi": "痰",
+      "pinyin": "tán",
+      "adj": 2,
+      "vi": "đàm, đờm"
+    },
+    {
+      "pos": 44,
+      "hanzi": "平安",
+      "pinyin": "píng'ān",
+      "adj": 6,
+      "vi": "bình an, an toàn"
+    }
+  ]
+}

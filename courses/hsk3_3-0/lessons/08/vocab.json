@@ -1,0 +1,215 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 8,
+  "label": "Bài 8",
+  "title": "今天我出院了",
+  "short_vi": "Nói về thói quen tập thể dục; hỏi thăm sức khỏe, triệu chứng bệnh; đi khám bệnh, nhập viện; bác sĩ kê đơn và hướng dẫn cách uống thuốc; xuất viện và dặn dò chăm sóc sức khỏe",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "最近",
+      "pinyin": "zuìjìn",
+      "adj": 2,
+      "vi": "gần đây, dạo gần đây"
+    },
+    {
+      "pos": 2,
+      "hanzi": "常",
+      "pinyin": "cháng",
+      "adj": 18,
+      "vi": "thường, hay, thường xuyên"
+    },
+    {
+      "pos": 3,
+      "hanzi": "体育馆",
+      "pinyin": "tǐyùguǎn",
+      "adj": 2,
+      "vi": "nhà thi đấu, phòng tập thể thao"
+    },
+    {
+      "pos": 4,
+      "hanzi": "习惯",
+      "pinyin": "xíguàn",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "thói quen; quen với, tập quen với"
+    },
+    {
+      "pos": 5,
+      "hanzi": "胖",
+      "pinyin": "pàng",
+      "adj": 6,
+      "vi": "béo, mập"
+    },
+    {
+      "pos": 6,
+      "hanzi": "健康",
+      "pinyin": "jiànkāng",
+      "adj": 6,
+      "vi": "sức khỏe; khỏe mạnh"
+    },
+    {
+      "pos": 7,
+      "hanzi": "以后",
+      "pinyin": "yǐhòu",
+      "adj": 2,
+      "vi": "sau này, về sau, sau đó"
+    },
+    {
+      "pos": 8,
+      "hanzi": "羽毛球",
+      "pinyin": "yǔmáoqiú",
+      "adj": 2,
+      "vi": "cầu lông"
+    },
+    {
+      "pos": 9,
+      "hanzi": "耳朵",
+      "pinyin": "ěrduo",
+      "adj": 2,
+      "vi": "tai"
+    },
+    {
+      "pos": 10,
+      "hanzi": "感冒",
+      "pinyin": "gǎnmào",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "cảm cúm, bị cảm"
+    },
+    {
+      "pos": 11,
+      "hanzi": "发烧",
+      "pinyin": "fāshāo",
+      "adj": 4,
+      "vi": "sốt, bị sốt"
+    },
+    {
+      "pos": 12,
+      "hanzi": "低",
+      "pinyin": "dī",
+      "adj": 6,
+      "vi": "thấp, hạ, cúi (đầu, giọng nói, mức độ)"
+    },
+    {
+      "pos": 13,
+      "hanzi": "关心",
+      "pinyin": "guānxīn",
+      "adj": 4,
+      "vi": "quan tâm, chăm sóc"
+    },
+    {
+      "pos": 14,
+      "hanzi": "注意",
+      "pinyin": "zhùyì",
+      "adj": 4,
+      "vi": "chú ý, để ý, quan tâm đến"
+    },
+    {
+      "pos": 15,
+      "hanzi": "突然",
+      "pinyin": "tūrán",
+      "adj": 6,
+      "vi": "đột ngột, bất ngờ"
+    },
+    {
+      "pos": 16,
+      "hanzi": "住院",
+      "pinyin": "zhùyuàn",
+      "adj": 4,
+      "vi": "nhập viện, nằm viện"
+    },
+    {
+      "pos": 17,
+      "hanzi": "担心",
+      "pinyin": "dānxīn",
+      "adj": 4,
+      "vi": "lo lắng, lo sợ"
+    },
+    {
+      "pos": 18,
+      "hanzi": "腿",
+      "pinyin": "tuǐ",
+      "adj": 2,
+      "vi": "chân"
+    },
+    {
+      "pos": 19,
+      "hanzi": "病人",
+      "pinyin": "bìngrén",
+      "adj": 2,
+      "vi": "bệnh nhân, người ốm"
+    },
+    {
+      "pos": 20,
+      "hanzi": "差不多",
+      "pinyin": "chàbuduō",
+      "adj": [
+        6,
+        18
+      ],
+      "vi": "gần như, tương đối giống, xấp xỉ"
+    },
+    {
+      "pos": 21,
+      "hanzi": "得",
+      "pinyin": "děi",
+      "adj": 11,
+      "vi": "phải"
+    },
+    {
+      "pos": 22,
+      "hanzi": "开心",
+      "pinyin": "kāixīn",
+      "adj": 6,
+      "vi": "vui vẻ, vui mừng"
+    },
+    {
+      "pos": 23,
+      "hanzi": "出院",
+      "pinyin": "chūyuàn",
+      "adj": 4,
+      "vi": "xuất viện, ra viện"
+    },
+    {
+      "pos": 24,
+      "hanzi": "开",
+      "pinyin": "kāi",
+      "adj": 4,
+      "vi": "mở, bật, điều khiển, tổ chức, lái"
+    },
+    {
+      "pos": 25,
+      "hanzi": "种",
+      "pinyin": "zhǒng",
+      "adj": 8,
+      "vi": "loại"
+    },
+    {
+      "pos": 26,
+      "hanzi": "方法",
+      "pinyin": "fāngfǎ",
+      "adj": 2,
+      "vi": "phương pháp, cách làm"
+    },
+    {
+      "pos": 27,
+      "hanzi": "其他",
+      "pinyin": "qítā",
+      "adj": 1,
+      "vi": "những cái khác, khác"
+    },
+    {
+      "pos": 28,
+      "hanzi": "心里",
+      "pinyin": "xīnlǐ",
+      "adj": 2,
+      "vi": "trong lòng, trong tâm, cảm giác bên trong"
+    }
+  ]
+}

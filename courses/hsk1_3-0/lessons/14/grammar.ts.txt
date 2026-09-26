@@ -1,0 +1,220 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const explanation = "Đối chiếu đúng ý nghĩa và trật tự từ của cấu trúc đã học.";
+const input = (
+	id: string,
+	prompt: string,
+	answer: string,
+	acceptedAnswers: string[] = []
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	acceptedAnswers,
+	explanation,
+	formula: "Giữ đúng trật tự từ; dấu câu và khoảng trắng không ảnh hưởng kết quả."
+});
+const choice = (
+	id: string,
+	answer: string,
+	options: [string, string, string],
+	image: string,
+	imageAlt: string
+): GrammarQuestion => ({
+	id,
+	prompt: "Chọn câu tiếng Trung phù hợp với hình.",
+	answer,
+	options,
+	image,
+	imageAlt,
+	explanation,
+	formula: "Quan sát chi tiết trong hình và chọn đúng một câu."
+});
+const arrange = (
+	id: string,
+	tokens: string[],
+	answer: string,
+	acceptedAnswers: string[] = []
+): GrammarQuestion => ({
+	id,
+	prompt: "Sắp xếp các thẻ từ thành câu đúng.",
+	tokens,
+	answer,
+	acceptedAnswers,
+	explanation,
+	formula: "Chọn từng thẻ theo đúng trật tự câu."
+});
+const img = (name: string) => `/images/grammar/lesson14/${name}.svg`;
+
+const pictures: GrammarQuestion[] = [
+	choice(
+		"l14-p1",
+		"我看了一个电影。",
+		["我看了一个电影。", "我没看电影。", "我正在看电影。"],
+		img("movie-completed"),
+		"Nhân vật đã xem xong một bộ phim, có dấu hoàn thành"
+	),
+	choice(
+		"l14-p2",
+		"妈妈买了牛奶。",
+		["妈妈买了牛奶。", "妈妈没买牛奶。", "妈妈想买牛奶。"],
+		img("mother-bought-milk"),
+		"Mẹ đã mua sữa với túi hàng và dấu hoàn thành"
+	),
+	choice(
+		"l14-p3",
+		"我没看电影。",
+		["我没看电影。", "我看了一个电影。", "我正在看电影呢。"],
+		img("movie-not-watched"),
+		"Nhân vật không xem phim, biểu tượng phim bị gạch chéo"
+	),
+	choice(
+		"l14-p4",
+		"他没去医院。",
+		["他没去医院。", "他去了医院。", "他正在医院工作。"],
+		img("hospital-not-visited"),
+		"Một người không đi bệnh viện, biểu tượng bệnh viện bị gạch chéo"
+	),
+	choice(
+		"l14-p5",
+		"他睡了一觉。",
+		["他睡了一觉。", "他正在睡觉。", "他没睡觉。"],
+		img("slept-one-sleep"),
+		"Một người đã ngủ một giấc và vừa thức dậy"
+	),
+	choice(
+		"l14-p6",
+		"她说了很多话。",
+		["她说了很多话。", "她正在说话。", "她没说话。"],
+		img("said-many-words"),
+		"Một cô gái đã nói rất nhiều với nhiều bong bóng hội thoại"
+	),
+	choice(
+		"l14-p7",
+		"他们都写了。",
+		["他们都写了。", "他们都没写。", "他写了。"],
+		img("all-wrote"),
+		"Nhiều người đều viết xong, mỗi người có dấu hoàn thành"
+	),
+	choice(
+		"l14-p8",
+		"他们都没去。",
+		["他们都没去。", "他们都去了。", "他没去。"],
+		img("all-did-not-go"),
+		"Một nhóm người đều không đi, có dấu phủ định trên tất cả"
+	)
+];
+
+const arrangements: GrammarQuestion[] = [
+	arrange("l14-a1", ["一个电影", "我", "看了"], "我看了一个电影。"),
+	arrange("l14-a2", ["牛奶", "买了", "妈妈"], "妈妈买了牛奶。"),
+	arrange("l14-a3", ["没看电影", "我"], "我没看电影。"),
+	arrange("l14-a4", ["去医院", "他", "没有"], "他没有去医院。", ["他没去医院。"]),
+	arrange("l14-a5", ["一觉", "他", "睡了"], "他睡了一觉。"),
+	arrange("l14-a6", ["中文课", "我们", "上"], "我们上中文课。"),
+	arrange("l14-a7", ["很多话", "她", "说了"], "她说了很多话。"),
+	arrange("l14-a8", ["都写了", "他们"], "他们都写了。"),
+	arrange("l14-a9", ["都很便宜", "这些苹果"], "这些苹果都很便宜。"),
+	arrange("l14-a10", ["都没去", "我们"], "我们都没去。")
+];
+
+const translations: GrammarQuestion[] = [
+	input("l14-t1", "Tôi đã xem một bộ phim.", "我看了一个电影。"),
+	input("l14-t2", "Mẹ đã mua sữa.", "妈妈买了牛奶。"),
+	input("l14-t3", "Anh ấy đã đến bệnh viện.", "他去了医院。"),
+	input("l14-t4", "Tôi không xem phim.", "我没看电影。"),
+	input("l14-t5", "Mẹ không mua sữa.", "妈妈没买牛奶。", ["妈妈没有买牛奶。"]),
+	input("l14-t6", "Anh ấy đã ngủ một giấc.", "他睡了一觉。"),
+	input("l14-t7", "Chúng tôi học tiết tiếng Trung.", "我们上中文课。"),
+	input("l14-t8", "Cô ấy đã nói rất nhiều.", "她说了很多话。"),
+	input("l14-t9", "Những quả táo này đều rất rẻ.", "这些苹果都很便宜。"),
+	input("l14-t10", "Chúng tôi đều không đi.", "我们都没去。")
+];
+
+export const hsk1Lesson14Grammar: GrammarLesson = {
+	title: "Bài 14: 我看了一个电影",
+	variant: "hsk1-3-0-lesson14",
+	points: [
+		{
+			id: "aspect-le-two",
+			title: "Trợ từ động thái 了 (2)",
+			explanation:
+				"了 đặt ngay sau động từ để biểu thị hành động đã xảy ra hoặc hoàn thành. Khi có tân ngữ, tân ngữ đứng sau 了. Phủ định dùng 没/没有 trước động từ và không dùng 了.",
+			formulas: ["Chủ ngữ + Động từ + 了 + Tân ngữ", "Chủ ngữ + 没/没有 + Động từ + Tân ngữ"],
+			examples: [
+				{ chinese: "我看了一个电影。", vietnamese: "Tôi đã xem một bộ phim." },
+				{ chinese: "妈妈买了牛奶。", vietnamese: "Mẹ đã mua sữa." },
+				{ chinese: "他去了医院。", vietnamese: "Anh ấy đã đến bệnh viện." },
+				{ chinese: "我写了名字。", vietnamese: "Tôi đã viết tên." },
+				{ chinese: "我没看电影。", vietnamese: "Tôi không xem phim." },
+				{ chinese: "妈妈没买牛奶。", vietnamese: "Mẹ không mua sữa." },
+				{ chinese: "他没有去医院。", vietnamese: "Anh ấy không đến bệnh viện." }
+			],
+			notes: [
+				"看 + 了 + 一个电影",
+				"买 + 了 + 牛奶",
+				"写 + 了 + 名字",
+				"Đúng: 我没看电影。",
+				"Sai: 我没看了电影。"
+			],
+			exercises: [
+				{
+					id: "l14-picture",
+					title: "Bài tập 1: Nhìn hình và chọn đáp án đúng",
+					type: "choice",
+					questions: pictures
+				}
+			]
+		},
+		{
+			id: "separable-verb-one",
+			title: "Từ li hợp (1)",
+			explanation:
+				"Từ li hợp có cấu trúc giống một động từ nhưng có thể tách ra để chèn số lượng, nội dung hoặc mức độ vào giữa. Không xử lý chúng hoàn toàn như động từ thông thường.",
+			formulas: ["睡觉 → 睡了一觉", "上课 → 上中文课", "说话 → 说了很多话"],
+			examples: [
+				{ chinese: "他睡了一觉。", vietnamese: "Anh ấy đã ngủ một giấc." },
+				{ chinese: "我们上中文课。", vietnamese: "Chúng tôi học tiết tiếng Trung." },
+				{ chinese: "她说了很多话。", vietnamese: "Cô ấy đã nói rất nhiều." }
+			],
+			notes: ["Dạng cơ bản: 睡觉 / 上课 / 说话", "Không nói: 睡觉了一觉"],
+			exercises: [
+				{
+					id: "l14-arrange",
+					title: "Bài tập 2: Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: arrangements
+				}
+			]
+		},
+		{
+			id: "scope-dou",
+			title: "Phó từ phạm vi 都",
+			explanation:
+				"都 có nghĩa là “đều, tất cả”. Đối tượng được bao quát phải đứng trước 都. 都不 diễn tả tất cả đều không; 都没 diễn tả tất cả đều chưa làm hoặc không làm trong quá khứ.",
+			formulas: [
+				"Chủ ngữ số nhiều/đối tượng + 都 + Động từ/Tính từ",
+				"Chủ ngữ + 都 + 不 + Động từ/Tính từ",
+				"Chủ ngữ + 都 + 没 + Động từ"
+			],
+			examples: [
+				{ chinese: "他们都写了。", vietnamese: "Họ đều đã viết." },
+				{ chinese: "这些苹果都很便宜。", vietnamese: "Những quả táo này đều rất rẻ." },
+				{ chinese: "大家都去超市。", vietnamese: "Mọi người đều đi siêu thị." },
+				{ chinese: "我们都不想去。", vietnamese: "Chúng tôi đều không muốn đi." },
+				{ chinese: "这些衣服都不贵。", vietnamese: "Những bộ quần áo này đều không đắt." },
+				{ chinese: "我们都没去。", vietnamese: "Chúng tôi đều không đi." },
+				{ chinese: "他们都没看电影。", vietnamese: "Họ đều không xem phim." }
+			],
+			notes: ["Đúng: 我们都没去。", "Sai: 都我们没去。"],
+			exercises: [
+				{
+					id: "l14-translate",
+					title: "Bài tập 3: Dịch sang tiếng Trung",
+					type: "input",
+					questions: translations
+				}
+			]
+		}
+	]
+};

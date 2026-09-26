@@ -1,0 +1,128 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 4,
+  "label": "Bài 4",
+  "title": "你穿红色的很好看",
+  "short_vi": "Đi mua sắm, chọn quần áo; tư vấn và nhận xét về màu sắc, kiểu dáng; hỏi về trải nghiệm đã từng làm gì",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "过",
+      "pinyin": "Guo",
+      "adj": [],
+      "vi": "Qua(đứng sau V để biểu thị hành động trong quá khứ )"
+    },
+    {
+      "pos": 2,
+      "hanzi": "商场",
+      "pinyin": "Shāngchǎng",
+      "adj": 2,
+      "vi": "Trung tâm thương mại"
+    },
+    {
+      "pos": 3,
+      "hanzi": "进去",
+      "pinyin": "Jìnqù",
+      "adj": 4,
+      "vi": "Đi vào"
+    },
+    {
+      "pos": 4,
+      "hanzi": "条",
+      "pinyin": "Tiáo",
+      "adj": 8,
+      "vi": "Lượng từ dành cho vật dài, hẹp, mỏng, uốn lượn"
+    },
+    {
+      "pos": 5,
+      "hanzi": "裤子",
+      "pinyin": "Kùzi",
+      "adj": 2,
+      "vi": "Quần bò"
+    },
+    {
+      "pos": 6,
+      "hanzi": "白色",
+      "pinyin": "Báisè",
+      "adj": 2,
+      "vi": "Màu trắng"
+    },
+    {
+      "pos": 7,
+      "hanzi": "因为",
+      "pinyin": "Yīnwèi",
+      "adj": [
+        10,
+        13
+      ],
+      "vi": "Bởi vì"
+    },
+    {
+      "pos": 8,
+      "hanzi": "试",
+      "pinyin": "Shì",
+      "adj": 4,
+      "vi": "thử"
+    },
+    {
+      "pos": 9,
+      "hanzi": "红色",
+      "pinyin": "Hóngsè",
+      "adj": 2,
+      "vi": "Màu đỏ"
+    },
+    {
+      "pos": 10,
+      "hanzi": "所以",
+      "pinyin": "Suǒyǐ",
+      "adj": [
+        10,
+        13
+      ],
+      "vi": "Vì thế, cho nên"
+    },
+    {
+      "pos": 11,
+      "hanzi": "书包",
+      "pinyin": "Shūbāo",
+      "adj": 2,
+      "vi": "Cặp sách"
+    },
+    {
+      "pos": 12,
+      "hanzi": "过去",
+      "pinyin": "Guòqù",
+      "adj": 4,
+      "vi": "Quá khứ, đi qua"
+    },
+    {
+      "pos": 13,
+      "hanzi": "绿色",
+      "pinyin": "Lǜsè",
+      "adj": 2,
+      "vi": "Màu xanh lá"
+    },
+    {
+      "pos": 14,
+      "hanzi": "黑色",
+      "pinyin": "Hēisè",
+      "adj": 2,
+      "vi": "Màu đen"
+    },
+    {
+      "pos": 15,
+      "hanzi": "更",
+      "pinyin": "Gèng",
+      "adj": 18,
+      "vi": "hơn"
+    },
+    {
+      "pos": 16,
+      "hanzi": "颜色",
+      "pinyin": "Yán sè",
+      "adj": 2,
+      "vi": "Màu sắc"
+    }
+  ]
+}

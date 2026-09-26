@@ -1,0 +1,115 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 13,
+  "label": "Bài 13",
+  "title": "我是走回来的。",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "终于",
+      "pinyin": "zhōngyú",
+      "adj": 7,
+      "vi": "cuối cùng"
+    },
+    {
+      "pos": 2,
+      "hanzi": "爷爷",
+      "pinyin": "yéye",
+      "adj": 2,
+      "vi": "ông nội"
+    },
+    {
+      "pos": 3,
+      "hanzi": "礼物",
+      "pinyin": "lǐwù",
+      "adj": 2,
+      "vi": "quà biếu, quà tặng"
+    },
+    {
+      "pos": 4,
+      "hanzi": "奶奶",
+      "pinyin": "nǎinai",
+      "adj": 2,
+      "vi": "bà nội"
+    },
+    {
+      "pos": 5,
+      "hanzi": "遇到",
+      "pinyin": "yùdào",
+      "adj": 4,
+      "vi": "tình cờ gặp"
+    },
+    {
+      "pos": 6,
+      "hanzi": "一边",
+      "pinyin": "yībiān",
+      "adj": 7,
+      "vi": "vừa (được dùng để liên kết hai hành động xảy ra cùng lúc)"
+    },
+    {
+      "pos": 7,
+      "hanzi": "过去",
+      "pinyin": "guòqù",
+      "adj": 2,
+      "vi": "quá khứ"
+    },
+    {
+      "pos": 8,
+      "hanzi": "一般",
+      "pinyin": "yībān",
+      "adj": 6,
+      "vi": "thông thường"
+    },
+    {
+      "pos": 9,
+      "hanzi": "愿意",
+      "pinyin": "yuànyì",
+      "adj": 4,
+      "vi": "muốn"
+    },
+    {
+      "pos": 10,
+      "hanzi": "起来",
+      "pinyin": "qǐlai",
+      "adj": 4,
+      "vi": "(chỉ sự di chuyển hướng lên) lên"
+    },
+    {
+      "pos": 11,
+      "hanzi": "应该",
+      "pinyin": "yīnggāi",
+      "adj": 4,
+      "vi": "nên, cần phải"
+    },
+    {
+      "pos": 12,
+      "hanzi": "生活",
+      "pinyin": "shēnghuó",
+      "adj": 2,
+      "vi": "đời sống, cuộc sống"
+    },
+    {
+      "pos": 13,
+      "hanzi": "校长",
+      "pinyin": "xiàozhǎng",
+      "adj": 2,
+      "vi": "hiệu trưởng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "坏",
+      "pinyin": "huài",
+      "adj": 6,
+      "vi": "quá, quá mức"
+    },
+    {
+      "pos": 15,
+      "hanzi": "经常",
+      "pinyin": "jīngcháng",
+      "adj": 7,
+      "vi": "thường xuyên"
+    }
+  ]
+}

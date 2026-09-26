@@ -1,0 +1,220 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const explanation = "Đối chiếu đúng ý nghĩa và trật tự từ của cấu trúc đã học.";
+const input = (id: string, prompt: string, answer: string): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	explanation,
+	formula: "Giữ đúng trật tự từ; dấu câu và khoảng trắng không ảnh hưởng kết quả."
+});
+const choice = (
+	id: string,
+	answer: string,
+	options: [string, string, string],
+	image: string,
+	imageAlt: string
+): GrammarQuestion => ({
+	id,
+	prompt: "Chọn câu tiếng Trung phù hợp với hình.",
+	answer,
+	options,
+	image,
+	imageAlt,
+	explanation,
+	formula: "Quan sát chi tiết trong hình và chọn đúng một câu."
+});
+const arrange = (id: string, tokens: string[], answer: string): GrammarQuestion => ({
+	id,
+	prompt: "Sắp xếp các thẻ từ thành câu đúng.",
+	tokens,
+	answer,
+	explanation,
+	formula: "Chọn từng thẻ theo đúng trật tự câu."
+});
+const img = (name: string) => `/images/grammar/lesson7/${name}.svg`;
+
+const pictures: GrammarQuestion[] = [
+	choice(
+		"l7-p1",
+		"现在八点四十分。",
+		["现在八点四十分。", "现在八点十四分。", "现在四点八十分。"],
+		img("clock-0840"),
+		"Đồng hồ chỉ 8 giờ 40 phút"
+	),
+	choice(
+		"l7-p2",
+		"现在上午十点。",
+		["现在上午十点。", "现在下午十点。", "现在上午十二点。"],
+		img("morning-1000"),
+		"Đồng hồ buổi sáng chỉ 10 giờ"
+	),
+	choice(
+		"l7-p3",
+		"她上午十点半上课。",
+		["她上午十点半上课。", "她下午十点半上课。", "她上午十点半下课。"],
+		img("class-1030"),
+		"Học sinh lên lớp lúc 10 giờ 30 phút sáng"
+	),
+	choice(
+		"l7-p4",
+		"爸爸晚上六点半下班。",
+		["爸爸晚上六点半下班。", "爸爸上午六点半下班。", "爸爸晚上六点半上班。"],
+		img("father-off-1830"),
+		"Bố tan làm lúc 6 giờ 30 phút tối"
+	),
+	choice(
+		"l7-p5",
+		"我们下午两点见吧。",
+		["我们下午两点见吧。", "我们上午两点见吧。", "我们下午两点上班吧。"],
+		img("meet-1400"),
+		"Hai người hẹn gặp lúc 2 giờ chiều"
+	),
+	choice(
+		"l7-p6",
+		"我们坐出租车去吧。",
+		["我们坐出租车去吧。", "我们去超市买东西。", "我们不想坐出租车。"],
+		img("suggest-taxi"),
+		"Một nhóm người đề nghị đi bằng taxi"
+	),
+	choice(
+		"l7-p7",
+		"我明天上午去超市。",
+		["我明天上午去超市。", "我今天下午去超市。", "我明天晚上去超市。"],
+		img("tomorrow-morning-market"),
+		"Nhân vật đi siêu thị vào sáng mai"
+	),
+	choice(
+		"l7-p8",
+		"我明天下午两点还上课呢。",
+		["我明天下午两点还上课呢。", "我明天上午两点还上课呢。", "我明天下午两点下课了。"],
+		img("still-class-1400"),
+		"Chiều mai lúc 2 giờ học sinh vẫn còn tiết học"
+	)
+];
+
+const arrangements: GrammarQuestion[] = [
+	arrange("l7-a1", ["四十分", "现在", "八点"], "现在八点四十分。"),
+	arrange("l7-a2", ["六点半", "我", "晚上", "下班"], "我晚上六点半下班。"),
+	arrange("l7-a3", ["上课", "上午十点半", "她"], "她上午十点半上课。"),
+	arrange("l7-a4", ["见吧", "我们", "下午两点"], "我们下午两点见吧。"),
+	arrange("l7-a5", ["去吧", "坐出租车", "我们"], "我们坐出租车去吧。"),
+	arrange("l7-a6", ["去超市", "明天上午", "我"], "我明天上午去超市。"),
+	arrange("l7-a7", ["下午五点", "妈妈", "下班"], "妈妈下午五点下班。"),
+	arrange("l7-a8", ["去", "我", "不想"], "我不想去。"),
+	arrange("l7-a9", ["还上课呢", "我", "明天下午两点"], "我明天下午两点还上课呢。"),
+	arrange("l7-a10", ["晚上六点", "还上班呢", "爸爸"], "爸爸晚上六点还上班呢。")
+];
+
+const translations: GrammarQuestion[] = [
+	input("l7-t1", "Bây giờ là 8 giờ 40 phút.", "现在八点四十分。"),
+	input("l7-t2", "Bây giờ là 10 giờ 10 phút.", "现在十点十分。"),
+	input("l7-t3", "Tôi tan làm lúc 6 giờ 30 phút tối.", "我晚上六点半下班。"),
+	input("l7-t4", "Cô ấy lên lớp lúc 10 giờ 30 phút sáng.", "她上午十点半上课。"),
+	input("l7-t5", "Chúng ta gặp nhau lúc 2 giờ chiều nhé.", "我们下午两点见吧。"),
+	input("l7-t6", "Chúng ta đi taxi nhé.", "我们坐出租车去吧。"),
+	input("l7-t7", "Sáng mai tôi đi siêu thị.", "我明天上午去超市。"),
+	input("l7-t8", "Mẹ tan làm lúc 5 giờ chiều.", "妈妈下午五点下班。"),
+	input("l7-t9", "Tôi không muốn đi.", "我不想去。"),
+	input("l7-t10", "Chiều mai lúc 2 giờ tôi vẫn còn có tiết học đấy.", "我明天下午两点还上课呢。")
+];
+
+export const hsk1Lesson7Grammar: GrammarLesson = {
+	title: "Bài 7: 我晚上六点半下班",
+	variant: "hsk1-3-0-lesson7",
+	points: [
+		{
+			id: "time-two",
+			title: "Cách diễn đạt thời gian (2)",
+			explanation:
+				"Thời điểm được nói theo thứ tự giờ rồi phút. Khi có 30 phút có thể dùng 半. Từ chỉ buổi trong ngày luôn đứng trước giờ.",
+			formulas: ["Số giờ + 点 + Số phút + 分", "Buổi + Số giờ + 点 + Số phút"],
+			examples: [
+				{ chinese: "八点四十分", vietnamese: "8 giờ 40 phút." },
+				{ chinese: "十点十分", vietnamese: "10 giờ 10 phút." },
+				{ chinese: "六点半 / 十点半", vietnamese: "6 giờ 30 phút / 10 giờ 30 phút." },
+				{ chinese: "上午十点 / 中午十二点", vietnamese: "10 giờ sáng / 12 giờ trưa." },
+				{ chinese: "下午两点半 / 晚上六点半", vietnamese: "2 giờ 30 chiều / 6 giờ 30 tối." }
+			],
+			notes: [
+				"早上: sáng sớm; 上午: buổi sáng; 中午: buổi trưa; 下午: buổi chiều; 晚上: buổi tối.",
+				"Đúng: 下午两点半",
+				"Sai: 两点半下午"
+			],
+			exercises: [
+				{
+					id: "l7-picture",
+					title: "Bài tập 1: Nhìn hình và chọn câu đúng",
+					type: "choice",
+					questions: pictures
+				}
+			]
+		},
+		{
+			id: "ba-one",
+			title: "Trợ từ ngữ khí 吧 (1)",
+			explanation:
+				"吧 đặt ở cuối câu để diễn tả lời đề nghị hoặc thương lượng nhẹ nhàng, tự nhiên hơn.",
+			formulas: ["Câu đề nghị + 吧"],
+			examples: [
+				{ chinese: "我们下午两点见吧。", vietnamese: "Chúng ta gặp nhau lúc 2 giờ chiều nhé." },
+				{ chinese: "我们坐出租车去吧。", vietnamese: "Chúng ta đi taxi nhé." },
+				{ chinese: "你休息吧。", vietnamese: "Bạn nghỉ ngơi nhé." }
+			],
+			exercises: [
+				{
+					id: "l7-arrange",
+					title: "Bài tập 2: Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: arrangements
+				}
+			]
+		},
+		{
+			id: "adverbial-position",
+			title: "Vị trí của trạng ngữ",
+			explanation:
+				"Từ chỉ thời gian và các phó từ 不、还、也、很 thường đứng trước động từ hoặc tính từ. Khi cùng xuất hiện, thời gian đứng trước phó từ.",
+			formulas: ["Chủ ngữ + Thời gian + Động từ", "Chủ ngữ + Thời gian + Phó từ + Động từ"],
+			examples: [
+				{ chinese: "她上午十点半上课。", vietnamese: "Cô ấy lên lớp lúc 10 giờ 30 sáng." },
+				{ chinese: "我明天上午去超市。", vietnamese: "Sáng mai tôi đi siêu thị." },
+				{ chinese: "妈妈下午五点下班。", vietnamese: "Mẹ tan làm lúc 5 giờ chiều." },
+				{ chinese: "我不想去。/ 我还上课。/ 她也很忙。", vietnamese: "Ví dụ vị trí của phó từ." },
+				{
+					chinese: "我明天下午两点还上课。",
+					vietnamese: "Chiều mai lúc 2 giờ tôi vẫn còn có tiết."
+				}
+			],
+			exercises: []
+		},
+		{
+			id: "ne-two",
+			title: "Trợ từ ngữ khí 呢 (2)",
+			explanation:
+				"呢 đặt cuối câu trần thuật để xác nhận hoặc nhấn mạnh một sự thật. Trong mẫu này 呢 không dùng để hỏi.",
+			formulas: ["Câu trần thuật + 呢"],
+			examples: [
+				{
+					chinese: "我明天下午两点还上课呢。",
+					vietnamese: "Chiều mai lúc 2 giờ tôi vẫn còn có tiết học đấy."
+				},
+				{
+					chinese: "爸爸晚上六点还上班呢。",
+					vietnamese: "Bố lúc 6 giờ tối vẫn còn đang làm việc đấy."
+				}
+			],
+			notes: [
+				"呢 ở đây dùng để nhấn mạnh tình trạng hoặc sự việc đang được nói đến, không phải để hỏi."
+			],
+			exercises: [
+				{
+					id: "l7-translate",
+					title: "Bài tập 3: Dịch sang tiếng Trung",
+					type: "input",
+					questions: translations
+				}
+			]
+		}
+	]
+};

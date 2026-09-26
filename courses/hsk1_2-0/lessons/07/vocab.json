@@ -1,0 +1,94 @@
+{
+	"course_id": "hsk1_2",
+	"course_name": "HSK 1 (2.0)",
+
+	"id": 7,
+	"title": "今天几号？",
+	"short_vi": "Hỏi đáp về ngày tháng, thứ và hoạt động ở trường.",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "请",
+			"pinyin": "qǐng",
+			"vi": "mời, xin",
+			"adj": 4
+		},
+		{
+			"pos": 2,
+			"hanzi": "问",
+			"pinyin": "wèn",
+			"vi": "hỏi",
+			"adj": 4
+		},
+		{
+			"pos": 3,
+			"hanzi": "今天",
+			"pinyin": "jīntiān",
+			"vi": "hôm nay",
+			"adj": 2
+		},
+		{
+			"pos": 4,
+			"hanzi": "号",
+			"pinyin": "hào",
+			"vi": "ngày (trong tháng)",
+			"adj": 2
+		},
+		{
+			"pos": 5,
+			"hanzi": "月",
+			"pinyin": "yuè",
+			"vi": "tháng",
+			"adj": 2
+		},
+		{
+			"pos": 6,
+			"hanzi": "星期",
+			"pinyin": "xīngqī",
+			"vi": "tuần, thứ",
+			"adj": 2
+		},
+		{
+			"pos": 7,
+			"hanzi": "昨天",
+			"pinyin": "zuótiān",
+			"vi": "hôm qua",
+			"adj": 2
+		},
+		{
+			"pos": 8,
+			"hanzi": "明天",
+			"pinyin": "míngtiān",
+			"vi": "ngày mai",
+			"adj": 2
+		},
+		{
+			"pos": 9,
+			"hanzi": "去",
+			"pinyin": "qù",
+			"vi": "đi",
+			"adj": 4
+		},
+		{
+			"pos": 10,
+			"hanzi": "学校",
+			"pinyin": "xuéxiào",
+			"vi": "trường học",
+			"adj": 2
+		},
+		{
+			"pos": 11,
+			"hanzi": "看",
+			"pinyin": "kàn",
+			"vi": "nhìn, xem",
+			"adj": 4
+		},
+		{
+			"pos": 12,
+			"hanzi": "书",
+			"pinyin": "shū",
+			"vi": "sách",
+			"adj": 2
+		}
+	]
+}

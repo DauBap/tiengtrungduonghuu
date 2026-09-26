@@ -1,0 +1,310 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 12,
+  "label": "Bài 12",
+  "title": " 海外用户玩儿微信",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "用户",
+      "pinyin": "yònghù",
+      "adj": 2,
+      "vi": "người dùng"
+    },
+    {
+      "pos": 2,
+      "hanzi": "颠球",
+      "pinyin": "diān qiú",
+      "adj": 4,
+      "vi": "tung hứng (bóng)"
+    },
+    {
+      "pos": 3,
+      "hanzi": "明星",
+      "pinyin": "míngxīng",
+      "adj": 2,
+      "vi": "ngôi sao"
+    },
+    {
+      "pos": 4,
+      "hanzi": "直播",
+      "pinyin": "zhíbō",
+      "adj": 4,
+      "vi": "phát sóng trực tiếp"
+    },
+    {
+      "pos": 5,
+      "hanzi": "宝贝",
+      "pinyin": "bǎobèi",
+      "adj": 2,
+      "vi": "cục cưng"
+    },
+    {
+      "pos": 6,
+      "hanzi": "逗",
+      "pinyin": "dòu",
+      "adj": 4,
+      "vi": "gây cười, chọc cười"
+    },
+    {
+      "pos": 7,
+      "hanzi": "宣传",
+      "pinyin": "xuānchuán",
+      "adj": 4,
+      "vi": "tuyên truyền"
+    },
+    {
+      "pos": 8,
+      "hanzi": "手笔",
+      "pinyin": "shǒubǐ",
+      "adj": 2,
+      "vi": "sự mạnh tay, sự phô trương"
+    },
+    {
+      "pos": 9,
+      "hanzi": "推广",
+      "pinyin": "tuīguǎng",
+      "adj": 4,
+      "vi": "phổ biến, mở rộng"
+    },
+    {
+      "pos": 10,
+      "hanzi": "注册",
+      "pinyin": "zhùcè",
+      "adj": 4,
+      "vi": "đăng ký"
+    },
+    {
+      "pos": 11,
+      "hanzi": "召开",
+      "pinyin": "zhàokāi",
+      "adj": 4,
+      "vi": "mời dự họp, tổ chức"
+    },
+    {
+      "pos": 12,
+      "hanzi": "合作",
+      "pinyin": "hézuò",
+      "adj": 4,
+      "vi": "hợp tác"
+    },
+    {
+      "pos": 13,
+      "hanzi": "伙伴",
+      "pinyin": "huǒbàn",
+      "adj": 2,
+      "vi": "cộng sự, đối tác"
+    },
+    {
+      "pos": 14,
+      "hanzi": "总裁",
+      "pinyin": "zǒngcái",
+      "adj": 2,
+      "vi": "chủ tịch, president"
+    },
+    {
+      "pos": 15,
+      "hanzi": "实现",
+      "pinyin": "shíxiàn",
+      "adj": 4,
+      "vi": "thực hiện"
+    },
+    {
+      "pos": 16,
+      "hanzi": "覆盖",
+      "pinyin": "fùgài",
+      "adj": 4,
+      "vi": "bao trùm"
+    },
+    {
+      "pos": 17,
+      "hanzi": "移动",
+      "pinyin": "yídòng",
+      "adj": 4,
+      "vi": "di động, di chuyển"
+    },
+    {
+      "pos": 18,
+      "hanzi": "通信",
+      "pinyin": "tōngxìn",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "sự thông tin; liên lạc"
+    },
+    {
+      "pos": 19,
+      "hanzi": "应用",
+      "pinyin": "yìngyòng",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "(tin học) trình ứng dụng; ứng dụng"
+    },
+    {
+      "pos": 20,
+      "hanzi": "企业",
+      "pinyin": "qǐyè",
+      "adj": 2,
+      "vi": "xí nghiệp, công ty"
+    },
+    {
+      "pos": 21,
+      "hanzi": "称霸",
+      "pinyin": "chēngbà",
+      "adj": 4,
+      "vi": "xưng bá, thống trị"
+    },
+    {
+      "pos": 22,
+      "hanzi": "背景",
+      "pinyin": "bèijǐng",
+      "adj": 2,
+      "vi": "bối cảnh"
+    },
+    {
+      "pos": 23,
+      "hanzi": "高级",
+      "pinyin": "gāojí",
+      "adj": 6,
+      "vi": "cao cấp"
+    },
+    {
+      "pos": 24,
+      "hanzi": "副",
+      "pinyin": "fù",
+      "adj": 6,
+      "vi": "phó, phụ"
+    },
+    {
+      "pos": 25,
+      "hanzi": "开发",
+      "pinyin": "kāifā",
+      "adj": 4,
+      "vi": "khai thác, phát triển"
+    },
+    {
+      "pos": 26,
+      "hanzi": "中心",
+      "pinyin": "zhōngxīn",
+      "adj": 2,
+      "vi": "trung tâm"
+    },
+    {
+      "pos": 27,
+      "hanzi": "相关",
+      "pinyin": "xiāngguān",
+      "adj": 4,
+      "vi": "liên quan, tương quan"
+    },
+    {
+      "pos": 28,
+      "hanzi": "业务",
+      "pinyin": "yèwù",
+      "adj": 2,
+      "vi": "nghiệp vụ"
+    },
+    {
+      "pos": 29,
+      "hanzi": "现实",
+      "pinyin": "xiànshí",
+      "adj": 2,
+      "vi": "hiện thực"
+    },
+    {
+      "pos": 30,
+      "hanzi": "个人",
+      "pinyin": "gèrén",
+      "adj": 2,
+      "vi": "cá nhân"
+    },
+    {
+      "pos": 31,
+      "hanzi": "程度",
+      "pinyin": "chéngdù",
+      "adj": 2,
+      "vi": "trình độ, mức độ"
+    },
+    {
+      "pos": 32,
+      "hanzi": "发达",
+      "pinyin": "fādá",
+      "adj": 6,
+      "vi": "phát triển"
+    },
+    {
+      "pos": 33,
+      "hanzi": "创新",
+      "pinyin": "chuàngxīn",
+      "adj": 4,
+      "vi": "sáng tạo cái mới, đổi mới"
+    },
+    {
+      "pos": 34,
+      "hanzi": "领导",
+      "pinyin": "lǐngdǎo",
+      "adj": 2,
+      "vi": "lãnh đạo"
+    },
+    {
+      "pos": 35,
+      "hanzi": "地位",
+      "pinyin": "dìwèi",
+      "adj": 2,
+      "vi": "địa vị, vị trí"
+    },
+    {
+      "pos": 36,
+      "hanzi": "经营",
+      "pinyin": "jīngyíng",
+      "adj": 4,
+      "vi": "kinh doanh"
+    },
+    {
+      "pos": 37,
+      "hanzi": "销售",
+      "pinyin": "xiāoshòu",
+      "adj": 4,
+      "vi": "tiêu thụ (hàng hóa)"
+    },
+    {
+      "pos": 38,
+      "hanzi": "针对",
+      "pinyin": "zhēnduì",
+      "adj": 4,
+      "vi": "nhằm vào, chìa vào"
+    },
+    {
+      "pos": 39,
+      "hanzi": "当地",
+      "pinyin": "dāngdì",
+      "adj": 2,
+      "vi": "bản địa, bản xứ"
+    },
+    {
+      "pos": 40,
+      "hanzi": "代言",
+      "pinyin": "dàiyán",
+      "adj": 4,
+      "vi": "phát ngôn"
+    },
+    {
+      "pos": 41,
+      "hanzi": "华裔",
+      "pinyin": "huáyì",
+      "adj": 2,
+      "vi": "người gốc Hoa"
+    },
+    {
+      "pos": 42,
+      "hanzi": "移民",
+      "pinyin": "yímín",
+      "adj": 2,
+      "vi": "dân di cư"
+    }
+  ]
+}

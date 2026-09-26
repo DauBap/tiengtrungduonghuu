@@ -1,0 +1,244 @@
+import type { GrammarExercise, GrammarLesson } from "./types";
+
+type Row = {
+	id: string;
+	zh: string;
+	vi: string;
+	tokens: string[];
+	wrong: [string, string];
+	note: string;
+};
+const exercises = (prefix: string, rows: Row[]): GrammarExercise[] => [
+	{
+		id: `${prefix}-choice`,
+		title: "1. Chọn đáp án đúng",
+		type: "choice",
+		questions: rows.map((r, i) => {
+			const options: [string, string, string] =
+				i % 3 === 0
+					? [r.zh, ...r.wrong]
+					: i % 3 === 1
+						? [r.wrong[0], r.zh, r.wrong[1]]
+						: [...r.wrong, r.zh];
+			return {
+				id: `${r.id}c`,
+				prompt: `Chọn câu đúng: “${r.vi}”`,
+				answer: r.zh,
+				options,
+				completedSentence: r.zh,
+				meaning: r.vi,
+				explanation: r.note,
+				optionExplanations: Object.fromEntries(
+					options.map((o) => [
+						o,
+						o === r.zh ? `Đúng: ${r.note}` : "Sai: trật tự hoặc cấu trúc không phù hợp."
+					])
+				)
+			};
+		})
+	},
+	{
+		id: `${prefix}-arrange`,
+		title: "2. Sắp xếp từ thành câu",
+		type: "arrange",
+		questions: rows.map((r) => ({
+			id: `${r.id}a`,
+			prompt: r.vi,
+			answer: r.zh,
+			tokens: r.tokens,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	},
+	{
+		id: `${prefix}-translate`,
+		title: "3. Dịch Việt sang Trung",
+		type: "input",
+		questions: rows.map((r) => ({
+			id: `${r.id}t`,
+			prompt: r.vi,
+			answer: r.zh,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	}
+];
+
+export const hsk2Lesson7Grammar: GrammarLesson = {
+	title: "BÀI 7: 他篮球打得很好",
+	points: [
+		{
+			id: "yi-jiu",
+			title: "Câu ghép “一……就……” – Vừa… là…",
+			explanation:
+				"“一……就……” biểu thị hành động hoặc tình huống thứ hai xảy ra ngay sau hành động thứ nhất. “一” đứng trước vị ngữ thứ nhất và “就” đứng trước vị ngữ thứ hai.",
+			formulas: [
+				"Chủ ngữ + 一 + động từ 1 + 就 + động từ 2",
+				"一 + tình huống 1，chủ ngữ + 就 + tình huống 2"
+			],
+			examples: [
+				{
+					chinese: "你怎么一下课就往外跑？",
+					vietnamese: "Sao cậu vừa tan học là chạy ra ngoài ngay thế?"
+				},
+				{ chinese: "我一回家就做饭。", vietnamese: "Tôi vừa về nhà là nấu cơm." }
+			],
+			notes: ["“就” phải đứng trước hành động xảy ra sau, không đặt ở cuối câu."],
+			exercises: exercises("h2l7-yijiu", [
+				{
+					id: "yj1",
+					zh: "你一下课就往外跑",
+					vi: "Bạn vừa tan học là chạy ra ngoài.",
+					tokens: ["往外跑", "就", "你", "下课", "一"],
+					wrong: ["你一就下课往外跑", "你一下课往外跑就"],
+					note: "一下课 là việc thứ nhất; 就往外跑 là việc xảy ra ngay sau."
+				},
+				{
+					id: "yj2",
+					zh: "我一回家就做饭",
+					vi: "Tôi vừa về nhà là nấu cơm.",
+					tokens: ["做饭", "我", "就", "回家", "一"],
+					wrong: ["我一就回家做饭", "我一回家做饭就"],
+					note: "一回家 đứng trước 就做饭."
+				},
+				{
+					id: "yj3",
+					zh: "他一开始运动就很高兴",
+					vi: "Anh ấy vừa bắt đầu vận động là rất vui.",
+					tokens: ["很高兴", "运动", "一", "他", "就", "开始"],
+					wrong: ["他一就开始运动很高兴", "他一开始就运动很高兴"],
+					note: "Cụm hành động thứ nhất là 开始运动."
+				},
+				{
+					id: "yj4",
+					zh: "她一看见篮球就想打",
+					vi: "Cô ấy vừa nhìn thấy bóng rổ là muốn chơi.",
+					tokens: ["想打", "篮球", "看见", "就", "她", "一"],
+					wrong: ["她一就看见篮球想打", "她一看见就篮球想打"],
+					note: "就 đứng trước vị ngữ thứ hai 想打."
+				},
+				{
+					id: "yj5",
+					zh: "我们一下课就去踢足球",
+					vi: "Chúng tôi vừa tan học là đi đá bóng.",
+					tokens: ["去", "我们", "足球", "就", "一", "踢", "下课"],
+					wrong: ["我们一就下课去踢足球", "我们一下课去就踢足球"],
+					note: "一下课 + 就去踢足球."
+				}
+			])
+		},
+		{
+			id: "state-complement-basic",
+			title: "Bổ ngữ trạng thái (1) – Động từ + 得 + trạng thái",
+			explanation:
+				"“得” đứng sau động từ, nối động từ với tính từ hoặc cụm tính từ miêu tả trạng thái, mức độ hay kết quả biểu hiện của hành động.",
+			formulas: ["Động từ + 得 + tính từ/cụm tính từ", "Động từ + 得 + 怎么样？"],
+			examples: [
+				{ chinese: "你踢得怎么样？", vietnamese: "Cậu đá thế nào?" },
+				{ chinese: "他跑得很快。", vietnamese: "Anh ấy chạy rất nhanh." }
+			],
+			notes: ["Phải dùng “得”, không dùng “的” hoặc “地”, giữa động từ và bổ ngữ trạng thái."],
+			exercises: exercises("h2l7-state1", [
+				{
+					id: "s1",
+					zh: "你踢得怎么样",
+					vi: "Bạn đá thế nào?",
+					tokens: ["怎么样", "得", "你", "踢"],
+					wrong: ["你踢的怎么样", "你得踢怎么样"],
+					note: "得 đứng sau động từ 踢 và trước 怎么样."
+				},
+				{
+					id: "s2",
+					zh: "他跑得很快",
+					vi: "Anh ấy chạy rất nhanh.",
+					tokens: ["很快", "他", "得", "跑"],
+					wrong: ["他跑的很快", "他得跑很快"],
+					note: "跑 + 得 + 很快."
+				},
+				{
+					id: "s3",
+					zh: "她说得很好",
+					vi: "Cô ấy nói rất hay.",
+					tokens: ["很好", "说", "她", "得"],
+					wrong: ["她说的很好", "她得说很好"],
+					note: "说 + 得 + 很好."
+				},
+				{
+					id: "s4",
+					zh: "你写得不错",
+					vi: "Bạn viết khá tốt.",
+					tokens: ["不错", "写", "你", "得"],
+					wrong: ["你写的不错", "你得写不错"],
+					note: "写 + 得 + 不错."
+				},
+				{
+					id: "s5",
+					zh: "他走得不快",
+					vi: "Anh ấy đi không nhanh.",
+					tokens: ["走", "不快", "他", "得"],
+					wrong: ["他走的不快", "他不走得快"],
+					note: "Phủ định nằm trong bổ ngữ: 得不快."
+				}
+			])
+		},
+		{
+			id: "state-complement-object",
+			title: "Bổ ngữ trạng thái (2) – Có tân ngữ hoặc động từ ly hợp",
+			explanation:
+				"Khi động từ có tân ngữ, thường đưa tân ngữ lên trước rồi lặp lại động từ trước “得”. Với động từ ly hợp, nói đầy đủ cụm rồi lặp phần động từ.",
+			formulas: [
+				"Chủ ngữ + tân ngữ + động từ + 得 + bổ ngữ",
+				"Chủ ngữ + động từ–tân ngữ + động từ + 得 + bổ ngữ"
+			],
+			examples: [
+				{ chinese: "我游泳游得不快。", vietnamese: "Tôi bơi không nhanh." },
+				{ chinese: "你篮球打得怎么样？", vietnamese: "Cậu chơi bóng rổ thế nào?" }
+			],
+			notes: ["Không đặt tân ngữ sau bổ ngữ trạng thái trong mẫu này."],
+			exercises: exercises("h2l7-state2", [
+				{
+					id: "o1",
+					zh: "我游泳游得不快",
+					vi: "Tôi bơi không nhanh.",
+					tokens: ["游", "不快", "我", "游泳", "得"],
+					wrong: ["我游泳得不快", "我游得不快泳"],
+					note: "游泳 là động từ ly hợp nên lặp 游 trước 得."
+				},
+				{
+					id: "o2",
+					zh: "你篮球打得怎么样",
+					vi: "Bạn chơi bóng rổ thế nào?",
+					tokens: ["怎么样", "你", "得", "篮球", "打"],
+					wrong: ["你打篮球得怎么样", "你篮球得打怎么样"],
+					note: "Tân ngữ 篮球 đứng trước động từ lặp 打."
+				},
+				{
+					id: "o3",
+					zh: "他足球踢得很好",
+					vi: "Anh ấy đá bóng rất giỏi.",
+					tokens: ["很好", "足球", "得", "他", "踢"],
+					wrong: ["他踢足球得很好", "他足球得踢很好"],
+					note: "足球 + 踢 + 得 + 很好."
+				},
+				{
+					id: "o4",
+					zh: "她跑步跑得很快",
+					vi: "Cô ấy chạy bộ rất nhanh.",
+					tokens: ["很快", "跑", "她", "得", "跑步"],
+					wrong: ["她跑步得很快", "她跑得很快步"],
+					note: "跑步 là động từ ly hợp nên lặp 跑."
+				},
+				{
+					id: "o5",
+					zh: "我汉字写得不错",
+					vi: "Tôi viết chữ Hán khá tốt.",
+					tokens: ["汉字", "不错", "我", "得", "写"],
+					wrong: ["我写汉字得不错", "我汉字得写不错"],
+					note: "Tân ngữ 汉字 đứng trước 写得不错."
+				}
+			])
+		}
+	]
+};

@@ -1,0 +1,115 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 10,
+  "label": "Bài 10",
+  "title": "数学比历史难多了",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "个子",
+      "pinyin": "gèzi",
+      "adj": 2,
+      "vi": "vóc dáng, thân hình"
+    },
+    {
+      "pos": 2,
+      "hanzi": "矮",
+      "pinyin": "ǎi",
+      "adj": 6,
+      "vi": "thấp"
+    },
+    {
+      "pos": 3,
+      "hanzi": "历史",
+      "pinyin": "lìshǐ",
+      "adj": 2,
+      "vi": "môn Lịch Sử"
+    },
+    {
+      "pos": 4,
+      "hanzi": "体育",
+      "pinyin": "tǐyù",
+      "adj": 2,
+      "vi": "môn Thể Dục"
+    },
+    {
+      "pos": 5,
+      "hanzi": "数学",
+      "pinyin": "shùxué",
+      "adj": 2,
+      "vi": "môn Toán"
+    },
+    {
+      "pos": 6,
+      "hanzi": "方便",
+      "pinyin": "fāngbiàn",
+      "adj": 6,
+      "vi": "thuận tiện"
+    },
+    {
+      "pos": 7,
+      "hanzi": "自行车",
+      "pinyin": "zìxíngchē",
+      "adj": 2,
+      "vi": "xe đạp"
+    },
+    {
+      "pos": 8,
+      "hanzi": "骑",
+      "pinyin": "qí",
+      "adj": 4,
+      "vi": "cưỡi, đi"
+    },
+    {
+      "pos": 9,
+      "hanzi": "旧",
+      "pinyin": "jiù",
+      "adj": 6,
+      "vi": "cũ"
+    },
+    {
+      "pos": 10,
+      "hanzi": "换",
+      "pinyin": "huàn",
+      "adj": 4,
+      "vi": "đổi, thay thế"
+    },
+    {
+      "pos": 11,
+      "hanzi": "地方",
+      "pinyin": "dìfang",
+      "adj": 2,
+      "vi": "chỗ, nơi"
+    },
+    {
+      "pos": 12,
+      "hanzi": "中介",
+      "pinyin": "zhōngjiè",
+      "adj": 2,
+      "vi": "môi giới"
+    },
+    {
+      "pos": 13,
+      "hanzi": "主要",
+      "pinyin": "zhǔyào",
+      "adj": 6,
+      "vi": "chủ yếu"
+    },
+    {
+      "pos": 14,
+      "hanzi": "环境",
+      "pinyin": "huánjìng",
+      "adj": 2,
+      "vi": "môi trường"
+    },
+    {
+      "pos": 15,
+      "hanzi": "附近",
+      "pinyin": "fùjìn",
+      "adj": 2,
+      "vi": "vùng lân cận"
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+	"course_id": "hsk1_2",
+	"course_name": "HSK 1 (2.0)",
+
+	"id": 10,
+	"title": "我能坐这儿吗？",
+	"short_vi": "Miêu tả vị trí đồ vật. Hỏi vị trí người và xin phép ngồi.",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "桌子",
+			"pinyin": "zhuōzi",
+			"vi": "bàn",
+			"adj": 2
+		},
+		{
+			"pos": 2,
+			"hanzi": "上",
+			"pinyin": "shàng",
+			"vi": "trên, phía trên",
+			"adj": 2
+		},
+		{
+			"pos": 3,
+			"hanzi": "电脑",
+			"pinyin": "diànnǎo",
+			"vi": "máy tính",
+			"adj": 2
+		},
+		{
+			"pos": 4,
+			"hanzi": "和",
+			"pinyin": "hé",
+			"vi": "và",
+			"adj": 10
+		},
+		{
+			"pos": 5,
+			"hanzi": "本",
+			"pinyin": "běn",
+			"vi": "quyển (dùng cho sách)",
+			"adj": 8
+		},
+		{
+			"pos": 6,
+			"hanzi": "里",
+			"pinyin": "lǐ",
+			"vi": "trong, bên trong",
+			"adj": 9
+		},
+		{
+			"pos": 7,
+			"hanzi": "前面",
+			"pinyin": "qiánmiàn",
+			"vi": "phía trước",
+			"adj": 2
+		},
+		{
+			"pos": 8,
+			"hanzi": "后面",
+			"pinyin": "hòumiàn",
+			"vi": "phía sau",
+			"adj": 2
+		},
+		{
+			"pos": 9,
+			"hanzi": "这儿",
+			"pinyin": "zhèr",
+			"vi": "ở đây, chỗ này",
+			"adj": 1
+		},
+		{
+			"pos": 10,
+			"hanzi": "没有",
+			"pinyin": "méiyǒu",
+			"vi": "không có, chưa",
+			"adj": 4
+		},
+		{
+			"pos": 11,
+			"hanzi": "能",
+			"pinyin": "néng",
+			"vi": "có thể (khả năng, điều kiện)",
+			"adj": 4
+		},
+		{
+			"pos": 12,
+			"hanzi": "坐",
+			"pinyin": "zuò",
+			"vi": "ngồi",
+			"adj": 4
+		},
+		{
+			"pos": 13,
+			"hanzi": "王方",
+			"pinyin": "Wáng Fāng",
+			"vi": "Vương Phương",
+			"adj": 3
+		},
+		{
+			"pos": 14,
+			"hanzi": "谢朋",
+			"pinyin": "Xiè Péng",
+			"vi": "Tạ Bằng",
+			"adj": 3
+		}
+	]
+}

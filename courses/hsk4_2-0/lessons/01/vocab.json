@@ -1,0 +1,240 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 1,
+  "label": "Bài 1",
+  "title": "简单的爱情",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "法律",
+      "pinyin": "fǎlǜ",
+      "adj": 2,
+      "vi": "pháp luật, luật"
+    },
+    {
+      "pos": 2,
+      "hanzi": "俩",
+      "pinyin": "liǎ",
+      "adj": [
+        null,
+        21
+      ],
+      "vi": "hai"
+    },
+    {
+      "pos": 3,
+      "hanzi": "印象",
+      "pinyin": "yìnxiàng",
+      "adj": 2,
+      "vi": "ấn tượng"
+    },
+    {
+      "pos": 4,
+      "hanzi": "深",
+      "pinyin": "shēn",
+      "adj": 6,
+      "vi": "sâu sắc"
+    },
+    {
+      "pos": 5,
+      "hanzi": "熟悉",
+      "pinyin": "shúxi",
+      "adj": 4,
+      "vi": "hiểu rõ"
+    },
+    {
+      "pos": 6,
+      "hanzi": "不仅",
+      "pinyin": "bùjǐn",
+      "adj": 10,
+      "vi": "không những, chẳng những"
+    },
+    {
+      "pos": 7,
+      "hanzi": "性格",
+      "pinyin": "xìnggé",
+      "adj": 2,
+      "vi": "tính cách, tính nết"
+    },
+    {
+      "pos": 8,
+      "hanzi": "开玩笑",
+      "pinyin": "kāi wánxiào",
+      "adj": 4,
+      "vi": "nói đùa, đùa"
+    },
+    {
+      "pos": 9,
+      "hanzi": "从来",
+      "pinyin": "cónglái",
+      "adj": 7,
+      "vi": "từ trước đến nay, từ trước đến giờ"
+    },
+    {
+      "pos": 10,
+      "hanzi": "最好",
+      "pinyin": "zuìhǎo",
+      "adj": 7,
+      "vi": "tốt nhất"
+    },
+    {
+      "pos": 11,
+      "hanzi": "共同",
+      "pinyin": "gòngtóng",
+      "adj": 6,
+      "vi": "chung, cùng"
+    },
+    {
+      "pos": 12,
+      "hanzi": "适合",
+      "pinyin": "shìhé",
+      "adj": 4,
+      "vi": "phù hợp"
+    },
+    {
+      "pos": 13,
+      "hanzi": "幸福",
+      "pinyin": "xìngfú",
+      "adj": 6,
+      "vi": "hạnh phúc"
+    },
+    {
+      "pos": 14,
+      "hanzi": "生活",
+      "pinyin": "shēnghuó",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "cuộc sống; sống"
+    },
+    {
+      "pos": 15,
+      "hanzi": "刚",
+      "pinyin": "gāng",
+      "adj": 7,
+      "vi": "vừa, vừa mới"
+    },
+    {
+      "pos": 16,
+      "hanzi": "浪漫",
+      "pinyin": "làngmàn",
+      "adj": 6,
+      "vi": "lãng mạn"
+    },
+    {
+      "pos": 17,
+      "hanzi": "够",
+      "pinyin": "gòu",
+      "adj": 4,
+      "vi": "đủ"
+    },
+    {
+      "pos": 18,
+      "hanzi": "缺点",
+      "pinyin": "quēdiǎn",
+      "adj": 2,
+      "vi": "khuyết điểm, thiếu sót"
+    },
+    {
+      "pos": 19,
+      "hanzi": "接受",
+      "pinyin": "jiēshòu",
+      "adj": 4,
+      "vi": "chấp nhận"
+    },
+    {
+      "pos": 20,
+      "hanzi": "羡慕",
+      "pinyin": "xiànmù",
+      "adj": 4,
+      "vi": "ước ao, ngưỡng mộ"
+    },
+    {
+      "pos": 21,
+      "hanzi": "爱情",
+      "pinyin": "àiqíng",
+      "adj": 2,
+      "vi": "tình yêu (giữa nam và nữ)"
+    },
+    {
+      "pos": 22,
+      "hanzi": "星星",
+      "pinyin": "xīngxing",
+      "adj": 2,
+      "vi": "ngôi sao"
+    },
+    {
+      "pos": 23,
+      "hanzi": "即使",
+      "pinyin": "jíshǐ",
+      "adj": 10,
+      "vi": "cho dù"
+    },
+    {
+      "pos": 24,
+      "hanzi": "加班",
+      "pinyin": "jiā bān",
+      "adj": 4,
+      "vi": "tăng ca, làm thêm giờ"
+    },
+    {
+      "pos": 25,
+      "hanzi": "亮",
+      "pinyin": "liàng",
+      "adj": 4,
+      "vi": "chiếu sáng, tỏa sáng"
+    },
+    {
+      "pos": 26,
+      "hanzi": "感动",
+      "pinyin": "gǎndòng",
+      "adj": 4,
+      "vi": "cảm động, làm xúc động"
+    },
+    {
+      "pos": 27,
+      "hanzi": "自然",
+      "pinyin": "zìrán",
+      "adj": 7,
+      "vi": "đương nhiên, hiển nhiên"
+    },
+    {
+      "pos": 28,
+      "hanzi": "原因",
+      "pinyin": "yuányīn",
+      "adj": 2,
+      "vi": "nguyên nhân"
+    },
+    {
+      "pos": 29,
+      "hanzi": "互相",
+      "pinyin": "hùxiāng",
+      "adj": 7,
+      "vi": "lẫn nhau, qua lại"
+    },
+    {
+      "pos": 30,
+      "hanzi": "吸引",
+      "pinyin": "xīyǐn",
+      "adj": 4,
+      "vi": "hấp dẫn, thu hút"
+    },
+    {
+      "pos": 31,
+      "hanzi": "幽默",
+      "pinyin": "yōumò",
+      "adj": 6,
+      "vi": "hóm hỉnh, khôi hài"
+    },
+    {
+      "pos": 32,
+      "hanzi": "脾气",
+      "pinyin": "píqi",
+      "adj": 2,
+      "vi": "tính tình, tính khí"
+    }
+  ]
+}

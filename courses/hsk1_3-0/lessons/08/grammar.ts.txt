@@ -1,0 +1,173 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const explanation =
+	"Đối chiếu đúng cấu trúc và trật tự từ; dấu câu và khoảng trắng không ảnh hưởng kết quả.";
+const input = (
+	id: string,
+	prompt: string,
+	answer: string,
+	acceptedAnswers: string[] = [],
+	image?: string,
+	imageAlt?: string
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	acceptedAnswers,
+	image,
+	imageAlt,
+	hidePrompt: Boolean(image),
+	explanation,
+	formula: "Giữ đúng trật tự từ của mẫu câu trong bài."
+});
+const arrange = (
+	id: string,
+	tokens: string[],
+	answer: string,
+	acceptedAnswers: string[] = []
+): GrammarQuestion => ({
+	id,
+	prompt: "Sắp xếp các từ thành câu đúng.",
+	tokens,
+	answer,
+	acceptedAnswers,
+	explanation,
+	formula: "Sắp xếp theo đúng cấu trúc câu."
+});
+const choice = (
+	id: string,
+	answer: string,
+	options: [string, string, string],
+	image: string,
+	imageAlt: string
+): GrammarQuestion => ({
+	id,
+	prompt: "Chọn câu tiếng Trung phù hợp với hình.",
+	answer,
+	options,
+	image,
+	imageAlt,
+	explanation,
+	formula: "Quan sát chi tiết trong hình và chọn đúng một câu."
+});
+const img = (name: string) => `/images/grammar/lesson8/${name}.svg`;
+
+const pictures: GrammarQuestion[] = [
+	choice("l8-p1", "手机在桌子上。", ["手机在桌子上。", "手机在桌子下。", "小猫在桌子上。"], img("phone-on-table"), "Điện thoại ở trên bàn"),
+	choice("l8-p2", "小猫在桌子下。", ["小猫在桌子下。", "小猫在桌子上。", "手机在桌子下。"], img("cat-under-table"), "Mèo con ở dưới bàn"),
+	choice("l8-p3", "医生在医院里。", ["医生在医院里。", "医生在医院外。", "病人在医院里。"], img("doctor-in-hospital"), "Bác sĩ ở trong bệnh viện"),
+	choice("l8-p4", "病人在医院外。", ["病人在医院外。", "病人在医院里。", "医生在医院外。"], img("patient-outside-hospital"), "Bệnh nhân ở ngoài bệnh viện"),
+	choice("l8-p5", "爸爸在医院工作。", ["爸爸在医院工作。", "爸爸在家工作。", "妈妈在医院工作。"], img("father-working"), "Bố làm việc ở bệnh viện"),
+	choice("l8-p6", "妈妈在家做饭。", ["妈妈在家做饭。", "妈妈在医院做饭。", "姐姐在家做饭。"], img("mother-cooking"), "Mẹ nấu ăn ở nhà"),
+	choice("l8-p7", "姐姐在超市买东西。", ["姐姐在超市买东西。", "妹妹在超市买东西。", "姐姐在家买东西。"], img("sister-shopping"), "Chị gái mua đồ ở siêu thị"),
+	choice("l8-p8", "他很忙，不能到。", ["他很忙，不能到。", "他不忙，能到。", "她很忙，不能到。"], img("busy-cannot-come"), "Người đàn ông rất bận và không thể đến, có dấu phủ định"),
+	choice("l8-p9", "明天你能到吗？", ["明天你能到吗？", "今天你能到吗？", "明天他能到吗？"], img("phone-call"), "Cuộc gọi hỏi ngày mai bạn có thể đến không")
+];
+
+const arrangements: GrammarQuestion[] = [
+	arrange("l8-a1", ["手机", "在", "桌子上"], "手机在桌子上。"),
+	arrange("l8-a2", ["小猫", "在", "桌子下"], "小猫在桌子下。"),
+	arrange("l8-a3", ["医生", "在", "医院里"], "医生在医院里。"),
+	arrange("l8-a4", ["爸爸", "在", "医院", "工作"], "爸爸在医院工作。"),
+	arrange("l8-a5", ["妈妈", "在", "家", "做饭"], "妈妈在家做饭。"),
+	arrange("l8-a6", ["姐姐", "在", "超市", "买东西"], "姐姐在超市买东西。"),
+	arrange("l8-a7", ["他", "能", "到", "学校"], "他能到学校。"),
+	arrange("l8-a8", ["明天", "你", "能", "到", "吗"], "明天你能到吗？", ["你明天能到吗？"])
+];
+
+const translations: GrammarQuestion[] = [
+	input("l8-t1", "Điện thoại ở trên bàn.", "手机在桌子上。"),
+	input("l8-t2", "Mèo con ở dưới bàn.", "小猫在桌子下。"),
+	input("l8-t3", "Bác sĩ ở trong bệnh viện.", "医生在医院里。"),
+	input("l8-t4", "Bệnh nhân ở ngoài bệnh viện.", "病人在医院外。"),
+	input("l8-t5", "Bố tôi làm việc ở bệnh viện.", "我爸爸在医院工作。", ["爸爸在医院工作。"]),
+	input("l8-t6", "Mẹ tôi nấu ăn ở nhà.", "我妈妈在家做饭。", ["妈妈在家做饭。"]),
+	input("l8-t7", "Chị gái mua đồ ở siêu thị.", "姐姐在超市买东西。"),
+	input("l8-t8", "Ngày mai tôi có thể đến trường.", "明天我能到学校。", ["我明天能到学校。"]),
+	input("l8-t9", "Hôm nay anh ấy rất bận, không thể đến.", "他今天很忙，不能到。", [
+		"今天他很忙，不能到。"
+	]),
+	input("l8-t10", "Ngày mai bạn có thể đến không?", "明天你能到吗？", ["你明天能到吗？"])
+];
+
+export const hsk1Lesson8Grammar: GrammarLesson = {
+	title: "Bài 8: 我爸爸也在医院工作",
+	variant: "hsk1-3-0-lesson8",
+	points: [
+		{
+			id: "position",
+			title: "Phương vị từ 方位词",
+			explanation:
+				"Phương vị từ đứng sau danh từ để chỉ vị trí: 上 shàng (trên), 下 xià (dưới), 里 lǐ (trong), 外 wài (ngoài), 前 qián (trước), 后 hòu (sau).",
+			formulas: ["Danh từ + Phương vị từ", "A + 在 + B + Phương vị từ"],
+			examples: [
+				{ chinese: "桌子上 / 桌子下", vietnamese: "trên bàn / dưới bàn" },
+				{ chinese: "医院里 / 医院外", vietnamese: "trong bệnh viện / ngoài bệnh viện" },
+				{ chinese: "学校前 / 学校后", vietnamese: "trước trường / sau trường" },
+				{ chinese: "手机在桌子上。", vietnamese: "Điện thoại ở trên bàn." },
+				{ chinese: "小猫在桌子下。", vietnamese: "Mèo con ở dưới bàn." },
+				{ chinese: "医生在医院里。", vietnamese: "Bác sĩ ở trong bệnh viện." },
+				{ chinese: "病人在医院外。", vietnamese: "Bệnh nhân ở ngoài bệnh viện." },
+				{ chinese: "书店在学校前。", vietnamese: "Hiệu sách ở phía trước trường học." }
+			],
+			exercises: [
+				{
+					id: "l8-picture",
+					title: "Phần A: Nhìn hình và chọn câu đúng",
+					type: "choice",
+					questions: pictures
+				}
+			]
+		},
+		{
+			id: "zai",
+			title: "Giới từ 在",
+			explanation: "在 đặt trước địa điểm, cho biết hành động diễn ra ở đâu.",
+			formulas: ["Chủ ngữ + 在 + Nơi chốn + Động từ"],
+			examples: [
+				{ chinese: "我爸爸在医院工作。", vietnamese: "Bố tôi làm việc ở bệnh viện." },
+				{ chinese: "妈妈在家做饭。", vietnamese: "Mẹ nấu ăn ở nhà." },
+				{ chinese: "学生在学校上课。", vietnamese: "Học sinh học ở trường." },
+				{ chinese: "姐姐在超市买东西。", vietnamese: "Chị gái mua đồ ở siêu thị." },
+				{ chinese: "我们在学校吃午饭。", vietnamese: "Chúng tôi ăn trưa ở trường." }
+			],
+			notes: ["Đúng: 我爸爸在医院工作。", "Sai: 我爸爸工作在医院。"],
+			exercises: [
+				{
+					id: "l8-arrange",
+					title: "Phần B: Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: arrangements
+				}
+			]
+		},
+		{
+			id: "neng",
+			title: "Động từ năng nguyện 能",
+			explanation:
+				"能 đứng trước động từ, diễn tả năng lực, điều kiện hoặc khả năng thực hiện một hành động.",
+			formulas: [
+				"Khẳng định: Chủ ngữ + 能 + Động từ",
+				"Phủ định: Chủ ngữ + 不能 + Động từ",
+				"Nghi vấn: Chủ ngữ + 能 + Động từ + 吗？"
+			],
+			examples: [
+				{ chinese: "我明天能到学校。", vietnamese: "Ngày mai tôi có thể đến trường." },
+				{ chinese: "他今天很忙，不能到。", vietnamese: "Hôm nay anh ấy rất bận, không thể đến." },
+				{ chinese: "妈妈能做饺子。", vietnamese: "Mẹ có thể làm sủi cảo." },
+				{ chinese: "你明天能到吗？", vietnamese: "Ngày mai bạn có thể đến không?" },
+				{ chinese: "妈妈会做饭。", vietnamese: "Mẹ biết nấu ăn." },
+				{ chinese: "妈妈今天能做饭。", vietnamese: "Hôm nay mẹ có thể nấu ăn." }
+			],
+			notes: ["会: biết làm gì do đã học được.", "能: có khả năng hoặc có điều kiện làm gì."],
+			exercises: [
+				{
+					id: "l8-translate",
+					title: "Phần C: Dịch tiếng Việt sang tiếng Trung",
+					type: "input",
+					questions: translations
+				}
+			]
+		}
+	]
+};

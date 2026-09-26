@@ -1,0 +1,202 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 14,
+  "label": "Bài 14",
+  "title": "这本书被别人借走了",
+  "short_vi": "Nhờ bạn mượn/trả sách thư viện; tìm thẻ thư viện bị thất lạc; bàn về hoạt động trong trường (văn nghệ, biểu diễn); chuẩn bị tiết mục ca hát cho đêm hội; cảm nhận sau buổi biểu diễn",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "词典",
+      "pinyin": "cídiǎn",
+      "adj": 2,
+      "vi": "từ điển"
+    },
+    {
+      "pos": 2,
+      "hanzi": "最好",
+      "pinyin": "zuìhǎo",
+      "adj": 18,
+      "vi": "tốt nhất"
+    },
+    {
+      "pos": 3,
+      "hanzi": "节",
+      "pinyin": "jié",
+      "adj": 8,
+      "vi": "tiết (lượng từ của tiết học)"
+    },
+    {
+      "pos": 4,
+      "hanzi": "图书馆",
+      "pinyin": "túshūguǎn",
+      "adj": 2,
+      "vi": "thư viện"
+    },
+    {
+      "pos": 5,
+      "hanzi": "被",
+      "pinyin": "bèi",
+      "adj": 13,
+      "vi": "bị"
+    },
+    {
+      "pos": 6,
+      "hanzi": "名人",
+      "pinyin": "míngrén",
+      "adj": 2,
+      "vi": "danh nhân, người nổi tiếng"
+    },
+    {
+      "pos": 7,
+      "hanzi": "故事",
+      "pinyin": "gùshi",
+      "adj": 2,
+      "vi": "câu chuyện"
+    },
+    {
+      "pos": 8,
+      "hanzi": "然后",
+      "pinyin": "ránhòu",
+      "adj": 10,
+      "vi": "sau đó, tiếp đó"
+    },
+    {
+      "pos": 9,
+      "hanzi": "报纸",
+      "pinyin": "bàozhǐ",
+      "adj": 2,
+      "vi": "báo, báo giấy"
+    },
+    {
+      "pos": 10,
+      "hanzi": "忘记",
+      "pinyin": "wàngjì",
+      "adj": 4,
+      "vi": "quên, quên mất"
+    },
+    {
+      "pos": 11,
+      "hanzi": "电子书",
+      "pinyin": "diànzǐshū",
+      "adj": 2,
+      "vi": "sách điện tử"
+    },
+    {
+      "pos": 12,
+      "hanzi": "女生",
+      "pinyin": "nǚshēng",
+      "adj": 2,
+      "vi": "nữ sinh, cô gái"
+    },
+    {
+      "pos": 13,
+      "hanzi": "表演",
+      "pinyin": "biǎoyǎn",
+      "adj": 4,
+      "vi": "biểu diễn"
+    },
+    {
+      "pos": 14,
+      "hanzi": "节目",
+      "pinyin": "jiémù",
+      "adj": 2,
+      "vi": "tiết mục, chương trình (biểu diễn)"
+    },
+    {
+      "pos": 15,
+      "hanzi": "怎么办",
+      "pinyin": "zěnme bàn",
+      "adj": 4,
+      "vi": "làm thế nào, phải làm sao"
+    },
+    {
+      "pos": 16,
+      "hanzi": "校长",
+      "pinyin": "xiàozhǎng",
+      "adj": 2,
+      "vi": "hiệu trưởng"
+    },
+    {
+      "pos": 17,
+      "hanzi": "面前",
+      "pinyin": "miànqián",
+      "adj": 2,
+      "vi": "trước mặt"
+    },
+    {
+      "pos": 18,
+      "hanzi": "有些",
+      "pinyin": "yǒuxiē",
+      "adj": 18,
+      "vi": "có chút, hơi"
+    },
+    {
+      "pos": 19,
+      "hanzi": "相信",
+      "pinyin": "xiāngxìn",
+      "adj": 4,
+      "vi": "tin, tin tưởng"
+    },
+    {
+      "pos": 20,
+      "hanzi": "新年",
+      "pinyin": "xīnnián",
+      "adj": 2,
+      "vi": "năm mới, tết dương lịch"
+    },
+    {
+      "pos": 21,
+      "hanzi": "班级",
+      "pinyin": "bānjí",
+      "adj": 2,
+      "vi": "lớp, lớp học"
+    },
+    {
+      "pos": 22,
+      "hanzi": "跳",
+      "pinyin": "tiào",
+      "adj": 4,
+      "vi": "nhảy"
+    },
+    {
+      "pos": 23,
+      "hanzi": "留学生",
+      "pinyin": "liúxuéshēng",
+      "adj": 2,
+      "vi": "du học sinh"
+    },
+    {
+      "pos": 24,
+      "hanzi": "最后",
+      "pinyin": "zuìhòu",
+      "adj": 2,
+      "vi": "cuối cùng, sau cùng"
+    },
+    {
+      "pos": 25,
+      "hanzi": "一块儿",
+      "pinyin": "yíkuàir",
+      "adj": [
+        18,
+        2
+      ],
+      "vi": "cùng, cùng nhau"
+    },
+    {
+      "pos": 26,
+      "hanzi": "网站",
+      "pinyin": "wǎngzhàn",
+      "adj": 2,
+      "vi": "website"
+    },
+    {
+      "pos": 27,
+      "hanzi": "视频",
+      "pinyin": "shìpín",
+      "adj": 2,
+      "vi": "video"
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 6,
+  "label": "Bài 6",
+  "title": "一分钱，一分货",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "果汁",
+      "pinyin": "guǒzhī",
+      "adj": 2,
+      "vi": "nước trái cây"
+    },
+    {
+      "pos": 2,
+      "hanzi": "售货员",
+      "pinyin": "shòuhuòyuán",
+      "adj": 2,
+      "vi": "nhân viên bán hàng"
+    },
+    {
+      "pos": 3,
+      "hanzi": "袜子",
+      "pinyin": "wàzi",
+      "adj": 2,
+      "vi": "tất, vớ"
+    },
+    {
+      "pos": 4,
+      "hanzi": "打扰",
+      "pinyin": "dǎrǎo",
+      "adj": 4,
+      "vi": "quấy rầy, làm phiền"
+    },
+    {
+      "pos": 5,
+      "hanzi": "竟然",
+      "pinyin": "jìngrán",
+      "adj": 7,
+      "vi": "(diễn tả sự bất ngờ) không ngờ, mà, vậy mà"
+    },
+    {
+      "pos": 6,
+      "hanzi": "西红柿",
+      "pinyin": "xīhóngshì",
+      "adj": 2,
+      "vi": "cà chua"
+    },
+    {
+      "pos": 7,
+      "hanzi": "百分之",
+      "pinyin": "bǎi fēn zhī",
+      "adj": 2,
+      "vi": "phần trăm"
+    },
+    {
+      "pos": 8,
+      "hanzi": "倍",
+      "pinyin": "bèi",
+      "adj": 8,
+      "vi": "lần"
+    },
+    {
+      "pos": 9,
+      "hanzi": "皮肤",
+      "pinyin": "pífū",
+      "adj": 2,
+      "vi": "da"
+    },
+    {
+      "pos": 10,
+      "hanzi": "好处",
+      "pinyin": "hǎochù",
+      "adj": 2,
+      "vi": "lợi ích, điều tốt"
+    },
+    {
+      "pos": 11,
+      "hanzi": "尝",
+      "pinyin": "cháng",
+      "adj": 4,
+      "vi": "thưởng thức, nếm"
+    },
+    {
+      "pos": 12,
+      "hanzi": "轻",
+      "pinyin": "qīng",
+      "adj": 6,
+      "vi": "nhẹ"
+    },
+    {
+      "pos": 13,
+      "hanzi": "方面",
+      "pinyin": "fāngmiàn",
+      "adj": 2,
+      "vi": "khía cạnh, phương diện"
+    },
+    {
+      "pos": 14,
+      "hanzi": "值得",
+      "pinyin": "zhídé",
+      "adj": 4,
+      "vi": "đáng"
+    },
+    {
+      "pos": 15,
+      "hanzi": "活动",
+      "pinyin": "huódòng",
+      "adj": 2,
+      "vi": "hoạt động"
+    },
+    {
+      "pos": 16,
+      "hanzi": "内",
+      "pinyin": "nèi",
+      "adj": 2,
+      "vi": "(bên) trong"
+    },
+    {
+      "pos": 17,
+      "hanzi": "免费",
+      "pinyin": "miǎn fèi",
+      "adj": 4,
+      "vi": "miễn phí"
+    },
+    {
+      "pos": 18,
+      "hanzi": "修理",
+      "pinyin": "xiūlǐ",
+      "adj": 4,
+      "vi": "sửa chữa"
+    },
+    {
+      "pos": 19,
+      "hanzi": "支持",
+      "pinyin": "zhīchí",
+      "adj": 4,
+      "vi": "ủng hộ"
+    },
+    {
+      "pos": 20,
+      "hanzi": "举行",
+      "pinyin": "jǔxíng",
+      "adj": 4,
+      "vi": "tổ chức (hội họp, thi đấu...)"
+    },
+    {
+      "pos": 21,
+      "hanzi": "满",
+      "pinyin": "mǎn",
+      "adj": 4,
+      "vi": "(đạt chỉ tiêu hay giới hạn) đủ, đầy, tròn"
+    },
+    {
+      "pos": 22,
+      "hanzi": "其中",
+      "pinyin": "qízhōng",
+      "adj": 2,
+      "vi": "trong đó"
+    },
+    {
+      "pos": 23,
+      "hanzi": "小说",
+      "pinyin": "xiǎoshuō",
+      "adj": 2,
+      "vi": "tiểu thuyết"
+    },
+    {
+      "pos": 24,
+      "hanzi": "会员卡",
+      "pinyin": "huìyuánkǎ",
+      "adj": 2,
+      "vi": "thẻ hội viên"
+    },
+    {
+      "pos": 25,
+      "hanzi": "所有",
+      "pinyin": "suǒyǒu",
+      "adj": 6,
+      "vi": "tất cả, toàn bộ"
+    },
+    {
+      "pos": 26,
+      "hanzi": "获得",
+      "pinyin": "huòdé",
+      "adj": 4,
+      "vi": "được, lấy được"
+    },
+    {
+      "pos": 27,
+      "hanzi": "情况",
+      "pinyin": "qíngkuàng",
+      "adj": 2,
+      "vi": "tình hình, tình huống"
+    },
+    {
+      "pos": 28,
+      "hanzi": "例如",
+      "pinyin": "lìrú",
+      "adj": 4,
+      "vi": "lấy ví dụ"
+    },
+    {
+      "pos": 29,
+      "hanzi": "举办",
+      "pinyin": "jǔbàn",
+      "adj": 4,
+      "vi": "tổ chức, tiến hành"
+    },
+    {
+      "pos": 30,
+      "hanzi": "各",
+      "pinyin": "gè",
+      "adj": 2,
+      "vi": "các, mọi"
+    },
+    {
+      "pos": 31,
+      "hanzi": "降低",
+      "pinyin": "jiàngdī",
+      "adj": 4,
+      "vi": "giảm, hạ"
+    }
+  ]
+}

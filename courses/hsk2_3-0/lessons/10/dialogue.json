@@ -1,0 +1,170 @@
+{
+  "lesson": 10,
+  "title": "就要考试了",
+  "title_pinyin": "Jiù yào kǎoshì le",
+  "title_vi": "Sắp thi rồi",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "小明，你们明天开学，你准备好了吗？",
+          "pinyin": "Xiǎomíng, nǐmen míngtiān kāixué, nǐ zhǔnbèi hǎo le ma?",
+          "vi": "Tiểu Minh, ngày mai các con khai giảng, con đã chuẩn bị sẵn sàng chưa?"
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "明天就开学啊？爸爸，我的书包你看见了吗？",
+          "pinyin": "Míngtiān jiù kāixué a? Bàba, wǒ de shūbāo nǐ kànjiàn le ma?",
+          "vi": "Ngày mai khai giảng rồi ạ? Bố ơi, bố có nhìn thấy cặp sách của con không?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "书包在门后面。",
+          "pinyin": "Shūbāo zài mén hòumian.",
+          "vi": "Cặp sách ở sau cửa."
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "书在哪儿呢？笔呢？",
+          "pinyin": "Shū zài nǎr ne? Bǐ ne?",
+          "vi": "Sách ở đâu ạ? Bút ở đâu ạ?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "书在床上，笔在桌子上。",
+          "pinyin": "Shū zài chuáng shàng, bǐ zài zhuōzi shàng.",
+          "vi": "Sách ở trên giường, bút ở trên bàn."
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "太好了！现在都准备好了。",
+          "pinyin": "Tài hǎo le! Xiànzài dōu zhǔnbèi hǎo le.",
+          "vi": "Tuyệt quá! Bây giờ đều chuẩn bị xong rồi."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "这次爸爸帮你，下次你自己准备，好不好？",
+          "pinyin": "Zhè cì bàba bāng nǐ, xià cì nǐ zìjǐ zhǔnbèi, hǎo bù hǎo?",
+          "vi": "Lần này bố giúp con, lần sau con tự chuẩn bị nhé, được không?"
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "好！",
+          "pinyin": "Hǎo!",
+          "vi": "Vâng ạ!"
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "小雪，你在做什么呢？",
+          "pinyin": "Xiǎoxuě, nǐ zài zuò shénme ne?",
+          "vi": "Tiểu Tuyết, con đang làm gì đấy?"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "明天考试，我在看书呢。",
+          "pinyin": "Míngtiān kǎoshì, wǒ zài kàn shū ne.",
+          "vi": "Ngày mai thi, con đang xem sách ạ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "这些词要好好看看。",
+          "pinyin": "Zhèxiē cí yào hǎohǎo kànkan.",
+          "vi": "Những từ này phải xem kỹ đấy."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "我看过了，意思也都懂了。",
+          "pinyin": "Wǒ kàn guo le, yìsi yě dōu dǒng le.",
+          "vi": "Con xem qua rồi, nghĩa cũng đều hiểu rồi ạ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你的本子呢？本子上做错的题也要看一看。",
+          "pinyin": "Nǐ de běnzi ne? Běnzi shàng zuò cuò de tí yě yào kàn yī kàn.",
+          "vi": "Vở của con đâu? Những bài làm sai trong vở cũng phải xem lại đấy."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "妈妈，是您准备考试还是我准备考试？",
+          "pinyin": "Māma, shì nín zhǔnbèi kǎoshì háishì wǒ zhǔnbèi kǎoshì?",
+          "vi": "Mẹ ơi, là mẹ chuẩn bị thi hay là con chuẩn bị thi vậy?"
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "刘小雪",
+          "zh": "妈妈，我回来了！",
+          "pinyin": "Māma, wǒ huílái le!",
+          "vi": "Mẹ ơi, con về rồi!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我买了奶茶，就在桌子上，自己去拿吧。",
+          "pinyin": "Wǒ mǎile nǎichá, jiù zài zhuōzi shàng, zìjǐ qù ná ba.",
+          "vi": "Mẹ mua trà sữa, ở trên bàn, tự đi lấy đi con."
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "谢谢妈妈！",
+          "pinyin": "Xièxie māma!",
+          "vi": "Cảm ơn mẹ!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "今天考试考得怎么样？",
+          "pinyin": "Jīntiān kǎoshì kǎo de zěnmeyàng?",
+          "vi": "Hôm nay thi thế nào?"
+        },
+        {
+          "speaker": "刘小雪",
+          "zh": "我觉得比上次好。",
+          "pinyin": "Wǒ juéde bǐ shàng cì hǎo.",
+          "vi": "Con thấy tốt hơn lần trước ạ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "真不错！饭菜快要做好了，你叫弟弟一起去洗手吧。",
+          "pinyin": "Zhēn búcuò! Fàncài kuài yào zuò hǎo le, nǐ jiào dìdi yīqǐ qù xǐshǒu ba.",
+          "vi": "Không tồi! Cơm canh sắp làm xong rồi, con gọi em trai cùng đi rửa tay đi."
+        },
+        {
+          "speaker": "刘小明",
+          "zh": "妈妈，我是第一名，姐姐还没洗完呢。",
+          "pinyin": "Māma, wǒ shì dì-yī míng, jiějie hái méi xǐ wán ne.",
+          "vi": "Mẹ ơi, con là người đầu tiên, chị gái chưa rửa xong ạ."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你洗得真快啊！",
+          "pinyin": "Nǐ xǐ de zhēn kuài a!",
+          "vi": "Con rửa nhanh thật đấy!"
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "快要开学了，爸爸帮弟弟准备书包、本子和笔。我就要考试了，妈妈让我看书，看做错的题。我们上学，爸爸、妈妈比我们还忙。我问他们：\"是我和弟弟上学还是你们上学？\"他们都笑了。",
+          "pinyin": "Kuài yào kāixué le, bàba bāng dìdi zhǔnbèi shūbāo, běnzi hé bǐ. Wǒ jiù yào kǎoshì le, māma ràng wǒ kàn shū, kàn zuò cuò de tí. Wǒmen shàngxué, bàba, māma bǐ wǒmen hái máng. Wǒ wèn tāmen: \"Shì wǒ hé dìdi shàngxué háishì nǐmen shàngxué?\" Tāmen dōu xiào le.",
+          "vi": "Sắp khai giảng rồi, bố giúp em trai chuẩn bị cặp sách, vở và bút. Con sắp thi rồi, mẹ bảo con xem sách, xem những bài làm sai. Bọn con đi học, bố mẹ còn bận hơn cả bọn con. Con hỏi họ: \"Là con và em trai đi học hay là bố mẹ đi học?\" Cả hai đều cười."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const explanation = "Đối chiếu đúng ý nghĩa và trật tự từ của cấu trúc đã học.";
+const input = (id: string, prompt: string, answer: string): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	explanation,
+	formula: "Giữ đúng trật tự từ; dấu câu và khoảng trắng không ảnh hưởng kết quả."
+});
+const choice = (
+	id: string,
+	answer: string,
+	options: [string, string, string],
+	image: string,
+	imageAlt: string
+): GrammarQuestion => ({
+	id,
+	prompt: "Chọn câu tiếng Trung phù hợp với hình.",
+	answer,
+	options,
+	image,
+	imageAlt,
+	explanation,
+	formula: "Quan sát chi tiết trong hình và chọn đúng một câu."
+});
+const arrange = (id: string, tokens: string[], answer: string): GrammarQuestion => ({
+	id,
+	prompt: "Sắp xếp các thẻ từ thành câu đúng.",
+	tokens,
+	answer,
+	explanation,
+	formula: "Chọn từng thẻ theo đúng trật tự câu."
+});
+const img = (name: string) => `/images/grammar/lesson12/${name}.svg`;
+
+const pictures: GrammarQuestion[] = [
+	choice(
+		"l12-p1",
+		"下雨了。",
+		["下雨了。", "没下雨。", "下雪了。"],
+		img("rain-started"),
+		"Trời bắt đầu mưa với các giọt mưa rõ ràng"
+	),
+	choice(
+		"l12-p2",
+		"下雪了。",
+		["下雪了。", "下雨了。", "没下雪。"],
+		img("snow-started"),
+		"Tuyết bắt đầu rơi"
+	),
+	choice(
+		"l12-p3",
+		"没下雨。",
+		["没下雨。", "下雨了。", "没下雪。"],
+		img("no-rain"),
+		"Bầu trời không mưa, biểu tượng mưa bị gạch chéo"
+	),
+	choice(
+		"l12-p4",
+		"天气冷了。",
+		["天气冷了。", "天气热了。", "天气很好。"],
+		img("temperature-dropping"),
+		"Nhiệt độ chuyển từ bình thường sang lạnh"
+	),
+	choice(
+		"l12-p5",
+		"他生病了。",
+		["他生病了。", "他没生病。", "他休息了。"],
+		img("became-sick"),
+		"Nhân vật vừa bị ốm với nhiệt kế"
+	),
+	choice(
+		"l12-p6",
+		"太冷了！",
+		["太冷了！", "天气冷了。", "有点儿冷。"],
+		img("too-cold"),
+		"Nhân vật rất lạnh với nhiều bông tuyết và biểu cảm cảm thán"
+	),
+	choice(
+		"l12-p7",
+		"太热了！",
+		["太热了！", "天气热了。", "有点儿热。"],
+		img("too-hot"),
+		"Trời rất nóng với mặt trời và biểu cảm cảm thán"
+	),
+	choice(
+		"l12-p8",
+		"这个菜太好吃了！",
+		["这个菜太好吃了！", "这个菜不好吃。", "这个菜太贵了！"],
+		img("food-delicious"),
+		"Một món ăn rất ngon và nhân vật thể hiện cảm thán tích cực"
+	)
+];
+
+const arrangements: GrammarQuestion[] = [
+	arrange("l12-a1", ["了", "下雨"], "下雨了。"),
+	arrange("l12-a2", ["下雪了", "昨天"], "昨天下雪了。"),
+	arrange("l12-a3", ["没下雨", "昨天"], "昨天没下雨。"),
+	arrange("l12-a4", ["今天", "没下雪"], "今天没下雪。"),
+	arrange("l12-a5", ["冷了", "天气"], "天气冷了。"),
+	arrange("l12-a6", ["生病了", "我"], "我生病了。"),
+	arrange("l12-a7", ["回家了", "他"], "他回家了。"),
+	arrange("l12-a8", ["了", "太", "冷"], "太冷了！"),
+	arrange("l12-a9", ["太好吃了", "这个菜"], "这个菜太好吃了！"),
+	arrange("l12-a10", ["这件衣服", "太贵了"], "这件衣服太贵了！")
+];
+
+const translations: GrammarQuestion[] = [
+	input("l12-t1", "Mưa rồi.", "下雨了。"),
+	input("l12-t2", "Tuyết rơi rồi.", "下雪了。"),
+	input("l12-t3", "Hôm qua tuyết rơi rồi.", "昨天下雪了。"),
+	input("l12-t4", "Hôm qua không mưa.", "昨天没下雨。"),
+	input("l12-t5", "Hôm nay không có tuyết rơi.", "今天没下雪。"),
+	input("l12-t6", "Thời tiết trở lạnh rồi.", "天气冷了。"),
+	input("l12-t7", "Tôi bị ốm rồi.", "我生病了。"),
+	input("l12-t8", "Lạnh quá!", "太冷了！"),
+	input("l12-t9", "Món ăn này ngon quá!", "这个菜太好吃了！"),
+	input("l12-t10", "Bộ quần áo này đắt quá!", "这件衣服太贵了！")
+];
+
+export const hsk1Lesson12Grammar: GrammarLesson = {
+	title: "Bài 12: 昨天下雪了",
+	variant: "hsk1-3-0-lesson12",
+	points: [
+		{
+			id: "non-subject-predicate",
+			title: "Câu phi chủ vị",
+			explanation:
+				"Câu phi chủ vị không có cấu trúc chủ ngữ–vị ngữ đầy đủ. Một từ hoặc cụm từ vẫn có thể biểu đạt ý hoàn chỉnh trong ngữ cảnh. Với 下雨了 và 下雪了 không cần thêm chủ ngữ 天.",
+			formulas: ["Một từ hoặc cụm từ biểu đạt ý hoàn chỉnh trong ngữ cảnh"],
+			examples: [
+				{ chinese: "下雨了。", vietnamese: "Mưa rồi." },
+				{ chinese: "下雪了。", vietnamese: "Tuyết rơi rồi." },
+				{ chinese: "太冷了！", vietnamese: "Lạnh quá!" },
+				{ chinese: "对不起！", vietnamese: "Xin lỗi!" },
+				{ chinese: "没关系！", vietnamese: "Không sao!" }
+			],
+			notes: ["Đúng: 下雨了。", "Không cần viết: 天下雨了。"],
+			exercises: [
+				{
+					id: "l12-picture",
+					title: "Bài tập 1: Nhìn hình và chọn đáp án đúng",
+					type: "choice",
+					questions: pictures
+				}
+			]
+		},
+		{
+			id: "sentence-final-le-one",
+			title: "Trợ từ ngữ khí 了 (1)",
+			explanation:
+				"了 ở cuối câu biểu thị một sự thay đổi, tình huống mới hoặc trạng thái hiện tại khác trước. Khi phủ định sự việc đã không xảy ra, dùng 没/没有 + động từ và không đặt 了 cuối câu.",
+			formulas: ["Câu + 了", "没/没有 + Động từ"],
+			examples: [
+				{ chinese: "下雨了。", vietnamese: "Mưa rồi." },
+				{ chinese: "下雪了。", vietnamese: "Tuyết rơi rồi." },
+				{ chinese: "天气冷了。", vietnamese: "Thời tiết trở lạnh rồi." },
+				{ chinese: "我生病了。", vietnamese: "Tôi bị ốm rồi." },
+				{ chinese: "他回家了。", vietnamese: "Anh ấy về nhà rồi." },
+				{ chinese: "昨天没下雨。", vietnamese: "Hôm qua không mưa." },
+				{ chinese: "今天没下雪。", vietnamese: "Hôm nay không có tuyết." }
+			],
+			notes: [
+				"Đúng: 昨天没下雨。",
+				"Sai: 昨天没下雨了。",
+				"Trong bài này không dùng 不 để phủ định sự việc đã không xảy ra."
+			],
+			exercises: [
+				{
+					id: "l12-arrange",
+					title: "Bài tập 2: Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: arrangements
+				}
+			]
+		},
+		{
+			id: "too-adjective-le",
+			title: "Cấu trúc 太……了",
+			explanation:
+				"太……了 diễn tả cảm thán về một mức độ cao. Trong mẫu đang học phải có cả 太 và 了.",
+			formulas: ["太 + Tính từ + 了"],
+			examples: [
+				{ chinese: "太冷了！", vietnamese: "Lạnh quá!" },
+				{ chinese: "太热了！", vietnamese: "Nóng quá!" },
+				{ chinese: "这个菜太好吃了！", vietnamese: "Món ăn này ngon quá!" },
+				{ chinese: "这件衣服太贵了！", vietnamese: "Bộ quần áo này đắt quá!" },
+				{ chinese: "小猫太漂亮了！", vietnamese: "Mèo con đẹp quá!" }
+			],
+			notes: ["Đúng: 太冷了！", "Chưa đầy đủ theo mẫu đang học: 太冷！"],
+			exercises: [
+				{
+					id: "l12-translate",
+					title: "Bài tập 3: Dịch sang tiếng Trung",
+					type: "input",
+					questions: translations
+				}
+			]
+		}
+	]
+};

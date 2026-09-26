@@ -1,0 +1,205 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const explanation = "Đối chiếu đúng ý nghĩa, liên từ bổ sung và trật tự từ của cấu trúc đã học.";
+const input = (
+	id: string,
+	prompt: string,
+	answer: string,
+	acceptedAnswers: string[] = []
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	acceptedAnswers,
+	explanation,
+	formula: "Phải giữ 也 hoặc 还 và đúng trật tự hai mệnh đề."
+});
+const choice = (
+	id: string,
+	answer: string,
+	options: [string, string, string],
+	image: string,
+	imageAlt: string
+): GrammarQuestion => ({
+	id,
+	prompt: "Chọn câu tiếng Trung phù hợp với hai phần của hình.",
+	answer,
+	options,
+	image,
+	imageAlt,
+	explanation,
+	formula: "Nối hai thông tin ngang hàng bằng 也 hoặc 还."
+});
+const arrange = (id: string, tokens: string[], answer: string): GrammarQuestion => ({
+	id,
+	prompt: "Sắp xếp các thẻ từ thành câu đúng.",
+	tokens,
+	answer,
+	explanation,
+	formula: "Mệnh đề 1， 也/还 + Mệnh đề 2"
+});
+const img = (name: string) => `/images/grammar/lesson15/${name}.svg`;
+
+const pictures: GrammarQuestion[] = [
+	choice(
+		"l15-p1",
+		"我喜欢这个，也喜欢那个。",
+		["我喜欢这个，也喜欢那个。", "我喜欢这个，不喜欢那个。", "我喜欢哪个？"],
+		img("likes-both-objects"),
+		"Một người thích cả đồ vật này và đồ vật kia"
+	),
+	choice(
+		"l15-p2",
+		"我喜欢苹果，也喜欢牛奶。",
+		["我喜欢苹果，也喜欢牛奶。", "我喜欢苹果，不喜欢牛奶。", "我想买苹果和牛奶。"],
+		img("likes-apple-milk"),
+		"Một người thích cả táo và sữa"
+	),
+	choice(
+		"l15-p3",
+		"她会做面条儿，也会做饺子。",
+		["她会做面条儿，也会做饺子。", "她会做面条儿，不会做饺子。", "她想吃面条儿和饺子。"],
+		img("cooks-noodles-dumplings"),
+		"Một cô gái biết làm cả mì và sủi cảo"
+	),
+	choice(
+		"l15-p4",
+		"他是医生，也是老师。",
+		["他是医生，也是老师。", "他是医生，不是老师。", "他是医生，老师也很好。"],
+		img("doctor-and-teacher"),
+		"Cùng một người vừa là bác sĩ vừa là giáo viên"
+	),
+	choice(
+		"l15-p5",
+		"这些菜都好吃，还很好看。",
+		["这些菜都好吃，还很好看。", "这些菜都好吃，不好看。", "这些菜都很贵，还不好吃。"],
+		img("food-tasty-beautiful"),
+		"Nhiều món ăn vừa ngon vừa được trình bày đẹp"
+	),
+	choice(
+		"l15-p6",
+		"他会开车，还会做饭。",
+		["他会开车，还会做饭。", "他会开车，不会做饭。", "他正在开车，也在吃饭。"],
+		img("drives-and-cooks"),
+		"Một người vừa biết lái xe vừa biết nấu ăn"
+	),
+	choice(
+		"l15-p7",
+		"我明天要去机场，还要接朋友。",
+		["我明天要去机场，还要接朋友。", "我明天要去机场，不接朋友。", "我明天坐飞机去北京。"],
+		img("airport-pickup"),
+		"Ngày mai nhân vật đi sân bay và đón bạn"
+	),
+	choice(
+		"l15-p8",
+		"北京很好看，还很好玩儿。",
+		["北京很好看，还很好玩儿。", "北京不好看，也不好玩儿。", "北京有机场，还有飞机。"],
+		img("beijing-beautiful-fun"),
+		"Bắc Kinh vừa đẹp vừa có nhiều hoạt động vui"
+	)
+];
+
+const arrangements: GrammarQuestion[] = [
+	arrange("l15-a1", ["也喜欢那个", "我", "喜欢这个"], "我喜欢这个，也喜欢那个。"),
+	arrange("l15-a2", ["也喜欢牛奶", "喜欢苹果", "我"], "我喜欢苹果，也喜欢牛奶。"),
+	arrange("l15-a3", ["也会做饺子", "她", "会做面条儿"], "她会做面条儿，也会做饺子。"),
+	arrange("l15-a4", ["也是老师", "是医生", "他"], "他是医生，也是老师。"),
+	arrange("l15-a5", ["还很好看", "这些菜", "都好吃"], "这些菜都好吃，还很好看。"),
+	arrange("l15-a6", ["还会做饭", "会开车", "他"], "他会开车，还会做饭。"),
+	arrange("l15-a7", ["还要接朋友", "我", "明天要去机场"], "我明天要去机场，还要接朋友。"),
+	arrange("l15-a8", ["还很好玩儿", "北京", "很好看"], "北京很好看，还很好玩儿。"),
+	arrange("l15-a9", ["也喜欢看电影", "喜欢唱歌", "姐姐"], "姐姐喜欢唱歌，也喜欢看电影。"),
+	arrange("l15-a10", ["还会写", "会读", "我们"], "我们会读，还会写。")
+];
+
+const translations: GrammarQuestion[] = [
+	input("l15-t1", "Tôi thích cái này, cũng thích cái kia.", "我喜欢这个，也喜欢那个。", [
+		"我喜欢这个，我也喜欢那个。"
+	]),
+	input("l15-t2", "Tôi thích táo, cũng thích sữa.", "我喜欢苹果，也喜欢牛奶。", [
+		"我喜欢苹果，我也喜欢牛奶。"
+	]),
+	input("l15-t3", "Cô ấy biết làm mì, cũng biết làm sủi cảo.", "她会做面条儿，也会做饺子。", [
+		"她会做面条儿，她也会做饺子。"
+	]),
+	input("l15-t4", "Anh ấy là bác sĩ, cũng là giáo viên.", "他是医生，也是老师。", [
+		"他是医生，他也是老师。"
+	]),
+	input("l15-t5", "Những món ăn này đều ngon, còn rất đẹp.", "这些菜都好吃，还很好看。"),
+	input("l15-t6", "Anh ấy biết lái xe, còn biết nấu ăn.", "他会开车，还会做饭。"),
+	input(
+		"l15-t7",
+		"Ngày mai tôi phải đi sân bay, còn phải đón bạn.",
+		"我明天要去机场，还要接朋友。"
+	),
+	input("l15-t8", "Bắc Kinh rất đẹp, hơn nữa còn rất vui.", "北京很好看，还很好玩儿。"),
+	input("l15-t9", "Chị gái thích hát, cũng thích xem phim.", "姐姐喜欢唱歌，也喜欢看电影。"),
+	input("l15-t10", "Chúng tôi biết đọc, còn biết viết.", "我们会读，还会写。")
+];
+
+export const hsk1Lesson15Grammar: GrammarLesson = {
+	title: "Bài 15: 大兴机场见！",
+	variant: "hsk1-3-0-lesson15",
+	points: [
+		{
+			id: "parallel-ye-hai",
+			title: "Câu ghép đẳng lập với 还 và 也",
+			explanation:
+				"Câu ghép đẳng lập gồm các mệnh đề ngang hàng; mệnh đề sau bổ sung thông tin cho mệnh đề trước. 也 diễn tả hành động hoặc đặc điểm tương tự, còn 还 bổ sung một hành động hoặc đặc điểm mới.",
+			formulas: ["Mệnh đề 1， 也/还 + Mệnh đề 2"],
+			examples: [
+				{
+					chinese: "我喜欢这个，也喜欢那个。",
+					vietnamese: "Tôi thích cái này, cũng thích cái kia."
+				},
+				{ chinese: "我喜欢苹果，也喜欢牛奶。", vietnamese: "Tôi thích táo, cũng thích sữa." },
+				{
+					chinese: "她会做面条儿，也会做饺子。",
+					vietnamese: "Cô ấy biết làm mì, cũng biết làm sủi cảo."
+				},
+				{ chinese: "他是医生，也是老师。", vietnamese: "Anh ấy là bác sĩ, cũng là giáo viên." },
+				{
+					chinese: "这些菜都好吃，还很好看。",
+					vietnamese: "Những món ăn này đều ngon, còn rất đẹp."
+				},
+				{ chinese: "他会开车，还会做饭。", vietnamese: "Anh ấy biết lái xe, còn biết nấu ăn." },
+				{
+					chinese: "我明天要去机场，还要接朋友。",
+					vietnamese: "Ngày mai tôi phải đi sân bay, còn phải đón bạn."
+				},
+				{
+					chinese: "北京很好看，还很好玩儿。",
+					vietnamese: "Bắc Kinh rất đẹp, hơn nữa còn rất thú vị."
+				}
+			],
+			notes: [
+				"Cùng chủ ngữ, mệnh đề sau có thể bỏ chủ ngữ: 我喜欢苹果，也喜欢牛奶。",
+				"也 đứng trước động từ, động từ năng nguyện hoặc tính từ: 也喜欢 / 也会做 / 也是 / 也很好看.",
+				"还 đứng trước động từ, động từ năng nguyện hoặc tính từ: 还喜欢 / 还会 / 还要 / 还很好看.",
+				"Đúng: 还很好看",
+				"Sai: 很还好看",
+				"也: thông tin tương tự; 还: bổ sung thông tin mới."
+			],
+			exercises: [
+				{
+					id: "l15-picture",
+					title: "Bài tập 1: Nhìn hình và chọn đáp án đúng",
+					type: "choice",
+					questions: pictures
+				},
+				{
+					id: "l15-arrange",
+					title: "Bài tập 2: Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: arrangements
+				},
+				{
+					id: "l15-translate",
+					title: "Bài tập 3: Dịch sang tiếng Trung",
+					type: "input",
+					questions: translations
+				}
+			]
+		}
+	]
+};

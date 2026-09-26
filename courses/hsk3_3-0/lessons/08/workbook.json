@@ -1,0 +1,444 @@
+{
+	"title": "HSK3 - Sách bài tập",
+	"lesson": 8,
+	"lesson_title": "今天我出院了",
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听对话，选择最匹配的图片。每题听两次。\nCâu 1–3: Nghe và chọn hình phù hợp. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 1,
+							"answer": "A",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"answer": "C",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"answer": "B",
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择正确答案。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 4,
+							"answer": "B",
+							"options": [
+								{
+									"label": "A",
+									"text": "住院"
+								},
+								{
+									"label": "B",
+									"text": "出院"
+								},
+								{
+									"label": "C",
+									"text": "看病"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "还可以"
+								},
+								{
+									"label": "B",
+									"text": "生病了"
+								},
+								{
+									"label": "C",
+									"text": "去医院了"
+								}
+							]
+						},
+						{
+							"number": 6,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "去看老师"
+								},
+								{
+									"label": "B",
+									"text": "给同学们写信"
+								},
+								{
+									"label": "C",
+									"text": "在家休息一周"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听一段话，选择正确答案。每题听两次。\nCâu 7–10: Nghe đoạn thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 7,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "身体不好"
+								},
+								{
+									"label": "B",
+									"text": "一直喜欢运动"
+								},
+								{
+									"label": "C",
+									"text": "现在会跑步和游泳"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "生病了"
+								},
+								{
+									"label": "B",
+									"text": "发高烧"
+								},
+								{
+									"label": "C",
+									"text": "回学校了"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"answer": "B",
+							"options": [
+								{
+									"label": "A",
+									"text": "家里没药了"
+								},
+								{
+									"label": "B",
+									"text": "头也开始疼了"
+								},
+								{
+									"label": "C",
+									"text": "晚上睡得不好"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "不用来医院"
+								},
+								{
+									"label": "B",
+									"text": "不用做检查"
+								},
+								{
+									"label": "C",
+									"text": "不要自己吃药"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—15题：匹配句子。\nCâu 11–15: Nối câu.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "我知道，咱们两点半以前走就行。"
+						},
+						{
+							"label": "B",
+							"text": "好的，我少吃一点儿。"
+						},
+						{
+							"label": "C",
+							"text": "她们都喜欢这么说，因为关心我们。"
+						},
+						{
+							"label": "D",
+							"text": "我记住了，我一定不会吃错的。"
+						},
+						{
+							"label": "E",
+							"text": "当然。我们先坐公交车，然后换地铁。"
+						},
+						{
+							"label": "F",
+							"text": "有个好的习惯，身体一定会越来越好的。"
+						}
+					],
+					"questions": [
+						{
+							"number": 11,
+							"answer": "B",
+							"question": "你不能再吃冰激凌了，吃多了会不舒服。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 12,
+							"answer": "A",
+							"question": "明天下午三点要去医院做检查。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 13,
+							"answer": "F",
+							"question": "我差不多运动了半年，现在健康多了。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 14,
+							"answer": "D",
+							"question": "这种药饭前吃，那种药饭后吃。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 15,
+							"answer": "C",
+							"question": "我妈妈常说，多吃饭身体才能健康。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第16—20题：选词填空。\nCâu 16–20: Chọn từ điền vào chỗ trống.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "其他"
+						},
+						{
+							"label": "B",
+							"text": "常"
+						},
+						{
+							"label": "C",
+							"text": "注意"
+						},
+						{
+							"label": "D",
+							"text": "心里"
+						},
+						{
+							"label": "E",
+							"text": "鞋"
+						},
+						{
+							"label": "F",
+							"text": "担心"
+						}
+					],
+					"questions": [
+						{
+							"number": 16,
+							"answer": "C",
+							"sentence": "医生说吃药的时候要（ ）时间和方法。"
+						},
+						{
+							"number": 17,
+							"answer": "F",
+							"sentence": "你别（ ），我没事，睡一觉就好了。"
+						},
+						{
+							"number": 18,
+							"answer": "D",
+							"sentence": "虽然她没说，但我知道她（ ）一定很难过。"
+						},
+						{
+							"number": 19,
+							"answer": "B",
+							"sentence": "A：我发现你（ ）来体育馆跑步。\nB：对，我每天下课以后都来跑一个小时步。"
+						},
+						{
+							"number": 20,
+							"answer": "A",
+							"sentence": "A：除了羽毛球以外，你还喜欢（ ）运动吗？\nB：我什么运动都喜欢。"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第21—24题：选择正确答案。\nCâu 21–24: Đọc và chọn đáp án đúng.",
+					"embedded_example_image": true,
+					"shared_passage": "23–24\n\n我爸爸以前不太喜欢运动，喜欢吃肉、喝饮料，今年他突然胖了不少。检查身体的时候医生告诉他，如果再胖下去，就会生病。最近他开始每天早上跑步，晚上也不吃太多。他现在不但自己运动，而且还常告诉我们要注意健康。",
+					"shared_passage_start": 23,
+					"questions": [
+						{
+							"number": 21,
+							"answer": "A",
+							"sentence": "前几天妈妈发烧了，这几天她头疼，也没睡好。今天早上妈妈去医院了，医生给她开了药，让她多休息。",
+							"question": "妈妈为什么去医院？",
+							"options": [
+								{
+									"label": "A",
+									"text": "一直不舒服"
+								},
+								{
+									"label": "B",
+									"text": "孩子生病了"
+								},
+								{
+									"label": "C",
+									"text": "今天发烧了"
+								}
+							]
+						},
+						{
+							"number": 22,
+							"answer": "A",
+							"sentence": "张先生感冒以后没有去医院，他吃了两天药，今天觉得身体好多了。他准备明天去上班。",
+							"question": "关于张先生，可以知道什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "感冒了"
+								},
+								{
+									"label": "B",
+									"text": "去医院了"
+								},
+								{
+									"label": "C",
+									"text": "明天不上班"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "B",
+							"question": "爸爸为什么开始跑步？",
+							"options": [
+								{
+									"label": "A",
+									"text": "他喜欢运动"
+								},
+								{
+									"label": "B",
+									"text": "他不想生病"
+								},
+								{
+									"label": "C",
+									"text": "家人让他跑步"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "C",
+							"question": "关于爸爸，可以知道什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "生病了"
+								},
+								{
+									"label": "B",
+									"text": "不吃肉了"
+								},
+								{
+									"label": "C",
+									"text": "开始注意健康了"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据拼音写汉字。\nCâu 25–27: Viết chữ Hán theo pinyin.",
+					"embedded_example_image": true,
+					"questions": [
+						{
+							"number": 25,
+							"answer": "心",
+							"type": "writing_input",
+							"sentence": "我一直很担（ ）爷爷的身体。",
+							"prompt_pinyin": "xīn"
+						},
+						{
+							"number": 26,
+							"answer": "法",
+							"type": "writing_input",
+							"sentence": "虽然问题有很多，但是方（ ）更多。",
+							"prompt_pinyin": "fǎ"
+						},
+						{
+							"number": 27,
+							"answer": "其",
+							"type": "writing_input",
+							"sentence": "医生说我不能吃这种药，（ ）他的药都可以吃。",
+							"prompt_pinyin": "qí"
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：看图，用词造句。\nCâu 28–30: Nhìn hình và dùng từ gợi ý đặt câu.",
+					"questions": [
+						{
+							"number": 28,
+							"answer": "这个孩子差不多一米高。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 差不多",
+							"accepted_answers": ["这个孩子的身高差不多一米。"]
+						},
+						{
+							"number": 29,
+							"answer": "这个孩子发烧了。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 发烧",
+							"accepted_answers": ["他正在发烧。"]
+						},
+						{
+							"number": 30,
+							"answer": "他们一家人都很健康。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 健康",
+							"accepted_answers": ["运动让他们更健康。"]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,213 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 8,
+  "label": "Bài 8",
+  "title": "生活中不缺少美",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "巧克力",
+      "pinyin": "qiǎokèlì",
+      "adj": 2,
+      "vi": "sôcôla"
+    },
+    {
+      "pos": 2,
+      "hanzi": "亲戚",
+      "pinyin": "qīnqi",
+      "adj": 2,
+      "vi": "họ hàng thân thích"
+    },
+    {
+      "pos": 3,
+      "hanzi": "伤心",
+      "pinyin": "shāng xīn",
+      "adj": 6,
+      "vi": "đau lòng"
+    },
+    {
+      "pos": 4,
+      "hanzi": "使",
+      "pinyin": "shǐ",
+      "adj": 4,
+      "vi": "khiến cho, làm cho"
+    },
+    {
+      "pos": 5,
+      "hanzi": "心情",
+      "pinyin": "xīnqíng",
+      "adj": 2,
+      "vi": "tâm trạng"
+    },
+    {
+      "pos": 6,
+      "hanzi": "愉快",
+      "pinyin": "yúkuài",
+      "adj": 6,
+      "vi": "vui vẻ"
+    },
+    {
+      "pos": 7,
+      "hanzi": "景色",
+      "pinyin": "jǐngsè",
+      "adj": 2,
+      "vi": "phong cảnh, cảnh vật"
+    },
+    {
+      "pos": 8,
+      "hanzi": "放松",
+      "pinyin": "fàngsōng",
+      "adj": 4,
+      "vi": "thả lỏng, thư giãn"
+    },
+    {
+      "pos": 9,
+      "hanzi": "压力",
+      "pinyin": "yālì",
+      "adj": 2,
+      "vi": "áp lực"
+    },
+    {
+      "pos": 10,
+      "hanzi": "回忆",
+      "pinyin": "huíyì",
+      "adj": 4,
+      "vi": "nhớ lại"
+    },
+    {
+      "pos": 11,
+      "hanzi": "发生",
+      "pinyin": "fāshēng",
+      "adj": 4,
+      "vi": "xảy ra"
+    },
+    {
+      "pos": 12,
+      "hanzi": "成为",
+      "pinyin": "chéngwéi",
+      "adj": 4,
+      "vi": "trở thành"
+    },
+    {
+      "pos": 13,
+      "hanzi": "只要",
+      "pinyin": "zhǐyào",
+      "adj": 10,
+      "vi": "chỉ cần, miễn là"
+    },
+    {
+      "pos": 14,
+      "hanzi": "师傅",
+      "pinyin": "shīfu",
+      "adj": 2,
+      "vi": "sư phụ (cách gọi kính trọng dành cho người có tay nghề)"
+    },
+    {
+      "pos": 15,
+      "hanzi": "大使馆",
+      "pinyin": "dàshǐguǎn",
+      "adj": 2,
+      "vi": "đại sứ quán"
+    },
+    {
+      "pos": 16,
+      "hanzi": "堵车",
+      "pinyin": "dǔ chē",
+      "adj": 4,
+      "vi": "kẹt xe"
+    },
+    {
+      "pos": 17,
+      "hanzi": "距离",
+      "pinyin": "jùlí",
+      "adj": 2,
+      "vi": "khoảng cách"
+    },
+    {
+      "pos": 18,
+      "hanzi": "耐心",
+      "pinyin": "nàixīn",
+      "adj": 2,
+      "vi": "lòng kiên nhẫn, sự nhẫn nại"
+    },
+    {
+      "pos": 19,
+      "hanzi": "生命",
+      "pinyin": "shēngmìng",
+      "adj": 2,
+      "vi": "sự sống, tính mệnh"
+    },
+    {
+      "pos": 20,
+      "hanzi": "缺少",
+      "pinyin": "quēshǎo",
+      "adj": 4,
+      "vi": "thiếu"
+    },
+    {
+      "pos": 21,
+      "hanzi": "到处",
+      "pinyin": "dàochù",
+      "adj": 7,
+      "vi": "khắp nơi, đâu đâu"
+    },
+    {
+      "pos": 22,
+      "hanzi": "态度",
+      "pinyin": "tàidù",
+      "adj": 2,
+      "vi": "thái độ"
+    },
+    {
+      "pos": 23,
+      "hanzi": "因此",
+      "pinyin": "yīncǐ",
+      "adj": 10,
+      "vi": "do đó, vì vậy"
+    },
+    {
+      "pos": 24,
+      "hanzi": "科学",
+      "pinyin": "kēxué",
+      "adj": 2,
+      "vi": "khoa học"
+    },
+    {
+      "pos": 25,
+      "hanzi": "证明",
+      "pinyin": "zhèngmíng",
+      "adj": 4,
+      "vi": "chứng minh"
+    },
+    {
+      "pos": 26,
+      "hanzi": "往往",
+      "pinyin": "wǎngwǎng",
+      "adj": 7,
+      "vi": "thường thường"
+    },
+    {
+      "pos": 27,
+      "hanzi": "阳光",
+      "pinyin": "yángguāng",
+      "adj": 6,
+      "vi": "lạc quan, vui vẻ"
+    },
+    {
+      "pos": 28,
+      "hanzi": "积极",
+      "pinyin": "jījí",
+      "adj": 6,
+      "vi": "tích cực"
+    },
+    {
+      "pos": 29,
+      "hanzi": "特点",
+      "pinyin": "tèdiǎn",
+      "adj": 2,
+      "vi": "đặc điểm"
+    }
+  ]
+}

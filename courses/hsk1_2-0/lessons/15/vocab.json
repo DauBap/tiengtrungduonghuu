@@ -1,0 +1,73 @@
+{
+  "course_id": "hsk1_2",
+  "course_name": "HSK 1(2.0)",
+  "id": 15,
+  "label": "Bài 15",
+  "title": "我是坐飞机来的",
+  "short_vi": "Hỏi về thời gian, nơi chốn và cách thức của sự việc. Làm quen và chào hỏi.",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "认识",
+      "pinyin": "rènshi",
+      "adj": 4,
+      "vi": "quen biết"
+    },
+    {
+      "pos": 2,
+      "hanzi": "年",
+      "pinyin": "nián",
+      "adj": 2,
+      "vi": "năm"
+    },
+    {
+      "pos": 3,
+      "hanzi": "大学",
+      "pinyin": "dàxué",
+      "adj": 2,
+      "vi": "đại học"
+    },
+    {
+      "pos": 4,
+      "hanzi": "饭店",
+      "pinyin": "fàndiàn",
+      "adj": 2,
+      "vi": "nhà hàng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "出租车",
+      "pinyin": "chūzūchē",
+      "adj": 2,
+      "vi": "taxi"
+    },
+    {
+      "pos": 6,
+      "hanzi": "一起",
+      "pinyin": "yìqǐ",
+      "adj": 7,
+      "vi": "cùng nhau"
+    },
+    {
+      "pos": 7,
+      "hanzi": "高兴",
+      "pinyin": "gāoxìng",
+      "adj": 6,
+      "vi": "vui mừng"
+    },
+    {
+      "pos": 8,
+      "hanzi": "听",
+      "pinyin": "tīng",
+      "adj": 4,
+      "vi": "nghe"
+    },
+    {
+      "pos": 9,
+      "hanzi": "飞机",
+      "pinyin": "fēijī",
+      "adj": 2,
+      "vi": "máy bay"
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 17,
+  "label": "Bài 17",
+  "title": "我要多向认真的人学习",
+  "short_vi": "Trò chuyện về cảm xúc lo lắng, sợ hãi khi mắc lỗi; bàn về định hướng sau khi tốt nghiệp (học tiếp, du học, đi làm); nhờ bạn tư vấn ngành học; nhấn mạnh tầm quan trọng của việc suy nghĩ kỹ về đam mê của bản thân",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "向",
+      "pinyin": "xiàng",
+      "adj": 13,
+      "vi": "về phía, hướng về"
+    },
+    {
+      "pos": 2,
+      "hanzi": "楼梯",
+      "pinyin": "lóutī",
+      "adj": 2,
+      "vi": "cầu thang"
+    },
+    {
+      "pos": 3,
+      "hanzi": "害怕",
+      "pinyin": "hàipà",
+      "adj": 4,
+      "vi": "sợ hãi"
+    },
+    {
+      "pos": 4,
+      "hanzi": "生气",
+      "pinyin": "shēngqì",
+      "adj": 4,
+      "vi": "tức giận"
+    },
+    {
+      "pos": 5,
+      "hanzi": "常见",
+      "pinyin": "chángjiàn",
+      "adj": 6,
+      "vi": "thường gặp, phổ biến"
+    },
+    {
+      "pos": 6,
+      "hanzi": "聪明",
+      "pinyin": "cōngmíng",
+      "adj": 6,
+      "vi": "thông minh"
+    },
+    {
+      "pos": 7,
+      "hanzi": "错",
+      "pinyin": "cuò",
+      "adj": 2,
+      "vi": "sai, lỗi sai"
+    },
+    {
+      "pos": 8,
+      "hanzi": "认为",
+      "pinyin": "rènwéi",
+      "adj": 4,
+      "vi": "cho rằng, nghĩ rằng"
+    },
+    {
+      "pos": 9,
+      "hanzi": "到处",
+      "pinyin": "dàochù",
+      "adj": 18,
+      "vi": "khắp nơi"
+    },
+    {
+      "pos": 10,
+      "hanzi": "继续",
+      "pinyin": "jìxù",
+      "adj": 4,
+      "vi": "tiếp tục"
+    },
+    {
+      "pos": 11,
+      "hanzi": "同意",
+      "pinyin": "tóngyì",
+      "adj": 4,
+      "vi": "đồng ý"
+    },
+    {
+      "pos": 12,
+      "hanzi": "可",
+      "pinyin": "kě",
+      "adj": 10,
+      "vi": "nhưng"
+    },
+    {
+      "pos": 13,
+      "hanzi": "屋子",
+      "pinyin": "wūzi",
+      "adj": 2,
+      "vi": "phòng, căn phòng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "有关",
+      "pinyin": "yǒuguān",
+      "adj": 4,
+      "vi": "có liên quan, về (vấn đề gì đó)"
+    },
+    {
+      "pos": 15,
+      "hanzi": "关机",
+      "pinyin": "guānjī",
+      "adj": 4,
+      "vi": "tắt máy (điện thoại)"
+    },
+    {
+      "pos": 16,
+      "hanzi": "前天",
+      "pinyin": "qiántiān",
+      "adj": 2,
+      "vi": "hôm kia"
+    },
+    {
+      "pos": 17,
+      "hanzi": "留学",
+      "pinyin": "liúxué",
+      "adj": 4,
+      "vi": "du học"
+    },
+    {
+      "pos": 18,
+      "hanzi": "国家",
+      "pinyin": "guójiā",
+      "adj": 2,
+      "vi": "quốc gia, đất nước"
+    },
+    {
+      "pos": 19,
+      "hanzi": "比如",
+      "pinyin": "bǐrú",
+      "adj": 4,
+      "vi": "ví dụ, chẳng hạn như"
+    },
+    {
+      "pos": 20,
+      "hanzi": "查",
+      "pinyin": "chá",
+      "adj": 4,
+      "vi": "tra cứu, kiểm tra"
+    },
+    {
+      "pos": 21,
+      "hanzi": "有用",
+      "pinyin": "yǒuyòng",
+      "adj": 6,
+      "vi": "có ích, hữu dụng"
+    },
+    {
+      "pos": 22,
+      "hanzi": "容易",
+      "pinyin": "róngyì",
+      "adj": 6,
+      "vi": "dễ, dễ dàng"
+    },
+    {
+      "pos": 23,
+      "hanzi": "回答",
+      "pinyin": "huídá",
+      "adj": 4,
+      "vi": "trả lời"
+    },
+    {
+      "pos": 24,
+      "hanzi": "方向",
+      "pinyin": "fāngxiàng",
+      "adj": 2,
+      "vi": "phương hướng"
+    },
+    {
+      "pos": 25,
+      "hanzi": "只有",
+      "pinyin": "zhǐyǒu",
+      "adj": 10,
+      "vi": "chỉ có, chỉ khi"
+    },
+    {
+      "pos": 26,
+      "hanzi": "真正",
+      "pinyin": "zhēnzhèng",
+      "adj": [
+        6,
+        18
+      ],
+      "vi": "chân chính, thực sự"
+    },
+    {
+      "pos": 27,
+      "hanzi": "难题",
+      "pinyin": "nántí",
+      "adj": 2,
+      "vi": "vấn đề khó khăn, câu hỏi khó"
+    },
+    {
+      "pos": 28,
+      "hanzi": "怎样",
+      "pinyin": "zěnyàng",
+      "adj": 1,
+      "vi": "thế nào, ra sao"
+    }
+  ]
+}

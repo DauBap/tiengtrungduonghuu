@@ -1,0 +1,249 @@
+import type { GrammarExercise, GrammarLesson } from "./types";
+
+type Row = {
+	id: string;
+	zh: string;
+	vi: string;
+	tokens: string[];
+	wrong: [string, string];
+	note: string;
+};
+const exercises = (prefix: string, rows: Row[]): GrammarExercise[] => [
+	{
+		id: `${prefix}-choice`,
+		title: "1. Chọn đáp án đúng",
+		type: "choice",
+		questions: rows.map((r, i) => {
+			const options: [string, string, string] =
+				i % 3 === 0
+					? [r.zh, ...r.wrong]
+					: i % 3 === 1
+						? [r.wrong[0], r.zh, r.wrong[1]]
+						: [...r.wrong, r.zh];
+			return {
+				id: `${r.id}c`,
+				prompt: `Chọn câu đúng: “${r.vi}”`,
+				answer: r.zh,
+				options,
+				completedSentence: r.zh,
+				meaning: r.vi,
+				explanation: r.note,
+				optionExplanations: Object.fromEntries(
+					options.map((o) => [
+						o,
+						o === r.zh ? `Đúng: ${r.note}` : "Sai: trật tự hoặc quan hệ ý nghĩa không phù hợp."
+					])
+				)
+			};
+		})
+	},
+	{
+		id: `${prefix}-arrange`,
+		title: "2. Sắp xếp từ thành câu",
+		type: "arrange",
+		questions: rows.map((r) => ({
+			id: `${r.id}a`,
+			prompt: r.vi,
+			answer: r.zh,
+			tokens: r.tokens,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	},
+	{
+		id: `${prefix}-translate`,
+		title: "3. Dịch Việt sang Trung",
+		type: "input",
+		questions: rows.map((r) => ({
+			id: `${r.id}t`,
+			prompt: r.vi,
+			answer: r.zh,
+			completedSentence: r.zh,
+			meaning: r.vi,
+			explanation: r.note
+		}))
+	}
+];
+
+export const hsk2Lesson9Grammar: GrammarLesson = {
+	title: "BÀI 9: 我去买杯奶茶",
+	points: [
+		{
+			id: "meiyou-comparison",
+			title: "Câu so sánh (3) – A 没有 B + tính từ",
+			explanation:
+				"Dùng “A 没有 B + tính từ” để nói A không đạt mức độ bằng B về một đặc điểm nào đó. Có thể thêm “那么/这么” trước tính từ để nhấn mạnh mức độ.",
+			formulas: ["A + 没有 + B + tính từ", "A + 没有 + B + 那么/这么 + tính từ"],
+			examples: [
+				{
+					chinese: "儿子的个子没有他那么高。",
+					vietnamese: "Cậu con trai không cao bằng cậu bé kia."
+				},
+				{
+					chinese: "这家咖啡店没有那家近。",
+					vietnamese: "Quán cà phê này không gần bằng quán kia."
+				}
+			],
+			notes: ["Không dùng “比” và “没有” đồng thời trong cùng cấu trúc so sánh này."],
+			exercises: exercises("h2l9-compare", [
+				{
+					id: "mc1",
+					zh: "儿子的个子没有他那么高",
+					vi: "Cậu con trai không cao bằng cậu bé kia.",
+					tokens: ["那么高", "没有", "他", "儿子的个子"],
+					wrong: ["儿子的个子比没有他那么高", "儿子的个子他没有那么高"],
+					note: "A đứng trước 没有, B đứng sau 没有, rồi đến 那么高."
+				},
+				{
+					id: "mc2",
+					zh: "我没有哥哥高",
+					vi: "Tôi không cao bằng anh trai.",
+					tokens: ["哥哥", "高", "我", "没有"],
+					wrong: ["我比没有哥哥高", "我哥哥没有高"],
+					note: "我 + 没有 + 哥哥 + 高."
+				},
+				{
+					id: "mc3",
+					zh: "这家咖啡店没有那家近",
+					vi: "Quán cà phê này không gần bằng quán kia.",
+					tokens: ["近", "那家", "没有", "这家咖啡店"],
+					wrong: ["这家咖啡店比没有那家近", "这家咖啡店那家没有近"],
+					note: "Đối tượng được so sánh nằm hai bên 没有."
+				},
+				{
+					id: "mc4",
+					zh: "今天没有昨天那么冷",
+					vi: "Hôm nay không lạnh bằng hôm qua.",
+					tokens: ["昨天", "那么冷", "今天", "没有"],
+					wrong: ["今天比没有昨天那么冷", "今天昨天没有那么冷"],
+					note: "今天 + 没有 + 昨天 + 那么冷."
+				},
+				{
+					id: "mc5",
+					zh: "走路没有打车那么快",
+					vi: "Đi bộ không nhanh bằng đi taxi.",
+					tokens: ["打车", "走路", "那么快", "没有"],
+					wrong: ["走路比没有打车那么快", "走路打车没有那么快"],
+					note: "Hai hoạt động có thể làm A và B trong cấu trúc 没有."
+				}
+			])
+		},
+		{
+			id: "distance-li",
+			title: "Động từ “离” – Khoảng cách không gian và thời gian",
+			explanation:
+				"“离” đứng giữa hai địa điểm hoặc hai mốc thời gian để diễn tả khoảng cách. Sau đối tượng thứ hai là phần mô tả khoảng cách như 近、远、有…公里 hoặc 还有…时间.",
+			formulas: [
+				"Địa điểm A + 离 + địa điểm B + 近/远",
+				"Thời điểm A + 离 + thời điểm B + khoảng thời gian"
+			],
+			examples: [
+				{ chinese: "咖啡店离这儿有点儿远。", vietnamese: "Quán cà phê cách đây hơi xa." },
+				{ chinese: "我家离学校很近。", vietnamese: "Nhà tôi cách trường rất gần." }
+			],
+			notes: ["Thứ tự hai nơi quyết định điểm xuất phát và điểm tham chiếu của khoảng cách."],
+			exercises: exercises("h2l9-li", [
+				{
+					id: "li1",
+					zh: "咖啡店离这儿有点儿远",
+					vi: "Quán cà phê cách đây hơi xa.",
+					tokens: ["有点儿远", "这儿", "咖啡店", "离"],
+					wrong: ["咖啡店这儿离有点儿远", "离咖啡店这儿有点儿远"],
+					note: "Địa điểm A + 离 + địa điểm B + 有点儿远."
+				},
+				{
+					id: "li2",
+					zh: "我家离学校很近",
+					vi: "Nhà tôi cách trường rất gần.",
+					tokens: ["学校", "我家", "很近", "离"],
+					wrong: ["我家学校离很近", "我家很近离学校"],
+					note: "我家 + 离 + 学校 + 很近."
+				},
+				{
+					id: "li3",
+					zh: "饭馆离商场不远",
+					vi: "Nhà hàng cách trung tâm thương mại không xa.",
+					tokens: ["不远", "商场", "离", "饭馆"],
+					wrong: ["饭馆商场离不远", "饭馆不远离商场"],
+					note: "Phần mô tả khoảng cách 不远 đứng cuối."
+				},
+				{
+					id: "li4",
+					zh: "学校离咖啡店有两公里",
+					vi: "Trường học cách quán cà phê hai kilômét.",
+					tokens: ["有两公里", "咖啡店", "学校", "离"],
+					wrong: ["学校咖啡店离有两公里", "学校有两公里离咖啡店"],
+					note: "Khoảng cách cụ thể đứng sau hai địa điểm."
+				},
+				{
+					id: "li5",
+					zh: "现在离十二点还有半个小时",
+					vi: "Từ bây giờ đến 12 giờ còn nửa tiếng.",
+					tokens: ["还有半个小时", "十二点", "现在", "离"],
+					wrong: ["现在十二点离还有半个小时", "现在还有半个小时离十二点"],
+					note: "离 cũng nối hai mốc thời gian."
+				}
+			])
+		},
+		{
+			id: "duration-complement",
+			title: "Bổ ngữ thời lượng (1) – Thời gian kéo dài của hành động",
+			explanation:
+				"Cụm chỉ thời lượng đặt sau động từ để cho biết hành động kéo dài bao lâu. Nếu động từ có tân ngữ, có thể lặp lại động từ hoặc đặt tân ngữ thích hợp theo mẫu của bài.",
+			formulas: [
+				"Chủ ngữ + động từ + thời lượng",
+				"Chủ ngữ + động từ + tân ngữ + động từ + thời lượng"
+			],
+			examples: [
+				{ chinese: "走半个多小时就到了。", vietnamese: "Đi bộ hơn nửa tiếng là tới." },
+				{ chinese: "我学汉语学了两年。", vietnamese: "Tôi học tiếng Trung được hai năm." }
+			],
+			notes: [
+				"Thời lượng trả lời câu hỏi “bao lâu”, khác với mốc thời gian chỉ lúc hành động xảy ra."
+			],
+			exercises: exercises("h2l9-duration", [
+				{
+					id: "du1",
+					zh: "走半个多小时就到了",
+					vi: "Đi bộ hơn nửa tiếng là tới.",
+					tokens: ["就到了", "半个多小时", "走"],
+					wrong: ["半个多小时走就到了", "走就到了半个多小时"],
+					note: "Cụm thời lượng 半个多小时 đứng sau động từ 走."
+				},
+				{
+					id: "du2",
+					zh: "我等了一个小时",
+					vi: "Tôi đã đợi một tiếng.",
+					tokens: ["一个小时", "等了", "我"],
+					wrong: ["我一个小时等了", "我等一个小时了了"],
+					note: "一个小时 bổ sung thời lượng cho 等."
+				},
+				{
+					id: "du3",
+					zh: "他跑了半个小时",
+					vi: "Anh ấy đã chạy nửa tiếng.",
+					tokens: ["半个小时", "跑了", "他"],
+					wrong: ["他半个小时跑了", "他跑半个小时了了"],
+					note: "Thời lượng đứng sau động từ đã xảy ra 跑了."
+				},
+				{
+					id: "du4",
+					zh: "我学汉语学了两年",
+					vi: "Tôi học tiếng Trung được hai năm.",
+					tokens: ["学了", "我", "两年", "汉语", "学"],
+					wrong: ["我学汉语了两年学", "我汉语学两年了学"],
+					note: "Có tân ngữ 汉语 nên lặp động từ 学 trước thời lượng."
+				},
+				{
+					id: "du5",
+					zh: "她在咖啡店坐了一会儿",
+					vi: "Cô ấy đã ngồi ở quán cà phê một lát.",
+					tokens: ["一会儿", "坐了", "她", "在咖啡店"],
+					wrong: ["她在咖啡店一会儿坐了", "她一会儿在咖啡店坐了"],
+					note: "一会儿 đứng sau động từ 坐了 để chỉ thời lượng."
+				}
+			])
+		}
+	]
+};

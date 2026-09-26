@@ -1,0 +1,205 @@
+{
+  "course_id": "HSK3_3-0",
+  "course_name": "HSK3_3-0",
+  "id": 7,
+  "label": "Bài 7",
+  "title": "那条裙子比短裤更好看",
+  "short_vi": "Mua sắm tại trung tâm thương mại; chọn xe đạp, quần áo; so sánh giá cả, kiểu dáng; mua trái cây và mặc cả; chọn mua tivi mới cho gia đình",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "辆",
+      "pinyin": "liàng",
+      "adj": 8,
+      "vi": "Chiếc, cái (dùng cho xe cộ)"
+    },
+    {
+      "pos": 2,
+      "hanzi": "自行车",
+      "pinyin": "zìxíngchē",
+      "adj": 2,
+      "vi": "Xe đạp"
+    },
+    {
+      "pos": 3,
+      "hanzi": "旧",
+      "pinyin": "jiù",
+      "adj": 6,
+      "vi": "Cũ"
+    },
+    {
+      "pos": 4,
+      "hanzi": "矮",
+      "pinyin": "ǎi",
+      "adj": 6,
+      "vi": "Thấp (chiều cao)"
+    },
+    {
+      "pos": 5,
+      "hanzi": "试",
+      "pinyin": "shì",
+      "adj": 4,
+      "vi": "Thử"
+    },
+    {
+      "pos": 6,
+      "hanzi": "黄色",
+      "pinyin": "huángsè",
+      "adj": 2,
+      "vi": "Màu vàng"
+    },
+    {
+      "pos": 7,
+      "hanzi": "短裤",
+      "pinyin": "duǎnkù",
+      "adj": 2,
+      "vi": "Quần đùi, quần soóc"
+    },
+    {
+      "pos": 8,
+      "hanzi": "大小",
+      "pinyin": "dàxiǎo",
+      "adj": 2,
+      "vi": "Kích cỡ, độ lớn"
+    },
+    {
+      "pos": 9,
+      "hanzi": "合适",
+      "pinyin": "héshì",
+      "adj": 6,
+      "vi": "Phù hợp, vừa vặn"
+    },
+    {
+      "pos": 10,
+      "hanzi": "裙子",
+      "pinyin": "qúnzi",
+      "adj": 2,
+      "vi": "Váy"
+    },
+    {
+      "pos": 11,
+      "hanzi": "更",
+      "pinyin": "gèng",
+      "adj": 7,
+      "vi": "Càng, hơn nữa"
+    },
+    {
+      "pos": 12,
+      "hanzi": "决定",
+      "pinyin": "juédìng",
+      "adj": [
+        2,
+        4
+      ],
+      "vi": "Quyết định"
+    },
+    {
+      "pos": 13,
+      "hanzi": "西瓜",
+      "pinyin": "xīguā",
+      "adj": 2,
+      "vi": "dưa hấu"
+    },
+    {
+      "pos": 14,
+      "hanzi": "新鲜",
+      "pinyin": "xīnxiān",
+      "adj": 6,
+      "vi": "tươi, mới, thú vị"
+    },
+    {
+      "pos": 15,
+      "hanzi": "甜",
+      "pinyin": "tián",
+      "adj": 6,
+      "vi": "ngọt"
+    },
+    {
+      "pos": 16,
+      "hanzi": "公斤",
+      "pinyin": "gōngjīn",
+      "adj": 8,
+      "vi": "kilogram, kg"
+    },
+    {
+      "pos": 17,
+      "hanzi": "冰",
+      "pinyin": "bīng",
+      "adj": 4,
+      "vi": "đá, lạnh, đông đá"
+    },
+    {
+      "pos": 18,
+      "hanzi": "极",
+      "pinyin": "jí",
+      "adj": [
+        7,
+        11
+      ],
+      "vi": "cực, rất, vô cùng"
+    },
+    {
+      "pos": 19,
+      "hanzi": "斤",
+      "pinyin": "jīn",
+      "adj": 8,
+      "vi": "cân"
+    },
+    {
+      "pos": 20,
+      "hanzi": "香蕉",
+      "pinyin": "xiāngjiāo",
+      "adj": 2,
+      "vi": "chuối"
+    },
+    {
+      "pos": 21,
+      "hanzi": "一共",
+      "pinyin": "yīgòng",
+      "adj": 18,
+      "vi": "tổng cộng, tất cả"
+    },
+    {
+      "pos": 22,
+      "hanzi": "毛",
+      "pinyin": "máo",
+      "adj": 8,
+      "vi": "lông, sợi lông; tiền tệ (1 毛 = 0.1 元)"
+    },
+    {
+      "pos": 23,
+      "hanzi": "结婚",
+      "pinyin": "jiéhūn",
+      "adj": 4,
+      "vi": "kết hôn, lập gia đình"
+    },
+    {
+      "pos": 24,
+      "hanzi": "不但",
+      "pinyin": "bùdàn",
+      "adj": 10,
+      "vi": "không chỉ… mà còn…"
+    },
+    {
+      "pos": 25,
+      "hanzi": "而且",
+      "pinyin": "érqiě",
+      "adj": 10,
+      "vi": "hơn nữa, lại còn, vả lại"
+    },
+    {
+      "pos": 26,
+      "hanzi": "声",
+      "pinyin": "shēng",
+      "adj": 2,
+      "vi": "âm thanh, tiếng"
+    },
+    {
+      "pos": 27,
+      "hanzi": "开机",
+      "pinyin": "kāijī",
+      "adj": 4,
+      "vi": "bật máy, khởi động thiết bị"
+    }
+  ]
+}

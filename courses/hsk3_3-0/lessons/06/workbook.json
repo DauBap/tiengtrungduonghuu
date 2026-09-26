@@ -1,0 +1,444 @@
+{
+	"title": "HSK3 - Sách bài tập",
+	"lesson": 6,
+	"lesson_title": "高铁上还可以点外卖",
+	"sections": [
+		{
+			"section": "听力 - Phần nghe",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第1—3题：听对话，选择最匹配的图片。每题听两次。\nCâu 1–3: Nghe và chọn hình phù hợp. Mỗi câu nghe hai lần.",
+					"questions": [
+						{
+							"number": 1,
+							"answer": "A",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 2,
+							"answer": "C",
+							"options": ["A", "B", "C"]
+						},
+						{
+							"number": 3,
+							"answer": "B",
+							"options": ["A", "B", "C"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第4—6题：听对话，选择正确答案。每题听两次。\nCâu 4–6: Nghe hội thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 4,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "找人"
+								},
+								{
+									"label": "B",
+									"text": "检票"
+								},
+								{
+									"label": "C",
+									"text": "买票"
+								}
+							]
+						},
+						{
+							"number": 5,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "回家"
+								},
+								{
+									"label": "B",
+									"text": "去花园"
+								},
+								{
+									"label": "C",
+									"text": "再玩一会儿"
+								}
+							]
+						},
+						{
+							"number": 6,
+							"answer": "A",
+							"options": [
+								{
+									"label": "A",
+									"text": "飞机票太贵了"
+								},
+								{
+									"label": "B",
+									"text": "起飞时间太晚了"
+								},
+								{
+									"label": "C",
+									"text": "坐高铁比坐飞机快"
+								}
+							]
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第7—10题：听一段话，选择正确答案。每题听两次。\nCâu 7–10: Nghe đoạn thoại và chọn đáp án đúng.",
+					"questions": [
+						{
+							"number": 7,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "白楼的西边"
+								},
+								{
+									"label": "B",
+									"text": "路口的东边"
+								},
+								{
+									"label": "C",
+									"text": "路口的西边"
+								}
+							]
+						},
+						{
+							"number": 8,
+							"answer": "B",
+							"options": [
+								{
+									"label": "A",
+									"text": "现在很难过"
+								},
+								{
+									"label": "B",
+									"text": "要出国上学了"
+								},
+								{
+									"label": "C",
+									"text": "是他初中时认识的"
+								}
+							]
+						},
+						{
+							"number": 9,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "一次"
+								},
+								{
+									"label": "B",
+									"text": "两次"
+								},
+								{
+									"label": "C",
+									"text": "三次"
+								}
+							]
+						},
+						{
+							"number": 10,
+							"answer": "C",
+							"options": [
+								{
+									"label": "A",
+									"text": "走路"
+								},
+								{
+									"label": "B",
+									"text": "跑步"
+								},
+								{
+									"label": "C",
+									"text": "坐公交车"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "阅读 - Phần đọc",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第11—15题：匹配句子。\nCâu 11–15: Nối câu.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "好的，我会慢慢开的。"
+						},
+						{
+							"label": "B",
+							"text": "妈妈说她要带我去海边。"
+						},
+						{
+							"label": "C",
+							"text": "不会，从这儿走过去只要十分钟。"
+						},
+						{
+							"label": "D",
+							"text": "爸爸让我晚上九点以前必须回家。"
+						},
+						{
+							"label": "E",
+							"text": "当然。我们先坐公交车，然后换地铁。"
+						},
+						{
+							"label": "F",
+							"text": "从这儿往前走，到了第一个路口，往右走就是。"
+						}
+					],
+					"questions": [
+						{
+							"number": 11,
+							"answer": "B",
+							"question": "就要放假了，你打算做什么？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 12,
+							"answer": "A",
+							"question": "下雪了，你路上一定要小心。",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 13,
+							"answer": "F",
+							"question": "不好意思，请问地铁站怎么走？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 14,
+							"answer": "D",
+							"question": "你一直看手表，有什么急事吗？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						},
+						{
+							"number": 15,
+							"answer": "C",
+							"question": "还有30分钟电影就开始了，咱们会迟到吗？",
+							"options": ["A", "B", "C", "D", "E", "F"]
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第16—20题：选词填空。\nCâu 16–20: Chọn từ điền vào chỗ trống.",
+					"embedded_example_image": true,
+					"options_pool": [
+						{
+							"label": "A",
+							"text": "选择"
+						},
+						{
+							"label": "B",
+							"text": "高铁"
+						},
+						{
+							"label": "C",
+							"text": "小心"
+						},
+						{
+							"label": "D",
+							"text": "电梯"
+						},
+						{
+							"label": "E",
+							"text": "鞋"
+						},
+						{
+							"label": "F",
+							"text": "检票"
+						}
+					],
+					"questions": [
+						{
+							"number": 16,
+							"answer": "F",
+							"sentence": "该（ ）了。拿好票，我们现在就过去吧。"
+						},
+						{
+							"number": 17,
+							"answer": "C",
+							"sentence": "路上（ ）点儿，到了那儿就给我打电话。"
+						},
+						{
+							"number": 18,
+							"answer": "A",
+							"sentence": "你可以（ ）这家宾馆，就在火车站旁边，方便得很。"
+						},
+						{
+							"number": 19,
+							"answer": "D",
+							"sentence": "A：你怎么还没到？大家都在等你。\nB：不好意思，我已经到楼下了，马上就坐（ ）上去。"
+						},
+						{
+							"number": 20,
+							"answer": "B",
+							"sentence": "A：我们这次旅游还坐（ ），怎么样？\nB：行，又快又舒服，也比坐飞机方便。"
+						}
+					]
+				},
+				{
+					"part": "第三部分 - Phần 3",
+					"description": "第21—24题：选择正确答案。\nCâu 21–24: Đọc và chọn đáp án đúng.",
+					"embedded_example_image": true,
+					"shared_passage": "23–24\n\n明天我是这么打算的：如果天气好，咱们就去爬山，在外面拍拍照、吃吃东西。这几天天气越来越热了，咱们早点儿去，下午就回来。如果明天下雨，咱们就在家里看电影吧。",
+					"shared_passage_start": 23,
+					"questions": [
+						{
+							"number": 21,
+							"answer": "B",
+							"sentence": "我爱人对现在住的房子比较满意。房子虽然不大，但很干净，也很安静，住着很舒服。",
+							"question": "他现在的房子怎么样？",
+							"options": [
+								{
+									"label": "A",
+									"text": "很大"
+								},
+								{
+									"label": "B",
+									"text": "很舒服"
+								},
+								{
+									"label": "C",
+									"text": "不太安静"
+								}
+							]
+						},
+						{
+							"number": 22,
+							"answer": "B",
+							"sentence": "乐乐，你从酒店出来后往西走，到第一个红绿灯再往北走，就能看到咖啡馆了，我就在那儿等你。",
+							"question": "他在哪儿等乐乐？",
+							"options": [
+								{
+									"label": "A",
+									"text": "酒店"
+								},
+								{
+									"label": "B",
+									"text": "咖啡馆"
+								},
+								{
+									"label": "C",
+									"text": "红绿灯路口"
+								}
+							]
+						},
+						{
+							"number": 23,
+							"answer": "B",
+							"question": "如果明天不下雨，他打算做什么？",
+							"options": [
+								{
+									"label": "A",
+									"text": "去外面爬山"
+								},
+								{
+									"label": "B",
+									"text": "在家看电影"
+								},
+								{
+									"label": "C",
+									"text": "去超市买东西"
+								}
+							]
+						},
+						{
+							"number": 24,
+							"answer": "A",
+							"question": "他为什么想下午回来？",
+							"options": [
+								{
+									"label": "A",
+									"text": "天气热"
+								},
+								{
+									"label": "B",
+									"text": "下午会下雨"
+								},
+								{
+									"label": "C",
+									"text": "想看个电影"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"section": "书写 - Phần viết",
+			"parts": [
+				{
+					"part": "第一部分 - Phần 1",
+					"description": "第25—27题：根据拼音写汉字。\nCâu 25–27: Viết chữ Hán theo pinyin.",
+					"embedded_example_image": true,
+					"questions": [
+						{
+							"number": 25,
+							"answer": "耳",
+							"type": "writing_input",
+							"sentence": "你用（ ）机听音乐吧，我要学习了。",
+							"prompt_pinyin": "ěr"
+						},
+						{
+							"number": 26,
+							"answer": "如",
+							"type": "writing_input",
+							"sentence": "（ ）果您想换本书，就告诉我，我帮您拿。",
+							"prompt_pinyin": "rú"
+						},
+						{
+							"number": 27,
+							"answer": "查",
+							"type": "writing_input",
+							"sentence": "你再检（ ）一下，护照和机票都带好了吗？",
+							"prompt_pinyin": "chá"
+						}
+					]
+				},
+				{
+					"part": "第二部分 - Phần 2",
+					"description": "第28—30题：看图，用词造句。\nCâu 28–30: Nhìn hình và dùng từ gợi ý đặt câu.",
+					"questions": [
+						{
+							"number": 28,
+							"answer": "电梯里有很多人。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 电梯",
+							"accepted_answers": ["很多人正在坐电梯。"]
+						},
+						{
+							"number": 29,
+							"answer": "这里很安静。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 安静",
+							"accepted_answers": ["他安静地坐在桌前。"]
+						},
+						{
+							"number": 30,
+							"answer": "医生正在给孩子检查身体。",
+							"type": "writing_input",
+							"sentence": "Từ gợi ý: 检查",
+							"accepted_answers": ["医生在给孩子做检查。"]
+						}
+					]
+				}
+			]
+		}
+	]
+}

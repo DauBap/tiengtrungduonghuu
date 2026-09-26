@@ -1,0 +1,178 @@
+{
+	"course_id": "hsk1_3-0",
+	"course_name": "HSK 1 (3.0)",
+	"id": 12,
+	"label": "Bài 12",
+	"title": "昨天下雪了",
+	"short_vi": "Mô tả thời tiết, hỏi và mô tả tình trạng bệnh, lời khuyên sức khỏe ",
+	"data": [
+		{
+			"pos": 1,
+			"hanzi": "天气",
+			"pinyin": "tiānqì",
+			"adj": 2,
+			"vi": "khí hậu, thời tiết"
+		},
+		{
+			"pos": 2,
+			"hanzi": "这里",
+			"pinyin": "zhèlǐ",
+			"adj": 1,
+			"vi": "ở đây"
+		},
+		{
+			"pos": 3,
+			"hanzi": "天",
+			"pinyin": "tiān",
+			"adj": 2,
+			"vi": "ngày"
+		},
+		{
+			"pos": 4,
+			"hanzi": "下雨",
+			"pinyin": "xià yǔ",
+			"adj": [],
+			"vi": "mưa, mưa rơi"
+		},
+		{
+			"pos": 5,
+			"hanzi": "了",
+			"pinyin": "le",
+			"adj": 11,
+			"vi": "Được sử dụng ở cuối câu để chỉ sự thay đổi về tình huống hoặc trạng thái."
+		},
+		{
+			"pos": 6,
+			"hanzi": "雨",
+			"pinyin": "yǔ",
+			"adj": 2,
+			"vi": "rain"
+		},
+		{
+			"pos": 7,
+			"hanzi": "有点儿",
+			"pinyin": "yǒudiǎnr",
+			"adj": 7,
+			"vi": "có một ít"
+		},
+		{
+			"pos": 8,
+			"hanzi": "觉得",
+			"pinyin": "juéde",
+			"adj": 4,
+			"vi": "cảm thấy"
+		},
+		{
+			"pos": 9,
+			"hanzi": "冷",
+			"pinyin": "lěnɡ",
+			"adj": 6,
+			"vi": "lạnh"
+		},
+		{
+			"pos": 10,
+			"hanzi": "下",
+			"pinyin": "xià",
+			"adj": 4,
+			"vi": "biểu thị sự đi xuống (rơi, rớt,...)"
+		},
+		{
+			"pos": 11,
+			"hanzi": "雪",
+			"pinyin": "xuě",
+			"adj": 2,
+			"vi": "tuyết"
+		},
+		{
+			"pos": 12,
+			"hanzi": "来",
+			"pinyin": "lái",
+			"adj": 4,
+			"vi": "đến, tới"
+		},
+		{
+			"pos": 13,
+			"hanzi": "公司",
+			"pinyin": "ɡōnɡsī",
+			"adj": 2,
+			"vi": "công ty"
+		},
+		{
+			"pos": 14,
+			"hanzi": "生病",
+			"pinyin": "shēnɡbìnɡ",
+			"adj": 4,
+			"vi": "bị bệnh"
+		},
+		{
+			"pos": 15,
+			"hanzi": "看病",
+			"pinyin": "kànbìnɡ",
+			"adj": 4,
+			"vi": "đi khám"
+		},
+		{
+			"pos": 16,
+			"hanzi": "病",
+			"pinyin": "bìnɡ",
+			"adj": 4,
+			"vi": "bệnh"
+		},
+		{
+			"pos": 17,
+			"hanzi": "一点儿",
+			"pinyin": "yìdiǎnr",
+			"adj": 8,
+			"vi": "1 ít"
+		},
+		{
+			"pos": 18,
+			"hanzi": "药",
+			"pinyin": "yào",
+			"adj": 2,
+			"vi": "thuốc"
+		},
+		{
+			"pos": 19,
+			"hanzi": "天",
+			"pinyin": "tiān",
+			"adj": 2,
+			"vi": "ngày"
+		},
+		{
+			"pos": 20,
+			"hanzi": "回",
+			"pinyin": "huí",
+			"adj": 4,
+			"vi": "về, quay về"
+		},
+		{
+			"pos": 21,
+			"hanzi": "再",
+			"pinyin": "zài",
+			"adj": 7,
+			"vi": "lần sau, lần nữa"
+		},
+		{
+			"pos": 22,
+			"hanzi": "喝",
+			"pinyin": "hē",
+			"adj": 4,
+			"vi": "uống"
+		},
+		{
+			"pos": 23,
+			"hanzi": "热",
+			"pinyin": "rè",
+			"adj": 6,
+			"vi": "nóng"
+		},
+		{
+			"pos": 24,
+			"hanzi": "水",
+			"pinyin": "shuǐ",
+			"adj": 2,
+			"vi": "nước"
+		}
+	]
+}

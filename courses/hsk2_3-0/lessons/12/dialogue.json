@@ -1,0 +1,158 @@
+{
+  "lesson": 12,
+  "title": "这里比北京冷多了",
+  "title_pinyin": "Zhèlǐ bǐ Běijīng lěng duō le",
+  "title_vi": "Ở đây lạnh hơn Bắc Kinh nhiều",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "喂，家月，是你啊！有什么事情吗？",
+          "pinyin": "Wèi, Jiāyuè, shì nǐ a! Yǒu shénme shìqing ma?",
+          "vi": "A lô, Gia Nguyệt, là em à! Có chuyện gì không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "没什么事，就想跟您说说话。",
+          "pinyin": "Méi shénme shì, jiù xiǎng gēn nín shuōshuo huà.",
+          "vi": "Không có việc gì ạ, chỉ muốn nói chuyện với chị một chút."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "好啊。你今天没课吗？",
+          "pinyin": "Hǎo a. Nǐ jīntiān méi kè ma?",
+          "vi": "Được thôi. Hôm nay em không có tiết học à?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "下午有课。您那里天气怎么样？",
+          "pinyin": "Xiàwǔ yǒu kè. Nín nàli tiānqì zěnmeyàng?",
+          "vi": "Chiều có tiết ạ. Chỗ chị thời tiết thế nào?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "北京这几天虽然是晴天，但是有点儿冷。",
+          "pinyin": "Běijīng zhè jǐ tiān suīrán shì qíngtiān, dànshì yǒudiǎnr lěng.",
+          "vi": "Mấy ngày nay Bắc Kinh tuy là trời nắng, nhưng hơi lạnh."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我这里比北京冷多了，外边还正下着雪呢！",
+          "pinyin": "Wǒ zhèlǐ bǐ Běijīng lěng duō le, wàibian hái zhèng xiàzhe xuě ne!",
+          "vi": "Chỗ em lạnh hơn Bắc Kinh nhiều ạ, bên ngoài còn đang có tuyết rơi đây này!"
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "喂，一飞，听家月说你那边下雪了，下得大不大？",
+          "pinyin": "Wèi, Yīfēi, tīng Jiāyuè shuō nǐ nàbiān xià xuě le, xià de dà bù dà?",
+          "vi": "A lô, Nhất Phi, nghe Gia Nguyệt nói bên em có tuyết rơi, tuyết to không?"
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "今天不大，昨天比今天下得大。",
+          "pinyin": "Jīntiān bú dà, zuótiān bǐ jīntiān xià de dà.",
+          "vi": "Hôm nay không to, hôm qua tuyết rơi to hơn hôm nay chị."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "天气不好，你去外面的时候多穿点儿衣服。",
+          "pinyin": "Tiānqì bù hǎo, nǐ qù wàimian de shíhou duō chuān diǎnr yīfu.",
+          "vi": "Thời tiết không tốt, em ra ngoài thì mặc thêm nhiều quần áo vào."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "这几天我在网上上课，没出去过。",
+          "pinyin": "Zhè jǐ tiān wǒ zài wǎngshàng shàngkè, méi chūqu guo.",
+          "vi": "Mấy ngày nay em học online, chưa ra ngoài."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "那就好，有事记得给我打电话。",
+          "pinyin": "Nà jiù hǎo, yǒu shì jìde gěi wǒ dǎ diànhuà.",
+          "vi": "Thế thì tốt, có việc nhớ gọi điện cho chị."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "好的。现在不下雪了，我出去买点儿吃的。",
+          "pinyin": "Hǎo de. Xiànzài bú xià xuě le, wǒ chūqu mǎi diǎnr chī de.",
+          "vi": "Vâng ạ. Bây giờ tuyết không rơi nữa, em ra ngoài mua chút đồ ăn."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "一次多买点儿，阴天下雪什么的就少出去吧。",
+          "pinyin": "Yī cì duō mǎi diǎnr, yīntiān xià xuě shénme de jiù shǎo chūqu ba.",
+          "vi": "Một lần mua nhiều một chút, mưa gió tuyết rơi gì đó thì hạn chế ra ngoài nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文三",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "喂，家月，今天天气不错，我们去跑步吧！",
+          "pinyin": "Wèi, Jiāyuè, jīntiān tiānqì búcuò, wǒmen qù pǎobù ba!",
+          "vi": "A lô, Gia Nguyệt, hôm nay thời tiết không tệ, chúng ta đi chạy bộ đi!"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "你跑步跑得比我快，你能跟我一起跑吗？",
+          "pinyin": "Nǐ pǎobù pǎo de bǐ wǒ kuài, nǐ néng gēn wǒ yīqǐ pǎo ma?",
+          "vi": "Cậu chạy nhanh hơn tớ, cậu có thể chạy cùng tớ được không?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "可以的，我慢慢跑，等着你。",
+          "pinyin": "Kěyǐ de, wǒ mànmàn pǎo, děngzhe nǐ.",
+          "vi": "Được chứ, tớ chạy chậm, đợi cậu."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好吧。你真爱跑步啊！",
+          "pinyin": "Hǎo ba. Nǐ zhēn ài pǎobù a!",
+          "vi": "Được thôi. Cậu thích chạy bộ thật đấy!"
+        },
+        {
+          "speaker": "李文",
+          "zh": "我从小就经常跟爸爸跑步，跑步能让人快乐！",
+          "pinyin": "Wǒ cóngxiǎo jiù jīngcháng gēn bàba pǎobù, pǎobù néng ràng rén kuàilè!",
+          "vi": "Từ nhỏ tớ thường chạy bộ với bố, chạy bộ có thể khiến người ta vui vẻ!"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好，那我准备一下。",
+          "pinyin": "Hǎo, nà wǒ zhǔnbèi yíxià.",
+          "vi": "Được, vậy tớ chuẩn bị một chút."
+        },
+        {
+          "speaker": "李文",
+          "zh": "我现在坐地铁去找你，一会儿楼下见。",
+          "pinyin": "Wǒ xiànzài zuò dìtiě qù zhǎo nǐ, yīhuìr lóuxià jiàn.",
+          "vi": "Tớ bây giờ đi tàu điện ngầm đến chỗ cậu, một lát gặp ở dưới nhà nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文四",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "叙述者",
+          "zh": "前几天天气不好，我没走路，每天坐两站地铁去学校。今天是个大晴天，李文让我跟他去外面跑步。他小时候经常跑步，跑得比我快，但是他会等我。跟李文一起跑步，我好高兴啊！",
+          "pinyin": "Qián jǐ tiān tiānqì bù hǎo, wǒ méi zǒulù, měitiān zuò liǎng zhàn dìtiě qù xuéxiào. Jīntiān shì ge dà qíngtiān, Lǐ Wén ràng wǒ gēn tā qù wàimian pǎobù. Tā xiǎoshíhou jīngcháng pǎobù, pǎo de bǐ wǒ kuài, dànshì tā huì děng wǒ. Gēn Lǐ Wén yīqǐ pǎobù, wǒ hǎo gāoxìng a!",
+          "vi": "Mấy ngày trước thời tiết không tốt, tôi không đi bộ, ngày nào cũng ngồi tàu điện ngầm hai trạm đến trường. Hôm nay là một ngày nắng đẹp, Lý Văn rủ tôi ra ngoài chạy bộ. Anh ấy hồi nhỏ thường chạy bộ, chạy nhanh hơn tôi, nhưng sẽ đợi tôi. Cùng chạy bộ với Lý Văn, tôi vui quá đi!"
+        }
+      ]
+    }
+  ]
+}

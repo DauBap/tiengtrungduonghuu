@@ -1,0 +1,247 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 34,
+  "label": "Bài 34",
+  "title": "鸟儿的护肤术",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "接触",
+      "pinyin": "jiēchù",
+      "adj": 4,
+      "vi": "tiếp xúc"
+    },
+    {
+      "pos": 2,
+      "hanzi": "特征",
+      "pinyin": "tèzhēng",
+      "adj": 2,
+      "vi": "điểm đặc trưng, nét đặc biệt"
+    },
+    {
+      "pos": 3,
+      "hanzi": "翅膀",
+      "pinyin": "chìbǎng",
+      "adj": 2,
+      "vi": "cánh (côn trùng, chim)"
+    },
+    {
+      "pos": 4,
+      "hanzi": "昆虫",
+      "pinyin": "kūnchóng",
+      "adj": 2,
+      "vi": "côn trùng, sâu bọ"
+    },
+    {
+      "pos": 5,
+      "hanzi": "天空",
+      "pinyin": "tiānkōng",
+      "adj": 2,
+      "vi": "bầu trời"
+    },
+    {
+      "pos": 6,
+      "hanzi": "区分",
+      "pinyin": "qūfēn",
+      "adj": 4,
+      "vi": "phân biệt"
+    },
+    {
+      "pos": 7,
+      "hanzi": "唯一",
+      "pinyin": "wéiyī",
+      "adj": 6,
+      "vi": "duy nhất, độc nhất"
+    },
+    {
+      "pos": 8,
+      "hanzi": "斑",
+      "pinyin": "bān",
+      "adj": 2,
+      "vi": "bớt, vết lốm đốm"
+    },
+    {
+      "pos": 9,
+      "hanzi": "充当",
+      "pinyin": "chōngdāng",
+      "adj": 4,
+      "vi": "làm, đảm nhiệm"
+    },
+    {
+      "pos": 10,
+      "hanzi": "总之",
+      "pinyin": "zǒngzhī",
+      "adj": 10,
+      "vi": "nói chung, tóm lại"
+    },
+    {
+      "pos": 11,
+      "hanzi": "角色",
+      "pinyin": "juésè",
+      "adj": 2,
+      "vi": "vai trò, vai"
+    },
+    {
+      "pos": 12,
+      "hanzi": "爱惜",
+      "pinyin": "àixī",
+      "adj": 4,
+      "vi": "yêu quý, quý trọng"
+    },
+    {
+      "pos": 13,
+      "hanzi": "保养",
+      "pinyin": "bǎoyǎng",
+      "adj": 4,
+      "vi": "chăm sóc, bảo quản"
+    },
+    {
+      "pos": 14,
+      "hanzi": "反复",
+      "pinyin": "fǎnfù",
+      "adj": 7,
+      "vi": "nhiều lần, lặp đi lặp lại"
+    },
+    {
+      "pos": 15,
+      "hanzi": "啄",
+      "pinyin": "zhuó",
+      "adj": 4,
+      "vi": "mổ, rỉa"
+    },
+    {
+      "pos": 16,
+      "hanzi": "随身",
+      "pinyin": "suíshēn",
+      "adj": 6,
+      "vi": "mang bên mình, theo bên người"
+    },
+    {
+      "pos": 17,
+      "hanzi": "梳子",
+      "pinyin": "shūzi",
+      "adj": 2,
+      "vi": "(cái) lược"
+    },
+    {
+      "pos": 18,
+      "hanzi": "光滑",
+      "pinyin": "guānghuá",
+      "adj": 6,
+      "vi": "trơn, mượt, bóng loáng"
+    },
+    {
+      "pos": 19,
+      "hanzi": "抓",
+      "pinyin": "zhuā",
+      "adj": 4,
+      "vi": "bắt, tóm"
+    },
+    {
+      "pos": 20,
+      "hanzi": "寄生",
+      "pinyin": "jìshēng",
+      "adj": 4,
+      "vi": "ký sinh, ăn bám"
+    },
+    {
+      "pos": 21,
+      "hanzi": "肥皂",
+      "pinyin": "féizào",
+      "adj": 2,
+      "vi": "xà phòng"
+    },
+    {
+      "pos": 22,
+      "hanzi": "种类",
+      "pinyin": "zhǒnglèi",
+      "adj": 2,
+      "vi": "chủng loại, loại"
+    },
+    {
+      "pos": 23,
+      "hanzi": "概括",
+      "pinyin": "gàikuò",
+      "adj": [
+        6,
+        4
+      ],
+      "vi": "khái quát; tóm tắt"
+    },
+    {
+      "pos": 24,
+      "hanzi": "岛屿",
+      "pinyin": "dǎoyǔ",
+      "adj": 2,
+      "vi": "(hòn) đảo"
+    },
+    {
+      "pos": 25,
+      "hanzi": "知更鸟",
+      "pinyin": "zhīgēngniǎo",
+      "adj": 2,
+      "vi": "chim cổ đỏ"
+    },
+    {
+      "pos": 26,
+      "hanzi": "坑",
+      "pinyin": "kēng",
+      "adj": 2,
+      "vi": "hố, vũng"
+    },
+    {
+      "pos": 27,
+      "hanzi": "池塘",
+      "pinyin": "chítáng",
+      "adj": 2,
+      "vi": "ao, đầm"
+    },
+    {
+      "pos": 28,
+      "hanzi": "痛快",
+      "pinyin": "tòngkuài",
+      "adj": 6,
+      "vi": "vui sướng, thích thú, đã, sướng"
+    },
+    {
+      "pos": 29,
+      "hanzi": "迎接",
+      "pinyin": "yíngjiē",
+      "adj": 4,
+      "vi": "nghênh đón, chào đón, đón nhận"
+    },
+    {
+      "pos": 30,
+      "hanzi": "洗礼",
+      "pinyin": "xǐlǐ",
+      "adj": 2,
+      "vi": "lễ rửa tội"
+    },
+    {
+      "pos": 31,
+      "hanzi": "沙子",
+      "pinyin": "shāzi",
+      "adj": 2,
+      "vi": "hạt cát"
+    },
+    {
+      "pos": 32,
+      "hanzi": "干燥",
+      "pinyin": "gānzào",
+      "adj": 6,
+      "vi": "khô"
+    },
+    {
+      "pos": 33,
+      "hanzi": "秘密",
+      "pinyin": "mìmì",
+      "adj": [
+        6,
+        2
+      ],
+      "vi": "bí mật; điều bí mật"
+    }
+  ]
+}

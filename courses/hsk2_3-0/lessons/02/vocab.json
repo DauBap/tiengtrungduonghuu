@@ -1,0 +1,132 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 2,
+  "label": "Bài 2",
+  "title": "还是打车去北大吧",
+  "short_vi": "Hỏi đường, hỏi phương tiện đi lại; tham quan trường đại học; tìm hiểu về trường Đại học Bắc Kinh",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "公交车",
+      "pinyin": "gōngjiāochē",
+      "adj": 2,
+      "vi": "Xe buýt"
+    },
+    {
+      "pos": 2,
+      "hanzi": "但",
+      "pinyin": "dàn",
+      "adj": [],
+      "vi": "Nhưng mà"
+    },
+    {
+      "pos": 3,
+      "hanzi": "车站",
+      "pinyin": "chē zhàn",
+      "adj": 2,
+      "vi": "Trạm xe, bến xe"
+    },
+    {
+      "pos": 4,
+      "hanzi": "远",
+      "pinyin": "yuǎn",
+      "adj": 6,
+      "vi": "Xa"
+    },
+    {
+      "pos": 5,
+      "hanzi": "打车",
+      "pinyin": "dǎ chē",
+      "adj": 4,
+      "vi": "Bắt taxi, gọi taxi"
+    },
+    {
+      "pos": 6,
+      "hanzi": "还是",
+      "pinyin": "hái shì",
+      "adj": 18,
+      "vi": "Hay là"
+    },
+    {
+      "pos": 7,
+      "hanzi": "北京大学",
+      "pinyin": "běijīng dàxué",
+      "adj": 3,
+      "vi": "Đại học Bắc Kinh"
+    },
+    {
+      "pos": 8,
+      "hanzi": "啊",
+      "pinyin": "a",
+      "adj": 11,
+      "vi": "dùng ở cuối câu để bày tỏ sự cảm kích, đồng ý..."
+    },
+    {
+      "pos": 9,
+      "hanzi": "万",
+      "pinyin": "wàn",
+      "adj": 21,
+      "vi": "Vạn"
+    },
+    {
+      "pos": 10,
+      "hanzi": "名",
+      "pinyin": "míng",
+      "adj": [
+        2,
+        8
+      ],
+      "vi": "dùng cho người, thứ hạng trong 1 cuộc thi, tên gọi"
+    },
+    {
+      "pos": 11,
+      "hanzi": "网上",
+      "pinyin": "wǎngshàng",
+      "adj": 2,
+      "vi": "Trên mạng"
+    },
+    {
+      "pos": 12,
+      "hanzi": "外国",
+      "pinyin": "wàiguó",
+      "adj": 2,
+      "vi": "Nước ngoài"
+    },
+    {
+      "pos": 13,
+      "hanzi": "间",
+      "pinyin": "jiān",
+      "adj": 8,
+      "vi": "Dùng cho căn phòng"
+    },
+    {
+      "pos": 14,
+      "hanzi": "教室",
+      "pinyin": "jiàoshì",
+      "adj": 2,
+      "vi": "Lớp học"
+    },
+    {
+      "pos": 15,
+      "hanzi": "票",
+      "pinyin": "piào",
+      "adj": 2,
+      "vi": "vé"
+    },
+    {
+      "pos": 16,
+      "hanzi": "别",
+      "pinyin": "bié",
+      "adj": 18,
+      "vi": "đừng"
+    },
+    {
+      "pos": 17,
+      "hanzi": "过来",
+      "pinyin": "guò lái",
+      "adj": 4,
+      "vi": "qua đây"
+    }
+  ]
+}

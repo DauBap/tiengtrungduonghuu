@@ -1,0 +1,214 @@
+import type { GrammarLesson, GrammarQuestion } from "./types";
+
+const explanation = "Đối chiếu đúng ý nghĩa và trật tự từ của cấu trúc đã học.";
+const input = (
+	id: string,
+	prompt: string,
+	answer: string,
+	acceptedAnswers: string[] = []
+): GrammarQuestion => ({
+	id,
+	prompt,
+	answer,
+	acceptedAnswers,
+	explanation,
+	formula: "Giữ đúng trật tự từ; dấu câu và khoảng trắng không ảnh hưởng kết quả."
+});
+const choice = (
+	id: string,
+	answer: string,
+	options: [string, string, string],
+	image: string,
+	imageAlt: string
+): GrammarQuestion => ({
+	id,
+	prompt: "Chọn câu tiếng Trung phù hợp với hình.",
+	answer,
+	options,
+	image,
+	imageAlt,
+	explanation,
+	formula: "Quan sát chi tiết trong hình và chọn đúng một câu."
+});
+const arrange = (id: string, tokens: string[], answer: string): GrammarQuestion => ({
+	id,
+	prompt: "Sắp xếp các thẻ từ thành câu đúng.",
+	tokens,
+	answer,
+	explanation,
+	formula: "Chọn từng thẻ theo đúng trật tự câu."
+});
+const img = (name: string) => `/images/grammar/lesson13/${name}.svg`;
+
+const pictures: GrammarQuestion[] = [
+	choice(
+		"l13-p1",
+		"我可以问老师一个问题吗？",
+		["我可以问老师一个问题吗？", "我正在问老师一个问题。", "老师可以问我一个问题吗？"],
+		img("ask-teacher-permission"),
+		"Học sinh giơ tay xin phép hỏi giáo viên một câu hỏi"
+	),
+	choice(
+		"l13-p2",
+		"您可以坐。",
+		["您可以坐。", "您不可以坐。", "您正在坐。"],
+		img("please-sit"),
+		"Nhân viên phục vụ mời một người ngồi"
+	),
+	choice(
+		"l13-p3",
+		"我可以看一下吗？",
+		["我可以看一下吗？", "我正在看。", "你不可以看。"],
+		img("look-briefly"),
+		"Một người xin phép xem món đồ trong thời gian ngắn"
+	),
+	choice(
+		"l13-p4",
+		"我打电话问一下。",
+		["我打电话问一下。", "我打电话看一下。", "我正在打电话呢。"],
+		img("call-and-ask"),
+		"Một người gọi điện để hỏi thử một việc"
+	),
+	choice(
+		"l13-p5",
+		"服务员给我一杯茶。",
+		["服务员给我一杯茶。", "我给服务员一杯茶。", "服务员问我一个问题。"],
+		img("server-gives-tea"),
+		"Nhân viên phục vụ đưa một cốc trà cho khách"
+	),
+	choice(
+		"l13-p6",
+		"妈妈给我一个鸡蛋。",
+		["妈妈给我一个鸡蛋。", "我给妈妈一个鸡蛋。", "妈妈给我一个面包。"],
+		img("mother-gives-egg"),
+		"Mẹ đưa cho nhân vật một quả trứng"
+	),
+	choice(
+		"l13-p7",
+		"学生问老师两个问题。",
+		["学生问老师两个问题。", "老师问学生两个问题。", "学生给老师两个问题。"],
+		img("student-asks-two"),
+		"Học sinh hỏi giáo viên hai câu hỏi"
+	),
+	choice(
+		"l13-p8",
+		"她问我一个问题。",
+		["她问我一个问题。", "我问她一个问题。", "她给我一个问题。"],
+		img("she-asks-me"),
+		"Một cô gái hỏi nhân vật một câu hỏi"
+	)
+];
+
+const arrangements: GrammarQuestion[] = [
+	arrange("l13-a1", ["一个问题吗", "问你", "我可以"], "我可以问你一个问题吗？"),
+	arrange("l13-a2", ["坐", "您", "可以"], "您可以坐。"),
+	arrange("l13-a3", ["看一下吗", "我", "可以"], "我可以看一下吗？"),
+	arrange("l13-a4", ["问一下", "我"], "我问一下。"),
+	arrange("l13-a5", ["一杯茶", "请", "给我"], "请给我一杯茶。"),
+	arrange("l13-a6", ["一个鸡蛋", "妈妈", "给我"], "妈妈给我一个鸡蛋。"),
+	arrange("l13-a7", ["一本书", "老师", "给学生"], "老师给学生一本书。"),
+	arrange("l13-a8", ["两个问题", "我", "问老师"], "我问老师两个问题。"),
+	arrange("l13-a9", ["一个问题", "她", "问我"], "她问我一个问题。"),
+	arrange("l13-a10", ["一个问题", "学生", "问王老师"], "学生问王老师一个问题。")
+];
+
+const translations: GrammarQuestion[] = [
+	input("l13-t1", "Tôi có thể hỏi bạn một câu hỏi không?", "我可以问你一个问题吗？"),
+	input("l13-t2", "Bạn có thể ngồi.", "你可以坐。", ["您可以坐。"]),
+	input("l13-t3", "Tôi có thể xem một chút không?", "我可以看一下吗？"),
+	input("l13-t4", "Bạn xem một chút đi.", "你看一下吧。", ["你看一下。", "请看一下。"]),
+	input("l13-t5", "Làm ơn đưa cho tôi một cốc trà.", "请给我一杯茶。"),
+	input("l13-t6", "Làm ơn đưa cho tôi một cốc sữa.", "请给我一杯牛奶。"),
+	input("l13-t7", "Mẹ đưa cho tôi một quả trứng.", "妈妈给我一个鸡蛋。"),
+	input("l13-t8", "Giáo viên đưa cho học sinh một quyển sách.", "老师给学生一本书。"),
+	input("l13-t9", "Tôi hỏi giáo viên hai câu hỏi.", "我问老师两个问题。"),
+	input("l13-t10", "Cô ấy hỏi tôi một câu hỏi.", "她问我一个问题。")
+];
+
+export const hsk1Lesson13Grammar: GrammarLesson = {
+	title: "Bài 13: 请给我一杯茶",
+	variant: "hsk1-3-0-lesson13",
+	points: [
+		{
+			id: "modal-keyi",
+			title: "Động từ năng nguyện 可以",
+			explanation:
+				"可以 đứng trước động từ để diễn tả được phép, điều kiện cho phép hoặc lời xin phép lịch sự. 会 nói về kỹ năng đã học; 能 nói về khả năng hoặc điều kiện; 可以 nhấn mạnh sự cho phép.",
+			formulas: [
+				"Chủ ngữ + 可以 + Động từ + Tân ngữ",
+				"Chủ ngữ + 可以 + Động từ + Tân ngữ + 吗？",
+				"Chủ ngữ + 不可以 + Động từ"
+			],
+			examples: [
+				{ chinese: "你可以坐。", vietnamese: "Bạn có thể ngồi." },
+				{ chinese: "我可以问老师。", vietnamese: "Tôi có thể hỏi giáo viên." },
+				{ chinese: "我可以问你一个问题吗？", vietnamese: "Tôi có thể hỏi bạn một câu hỏi không?" },
+				{ chinese: "我可以看一下吗？", vietnamese: "Tôi có thể xem một chút không?" },
+				{ chinese: "你不可以坐这儿。", vietnamese: "Bạn không được ngồi ở đây." }
+			],
+			notes: ["会: biết làm do đã học.", "能: có khả năng hoặc điều kiện.", "可以: được phép làm."],
+			exercises: [
+				{
+					id: "l13-picture",
+					title: "Bài tập 1: Nhìn hình và chọn đáp án đúng",
+					type: "choice",
+					questions: pictures
+				}
+			]
+		},
+		{
+			id: "verb-yixia",
+			title: "Động từ + 一下",
+			explanation:
+				"一下 đứng sau động từ để diễn tả hành động ngắn, làm thử hoặc khiến lời nói nhẹ nhàng, lịch sự hơn.",
+			formulas: ["Chủ ngữ + Động từ + 一下 + Tân ngữ"],
+			examples: [
+				{ chinese: "你看一下。", vietnamese: "Bạn xem một chút." },
+				{ chinese: "我问一下。", vietnamese: "Tôi hỏi một chút." },
+				{ chinese: "请坐一下。", vietnamese: "Mời ngồi một lát." },
+				{ chinese: "我打电话问一下。", vietnamese: "Tôi gọi điện hỏi thử một chút." },
+				{ chinese: "我可以看一下吗？", vietnamese: "Tôi có thể xem một chút không?" },
+				{ chinese: "我可以问一下吗？", vietnamese: "Tôi có thể hỏi một chút không?" }
+			],
+			notes: ["Đúng: 看一下", "Sai: 一下看"],
+			exercises: [
+				{
+					id: "l13-arrange",
+					title: "Bài tập 2: Sắp xếp từ thành câu",
+					type: "arrange",
+					questions: arrangements
+				}
+			]
+		},
+		{
+			id: "double-object-one",
+			title: "Câu có hai tân ngữ (1)",
+			explanation:
+				"Một số động từ đi cùng hai tân ngữ: tân ngữ chỉ người và tân ngữ chỉ vật hoặc sự việc. Với 给, người nhận đứng trước vật; với 问, người được hỏi đứng trước vấn đề.",
+			formulas: ["Chủ ngữ + 给 + Người nhận + Vật", "Chủ ngữ + 问 + Người được hỏi + Vấn đề"],
+			examples: [
+				{ chinese: "请给我一杯牛奶。", vietnamese: "Làm ơn đưa tôi một cốc sữa." },
+				{ chinese: "请给我一杯茶。", vietnamese: "Làm ơn đưa tôi một cốc trà." },
+				{ chinese: "妈妈给我一个鸡蛋。", vietnamese: "Mẹ đưa tôi một quả trứng." },
+				{ chinese: "老师给学生一本书。", vietnamese: "Giáo viên đưa học sinh một quyển sách." },
+				{ chinese: "我问老师两个问题。", vietnamese: "Tôi hỏi giáo viên hai câu hỏi." },
+				{ chinese: "她问我一个问题。", vietnamese: "Cô ấy hỏi tôi một câu hỏi." },
+				{ chinese: "学生问王老师一个问题。", vietnamese: "Học sinh hỏi cô Vương một câu hỏi." }
+			],
+			notes: [
+				"Đúng: 请给我一杯茶。",
+				"Sai: 请给一杯茶我。",
+				"Đúng: 我问老师两个问题。",
+				"Sai: 我问两个问题老师。"
+			],
+			exercises: [
+				{
+					id: "l13-translate",
+					title: "Bài tập 3: Dịch sang tiếng Trung",
+					type: "input",
+					questions: translations
+				}
+			]
+		}
+	]
+};

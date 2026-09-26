@@ -1,0 +1,101 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 7,
+  "label": "Bài 7",
+  "title": "你家离公司远吗？",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "教室",
+      "pinyin": "jiàoshì",
+      "adj": 2,
+      "vi": "lớp học"
+    },
+    {
+      "pos": 2,
+      "hanzi": "机场",
+      "pinyin": "jīchǎng",
+      "adj": 2,
+      "vi": "sân bay"
+    },
+    {
+      "pos": 3,
+      "hanzi": "路",
+      "pinyin": "lù",
+      "adj": 2,
+      "vi": "đường, lối đi"
+    },
+    {
+      "pos": 4,
+      "hanzi": "离",
+      "pinyin": "lí",
+      "adj": 4,
+      "vi": "cách"
+    },
+    {
+      "pos": 5,
+      "hanzi": "公司",
+      "pinyin": "gōngsī",
+      "adj": 2,
+      "vi": "công ty"
+    },
+    {
+      "pos": 6,
+      "hanzi": "远",
+      "pinyin": "yuǎn",
+      "adj": 6,
+      "vi": "xa"
+    },
+    {
+      "pos": 7,
+      "hanzi": "公共汽车",
+      "pinyin": "gōnggòng qìchē",
+      "adj": 2,
+      "vi": "xe buýt"
+    },
+    {
+      "pos": 8,
+      "hanzi": "小时",
+      "pinyin": "xiǎoshí",
+      "adj": 2,
+      "vi": "giờ (đồng hồ)"
+    },
+    {
+      "pos": 9,
+      "hanzi": "慢",
+      "pinyin": "màn",
+      "adj": 6,
+      "vi": "chậm"
+    },
+    {
+      "pos": 10,
+      "hanzi": "快",
+      "pinyin": "kuài",
+      "adj": 6,
+      "vi": "nhanh"
+    },
+    {
+      "pos": 11,
+      "hanzi": "过",
+      "pinyin": "guò",
+      "adj": 4,
+      "vi": "ăn (mừng), trải qua"
+    },
+    {
+      "pos": 12,
+      "hanzi": "走",
+      "pinyin": "zǒu",
+      "adj": 4,
+      "vi": "đi, đi bộ"
+    },
+    {
+      "pos": 13,
+      "hanzi": "到",
+      "pinyin": "dào",
+      "adj": 4,
+      "vi": "đến, tới"
+    }
+  ]
+}

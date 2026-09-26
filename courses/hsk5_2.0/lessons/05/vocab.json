@@ -1,0 +1,332 @@
+{
+  "course_id": "HSK5_2-0",
+  "course_name": "HSK5_2-0",
+  "id": 5,
+  "label": "Bài 5",
+  "title": "济南的泉水",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "悠久",
+      "pinyin": "yōujiǔ",
+      "adj": 6,
+      "vi": "lâu đời"
+    },
+    {
+      "pos": 2,
+      "hanzi": "文字",
+      "pinyin": "wénzì",
+      "adj": 2,
+      "vi": "văn tự (ngôn ngữ viết)"
+    },
+    {
+      "pos": 3,
+      "hanzi": "记载",
+      "pinyin": "jìzǎi",
+      "adj": 4,
+      "vi": "ghi chép, ghi lại"
+    },
+    {
+      "pos": 4,
+      "hanzi": "形状",
+      "pinyin": "xíngzhuàng",
+      "adj": 2,
+      "vi": "hình dạng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "描写",
+      "pinyin": "miáoxiě",
+      "adj": 4,
+      "vi": "miêu tả"
+    },
+    {
+      "pos": 6,
+      "hanzi": "赞美",
+      "pinyin": "zànměi",
+      "adj": 4,
+      "vi": "ca ngợi, ca tụng"
+    },
+    {
+      "pos": 7,
+      "hanzi": "诗",
+      "pinyin": "shī",
+      "adj": 2,
+      "vi": "thơ"
+    },
+    {
+      "pos": 8,
+      "hanzi": "老百姓",
+      "pinyin": "lǎobǎixìng",
+      "adj": 2,
+      "vi": "người dân, thường dân"
+    },
+    {
+      "pos": 9,
+      "hanzi": "充满",
+      "pinyin": "chōngmǎn",
+      "adj": 4,
+      "vi": "chan chứa, tràn ngập"
+    },
+    {
+      "pos": 10,
+      "hanzi": "感激",
+      "pinyin": "gǎnjī",
+      "adj": 4,
+      "vi": "cảm kích, biết ơn"
+    },
+    {
+      "pos": 11,
+      "hanzi": "从而",
+      "pinyin": "cóng'ér",
+      "adj": 10,
+      "vi": "do đó, vì vậy"
+    },
+    {
+      "pos": 12,
+      "hanzi": "产生",
+      "pinyin": "chǎnshēng",
+      "adj": 4,
+      "vi": "sản sinh, xuất hiện"
+    },
+    {
+      "pos": 13,
+      "hanzi": "传说",
+      "pinyin": "chuánshuō",
+      "adj": 2,
+      "vi": "truyền thuyết"
+    },
+    {
+      "pos": 14,
+      "hanzi": "善良",
+      "pinyin": "shànliáng",
+      "adj": 6,
+      "vi": "lương thiện, tốt bụng"
+    },
+    {
+      "pos": 15,
+      "hanzi": "救",
+      "pinyin": "jiù",
+      "adj": 4,
+      "vi": "cứu, cứu giúp"
+    },
+    {
+      "pos": 16,
+      "hanzi": "晕",
+      "pinyin": "yūn",
+      "adj": 4,
+      "vi": "hôn mê, bất tỉnh"
+    },
+    {
+      "pos": 17,
+      "hanzi": "龙",
+      "pinyin": "lóng",
+      "adj": 2,
+      "vi": "rồng"
+    },
+    {
+      "pos": 18,
+      "hanzi": "治（疗）",
+      "pinyin": "zhì(liáo)",
+      "adj": 4,
+      "vi": "điều trị, chữa bệnh"
+    },
+    {
+      "pos": 19,
+      "hanzi": "玉",
+      "pinyin": "yù",
+      "adj": 2,
+      "vi": "ngọc thạch"
+    },
+    {
+      "pos": 20,
+      "hanzi": "壶",
+      "pinyin": "hú",
+      "adj": 2,
+      "vi": "ấm, bình"
+    },
+    {
+      "pos": 21,
+      "hanzi": "抢",
+      "pinyin": "qiǎng",
+      "adj": 4,
+      "vi": "cướp, cướp đoạt"
+    },
+    {
+      "pos": 22,
+      "hanzi": "埋",
+      "pinyin": "mái",
+      "adj": 4,
+      "vi": "chôn"
+    },
+    {
+      "pos": 23,
+      "hanzi": "（躲）藏",
+      "pinyin": "(duǒ) cáng",
+      "adj": 4,
+      "vi": "giấu, ẩn núp"
+    },
+    {
+      "pos": 24,
+      "hanzi": "如今",
+      "pinyin": "rújīn",
+      "adj": 2,
+      "vi": "ngày nay"
+    },
+    {
+      "pos": 25,
+      "hanzi": "分布",
+      "pinyin": "fēnbù",
+      "adj": 4,
+      "vi": "phân bố"
+    },
+    {
+      "pos": 26,
+      "hanzi": "天然",
+      "pinyin": "tiānrán",
+      "adj": 6,
+      "vi": "tự nhiên, (thuộc) thiên nhiên"
+    },
+    {
+      "pos": 27,
+      "hanzi": "优美",
+      "pinyin": "yōuměi",
+      "adj": 6,
+      "vi": "đẹp đẽ, tốt đẹp"
+    },
+    {
+      "pos": 28,
+      "hanzi": "独特",
+      "pinyin": "dútè",
+      "adj": 6,
+      "vi": "đặc biệt, riêng biệt"
+    },
+    {
+      "pos": 29,
+      "hanzi": "反映",
+      "pinyin": "fǎnyìng",
+      "adj": 4,
+      "vi": "phản ánh/thể hiện"
+    },
+    {
+      "pos": 30,
+      "hanzi": "珍珠",
+      "pinyin": "zhēnzhū",
+      "adj": 2,
+      "vi": "ngọc trai, trân châu"
+    },
+    {
+      "pos": 31,
+      "hanzi": "形成",
+      "pinyin": "xíngchéng",
+      "adj": 4,
+      "vi": "hình thành"
+    },
+    {
+      "pos": 32,
+      "hanzi": "于",
+      "pinyin": "yú",
+      "adj": 13,
+      "vi": "từ, ở, vào"
+    },
+    {
+      "pos": 33,
+      "hanzi": "广大",
+      "pinyin": "guǎngdà",
+      "adj": 6,
+      "vi": "rộng, rộng lớn"
+    },
+    {
+      "pos": 34,
+      "hanzi": "岩石",
+      "pinyin": "yánshí",
+      "adj": 2,
+      "vi": "nham thạch"
+    },
+    {
+      "pos": 35,
+      "hanzi": "亿",
+      "pinyin": "yì",
+      "adj": 21,
+      "vi": "một trăm triệu"
+    },
+    {
+      "pos": 36,
+      "hanzi": "石灰岩",
+      "pinyin": "shíhuīyán",
+      "adj": 2,
+      "vi": "đá vôi"
+    },
+    {
+      "pos": 37,
+      "hanzi": "地区",
+      "pinyin": "dìqū",
+      "adj": 2,
+      "vi": "khu vực, vùng"
+    },
+    {
+      "pos": 38,
+      "hanzi": "表面",
+      "pinyin": "biǎomiàn",
+      "adj": 2,
+      "vi": "bề mặt, phía ngoài"
+    },
+    {
+      "pos": 39,
+      "hanzi": "角度",
+      "pinyin": "jiǎodù",
+      "adj": 2,
+      "vi": "góc, độ của góc"
+    },
+    {
+      "pos": 40,
+      "hanzi": "斜",
+      "pinyin": "xié",
+      "adj": 6,
+      "vi": "xiên, nghiêng"
+    },
+    {
+      "pos": 41,
+      "hanzi": "为",
+      "pinyin": "wéi",
+      "adj": 4,
+      "vi": "trở thành"
+    },
+    {
+      "pos": 42,
+      "hanzi": "火成岩",
+      "pinyin": "huǒchéngyán",
+      "adj": 2,
+      "vi": "đá phun trào, đá mác-ma"
+    },
+    {
+      "pos": 43,
+      "hanzi": "碰",
+      "pinyin": "pèng",
+      "adj": 4,
+      "vi": "đụng, gặp phải"
+    },
+    {
+      "pos": 44,
+      "hanzi": "挡",
+      "pinyin": "dǎng",
+      "adj": 4,
+      "vi": "chặn, cản"
+    },
+    {
+      "pos": 45,
+      "hanzi": "地势",
+      "pinyin": "dìshì",
+      "adj": 2,
+      "vi": "địa thế"
+    },
+    {
+      "pos": 46,
+      "hanzi": "冲",
+      "pinyin": "chōng",
+      "adj": 4,
+      "vi": "xông thẳng lên"
+    }
+  ]
+}

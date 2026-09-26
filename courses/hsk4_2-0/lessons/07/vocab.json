@@ -1,0 +1,241 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK4_2-0",
+  "id": 7,
+  "label": "Bài 7",
+  "title": "最好的医生是自己",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "流血",
+      "pinyin": "liú xiě",
+      "adj": 4,
+      "vi": "chảy máu"
+    },
+    {
+      "pos": 2,
+      "hanzi": "擦",
+      "pinyin": "cā",
+      "adj": 4,
+      "vi": "lau, chùi"
+    },
+    {
+      "pos": 3,
+      "hanzi": "气候",
+      "pinyin": "qìhòu",
+      "adj": 2,
+      "vi": "khí hậu"
+    },
+    {
+      "pos": 4,
+      "hanzi": "估计",
+      "pinyin": "gūjì",
+      "adj": 4,
+      "vi": "đoán chừng, dự đoán"
+    },
+    {
+      "pos": 5,
+      "hanzi": "咳嗽",
+      "pinyin": "késou",
+      "adj": 4,
+      "vi": "ho"
+    },
+    {
+      "pos": 6,
+      "hanzi": "严重",
+      "pinyin": "yánzhòng",
+      "adj": 6,
+      "vi": "nghiêm trọng"
+    },
+    {
+      "pos": 7,
+      "hanzi": "窗户",
+      "pinyin": "chuānghu",
+      "adj": 2,
+      "vi": "cửa sổ"
+    },
+    {
+      "pos": 8,
+      "hanzi": "空气",
+      "pinyin": "kōngqì",
+      "adj": 2,
+      "vi": "không khí"
+    },
+    {
+      "pos": 9,
+      "hanzi": "抽烟",
+      "pinyin": "chōu yān",
+      "adj": 4,
+      "vi": "hút thuốc"
+    },
+    {
+      "pos": 10,
+      "hanzi": "动作",
+      "pinyin": "dòngzuò",
+      "adj": 2,
+      "vi": "động tác, hành động"
+    },
+    {
+      "pos": 11,
+      "hanzi": "帅",
+      "pinyin": "shuài",
+      "adj": 6,
+      "vi": "đẹp"
+    },
+    {
+      "pos": 12,
+      "hanzi": "出现",
+      "pinyin": "chūxiàn",
+      "adj": 4,
+      "vi": "xuất hiện, nảy sinh"
+    },
+    {
+      "pos": 13,
+      "hanzi": "后悔",
+      "pinyin": "hòuhuǐ",
+      "adj": 4,
+      "vi": "ân hận"
+    },
+    {
+      "pos": 14,
+      "hanzi": "来不及",
+      "pinyin": "láibují",
+      "adj": 4,
+      "vi": "không kịp"
+    },
+    {
+      "pos": 15,
+      "hanzi": "反对",
+      "pinyin": "fǎnduì",
+      "adj": 4,
+      "vi": "phản đối"
+    },
+    {
+      "pos": 16,
+      "hanzi": "大夫",
+      "pinyin": "dàifu",
+      "adj": 2,
+      "vi": "bác sĩ"
+    },
+    {
+      "pos": 17,
+      "hanzi": "植物",
+      "pinyin": "zhíwù",
+      "adj": 2,
+      "vi": "thực vật"
+    },
+    {
+      "pos": 18,
+      "hanzi": "研究",
+      "pinyin": "yánjiū",
+      "adj": 4,
+      "vi": "nghiên cứu"
+    },
+    {
+      "pos": 19,
+      "hanzi": "超过",
+      "pinyin": "chāoguò",
+      "adj": 4,
+      "vi": "vượt quá"
+    },
+    {
+      "pos": 20,
+      "hanzi": "散步",
+      "pinyin": "sàn bù",
+      "adj": 4,
+      "vi": "đi dạo"
+    },
+    {
+      "pos": 21,
+      "hanzi": "指",
+      "pinyin": "zhǐ",
+      "adj": 4,
+      "vi": "chỉ về, nói đến"
+    },
+    {
+      "pos": 22,
+      "hanzi": "精神",
+      "pinyin": "jīngshén",
+      "adj": 2,
+      "vi": "tinh thần"
+    },
+    {
+      "pos": 23,
+      "hanzi": "教授",
+      "pinyin": "jiàoshòu",
+      "adj": 2,
+      "vi": "giáo sư"
+    },
+    {
+      "pos": 24,
+      "hanzi": "数字",
+      "pinyin": "shùzì",
+      "adj": 2,
+      "vi": "con số"
+    },
+    {
+      "pos": 25,
+      "hanzi": "说明",
+      "pinyin": "shuōmíng",
+      "adj": 4,
+      "vi": "giải thích rõ, nói rõ"
+    },
+    {
+      "pos": 26,
+      "hanzi": "要是",
+      "pinyin": "yàoshi",
+      "adj": 10,
+      "vi": "nếu như, nếu"
+    },
+    {
+      "pos": 27,
+      "hanzi": "既",
+      "pinyin": "jì",
+      "adj": 7,
+      "vi": "(kết hợp với 又) đã...lại..., vừa...vừa..."
+    },
+    {
+      "pos": 28,
+      "hanzi": "减肥",
+      "pinyin": "jiǎn féi",
+      "adj": 4,
+      "vi": "giảm cân"
+    },
+    {
+      "pos": 29,
+      "hanzi": "辛苦",
+      "pinyin": "xīnkǔ",
+      "adj": 6,
+      "vi": "vất vả, cực nhọc"
+    },
+    {
+      "pos": 30,
+      "hanzi": "肚子",
+      "pinyin": "dùzi",
+      "adj": 2,
+      "vi": "bụng"
+    },
+    {
+      "pos": 31,
+      "hanzi": "感情",
+      "pinyin": "gǎnqíng",
+      "adj": 2,
+      "vi": "tình cảm"
+    },
+    {
+      "pos": 32,
+      "hanzi": "烦恼",
+      "pinyin": "fánnǎo",
+      "adj": 6,
+      "vi": "phiền muộn, buồn phiền"
+    },
+    {
+      "pos": 33,
+      "hanzi": "掉",
+      "pinyin": "diào",
+      "adj": 4,
+      "vi": "(dùng sau động từ chỉ kết quả hành động) mất, đi, hết"
+    }
+  ]
+}

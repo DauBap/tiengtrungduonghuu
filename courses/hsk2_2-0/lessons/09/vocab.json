@@ -1,0 +1,87 @@
+{
+  "course_id": "HSK2_2-0",
+  "course_name": "HSK2_2-0",
+  "id": 9,
+  "label": "Bài 9",
+  "title": "题太多，我没做完",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "错",
+      "pinyin": "cuò",
+      "adj": 6,
+      "vi": "sai, nhầm"
+    },
+    {
+      "pos": 2,
+      "hanzi": "从",
+      "pinyin": "cóng",
+      "adj": 13,
+      "vi": "từ"
+    },
+    {
+      "pos": 3,
+      "hanzi": "跳舞",
+      "pinyin": "tiào wǔ",
+      "adj": 4,
+      "vi": "múa, khiêu vũ"
+    },
+    {
+      "pos": 4,
+      "hanzi": "第一",
+      "pinyin": "dì yī",
+      "adj": 21,
+      "vi": "thứ nhất, đầu tiên"
+    },
+    {
+      "pos": 5,
+      "hanzi": "希望",
+      "pinyin": "xīwàng",
+      "adj": 4,
+      "vi": "mong, hy vọng"
+    },
+    {
+      "pos": 6,
+      "hanzi": "问题",
+      "pinyin": "wèntí",
+      "adj": 2,
+      "vi": "vấn đề, câu hỏi"
+    },
+    {
+      "pos": 7,
+      "hanzi": "欢迎",
+      "pinyin": "huānyíng",
+      "adj": 4,
+      "vi": "hoan nghênh"
+    },
+    {
+      "pos": 8,
+      "hanzi": "上班",
+      "pinyin": "shàng bān",
+      "adj": 4,
+      "vi": "đi làm"
+    },
+    {
+      "pos": 9,
+      "hanzi": "懂",
+      "pinyin": "dǒng",
+      "adj": 4,
+      "vi": "hiểu, biết"
+    },
+    {
+      "pos": 10,
+      "hanzi": "完",
+      "pinyin": "wán",
+      "adj": 4,
+      "vi": "xong, hết"
+    },
+    {
+      "pos": 11,
+      "hanzi": "题",
+      "pinyin": "tí",
+      "adj": 2,
+      "vi": "câu hỏi"
+    }
+  ]
+}

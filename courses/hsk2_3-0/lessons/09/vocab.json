@@ -1,0 +1,101 @@
+{
+  "course_id": "HSK2_3.0",
+  "course_name": "HSK2_3.0",
+  "id": 9,
+  "label": "Bài 9",
+  "title": "我去买杯奶茶",
+  "short_vi": "Mua sắm quần áo cho con; so sánh giá cả, kiểu dáng; hỏi và trả lời về khoảng cách địa điểm; gọi đồ uống tại quán (cà phê, trà sữa)",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "坏",
+      "pinyin": "Huài",
+      "adj": 6,
+      "vi": "xấu, hỏng"
+    },
+    {
+      "pos": 2,
+      "hanzi": "旁边",
+      "pinyin": "Pángbiān",
+      "adj": 2,
+      "vi": "Bên cạnh"
+    },
+    {
+      "pos": 3,
+      "hanzi": "男孩儿",
+      "pinyin": "Nánháir",
+      "adj": 2,
+      "vi": "Cậu trai"
+    },
+    {
+      "pos": 4,
+      "hanzi": "这样",
+      "pinyin": "Zhèyàng",
+      "adj": 1,
+      "vi": "Như thế, như vậy"
+    },
+    {
+      "pos": 5,
+      "hanzi": "个子",
+      "pinyin": "Gèzi",
+      "adj": 2,
+      "vi": "Dáng người, chiều cao"
+    },
+    {
+      "pos": 6,
+      "hanzi": "那么",
+      "pinyin": "Nàme",
+      "adj": 1,
+      "vi": "Thế thì"
+    },
+    {
+      "pos": 7,
+      "hanzi": "高",
+      "pinyin": "Gāo",
+      "adj": 6,
+      "vi": "cao"
+    },
+    {
+      "pos": 8,
+      "hanzi": "门口",
+      "pinyin": "Ménkǒu",
+      "adj": 2,
+      "vi": "Trước cửa, lối ra vào"
+    },
+    {
+      "pos": 9,
+      "hanzi": "咖啡",
+      "pinyin": "Kāfēi",
+      "adj": 2,
+      "vi": "Cà phê"
+    },
+    {
+      "pos": 10,
+      "hanzi": "离",
+      "pinyin": "Lí",
+      "adj": 4,
+      "vi": "cách"
+    },
+    {
+      "pos": 11,
+      "hanzi": "近",
+      "pinyin": "Jìn",
+      "adj": 6,
+      "vi": "gần"
+    },
+    {
+      "pos": 12,
+      "hanzi": "走路",
+      "pinyin": "Zǒulù",
+      "adj": 4,
+      "vi": "Đi bộ"
+    },
+    {
+      "pos": 13,
+      "hanzi": "周",
+      "pinyin": "Zhōu",
+      "adj": 2,
+      "vi": "tuần"
+    }
+  ]
+}

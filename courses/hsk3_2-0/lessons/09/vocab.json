@@ -1,0 +1,101 @@
+{
+  "course_id": "HSK3_2-0",
+  "course_name": "HSK3_2-0",
+  "id": 9,
+  "label": "Bài 9",
+  "title": "她的汉语说得跟中国人一样好",
+  "short_vi": "N/A",
+  "data": [
+    {
+      "pos": 1,
+      "hanzi": "中文",
+      "pinyin": "Zhōngwén",
+      "adj": 2,
+      "vi": "tiếng Trung Quốc"
+    },
+    {
+      "pos": 2,
+      "hanzi": "班",
+      "pinyin": "bān",
+      "adj": 2,
+      "vi": "lớp"
+    },
+    {
+      "pos": 3,
+      "hanzi": "一样",
+      "pinyin": "yīyàng",
+      "adj": 6,
+      "vi": "giống nhau, như nhau"
+    },
+    {
+      "pos": 4,
+      "hanzi": "最后",
+      "pinyin": "zuìhòu",
+      "adj": 2,
+      "vi": "(cái) cuối cùng"
+    },
+    {
+      "pos": 5,
+      "hanzi": "放心",
+      "pinyin": "fàng xīn",
+      "adj": 4,
+      "vi": "yên tâm"
+    },
+    {
+      "pos": 6,
+      "hanzi": "一定",
+      "pinyin": "yídìng",
+      "adj": 7,
+      "vi": "nhất định, chắc chắn"
+    },
+    {
+      "pos": 7,
+      "hanzi": "担心",
+      "pinyin": "dān xīn",
+      "adj": 4,
+      "vi": "lo lắng"
+    },
+    {
+      "pos": 8,
+      "hanzi": "比较",
+      "pinyin": "bǐjiào",
+      "adj": 7,
+      "vi": "tương đối, khá"
+    },
+    {
+      "pos": 9,
+      "hanzi": "了解",
+      "pinyin": "liǎojiě",
+      "adj": 4,
+      "vi": "hiểu rõ"
+    },
+    {
+      "pos": 10,
+      "hanzi": "先",
+      "pinyin": "xiān",
+      "adj": 7,
+      "vi": "trước, trước hết"
+    },
+    {
+      "pos": 11,
+      "hanzi": "中间",
+      "pinyin": "zhōngjiān",
+      "adj": 2,
+      "vi": "giữa, chính giữa"
+    },
+    {
+      "pos": 12,
+      "hanzi": "参加",
+      "pinyin": "cānjiā",
+      "adj": 4,
+      "vi": "tham gia"
+    },
+    {
+      "pos": 13,
+      "hanzi": "影响",
+      "pinyin": "yǐngxiǎng",
+      "adj": 2,
+      "vi": "ảnh hưởng"
+    }
+  ]
+}
