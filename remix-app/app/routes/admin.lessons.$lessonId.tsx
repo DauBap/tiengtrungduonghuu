@@ -30,7 +30,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
   const lesson = await getLessonForAdmin(params.lessonId!);
   if (!lesson) throw new Response("Không tìm thấy bài học", { status: 404 });
-  return { user, lesson };
+  const previousLessons = await prisma.lesson.count({
+    where: { courseId: lesson.courseId, order: { lt: lesson.order } },
+  });
+  return { user, lesson, lessonNumber: previousLessons + 1 };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -652,7 +655,7 @@ function LessonAudioScriptModal({ mode, script, lessonId, onClose }: { mode: Voc
 // ─── Trang ───────────────────────────────────────────────────────────────────
 
 export default function AdminLessonDetail() {
-  const { user, lesson } = useLoaderData<typeof loader>();
+  const { user, lesson, lessonNumber } = useLoaderData<typeof loader>();
   const moveFetcher = useFetcher();
   const [vocabMode, setVocabMode] = useState<VocabModalMode>(null);
   const [selectedVocab, setSelectedVocab] = useState<VocabRow | null>(null);
@@ -699,7 +702,7 @@ export default function AdminLessonDetail() {
             </Button>
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
               <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">HSK {lesson.course.hskLevel}</span>
-              <span>Bài {lesson.order}</span>
+              <span>Bài {lessonNumber}</span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight">{lesson.title}</h1>
             <p className="text-xl text-muted-foreground font-mono mt-1">{lesson.subtitle}</p>
