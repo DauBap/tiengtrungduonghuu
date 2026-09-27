@@ -128,6 +128,14 @@ export async function getLessonsByCourse(courseId: string) {
   });
 }
 
+export async function getLessonSummariesByCourse(courseId: string) {
+  return prisma.lesson.findMany({
+    where: { courseId },
+    select: { id: true, courseId: true, order: true, title: true, subtitle: true },
+    orderBy: { order: "asc" },
+  });
+}
+
 export async function getCourseReviewSets(courseId: string) {
   return prisma.courseReviewSet.findMany({
     where: { courseId },
@@ -185,13 +193,8 @@ export async function getLessonProgress(userId: string, lessonId: string) {
 }
 
 export async function getAllProgressForCourse(userId: string, courseId: string) {
-  const lessons = await prisma.lesson.findMany({
-    where: { courseId },
-    select: { id: true },
-  });
-  const lessonIds = lessons.map((l) => l.id);
   return prisma.lessonProgress.findMany({
-    where: { userId, lessonId: { in: lessonIds } },
+    where: { userId, lesson: { courseId } },
   });
 }
 

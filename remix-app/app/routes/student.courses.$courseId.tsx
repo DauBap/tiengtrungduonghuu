@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
-import { getCourseById, getLessonsByCourse, getCourseReviewSetSummaries, getAllProgressForCourse, computeCourseProgress, computeLessonStatus, isEnrolled } from "~/lib/db.server";
+import { getCourseById, getLessonSummariesByCourse, getCourseReviewSetSummaries, getAllProgressForCourse, computeCourseProgress, computeLessonStatus, isEnrolled } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { LessonCard } from "~/components/lessons/lesson-card";
 import { ProgressBar } from "~/components/progress/progress-bar";
@@ -13,14 +13,17 @@ import type { ProgressStatus } from "~/types/progress";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
-  const course = await getCourseById(params.courseId!);
+  // Hai query độc lập nhau (cả hai chỉ cần courseId từ params) — chạy song song
+  // để tiết kiệm một round-trip tới DB trước khi vào nhóm query bên dưới.
+  const [course, enrolled] = await Promise.all([
+    getCourseById(params.courseId!),
+    isEnrolled(user.id, params.courseId!),
+  ]);
   if (!course) throw new Response("Không tìm thấy", { status: 404 });
-
-  const enrolled = await isEnrolled(user.id, course.id);
   if (!enrolled) throw new Response("Không có quyền truy cập", { status: 403 });
 
   const [lessons, reviewSets, progressList] = await Promise.all([
-    getLessonsByCourse(course.id),
+    getLessonSummariesByCourse(course.id),
     getCourseReviewSetSummaries(course.id),
     getAllProgressForCourse(user.id, course.id),
   ]);
@@ -105,7 +108,7 @@ export default function StudentCourseDetail() {
                     return (
                       <LessonCard
                         key={lesson.id}
-                        lesson={{ id: lesson.id, courseId: lesson.courseId, order: lesson.order, title: lesson.title, subtitle: lesson.subtitle, content: lesson.content }}
+                        lesson={{ ...lesson, content: [] }}
                         status={lesson.status}
                         index={(lessonNumbers.get(lesson.id) ?? 1) - 1}
                         href={`/student/courses/${course.id}/lessons/${lesson.id}`}
