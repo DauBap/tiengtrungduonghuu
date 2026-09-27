@@ -60,7 +60,7 @@ function listeningQuestions(
   }));
 }
 
-export function BlockRenderer({ block, status }: { block: ResolvedBlock; status: ProgressStatus }) {
+export function BlockRenderer({ block, status, courseId, lessonId }: { block: ResolvedBlock; status: ProgressStatus; courseId: string; lessonId: string }) {
   const fetcher = useFetcher();
   const effectiveStatus = status === "LOCKED" ? "AVAILABLE" : status;
   const isCompleted = effectiveStatus === "COMPLETED";
@@ -93,7 +93,7 @@ export function BlockRenderer({ block, status }: { block: ResolvedBlock; status:
 
     return (
       <BlockShell {...shellProps}>
-        <FlashcardBlock config={parsed.data} items={items} isCompleted={isCompleted} onComplete={markComplete} />
+        <FlashcardBlock config={parsed.data} items={items} courseId={courseId} lessonId={lessonId} isCompleted={isCompleted} onComplete={markComplete} />
       </BlockShell>
     );
   }

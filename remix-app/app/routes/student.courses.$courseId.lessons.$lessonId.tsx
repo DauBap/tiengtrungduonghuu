@@ -846,7 +846,7 @@ export default function LessonDetail() {
     // dung, trường hợp đó BlockRenderer hiện "chưa có nội dung" của riêng nó.
     if (blockIndex === -1) return <LessonTabEmpty tab={activeTab} />;
 
-    return <BlockRenderer block={blocks[blockIndex]} status={blockStatuses[blockIndex]} />;
+    return <BlockRenderer block={blocks[blockIndex]} status={blockStatuses[blockIndex]} courseId={lesson.courseId} lessonId={lesson.id} />;
   };
 
   return (
