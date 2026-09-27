@@ -198,6 +198,91 @@ export async function getAllProgressForCourse(userId: string, courseId: string) 
   });
 }
 
+/**
+ * Tiến độ của nhiều khóa cùng lúc — 2 query cho cả danh sách, thay vì 2 query
+ * mỗi khóa. Mỗi round-trip tới Neon là một lần đi mạng, nên vòng lặp `await`
+ * theo từng khóa là thứ đắt nhất trên trang danh sách khóa học.
+ */
+export async function getCourseProgressMap(userId: string, courseIds: string[]) {
+  if (courseIds.length === 0) return {};
+
+  const [lessons, progressList] = await Promise.all([
+    prisma.lesson.findMany({
+      where: { courseId: { in: courseIds } },
+      select: { id: true, courseId: true },
+    }),
+    prisma.lessonProgress.findMany({
+      where: { userId, lesson: { courseId: { in: courseIds } } },
+      select: { lessonId: true, testCompleted: true },
+    }),
+  ]);
+
+  const lessonsByCourse = new Map<string, { id: string }[]>();
+  for (const lesson of lessons) {
+    const list = lessonsByCourse.get(lesson.courseId);
+    if (list) list.push({ id: lesson.id });
+    else lessonsByCourse.set(lesson.courseId, [{ id: lesson.id }]);
+  }
+
+  const result: Record<string, number> = {};
+  for (const courseId of courseIds) {
+    result[courseId] = computeCourseProgress(
+      lessonsByCourse.get(courseId) ?? [],
+      progressList,
+    );
+  }
+  return result;
+}
+
+/**
+ * Số liệu cho dashboard học viên trong 2 query, chỉ `select` các field bảng
+ * thật sự dùng. Trước đây trang này gọi `getLessonsByCourse` cho từng khóa,
+ * kéo theo cả vocab/exercise/test chỉ để đếm bài và tìm bài đang học.
+ */
+export async function getStudentDashboardStats(userId: string, courseIds: string[]) {
+  if (courseIds.length === 0) {
+    return { totalLessons: 0, totalCompleted: 0, currentLesson: null, courseProgress: {} };
+  }
+
+  const [lessons, progressList] = await Promise.all([
+    prisma.lesson.findMany({
+      where: { courseId: { in: courseIds } },
+      select: { id: true, courseId: true, order: true, title: true, subtitle: true },
+      orderBy: { order: "asc" },
+    }),
+    prisma.lessonProgress.findMany({
+      where: { userId, lesson: { courseId: { in: courseIds } } },
+      select: { lessonId: true, testCompleted: true },
+    }),
+  ]);
+
+  const progressMap = new Map(progressList.map((p) => [p.lessonId, p]));
+  const isDone = (lessonId: string) => progressMap.get(lessonId)?.testCompleted === true;
+
+  const courseProgress: Record<string, number> = {};
+  for (const courseId of courseIds) {
+    const courseLessons = lessons.filter((l) => l.courseId === courseId);
+    courseProgress[courseId] = computeCourseProgress(courseLessons, progressList);
+  }
+
+  // Bài đang học = bài chưa xong đầu tiên, theo đúng thứ tự khóa học hiển thị.
+  let currentLesson: (typeof lessons)[number] | null = null;
+  for (const courseId of courseIds) {
+    const next = lessons.find((l) => l.courseId === courseId && !isDone(l.id));
+    if (next) {
+      currentLesson = next;
+      break;
+    }
+  }
+
+  return {
+    totalLessons: lessons.length,
+    totalCompleted: lessons.filter((l) => isDone(l.id)).length,
+    currentLesson,
+    courseProgress,
+  };
+}
+
 export async function upsertLessonProgress(
   userId: string,
   lessonId: string,

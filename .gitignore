@@ -56,3 +56,4 @@ smoke.mjs
 .agents/
 .cursor/
 .devin/
+.env*.local

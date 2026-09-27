@@ -127,6 +127,9 @@ model Lesson {
   progresses     LessonProgress[]
   exams          Exam[]
   audioScripts    LessonAudioScript[]
+
+  // Mọi truy vấn bài học đều lọc theo courseId rồi sắp xếp theo order.
+  @@index([courseId, order])
 }
 
 model LessonAudioScript {
@@ -190,6 +193,8 @@ model VocabItem {
   order       Int     @default(0)
 
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId, order])
 }
 
 enum WordType {
@@ -390,6 +395,10 @@ model Enrollment {
   class  Class?  @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
+  // `@@unique([userId, courseId])` chỉ phục vụ tra cứu theo userId. Trang admin
+  // còn đếm/liệt kê học viên theo khóa và theo lớp, nên cần index riêng.
+  @@index([courseId])
+  @@index([classId])
 }
 
 model LessonProgress {
@@ -405,6 +414,8 @@ model LessonProgress {
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
+  // Tiến độ theo khóa lọc qua quan hệ lesson → cần index phía lessonId.
+  @@index([lessonId])
 }
 
 model BlockProgress {
@@ -418,6 +429,7 @@ model BlockProgress {
   block LearningBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
 
   @@unique([userId, blockId])
+  @@index([blockId])
 }
 
 // ─── Bài thi ─────────────────────────────────────────────────────────────────
@@ -493,6 +505,7 @@ model Exam {
 
   @@index([status])
   @@index([lessonId])
+  @@index([courseId])
 }
 
 /// Một bản của đề. Publish = đóng băng. Sửa đề đã publish → tạo version mới.
@@ -595,6 +608,8 @@ model ExamQuestion {
 
   @@unique([examVersionId, questionId])
   @@index([sectionId, order])
+  // onDelete: Restrict — xoá câu hỏi phải kiểm tra bảng này, cần index.
+  @@index([questionId])
 }
 
 /// Một lượt thi của một học viên.
@@ -644,6 +659,7 @@ model ExamAnswer {
   examQuestion ExamQuestion @relation(fields: [examQuestionId], references: [id], onDelete: Cascade)
 
   @@unique([attemptId, examQuestionId])
+  @@index([examQuestionId])
 }
 
 model ExamResult {
@@ -679,4 +695,5 @@ model ExamAccessRule {
   course Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([examId])
+  @@index([courseId])
 }

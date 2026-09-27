@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData } from "react-router";
 import { requireRole } from "~/lib/session.server";
-import { getEnrolledCourses, getAllProgressForCourse, getLessonsByCourse, computeCourseProgress } from "~/lib/db.server";
+import { getEnrolledCourses, getCourseProgressMap } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { CourseCard } from "~/components/courses/course-card";
 import { EmptyState } from "~/components/common/empty-state";
@@ -11,12 +11,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
   const myCourses = await getEnrolledCourses(user.id);
 
-  const courseProgress: Record<string, number> = {};
-  for (const course of myCourses) {
-    const lessons = await getLessonsByCourse(course.id);
-    const progressList = await getAllProgressForCourse(user.id, course.id);
-    courseProgress[course.id] = computeCourseProgress(lessons, progressList);
-  }
+  const courseProgress = await getCourseProgressMap(
+    user.id,
+    myCourses.map((c) => c.id),
+  );
 
   return { user, myCourses, courseProgress };
 }

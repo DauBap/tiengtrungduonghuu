@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
-import { getEnrolledCoursesWithClass, getAllProgressForCourse, getLessonsByCourse, computeCourseProgress } from "~/lib/db.server";
+import { getEnrolledCoursesWithClass, getStudentDashboardStats } from "~/lib/db.server";
 import { formatSchedule, formatNextClass } from "~/lib/schedule-utils";
 import { AppShell } from "~/components/layout/app-shell";
 import { StatCard } from "~/components/common/stat-card";
@@ -15,39 +15,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const enrollments = await getEnrolledCoursesWithClass(user.id);
   const myCourses = enrollments.map((e) => e.course);
 
-  // overall stats
-  let totalLessons = 0;
-  let totalCompleted = 0;
-  let currentLesson = null;
-
-  const courseStats = await Promise.all(myCourses.map(async (course) => {
-    const [lessons, progressList] = await Promise.all([
-      getLessonsByCourse(course.id),
-      getAllProgressForCourse(user.id, course.id),
-    ]);
-    const progressMap = new Map(progressList.map((p) => [p.lessonId, p]));
-    return {
-      lessons,
-      progressList,
-      totalLessons: lessons.length,
-      totalCompleted: lessons.filter((l) => progressMap.get(l.id)?.testCompleted).length,
-      currentLesson: lessons.find((l) => !progressMap.get(l.id)?.testCompleted) ?? null,
-    };
-  }));
-
-  for (const stats of courseStats) {
-    totalLessons += stats.totalLessons;
-    totalCompleted += stats.totalCompleted;
-    if (!currentLesson) currentLesson = stats.currentLesson;
-  }
+  const { totalLessons, totalCompleted, currentLesson, courseProgress } =
+    await getStudentDashboardStats(user.id, myCourses.map((c) => c.id));
 
   const overallProgress = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
-
-  // progress per course
-  const courseProgress: Record<string, number> = {};
-  for (const [index, course] of myCourses.entries()) {
-    courseProgress[course.id] = computeCourseProgress(courseStats[index].lessons, courseStats[index].progressList);
-  }
 
   return { user, myCourses, enrollments, overallProgress, totalCompleted, currentLesson, courseProgress };
 }
