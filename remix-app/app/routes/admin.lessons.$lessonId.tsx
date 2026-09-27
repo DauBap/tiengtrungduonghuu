@@ -1107,7 +1107,7 @@ export default function AdminLessonDetail() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <CardTitle className="text-base">
-                      Kiểm tra từ vựng <span className="text-sm font-normal text-muted-foreground">({lesson.content.length} từ)</span>
+                      Ôn từ vựng <span className="text-sm font-normal text-muted-foreground">({lesson.content.length} từ)</span>
                   </CardTitle>
                   <CardDescription>
                     Mỗi từ tạo một câu trắc nghiệm. Cài đặt điểm đạt và thời gian làm bài cho học viên.
@@ -1126,7 +1126,7 @@ export default function AdminLessonDetail() {
                   <ClipboardCheck className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
                   <p className="text-sm font-medium">Chưa có từ vựng để kiểm tra</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Thêm từ vựng cho bài học để tạo câu hỏi trong tab Kiểm tra.
+                    Thêm từ vựng cho bài học để tạo câu hỏi trong tab Ôn từ vựng.
                   </p>
                 </div>
               ) : (
@@ -1135,7 +1135,7 @@ export default function AdminLessonDetail() {
                     <ClipboardCheck className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{lesson.test?.title ?? "Kiểm tra từ vựng"}</p>
+                    <p className="font-medium truncate">{lesson.test?.title ?? "Ôn từ vựng"}</p>
                     <p className="text-sm text-muted-foreground">
                       {lesson.content.length} câu · đạt {lesson.test?.passScore ?? 50}% · {testTimeLabel}
                     </p>

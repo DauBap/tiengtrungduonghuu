@@ -5,12 +5,12 @@ import type { LessonTab } from "./lesson-tabs";
 
 /**
  * Icon + nhãn cho một tab bất kỳ.
- * Tab Kiểm tra không phải LearningBlockType nên không có trong BLOCK_META,
+ * Tab Ôn từ vựng không phải LearningBlockType nên không có trong BLOCK_META,
  * phải khai riêng — icon giữ đúng cái đang dùng trên thanh tab.
  */
 function tabMeta(tab: LessonTab) {
   if (tab === "TEST") {
-    return { icon: ClipboardCheck, label: "Kiểm tra", implemented: true };
+    return { icon: ClipboardCheck, label: "Ôn từ vựng", implemented: true };
   }
   if (tab === "LESSON") {
     return { icon: BookOpen, label: "Bài khóa", implemented: true };

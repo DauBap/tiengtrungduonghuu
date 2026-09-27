@@ -180,7 +180,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 export default function LessonDetail() {
   const { user, lesson, blocks, blockStatuses, vocabularyQuestions, passScore, timeLimitMinutes, lessonStatus } = useLoaderData<typeof loader>();
   const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string }>();
-  const [activeTab, setActiveTab] = useState<LessonTab>("VOCABULARY");
+  const [activeTab, setActiveTab] = useState<LessonTab>("FLASHCARD");
   const [showScript, setShowScript] = useState(true);
   const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -346,7 +346,7 @@ export default function LessonDetail() {
       return <WorkbookListeningTest config={parsed.data} />;
     }
 
-    // Tab Kiểm tra — inline, dùng fetcher để không rời trang
+    // Tab Ôn từ vựng — inline, dùng fetcher để không rời trang
     if (activeTab === "TEST") {
       // Kết quả sau khi nộp
       if (testResult) {

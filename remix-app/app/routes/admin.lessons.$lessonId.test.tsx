@@ -646,7 +646,7 @@ export default function AdminLessonTest() {
                   <ClipboardCheck className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
                   <p className="text-sm font-medium">Chưa có câu hỏi nào</p>
                   <p className="text-sm text-muted-foreground mt-1 mb-4">
-                    Chưa có câu hỏi thì tab Kiểm tra của học viên hiện mờ và không làm được.
+                    Chưa có câu hỏi thì tab Ôn từ vựng của học viên hiện mờ và không làm được.
                   </p>
                   <Button size="sm" onClick={() => open("create")}>
                     <Plus className="h-4 w-4 mr-1.5" />Thêm câu hỏi

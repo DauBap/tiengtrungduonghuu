@@ -154,7 +154,7 @@ export default function TestPage() {
         <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
           HSK {lesson.course.hskLevel}
         </span>
-        <span>{lesson.title} - Kiểm tra</span>
+        <span>{lesson.title} - Ôn từ vựng</span>
       </div>
       <h1 className="text-2xl font-bold tracking-tight">{lesson.test?.title ?? "Bài kiểm tra"}</h1>
     </div>
