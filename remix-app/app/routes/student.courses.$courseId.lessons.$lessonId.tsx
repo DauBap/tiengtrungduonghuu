@@ -746,10 +746,10 @@ export default function LessonDetail() {
                           <span className="h-2 w-2 rounded-full bg-primary" />
                           <span className="text-sm font-bold">{speaker.speakerName || `Người ${idx + 1}`}</span>
                         </div>
-                        <div className="mt-2 text-sm">
+                        <div className="mt-2 text-base">
                           <p className="font-medium text-foreground">{speaker.chinese}</p>
-                          <p className="text-xs font-mono text-muted-foreground mt-1">{speaker.pinyin}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{speaker.translation}</p>
+                          <p className="text-lg font-mono text-muted-foreground mt-1">{speaker.pinyin}</p>
+                          <p className="text-base text-muted-foreground mt-1">{speaker.translation}</p>
                         </div>
                       </div>
                     ))}
