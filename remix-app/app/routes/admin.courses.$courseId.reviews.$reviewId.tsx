@@ -2,6 +2,7 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Form, Link, redirect, useLoaderData, useNavigation } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { prisma } from "~/lib/prisma.server";
+import { parseAnswerVariants } from "~/lib/listening-answer";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -42,6 +43,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
     id: question.id,
     prompt: String(form.get(`questionPrompt-${question.id}`) ?? "").trim(),
     answer: String(form.get(`questionAnswer-${question.id}`) ?? "").trim(),
+    acceptedAnswers: parseAnswerVariants(
+      String(form.get(`questionAcceptedAnswers-${question.id}`) ?? ""),
+      String(form.get(`questionAnswer-${question.id}`) ?? "").trim(),
+    ),
     explanation: String(form.get(`questionExplanation-${question.id}`) ?? "").trim() || null,
   }));
   if (updates.some((question) => !question.prompt || !question.answer)
@@ -53,7 +58,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     prisma.courseReviewSet.update({ where: { id: reviewSet.id }, data: { title, subtitle } }),
     ...updates.map((question) => prisma.courseReviewQuestion.update({
       where: { id: question.id },
-      data: { prompt: question.prompt, answer: question.answer, explanation: question.explanation },
+      data: { prompt: question.prompt, answer: question.answer, acceptedAnswers: question.acceptedAnswers, explanation: question.explanation },
     })),
   ]);
 
@@ -117,6 +122,11 @@ export default function AdminReviewEdit() {
                   <div className="space-y-2">
                     <Label htmlFor={`questionAnswer-${question.id}`}>Đáp án</Label>
                     <Input id={`questionAnswer-${question.id}`} name={`questionAnswer-${question.id}`} defaultValue={question.answer} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`questionAcceptedAnswers-${question.id}`}>Đáp án khác được chấp nhận <span className="text-xs font-normal text-muted-foreground">(mỗi đáp án một dòng)</span></Label>
+                    <Textarea id={`questionAcceptedAnswers-${question.id}`} name={`questionAcceptedAnswers-${question.id}`}
+                      defaultValue={question.acceptedAnswers.join("\n")} rows={2} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor={`questionExplanation-${question.id}`}>Giải thích (tùy chọn)</Label>

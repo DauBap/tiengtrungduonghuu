@@ -30,6 +30,7 @@ interface FlashcardBlockProps {
   isCompleted: boolean;
   onComplete: () => void;
   lessonName?: string;
+  progressStorageKey?: string;
 }
 
 function shuffled<T>(arr: T[]): T[] {
@@ -41,9 +42,9 @@ function shuffled<T>(arr: T[]): T[] {
   return copy;
 }
 
-export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted, onComplete, lessonName }: FlashcardBlockProps) {
+export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted, onComplete, lessonName, progressStorageKey }: FlashcardBlockProps) {
   const settings = useAppSettings();
-  const storageKey = `flashcard-progress:${courseId}:${lessonId}`;
+  const storageKey = progressStorageKey ?? `flashcard-progress:${courseId}:${lessonId}`;
   const [round, setRound] = useState(0);
   const cards = useMemo(() => (config.shuffle ? shuffled(items) : items), [items, config.shuffle, round]);
   const [index, setIndex] = useState(0);

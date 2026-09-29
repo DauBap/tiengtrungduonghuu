@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigation, Form, Link } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
@@ -56,6 +57,7 @@ function emptyQuestion(number: number): Question {
       { id: uid(), label: "C", text: "", pinyin: "" },
     ],
     correctAnswer: "",
+    acceptedAnswers: [],
   };
 }
 
@@ -142,11 +144,12 @@ function QuestionEditor({
             options: question.options.length ? question.options : OPTION_LABELS.slice(0, 3).map((label) => ({ id: uid(), label, text: "", pinyin: "" })),
             gradable: question.kind === "choice" ? question.gradable : false,
             correctAnswer: question.kind === "choice" ? question.correctAnswer : "",
+            acceptedAnswers: question.kind === "choice" ? question.acceptedAnswers : [],
           })}>
           Trắc nghiệm
         </Button>
         <Button type="button" size="sm" variant={question.kind === "input" ? "default" : "outline"}
-          onClick={() => onChange({ ...question, kind: "input", gradable: false, options: [], correctAnswer: "" })}>
+          onClick={() => onChange({ ...question, kind: "input", gradable: false, options: [], correctAnswer: "", acceptedAnswers: [] })}>
           Điền chữ
         </Button>
       </div>
@@ -183,11 +186,26 @@ function QuestionEditor({
       </div>
 
       {question.kind === "input" ? (
-        <div className="space-y-1.5">
-          <Label className="text-xs">Đáp án đúng</Label>
-          <Input value={question.correctAnswer}
-            onChange={(e) => onChange({ ...question, correctAnswer: e.target.value, gradable: Boolean(e.target.value.trim()) })}
-            placeholder="Nhập đáp án chính xác" className="h-8 text-sm" />
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Đáp án đúng</Label>
+            <Input value={question.correctAnswer}
+              onChange={(e) => onChange({ ...question, correctAnswer: e.target.value, gradable: Boolean(e.target.value.trim()) })}
+              placeholder="Nhập đáp án chính xác" className="h-8 text-sm" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Đáp án khác được chấp nhận <span className="font-normal text-muted-foreground">(mỗi đáp án một dòng)</span></Label>
+            <Textarea value={(question.acceptedAnswers ?? []).join("\n")} rows={2}
+              onChange={(e) => onChange({
+                ...question,
+                acceptedAnswers: e.target.value.split(/\r?\n/),
+              })}
+              onBlur={() => onChange({
+                ...question,
+                acceptedAnswers: [...new Set((question.acceptedAnswers ?? []).map((answer) => answer.trim()).filter(Boolean))],
+              })}
+              placeholder="Nhập cách trả lời tương đương" className="text-sm" />
+          </div>
         </div>
       ) : <div className="space-y-1.5">
         <Label className="text-xs">Đáp án</Label>

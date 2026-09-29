@@ -8,6 +8,7 @@ import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 import type { WorkbookConfig } from "~/lib/learning-blocks";
 import { useAppSettings } from "~/lib/app-settings";
+import { answerVariants, isAnswerCorrectForAny } from "~/lib/listening-answer";
 
 interface QuestionOption {
   id: string;
@@ -30,6 +31,7 @@ interface Question {
   dialogue?: { chinese: string; pinyin: string; translation: string };
   options: QuestionOption[];
   correctAnswer: string;
+  acceptedAnswers: string[];
   selectedAnswer?: string;
 }
 
@@ -141,7 +143,7 @@ export function WorkbookListeningTest({
   const correctCount = gradableQuestions.filter((question) => {
     const answer = answers[question.id]?.trim();
     return answer && (question.kind === "input"
-      ? answer === question.correctAnswer.trim()
+      ? isAnswerCorrectForAny(answer, answerVariants(question.correctAnswer, question.acceptedAnswers), "chinese")
       : answer === question.correctAnswer);
   }).length;
 

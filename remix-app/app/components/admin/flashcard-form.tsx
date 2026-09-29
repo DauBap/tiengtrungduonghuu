@@ -50,6 +50,7 @@ export function FlashcardForm({ vocabOptions, initial, error, field, cancelTo }:
   const vocabById = new Map(vocabOptions.map((v) => [v.id, v]));
   const selected = selectedIds.map((id) => vocabById.get(id)).filter((v): v is VocabOption => Boolean(v));
   const unselected = vocabOptions.filter((v) => !selectedIds.includes(v.id));
+  const allSelected = vocabOptions.length > 0 && unselected.length === 0;
 
   const toggle = (id: string) =>
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -102,9 +103,18 @@ export function FlashcardForm({ vocabOptions, initial, error, field, cancelTo }:
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">
-            Chọn từ vựng <span className="text-sm font-normal text-muted-foreground">({selectedIds.length} thẻ)</span>
-          </CardTitle>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="text-base">
+              Chọn từ vựng <span className="text-sm font-normal text-muted-foreground">({selectedIds.length} thẻ)</span>
+            </CardTitle>
+            <Button type="button" variant="outline" size="sm" disabled={vocabOptions.length === 0}
+              onClick={() => {
+                if (allSelected) setSelectedIds([]);
+                else setSelectedIds((prev) => [...prev, ...vocabOptions.filter((v) => !prev.includes(v.id)).map((v) => v.id)]);
+              }}>
+              {allSelected ? "Bỏ chọn tất cả" : "Chọn tất cả"}
+            </Button>
+          </div>
           <CardDescription>Bấm để chọn, dùng mũi tên để sắp thứ tự thẻ.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

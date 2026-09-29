@@ -135,6 +135,7 @@ export const workbookConfigSchema = z.object({
           })).default([]),
           gradable: z.boolean().default(true),
           correctAnswer: z.string().default(""),
+          acceptedAnswers: z.array(z.string()).default([]),
         }).refine((question) => question.kind === "input" || question.options.length > 0, {
           message: "Câu trắc nghiệm cần có ít nhất một đáp án",
         }).refine((question) => !question.gradable || Boolean(question.correctAnswer.trim()), {

@@ -5,7 +5,7 @@
  * Cả admin và student đều import từ đây để nhãn và luật so đáp án chỉ có một
  * nguồn — lệch nhau thì admin soạn một kiểu, học viên bị chấm một kiểu khác.
  */
-import { isAnswerCorrect } from "~/lib/listening-answer";
+import { answerVariants, isAnswerCorrect, isAnswerCorrectForAny } from "~/lib/listening-answer";
 
 export const GRAMMAR_QUESTION_TYPES = ["SINGLE_CHOICE", "ARRANGE", "FILL"] as const;
 
@@ -76,6 +76,7 @@ export interface GrammarAnswerable {
   type: GrammarQuestionType;
   options: string[];
   answer: string;
+  acceptedAnswers?: string[];
 }
 
 /**
@@ -99,7 +100,7 @@ export function checkGrammarAnswer(question: GrammarAnswerable, response: string
     return text === question.answer;
   }
   // FILL: học viên tự gõ → nới dấu câu và khoảng trắng như phần Nghe câu
-  return isAnswerCorrect(text, question.answer, "chinese");
+  return isAnswerCorrectForAny(text, answerVariants(question.answer, question.acceptedAnswers), "chinese");
 }
 
 /** Đáp án đúng ở dạng chuỗi để hiện khi học viên bấm "Xem đáp án". */

@@ -188,17 +188,20 @@ model PronunciationAssessment {
   @@index([lessonAudioScriptId])
 }
 model VocabItem {
-  id          String  @id @default(cuid())
-  lessonId    String
-  chinese     String
-  pinyin      String
-  translation String
+  id                      String    @id @default(cuid())
+  lessonId                String
+  chinese                 String
+  chineseAlternatives     String[]  @default([])
+  pinyin                  String
+  pinyinAlternatives      String[]  @default([])
+  translation             String
+  translationAlternatives String[]  @default([])
   // từ loại: danh từ, động từ, tính từ... (tùy chọn)
   // Cho phép nhiều từ loại cho cùng một từ, vì một từ có thể dính nhiều lớp từ vựng.
-  wordTypes   WordType[] @default([])
-  audioUrl    String?
-  note        String?
-  order       Int     @default(0)
+  wordTypes               WordType[] @default([])
+  audioUrl                String?
+  note                    String?
+  order                   Int       @default(0)
 
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
@@ -223,14 +226,16 @@ enum WordType {
 /// Câu mẫu của bài, admin soạn riêng. Dùng làm nguồn cho block Nghe câu —
 /// tách khỏi VocabItem vì câu không có từ loại và không lên thẻ flashcard.
 model SentenceItem {
-  id          String  @id @default(cuid())
-  lessonId    String
-  chinese     String
-  pinyin      String
-  translation String
-  audioUrl    String?
-  note        String?
-  order       Int     @default(0)
+  id                 String   @id @default(cuid())
+  lessonId           String
+  chinese            String
+  chineseAlternatives String[] @default([])
+  pinyin             String
+  pinyinAlternatives String[] @default([])
+  translation        String
+  audioUrl           String?
+  note               String?
+  order              Int      @default(0)
 
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
@@ -269,15 +274,16 @@ model GrammarSection {
 ///  - ARRANGE: các từ theo ĐÚNG thứ tự (học viên thấy bản đã trộn), `answer` là options nối lại
 ///  - FILL: rỗng, `answer` là đáp án học viên phải nhập
 model GrammarQuestion {
-  id        String              @id @default(cuid())
-  sectionId String
-  type      GrammarQuestionType
-  prompt    String
-  options   String[]            @default([])
-  answer    String
+  id              String              @id @default(cuid())
+  sectionId       String
+  type            GrammarQuestionType
+  prompt          String
+  options         String[]            @default([])
+  answer          String
+  acceptedAnswers String[]            @default([])
   /// Giải thích hiện ra sau khi bấm "Xem đáp án"
-  hint      String?
-  order     Int                 @default(0)
+  hint            String?
+  order           Int                 @default(0)
 
   section GrammarSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 
@@ -348,17 +354,18 @@ model Test {
 ///  - ARRANGE: các từ theo ĐÚNG thứ tự (học viên thấy bản đã trộn), `answer` là options nối lại
 ///  - FILL: rỗng, `answer` là đáp án học viên phải nhập
 model TestQuestion {
-  id      String              @id @default(cuid())
-  testId  String
-  type    GrammarQuestionType
-  prompt  String
-  options String[]            @default([])
-  answer  String
+  id              String              @id @default(cuid())
+  testId          String
+  type            GrammarQuestionType
+  prompt          String
+  options         String[]            @default([])
+  answer          String
+  acceptedAnswers String[]            @default([])
   /// Giải thích, CHỈ hiện sau khi học viên đã nộp bài
-  hint    String?
+  hint            String?
   /// Điểm của câu, để admin đánh trọng số câu khó
-  points  Float               @default(1)
-  order   Int                 @default(0)
+  points          Float               @default(1)
+  order           Int                 @default(0)
 
   test Test @relation(fields: [testId], references: [id], onDelete: Cascade)
 

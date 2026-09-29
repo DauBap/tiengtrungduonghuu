@@ -1,5 +1,6 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { useLoaderData, Link } from "react-router";
+import { useLoaderData, Link, useNavigate } from "react-router";
+import { useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import { getCourseById, getLessonSummariesByCourse, getCourseReviewSetSummaries, getAllProgressForCourse, computeLessonStatus, computeTrackedCourseProgress, isEnrolled } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
@@ -8,7 +9,7 @@ import { ProgressBar } from "~/components/progress/progress-bar";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { ArrowLeft, BookOpen, Layers } from "lucide-react";
 import type { ProgressStatus } from "~/types/progress";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
 import { prisma } from "~/lib/prisma.server";
@@ -79,6 +80,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 export default function StudentCourseDetail() {
   const { user, course, lessonsWithStatus, reviewSets, courseProgress } = useLoaderData<typeof loader>();
+  const navigate = useNavigate();
+  const [showCombinedStudy, setShowCombinedStudy] = useState(false);
+  const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([]);
 
   const orderedCourseItems = [
     ...lessonsWithStatus.map((lesson) => ({
@@ -122,7 +126,14 @@ export default function StudentCourseDetail() {
         </Card>
 
         <div>
-          <h2 className="text-lg font-semibold mb-4">Bài học</h2>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold">Bài học</h2>
+            {lessonsWithStatus.length > 0 && (
+              <Button variant="outline" size="sm" onClick={() => setShowCombinedStudy(true)}>
+                <Layers className="mr-1.5 h-4 w-4" />Học tổng hợp
+              </Button>
+            )}
+          </div>
           {orderedCourseItems.length === 0
             ? <EmptyState title="Chưa có bài học" message="Khóa học này chưa có bài học nào." />
             : <div className="space-y-3">
@@ -155,6 +166,55 @@ export default function StudentCourseDetail() {
                 })}
               </div>}
         </div>
+
+        {showCombinedStudy && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) setShowCombinedStudy(false);
+            }}
+          >
+            <section role="dialog" aria-modal="true" aria-labelledby="combined-study-title"
+              className="w-full max-w-lg rounded-lg border bg-background shadow-xl">
+              <div className="border-b p-5">
+                <h2 id="combined-study-title" className="text-lg font-semibold">Học tổng hợp</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Chọn các bài học trong khóa {course.title}.</p>
+              </div>
+              <div className="max-h-[55vh] space-y-1 overflow-y-auto p-3">
+                {lessonsWithStatus.map((lesson) => (
+                  <label key={lesson.id} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 hover:bg-muted/60">
+                    <input
+                      type="checkbox"
+                      checked={selectedLessonIds.includes(lesson.id)}
+                      onChange={(event) => setSelectedLessonIds((previous) => event.target.checked
+                        ? [...previous, lesson.id]
+                        : previous.filter((id) => id !== lesson.id))}
+                      className="h-4 w-4 accent-primary"
+                    />
+                    <span className="min-w-0">
+                      <span className="mr-2 text-xs font-medium text-muted-foreground">Bài {lesson.order}</span>
+                      <span className="text-sm font-medium">{lesson.title}</span>
+                      {lesson.subtitle && <span className="mt-0.5 block text-xs text-muted-foreground">{lesson.subtitle}</span>}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              <div className="flex items-center justify-between gap-3 border-t p-4">
+                <span className="text-xs text-muted-foreground">Đã chọn {selectedLessonIds.length} bài</span>
+                <div className="flex gap-2">
+                  <Button variant="ghost" onClick={() => setShowCombinedStudy(false)}>Hủy</Button>
+                  <Button disabled={selectedLessonIds.length === 0} onClick={() => {
+                    const search = new URLSearchParams();
+                    selectedLessonIds.forEach((id) => search.append("lessonId", id));
+                    navigate(`/student/courses/${course.id}/flashcards?${search.toString()}`);
+                  }}>
+                    <BookOpen className="mr-1.5 h-4 w-4" />Học bài
+                  </Button>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
       </div>
     </AppShell>
   );

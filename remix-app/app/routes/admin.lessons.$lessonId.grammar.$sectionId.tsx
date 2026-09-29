@@ -3,6 +3,7 @@ import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useFetcher, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { prisma } from "~/lib/prisma.server";
+import { parseAnswerVariants } from "~/lib/listening-answer";
 import {
   GRAMMAR_QUESTION_TYPES, GRAMMAR_QUESTION_META, parseGrammarQuestionType,
   grammarAnswerText, type GrammarQuestionType,
@@ -27,6 +28,7 @@ type QuestionRow = {
   prompt: string;
   options: string[];
   answer: string;
+  acceptedAnswers: string[];
   hint: string | null;
   order: number;
 };
@@ -39,6 +41,7 @@ type ParsedQuestion = {
   prompt: string;
   options: string[];
   answer: string;
+  acceptedAnswers: string[];
   hint: string | null;
 };
 
@@ -94,17 +97,18 @@ function parseQuestionAt(
     if (!Number.isInteger(correctIndex) || correctIndex < 0 || correctIndex >= options.length) {
       return fail("Chọn đáp án đúng", "options");
     }
-    return { ok: true, data: { type, prompt, options, answer: options[correctIndex], hint } };
+    return { ok: true, data: { type, prompt, options, answer: options[correctIndex], acceptedAnswers: [], hint } };
   }
 
   if (type === "ARRANGE") {
     if (options.length < 2) return fail("Cần ít nhất 2 từ để sắp xếp", "options");
-    return { ok: true, data: { type, prompt, options, answer: options.join(""), hint } };
+    return { ok: true, data: { type, prompt, options, answer: options.join(""), acceptedAnswers: [], hint } };
   }
 
   const answer = String(form.get(at("answer")) ?? "").trim();
   if (!answer) return fail("Vui lòng nhập đáp án", "answer");
-  return { ok: true, data: { type, prompt, options: [], answer, hint } };
+  const acceptedAnswers = parseAnswerVariants(String(form.get(at("acceptedAnswers")) ?? ""), answer);
+  return { ok: true, data: { type, prompt, options: [], answer, acceptedAnswers, hint } };
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -213,11 +217,12 @@ type Draft = {
   options: string[];
   correctIndex: number;
   answer: string;
+  acceptedAnswers: string;
   hint: string;
 };
 
 function emptyDraft(): Draft {
-  return { prompt: "", options: ["", ""], correctIndex: 0, answer: "", hint: "" };
+  return { prompt: "", options: ["", ""], correctIndex: 0, answer: "", acceptedAnswers: "", hint: "" };
 }
 
 function draftFrom(question: QuestionRow): Draft {
@@ -227,6 +232,7 @@ function draftFrom(question: QuestionRow): Draft {
     options: question.options.length > 0 ? question.options : ["", ""],
     correctIndex: found >= 0 ? found : 0,
     answer: question.answer,
+    acceptedAnswers: question.acceptedAnswers.join("\n"),
     hint: question.hint ?? "",
   };
 }
@@ -331,14 +337,20 @@ function DraftFields({
       )}
 
       {type === "FILL" && (
-        <div className="space-y-2">
-          <Label htmlFor={at("answer")}>Đáp án đúng <span className="text-destructive">*</span></Label>
-          <Input id={at("answer")} name={at("answer")} value={draft.answer}
-            onChange={(e) => onChange({ answer: e.target.value })}
-            placeholder="我是学生" aria-invalid={isInvalid("answer")} />
-          <p className="text-xs text-muted-foreground">
-            Khi so đáp án, dấu câu và khoảng trắng được bỏ qua.
-          </p>
+        <div className="space-y-3">
+          <div className="space-y-2">
+            <Label htmlFor={at("answer")}>Đáp án đúng <span className="text-destructive">*</span></Label>
+            <Input id={at("answer")} name={at("answer")} value={draft.answer}
+              onChange={(e) => onChange({ answer: e.target.value })}
+              placeholder="我是学生" aria-invalid={isInvalid("answer")} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={at("acceptedAnswers")}>Đáp án khác được chấp nhận <span className="text-muted-foreground font-normal text-xs">(mỗi đáp án một dòng)</span></Label>
+            <Textarea id={at("acceptedAnswers")} name={at("acceptedAnswers")} value={draft.acceptedAnswers} rows={2}
+              onChange={(e) => onChange({ acceptedAnswers: e.target.value })}
+              placeholder="我是学生。" />
+          </div>
+          <p className="text-xs text-muted-foreground">Khi so đáp án, dấu câu và khoảng trắng được bỏ qua.</p>
         </div>
       )}
 

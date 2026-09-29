@@ -64,6 +64,8 @@ export function LessonTabs({ activeTab, onTabChange, availableTypes, hasQuiz }: 
               );
             }
 
+            if ((type === "GRAMMAR" || type === "WORKBOOK") && !availableTypes.has(type)) return null;
+
             const blockType = type as LearningBlockType;
             const Icon = BLOCK_META[blockType].icon;
             const isActive = activeTab === blockType;

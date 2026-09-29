@@ -1,7 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { answerMatchPercent, compareAnswerHighlights, normalizeAnswer } from "./listening-answer";
+import {
+  answerMatchPercent,
+  answerVariants,
+  bestAnswerMatchPercent,
+  compareAnswerHighlights,
+  isAnswerCorrectForAny,
+  normalizeAnswer,
+  parseAnswerVariants,
+} from "./listening-answer";
 
 test("normalizeAnswer strips punctuation and tones for pinyin", () => {
   assert.equal(normalizeAnswer("nǐ hǎo!", "pinyin"), "nihao");
@@ -28,4 +36,11 @@ test("answerMatchPercent awards partial credit after normalization", () => {
   assert.equal(answerMatchPercent("你好嗎", "你好吗", "chinese"), 66.67);
   assert.equal(answerMatchPercent("ni", "nihao", "pinyin"), 40);
   assert.equal(answerMatchPercent("", "nihao", "pinyin"), 0);
+});
+
+test("answer variants are parsed, deduplicated, and matched after normalization", () => {
+  assert.deepEqual(parseAnswerVariants("\n你好\n您好\n你好\n", "你好"), ["您好"]);
+  assert.deepEqual(answerVariants("你好", [" 您好 ", "你好"]), ["你好", "您好"]);
+  assert.equal(isAnswerCorrectForAny("nǐ hǎo", ["再见", "nihao"], "pinyin"), true);
+  assert.equal(bestAnswerMatchPercent("您好", ["你好", "您好"], "chinese"), 100);
 });

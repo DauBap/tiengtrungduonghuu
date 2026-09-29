@@ -10,6 +10,7 @@ import { WORD_TYPES, WORD_TYPE_META, parseWordTypes, type WordType } from "~/lib
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -20,9 +21,10 @@ import {
   Eye, Settings, BookMarked,
 } from "lucide-react";
 import { speakChinese } from "~/lib/speech";
+import { parseAnswerVariants } from "~/lib/listening-answer";
 
-type VocabRow = { id: string; chinese: string; pinyin: string; translation: string; wordTypes: WordType[]; audioUrl: string | null; note: string | null; order: number };
-type SentenceRow = { id: string; chinese: string; pinyin: string; translation: string; audioUrl: string | null; note: string | null; order: number };
+type VocabRow = { id: string; chinese: string; chineseAlternatives: string[]; pinyin: string; pinyinAlternatives: string[]; translation: string; translationAlternatives: string[]; wordTypes: WordType[]; audioUrl: string | null; note: string | null; order: number };
+type SentenceRow = { id: string; chinese: string; chineseAlternatives: string[]; pinyin: string; pinyinAlternatives: string[]; translation: string; audioUrl: string | null; note: string | null; order: number };
 /** Ba chế độ modal dùng chung cho cả từ vựng và câu */
 type VocabModalMode = "create" | "edit" | "delete" | null;
 
@@ -130,8 +132,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
   // ── Từ vựng ──
   if (intent === "vocab-create" || intent === "vocab-edit") {
     const chinese = String(form.get("chinese") ?? "").trim();
+    const chineseAlternatives = parseAnswerVariants(String(form.get("chineseAlternatives") ?? ""), chinese);
     const pinyin = String(form.get("pinyin") ?? "").trim();
+    const pinyinAlternatives = parseAnswerVariants(String(form.get("pinyinAlternatives") ?? ""), pinyin);
     const translation = String(form.get("translation") ?? "").trim();
+    const translationAlternatives = parseAnswerVariants(String(form.get("translationAlternatives") ?? ""), translation);
     const audioUrl = String(form.get("audioUrl") ?? "").trim();
     const note = String(form.get("note") ?? "").trim();
     const wordTypes = parseWordTypes(form.getAll("wordTypes"));
@@ -143,7 +148,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       return { error: "Link audio phải bắt đầu bằng http:// hoặc https://", field: "audioUrl" };
     }
 
-    const data = { chinese, pinyin, translation, wordTypes, audioUrl: audioUrl || null, note: note || null };
+    const data = { chinese, chineseAlternatives, pinyin, pinyinAlternatives, translation, translationAlternatives, wordTypes, audioUrl: audioUrl || null, note: note || null };
 
     if (intent === "vocab-edit") {
       await prisma.vocabItem.update({ where: { id: String(form.get("vocabId")) }, data });
@@ -194,7 +199,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
   // ── Câu mẫu (nguồn cho block Nghe câu) ──
   if (intent === "sentence-create" || intent === "sentence-edit") {
     const chinese = String(form.get("chinese") ?? "").trim();
+    const chineseAlternatives = parseAnswerVariants(String(form.get("chineseAlternatives") ?? ""), chinese);
     const pinyin = String(form.get("pinyin") ?? "").trim();
+    const pinyinAlternatives = parseAnswerVariants(String(form.get("pinyinAlternatives") ?? ""), pinyin);
     const translation = String(form.get("translation") ?? "").trim();
     const audioUrl = String(form.get("audioUrl") ?? "").trim();
     const note = String(form.get("note") ?? "").trim();
@@ -206,7 +213,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       return { error: "Link audio phải bắt đầu bằng http:// hoặc https://", field: "audioUrl" };
     }
 
-    const data = { chinese, pinyin, translation, audioUrl: audioUrl || null, note: note || null };
+    const data = { chinese, chineseAlternatives, pinyin, pinyinAlternatives, translation, audioUrl: audioUrl || null, note: note || null };
 
     if (intent === "sentence-edit") {
       await prisma.sentenceItem.update({ where: { id: String(form.get("sentenceId")) }, data });
@@ -319,14 +326,29 @@ function VocabModal({ mode, vocab, onClose }: { mode: VocabModalMode; vocab: Voc
             aria-invalid={fetcher.data?.field === "chinese" || undefined} />
         </div>
         <div className="space-y-2">
+          <Label htmlFor="chineseAlternatives">Chữ Hán khác được chấp nhận <span className="text-muted-foreground font-normal text-xs">(mỗi đáp án một dòng)</span></Label>
+          <Textarea id="chineseAlternatives" name="chineseAlternatives" defaultValue={vocab?.chineseAlternatives.join("\n")} rows={2}
+            placeholder="Các cách viết khác của từ này" />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="pinyin">Pinyin <span className="text-destructive">*</span></Label>
           <Input id="pinyin" name="pinyin" defaultValue={vocab?.pinyin} placeholder="nǐ hǎo" className="font-mono"
             aria-invalid={fetcher.data?.field === "pinyin" || undefined} />
         </div>
         <div className="space-y-2">
+          <Label htmlFor="pinyinAlternatives">Pinyin khác được chấp nhận <span className="text-muted-foreground font-normal text-xs">(mỗi đáp án một dòng)</span></Label>
+          <Textarea id="pinyinAlternatives" name="pinyinAlternatives" defaultValue={vocab?.pinyinAlternatives.join("\n")} rows={2}
+            placeholder="Biến thể phiên âm khác" />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="translation">Nghĩa tiếng Việt <span className="text-destructive">*</span></Label>
           <Input id="translation" name="translation" defaultValue={vocab?.translation} placeholder="Xin chào"
             aria-invalid={fetcher.data?.field === "translation" || undefined} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="translationAlternatives">Nghĩa khác được chấp nhận <span className="text-muted-foreground font-normal text-xs">(mỗi đáp án một dòng)</span></Label>
+          <Textarea id="translationAlternatives" name="translationAlternatives" defaultValue={vocab?.translationAlternatives.join("\n")} rows={2}
+            placeholder="Các nghĩa tương đương khác" />
         </div>
         <div className="space-y-2">
           <Label>Từ loại <span className="text-muted-foreground font-normal text-xs">(tùy chọn, có thể chọn nhiều)</span></Label>
@@ -426,9 +448,19 @@ function SentenceModal({ mode, sentence, onClose }: { mode: VocabModalMode; sent
             aria-invalid={fetcher.data?.field === "chinese" || undefined} />
         </div>
         <div className="space-y-2">
+          <Label htmlFor="s-chineseAlternatives">Câu tiếng Trung khác được chấp nhận <span className="text-muted-foreground font-normal text-xs">(mỗi đáp án một dòng)</span></Label>
+          <Textarea id="s-chineseAlternatives" name="chineseAlternatives" defaultValue={sentence?.chineseAlternatives.join("\n")} rows={2}
+            placeholder="Cách diễn đạt khác có cùng nghĩa" />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="s-pinyin">Pinyin <span className="text-destructive">*</span></Label>
           <Input id="s-pinyin" name="pinyin" defaultValue={sentence?.pinyin} placeholder="nǐ hǎo, wǒ jiào xiǎo míng." className="font-mono"
             aria-invalid={fetcher.data?.field === "pinyin" || undefined} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="s-pinyinAlternatives">Pinyin khác được chấp nhận <span className="text-muted-foreground font-normal text-xs">(mỗi đáp án một dòng)</span></Label>
+          <Textarea id="s-pinyinAlternatives" name="pinyinAlternatives" defaultValue={sentence?.pinyinAlternatives.join("\n")} rows={2}
+            placeholder="Biến thể phiên âm khác" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="s-translation">Nghĩa tiếng Việt <span className="text-destructive">*</span></Label>

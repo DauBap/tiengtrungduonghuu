@@ -30,7 +30,7 @@ import { Progress } from "~/components/ui/progress";
 import { ArrowLeft, BookOpen, PartyPopper, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2, MessageSquareText } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
 import { createVocabularyTest, gradeVocabularyTest } from "~/lib/vocabulary-test";
-import { answerMatchPercent } from "~/lib/listening-answer";
+import { answerVariants, bestAnswerMatchPercent, isAnswerCorrectForAny } from "~/lib/listening-answer";
 import {
   GRAMMAR_QUESTION_META, checkGrammarAnswer, grammarAnswerText, parseGrammarQuestionType,
   type GrammarQuestionType,
@@ -166,7 +166,7 @@ function makeStudentWorkbookConfig(config: unknown): WorkbookConfig | null {
     showResultsImmediately: false,
     sections: parsed.data.sections.map((section) => ({
       ...section,
-      questions: section.questions.map((question) => ({ ...question, correctAnswer: "" })),
+      questions: section.questions.map((question) => ({ ...question, correctAnswer: "", acceptedAnswers: [] })),
     })),
   };
 }
@@ -204,7 +204,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     getLessonProgress(user.id, lesson.id),
     prisma.vocabItem.findMany({
       where: { lesson: { courseId: lesson.courseId } },
-      select: { id: true, chinese: true, pinyin: true, translation: true, wordTypes: true },
+      select: {
+        id: true, chinese: true, chineseAlternatives: true, pinyin: true,
+        translation: true, translationAlternatives: true, wordTypes: true,
+      },
     }),
     prisma.lessonTabProgress.findMany({
       where: { userId: user.id, lessonId: lesson.id },
@@ -369,7 +372,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     ...lesson,
     grammarSections: lesson.grammarSections.map((section) => ({
       ...section,
-      questions: section.questions.map((question) => ({ ...question, answer: "", hint: null })),
+      questions: section.questions.map((question) => ({ ...question, answer: "", acceptedAnswers: [], hint: null })),
     })),
     learningBlocks: lesson.learningBlocks.map((block) => ({
       ...block,
@@ -728,11 +731,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const sourceItems = source === "sentence"
       ? await prisma.sentenceItem.findMany({
           where: { id: { in: chosenIds }, lessonId: params.lessonId! },
-          select: { id: true, chinese: true, pinyin: true, translation: true },
+          select: {
+            id: true, chinese: true, chineseAlternatives: true, pinyin: true,
+            pinyinAlternatives: true, translation: true,
+          },
         })
       : await prisma.vocabItem.findMany({
           where: { id: { in: chosenIds }, lessonId: params.lessonId! },
-          select: { id: true, chinese: true, pinyin: true, translation: true },
+          select: {
+            id: true, chinese: true, chineseAlternatives: true, pinyin: true,
+            pinyinAlternatives: true, translation: true,
+          },
         });
     const itemsById = new Map(sourceItems.map((item) => [item.id, item]));
     const questions = chosenIds.map((id) => itemsById.get(id)).filter((item): item is NonNullable<typeof item> => Boolean(item));
@@ -760,7 +769,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const results = questions.map((question, index) => {
       const given = answerMap.get(question.id) ?? "";
       const correctAnswer = answerMode === "pinyin" ? question.pinyin : question.chinese;
-      const matchPercent = answerMatchPercent(given, correctAnswer, answerMode);
+      const expectedAnswers = answerMode === "pinyin"
+        ? answerVariants(question.pinyin, question.pinyinAlternatives)
+        : answerVariants(question.chinese, question.chineseAlternatives);
+      const matchPercent = bestAnswerMatchPercent(given, expectedAnswers, answerMode);
       return {
         id: question.id,
         prompt: `Câu ${index + 1}`,
@@ -869,7 +881,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       const correct = !question.gradable
         ? null
         : question.kind === "input"
-          ? given.trim() === question.correctAnswer.trim()
+          ? isAnswerCorrectForAny(given, answerVariants(question.correctAnswer, question.acceptedAnswers), "chinese")
           : given === question.correctAnswer;
 
       return {
@@ -1049,6 +1061,15 @@ export default function LessonDetail() {
   }>();
   const progressFetcher = useFetcher();
   const [activeTab, setActiveTab] = useState<LessonTab>("FLASHCARD");
+  const hasGrammar = lesson.grammarSections.length > 0;
+  const hasWorkbook = blocks.some((block) => block.type === "WORKBOOK");
+
+  useEffect(() => {
+    if ((activeTab === "GRAMMAR" && !hasGrammar) || (activeTab === "WORKBOOK" && !hasWorkbook)) {
+      setActiveTab("FLASHCARD");
+    }
+  }, [activeTab, hasGrammar, hasWorkbook]);
+
   const feedbackTab = activeTab === "TEST" ? "VOCABULARY_TEST" : activeTab;
   const activeTabComment = feedbackTab === "FLASHCARD" || feedbackTab === "VOCABULARY"
     ? null

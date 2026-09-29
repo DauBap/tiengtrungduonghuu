@@ -24,6 +24,19 @@ function stripTone(input: string): string {
 
 export type AnswerMode = "chinese" | "pinyin";
 
+export function parseAnswerVariants(input: string, primary: string): string[] {
+  const seen = new Set([primary.trim()]);
+  return input.split(/\r?\n/).map((answer) => answer.trim()).filter((answer) => {
+    if (!answer || seen.has(answer)) return false;
+    seen.add(answer);
+    return true;
+  });
+}
+
+export function answerVariants(primary: string, alternatives: readonly string[] = []): string[] {
+  return [...new Set([primary, ...alternatives].map((answer) => answer.trim()).filter(Boolean))];
+}
+
 /** Chuẩn hoá một chuỗi để so sánh, theo chế độ trả lời. */
 export function normalizeAnswer(input: string, mode: AnswerMode): string {
   const base = input.trim().replace(PUNCTUATION, "");
@@ -37,6 +50,10 @@ export function isAnswerCorrect(input: string, expected: string, mode: AnswerMod
   const a = normalizeAnswer(input, mode);
   if (!a) return false;
   return a === normalizeAnswer(expected, mode);
+}
+
+export function isAnswerCorrectForAny(input: string, expected: readonly string[], mode: AnswerMode): boolean {
+  return expected.some((answer) => isAnswerCorrect(input, answer, mode));
 }
 
 /** Percentage of normalized characters matching, allowing insertions and omissions. */
@@ -60,6 +77,10 @@ export function answerMatchPercent(input: string, expected: string, mode: Answer
   }
 
   return Math.round(((longest - previous[target.length]) / longest) * 10_000) / 100;
+}
+
+export function bestAnswerMatchPercent(input: string, expected: readonly string[], mode: AnswerMode): number {
+  return expected.reduce((best, answer) => Math.max(best, answerMatchPercent(input, answer, mode)), 0);
 }
 
 export type ComparisonPartStatus = "match" | "mismatch" | "neutral";

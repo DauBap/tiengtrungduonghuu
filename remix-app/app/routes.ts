@@ -68,6 +68,7 @@ export default [
   // Student
   route("student", "routes/student._index.tsx"),
   route("student/courses", "routes/student.courses._index.tsx"),
+  route("student/courses/:courseId/flashcards", "routes/student.courses.$courseId.flashcards.tsx"),
   route("student/courses/:courseId", "routes/student.courses.$courseId.tsx"),
   route("student/courses/:courseId/reviews/:reviewId", "routes/student.courses.$courseId.reviews.$reviewId.tsx"),
   route(
