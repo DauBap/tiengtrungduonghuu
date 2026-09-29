@@ -58,6 +58,7 @@ export function GrammarSection({
   };
   const availablePracticeTabs = PRACTICE_TABS.filter((tab) => questionsByType[tab.type].length > 0);
   const latestPracticeTabs = availablePracticeTabs.filter((tab) => latestAttempts[tab.type]);
+  const unattemptedPracticeTabs = availablePracticeTabs.filter((tab) => !latestAttempts[tab.type]);
 
   const openPractice = (type?: GrammarQuestionType) => {
     const selected = type
@@ -139,10 +140,10 @@ export function GrammarSection({
         })}
       </div>
 
-      {!practicing && latestPracticeTabs.length > 0 && (
+      {!practicing && availablePracticeTabs.length > 0 && (
         <div className="space-y-2 border-t px-5 py-4 sm:px-6">
           <p className="text-xs font-bold uppercase text-muted-foreground">Luyện tập theo dạng</p>
-          {availablePracticeTabs.map((tab) => {
+          {latestPracticeTabs.map((tab) => {
             const result = latestAttempts[tab.type];
             return (
               <div key={tab.type} className="flex flex-wrap items-center justify-between gap-3 rounded-md border px-3 py-2">
@@ -172,19 +173,12 @@ export function GrammarSection({
               </div>
             );
           })}
-        </div>
-      )}
-
-      {hasQuestions && latestPracticeTabs.length === 0 && (
-        <div className="border-t bg-muted/20 px-5 py-3 sm:px-6">
-          <Button onClick={() => openPractice()} className="w-full justify-between sm:w-auto sm:justify-start">
-            <span className="flex items-center">
+          {unattemptedPracticeTabs.length > 0 && (
+            <Button type="button" variant="ghost" size="sm" onClick={() => openPractice(unattemptedPracticeTabs[0].type)}>
               <ListChecks className="mr-1.5 h-4 w-4" />
-              Luyện tập
-              <span className="ml-1.5 tabular-nums text-muted-foreground">({section.questions.length})</span>
-            </span>
-            <ChevronDown className="h-4 w-4" />
-          </Button>
+              {latestPracticeTabs.length > 0 ? "Luyện dạng khác" : "Bắt đầu luyện tập"}
+            </Button>
+          )}
         </div>
       )}
 
