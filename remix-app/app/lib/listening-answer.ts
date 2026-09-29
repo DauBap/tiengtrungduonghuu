@@ -39,6 +39,29 @@ export function isAnswerCorrect(input: string, expected: string, mode: AnswerMod
   return a === normalizeAnswer(expected, mode);
 }
 
+/** Percentage of normalized characters matching, allowing insertions and omissions. */
+export function answerMatchPercent(input: string, expected: string, mode: AnswerMode): number {
+  const actual = Array.from(normalizeAnswer(input, mode));
+  const target = Array.from(normalizeAnswer(expected, mode));
+  const longest = Math.max(actual.length, target.length);
+  if (longest === 0) return 0;
+
+  let previous = Array.from({ length: target.length + 1 }, (_, index) => index);
+  for (let row = 1; row <= actual.length; row += 1) {
+    const current = [row];
+    for (let column = 1; column <= target.length; column += 1) {
+      current[column] = Math.min(
+        current[column - 1] + 1,
+        previous[column] + 1,
+        previous[column - 1] + (actual[row - 1] === target[column - 1] ? 0 : 1),
+      );
+    }
+    previous = current;
+  }
+
+  return Math.round(((longest - previous[target.length]) / longest) * 10_000) / 100;
+}
+
 export type ComparisonPartStatus = "match" | "mismatch" | "neutral";
 
 export interface ComparisonPart {

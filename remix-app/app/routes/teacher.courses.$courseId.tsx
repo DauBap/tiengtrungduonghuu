@@ -6,7 +6,7 @@ import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
-import { ArrowLeft, BookOpen, FileText, Inbox } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, FileText, Inbox, UsersRound } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -23,16 +23,21 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 export default function TeacherCourseDetail() {
   const { user, course, lessons } = useLoaderData<typeof loader>();
+
   return (
     <AppShell user={user}>
-      <div className="space-y-6">
-        <div>
-          <Button asChild variant="ghost" size="sm" className="mb-2">
-            <Link to="/teacher/courses"><ArrowLeft className="h-4 w-4 mr-1.5" />Quay lại khóa học</Link>
+      <div className="sticky top-0 z-30 -mx-6 -mt-6 mb-6 border-b bg-background/95 px-6 py-3 backdrop-blur lg:-mx-8 lg:-mt-8 lg:px-8">
+        <div className="mx-auto max-w-4xl">
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/teacher/courses"><ArrowLeft className="mr-1.5 h-4 w-4" />Quay lại khóa học</Link>
           </Button>
+        </div>
+      </div>
+      <div className="mx-auto max-w-4xl space-y-6">
+        <div>
           <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
-              <BookOpen className="h-7 w-7" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <BookOpen className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -44,6 +49,7 @@ export default function TeacherCourseDetail() {
             </div>
           </div>
         </div>
+
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
@@ -55,21 +61,27 @@ export default function TeacherCourseDetail() {
               ? <EmptyState title="Chưa có bài học" message="Khóa học này chưa có bài học nào." />
               : <div className="space-y-3">
                   {lessons.map((lesson, index) => {
-                    // Block lý thuyết chỉ tham chiếu từ vựng của chính bài học này,
-                    // nên hết từ vựng là không còn gì học được → bài trống.
-                    // Cùng điều kiện với isEmptyLesson ở trang học của học viên.
                     const isEmpty = lesson.content.length === 0;
+
                     return (
-                      <div key={lesson.id} className={cn("flex items-center gap-4 rounded-lg border p-4", isEmpty && "border-dashed")}>
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground font-mono text-sm font-bold">{index + 1}</div>
-                        <div className="flex-1">
+                      <Link
+                        key={lesson.id}
+                        to={`/teacher/courses/${course.id}/lessons/${lesson.id}`}
+                        className={cn("group flex items-center gap-4 rounded-lg border p-4 transition-colors hover:border-primary/40 hover:bg-muted/20", isEmpty && "border-dashed")}
+                      >
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted font-mono text-sm font-bold text-muted-foreground">{index + 1}</div>
+                        <div className="min-w-0 flex-1">
                           <h3 className="text-sm font-semibold">{lesson.title}</h3>
                           <p className="text-sm text-muted-foreground font-mono">{lesson.subtitle}</p>
                           {isEmpty
-                            ? <p className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1"><Inbox className="h-3.5 w-3.5" />Bài học trống — chưa có nội dung</p>
-                            : <p className="text-xs text-muted-foreground mt-1">{lesson.content.length} từ vựng</p>}
+                            ? <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><Inbox className="h-3.5 w-3.5" />Bài học trống — chưa có nội dung</p>
+                            : <p className="mt-1 text-xs text-muted-foreground">{lesson.content.length} từ vựng</p>}
                         </div>
-                      </div>
+                        <span className="hidden shrink-0 items-center gap-1.5 text-xs font-medium text-muted-foreground sm:inline-flex">
+                          <UsersRound className="h-4 w-4" />Xem tiến độ
+                        </span>
+                        <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                      </Link>
                     );
                   })}
                 </div>}

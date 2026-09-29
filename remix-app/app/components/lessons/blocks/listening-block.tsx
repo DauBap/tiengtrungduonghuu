@@ -3,11 +3,10 @@ import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Progress } from "~/components/ui/progress";
-import { Volume2, CheckCircle2, XCircle, ArrowRight, RefreshCw, Loader2 } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Volume2, CheckCircle2, ArrowLeft, ArrowRight, RefreshCw, Loader2, Send } from "lucide-react";
 import { speakChinese, isSpeechSupported } from "~/lib/speech";
-import { compareAnswerHighlights, isAnswerCorrect } from "~/lib/listening-answer";
 import type { ListeningConfig } from "~/lib/learning-blocks";
-import { useAppSettings } from "~/lib/app-settings";
 
 /** Một câu hỏi nghe — đã được loader phẳng hoá từ VocabItem hoặc SentenceItem. */
 export interface ListeningQuestion {
@@ -21,8 +20,11 @@ export interface ListeningQuestion {
 interface ListeningBlockProps {
   config: ListeningConfig;
   questions: ListeningQuestion[];
-  isCompleted: boolean;
-  onComplete: () => void;
+  onComplete: (answers: { questionId: string; answer: string }[]) => void;
+  isSubmitting?: boolean;
+  savedResult?: { score: number; correctCount: number; totalCount: number } | null;
+  submissionError?: string | null;
+  showAnswerDetails?: boolean;
 }
 
 /** Trộn mảng, không đụng vào mảng gốc */
@@ -40,8 +42,15 @@ function formatTime(seconds: number): string {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
-export function ListeningBlock({ config, questions, isCompleted, onComplete }: ListeningBlockProps) {
-  const settings = useAppSettings();
+export function ListeningBlock({
+  config,
+  questions,
+  onComplete,
+  isSubmitting = false,
+  savedResult = null,
+  submissionError = null,
+  showAnswerDetails = false,
+}: ListeningBlockProps) {
   const [round, setRound] = useState(0);
   const items = useMemo(
     () => (config.shuffle ? shuffled(questions) : questions),
@@ -50,10 +59,9 @@ export function ListeningBlock({ config, questions, isCompleted, onComplete }: L
   );
 
   const [index, setIndex] = useState(0);
-  const [answer, setAnswer] = useState("");
-  const [verdict, setVerdict] = useState<"correct" | "wrong" | null>(null);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [replays, setReplays] = useState(0);
+  const [answersByQuestion, setAnswersByQuestion] = useState<Record<string, string>>({});
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [replaysByQuestion, setReplaysByQuestion] = useState<Record<string, number>>({});
   const [speechReady, setSpeechReady] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -61,43 +69,46 @@ export function ListeningBlock({ config, questions, isCompleted, onComplete }: L
 
   const question = items[index];
   const isLast = index === items.length - 1;
-  const finished = verdict !== null && isLast;
-  const answered = verdict !== null;
+  const answer = question ? answersByQuestion[question.id] ?? "" : "";
+  const replays = question ? replaysByQuestion[question.id] ?? 0 : 0;
 
   const outOfReplays = config.maxReplays > 0 && replays >= config.maxReplays;
 
   const play = useCallback(() => {
     if (!question) return;
     speakChinese(question.chinese, question.audioUrl);
-    setReplays((r) => r + 1);
+    setReplaysByQuestion((previous) => ({
+      ...previous,
+      [question.id]: (previous[question.id] ?? 0) + 1,
+    }));
   }, [question]);
 
-  // Tự focus ô nhập khi sang câu mới để học viên gõ được ngay
+  // Tự focus ô nhập khi chuyển câu để học viên gõ được ngay
   useEffect(() => {
-    if (!answered) inputRef.current?.focus();
-  }, [index, answered]);
-
-  const check = () => {
-    if (!question || answered || !answer.trim()) return;
-    const correct = isAnswerCorrect(answer, config.answerMode === "pinyin" ? question.pinyin : question.chinese, config.answerMode);
-    setVerdict(correct ? "correct" : "wrong");
-    if (correct) setCorrectCount((c) => c + 1);
-  };
+    inputRef.current?.focus();
+  }, [index]);
 
   const next = () => {
     if (isLast) return;
-    setIndex((i) => i + 1);
-    setAnswer("");
-    setVerdict(null);
-    setReplays(0);
+    setIndex((current) => current + 1);
+  };
+
+  const previous = () => {
+    if (index === 0) return;
+    setIndex((current) => current - 1);
+  };
+
+  const submitAttempt = () => {
+    if (hasSubmitted || isSubmitting) return;
+    setHasSubmitted(true);
+    onComplete(items.map((item) => ({ questionId: item.id, answer: (answersByQuestion[item.id] ?? "").trim() })));
   };
 
   const restart = () => {
     setIndex(0);
-    setAnswer("");
-    setVerdict(null);
-    setCorrectCount(0);
-    setReplays(0);
+    setAnswersByQuestion({});
+    setHasSubmitted(false);
+    setReplaysByQuestion({});
     setRound((r) => r + 1);
   };
 
@@ -109,11 +120,62 @@ export function ListeningBlock({ config, questions, isCompleted, onComplete }: L
     );
   }
 
-  const expected = config.answerMode === "pinyin" ? question.pinyin : question.chinese;
-  const comparisonResult = verdict !== null && answer.trim() ? compareAnswerHighlights(answer, expected, config.answerMode) : null;
+  const submittedAnswers = items.map((item) => ({ questionId: item.id, answer: answersByQuestion[item.id] ?? "" }));
 
   return (
     <div className="space-y-5">
+      {hasSubmitted ? (
+        <>
+          {isSubmitting ? (
+            <div className="flex items-center justify-center gap-2 rounded-md border bg-muted/30 px-4 py-8 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />Đang chấm và lưu kết quả...
+            </div>
+          ) : submissionError ? (
+            <div role="alert" className="space-y-3 rounded-md border border-destructive/30 bg-destructive/5 p-4">
+              <p className="text-sm text-destructive">{submissionError}</p>
+              <Button type="button" size="sm" onClick={() => onComplete(submittedAnswers)}>
+                Thử lưu lại
+              </Button>
+            </div>
+          ) : savedResult ? (
+            <>
+              <Card className={cn(savedResult.score === 100 ? "border-success/40" : "border-primary/30")}>
+                <CardContent className="space-y-4 pt-6">
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    {savedResult.score === 100
+                      ? <CheckCircle2 className="h-10 w-10 text-success" />
+                      : <CheckCircle2 className="h-10 w-10 text-primary" />}
+                    <p className="text-lg font-bold">Đã lưu kết quả Nghe câu</p>
+                    <p className="text-4xl font-bold tabular-nums">{savedResult.score}%</p>
+                    <p className="text-sm text-muted-foreground tabular-nums">
+                      Khớp hoàn toàn {savedResult.correctCount}/{savedResult.totalCount} câu
+                    </p>
+                  </div>
+                  <Progress value={savedResult.score} className="h-2" />
+                  {!showAnswerDetails && (
+                    <div className="flex justify-center">
+                      <Button type="button" variant="outline" size="sm" onClick={restart}>
+                        <RefreshCw className="mr-1.5 h-4 w-4" />Làm lại
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <p className="rounded-md border bg-muted/20 p-3 text-sm text-muted-foreground">
+                {showAnswerDetails
+                  ? "Đáp án chi tiết đã được mở ở phía trên."
+                  : "Đáp án chi tiết sẽ hiện khi giáo viên mở xem kết quả."}
+              </p>
+            </>
+          ) : (
+            <div className="flex items-center justify-center gap-2 rounded-md border bg-muted/30 px-4 py-8 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />Đang nhận kết quả từ máy chủ...
+            </div>
+          )}
+        </>
+      ) : (
+        <>
       <div className="flex items-center gap-3">
         <Progress value={((index + 1) / items.length) * 100} className="h-1.5 flex-1" />
         <span className="text-xs font-medium text-muted-foreground tabular-nums shrink-0">
@@ -157,121 +219,44 @@ export function ListeningBlock({ config, questions, isCompleted, onComplete }: L
 
       {/* Ô nhập đáp án */}
       <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (answered) next();
-          else check();
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (isLast) submitAttempt();
+          else next();
         }}
         className="space-y-3"
       >
-        <div className={cn(
-          "rounded-lg border bg-background",
-          verdict === "correct" && "border-success bg-success/5",
-          verdict === "wrong" && "border-destructive bg-destructive/5"
-        )}>
+        <div className="rounded-lg border bg-background">
           <Input
             ref={inputRef}
             value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            readOnly={answered}
+            onChange={(event) => {
+              if (!question) return;
+              setAnswersByQuestion((previousAnswers) => ({ ...previousAnswers, [question.id]: event.target.value }));
+            }}
             placeholder={config.answerMode === "pinyin" ? "Nhập pinyin vừa nghe…" : "Nhập câu tiếng Trung vừa nghe…"}
             aria-label={config.answerMode === "pinyin" ? "Đáp án pinyin" : "Đáp án tiếng Trung"}
-            aria-invalid={verdict === "wrong" || undefined}
-            className={cn(
-              "text-lg h-12 text-center border-0 shadow-none focus-visible:ring-0 bg-transparent",
-              verdict === "correct" && "text-success",
-              verdict === "wrong" && "text-destructive"
-            )}
+            className="h-12 border-0 bg-transparent text-center text-lg shadow-none focus-visible:ring-0"
           />
         </div>
 
-        {verdict === null ? (
-          <Button type="submit" size="lg" className="w-full" disabled={!answer.trim()}>
-            Kiểm tra
+        <div className="flex items-center justify-between gap-3 border-t pt-3">
+          <Button type="button" variant="outline" onClick={previous} disabled={index === 0 || isSubmitting}>
+            <ArrowLeft className="mr-1.5 h-4 w-4" />Câu trước
           </Button>
-        ) : (
-          <div
-            className={cn(
-              "rounded-lg border p-4",
-              verdict === "correct" ? "border-success/30 bg-success/5" : "border-destructive/30 bg-destructive/5"
-            )}
-          >
-            <div
-              className={cn(
-                "flex items-center gap-2 text-sm font-medium",
-                verdict === "correct" ? "text-success" : "text-destructive"
-              )}
-            >
-              {verdict === "correct" ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-              {verdict === "correct" ? "Chính xác!" : "Chưa đúng"}
-            </div>
-
-            {comparisonResult && (
-              <div className="mt-3 space-y-2 border-t border-current/10 pt-3">
-                <p className="text-xs text-muted-foreground">So sánh đáp án</p>
-                <div className="flex flex-wrap items-center gap-1 text-lg leading-relaxed break-words">
-                  {comparisonResult.map((part, idx) => (
-                    <span
-                      key={`${part.text}-${idx}`}
-                      className={cn(
-                        "rounded-sm px-0.5",
-                        part.status === "match" && "bg-success/20 text-success",
-                        part.status === "mismatch" && "bg-destructive/20 text-destructive"
-                      )}
-                    >
-                      {part.text}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Sai thì hiện đáp án để học viên đối chiếu */}
-            {verdict === "wrong" && (
-              <div className="mt-3 space-y-1 border-t border-destructive/20 pt-3">
-                <p className="text-xs text-muted-foreground">Đáp án đúng</p>
-                <p className="text-lg font-medium">{expected}</p>
-                {settings.showPinyin && config.answerMode === "chinese" && (
-                  <p className="text-sm text-primary font-mono">{question.pinyin}</p>
-                )}
-                <p className="text-sm text-muted-foreground">{question.translation}</p>
-              </div>
-            )}
-
-            {!isLast && (
-              <Button type="submit" size="lg" className="w-full mt-4">
-                Câu tiếp theo
-                <ArrowRight className="h-4 w-4 ml-1.5" />
-              </Button>
-            )}
-          </div>
-        )}
+          {isLast ? (
+            <Button type="submit" size="lg" disabled={isSubmitting}>
+              <Send className="mr-1.5 h-4 w-4" />Nộp bài
+            </Button>
+          ) : (
+            <Button type="submit" size="lg" disabled={isSubmitting}>
+              Câu tiếp theo<ArrowRight className="ml-1.5 h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </form>
 
-      {/* Xong hết câu */}
-      {finished && (
-        <div className="space-y-3 border-t pt-4">
-          <p className="text-sm text-center">
-            Kết quả: <span className="font-semibold tabular-nums">{correctCount}/{items.length}</span> câu đúng
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button variant="ghost" size="sm" onClick={restart} className="sm:w-auto">
-              <RefreshCw className="h-4 w-4 mr-1.5" />
-              Làm lại từ đầu
-            </Button>
-            {isCompleted ? (
-              <div className="flex items-center justify-center gap-2 text-success text-sm font-medium flex-1 py-2">
-                <CheckCircle2 className="h-4 w-4" />
-                Đã hoàn thành
-              </div>
-            ) : (
-              <Button onClick={onComplete} className="flex-1">
-                <CheckCircle2 className="h-4 w-4 mr-1.5" />
-                Hoàn thành phần này
-              </Button>
-            )}
-          </div>
-        </div>
+        </>
       )}
     </div>
   );

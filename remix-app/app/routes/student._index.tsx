@@ -15,10 +15,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const enrollments = await getEnrolledCoursesWithClass(user.id);
   const myCourses = enrollments.map((e) => e.course);
 
-  const { totalLessons, totalCompleted, currentLesson, courseProgress } =
+  const { totalCompleted, currentLesson, courseProgress, overallProgress } =
     await getStudentDashboardStats(user.id, myCourses.map((c) => c.id));
-
-  const overallProgress = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
 
   return { user, myCourses, enrollments, overallProgress, totalCompleted, currentLesson, courseProgress };
 }

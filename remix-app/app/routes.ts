@@ -5,6 +5,7 @@ export default [
   route("login", "routes/login.tsx"),
   route("logout", "routes/logout.tsx"),
   route("api/tts", "routes/api.tts.ts"),
+  route("api/pronunciation-recordings/:assessmentId", "routes/api.pronunciation-recordings.$assessmentId.ts"),
 
   // Admin
   route("admin", "routes/admin.tsx", [
@@ -53,6 +54,16 @@ export default [
   route("teacher", "routes/teacher._index.tsx"),
   route("teacher/courses", "routes/teacher.courses._index.tsx"),
   route("teacher/courses/:courseId", "routes/teacher.courses.$courseId.tsx"),
+  route("teacher/courses/:courseId/lessons/:lessonId", "routes/teacher.courses.$courseId.lessons.$lessonId.tsx"),
+  route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/vocabulary-history", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.vocabulary-history.tsx"),
+  route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/listening-history", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.listening-history.tsx"),
+  route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/listening-history/attempts/:attemptId", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.listening-history.attempts.$attemptId.tsx"),
+  route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/vocabulary-history/attempts/:attemptId", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.vocabulary-history.attempts.$attemptId.tsx"),
+  route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/grammar-history", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.grammar-history.tsx"),
+  route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/grammar-history/attempts/:attemptId", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.grammar-history.attempts.$attemptId.tsx"),
+  route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/workbook-history", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.workbook-history.tsx"),
+  route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/workbook-history/attempts/:attemptId", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.workbook-history.attempts.$attemptId.tsx"),
+  route("teacher/courses/:courseId/students/:studentId", "routes/teacher.courses.$courseId.students.$studentId.tsx"),
 
   // Student
   route("student", "routes/student._index.tsx"),

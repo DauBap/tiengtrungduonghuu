@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
-import { getCourseById, getLessonSummariesByCourse, getCourseReviewSetSummaries, getAllProgressForCourse, computeCourseProgress, computeLessonStatus, isEnrolled } from "~/lib/db.server";
+import { getCourseById, getLessonSummariesByCourse, getCourseReviewSetSummaries, getAllProgressForCourse, computeLessonStatus, computeTrackedCourseProgress, isEnrolled } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { LessonCard } from "~/components/lessons/lesson-card";
 import { ProgressBar } from "~/components/progress/progress-bar";
@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import type { ProgressStatus } from "~/types/progress";
+import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
+import { prisma } from "~/lib/prisma.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
@@ -22,22 +24,44 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   if (!course) throw new Response("Không tìm thấy", { status: 404 });
   if (!enrolled) throw new Response("Không có quyền truy cập", { status: 403 });
 
-  const [lessons, reviewSets, progressList] = await Promise.all([
+  const [lessons, reviewSets, progressList, tabProgressRows] = await Promise.all([
     getLessonSummariesByCourse(course.id),
     getCourseReviewSetSummaries(course.id),
     getAllProgressForCourse(user.id, course.id),
+    prisma.lessonTabProgress.findMany({
+      where: { userId: user.id, lesson: { courseId: course.id } },
+      include: {
+        attempts: {
+          where: { tab: "VOCABULARY_TEST" },
+          orderBy: { completedAt: "desc" },
+          take: 1,
+        },
+      },
+    }),
   ]);
   const progressMap = new Map(progressList.map((p) => [p.lessonId, p]));
-  const courseProgress = computeCourseProgress(lessons, progressList);
+  const courseProgress = computeTrackedCourseProgress(lessons.map((lesson) => lesson.id), tabProgressRows);
+  const tabProgressByLesson = new Map<string, typeof tabProgressRows>();
+  for (const row of tabProgressRows) {
+    const rows = tabProgressByLesson.get(row.lessonId) ?? [];
+    rows.push(row);
+    tabProgressByLesson.set(row.lessonId, rows);
+  }
 
   // Mọi bài học đều mở — không còn khóa theo tiến độ bài trước.
   // Status chỉ còn phản ánh học viên đã học tới đâu, không dùng để chặn truy cập.
   const lessonsWithStatus = lessons.map((lesson) => {
     const p = progressMap.get(lesson.id) ?? null;
     const s = computeLessonStatus(p);
+    const tabRows = tabProgressByLesson.get(lesson.id) ?? [];
+    const completedTabCount = tabRows.filter((row) => row.tab === "VOCABULARY_TEST"
+      ? row.attempts[0]?.passed === true
+      : row.completed).length;
+    const hasStartedTab = tabRows.some((row) => row.opened || row.completed);
 
     let status: ProgressStatus;
-    if (s.testStatus === "COMPLETED") status = "COMPLETED";
+    if (completedTabCount === LESSON_TAB_KEYS.length) status = "COMPLETED";
+    else if (hasStartedTab) status = "IN_PROGRESS";
     else if (s.learningStatus === "COMPLETED" || s.exerciseStatus !== "LOCKED") status = "IN_PROGRESS";
     else status = "AVAILABLE";
 

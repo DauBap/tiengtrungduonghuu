@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { compareAnswerHighlights, normalizeAnswer } from "./listening-answer";
+import { answerMatchPercent, compareAnswerHighlights, normalizeAnswer } from "./listening-answer";
 
 test("normalizeAnswer strips punctuation and tones for pinyin", () => {
   assert.equal(normalizeAnswer("nǐ hǎo!", "pinyin"), "nihao");
@@ -21,4 +21,11 @@ test("compareAnswerHighlights marks matching characters in green and mismatches 
   const wrong = compareAnswerHighlights("ni x", "nǐ hǎo", "pinyin");
   assert.equal(wrong.some((part) => part.status === "mismatch"), true);
   assert.equal(wrong.some((part) => part.status === "match"), true);
+});
+
+test("answerMatchPercent awards partial credit after normalization", () => {
+  assert.equal(answerMatchPercent("nǐ hǎo", "ni hao", "pinyin"), 100);
+  assert.equal(answerMatchPercent("你好嗎", "你好吗", "chinese"), 66.67);
+  assert.equal(answerMatchPercent("ni", "nihao", "pinyin"), 40);
+  assert.equal(answerMatchPercent("", "nihao", "pinyin"), 0);
 });

@@ -29,6 +29,9 @@ model User {
   authoredQuestions      Question[] @relation("QuestionAuthor")
   taughtClasses          Class[]    @relation("ClassTeacher")
   pronunciationAssessments PronunciationAssessment[]
+  lessonTabProgresses    LessonTabProgress[]
+  lessonTabAttempts      LessonTabAttempt[]
+  lessonTabFeedback      LessonTabFeedback[] @relation("TeacherTabFeedback")
 }
 
 enum Role {
@@ -116,6 +119,7 @@ model Lesson {
   order    Int
   title    String
   subtitle String
+  answerReviewTabs LessonTabKey[] @default([])
 
   course          Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   content         VocabItem[]
@@ -125,6 +129,8 @@ model Lesson {
   exercise       Exercise?
   test           Test?
   progresses     LessonProgress[]
+  tabProgresses  LessonTabProgress[]
+  tabAttempts    LessonTabAttempt[]
   exams          Exam[]
   audioScripts    LessonAudioScript[]
 
@@ -168,15 +174,17 @@ model PronunciationAssessment {
   userId              String
   lessonAudioScriptId String
   score               Int      @default(0)
+  evaluation          String?
+  scriptText          String?
   transcript          String?
+  audioUrl            String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
   user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   lessonAudioScript LessonAudioScript @relation(fields: [lessonAudioScriptId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, lessonAudioScriptId])
-  @@index([userId])
+  @@index([userId, lessonAudioScriptId, score])
   @@index([lessonAudioScriptId])
 }
 model VocabItem {
@@ -430,6 +438,114 @@ model BlockProgress {
 
   @@unique([userId, blockId])
   @@index([blockId])
+}
+
+enum LessonTabKey {
+  FLASHCARD
+  VOCABULARY_TEST
+  LISTENING
+  VOCABULARY
+  LESSON
+  GRAMMAR
+  WORKBOOK
+}
+
+enum LessonTabProgressState {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  NEEDS_REVIEW
+}
+
+model LessonTabProgress {
+  id            String                  @id @default(cuid())
+  userId        String
+  lessonId      String
+  tab           LessonTabKey
+  state         LessonTabProgressState  @default(NOT_STARTED)
+  opened        Boolean                 @default(false)
+  completed     Boolean                 @default(false)
+  percent       Int                     @default(0)
+  currentScore  Float?
+  bestScore     Float?
+  lastAttemptAt DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson    Lesson                 @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  attempts LessonTabAttempt[]
+  items    LessonTabItemProgress[]
+  feedback LessonTabFeedback[]
+
+  @@unique([userId, lessonId, tab])
+  @@index([userId, lessonId])
+  @@index([lessonId, tab])
+}
+
+model LessonTabAttempt {
+  id           String        @id @default(cuid())
+  userId       String
+  lessonId     String
+  tab          LessonTabKey
+  mode         String?
+  score        Float?
+  correctCount Int?
+  totalCount   Int?
+  passed       Boolean?
+  details      Json?
+  startedAt    DateTime?
+  completedAt  DateTime       @default(now())
+  createdAt    DateTime       @default(now())
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  tabProgress LessonTabProgress @relation(fields: [userId, lessonId, tab], references: [userId, lessonId, tab], onDelete: Cascade)
+  items       LessonTabItemProgress[]
+
+  @@index([userId, lessonId, tab, completedAt])
+  @@index([lessonId, tab])
+}
+
+model LessonTabItemProgress {
+  id             String                  @id @default(cuid())
+  tabProgressId  String
+  attemptId      String?
+  itemKey        String
+  state          LessonTabProgressState  @default(NOT_STARTED)
+  attempts       Int                     @default(0)
+  correct        Boolean?
+  score          Float?
+  lastAnswer     String?
+  viewedAt       DateTime?
+  completedAt    DateTime?
+  updatedAt      DateTime                @updatedAt
+
+  tabProgress LessonTabProgress @relation(fields: [tabProgressId], references: [id], onDelete: Cascade)
+  attempt     LessonTabAttempt? @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@unique([tabProgressId, itemKey])
+  @@index([attemptId])
+}
+
+model LessonTabFeedback {
+  id            String   @id @default(cuid())
+  tabProgressId String
+  teacherId     String
+  targetType    String?
+  targetId      String?
+  score         Float?
+  comment       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tabProgress LessonTabProgress @relation(fields: [tabProgressId], references: [id], onDelete: Cascade)
+  teacher     User             @relation("TeacherTabFeedback", fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([tabProgressId, createdAt])
+  @@index([teacherId])
+  @@index([targetType, targetId])
 }
 
 // ─── Bài thi ─────────────────────────────────────────────────────────────────

@@ -47,7 +47,7 @@ export function BlockShell({ type, title, description, status, required = true, 
                   Tùy chọn
                 </Badge>
               )}
-              {isDone && (
+              {isDone && type !== "LISTENING" && (
                 <Badge variant="outline" className="bg-success/15 text-success border-success/30 gap-1 text-[10px]">
                   <CheckCircle2 className="h-3 w-3" />
                   Hoàn thành

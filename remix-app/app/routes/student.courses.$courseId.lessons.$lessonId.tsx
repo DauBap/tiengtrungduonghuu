@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useFetcher, Link, redirect } from "react-router";
 import { useEffect, useRef, useState } from "react";
+import { put } from "@vercel/blob";
 import { requireRole } from "~/lib/session.server";
 import {
   getLessonById,
@@ -15,23 +16,167 @@ import {
 import { AppShell } from "~/components/layout/app-shell";
 import { EmptyState } from "~/components/common/empty-state";
 import { BlockRenderer, isBlockLearnable, type ResolvedBlock } from "~/components/lessons/blocks/block-renderer";
-import { isLearningBlockType, parseWorkbookConfig } from "~/lib/learning-blocks";
+import { isLearningBlockType, parseListeningConfig, parseWorkbookConfig, type WorkbookConfig } from "~/lib/learning-blocks";
 import { LessonTabs, type LessonTab } from "~/components/lessons/lesson-tabs";
 import { LessonTabEmpty } from "~/components/lessons/lesson-tab-empty";
 import { VocabularyTable } from "~/components/lessons/vocabulary-table";
-import { GrammarSection } from "~/components/lessons/grammar-section";
+import { GrammarSection, type GrammarPracticeSummary } from "~/components/lessons/grammar-section";
 import { WorkbookListeningTest } from "~/components/lessons/workbook-listening-test";
 import { VocabularyTest } from "~/components/lessons/vocabulary-test";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
-import { ArrowLeft, BookOpen, PartyPopper, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2 } from "lucide-react";
+import { ArrowLeft, BookOpen, PartyPopper, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2, MessageSquareText } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
 import { createVocabularyTest, gradeVocabularyTest } from "~/lib/vocabulary-test";
+import { answerMatchPercent } from "~/lib/listening-answer";
+import {
+  GRAMMAR_QUESTION_META, checkGrammarAnswer, grammarAnswerText, parseGrammarQuestionType,
+  type GrammarQuestionType,
+} from "~/lib/grammar";
 import { cn } from "~/lib/utils";
 import { speakChinese } from "~/lib/speech";
 import { useAppSettings } from "~/lib/app-settings";
+import { SettingsMenu } from "~/components/layout/settings-menu";
+import { isLessonTabKey, openLessonTab, recordLessonTabAttempt } from "~/lib/lesson-tab-progress.server";
+import type { LessonTab as ProgressTab } from "~/lib/lesson-tab-progress";
+
+const FEEDBACK_TAB_LABELS: Record<string, string> = {
+  FLASHCARD: "Flashcard",
+  VOCABULARY_TEST: "Ôn từ vựng",
+  LISTENING: "Nghe câu",
+  VOCABULARY: "Từ vựng",
+  LESSON: "Bài học",
+  GRAMMAR: "Ngữ pháp",
+  WORKBOOK: "Workbook",
+};
+
+interface AnswerReviewResult {
+  id: string;
+  prompt: string;
+  given: string;
+  correctAnswer: string;
+  correct: boolean | null;
+  matchPercent: number | null;
+  hint: string | null;
+}
+
+interface AnswerReviewGroup {
+  targetKey: string;
+  title: string;
+  score: number | null;
+  correctCount: number | null;
+  totalCount: number | null;
+  results: AnswerReviewResult[];
+}
+
+interface ReviewTarget {
+  sectionId?: string;
+  questionType?: string;
+  blockId?: string;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function makeAnswerReviewGroup(
+  attempt: { details: unknown; score: number | null; correctCount: number | null; totalCount: number | null },
+  targetKey: string,
+  title: string,
+): AnswerReviewGroup | null {
+  const details = isRecord(attempt.details) ? attempt.details : null;
+  if (!details || !Array.isArray(details.results)) return null;
+
+  const results = details.results.flatMap((value, index): AnswerReviewResult[] => {
+    if (!isRecord(value)) return [];
+    const prompt = typeof value.prompt === "string"
+      ? value.prompt
+      : typeof value.number === "number"
+        ? `Câu ${value.number}`
+        : `Câu ${index + 1}`;
+    const given = typeof value.givenLabel === "string"
+      ? value.givenLabel
+      : typeof value.given === "string"
+        ? value.given
+        : "";
+    return [{
+      id: typeof value.id === "string" ? value.id : `${targetKey}-${index}`,
+      prompt,
+      given,
+      correctAnswer: typeof value.correctAnswer === "string" ? value.correctAnswer : "",
+      correct: typeof value.correct === "boolean" ? value.correct : null,
+      matchPercent: typeof value.matchPercent === "number" ? value.matchPercent : null,
+      hint: typeof value.hint === "string" ? value.hint : null,
+    }];
+  });
+
+  return {
+    targetKey,
+    title,
+    score: attempt.score,
+    correctCount: attempt.correctCount,
+    totalCount: attempt.totalCount,
+    results,
+  };
+}
+
+async function getAnswerReviewGate(
+  userId: string,
+  lessonId: string,
+  tab: ProgressTab,
+  target: ReviewTarget = {},
+) {
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId },
+    select: { answerReviewTabs: true },
+  });
+  const isOpen = lesson?.answerReviewTabs.includes(tab) ?? false;
+  if (!isOpen) return { isOpen, isLocked: false };
+
+  const attempts = await prisma.lessonTabAttempt.findMany({
+    where: { userId, lessonId, tab },
+    select: { details: true },
+  });
+  const isLocked = attempts.some(({ details }) => {
+    if (!isRecord(details)) return false;
+    if (tab === "GRAMMAR") {
+      return details.sectionId === target.sectionId && details.questionType === target.questionType;
+    }
+    if (tab === "LISTENING" || tab === "WORKBOOK") return details.blockId === target.blockId;
+    return true;
+  });
+  return { isOpen, isLocked };
+}
+
+function answerReviewLockError(tab: ProgressTab) {
+  const message = "Giáo viên đã mở đáp án chi tiết. Bạn không thể nộp lại phần này.";
+  if (tab === "GRAMMAR") return { grammarError: message };
+  if (tab === "LISTENING") return { listeningError: message };
+  if (tab === "WORKBOOK") return { workbookError: message };
+  return { testError: message };
+}
+
+function makeStudentWorkbookConfig(config: unknown): WorkbookConfig | null {
+  const parsed = parseWorkbookConfig(config);
+  if (!parsed.ok) return null;
+  return {
+    ...parsed.data,
+    showResultsImmediately: false,
+    sections: parsed.data.sections.map((section) => ({
+      ...section,
+      questions: section.questions.map((question) => ({ ...question, correctAnswer: "" })),
+    })),
+  };
+}
+
+function getPronunciationEvaluation(score: number) {
+  if (score >= 90) return "TỐT";
+  if (score >= 75) return "KHÁ";
+  if (score >= 60) return "CẦN CẢI THIỆN";
+  return "CHƯA ĐẠT";
+}
 
 declare global {
   interface Window {
@@ -45,13 +190,135 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const lesson = await getLessonById(params.lessonId!);
   if (!lesson) throw new Response("Không tìm thấy", { status: 404 });
 
-  const [progress, courseWords] = await Promise.all([
+  const [
+    progress,
+    courseWords,
+    teacherTabFeedback,
+    pronunciationAssessments,
+    grammarAttempts,
+    latestVocabularyAttempt,
+    latestListeningAttempt,
+    latestWorkbookAttempt,
+    answerReviewSetting,
+  ] = await Promise.all([
     getLessonProgress(user.id, lesson.id),
     prisma.vocabItem.findMany({
       where: { lesson: { courseId: lesson.courseId } },
       select: { id: true, chinese: true, pinyin: true, translation: true, wordTypes: true },
     }),
+    prisma.lessonTabProgress.findMany({
+      where: { userId: user.id, lessonId: lesson.id },
+      select: {
+        tab: true,
+        feedback: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          include: { teacher: { select: { name: true } } },
+        },
+      },
+    }),
+    prisma.pronunciationAssessment.findMany({
+      where: {
+        userId: user.id,
+        lessonAudioScript: { is: { lessonId: lesson.id } },
+      },
+      orderBy: [{ score: "desc" }, { createdAt: "desc" }],
+      select: {
+        id: true,
+        lessonAudioScriptId: true,
+        score: true,
+        evaluation: true,
+        scriptText: true,
+        transcript: true,
+        audioUrl: true,
+        createdAt: true,
+      },
+    }),
+    prisma.lessonTabAttempt.findMany({
+      where: { userId: user.id, lessonId: lesson.id, tab: "GRAMMAR" },
+      orderBy: { completedAt: "desc" },
+      select: {
+        mode: true,
+        score: true,
+        correctCount: true,
+        totalCount: true,
+        passed: true,
+        details: true,
+      },
+    }),
+    prisma.lessonTabAttempt.findFirst({
+      where: { userId: user.id, lessonId: lesson.id, tab: "VOCABULARY_TEST", score: { not: null } },
+      orderBy: [{ score: "desc" }, { completedAt: "desc" }],
+      select: { score: true, correctCount: true, totalCount: true, passed: true },
+    }),
+    prisma.lessonTabAttempt.findFirst({
+      where: { userId: user.id, lessonId: lesson.id, tab: "LISTENING", score: { not: null } },
+      orderBy: [{ score: "desc" }, { completedAt: "desc" }],
+      select: { score: true, correctCount: true, totalCount: true, passed: true },
+    }),
+    prisma.lessonTabAttempt.findFirst({
+      where: { userId: user.id, lessonId: lesson.id, tab: "WORKBOOK", score: { not: null } },
+      orderBy: [{ score: "desc" }, { completedAt: "desc" }],
+      select: { score: true, correctCount: true, totalCount: true, passed: true },
+    }),
+    prisma.lesson.findUnique({ where: { id: lesson.id }, select: { answerReviewTabs: true } }),
   ]);
+  const answerReviewTabs = answerReviewSetting?.answerReviewTabs ?? [];
+  const answerReviewAttempts = answerReviewTabs.length > 0
+    ? await prisma.lessonTabAttempt.findMany({
+        where: { userId: user.id, lessonId: lesson.id, tab: { in: answerReviewTabs } },
+        orderBy: [{ score: "desc" }, { completedAt: "desc" }],
+        select: { tab: true, mode: true, score: true, correctCount: true, totalCount: true, details: true },
+      })
+    : [];
+  const answerReviewGroups: Partial<Record<ProgressTab, AnswerReviewGroup[]>> = {};
+  const answerReviewLockedTargets: Partial<Record<ProgressTab, string[]>> = {};
+  for (const attempt of answerReviewAttempts) {
+    const details = isRecord(attempt.details) ? attempt.details : {};
+    const targetKey = attempt.tab === "GRAMMAR"
+      ? `${String(details.sectionId ?? "")}:${String(details.questionType ?? attempt.mode ?? "")}`
+      : attempt.tab === "VOCABULARY_TEST"
+        ? "vocabulary-test"
+        : typeof details.blockId === "string"
+          ? details.blockId
+          : "";
+    if (!targetKey) continue;
+
+    const lockedTargets = answerReviewLockedTargets[attempt.tab] ??= [];
+    if (!lockedTargets.includes(targetKey)) lockedTargets.push(targetKey);
+    const groups = answerReviewGroups[attempt.tab] ??= [];
+    if (groups.some((group) => group.targetKey === targetKey)) continue;
+    const title = attempt.tab === "GRAMMAR"
+      ? `${typeof details.sectionTitle === "string" ? details.sectionTitle : "Ngữ pháp"} · ${String(details.questionType ?? attempt.mode ?? "")}`
+      : typeof details.blockTitle === "string"
+        ? details.blockTitle
+        : attempt.tab === "VOCABULARY_TEST"
+          ? "Ôn từ vựng"
+          : "Kết quả bài làm";
+    const group = makeAnswerReviewGroup(attempt, targetKey, title);
+    if (group) groups.push(group);
+  }
+  const grammarAttemptsBySection: Record<
+    string,
+    Partial<Record<GrammarQuestionType, GrammarPracticeSummary>>
+  > = {};
+  for (const attempt of grammarAttempts) {
+    const details = typeof attempt.details === "object" && attempt.details !== null && !Array.isArray(attempt.details)
+      ? attempt.details as Record<string, unknown>
+      : {};
+    const sectionId = details.sectionId;
+    const questionType = parseGrammarQuestionType(details.questionType ?? attempt.mode);
+    if (typeof sectionId !== "string" || !questionType) continue;
+
+    const sectionAttempts = grammarAttemptsBySection[sectionId] ??= {};
+    if (sectionAttempts[questionType]) continue;
+    sectionAttempts[questionType] = {
+      score: attempt.score,
+      correctCount: attempt.correctCount,
+      totalCount: attempt.totalCount,
+      passed: attempt.passed,
+    };
+  }
   const lessonStatus = computeLessonStatus(progress);
 
   // Resolve nội dung cho từng block ngay ở loader — component không tự query.
@@ -71,7 +338,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         description: b.description,
         required: b.required,
         order: b.order,
-        config: b.config,
+        config: b.type === "WORKBOOK" ? makeStudentWorkbookConfig(b.config) : b.config,
         vocabItems: vocabIds
           .map((id) => vocabById.get(id))
           .filter((v): v is NonNullable<typeof v> => Boolean(v))
@@ -98,6 +365,17 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     });
 
   const blocks = allBlocks.map((b) => ({ ...b, required: b.required && isBlockLearnable(b) }));
+  const studentLesson = {
+    ...lesson,
+    grammarSections: lesson.grammarSections.map((section) => ({
+      ...section,
+      questions: section.questions.map((question) => ({ ...question, answer: "", hint: null })),
+    })),
+    learningBlocks: lesson.learningBlocks.map((block) => ({
+      ...block,
+      config: block.type === "WORKBOOK" ? makeStudentWorkbookConfig(block.config) : block.config,
+    })),
+  };
   const blockProgressMap = await getBlockProgressMap(user.id, blocks.map((b) => b.id));
   const blockStatuses = computeBlockStatuses(blocks, blockProgressMap);
 
@@ -107,8 +385,44 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   };
   const passScore = lesson.test?.passScore ?? 50;
   const timeLimitMinutes = lesson.test ? lesson.test.timeLimitMinutes : 30;
+  const teacherTabComments = teacherTabFeedback.map((item) => ({
+    tab: item.tab,
+    feedback: item.feedback[0]
+      ? {
+          comment: item.feedback[0].comment,
+          teacherName: item.feedback[0].teacher.name,
+          createdAt: item.feedback[0].createdAt.toISOString(),
+        }
+      : null,
+  }));
 
-  return { user, lesson, lessonStatus, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes };
+  return {
+    user,
+    lesson: studentLesson,
+    lessonStatus,
+    blocks,
+    blockStatuses,
+    vocabularyQuestionSets,
+    passScore,
+    timeLimitMinutes,
+    teacherTabComments,
+    grammarAttemptsBySection,
+    answerReviewTabs,
+    answerReviewGroups,
+    answerReviewLockedTargets,
+    latestTabScores: {
+      vocabularyTest: latestVocabularyAttempt,
+      listening: latestListeningAttempt,
+      workbook: latestWorkbookAttempt,
+    },
+    pronunciationAssessments: pronunciationAssessments
+      .filter((assessment) => assessment.scriptText?.trim() && assessment.transcript?.trim() && assessment.audioUrl)
+      .map((assessment) => ({
+        ...assessment,
+        audioUrl: `/api/pronunciation-recordings/${assessment.id}`,
+        createdAt: assessment.createdAt.toISOString(),
+      })),
+  };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -116,41 +430,505 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const form = await request.formData();
   const intent = String(form.get("intent") ?? "complete-learning");
 
+  if (intent === "open-tab") {
+    const rawTab = String(form.get("tab") ?? "");
+    const tab = rawTab === "TEST" ? "VOCABULARY_TEST" : rawTab;
+    if (!isLessonTabKey(tab)) return { error: "Tab bài học không hợp lệ." };
+
+    await openLessonTab(prisma, {
+      userId: user.id,
+      lessonId: params.lessonId!,
+      tab,
+    });
+    return { success: true as const, intent: "open-tab" as const, tab };
+  }
+
+  const reviewSubmission = intent === "submit-test"
+    ? { tab: "VOCABULARY_TEST" as const, target: {} }
+    : intent === "submit-grammar-attempt"
+      ? {
+          tab: "GRAMMAR" as const,
+          target: {
+            sectionId: String(form.get("sectionId") ?? ""),
+            questionType: String(form.get("questionType") ?? ""),
+          },
+        }
+      : intent === "submit-listening-attempt"
+        ? { tab: "LISTENING" as const, target: { blockId: String(form.get("blockId") ?? "") } }
+        : intent === "submit-workbook-attempt"
+          ? { tab: "WORKBOOK" as const, target: { blockId: String(form.get("blockId") ?? "") } }
+          : null;
+  let answerReviewOpen = false;
+  if (reviewSubmission) {
+    const gate = await getAnswerReviewGate(user.id, params.lessonId!, reviewSubmission.tab, reviewSubmission.target);
+    answerReviewOpen = gate.isOpen;
+    if (gate.isLocked) return answerReviewLockError(reviewSubmission.tab);
+  }
+
   if (intent === "save-pronunciation-score") {
     const scriptId = String(form.get("lessonAudioScriptId") ?? "");
     const rawScore = Number(String(form.get("score") ?? "0"));
     const score = Number.isFinite(rawScore) ? Math.max(0, Math.min(100, Math.round(rawScore))) : 0;
     const transcript = String(form.get("transcript") ?? "").trim();
+    const recording = form.get("recording");
 
     if (!scriptId) return { error: "Thiếu đoạn nghe để lưu điểm." };
+    if (!transcript) return { error: "Không có nội dung nhận diện để chấm điểm." };
+    if (!(recording instanceof File) || recording.size === 0 || !recording.type.startsWith("audio/")) {
+      return { error: "Không tìm thấy file ghi âm hợp lệ để lưu." };
+    }
+    if (recording.size > 20 * 1024 * 1024) {
+      return { error: "Bản ghi vượt quá giới hạn 20 MB." };
+    }
 
     const script = await prisma.lessonAudioScript.findUnique({
       where: { id: scriptId },
-      select: { id: true, lessonId: true },
+      select: {
+        id: true,
+        lessonId: true,
+        title: true,
+        speakers: { orderBy: { order: "asc" }, select: { chinese: true } },
+      },
     });
     if (!script || script.lessonId !== params.lessonId) {
       return { error: "Không tìm thấy đoạn nghe trong bài học này." };
     }
+    const scriptText = script.speakers.map((speaker) => speaker.chinese).join(" ");
 
-    await prisma.pronunciationAssessment.upsert({
-      where: { userId_lessonAudioScriptId: { userId: user.id, lessonAudioScriptId: script.id } },
-      update: { score, transcript: transcript || null },
-      create: { userId: user.id, lessonAudioScriptId: script.id, score, transcript: transcript || null },
+    let audioUrl: string;
+    try {
+      const uploaded = await put(
+        `pronunciation/${script.id}/${user.id}/reading.webm`,
+        recording,
+        {
+          access: "public",
+          addRandomSuffix: true,
+          contentType: recording.type,
+        }
+      );
+      audioUrl = uploaded.url;
+    } catch {
+      return { error: "Không thể tải bản ghi lên kho lưu trữ. Vui lòng thử lại." };
+    }
+
+    const evaluation = getPronunciationEvaluation(score);
+    const assessment = await prisma.pronunciationAssessment.create({
+      data: {
+        userId: user.id,
+        lessonAudioScriptId: script.id,
+        score,
+        evaluation,
+        scriptText: scriptText || null,
+        transcript: transcript || null,
+        audioUrl,
+      },
     });
-    return { success: true };
+    await recordLessonTabAttempt(prisma, {
+      userId: user.id,
+      lessonId: params.lessonId!,
+      tab: "LESSON",
+      mode: "PRONUNCIATION",
+      score,
+      passed: score >= 50,
+      startedAt: new Date(),
+      completedAt: new Date(),
+      details: {
+        assessmentId: assessment.id,
+        lessonAudioScriptId: script.id,
+        scriptTitle: script.title,
+        evaluation,
+        scriptText: scriptText || null,
+        transcript: transcript || null,
+      },
+    });
+    return { success: true, intent: "save-pronunciation-score" as const };
   }
 
   if (intent === "complete-block") {
     const blockId = String(form.get("blockId"));
     const block = await prisma.learningBlock.findFirst({
       where: { id: blockId, lessonId: params.lessonId! },
-      select: { id: true },
+      select: { id: true, type: true },
     });
     if (!block) return { error: "Không tìm thấy phần học" };
+    if (block.type === "LISTENING") {
+      return { error: "Phần nghe câu cần nộp kết quả chấm điểm." as const };
+    }
 
     await markBlockCompleted(user.id, block.id);
     await syncLearningCompleted(user.id, params.lessonId!);
+
+    const mappedTab = block.type === "FLASHCARD" ? "FLASHCARD" : null;
+    if (mappedTab) {
+      await recordLessonTabAttempt(prisma, {
+        userId: user.id,
+        lessonId: params.lessonId!,
+        tab: mappedTab,
+        mode: mappedTab,
+        score: 100,
+        passed: true,
+        startedAt: new Date(),
+        completedAt: new Date(),
+      });
+    }
     return { success: true };
+  }
+
+  if (intent === "submit-grammar-attempt") {
+    const sectionId = String(form.get("sectionId") ?? "");
+    const questionType = parseGrammarQuestionType(form.get("questionType"));
+    let submittedAnswers: unknown;
+    try {
+      submittedAnswers = JSON.parse(String(form.get("answers") ?? ""));
+    } catch {
+      return { grammarError: "Không đọc được câu trả lời. Vui lòng thử lại." as const };
+    }
+    if (!sectionId || !questionType || !Array.isArray(submittedAnswers)) {
+      return { grammarError: "Thông tin bài luyện tập không hợp lệ." as const };
+    }
+    const enrollment = await prisma.enrollment.findUnique({
+      where: { userId_courseId: { userId: user.id, courseId: params.courseId! } },
+      select: { userId: true },
+    });
+    if (!enrollment) return { grammarError: "Bạn không thuộc khóa học này." as const };
+
+    const section = await prisma.grammarSection.findFirst({
+      where: {
+        id: sectionId,
+        lessonId: params.lessonId!,
+        lesson: { courseId: params.courseId! },
+      },
+      select: {
+        id: true,
+        title: true,
+        questions: {
+          where: { type: questionType },
+          orderBy: { order: "asc" },
+          select: { id: true, type: true, prompt: true, options: true, answer: true, hint: true },
+        },
+      },
+    });
+    if (!section || section.questions.length === 0) {
+      return { grammarError: "Không tìm thấy câu hỏi của dạng luyện tập này." as const };
+    }
+
+    const answerMap = new Map<string, string | string[]>();
+    for (const entry of submittedAnswers) {
+      if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
+        return { grammarError: "Định dạng câu trả lời không hợp lệ." as const };
+      }
+      const answer = entry as Record<string, unknown>;
+      const questionId = answer.questionId;
+      const response = answer.response;
+      const validResponse = typeof response === "string"
+        || (Array.isArray(response) && response.every((item) => typeof item === "string"));
+      if (typeof questionId !== "string" || !validResponse || answerMap.has(questionId)) {
+        return { grammarError: "Câu trả lời không hợp lệ hoặc bị trùng." as const };
+      }
+      answerMap.set(questionId, response as string | string[]);
+    }
+
+    const questions = section.questions;
+    if (answerMap.size !== questions.length || questions.some((question) => !answerMap.has(question.id))) {
+      return { grammarError: "Vui lòng trả lời đầy đủ các câu hỏi trong tab này." as const };
+    }
+
+    const results = [];
+    for (const question of questions) {
+      const response = answerMap.get(question.id)!;
+      if (question.type === "ARRANGE") {
+        if (!Array.isArray(response) || response.length !== question.options.length) {
+          return { grammarError: "Vui lòng sắp xếp đầy đủ các từ trong mỗi câu." as const };
+        }
+        const remaining = new Map<string, number>();
+        for (const option of question.options) remaining.set(option, (remaining.get(option) ?? 0) + 1);
+        for (const token of response) {
+          const count = remaining.get(token) ?? 0;
+          if (count === 0) return { grammarError: "Từ được chọn không thuộc câu hỏi này." as const };
+          remaining.set(token, count - 1);
+        }
+      } else if (typeof response !== "string" || !response.trim()) {
+        return { grammarError: "Vui lòng trả lời đầy đủ các câu hỏi trong tab này." as const };
+      }
+
+      if (question.type === "SINGLE_CHOICE" && !question.options.includes(response as string)) {
+        return { grammarError: "Lựa chọn không thuộc câu hỏi này." as const };
+      }
+
+      const correct = checkGrammarAnswer(question, response);
+      results.push({
+        id: question.id,
+        prompt: question.prompt,
+        type: question.type,
+        typeLabel: GRAMMAR_QUESTION_META[question.type].label,
+        given: Array.isArray(response) ? response.join("") : response,
+        givenTokens: Array.isArray(response) ? response : null,
+        correctAnswer: grammarAnswerText(question),
+        correct,
+        points: 1,
+        hint: question.hint,
+      });
+    }
+
+    const correctCount = results.filter((result) => result.correct).length;
+    const totalCount = results.length;
+    const score = Math.round((correctCount / totalCount) * 10000) / 100;
+    const completedAt = new Date();
+    await recordLessonTabAttempt(prisma, {
+      userId: user.id,
+      lessonId: params.lessonId!,
+      tab: "GRAMMAR",
+      mode: questionType,
+      score,
+      correctCount,
+      totalCount,
+      passed: correctCount === totalCount,
+      completedAt,
+      details: {
+        sectionId: section.id,
+        sectionTitle: section.title,
+        questionType,
+        results,
+      },
+    });
+
+    return {
+      success: true as const,
+      intent: "submit-grammar-attempt" as const,
+      score,
+      correctCount,
+      totalCount,
+    };
+  }
+
+  if (intent === "submit-listening-attempt") {
+    const blockId = String(form.get("blockId") ?? "");
+    const rawAnswers = String(form.get("answers") ?? "");
+    let submittedAnswers: unknown;
+    try {
+      submittedAnswers = JSON.parse(rawAnswers);
+    } catch {
+      return { listeningError: "Không đọc được câu trả lời. Vui lòng thử lại." as const };
+    }
+    if (!Array.isArray(submittedAnswers)) {
+      return { listeningError: "Danh sách câu trả lời không hợp lệ." as const };
+    }
+
+    const block = await prisma.learningBlock.findFirst({
+      where: { id: blockId, lessonId: params.lessonId!, type: "LISTENING" },
+      select: { id: true, title: true, config: true },
+    });
+    if (!block) throw new Response("Không tìm thấy phần nghe câu", { status: 404 });
+
+    const parsedConfig = parseListeningConfig(block.config);
+    if (!parsedConfig.ok) throw new Response("Cấu hình phần nghe không hợp lệ", { status: 400 });
+
+    const { source, answerMode } = parsedConfig.data;
+    const chosenIds = source === "sentence" ? parsedConfig.data.sentenceItemIds : parsedConfig.data.vocabItemIds;
+    const sourceItems = source === "sentence"
+      ? await prisma.sentenceItem.findMany({
+          where: { id: { in: chosenIds }, lessonId: params.lessonId! },
+          select: { id: true, chinese: true, pinyin: true, translation: true },
+        })
+      : await prisma.vocabItem.findMany({
+          where: { id: { in: chosenIds }, lessonId: params.lessonId! },
+          select: { id: true, chinese: true, pinyin: true, translation: true },
+        });
+    const itemsById = new Map(sourceItems.map((item) => [item.id, item]));
+    const questions = chosenIds.map((id) => itemsById.get(id)).filter((item): item is NonNullable<typeof item> => Boolean(item));
+    if (questions.length === 0 || questions.length !== chosenIds.length) {
+      throw new Response("Không tìm thấy đầy đủ câu hỏi của phần nghe", { status: 400 });
+    }
+
+    const answerMap = new Map<string, string>();
+    for (const entry of submittedAnswers) {
+      if (typeof entry !== "object" || entry === null || !("questionId" in entry) || !("answer" in entry)) {
+        return { listeningError: "Định dạng câu trả lời không hợp lệ." as const };
+      }
+      const questionId = entry.questionId;
+      const answer = entry.answer;
+      if (typeof questionId !== "string" || typeof answer !== "string" || answerMap.has(questionId)) {
+        return { listeningError: "Câu trả lời không hợp lệ hoặc bị trùng." as const };
+      }
+      answerMap.set(questionId, answer);
+    }
+
+    if (answerMap.size !== questions.length || questions.some((question) => !answerMap.has(question.id))) {
+      return { listeningError: "Câu trả lời chưa khớp với danh sách câu hỏi." as const };
+    }
+
+    const results = questions.map((question, index) => {
+      const given = answerMap.get(question.id) ?? "";
+      const correctAnswer = answerMode === "pinyin" ? question.pinyin : question.chinese;
+      const matchPercent = answerMatchPercent(given, correctAnswer, answerMode);
+      return {
+        id: question.id,
+        prompt: `Câu ${index + 1}`,
+        answerMode,
+        given,
+        correctAnswer,
+        pinyin: question.pinyin,
+        translation: question.translation,
+        correct: matchPercent === 100,
+        matchPercent,
+        points: 1,
+      };
+    });
+    const correctCount = results.filter((result) => result.correct).length;
+    const totalCount = results.length;
+    const score = totalCount > 0
+      ? Math.round((results.reduce((sum, result) => sum + result.matchPercent, 0) / totalCount) * 100) / 100
+      : 0;
+    const completedAt = new Date();
+
+    await recordLessonTabAttempt(prisma, {
+      userId: user.id,
+      lessonId: params.lessonId!,
+      tab: "LISTENING",
+      mode: answerMode,
+      score,
+      correctCount,
+      totalCount,
+      passed: correctCount === totalCount,
+      startedAt: completedAt,
+      completedAt,
+      details: {
+        blockId: block.id,
+        blockTitle: block.title,
+        source,
+        answerMode,
+        results,
+      },
+    });
+    await markBlockCompleted(user.id, block.id);
+    await syncLearningCompleted(user.id, params.lessonId!);
+
+    return { success: true as const, intent: "submit-listening-attempt" as const, score, correctCount, totalCount };
+  }
+
+  if (intent === "submit-workbook-attempt") {
+    const blockId = String(form.get("blockId") ?? "");
+    let submittedAnswers: unknown;
+    try {
+      submittedAnswers = JSON.parse(String(form.get("answers") ?? ""));
+    } catch {
+      return { workbookError: "Không đọc được câu trả lời. Vui lòng thử lại." as const };
+    }
+    if (!blockId || typeof submittedAnswers !== "object" || submittedAnswers === null || Array.isArray(submittedAnswers)) {
+      return { workbookError: "Thông tin bài làm không hợp lệ." as const };
+    }
+
+    const enrollment = await prisma.enrollment.findUnique({
+      where: { userId_courseId: { userId: user.id, courseId: params.courseId! } },
+      select: { userId: true },
+    });
+    if (!enrollment) return { workbookError: "Bạn không thuộc khóa học này." as const };
+
+    const block = await prisma.learningBlock.findFirst({
+      where: {
+        id: blockId,
+        lessonId: params.lessonId!,
+        lesson: { courseId: params.courseId! },
+        type: "WORKBOOK",
+      },
+      select: { id: true, title: true, config: true },
+    });
+    if (!block) return { workbookError: "Không tìm thấy sách bài tập này." as const };
+
+    const parsedConfig = parseWorkbookConfig(block.config);
+    if (!parsedConfig.ok) return { workbookError: "Cấu hình sách bài tập không hợp lệ." as const };
+
+    const questions = parsedConfig.data.sections.flatMap((section) =>
+      section.questions.map((question) => ({ ...question, sectionId: section.id, sectionTitle: section.title }))
+    );
+    const gradableQuestions = questions.filter((question) => question.gradable);
+    if (gradableQuestions.length === 0) {
+      return { workbookError: "Sách bài tập chưa có câu hỏi với đáp án để chấm." as const };
+    }
+
+    const answers = submittedAnswers as Record<string, unknown>;
+    const questionIds = new Set(questions.map((question) => question.id));
+    for (const [questionId, answer] of Object.entries(answers)) {
+      if (!questionIds.has(questionId) || typeof answer !== "string") {
+        return { workbookError: "Danh sách câu trả lời không hợp lệ." as const };
+      }
+    }
+
+    const results = questions.map((question) => {
+      const given = typeof answers[question.id] === "string" ? answers[question.id] as string : "";
+      const selectedOption = question.kind === "choice"
+        ? question.options.find((option) => option.id === given)
+        : undefined;
+      if (question.gradable && question.kind === "choice" && given && !selectedOption) {
+        return null;
+      }
+
+      const correctOption = question.kind === "choice"
+        ? question.options.find((option) => option.id === question.correctAnswer)
+        : undefined;
+      const correct = !question.gradable
+        ? null
+        : question.kind === "input"
+          ? given.trim() === question.correctAnswer.trim()
+          : given === question.correctAnswer;
+
+      return {
+        id: question.id,
+        number: question.number,
+        sectionId: question.sectionId,
+        sectionTitle: question.sectionTitle,
+        prompt: question.prompt,
+        passage: question.passage,
+        translation: question.translation,
+        kind: question.kind,
+        gradable: question.gradable,
+        given,
+        givenLabel: selectedOption ? `${selectedOption.label}${selectedOption.text ? ` · ${selectedOption.text}` : ""}` : given,
+        correctAnswer: question.kind === "choice" && correctOption
+          ? `${correctOption.label}${correctOption.text ? ` · ${correctOption.text}` : ""}`
+          : question.correctAnswer,
+        correct,
+        points: question.gradable ? 1 : 0,
+      };
+    });
+    if (results.some((result) => result === null)) {
+      return { workbookError: "Lựa chọn câu trả lời không hợp lệ." as const };
+    }
+
+    const savedResults = results.filter((result): result is NonNullable<typeof result> => result !== null);
+    const correctCount = savedResults.filter((result) => result.correct === true).length;
+    const totalCount = gradableQuestions.length;
+    const score = Math.round((correctCount / totalCount) * 10000) / 100;
+    const completedAt = new Date();
+
+    await recordLessonTabAttempt(prisma, {
+      userId: user.id,
+      lessonId: params.lessonId!,
+      tab: "WORKBOOK",
+      mode: "workbook",
+      score,
+      correctCount,
+      totalCount,
+      passed: correctCount === totalCount,
+      startedAt: completedAt,
+      completedAt,
+      details: {
+        blockId: block.id,
+        blockTitle: block.title,
+        ungradableCount: questions.length - totalCount,
+        results: savedResults,
+      },
+    });
+    await markBlockCompleted(user.id, block.id);
+    await syncLearningCompleted(user.id, params.lessonId!);
+
+    return {
+      success: true as const,
+      intent: "submit-workbook-attempt" as const,
+      score,
+      correctCount,
+      totalCount,
+    };
   }
 
   if (intent === "submit-test") {
@@ -171,21 +949,127 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
 
     const testResult = gradeVocabularyTest(lesson.content, form, lesson.test?.passScore ?? 50);
+    const rawQuizMode = String(form.get("quizMode") ?? "");
+    const quizMode = rawQuizMode === "zh2vi" || rawQuizMode === "vi2zh" || rawQuizMode === "mixed"
+      ? rawQuizMode
+      : "mixed";
     if (testResult.passed) {
       await upsertLessonProgress(user.id, lessonId, { testCompleted: true });
     }
-    return { testResult };
+
+    await recordLessonTabAttempt(prisma, {
+      userId: user.id,
+      lessonId,
+      tab: "VOCABULARY_TEST",
+      mode: quizMode,
+      score: testResult.percentage,
+      correctCount: testResult.correctCount,
+      totalCount: testResult.questionCount,
+      passed: testResult.passed,
+      startedAt: new Date(),
+      completedAt: new Date(),
+      details: {
+        earnedPoints: testResult.earnedPoints,
+        totalPoints: testResult.totalPoints,
+        blankCount: testResult.blankCount,
+        passScore: testResult.passScore,
+        results: testResult.results,
+      },
+    });
+
+    return { testResult: { ...testResult, results: answerReviewOpen ? testResult.results : [] } };
   }
 
   await upsertLessonProgress(user.id, params.lessonId!, { learningCompleted: true });
   return redirect(`/student/courses/${params.courseId}/lessons/${params.lessonId}/exercise`);
 }
 
+function AnswerReviewDetails({ groups }: { groups: AnswerReviewGroup[] }) {
+  if (groups.length === 0) {
+    return <p className="mt-3 text-sm text-muted-foreground">Chưa có lượt làm để đối chiếu đáp án.</p>;
+  }
+
+  return (
+    <div className="mt-4 space-y-4">
+      {groups.map((group) => (
+        <section key={group.targetKey} className="space-y-3 border-t pt-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="font-semibold">{group.title}</h3>
+            {group.score != null && (
+              <span className="text-sm font-medium tabular-nums">
+                {group.score}%{group.correctCount != null && group.totalCount != null ? ` · ${group.correctCount}/${group.totalCount} câu đúng` : ""}
+              </span>
+            )}
+          </div>
+          {group.results.map((result, index) => (
+            <div
+              key={result.id}
+              className={cn(
+                "rounded-md border p-3",
+                result.matchPercent === 100 ? "border-success/30 bg-success/5" : result.matchPercent === 0 ? "border-destructive/30 bg-destructive/5" : "bg-muted/20",
+              )}
+            >
+              <div className="flex items-start gap-2">
+                {result.matchPercent === 100
+                  ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                  : result.matchPercent === 0
+                    ? <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                    : null}
+                <div className="min-w-0 space-y-1.5">
+                  <p className="font-medium">{index + 1}. {result.prompt}</p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Bạn trả lời: </span>{result.given || "Bỏ trống"}
+                    {result.matchPercent != null ? ` · Khớp ${result.matchPercent}%` : ""}
+                  </p>
+                  {result.correctAnswer && (
+                    <p className="text-sm"><span className="text-muted-foreground">Đáp án đúng: </span>{result.correctAnswer}</p>
+                  )}
+                  {result.hint && <p className="whitespace-pre-line text-xs text-muted-foreground">{result.hint}</p>}
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
+      ))}
+    </div>
+  );
+}
+
 export default function LessonDetail() {
-  const { user, lesson, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus } = useLoaderData<typeof loader>();
+  const { user, lesson, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewTabs, answerReviewGroups, answerReviewLockedTargets } = useLoaderData<typeof loader>();
   const settings = useAppSettings();
-  const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; lessonPinyin: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string }>();
+  const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; lessonPinyin: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string; error?: string }>();
+  const workbookFetcher = useFetcher<{
+    intent?: string;
+    success?: boolean;
+    score?: number;
+    correctCount?: number;
+    totalCount?: number;
+    workbookError?: string;
+  }>();
+  const progressFetcher = useFetcher();
   const [activeTab, setActiveTab] = useState<LessonTab>("FLASHCARD");
+  const feedbackTab = activeTab === "TEST" ? "VOCABULARY_TEST" : activeTab;
+  const activeTabComment = feedbackTab === "FLASHCARD" || feedbackTab === "VOCABULARY"
+    ? null
+    : teacherTabComments.find((item) => item.tab === feedbackTab)?.feedback ?? null;
+  const activeScore = activeTab === "TEST"
+    ? latestTabScores.vocabularyTest
+    : activeTab === "LISTENING"
+      ? latestTabScores.listening
+      : activeTab === "WORKBOOK"
+        ? latestTabScores.workbook
+        : null;
+    const activeReviewTab: ProgressTab | null = activeTab === "TEST"
+      ? "VOCABULARY_TEST"
+      : activeTab === "LISTENING" || activeTab === "GRAMMAR" || activeTab === "WORKBOOK"
+        ? activeTab
+        : null;
+    const answerReviewEnabled = activeReviewTab !== null && answerReviewTabs.includes(activeReviewTab);
+    const activeReviewGroups = activeReviewTab ? answerReviewGroups[activeReviewTab] ?? [] : [];
+    const activeLockedTargets = activeReviewTab ? answerReviewLockedTargets[activeReviewTab] ?? [] : [];
+    const testRetakeLocked = answerReviewEnabled && activeLockedTargets.includes("vocabulary-test");
+    const [showAnswerReview, setShowAnswerReview] = useState(false);
   const [showScript, setShowScript] = useState(true);
   const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -204,40 +1088,41 @@ export default function LessonDetail() {
   const recordingStartedAtRef = useRef<number | null>(null);
   const recognitionRef = useRef<any>(null);
   const manualStopRequestedRef = useRef(false);
+  const pendingPronunciationRef = useRef<{
+    scriptId: string;
+    scriptText: string;
+    score: number;
+    transcript: string;
+  } | null>(null);
 
   const normalizePronunciationText = (value: string) =>
     value
       .toLowerCase()
-      .replace(/\p{P}/gu, " ")
-      .replace(/\s+/g, " ")
-      .trim();
+      .replace(/[^\p{L}\p{N}]/gu, "");
 
   const computePronunciationScore = (scriptText: string, spokenText: string) => {
-    const scriptWords = normalizePronunciationText(scriptText)
-      .split(" ")
-      .filter(Boolean);
-    const spokenWords = normalizePronunciationText(spokenText)
-      .split(" ")
-      .filter(Boolean);
+    const scriptCharacters = Array.from(normalizePronunciationText(scriptText));
+    const spokenCharacters = Array.from(normalizePronunciationText(spokenText));
 
-    if (scriptWords.length === 0) return 0;
-    if (spokenWords.length === 0) return 0;
+    if (scriptCharacters.length === 0 || spokenCharacters.length === 0) return 0;
 
-    const scriptWordCounts = new Map<string, number>();
-    for (const word of scriptWords) {
-      scriptWordCounts.set(word, (scriptWordCounts.get(word) ?? 0) + 1);
-    }
+    let previousRow = Array.from({ length: spokenCharacters.length + 1 }, (_, index) => index);
 
-    let matched = 0;
-    for (const word of spokenWords) {
-      const remaining = scriptWordCounts.get(word) ?? 0;
-      if (remaining > 0) {
-        scriptWordCounts.set(word, remaining - 1);
-        matched += 1;
+    for (let i = 1; i <= scriptCharacters.length; i += 1) {
+      const currentRow = [i];
+      for (let j = 1; j <= spokenCharacters.length; j += 1) {
+        currentRow[j] = Math.min(
+          currentRow[j - 1] + 1,
+          previousRow[j] + 1,
+          previousRow[j - 1] + (scriptCharacters[i - 1] === spokenCharacters[j - 1] ? 0 : 1)
+        );
       }
+      previousRow = currentRow;
     }
 
-    return Math.min(100, Math.max(0, Math.round((matched / scriptWords.length) * 100)));
+    const distance = previousRow[spokenCharacters.length];
+    const length = Math.max(scriptCharacters.length, spokenCharacters.length);
+    return Math.max(0, Math.round(((length - distance) / length) * 100));
   };
 
   const buildPronunciationFeedback = (score: number) => {
@@ -299,6 +1184,14 @@ export default function LessonDetail() {
   }, [lessonAudioScripts, selectedScriptId]);
 
   useEffect(() => {
+    const best = pronunciationAssessments.find((assessment) => assessment.lessonAudioScriptId === selectedScriptId);
+    setPhoneticScore(best?.score ?? 0);
+    setRecognizedTranscript(best?.transcript ?? "");
+    setRecordedAudioUrl(best?.audioUrl ?? null);
+    setPronunciationFeedback(best ? buildPronunciationFeedback(best.score) : null);
+  }, [pronunciationAssessments, selectedScriptId]);
+
+  useEffect(() => {
     const selected = lessonAudioScripts.find((script) => script.id === selectedScriptId) ?? lessonAudioScripts[0];
     if (selected) {
       setShowScript(selected.showScript ?? true);
@@ -308,6 +1201,7 @@ export default function LessonDetail() {
   // Khi nộp bài xong, tự giữ kết quả trong fetcher.data
   const testResult = testFetcher.data && "testResult" in testFetcher.data ? testFetcher.data.testResult : null;
   const testError = testFetcher.data && "testError" in testFetcher.data ? testFetcher.data.testError : null;
+  const pronunciationSaveError = testFetcher.data && "error" in testFetcher.data ? testFetcher.data.error : null;
   const isSubmittingTest = testFetcher.state !== "idle";
 
   // Dạng bài có mặt trong bài này. Dùng để làm mờ tab của dạng bài chưa soạn —
@@ -327,16 +1221,32 @@ export default function LessonDetail() {
   const renderTabContent = () => {
     // Từ vựng đọc trực tiếp kho từ của bài, không qua block.
     if (activeTab === "VOCABULARY") {
-      return <VocabularyTable items={lesson.content} lessonName={lesson.title} />;
+      return (
+        <div className="mx-auto max-w-6xl space-y-3">
+          <div className="flex justify-end">
+            <SettingsMenu align="right" />
+          </div>
+          <VocabularyTable items={lesson.content} lessonName={lesson.title} />
+        </div>
+      );
     }
 
     // Ngữ pháp cũng đọc trực tiếp từ bài, mỗi section một card.
     if (activeTab === "GRAMMAR") {
       if (lesson.grammarSections.length === 0) return <LessonTabEmpty tab="GRAMMAR" />;
       return (
-        <div className="space-y-4 max-w-3xl mx-auto">
+        <div className="space-y-4 max-w-6xl mx-auto">
           {lesson.grammarSections.map((section, index) => (
-            <GrammarSection key={section.id} section={section} number={index + 1} />
+            <GrammarSection
+              key={section.id}
+              section={section}
+              number={index + 1}
+              latestAttempts={grammarAttemptsBySection[section.id] ?? {}}
+              lockedPracticeTypes={activeLockedTargets.flatMap((targetKey) => {
+                const [lockedSectionId, lockedType] = targetKey.split(":");
+                return lockedSectionId === section.id && parseGrammarQuestionType(lockedType) ? [parseGrammarQuestionType(lockedType)!] : [];
+              })}
+            />
           ))}
         </div>
       );
@@ -346,9 +1256,30 @@ export default function LessonDetail() {
     if (activeTab === "WORKBOOK") {
       const workbookBlock = blocks.find((b) => b.type === "WORKBOOK");
       if (!workbookBlock) return <LessonTabEmpty tab="WORKBOOK" />;
-      const parsed = parseWorkbookConfig(workbookBlock.config);
-      if (!parsed.ok) return <LessonTabEmpty tab="WORKBOOK" />;
-      return <WorkbookListeningTest config={parsed.data} />;
+      if (!workbookBlock.config) return <LessonTabEmpty tab="WORKBOOK" />;
+      if (answerReviewEnabled && activeLockedTargets.includes(workbookBlock.id)) {
+        return <p className="rounded-md border bg-muted/30 p-4 text-sm text-muted-foreground">Lượt làm này đã được chốt. Hãy xem đáp án chi tiết ở phía trên.</p>;
+      }
+      return (
+        <WorkbookListeningTest
+          config={workbookBlock.config as WorkbookConfig}
+          isSaving={workbookFetcher.state !== "idle"}
+          savedResult={workbookFetcher.data?.intent === "submit-workbook-attempt" && workbookFetcher.data.success
+            && workbookFetcher.data.score != null && workbookFetcher.data.correctCount != null && workbookFetcher.data.totalCount != null
+            ? {
+                score: workbookFetcher.data.score,
+                correctCount: workbookFetcher.data.correctCount,
+                totalCount: workbookFetcher.data.totalCount,
+              }
+            : null}
+          submissionError={workbookFetcher.data?.workbookError ?? null}
+          onSubmitAttempt={(answers) => workbookFetcher.submit({
+            intent: "submit-workbook-attempt",
+            blockId: workbookBlock.id,
+            answers: JSON.stringify(answers),
+          }, { method: "post" })}
+        />
+      );
     }
 
     // Tab Ôn từ vựng — inline, dùng fetcher để không rời trang
@@ -356,7 +1287,7 @@ export default function LessonDetail() {
       // Kết quả sau khi nộp
       if (testResult) {
         return (
-          <div className="space-y-4 max-w-3xl mx-auto">
+          <div className="space-y-4 max-w-6xl mx-auto">
             <Card className={cn(testResult.passed ? "border-success/40" : "border-destructive/40")}>
               <CardContent className="pt-6 space-y-4">
                 <div className="flex flex-col items-center text-center gap-2">
@@ -389,6 +1320,8 @@ export default function LessonDetail() {
                     <Button asChild>
                       <Link to={`/student/courses/${lesson.courseId}`}>Quay lại khóa học</Link>
                     </Button>
+                  ) : testRetakeLocked ? (
+                    <p className="text-sm font-medium text-muted-foreground">Phần làm bài đã bị khóa. Xem đáp án chi tiết ở phía trên.</p>
                   ) : (
                     // Xóa kết quả cũ bằng cách reload loader (trộn lại câu ARRANGE)
                     <Button onClick={() => window.location.reload()}>
@@ -399,67 +1332,19 @@ export default function LessonDetail() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Chi tiết từng câu</CardTitle>
-                <CardDescription>Đối chiếu đáp án đúng để lần sau làm tốt hơn.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {testResult.results.map((q, i) => (
-                  <div key={q.id}
-                    className={cn("rounded-lg border p-3 space-y-1.5",
-                      q.correct ? "border-success/30 bg-success/5" : "border-destructive/30 bg-destructive/5")}>
-                    <div className="flex items-start gap-2">
-                      {q.correct
-                        ? <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
-                        : <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />}
-                      <div className="flex-1 min-w-0 space-y-1.5">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-mono text-xs text-muted-foreground tabular-nums">{i + 1}.</span>
-                          <p className="font-medium">{q.prompt}</p>
-                          {settings.showPinyin && q.lessonPinyin && q.typeLabel === "Trung → Việt" && (
-                            <p className="w-full pl-6 font-mono text-xs text-muted-foreground">{q.lessonPinyin}</p>
-                          )}
-                          <Badge variant="outline" className="bg-background/60 text-muted-foreground text-[10px]">
-                            {q.typeLabel}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground tabular-nums">
-                            {q.correct ? q.points : 0}/{q.points} điểm
-                          </span>
-                        </div>
-                        <p className="text-sm">
-                          <span className="text-muted-foreground">Bạn trả lời: </span>
-                          {q.given
-                            ? <span className={q.correct ? "text-success" : "text-destructive"}>{q.given}</span>
-                            : <span className="italic text-muted-foreground">bỏ trống</span>}
-                        </p>
-                        {!q.correct && (
-                          <p className="text-sm">
-                            <span className="text-muted-foreground">Đáp án đúng: </span>
-                            <span className="font-medium">{q.correctAnswer}</span>
-                          </p>
-                        )}
-                        {q.hint && (
-                          <p className="flex items-start gap-1.5 text-sm text-muted-foreground whitespace-pre-line">
-                            <Lightbulb className="h-3.5 w-3.5 shrink-0 mt-0.5" />{q.hint}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
           </div>
         );
       }
 
       // Chưa có câu hỏi
       if (vocabularyQuestionSets.sameWordType.length === 0) return <LessonTabEmpty tab="TEST" />;
+      if (testRetakeLocked) {
+        return <p className="rounded-md border bg-muted/30 p-4 text-sm text-muted-foreground">Phần làm bài đã bị khóa. Xem đáp án chi tiết ở phía trên.</p>;
+      }
 
       // Form làm bài
       return (
-        <div className="max-w-3xl mx-auto space-y-4">
+        <div className="max-w-6xl mx-auto space-y-4">
           {lessonStatus.testStatus === "COMPLETED" && (
             <div className="flex items-center gap-2 rounded-lg border border-success/30 bg-success/5 p-3 text-sm text-success">
               <PartyPopper className="h-4 w-4 shrink-0" />
@@ -538,13 +1423,35 @@ export default function LessonDetail() {
               type: mediaRecorder.mimeType || "audio/webm",
             });
 
-            if (recordedAudioUrl) {
+            if (recordedAudioUrl?.startsWith("blob:")) {
               URL.revokeObjectURL(recordedAudioUrl);
             }
 
-            setRecordedAudioUrl(URL.createObjectURL(audioBlob));
+            const localAudioUrl = URL.createObjectURL(audioBlob);
+            setRecordedAudioUrl(localAudioUrl);
             mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
             mediaStreamRef.current = null;
+
+            const pending = pendingPronunciationRef.current;
+            pendingPronunciationRef.current = null;
+            if (!pending || audioBlob.size === 0) {
+              if (pending) setRecordingError("Không thu được âm thanh để lưu. Vui lòng thử lại.");
+              return;
+            }
+
+            const formData = new FormData();
+            formData.append("intent", "save-pronunciation-score");
+            formData.append("lessonAudioScriptId", pending.scriptId);
+            formData.append("score", String(pending.score));
+            formData.append("scriptText", pending.scriptText);
+            formData.append("transcript", pending.transcript);
+            formData.append(
+              "recording",
+              new File([audioBlob], `${pending.scriptId}-${Date.now()}.webm`, {
+                type: audioBlob.type || "audio/webm",
+              })
+            );
+            testFetcher.submit(formData, { method: "post", encType: "multipart/form-data" });
           };
 
           mediaRecorder.start();
@@ -563,7 +1470,7 @@ export default function LessonDetail() {
         let spokenText = "";
         recognition.onresult = (event: any) => {
           let transcript = "";
-          for (let i = event.resultIndex; i < event.results.length; i += 1) {
+          for (let i = 0; i < event.results.length; i += 1) {
             transcript += event.results[i][0].transcript;
           }
           spokenText = transcript.trim();
@@ -581,7 +1488,23 @@ export default function LessonDetail() {
           }
 
           const scriptText = selectedAudioScript.speakers.map((speaker) => speaker.chinese).join(" ");
-          const finalTranscript = spokenText || recognizedTranscript;
+          const finalTranscript = spokenText.trim();
+          if (!finalTranscript) {
+            setRecordingError("Không nhận diện được nội dung đọc. Hãy thử lại khi kết nối nhận diện giọng nói ổn định.");
+            setRecordingSeconds(0);
+            setIsRecording(false);
+            if (recordingTimerRef.current) {
+              window.clearInterval(recordingTimerRef.current);
+              recordingTimerRef.current = null;
+            }
+            recordingStartedAtRef.current = null;
+            pendingPronunciationRef.current = null;
+            if (mediaRecorderRef.current?.state === "recording") {
+              mediaRecorderRef.current.stop();
+            }
+            return;
+          }
+
           const score = computePronunciationScore(scriptText, finalTranscript);
           const finalScore = Number.isFinite(score) ? Math.min(100, Math.max(0, score)) : 0;
           setPhoneticScore(finalScore);
@@ -594,18 +1517,14 @@ export default function LessonDetail() {
             recordingTimerRef.current = null;
           }
           recordingStartedAtRef.current = null;
-          mediaRecorderRef.current?.stop();
-
-          if (selectedAudioScript.id) {
-            testFetcher.submit(
-              {
-                intent: "save-pronunciation-score",
-                lessonAudioScriptId: selectedAudioScript.id,
-                score: String(finalScore),
-                transcript: finalTranscript || lesson.title,
-              },
-              { method: "post" }
-            );
+          pendingPronunciationRef.current = {
+            scriptId: selectedAudioScript.id,
+            scriptText,
+            score: finalScore,
+            transcript: finalTranscript,
+          };
+          if (mediaRecorderRef.current?.state === "recording") {
+            mediaRecorderRef.current.stop();
           }
         };
 
@@ -614,6 +1533,7 @@ export default function LessonDetail() {
             return;
           }
           setRecordingError("Không nhận dạng được giọng nói. Hãy thử lại sau vài giây.");
+          manualStopRequestedRef.current = true;
           setIsRecording(false);
         };
 
@@ -679,9 +1599,20 @@ export default function LessonDetail() {
         return <LessonTabEmpty tab="LESSON" />;
       }
 
+      const bestPronunciationAssessment = pronunciationAssessments.find(
+        (assessment) => assessment.lessonAudioScriptId === selectedAudioScript.id
+      );
+      const displayedScore = bestPronunciationAssessment?.score ?? (recognizedTranscript.trim() ? phoneticScore : null);
+      const displayedEvaluation = bestPronunciationAssessment?.evaluation
+        ?? (displayedScore === null ? "CHƯA CÓ LƯỢT ĐỌC" : getPronunciationEvaluation(displayedScore));
+
       return (
-        <div className="max-w-5xl mx-auto rounded-xl border bg-card shadow-sm">
-          <div className="border-b px-6 py-4">
+        <div className="mx-auto max-w-6xl space-y-3">
+          <div className="flex justify-end">
+            <SettingsMenu align="right" />
+          </div>
+          <div className="rounded-xl border bg-card shadow-sm">
+            <div className="border-b px-6 py-4">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-primary" />
@@ -705,9 +1636,9 @@ export default function LessonDetail() {
                 ))}
               </div>
             </div>
-          </div>
+            </div>
 
-          <div className="space-y-5 p-6">
+            <div className="space-y-5 p-6">
             <div className="grid gap-4 lg:grid-cols-[minmax(280px,0.95fr)_minmax(420px,1.05fr)]">
               <section className="rounded-xl border bg-muted/20 p-4">
                 <div className="mb-3 flex items-center justify-between">
@@ -756,7 +1687,9 @@ export default function LessonDetail() {
                         </div>
                         <div className="mt-2 text-base">
                           <p className="font-medium text-foreground">{speaker.chinese}</p>
-                          <p className="text-lg font-mono text-muted-foreground mt-1">{speaker.pinyin}</p>
+                          {settings.showPinyin && (
+                            <p className="text-lg font-mono text-muted-foreground mt-1">{speaker.pinyin}</p>
+                          )}
                           <p className="text-base text-muted-foreground mt-1">{speaker.translation}</p>
                         </div>
                       </div>
@@ -791,29 +1724,27 @@ export default function LessonDetail() {
                     onClick={replayLastRecording}
                     disabled={!recordedAudioUrl}
                   >
-                    {isPlayingReplay ? "Dừng lại" : "Nghe lại bài đọc của tôi"}
+                    {isPlayingReplay
+                      ? "Dừng lại"
+                      : bestPronunciationAssessment
+                        ? "Nghe bản ghi điểm cao nhất"
+                        : "Nghe lại bài đọc của tôi"}
                   </Button>
                 </div>
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border p-3">
-                  <div className="text-xs font-bold uppercase text-muted-foreground">Điểm luyện nói</div>
+                  <div className="text-xs font-bold uppercase text-muted-foreground">Điểm cao nhất</div>
                   <div className="mt-2 flex items-center gap-2">
-                    <span className="text-2xl font-bold text-primary tabular-nums">{phoneticScore}</span>
+                    <span className="text-2xl font-bold text-primary tabular-nums">{displayedScore ?? "—"}</span>
                     <span className="text-xs text-muted-foreground">/ 100</span>
                   </div>
                 </div>
                 <div className="rounded-lg border p-3">
                   <div className="text-xs font-bold uppercase text-muted-foreground">Đánh giá</div>
                   <div className="mt-2 font-medium">
-                    {phoneticScore >= 90
-                      ? "TỐT"
-                      : phoneticScore >= 75
-                        ? "KHÁ"
-                        : phoneticScore >= 60
-                          ? "CẦN CẢI THIỆN"
-                          : "CHƯA ĐẠT"}
+                    {displayedEvaluation}
                   </div>
                 </div>
               </div>
@@ -824,13 +1755,37 @@ export default function LessonDetail() {
                 </div>
               ) : null}
 
-              {pronunciationFeedback && (
+              {pronunciationSaveError && (
+                <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                  {pronunciationSaveError}
+                </div>
+              )}
+
+              {displayedScore !== null && pronunciationFeedback && (
                 <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-4 text-foreground">
                   {pronunciationFeedback}
                 </div>
               )}
 
-              {recognizedTranscript && !isRecording && (
+              {bestPronunciationAssessment && (
+                <div className="mt-4 space-y-3 rounded-lg border p-3 text-sm">
+                  <div className="text-xs font-bold uppercase text-muted-foreground">
+                    Kết quả tốt nhất · {new Date(bestPronunciationAssessment.createdAt).toLocaleString("vi-VN")}
+                  </div>
+                  <div>
+                    <div className="font-medium text-foreground">Script đã đọc</div>
+                    <p className="mt-1 text-muted-foreground">{bestPronunciationAssessment.scriptText || "—"}</p>
+                  </div>
+                  <div>
+                    <div className="font-medium text-foreground">Bạn đã đọc</div>
+                    <p className="mt-1 text-muted-foreground">
+                      {bestPronunciationAssessment.transcript || "Không nhận diện được nội dung trong lượt đọc này."}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {!bestPronunciationAssessment && recognizedTranscript && !isRecording && (
                 <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
                   <div className="font-medium text-foreground">Bạn đã đọc:</div>
                   <p className="mt-1 text-muted-foreground">{recognizedTranscript}</p>
@@ -844,6 +1799,7 @@ export default function LessonDetail() {
                 </div>
               )}
             </section>
+            </div>
           </div>
         </div>
       );
@@ -854,8 +1810,34 @@ export default function LessonDetail() {
     // dung, trường hợp đó BlockRenderer hiện "chưa có nội dung" của riêng nó.
     if (blockIndex === -1) return <LessonTabEmpty tab={activeTab} />;
 
-    return <BlockRenderer block={blocks[blockIndex]} status={blockStatuses[blockIndex]} courseId={lesson.courseId} lessonId={lesson.id} lessonName={lesson.title} />;
+    return <BlockRenderer
+      block={blocks[blockIndex]}
+      status={blockStatuses[blockIndex]}
+      courseId={lesson.courseId}
+      lessonId={lesson.id}
+      lessonName={lesson.title}
+      isRetakeLocked={answerReviewEnabled && activeTab === "LISTENING" && activeLockedTargets.includes(blocks[blockIndex].id)}
+      showAnswerDetails={answerReviewEnabled}
+    />;
   };
+
+  const answerReviewControl = answerReviewEnabled ? (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <p className="text-sm font-semibold">Đáp án chi tiết</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {activeReviewGroups.length > 0
+            ? "Xem câu trả lời và đáp án đúng của lượt làm tốt nhất."
+            : "Sau khi nộp lượt làm cuối, kết quả chi tiết sẽ hiện tại đây."}
+        </p>
+      </div>
+      {activeReviewGroups.length > 0 && (
+        <Button type="button" variant="outline" size="sm" onClick={() => setShowAnswerReview((visible) => !visible)}>
+          {showAnswerReview ? "Ẩn kết quả" : "Xem kết quả chi tiết"}
+        </Button>
+      )}
+    </div>
+  ) : null;
 
   return (
     <AppShell user={user}>
@@ -884,15 +1866,79 @@ export default function LessonDetail() {
           <>
             <LessonTabs
               activeTab={activeTab}
-              onTabChange={setActiveTab}
+              onTabChange={(tab) => {
+                setActiveTab(tab);
+                setShowAnswerReview(false);
+                progressFetcher.submit(
+                  { intent: "open-tab", tab },
+                  { method: "post" },
+                );
+              }}
               availableTypes={availableTypes}
               hasQuiz={lesson.content.length > 0}
             />
 
+            {activeTabComment && (
+              <aside className="mx-auto mt-4 max-w-6xl rounded-md border border-primary/20 bg-primary/5 px-4 py-3">
+                <h2 className="flex items-center gap-2 text-sm font-semibold text-primary">
+                  <MessageSquareText className="h-4 w-4" />Nhận xét của giáo viên · {FEEDBACK_TAB_LABELS[feedbackTab] ?? feedbackTab}
+                </h2>
+                <p className="mt-2 whitespace-pre-wrap text-sm">{activeTabComment.comment}</p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {activeTabComment.teacherName ?? "Giáo viên"} · {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(activeTabComment.createdAt))}
+                </p>
+              </aside>
+            )}
 
-            <div className="max-w-6xl mx-auto px-4">
-              {renderTabContent()}
-            </div>
+            {activeTab === "TEST" || activeScore ? (
+              <div className="mx-auto max-w-6xl space-y-3">
+                {activeTab === "TEST" && (testResult || vocabularyQuestionSets.sameWordType.length > 0) && (
+                  <div className="flex justify-end">
+                    <SettingsMenu align="right" />
+                  </div>
+                )}
+                {activeScore && (
+                  <section className="rounded-md border bg-card px-4 py-3" aria-label="Điểm cao nhất">
+                    <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Điểm cao nhất</p>
+                        <p className="mt-0.5 text-lg font-bold tabular-nums">
+                          {activeScore.score != null ? `${Math.round(activeScore.score)}%` : "-"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Số câu đúng / tổng số</p>
+                        <p className="mt-0.5 text-sm font-semibold tabular-nums">
+                          {activeScore.correctCount != null && activeScore.totalCount != null
+                            ? `${activeScore.correctCount}/${activeScore.totalCount}`
+                            : "-"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Kết quả</p>
+                        <p className={cn("mt-0.5 text-sm font-semibold", activeScore.passed ? "text-success" : "text-destructive")}>
+                          {activeScore.passed ? "Đạt" : "Chưa đạt"}
+                        </p>
+                      </div>
+                      {answerReviewControl}
+                    </div>
+                  </section>
+                )}
+                {answerReviewEnabled && !activeScore && (
+                  <section className="rounded-md border bg-card px-4 py-3">{answerReviewControl}</section>
+                )}
+                {showAnswerReview && answerReviewEnabled && <AnswerReviewDetails groups={activeReviewGroups} />}
+                <div>{renderTabContent()}</div>
+              </div>
+            ) : (
+              <div className="max-w-6xl mx-auto space-y-3">
+                {answerReviewEnabled && (
+                  <section className="rounded-md border bg-card px-4 py-3">{answerReviewControl}</section>
+                )}
+                {showAnswerReview && answerReviewEnabled && <AnswerReviewDetails groups={activeReviewGroups} />}
+                {renderTabContent()}
+              </div>
+            )}
           </>
         )}
       </div>

@@ -211,6 +211,7 @@ export function VocabularyTest({
 
   return (
     <div className="space-y-4">
+      <input type="hidden" name="quizMode" value={direction} />
       {runQuestions.map((question) => (
         <span key={question.id} className="hidden">
           <input type="hidden" name={`response-${question.id}`} value={answers[question.id] ?? ""} />

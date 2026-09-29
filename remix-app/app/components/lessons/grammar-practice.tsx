@@ -1,14 +1,15 @@
 import { useMemo, useState } from "react";
+import { useFetcher } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Progress } from "~/components/ui/progress";
 import {
-  GRAMMAR_QUESTION_META, checkGrammarAnswer, grammarAnswerText, shuffledTokens,
+  GRAMMAR_QUESTION_META, shuffledTokens,
   type GrammarQuestionType,
 } from "~/lib/grammar";
 import { cn } from "~/lib/utils";
 import {
-  CheckCircle2, XCircle, ArrowRight, ArrowLeft, RefreshCw, Eye, Lightbulb, Eraser,
+  CheckCircle2, XCircle, ArrowRight, ArrowLeft, Lightbulb, Eraser,
 } from "lucide-react";
 
 export interface GrammarPracticeQuestion {
@@ -26,17 +27,22 @@ interface QuestionState {
   text: string;
   /** Các từ đã ghép, theo thứ tự học viên bấm (ARRANGE) */
   picked: string[];
-  verdict: "correct" | "wrong" | null;
-  /** Đã bấm "Xem đáp án" — không tính là tự làm được nữa */
-  revealed: boolean;
 }
 
-const EMPTY: QuestionState = { text: "", picked: [], verdict: null, revealed: false };
+const EMPTY: QuestionState = { text: "", picked: [] };
 
-export function GrammarPractice({ questions }: { questions: GrammarPracticeQuestion[] }) {
+export function GrammarPractice({ questions, sectionId, answerReviewEnabled = false }: { questions: GrammarPracticeQuestion[]; sectionId: string; answerReviewEnabled?: boolean }) {
+  const fetcher = useFetcher<{
+    intent?: string;
+    success?: boolean;
+    score?: number;
+    correctCount?: number;
+    totalCount?: number;
+    grammarError?: string;
+  }>();
   const [index, setIndex] = useState(0);
-  const [round, setRound] = useState(0);
   const [states, setStates] = useState<Record<string, QuestionState>>({});
+  const [submitted, setSubmitted] = useState(false);
 
   const question = questions[index];
   const state = states[question?.id ?? ""] ?? EMPTY;
@@ -45,7 +51,7 @@ export function GrammarPractice({ questions }: { questions: GrammarPracticeQuest
   const tokens = useMemo(
     () => (question?.type === "ARRANGE" ? shuffledTokens(question.options) : []),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [question?.id, round]
+    [question?.id]
   );
 
   if (!question) {
@@ -55,33 +61,34 @@ export function GrammarPractice({ questions }: { questions: GrammarPracticeQuest
   const update = (patch: Partial<QuestionState>) =>
     setStates((prev) => ({ ...prev, [question.id]: { ...(prev[question.id] ?? EMPTY), ...patch } }));
 
-  const answered = state.verdict !== null || state.revealed;
-  // Đã chấm hoặc đã xem đáp án thì khoá lại, tránh sửa rồi chấm lại cùng một câu
-  const locked = answered;
-  const hasResponse = question.type === "ARRANGE" ? state.picked.length > 0 : state.text.trim().length > 0;
-
+  const savedResult = submitted && fetcher.data?.intent === "submit-grammar-attempt" && fetcher.data.success
+    ? fetcher.data
+    : null;
+  const locked = Boolean(savedResult) || fetcher.state !== "idle";
   const isLast = index === questions.length - 1;
-  const correctCount = questions.filter((q) => states[q.id]?.verdict === "correct").length;
-  const doneCount = questions.filter((q) => {
-    const s = states[q.id];
-    return s && (s.verdict !== null || s.revealed);
+  const doneCount = questions.filter((item) => {
+    const itemState = states[item.id] ?? EMPTY;
+    return item.type === "ARRANGE"
+      ? itemState.picked.length === item.options.length
+      : itemState.text.trim().length > 0;
   }).length;
+  const questionType = questions[0]?.type;
 
-  const check = () => {
-    if (locked || !hasResponse) return;
-    const response = question.type === "ARRANGE" ? state.picked : state.text;
-    update({ verdict: checkGrammarAnswer(question, response) ? "correct" : "wrong" });
-  };
-
-  const reveal = () => update({ revealed: true });
-
-  /** Làm lại câu hiện tại — xoá câu trả lời và kết quả của riêng câu này */
-  const retry = () => update({ ...EMPTY });
-
-  const restartAll = () => {
-    setStates({});
-    setIndex(0);
-    setRound((r) => r + 1);
+  const submitAttempt = () => {
+    if (!questionType || doneCount !== questions.length || fetcher.state !== "idle") return;
+    setSubmitted(true);
+    fetcher.submit({
+      intent: "submit-grammar-attempt",
+      sectionId,
+      questionType,
+      answers: JSON.stringify(questions.map((item) => {
+        const itemState = states[item.id] ?? EMPTY;
+        return {
+          questionId: item.id,
+          response: item.type === "ARRANGE" ? itemState.picked : itemState.text,
+        };
+      })),
+    }, { method: "post" });
   };
 
   // Các từ chưa được ghép vào đáp án. Từ trùng nội dung phải trừ theo số lượng,
@@ -123,13 +130,14 @@ export function GrammarPractice({ questions }: { questions: GrammarPracticeQuest
               const chosen = state.text === opt;
               return (
                 <button key={opt} type="button" disabled={locked}
-                  onClick={() => update({ text: opt })}
+                  onClick={() => {
+                    update({ text: opt });
+                    if (!isLast) setIndex(index + 1);
+                  }}
                   className={cn(
                     "flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors",
                     chosen ? "border-primary bg-primary/5" : "hover:bg-muted/50",
-                    locked && "cursor-not-allowed",
-                    locked && chosen && state.verdict === "correct" && "border-success bg-success/5",
-                    locked && chosen && state.verdict === "wrong" && "border-destructive bg-destructive/5"
+                    locked && "cursor-not-allowed"
                   )}>
                   <span className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
                     chosen && "border-primary")}>
@@ -183,60 +191,15 @@ export function GrammarPractice({ questions }: { questions: GrammarPracticeQuest
         )}
 
         {question.type === "FILL" && (
-          <form onSubmit={(e) => { e.preventDefault(); check(); }}>
-            <Input
-              value={state.text}
-              onChange={(e) => update({ text: e.target.value })}
-              readOnly={locked}
-              placeholder="Nhập câu trả lời…"
-              aria-label="Câu trả lời"
-              aria-invalid={state.verdict === "wrong" || undefined}
-              className={cn("text-base h-11",
-                state.verdict === "correct" && "border-success bg-success/5",
-                state.verdict === "wrong" && "border-destructive bg-destructive/5")}
-            />
-          </form>
+          <Input
+            value={state.text}
+            onChange={(e) => update({ text: e.target.value })}
+            readOnly={locked}
+            placeholder="Nhập câu trả lời…"
+            aria-label="Câu trả lời"
+            className="h-11 text-base"
+          />
         )}
-      </div>
-
-      {/* Kết quả */}
-      {state.verdict !== null && (
-        <div className={cn("rounded-lg border p-4",
-          state.verdict === "correct" ? "border-success/30 bg-success/5" : "border-destructive/30 bg-destructive/5")}>
-          <div className={cn("flex items-center gap-2 text-sm font-medium",
-            state.verdict === "correct" ? "text-success" : "text-destructive")}>
-            {state.verdict === "correct" ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-            {state.verdict === "correct" ? "Chính xác!" : "Chưa đúng"}
-          </div>
-          {state.verdict === "wrong" && !state.revealed && (
-            <p className="text-xs text-muted-foreground mt-2">
-              Bấm &quot;Xem đáp án&quot; để đối chiếu, hoặc &quot;Làm lại&quot; để thử lần nữa.
-            </p>
-          )}
-        </div>
-      )}
-
-      {state.revealed && (
-        <div className="rounded-lg border border-warning/30 bg-warning/10 p-4 space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium text-warning">
-            <Lightbulb className="h-4 w-4" />Đáp án đúng
-          </div>
-          <p className="text-lg font-medium">{grammarAnswerText(question)}</p>
-          {question.hint && <p className="text-sm text-muted-foreground whitespace-pre-line">{question.hint}</p>}
-        </div>
-      )}
-
-      {/* Ba nút của phần luyện tập */}
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" onClick={check} disabled={locked || !hasResponse}>
-          <CheckCircle2 className="h-4 w-4 mr-1.5" />Kiểm tra đáp án
-        </Button>
-        <Button type="button" variant="outline" onClick={reveal} disabled={state.revealed}>
-          <Eye className="h-4 w-4 mr-1.5" />Xem đáp án
-        </Button>
-        <Button type="button" variant="ghost" onClick={retry} disabled={!hasResponse && !answered}>
-          <RefreshCw className="h-4 w-4 mr-1.5" />Làm lại
-        </Button>
       </div>
 
       {/* Chuyển câu */}
@@ -246,18 +209,42 @@ export function GrammarPractice({ questions }: { questions: GrammarPracticeQuest
           <ArrowLeft className="h-4 w-4 mr-1.5" />Câu trước
         </Button>
         <span className="text-xs text-muted-foreground tabular-nums">
-          Đúng {correctCount}/{questions.length}
+          Đã trả lời {doneCount}/{questions.length}
         </span>
-        {isLast ? (
-          <Button type="button" variant="ghost" size="sm" onClick={restartAll}>
-            <RefreshCw className="h-4 w-4 mr-1.5" />Làm lại từ đầu
-          </Button>
-        ) : (
+        {!isLast && (
           <Button type="button" size="sm" onClick={() => setIndex((i) => i + 1)}>
             Câu tiếp theo<ArrowRight className="h-4 w-4 ml-1.5" />
           </Button>
         )}
       </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-muted/20 p-3">
+        {savedResult ? (
+          <div>
+            <p className="text-sm font-medium text-success">
+              Số câu đúng: {savedResult.correctCount}/{savedResult.totalCount} · {savedResult.score}%
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {answerReviewEnabled
+                ? "Đáp án chi tiết đã mở ở phần kết quả phía trên."
+                : "Đáp án chi tiết sẽ hiện khi giáo viên mở xem kết quả."}
+            </p>
+          </div>
+        ) : fetcher.data?.grammarError && submitted ? (
+          <p role="alert" className="text-sm text-destructive">{fetcher.data.grammarError}</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">Trả lời hết câu hỏi để nộp kết quả.</p>
+        )}
+        <Button
+          type="button"
+          size="sm"
+          onClick={submitAttempt}
+          disabled={doneCount !== questions.length || fetcher.state !== "idle" || Boolean(savedResult)}
+        >
+          {fetcher.state !== "idle" ? "Đang nộp..." : savedResult ? "Đã nộp kết quả" : submitted && fetcher.data?.grammarError ? "Thử nộp lại" : "Nộp kết quả"}
+        </Button>
+      </div>
+
     </div>
   );
 }

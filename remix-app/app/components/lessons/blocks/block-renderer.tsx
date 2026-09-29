@@ -60,13 +60,31 @@ function listeningQuestions(
   }));
 }
 
-export function BlockRenderer({ block, status, courseId, lessonId, lessonName }: { block: ResolvedBlock; status: ProgressStatus; courseId: string; lessonId: string; lessonName?: string }) {
-  const fetcher = useFetcher();
+export function BlockRenderer({ block, status, courseId, lessonId, lessonName, isRetakeLocked = false, showAnswerDetails = false }: { block: ResolvedBlock; status: ProgressStatus; courseId: string; lessonId: string; lessonName?: string; isRetakeLocked?: boolean; showAnswerDetails?: boolean }) {
+  const fetcher = useFetcher<{
+    success?: boolean;
+    intent?: string;
+    score?: number;
+    correctCount?: number;
+    totalCount?: number;
+    listeningError?: string;
+  }>();
   const effectiveStatus = status === "LOCKED" ? "AVAILABLE" : status;
   const isCompleted = effectiveStatus === "COMPLETED";
 
   const markComplete = () => {
     fetcher.submit({ intent: "complete-block", blockId: block.id }, { method: "post" });
+  };
+
+  const submitListeningAttempt = (answers: { questionId: string; answer: string }[]) => {
+    fetcher.submit(
+      {
+        intent: "submit-listening-attempt",
+        blockId: block.id,
+        answers: JSON.stringify(answers),
+      },
+      { method: "post" },
+    );
   };
 
   const shellProps = {
@@ -111,9 +129,34 @@ export function BlockRenderer({ block, status, courseId, lessonId, lessonName }:
 
     if (items.length === 0) return <LessonTabEmpty tab="LISTENING" />;
 
+    if (isRetakeLocked) {
+      return (
+        <BlockShell {...shellProps}>
+          <p className="rounded-md border bg-muted/30 p-4 text-sm text-muted-foreground">
+            Phần làm bài đã bị khóa. Xem đáp án chi tiết ở phía trên.
+          </p>
+        </BlockShell>
+      );
+    }
+
     return (
       <BlockShell {...shellProps}>
-        <ListeningBlock config={parsed.data} questions={items} isCompleted={isCompleted} onComplete={markComplete} />
+        <ListeningBlock
+          config={parsed.data}
+          questions={items}
+          isSubmitting={fetcher.state !== "idle"}
+          savedResult={fetcher.data?.intent === "submit-listening-attempt" && fetcher.data.success
+            && fetcher.data.score != null && fetcher.data.correctCount != null && fetcher.data.totalCount != null
+            ? {
+                score: fetcher.data.score,
+                correctCount: fetcher.data.correctCount,
+                totalCount: fetcher.data.totalCount,
+              }
+            : null}
+          submissionError={fetcher.data?.listeningError ?? null}
+          showAnswerDetails={showAnswerDetails}
+          onComplete={submitListeningAttempt}
+        />
       </BlockShell>
     );
   }

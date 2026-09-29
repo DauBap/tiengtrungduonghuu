@@ -39,7 +39,7 @@ function SettingsSwitch({
   );
 }
 
-export function SettingsMenu() {
+export function SettingsMenu({ align = "left" }: { align?: "left" | "right" }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const settings = useAppSettings();
@@ -83,7 +83,10 @@ export function SettingsMenu() {
         <section
           role="dialog"
           aria-label="Cài đặt học tập"
-          className="absolute left-0 top-full z-[60] mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-md border bg-popover p-3 text-popover-foreground shadow-lg"
+          className={cn(
+            "absolute top-full z-[60] mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-md border bg-popover p-3 text-popover-foreground shadow-lg",
+            align === "right" ? "right-0" : "left-0"
+          )}
         >
           <h2 className="px-2 pb-2 text-sm font-semibold">Cài đặt</h2>
           <div className="space-y-0.5">

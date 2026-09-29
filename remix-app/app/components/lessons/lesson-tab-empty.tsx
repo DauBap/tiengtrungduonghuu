@@ -38,7 +38,7 @@ export function LessonTabEmpty({ tab }: LessonTabEmptyProps) {
   const { icon: Icon, label, implemented } = tabMeta(tab);
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <EmptyState
         icon={
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">

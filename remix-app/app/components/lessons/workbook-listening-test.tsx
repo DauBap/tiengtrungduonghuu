@@ -50,7 +50,21 @@ interface Section {
   questions: Question[];
 }
 
-export function WorkbookListeningTest({ config }: { config: WorkbookConfig }) {
+export function WorkbookListeningTest({
+  config,
+  onSubmitAttempt,
+  isSaving = false,
+  answerReviewEnabled = false,
+  savedResult = null,
+  submissionError = null,
+}: {
+  config: WorkbookConfig;
+  onSubmitAttempt: (answers: Record<string, string>) => void;
+  isSaving?: boolean;
+  answerReviewEnabled?: boolean;
+  savedResult?: { score: number; correctCount: number; totalCount: number } | null;
+  submissionError?: string | null;
+}) {
   const appSettings = useAppSettings();
   const showPinyin = config.showPinyin && appSettings.showPinyin;
   const [isPlaying, setIsPlaying] = useState(false);
@@ -62,6 +76,14 @@ export function WorkbookListeningTest({ config }: { config: WorkbookConfig }) {
   const [timeRemaining, setTimeRemaining] = useState(config.timeLimit ? config.timeLimit * 60 : 0);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const submitAttemptRef = useRef<() => void>(() => undefined);
+
+  const submitAttempt = () => {
+    if (isSubmitted) return;
+    setIsSubmitted(true);
+    onSubmitAttempt(answers);
+  };
+  submitAttemptRef.current = submitAttempt;
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.playbackRate = speed;
@@ -73,13 +95,18 @@ export function WorkbookListeningTest({ config }: { config: WorkbookConfig }) {
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
-          setIsSubmitted(true);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
+  }, [config.timeLimit, timeRemaining, isSubmitted]);
+
+  useEffect(() => {
+    if (config.timeLimit > 0 && timeRemaining === 0 && !isSubmitted) {
+      submitAttemptRef.current();
+    }
   }, [config.timeLimit, timeRemaining, isSubmitted]);
 
   const formatTime = (seconds: number) => {
@@ -103,7 +130,7 @@ export function WorkbookListeningTest({ config }: { config: WorkbookConfig }) {
 
   if (sections.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto rounded-lg border border-dashed p-12 text-center">
+      <div className="max-w-6xl mx-auto rounded-lg border border-dashed p-12 text-center">
         <p className="text-sm font-medium text-muted-foreground">Chưa có nội dung bài tập.</p>
       </div>
     );
@@ -119,7 +146,7 @@ export function WorkbookListeningTest({ config }: { config: WorkbookConfig }) {
   }).length;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-3">
       {/* Audio Player Header - Sticky */}
       <Card className="sticky top-0 z-10 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90">
         <div className="p-6 space-y-4">
@@ -287,7 +314,6 @@ export function WorkbookListeningTest({ config }: { config: WorkbookConfig }) {
                 question={question}
                 selectedAnswer={answers[question.id]}
                 onAnswer={(optId) => setAnswers((prev) => ({ ...prev, [question.id]: optId }))}
-                showResultsImmediately={config.showResultsImmediately}
                 showTranslation={config.showTranslation}
                 showPinyin={showPinyin}
                 isSubmitted={isSubmitted}
@@ -299,7 +325,20 @@ export function WorkbookListeningTest({ config }: { config: WorkbookConfig }) {
       <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
         {isSubmitted ? (
           <div>
-            <p className="text-sm font-medium">Kết quả: {correctCount}/{gradableQuestions.length} câu có đáp án</p>
+            <p className="text-sm font-medium">
+              {savedResult
+                ? `Đã lưu kết quả: ${savedResult.correctCount}/${savedResult.totalCount} câu · ${savedResult.score}%`
+                : `Kết quả: ${correctCount}/${gradableQuestions.length} câu có đáp án`}
+            </p>
+            {savedResult && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {answerReviewEnabled
+                  ? "Đáp án chi tiết đã mở ở phần kết quả phía trên."
+                  : "Đáp án chi tiết sẽ hiện khi giáo viên mở xem kết quả."}
+              </p>
+            )}
+            {isSaving && <p className="mt-1 text-xs text-muted-foreground">Đang lưu kết quả...</p>}
+            {submissionError && <p role="alert" className="mt-1 text-xs text-destructive">{submissionError}</p>}
             {questions.length > gradableQuestions.length && (
               <p className="text-xs text-muted-foreground">{questions.length - gradableQuestions.length} câu chưa có answer key, không tính điểm</p>
             )}
@@ -307,7 +346,7 @@ export function WorkbookListeningTest({ config }: { config: WorkbookConfig }) {
         ) : (
           <p className="text-sm text-muted-foreground">Đã trả lời {Object.values(answers).filter(Boolean).length}/{questions.length} câu</p>
         )}
-        <Button type="button" onClick={() => setIsSubmitted(true)} disabled={isSubmitted}>Nộp bài</Button>
+        <Button type="button" onClick={submitAttempt} disabled={isSubmitted || isSaving}>Nộp bài</Button>
       </Card>
     </div>
   );
@@ -317,7 +356,6 @@ function QuestionCard({
   question,
   selectedAnswer,
   onAnswer,
-  showResultsImmediately = false,
   showTranslation = true,
   showPinyin = true,
   isSubmitted = false,
@@ -325,7 +363,6 @@ function QuestionCard({
   question: Question;
   selectedAnswer?: string;
   onAnswer: (optId: string) => void;
-  showResultsImmediately?: boolean;
   showTranslation?: boolean;
   showPinyin?: boolean;
   isSubmitted?: boolean;
@@ -334,7 +371,7 @@ function QuestionCard({
   const isCorrect = question.gradable && (question.kind === "input"
     ? selectedAnswer?.trim() === question.correctAnswer.trim()
     : selectedAnswer === question.correctAnswer);
-  const showResults = question.gradable && isAnswered && (showResultsImmediately || isSubmitted);
+  const showResults = question.gradable && isAnswered && isSubmitted && Boolean(question.correctAnswer);
 
   return (
     <Card className="p-4 space-y-4">

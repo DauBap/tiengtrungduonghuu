@@ -22,74 +22,73 @@ export function LessonTabs({ activeTab, onTabChange, availableTypes, hasQuiz }: 
     <div className="border-b border-border">
       <div className="flex overflow-x-auto">
         {ordered.map((type) => {
-          if (type === "TEST") {
+            if (type === "TEST") {
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => onTabChange("TEST")}
+                  aria-current={activeTab === "TEST" ? "page" : undefined}
+                  className={cn(
+                    baseTab,
+                    activeTab === "TEST"
+                      ? "border-primary text-primary"
+                      : hasQuiz
+                        ? "border-transparent text-foreground hover:text-primary hover:border-border"
+                        : "border-transparent text-muted-foreground"
+                  )}
+                >
+                  <ClipboardCheck className="h-4 w-4" />
+                  Ôn từ vựng
+                </button>
+              );
+            }
+
+            if (type === "LESSON") {
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => onTabChange("LESSON")}
+                  aria-current={activeTab === "LESSON" ? "page" : undefined}
+                  className={cn(
+                    baseTab,
+                    activeTab === "LESSON"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-foreground hover:text-primary hover:border-border"
+                  )}
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Bài khóa
+                </button>
+              );
+            }
+
+            const blockType = type as LearningBlockType;
+            const Icon = BLOCK_META[blockType].icon;
+            const isActive = activeTab === blockType;
+            const hasContent = availableTypes.has(blockType);
+
             return (
               <button
-                key={type}
+                key={blockType}
                 type="button"
-                onClick={() => onTabChange("TEST")}
-                aria-current={activeTab === "TEST" ? "page" : undefined}
+                onClick={() => onTabChange(blockType)}
+                aria-current={isActive ? "page" : undefined}
                 className={cn(
                   baseTab,
-                  activeTab === "TEST"
+                  isActive
                     ? "border-primary text-primary"
-                    : hasQuiz
+                    : hasContent
                       ? "border-transparent text-foreground hover:text-primary hover:border-border"
                       : "border-transparent text-muted-foreground"
                 )}
               >
-                <ClipboardCheck className="h-4 w-4" />
-                Ôn từ vựng
+                <Icon className="h-4 w-4" />
+                {BLOCK_META[blockType].label}
               </button>
             );
-          }
-
-          if (type === "LESSON") {
-            return (
-              <button
-                key={type}
-                type="button"
-                onClick={() => onTabChange("LESSON")}
-                aria-current={activeTab === "LESSON" ? "page" : undefined}
-                className={cn(
-                  baseTab,
-                  activeTab === "LESSON"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-foreground hover:text-primary hover:border-border"
-                )}
-              >
-                <BookOpen className="h-4 w-4" />
-                Bài khóa
-              </button>
-            );
-          }
-
-          const blockType = type as LearningBlockType;
-          const Icon = BLOCK_META[blockType].icon;
-          const isActive = activeTab === blockType;
-          const hasContent = availableTypes.has(blockType);
-
-          return (
-            <button
-              key={blockType}
-              type="button"
-              onClick={() => onTabChange(blockType)}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                baseTab,
-                isActive
-                  ? "border-primary text-primary"
-                  : hasContent
-                    ? "border-transparent text-foreground hover:text-primary hover:border-border"
-                    : "border-transparent text-muted-foreground"
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              {BLOCK_META[blockType].label}
-            </button>
-          );
         })}
-
       </div>
     </div>
   );

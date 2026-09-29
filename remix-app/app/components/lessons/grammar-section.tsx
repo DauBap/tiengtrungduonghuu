@@ -22,13 +22,32 @@ export interface GrammarSectionData extends Record<GrammarFieldKey, string | nul
   questions: GrammarPracticeQuestion[];
 }
 
+export interface GrammarPracticeSummary {
+  score: number | null;
+  correctCount: number | null;
+  totalCount: number | null;
+  passed: boolean | null;
+}
+
 /**
  * Một điểm ngữ pháp cho học viên.
  *
  * Bốn field nội dung đều tùy chọn — field trống thì ẩn cả nhãn. Ví dụ được
  * tách theo từng đoạn để học viên dễ đối chiếu câu tiếng Trung và nghĩa.
  */
-export function GrammarSection({ section, number }: { section: GrammarSectionData; number: number }) {
+export function GrammarSection({
+  section,
+  number,
+  latestAttempts,
+  lockedPracticeTypes = [],
+  answerReviewEnabled = false,
+}: {
+  section: GrammarSectionData;
+  number: number;
+  latestAttempts: Partial<Record<GrammarQuestionType, GrammarPracticeSummary>>;
+  lockedPracticeTypes?: GrammarQuestionType[];
+  answerReviewEnabled?: boolean;
+}) {
   const [practicing, setPracticing] = useState(false);
   const [activeType, setActiveType] = useState<GrammarQuestionType>("SINGLE_CHOICE");
   const hasQuestions = section.questions.length > 0;
@@ -37,10 +56,14 @@ export function GrammarSection({ section, number }: { section: GrammarSectionDat
     ARRANGE: section.questions.filter((question) => question.type === "ARRANGE"),
     FILL: section.questions.filter((question) => question.type === "FILL"),
   };
+  const availablePracticeTabs = PRACTICE_TABS.filter((tab) => questionsByType[tab.type].length > 0);
+  const latestPracticeTabs = availablePracticeTabs.filter((tab) => latestAttempts[tab.type]);
 
-  const openPractice = () => {
-    const firstAvailable = PRACTICE_TABS.find((tab) => questionsByType[tab.type].length > 0);
-    if (firstAvailable) setActiveType(firstAvailable.type);
+  const openPractice = (type?: GrammarQuestionType) => {
+    const selected = type
+      ? availablePracticeTabs.find((tab) => tab.type === type)
+      : availablePracticeTabs[0];
+    if (selected) setActiveType(selected.type);
     setPracticing(true);
   };
 
@@ -116,9 +139,45 @@ export function GrammarSection({ section, number }: { section: GrammarSectionDat
         })}
       </div>
 
-      {hasQuestions && (
+      {!practicing && latestPracticeTabs.length > 0 && (
+        <div className="space-y-2 border-t px-5 py-4 sm:px-6">
+          <p className="text-xs font-bold uppercase text-muted-foreground">Luyện tập theo dạng</p>
+          {availablePracticeTabs.map((tab) => {
+            const result = latestAttempts[tab.type];
+            return (
+              <div key={tab.type} className="flex flex-wrap items-center justify-between gap-3 rounded-md border px-3 py-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{tab.label}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {result ? (
+                      <>
+                        {result.passed === true ? "Đạt" : "Chưa đạt"}
+                        {result.correctCount != null && result.totalCount != null
+                          ? ` · Đúng ${result.correctCount}/${result.totalCount} câu`
+                          : ""}
+                        {result.score != null ? ` · ${result.score}%` : ""}
+                      </>
+                    ) : "Chưa làm"}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={lockedPracticeTypes.includes(tab.type)}
+                  onClick={() => openPractice(tab.type)}
+                >
+                  {lockedPracticeTypes.includes(tab.type) ? "Đã chốt" : result ? "Làm lại" : "Luyện tập"}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {hasQuestions && latestPracticeTabs.length === 0 && (
         <div className="border-t bg-muted/20 px-5 py-3 sm:px-6">
-          <Button onClick={openPractice} className="w-full justify-between sm:w-auto sm:justify-start">
+          <Button onClick={() => openPractice()} className="w-full justify-between sm:w-auto sm:justify-start">
             <span className="flex items-center">
               <ListChecks className="mr-1.5 h-4 w-4" />
               Luyện tập
@@ -148,8 +207,13 @@ export function GrammarSection({ section, number }: { section: GrammarSectionDat
             </header>
 
             <div className="shrink-0 border-b px-3 sm:px-5">
-              <div role="tablist" aria-label="Dạng bài tập" className="grid grid-cols-3">
-                {PRACTICE_TABS.map((tab) => {
+              <div
+                role="tablist"
+                aria-label="Dạng bài tập"
+                className="grid"
+                style={{ gridTemplateColumns: `repeat(${availablePracticeTabs.length}, minmax(0, 1fr))` }}
+              >
+                {availablePracticeTabs.map((tab) => {
                   const Icon = tab.icon;
                   const selected = activeType === tab.type;
                   const tabId = `grammar-practice-tab-${section.id}-${tab.type}`;
@@ -177,7 +241,7 @@ export function GrammarSection({ section, number }: { section: GrammarSectionDat
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6">
-              {PRACTICE_TABS.map((tab) => {
+              {availablePracticeTabs.map((tab) => {
                 const tabId = `grammar-practice-tab-${section.id}-${tab.type}`;
                 const questions = questionsByType[tab.type];
                 return (
@@ -188,13 +252,7 @@ export function GrammarSection({ section, number }: { section: GrammarSectionDat
                     aria-labelledby={tabId}
                     hidden={activeType !== tab.type}
                   >
-                    {questions.length > 0 ? (
-                      <GrammarPractice questions={questions} />
-                    ) : (
-                      <p className="py-8 text-center text-sm text-muted-foreground">
-                        Chưa có câu hỏi dạng này trong phần ngữ pháp.
-                      </p>
-                    )}
+                      <GrammarPractice questions={questions} sectionId={section.id} answerReviewEnabled={answerReviewEnabled} />
                   </section>
                 );
               })}

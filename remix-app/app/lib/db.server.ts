@@ -2,6 +2,27 @@
  * Shared DB query helpers dùng trong các routes
  */
 import { prisma } from "~/lib/prisma.server";
+import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
+
+type TrackedTabProgressRow = {
+  lessonId: string;
+  tab: string;
+  completed: boolean;
+  attempts?: { passed: boolean | null }[];
+};
+
+function isTrackedTabCompleted(row: TrackedTabProgressRow) {
+  return row.tab === "VOCABULARY_TEST" ? row.attempts?.[0]?.passed === true : row.completed;
+}
+
+export function computeTrackedCourseProgress(lessonIds: string[], rows: TrackedTabProgressRow[]) {
+  const totalTabs = lessonIds.length * LESSON_TAB_KEYS.length;
+  if (totalTabs === 0) return 0;
+
+  const lessonIdSet = new Set(lessonIds);
+  const completedTabs = rows.filter((row) => lessonIdSet.has(row.lessonId) && isTrackedTabCompleted(row)).length;
+  return Math.round((completedTabs / totalTabs) * 100);
+}
 
 // ─── Courses ─────────────────────────────────────────────────────────────────
 
@@ -211,25 +232,28 @@ export async function getCourseProgressMap(userId: string, courseIds: string[]) 
       where: { courseId: { in: courseIds } },
       select: { id: true, courseId: true },
     }),
-    prisma.lessonProgress.findMany({
+    prisma.lessonTabProgress.findMany({
       where: { userId, lesson: { courseId: { in: courseIds } } },
-      select: { lessonId: true, testCompleted: true },
+      include: {
+        attempts: {
+          where: { tab: "VOCABULARY_TEST" },
+          orderBy: { completedAt: "desc" },
+          take: 1,
+        },
+      },
     }),
   ]);
 
-  const lessonsByCourse = new Map<string, { id: string }[]>();
+  const lessonsByCourse = new Map<string, string[]>();
   for (const lesson of lessons) {
     const list = lessonsByCourse.get(lesson.courseId);
-    if (list) list.push({ id: lesson.id });
-    else lessonsByCourse.set(lesson.courseId, [{ id: lesson.id }]);
+    if (list) list.push(lesson.id);
+    else lessonsByCourse.set(lesson.courseId, [lesson.id]);
   }
 
   const result: Record<string, number> = {};
   for (const courseId of courseIds) {
-    result[courseId] = computeCourseProgress(
-      lessonsByCourse.get(courseId) ?? [],
-      progressList,
-    );
+    result[courseId] = computeTrackedCourseProgress(lessonsByCourse.get(courseId) ?? [], progressList);
   }
   return result;
 }
@@ -241,7 +265,7 @@ export async function getCourseProgressMap(userId: string, courseIds: string[]) 
  */
 export async function getStudentDashboardStats(userId: string, courseIds: string[]) {
   if (courseIds.length === 0) {
-    return { totalLessons: 0, totalCompleted: 0, currentLesson: null, courseProgress: {} };
+    return { totalLessons: 0, totalCompleted: 0, currentLesson: null, courseProgress: {}, overallProgress: 0 };
   }
 
   const [lessons, progressList] = await Promise.all([
@@ -250,20 +274,40 @@ export async function getStudentDashboardStats(userId: string, courseIds: string
       select: { id: true, courseId: true, order: true, title: true, subtitle: true },
       orderBy: { order: "asc" },
     }),
-    prisma.lessonProgress.findMany({
+    prisma.lessonTabProgress.findMany({
       where: { userId, lesson: { courseId: { in: courseIds } } },
-      select: { lessonId: true, testCompleted: true },
+      include: {
+        attempts: {
+          where: { tab: "VOCABULARY_TEST" },
+          orderBy: { completedAt: "desc" },
+          take: 1,
+        },
+      },
     }),
   ]);
 
-  const progressMap = new Map(progressList.map((p) => [p.lessonId, p]));
-  const isDone = (lessonId: string) => progressMap.get(lessonId)?.testCompleted === true;
+  const progressByLesson = new Map<string, typeof progressList>();
+  for (const row of progressList) {
+    const rows = progressByLesson.get(row.lessonId) ?? [];
+    rows.push(row);
+    progressByLesson.set(row.lessonId, rows);
+  }
+  const isDone = (lessonId: string) => LESSON_TAB_KEYS.every((tab) => {
+    const row = progressByLesson.get(lessonId)?.find((item) => item.tab === tab);
+    return row ? isTrackedTabCompleted(row) : false;
+  });
 
   const courseProgress: Record<string, number> = {};
   for (const courseId of courseIds) {
     const courseLessons = lessons.filter((l) => l.courseId === courseId);
-    courseProgress[courseId] = computeCourseProgress(courseLessons, progressList);
+    courseProgress[courseId] = computeTrackedCourseProgress(
+      courseLessons.map((lesson) => lesson.id),
+      progressList,
+    );
   }
+
+  const totalTrackedTabs = lessons.length * LESSON_TAB_KEYS.length;
+  const totalCompletedTabs = progressList.filter(isTrackedTabCompleted).length;
 
   // Bài đang học = bài chưa xong đầu tiên, theo đúng thứ tự khóa học hiển thị.
   let currentLesson: (typeof lessons)[number] | null = null;
@@ -280,6 +324,7 @@ export async function getStudentDashboardStats(userId: string, courseIds: string
     totalCompleted: lessons.filter((l) => isDone(l.id)).length,
     currentLesson,
     courseProgress,
+    overallProgress: totalTrackedTabs > 0 ? Math.round((totalCompletedTabs / totalTrackedTabs) * 100) : 0,
   };
 }
 
