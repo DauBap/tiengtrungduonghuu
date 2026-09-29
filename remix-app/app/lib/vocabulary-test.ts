@@ -13,6 +13,7 @@ export interface VocabularyTestQuestion {
   chinese: string;
   pinyin: string;
   translation: string;
+  lessonPinyin: string;
   wordTypeLabels: string[];
   translationOptions: string[];
   chineseOptions: string[];
@@ -29,19 +30,39 @@ function shuffled<T>(items: readonly T[]): T[] {
 
 export function createVocabularyTest(
   lessonWords: readonly VocabularyTestWord[],
-  courseWords: readonly VocabularyTestWord[]
+  courseWords: readonly VocabularyTestWord[],
+  sameWordTypeDistractors = true
 ): VocabularyTestQuestion[] {
-  const translations = [...new Set(
-    courseWords.map((word) => word.translation.trim()).filter(Boolean)
-  )];
-  const chineseWords = [...new Set(
-    courseWords.map((word) => word.chinese.trim()).filter(Boolean)
-  )];
+  const uniqueValues = (field: "translation" | "chinese") => {
+    const byValue = new Map<string, Set<string>>();
+    for (const word of courseWords) {
+      const value = word[field].trim();
+      if (!value) continue;
+      const types = byValue.get(value) ?? new Set<string>();
+      word.wordTypes.filter(isWordType).forEach((type) => types.add(type));
+      byValue.set(value, types);
+    }
+    return byValue;
+  };
+  const translations = uniqueValues("translation");
+  const chineseWords = uniqueValues("chinese");
+
+  const distractorsFor = (pool: Map<string, Set<string>>, word: VocabularyTestWord, correct: string) => {
+    const wantedTypes = new Set<string>(word.wordTypes.filter(isWordType));
+    const available = [...pool].filter(([value]) => value !== correct);
+    const preferred = sameWordTypeDistractors && wantedTypes.size > 0
+      ? available.filter(([, types]) => [...types].some((type) => wantedTypes.has(type)))
+      : [];
+    const remainder = available.filter(([value]) => !preferred.some(([candidate]) => candidate === value));
+    const selected = shuffled(preferred).slice(0, 3);
+    if (selected.length < 3) selected.push(...shuffled(remainder).slice(0, 3 - selected.length));
+    return selected.map(([value]) => value);
+  };
 
   return shuffled(lessonWords.filter((word) => word.chinese.trim() && word.translation.trim())).map((word) => {
     const correct = word.translation.trim();
-    const distractors = shuffled(translations.filter((translation) => translation !== correct)).slice(0, 3);
-    const chineseDistractors = shuffled(chineseWords.filter((chinese) => chinese !== word.chinese.trim())).slice(0, 3);
+    const distractors = distractorsFor(translations, word, correct);
+    const chineseDistractors = distractorsFor(chineseWords, word, word.chinese.trim());
     const wordTypeLabels = word.wordTypes
       .filter(isWordType)
       .map((type) => WORD_TYPE_META[type].label);
@@ -51,6 +72,7 @@ export function createVocabularyTest(
       chinese: word.chinese,
       pinyin: word.pinyin,
       translation: word.translation,
+      lessonPinyin: word.pinyin,
       wordTypeLabels,
       translationOptions: shuffled([correct, ...distractors]),
       chineseOptions: shuffled([word.chinese, ...chineseDistractors]),
@@ -75,7 +97,8 @@ export function gradeVocabularyTest(
 
     return {
       id: word.id,
-      prompt: direction === "vi2zh" ? word.translation : `${word.chinese} (${word.pinyin})`,
+      prompt: direction === "vi2zh" ? word.translation : word.chinese,
+      lessonPinyin: word.pinyin,
       typeLabel: direction === "vi2zh" ? "Việt → Trung" : "Trung → Việt",
       points: 1,
       correct,

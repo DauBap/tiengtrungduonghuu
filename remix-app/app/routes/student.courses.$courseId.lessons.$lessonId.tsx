@@ -31,6 +31,7 @@ import { prisma } from "~/lib/prisma.server";
 import { createVocabularyTest, gradeVocabularyTest } from "~/lib/vocabulary-test";
 import { cn } from "~/lib/utils";
 import { speakChinese } from "~/lib/speech";
+import { useAppSettings } from "~/lib/app-settings";
 
 declare global {
   interface Window {
@@ -100,11 +101,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const blockProgressMap = await getBlockProgressMap(user.id, blocks.map((b) => b.id));
   const blockStatuses = computeBlockStatuses(blocks, blockProgressMap);
 
-  const vocabularyQuestions = createVocabularyTest(lesson.content, courseWords);
+  const vocabularyQuestionSets = {
+    sameWordType: createVocabularyTest(lesson.content, courseWords, true),
+    random: createVocabularyTest(lesson.content, courseWords, false),
+  };
   const passScore = lesson.test?.passScore ?? 50;
   const timeLimitMinutes = lesson.test ? lesson.test.timeLimitMinutes : 30;
 
-  return { user, lesson, lessonStatus, blocks, blockStatuses, vocabularyQuestions, passScore, timeLimitMinutes };
+  return { user, lesson, lessonStatus, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -178,8 +182,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function LessonDetail() {
-  const { user, lesson, blocks, blockStatuses, vocabularyQuestions, passScore, timeLimitMinutes, lessonStatus } = useLoaderData<typeof loader>();
-  const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string }>();
+  const { user, lesson, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus } = useLoaderData<typeof loader>();
+  const settings = useAppSettings();
+  const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; lessonPinyin: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string }>();
   const [activeTab, setActiveTab] = useState<LessonTab>("FLASHCARD");
   const [showScript, setShowScript] = useState(true);
   const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
@@ -322,7 +327,7 @@ export default function LessonDetail() {
   const renderTabContent = () => {
     // Từ vựng đọc trực tiếp kho từ của bài, không qua block.
     if (activeTab === "VOCABULARY") {
-      return <VocabularyTable items={lesson.content} />;
+      return <VocabularyTable items={lesson.content} lessonName={lesson.title} />;
     }
 
     // Ngữ pháp cũng đọc trực tiếp từ bài, mỗi section một card.
@@ -412,6 +417,9 @@ export default function LessonDetail() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-mono text-xs text-muted-foreground tabular-nums">{i + 1}.</span>
                           <p className="font-medium">{q.prompt}</p>
+                          {settings.showPinyin && q.lessonPinyin && q.typeLabel === "Trung → Việt" && (
+                            <p className="w-full pl-6 font-mono text-xs text-muted-foreground">{q.lessonPinyin}</p>
+                          )}
                           <Badge variant="outline" className="bg-background/60 text-muted-foreground text-[10px]">
                             {q.typeLabel}
                           </Badge>
@@ -447,7 +455,7 @@ export default function LessonDetail() {
       }
 
       // Chưa có câu hỏi
-      if (vocabularyQuestions.length === 0) return <LessonTabEmpty tab="TEST" />;
+      if (vocabularyQuestionSets.sameWordType.length === 0) return <LessonTabEmpty tab="TEST" />;
 
       // Form làm bài
       return (
@@ -461,7 +469,7 @@ export default function LessonDetail() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">
-                {vocabularyQuestions.length} từ · cần {passScore}% để đạt
+                {vocabularyQuestionSets.sameWordType.length} từ · cần {passScore}% để đạt
               </CardTitle>
               <CardDescription>
                 Chọn nghĩa tiếng Việt phù hợp cho từng từ. Đề được trộn lại mỗi lần tải trang.
@@ -476,7 +484,7 @@ export default function LessonDetail() {
               <testFetcher.Form method="post">
                 <input type="hidden" name="intent" value="submit-test" />
                 <VocabularyTest
-                  questions={vocabularyQuestions}
+                  questionSets={vocabularyQuestionSets}
                   timeLimitMinutes={timeLimitMinutes}
                   isSubmitting={isSubmittingTest}
                 />
@@ -846,7 +854,7 @@ export default function LessonDetail() {
     // dung, trường hợp đó BlockRenderer hiện "chưa có nội dung" của riêng nó.
     if (blockIndex === -1) return <LessonTabEmpty tab={activeTab} />;
 
-    return <BlockRenderer block={blocks[blockIndex]} status={blockStatuses[blockIndex]} courseId={lesson.courseId} lessonId={lesson.id} />;
+    return <BlockRenderer block={blocks[blockIndex]} status={blockStatuses[blockIndex]} courseId={lesson.courseId} lessonId={lesson.id} lessonName={lesson.title} />;
   };
 
   return (

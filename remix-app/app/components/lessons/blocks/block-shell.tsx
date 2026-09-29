@@ -4,6 +4,7 @@ import { Badge } from "~/components/ui/badge";
 import { CheckCircle2, Lock } from "lucide-react";
 import { BLOCK_META, type LearningBlockType } from "~/lib/learning-blocks";
 import type { ProgressStatus } from "~/types/progress";
+import { SettingsMenu } from "~/components/layout/settings-menu";
 
 interface BlockShellProps {
   type: LearningBlockType;
@@ -13,10 +14,11 @@ interface BlockShellProps {
   required?: boolean;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  showSettings?: boolean;
 }
 
 /** Khung dùng chung cho mọi dạng block: header có icon + trạng thái, body, footer hành động */
-export function BlockShell({ type, title, description, status, required = true, children, footer }: BlockShellProps) {
+export function BlockShell({ type, title, description, status, required = true, children, footer, showSettings = false }: BlockShellProps) {
   const meta = BLOCK_META[type];
   const Icon = meta.icon;
   const isLocked = status === "LOCKED";
@@ -54,6 +56,7 @@ export function BlockShell({ type, title, description, status, required = true, 
             </div>
             {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
           </div>
+          {showSettings && <SettingsMenu />}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

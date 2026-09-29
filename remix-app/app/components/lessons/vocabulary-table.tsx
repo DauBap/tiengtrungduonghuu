@@ -7,6 +7,7 @@ import { speakChinese } from "~/lib/speech";
 import { WORD_TYPE_META, type WordType } from "~/lib/word-types";
 import { LessonTabEmpty } from "./lesson-tab-empty";
 import { StrokeOrderDialog, splitHanCharacters } from "./stroke-order-dialog";
+import { useAppSettings } from "~/lib/app-settings";
 
 interface VocabularyItem {
   id: string;
@@ -19,9 +20,11 @@ interface VocabularyItem {
 
 interface VocabularyTableProps {
   items: VocabularyItem[];
+  lessonName?: string;
 }
 
-export function VocabularyTable({ items }: VocabularyTableProps) {
+export function VocabularyTable({ items, lessonName }: VocabularyTableProps) {
+  const settings = useAppSettings();
   // Từ đang xem cách viết; null = đóng hộp thoại.
   const [strokeItem, setStrokeItem] = useState<VocabularyItem | null>(null);
 
@@ -35,7 +38,8 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
             <TableHead className="w-12 text-center">STT</TableHead>
             {/* Chữ Hán + 2 nút cần chỗ: w-32 cũ làm chữ bị bẻ dòng giữa từ */}
             <TableHead className="w-48">Chữ Hán</TableHead>
-            <TableHead className="w-32">Pinyin</TableHead>
+            {settings.showPinyin && <TableHead className="w-32">Pinyin</TableHead>}
+            {lessonName && <TableHead>Bài học</TableHead>}
             <TableHead className="w-20">Từ loại</TableHead>
             <TableHead>Nghĩa tiếng Việt</TableHead>
           </TableRow>
@@ -73,7 +77,8 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
                   )}
                 </div>
               </TableCell>
-              <TableCell className="font-mono text-sm text-primary">{item.pinyin}</TableCell>
+              {settings.showPinyin && <TableCell className="font-mono text-sm text-primary">{item.pinyin}</TableCell>}
+              {lessonName && <TableCell className="text-sm text-muted-foreground">{lessonName}</TableCell>}
               <TableCell>
                 {item.wordTypes?.length ? (
                   <div className="flex flex-wrap gap-1">
@@ -99,6 +104,7 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
           chinese={strokeItem.chinese}
           pinyin={strokeItem.pinyin}
           translation={strokeItem.translation}
+          showPinyin={settings.showPinyin}
           onClose={() => setStrokeItem(null)}
         />
       )}

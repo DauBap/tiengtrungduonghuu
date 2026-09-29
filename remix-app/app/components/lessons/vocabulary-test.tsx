@@ -3,6 +3,7 @@ import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import type { VocabularyTestQuestion } from "~/lib/vocabulary-test";
 import { ChevronLeft, ChevronRight, RotateCcw, Send, Timer } from "lucide-react";
+import { useAppSettings } from "~/lib/app-settings";
 
 type QuizDirection = "zh2vi" | "vi2zh" | "mixed";
 type QuestionDirection = Exclude<QuizDirection, "mixed">;
@@ -27,14 +28,16 @@ const DISPLAY_MODES: Array<{ id: DisplayMode; label: string }> = [
 ];
 
 export function VocabularyTest({
-  questions,
+  questionSets,
   timeLimitMinutes,
   isSubmitting = false,
 }: {
-  questions: VocabularyTestQuestion[];
+  questionSets: { sameWordType: VocabularyTestQuestion[]; random: VocabularyTestQuestion[] };
   timeLimitMinutes: number | null;
   isSubmitting?: boolean;
 }) {
+  const settings = useAppSettings();
+  const questions = questionSets.sameWordType;
   const [direction, setDirection] = useState<QuizDirection>("mixed");
   const [displayMode, setDisplayMode] = useState<DisplayMode>("paged");
   const [startedAt, setStartedAt] = useState<number | null>(null);
@@ -165,7 +168,7 @@ export function VocabularyTest({
         <p className={cn("font-semibold leading-tight", question.direction === "zh2vi" ? "text-5xl" : "text-2xl")}>
           {question.prompt}
         </p>
-        {question.promptDetail && <p className="font-mono text-sm text-muted-foreground">{question.promptDetail}</p>}
+        {settings.showPinyin && question.promptDetail && <p className="font-mono text-sm text-muted-foreground">{question.promptDetail}</p>}
         {question.wordTypeLabels.length > 0 && (
           <div className="flex flex-wrap justify-center gap-1.5">
             {question.wordTypeLabels.map((label) => (

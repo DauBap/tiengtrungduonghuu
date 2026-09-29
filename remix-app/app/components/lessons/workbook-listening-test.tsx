@@ -7,6 +7,7 @@ import { Progress } from "~/components/ui/progress";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 import type { WorkbookConfig } from "~/lib/learning-blocks";
+import { useAppSettings } from "~/lib/app-settings";
 
 interface QuestionOption {
   id: string;
@@ -50,6 +51,8 @@ interface Section {
 }
 
 export function WorkbookListeningTest({ config }: { config: WorkbookConfig }) {
+  const appSettings = useAppSettings();
+  const showPinyin = config.showPinyin && appSettings.showPinyin;
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState<0.8 | 1 | 1.5>(1);
   const [currentTime, setCurrentTime] = useState(0);
@@ -240,10 +243,10 @@ export function WorkbookListeningTest({ config }: { config: WorkbookConfig }) {
               <Card className="bg-accent/5 border-accent/20">
                 <div className="p-4 space-y-3">
                   <div className="font-medium text-accent">Ví dụ</div>
-                  {(section.example.chinese || (config.showPinyin && section.example.pinyin) || (config.showTranslation && section.example.translation)) && (
+                  {(section.example.chinese || (showPinyin && section.example.pinyin) || (config.showTranslation && section.example.translation)) && (
                     <div className="space-y-1">
                       {section.example.chinese && <p className="font-medium">{section.example.chinese}</p>}
-                      {config.showPinyin && section.example.pinyin && <p className="text-sm text-muted-foreground">{section.example.pinyin}</p>}
+                      {showPinyin && section.example.pinyin && <p className="text-sm text-muted-foreground">{section.example.pinyin}</p>}
                       {config.showTranslation && section.example.translation && <p className="text-sm italic">{section.example.translation}</p>}
                     </div>
                   )}
@@ -261,10 +264,10 @@ export function WorkbookListeningTest({ config }: { config: WorkbookConfig }) {
                         <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-current font-medium">
                           {option.label}
                         </div>
-                        {(option.text || (config.showPinyin && option.pinyin)) && (
+                        {(option.text || (showPinyin && option.pinyin)) && (
                           <span className="min-w-0 flex-1">
                             {option.text && <span className="block">{option.text}</span>}
-                            {config.showPinyin && option.pinyin && <span className="block text-xs text-muted-foreground">{option.pinyin}</span>}
+                            {showPinyin && option.pinyin && <span className="block text-xs text-muted-foreground">{option.pinyin}</span>}
                           </span>
                         )}
                         {option.id === section.example?.correctAnswer && (
@@ -286,7 +289,7 @@ export function WorkbookListeningTest({ config }: { config: WorkbookConfig }) {
                 onAnswer={(optId) => setAnswers((prev) => ({ ...prev, [question.id]: optId }))}
                 showResultsImmediately={config.showResultsImmediately}
                 showTranslation={config.showTranslation}
-                showPinyin={config.showPinyin}
+                showPinyin={showPinyin}
                 isSubmitted={isSubmitted}
               />
             ))}

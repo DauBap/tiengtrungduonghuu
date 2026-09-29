@@ -7,6 +7,7 @@ import { Volume2, CheckCircle2, XCircle, ArrowRight, RefreshCw, Loader2 } from "
 import { speakChinese, isSpeechSupported } from "~/lib/speech";
 import { compareAnswerHighlights, isAnswerCorrect } from "~/lib/listening-answer";
 import type { ListeningConfig } from "~/lib/learning-blocks";
+import { useAppSettings } from "~/lib/app-settings";
 
 /** Một câu hỏi nghe — đã được loader phẳng hoá từ VocabItem hoặc SentenceItem. */
 export interface ListeningQuestion {
@@ -40,6 +41,7 @@ function formatTime(seconds: number): string {
 }
 
 export function ListeningBlock({ config, questions, isCompleted, onComplete }: ListeningBlockProps) {
+  const settings = useAppSettings();
   const [round, setRound] = useState(0);
   const items = useMemo(
     () => (config.shuffle ? shuffled(questions) : questions),
@@ -229,7 +231,7 @@ export function ListeningBlock({ config, questions, isCompleted, onComplete }: L
               <div className="mt-3 space-y-1 border-t border-destructive/20 pt-3">
                 <p className="text-xs text-muted-foreground">Đáp án đúng</p>
                 <p className="text-lg font-medium">{expected}</p>
-                {config.answerMode === "chinese" && (
+                {settings.showPinyin && config.answerMode === "chinese" && (
                   <p className="text-sm text-primary font-mono">{question.pinyin}</p>
                 )}
                 <p className="text-sm text-muted-foreground">{question.translation}</p>

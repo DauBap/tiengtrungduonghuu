@@ -26,10 +26,11 @@ interface StrokeOrderDialogProps {
   chinese: string;
   pinyin: string;
   translation: string;
+  showPinyin?: boolean;
   onClose: () => void;
 }
 
-export function StrokeOrderDialog({ chinese, pinyin, translation, onClose }: StrokeOrderDialogProps) {
+export function StrokeOrderDialog({ chinese, pinyin, translation, showPinyin = true, onClose }: StrokeOrderDialogProps) {
   const chars = splitHanCharacters(chinese);
 
   // Một ô vẽ cho mỗi chữ. Từ nhiều chữ thì thu nhỏ lại cho vừa hộp thoại.
@@ -116,8 +117,8 @@ export function StrokeOrderDialog({ chinese, pinyin, translation, onClose }: Str
           <div>
             <h2 className="text-2xl font-bold leading-tight">{chinese}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              <span className="font-mono text-primary">{pinyin}</span>
-              {translation ? ` · ${translation}` : ""}
+              {showPinyin && <span className="font-mono text-primary">{pinyin}{translation ? " · " : ""}</span>}
+              {translation}
             </p>
           </div>
           <button

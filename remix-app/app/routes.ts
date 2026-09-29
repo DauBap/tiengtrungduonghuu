@@ -4,6 +4,7 @@ export default [
   index("routes/_index.tsx"),
   route("login", "routes/login.tsx"),
   route("logout", "routes/logout.tsx"),
+  route("api/tts", "routes/api.tts.ts"),
 
   // Admin
   route("admin", "routes/admin.tsx", [

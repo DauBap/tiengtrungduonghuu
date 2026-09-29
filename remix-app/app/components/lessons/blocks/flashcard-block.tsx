@@ -6,6 +6,7 @@ import { Check, CheckCircle2, ChevronLeft, ChevronRight, CircleHelp, RefreshCw, 
 import { speakChinese, isSpeechSupported } from "~/lib/speech";
 import type { FlashcardConfig } from "~/lib/learning-blocks";
 import { WORD_TYPE_META, type WordType } from "~/lib/word-types";
+import { useAppSettings } from "~/lib/app-settings";
 
 export interface FlashcardVocab {
   id: string;
@@ -28,6 +29,7 @@ interface FlashcardBlockProps {
   lessonId: string;
   isCompleted: boolean;
   onComplete: () => void;
+  lessonName?: string;
 }
 
 function shuffled<T>(arr: T[]): T[] {
@@ -39,7 +41,8 @@ function shuffled<T>(arr: T[]): T[] {
   return copy;
 }
 
-export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted, onComplete }: FlashcardBlockProps) {
+export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted, onComplete, lessonName }: FlashcardBlockProps) {
+  const settings = useAppSettings();
   const storageKey = `flashcard-progress:${courseId}:${lessonId}`;
   const [round, setRound] = useState(0);
   const cards = useMemo(() => (config.shuffle ? shuffled(items) : items), [items, config.shuffle, round]);
@@ -214,12 +217,13 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
         <div className={cn("relative h-72 w-full transition-transform duration-500 [transform-style:preserve-3d]", flipped && "[transform:rotateY(180deg)]")}>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/20 bg-primary/5 p-6 transition-colors [backface-visibility:hidden] group-hover:border-primary/40">
             <p className={cn("text-center font-semibold", frontIsChinese ? "text-5xl" : "text-2xl")}>{frontMain}</p>
-            {frontIsChinese && config.showPinyinOnFront && <p className="font-mono text-lg text-primary">{card.pinyin}</p>}
+            {lessonName && <p className="text-xs text-muted-foreground">{lessonName}</p>}
+            {frontIsChinese && config.showPinyinOnFront && settings.showPinyin && <p className="font-mono text-lg text-primary">{card.pinyin}</p>}
             <p className="absolute bottom-4 text-xs text-muted-foreground">Bấm để lật thẻ</p>
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/30 bg-primary/10 p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]">
             <p className={cn("text-center font-semibold", frontIsChinese ? "text-2xl" : "text-5xl")}>{backMain}</p>
-            <p className="font-mono text-base text-primary">{card.pinyin}</p>
+            {settings.showPinyin && <p className="font-mono text-base text-primary">{card.pinyin}</p>}
             {!!card.wordTypes?.length && <div className="flex flex-wrap justify-center gap-1">{card.wordTypes.map((type) => <span key={type} className="rounded-full border border-border bg-background/60 px-2.5 py-0.5 text-xs text-muted-foreground">{WORD_TYPE_META[type].label}</span>)}</div>}
             {card.note && <p className="mt-1 max-w-xs text-center text-sm text-muted-foreground">{card.note}</p>}
           </div>
