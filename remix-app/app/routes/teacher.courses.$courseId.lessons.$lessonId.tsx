@@ -17,12 +17,24 @@ const TAB_LABELS: Record<string, string> = {
   VOCABULARY_TEST: "Ôn từ vựng",
   LISTENING: "Nghe câu",
   VOCABULARY: "Từ vựng",
-  LESSON: "Bài học",
+  LESSON: "Bài khóa",
   GRAMMAR: "Ngữ pháp",
   WORKBOOK: "Workbook",
 };
 
 const ANSWER_REVIEW_TABS = new Set<LessonTab>(["VOCABULARY_TEST", "LISTENING", "GRAMMAR", "WORKBOOK"]);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isPendingGrammarReview(attempt: { passed: boolean | null; details: unknown } | undefined) {
+  if (!attempt || attempt.passed !== null) return false;
+  const details = isRecord(attempt.details) ? attempt.details : {};
+  return details.questionType === "FILL"
+    && details.reviewPending === true
+    && !isRecord(details.teacherGrading);
+}
 
 function getTabStateTone(state: string | null | undefined) {
   switch (state) {
@@ -623,6 +635,7 @@ export default function TeacherLessonProgress() {
                             const row = (progressByStudent.get(student.id) ?? []).find((item) => item.tab === "GRAMMAR");
                             const attempts = row?.attempts.filter((attempt) => attempt.tab === "GRAMMAR") ?? [];
                             const latestAttempt = attempts[0];
+                            const reviewPending = isPendingGrammarReview(latestAttempt);
                             const latestState = latestAttempt == null
                               ? "NOT_STARTED"
                               : latestAttempt.passed === true
@@ -635,7 +648,7 @@ export default function TeacherLessonProgress() {
                                 <td className="px-4 py-3 font-medium">{student.name ?? "Học viên"}</td>
                                 <td className="px-4 py-3">
                                   <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium", getTabStateTone(latestState))}>
-                                    {latestAttempt == null ? "Chưa làm" : latestAttempt.passed ? "Đạt" : "Chưa đạt"}
+                                    {latestAttempt == null ? "Chưa làm" : reviewPending ? "Chờ chấm" : latestAttempt.passed ? "Đạt" : "Chưa đạt"}
                                   </span>
                                   {latestAttempt?.passed === true && latestAttempt.score != null && (
                                     <span className="ml-2 font-semibold tabular-nums">{latestAttempt.score}%</span>
@@ -689,7 +702,9 @@ export default function TeacherLessonProgress() {
                                   {stateLabel}
                                 </span>
                                 <span className="min-w-12 text-right text-sm font-semibold tabular-nums">
-                                  {row?.currentScore != null ? `${Math.round(row.currentScore)}%` : "-"}
+                                  {row?.currentScore != null
+                                    ? activeTab === "LESSON" ? `${Math.round(row.currentScore)} / 100` : `${Math.round(row.currentScore)}%`
+                                    : "-"}
                                 </span>
                                 <Button asChild size="sm" variant="outline">
                                   <Link to={`/teacher/courses/${course.id}/students/${student.id}?lessonId=${encodeURIComponent(lesson.id)}&tab=${activeTab}`}>Chi tiết</Link>
@@ -697,19 +712,21 @@ export default function TeacherLessonProgress() {
                               </div>
                             </div>
 
-                            <div className="flex flex-wrap items-start justify-between gap-3">
-                              <TeacherTabComment studentId={student.id} studentName={student.name ?? "Học viên"} tab={activeTab} feedback={row?.feedback[0]} />
-                              <form method="post" className="flex flex-wrap items-end gap-2 rounded-md border bg-muted/20 p-2">
-                                <input type="hidden" name="intent" value="save-tab-grade" />
-                                <input type="hidden" name="studentId" value={student.id} />
-                                <input type="hidden" name="tab" value={activeTab} />
-                                <div className="w-24">
-                                  <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Điểm</label>
-                                  <input type="number" name="score" min={0} max={100} defaultValue={row?.currentScore ?? 0} className="w-full rounded-md border bg-background px-2 py-1.5 text-sm" />
-                                </div>
-                                <Button type="submit" size="sm" className="whitespace-nowrap">Lưu điểm</Button>
-                              </form>
-                            </div>
+                            {activeTab !== "LESSON" && (
+                              <div className="flex flex-wrap items-start justify-between gap-3">
+                                <TeacherTabComment studentId={student.id} studentName={student.name ?? "Học viên"} tab={activeTab} feedback={row?.feedback[0]} />
+                                <form method="post" className="flex flex-wrap items-end gap-2 rounded-md border bg-muted/20 p-2">
+                                  <input type="hidden" name="intent" value="save-tab-grade" />
+                                  <input type="hidden" name="studentId" value={student.id} />
+                                  <input type="hidden" name="tab" value={activeTab} />
+                                  <div className="w-24">
+                                    <label className="mb-1 block text-[11px] font-medium text-muted-foreground">Điểm</label>
+                                    <input type="number" name="score" min={0} max={100} defaultValue={row?.currentScore ?? 0} className="w-full rounded-md border bg-background px-2 py-1.5 text-sm" />
+                                  </div>
+                                  <Button type="submit" size="sm" className="whitespace-nowrap">Lưu điểm</Button>
+                                </form>
+                              </div>
+                            )}
                           </section>
                         );
                       })}

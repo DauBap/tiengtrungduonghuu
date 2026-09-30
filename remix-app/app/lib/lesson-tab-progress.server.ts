@@ -15,6 +15,7 @@ export interface AttemptInput {
   correctCount?: number | null;
   totalCount?: number | null;
   passed?: boolean | null;
+  needsReview?: boolean;
   details?: Prisma.InputJsonValue;
   startedAt?: Date | null;
   completedAt?: Date;
@@ -59,8 +60,8 @@ export function computeTabSnapshot(input: {
   bestScore?: number | null;
   needsReview?: boolean;
 }): TabSnapshot {
-  const percent = boundedPercent(input.percent ?? (input.completed ? 100 : 0));
-  const completed = input.completed || percent >= 100;
+  const percent = boundedPercent(input.needsReview ? 0 : input.percent ?? (input.completed ? 100 : 0));
+  const completed = !input.needsReview && (input.completed || percent >= 100);
   const state: LessonTabState = input.needsReview
     ? "NEEDS_REVIEW"
     : completed
@@ -169,11 +170,18 @@ export async function recordLessonTabAttempt(prisma: PrismaClient, input: Attemp
     const score = normalizeScore(input.score);
     const completedAt = input.completedAt ?? new Date();
     const completed = input.tab === "VOCABULARY_TEST" ? input.passed === true : true;
-    const state: LessonTabState = completed ? "COMPLETED" : "IN_PROGRESS";
-    const percent = completed ? 100 : 0;
+    const needsReview = input.needsReview === true || previous?.state === "NEEDS_REVIEW";
     const bestScore = score == null
       ? previous?.bestScore ?? null
       : Math.max(previous?.bestScore ?? 0, score);
+    const snapshot = computeTabSnapshot({
+      opened: true,
+      completed,
+      percent: completed ? 100 : 0,
+      currentScore: needsReview ? null : score,
+      bestScore,
+      needsReview,
+    });
     const progress = await tx.lessonTabProgress.upsert({
       where: {
         userId_lessonId_tab: {
@@ -184,26 +192,26 @@ export async function recordLessonTabAttempt(prisma: PrismaClient, input: Attemp
       },
       update: {
         opened: true,
-        completed,
-        state,
-        percent,
-        currentScore: score,
-        bestScore,
+        completed: snapshot.completed,
+        state: snapshot.state,
+        percent: snapshot.percent,
+        currentScore: snapshot.currentScore,
+        bestScore: snapshot.bestScore,
         lastAttemptAt: completedAt,
-        completedAt: completed ? previous?.completedAt ?? completedAt : null,
+        completedAt: snapshot.completed ? previous?.completedAt ?? completedAt : null,
       },
       create: {
         userId: input.userId,
         lessonId: input.lessonId,
         tab: input.tab,
         opened: true,
-        completed,
-        state,
-        percent,
-        currentScore: score,
-        bestScore,
+        completed: snapshot.completed,
+        state: snapshot.state,
+        percent: snapshot.percent,
+        currentScore: snapshot.currentScore,
+        bestScore: snapshot.bestScore,
         lastAttemptAt: completedAt,
-        completedAt: completed ? completedAt : null,
+        completedAt: snapshot.completed ? completedAt : null,
       },
     });
 

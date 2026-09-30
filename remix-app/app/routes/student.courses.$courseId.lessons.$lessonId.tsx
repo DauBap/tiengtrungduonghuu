@@ -1,7 +1,6 @@
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useFetcher, Link, redirect } from "react-router";
 import { useEffect, useRef, useState } from "react";
-import { put } from "@vercel/blob";
 import { requireRole } from "~/lib/session.server";
 import {
   getLessonById,
@@ -41,6 +40,7 @@ import { useAppSettings } from "~/lib/app-settings";
 import { SettingsMenu } from "~/components/layout/settings-menu";
 import { isLessonTabKey, openLessonTab, recordLessonTabAttempt } from "~/lib/lesson-tab-progress.server";
 import type { LessonTab as ProgressTab } from "~/lib/lesson-tab-progress";
+import { computePronunciationScore } from "~/lib/pronunciation";
 
 const FEEDBACK_TAB_LABELS: Record<string, string> = {
   FLASHCARD: "Flashcard",
@@ -60,6 +60,7 @@ interface AnswerReviewResult {
   correct: boolean | null;
   matchPercent: number | null;
   hint: string | null;
+  teacherFeedback: string | null;
 }
 
 interface AnswerReviewGroup {
@@ -79,6 +80,10 @@ interface ReviewTarget {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function hasTeacherGrade(details: Record<string, unknown>) {
+  return isRecord(details.teacherGrading) && typeof details.teacherGrading.gradedAt === "string";
 }
 
 function makeAnswerReviewGroup(
@@ -109,6 +114,7 @@ function makeAnswerReviewGroup(
       correct: typeof value.correct === "boolean" ? value.correct : null,
       matchPercent: typeof value.matchPercent === "number" ? value.matchPercent : null,
       hint: typeof value.hint === "string" ? value.hint : null,
+      teacherFeedback: typeof value.teacherFeedback === "string" ? value.teacherFeedback : null,
     }];
   });
 
@@ -233,7 +239,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         evaluation: true,
         scriptText: true,
         transcript: true,
-        audioUrl: true,
         createdAt: true,
       },
     }),
@@ -278,6 +283,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const answerReviewLockedTargets: Partial<Record<ProgressTab, string[]>> = {};
   for (const attempt of answerReviewAttempts) {
     const details = isRecord(attempt.details) ? attempt.details : {};
+    if (attempt.tab === "GRAMMAR"
+      && details.questionType === "FILL"
+      && details.reviewPending === true
+      && !hasTeacherGrade(details)) continue;
     const targetKey = attempt.tab === "GRAMMAR"
       ? `${String(details.sectionId ?? "")}:${String(details.questionType ?? attempt.mode ?? "")}`
       : attempt.tab === "VOCABULARY_TEST"
@@ -315,11 +324,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
     const sectionAttempts = grammarAttemptsBySection[sectionId] ??= {};
     if (sectionAttempts[questionType]) continue;
+    const pendingReview = details.reviewPending === true && !hasTeacherGrade(details);
     sectionAttempts[questionType] = {
-      score: attempt.score,
-      correctCount: attempt.correctCount,
-      totalCount: attempt.totalCount,
-      passed: attempt.passed,
+      score: pendingReview ? null : attempt.score,
+      correctCount: pendingReview ? null : attempt.correctCount,
+      totalCount: pendingReview ? null : attempt.totalCount,
+      passed: pendingReview ? null : attempt.passed,
+      pendingReview,
     };
   }
   const lessonStatus = computeLessonStatus(progress);
@@ -419,12 +430,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       workbook: latestWorkbookAttempt,
     },
     pronunciationAssessments: pronunciationAssessments
-      .filter((assessment) => assessment.scriptText?.trim() && assessment.transcript?.trim() && assessment.audioUrl)
-      .map((assessment) => ({
-        ...assessment,
-        audioUrl: `/api/pronunciation-recordings/${assessment.id}`,
-        createdAt: assessment.createdAt.toISOString(),
-      })),
+      .filter((assessment) => assessment.scriptText?.trim() && assessment.transcript?.trim())
+      .map((assessment) => ({ ...assessment, createdAt: assessment.createdAt.toISOString() })),
   };
 }
 
@@ -463,6 +470,21 @@ export async function action({ request, params }: ActionFunctionArgs) {
           : null;
   let answerReviewOpen = false;
   if (reviewSubmission) {
+    if (reviewSubmission.tab === "GRAMMAR" && reviewSubmission.target.questionType === "FILL") {
+      const attempts = await prisma.lessonTabAttempt.findMany({
+        where: { userId: user.id, lessonId: params.lessonId!, tab: "GRAMMAR", mode: "FILL" },
+        select: { details: true },
+      });
+      const hasPendingFill = attempts.some((attempt) => {
+        const details = isRecord(attempt.details) ? attempt.details : {};
+        return details.sectionId === reviewSubmission.target.sectionId
+          && details.reviewPending === true
+          && !hasTeacherGrade(details);
+      });
+      if (hasPendingFill) {
+        return { grammarError: "Lượt Dịch câu đang chờ giáo viên chấm. Bạn có thể luyện lại sau khi có kết quả." as const };
+      }
+    }
     const gate = await getAnswerReviewGate(user.id, params.lessonId!, reviewSubmission.tab, reviewSubmission.target);
     answerReviewOpen = gate.isOpen;
     if (gate.isLocked) return answerReviewLockError(reviewSubmission.tab);
@@ -470,19 +492,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   if (intent === "save-pronunciation-score") {
     const scriptId = String(form.get("lessonAudioScriptId") ?? "");
-    const rawScore = Number(String(form.get("score") ?? "0"));
-    const score = Number.isFinite(rawScore) ? Math.max(0, Math.min(100, Math.round(rawScore))) : 0;
     const transcript = String(form.get("transcript") ?? "").trim();
-    const recording = form.get("recording");
 
     if (!scriptId) return { error: "Thiếu đoạn nghe để lưu điểm." };
     if (!transcript) return { error: "Không có nội dung nhận diện để chấm điểm." };
-    if (!(recording instanceof File) || recording.size === 0 || !recording.type.startsWith("audio/")) {
-      return { error: "Không tìm thấy file ghi âm hợp lệ để lưu." };
-    }
-    if (recording.size > 20 * 1024 * 1024) {
-      return { error: "Bản ghi vượt quá giới hạn 20 MB." };
-    }
+    if (transcript.length > 10000) return { error: "Nội dung nhận diện quá dài." };
 
     const script = await prisma.lessonAudioScript.findUnique({
       where: { id: scriptId },
@@ -497,23 +511,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       return { error: "Không tìm thấy đoạn nghe trong bài học này." };
     }
     const scriptText = script.speakers.map((speaker) => speaker.chinese).join(" ");
-
-    let audioUrl: string;
-    try {
-      const uploaded = await put(
-        `pronunciation/${script.id}/${user.id}/reading.webm`,
-        recording,
-        {
-          access: "public",
-          addRandomSuffix: true,
-          contentType: recording.type,
-        }
-      );
-      audioUrl = uploaded.url;
-    } catch {
-      return { error: "Không thể tải bản ghi lên kho lưu trữ. Vui lòng thử lại." };
-    }
-
+    const score = computePronunciationScore(scriptText, transcript);
     const evaluation = getPronunciationEvaluation(score);
     const assessment = await prisma.pronunciationAssessment.create({
       data: {
@@ -522,8 +520,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         score,
         evaluation,
         scriptText: scriptText || null,
-        transcript: transcript || null,
-        audioUrl,
+        transcript,
       },
     });
     await recordLessonTabAttempt(prisma, {
@@ -607,7 +604,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         questions: {
           where: { type: questionType },
           orderBy: { order: "asc" },
-          select: { id: true, type: true, prompt: true, options: true, answer: true, hint: true },
+          select: { id: true, type: true, prompt: true, options: true, answer: true, acceptedAnswers: true, hint: true },
         },
       },
     });
@@ -636,6 +633,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       return { grammarError: "Vui lòng trả lời đầy đủ các câu hỏi trong tab này." as const };
     }
 
+    const reviewPending = questionType === "FILL";
     const results = [];
     for (const question of questions) {
       const response = answerMap.get(question.id)!;
@@ -668,6 +666,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
         givenTokens: Array.isArray(response) ? response : null,
         correctAnswer: grammarAnswerText(question),
         correct,
+        autoCorrect: correct,
+        teacherFeedback: null,
         points: 1,
         hint: question.hint,
       });
@@ -682,15 +682,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
       lessonId: params.lessonId!,
       tab: "GRAMMAR",
       mode: questionType,
-      score,
-      correctCount,
-      totalCount,
-      passed: correctCount === totalCount,
+      score: reviewPending ? null : score,
+      correctCount: reviewPending ? null : correctCount,
+      totalCount: reviewPending ? null : totalCount,
+      passed: reviewPending ? null : correctCount === totalCount,
+      needsReview: reviewPending,
       completedAt,
       details: {
         sectionId: section.id,
         sectionTitle: section.title,
         questionType,
+        reviewPending,
         results,
       },
     });
@@ -698,9 +700,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return {
       success: true as const,
       intent: "submit-grammar-attempt" as const,
-      score,
-      correctCount,
-      totalCount,
+      score: reviewPending ? null : score,
+      correctCount: reviewPending ? null : correctCount,
+      totalCount: reviewPending ? null : totalCount,
+      reviewPending,
     };
   }
 
@@ -1014,17 +1017,21 @@ function AnswerReviewDetails({ groups }: { groups: AnswerReviewGroup[] }) {
             )}
           </div>
           {group.results.map((result, index) => (
+            (() => {
+              const isCorrect = result.correct === true || result.matchPercent === 100;
+              const isIncorrect = result.correct === false || result.matchPercent === 0;
+              return (
             <div
               key={result.id}
               className={cn(
                 "rounded-md border p-3",
-                result.matchPercent === 100 ? "border-success/30 bg-success/5" : result.matchPercent === 0 ? "border-destructive/30 bg-destructive/5" : "bg-muted/20",
+                isCorrect ? "border-success/30 bg-success/5" : isIncorrect ? "border-destructive/30 bg-destructive/5" : "bg-muted/20",
               )}
             >
               <div className="flex items-start gap-2">
-                {result.matchPercent === 100
+                {isCorrect
                   ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-                  : result.matchPercent === 0
+                  : isIncorrect
                     ? <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
                     : null}
                 <div className="min-w-0 space-y-1.5">
@@ -1036,10 +1043,17 @@ function AnswerReviewDetails({ groups }: { groups: AnswerReviewGroup[] }) {
                   {result.correctAnswer && (
                     <p className="text-sm"><span className="text-muted-foreground">Đáp án đúng: </span>{result.correctAnswer}</p>
                   )}
+                  {result.teacherFeedback && (
+                    <p className="whitespace-pre-wrap text-sm">
+                      <span className="text-muted-foreground">Đáp án/Nhận xét của giáo viên: </span>{result.teacherFeedback}
+                    </p>
+                  )}
                   {result.hint && <p className="whitespace-pre-line text-xs text-muted-foreground">{result.hint}</p>}
                 </div>
               </div>
             </div>
+              );
+            })()
           ))}
         </section>
       ))}
@@ -1059,6 +1073,7 @@ export default function LessonDetail() {
     totalCount?: number;
     workbookError?: string;
   }>();
+  const pronunciationFetcher = useFetcher<{ success?: boolean; intent?: string; error?: string }>();
   const progressFetcher = useFetcher();
   const [activeTab, setActiveTab] = useState<LessonTab>("FLASHCARD");
   const hasGrammar = lesson.grammarSections.length > 0;
@@ -1087,6 +1102,7 @@ export default function LessonDetail() {
         ? activeTab
         : null;
     const answerReviewEnabled = activeReviewTab !== null && answerReviewTabs.includes(activeReviewTab);
+    const showAnswerReviewControls = answerReviewEnabled && activeTab !== "GRAMMAR";
     const activeReviewGroups = activeReviewTab ? answerReviewGroups[activeReviewTab] ?? [] : [];
     const activeLockedTargets = activeReviewTab ? answerReviewLockedTargets[activeReviewTab] ?? [] : [];
     const testRetakeLocked = answerReviewEnabled && activeLockedTargets.includes("vocabulary-test");
@@ -1098,53 +1114,12 @@ export default function LessonDetail() {
   const [recordingError, setRecordingError] = useState<string | null>(null);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [recognizedTranscript, setRecognizedTranscript] = useState("");
-  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
-  const [isPlayingReplay, setIsPlayingReplay] = useState(false);
   const [pronunciationFeedback, setPronunciationFeedback] = useState<React.ReactNode | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-  const replayAudioRef = useRef<HTMLAudioElement | null>(null);
-  const recordedAudioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<number | null>(null);
   const recordingStartedAtRef = useRef<number | null>(null);
   const recognitionRef = useRef<any>(null);
   const manualStopRequestedRef = useRef(false);
-  const pendingPronunciationRef = useRef<{
-    scriptId: string;
-    scriptText: string;
-    score: number;
-    transcript: string;
-  } | null>(null);
-
-  const normalizePronunciationText = (value: string) =>
-    value
-      .toLowerCase()
-      .replace(/[^\p{L}\p{N}]/gu, "");
-
-  const computePronunciationScore = (scriptText: string, spokenText: string) => {
-    const scriptCharacters = Array.from(normalizePronunciationText(scriptText));
-    const spokenCharacters = Array.from(normalizePronunciationText(spokenText));
-
-    if (scriptCharacters.length === 0 || spokenCharacters.length === 0) return 0;
-
-    let previousRow = Array.from({ length: spokenCharacters.length + 1 }, (_, index) => index);
-
-    for (let i = 1; i <= scriptCharacters.length; i += 1) {
-      const currentRow = [i];
-      for (let j = 1; j <= spokenCharacters.length; j += 1) {
-        currentRow[j] = Math.min(
-          currentRow[j - 1] + 1,
-          previousRow[j] + 1,
-          previousRow[j - 1] + (scriptCharacters[i - 1] === spokenCharacters[j - 1] ? 0 : 1)
-        );
-      }
-      previousRow = currentRow;
-    }
-
-    const distance = previousRow[spokenCharacters.length];
-    const length = Math.max(scriptCharacters.length, spokenCharacters.length);
-    return Math.max(0, Math.round(((length - distance) / length) * 100));
-  };
+  const recognitionErrorRef = useRef(false);
 
   const buildPronunciationFeedback = (score: number) => {
     if (score >= 90) {
@@ -1188,8 +1163,7 @@ export default function LessonDetail() {
       if (recordingTimerRef.current) {
         window.clearInterval(recordingTimerRef.current);
       }
-      mediaRecorderRef.current?.stop();
-      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+      recognitionRef.current?.stop();
     };
   }, []);
 
@@ -1208,7 +1182,6 @@ export default function LessonDetail() {
     const best = pronunciationAssessments.find((assessment) => assessment.lessonAudioScriptId === selectedScriptId);
     setPhoneticScore(best?.score ?? 0);
     setRecognizedTranscript(best?.transcript ?? "");
-    setRecordedAudioUrl(best?.audioUrl ?? null);
     setPronunciationFeedback(best ? buildPronunciationFeedback(best.score) : null);
   }, [pronunciationAssessments, selectedScriptId]);
 
@@ -1222,7 +1195,8 @@ export default function LessonDetail() {
   // Khi nộp bài xong, tự giữ kết quả trong fetcher.data
   const testResult = testFetcher.data && "testResult" in testFetcher.data ? testFetcher.data.testResult : null;
   const testError = testFetcher.data && "testError" in testFetcher.data ? testFetcher.data.testError : null;
-  const pronunciationSaveError = testFetcher.data && "error" in testFetcher.data ? testFetcher.data.error : null;
+  const pronunciationSaveError = pronunciationFetcher.data?.error ?? null;
+  const isSubmittingPronunciation = pronunciationFetcher.state !== "idle";
   const isSubmittingTest = testFetcher.state !== "idle";
 
   // Dạng bài có mặt trong bài này. Dùng để làm mờ tab của dạng bài chưa soạn —
@@ -1263,6 +1237,9 @@ export default function LessonDetail() {
               section={section}
               number={index + 1}
               latestAttempts={grammarAttemptsBySection[section.id] ?? {}}
+              answerReviewGroups={(answerReviewGroups.GRAMMAR ?? []).filter((group) =>
+                group.targetKey.startsWith(`${section.id}:`)
+              )}
               lockedPracticeTypes={activeLockedTargets.flatMap((targetKey) => {
                 const [lockedSectionId, lockedType] = targetKey.split(":");
                 return lockedSectionId === section.id && parseGrammarQuestionType(lockedType) ? [parseGrammarQuestionType(lockedType)!] : [];
@@ -1414,71 +1391,11 @@ export default function LessonDetail() {
           return;
         }
 
-        if (!navigator.mediaDevices?.getUserMedia) {
-          setRecordingError("Trình duyệt của bạn chưa cho phép ghi âm giọng nói.");
-          return;
-        }
-
         manualStopRequestedRef.current = false;
+        recognitionErrorRef.current = false;
 
         if (recognitionRef.current) {
           recognitionRef.current.stop();
-        }
-
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          mediaStreamRef.current = stream;
-          recordedAudioChunksRef.current = [];
-
-          const mediaRecorder = new MediaRecorder(stream, MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? { mimeType: "audio/webm;codecs=opus" } : undefined);
-          mediaRecorderRef.current = mediaRecorder;
-
-          mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-              recordedAudioChunksRef.current.push(event.data);
-            }
-          };
-
-          mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(recordedAudioChunksRef.current, {
-              type: mediaRecorder.mimeType || "audio/webm",
-            });
-
-            if (recordedAudioUrl?.startsWith("blob:")) {
-              URL.revokeObjectURL(recordedAudioUrl);
-            }
-
-            const localAudioUrl = URL.createObjectURL(audioBlob);
-            setRecordedAudioUrl(localAudioUrl);
-            mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
-            mediaStreamRef.current = null;
-
-            const pending = pendingPronunciationRef.current;
-            pendingPronunciationRef.current = null;
-            if (!pending || audioBlob.size === 0) {
-              if (pending) setRecordingError("Không thu được âm thanh để lưu. Vui lòng thử lại.");
-              return;
-            }
-
-            const formData = new FormData();
-            formData.append("intent", "save-pronunciation-score");
-            formData.append("lessonAudioScriptId", pending.scriptId);
-            formData.append("score", String(pending.score));
-            formData.append("scriptText", pending.scriptText);
-            formData.append("transcript", pending.transcript);
-            formData.append(
-              "recording",
-              new File([audioBlob], `${pending.scriptId}-${Date.now()}.webm`, {
-                type: audioBlob.type || "audio/webm",
-              })
-            );
-            testFetcher.submit(formData, { method: "post", encType: "multipart/form-data" });
-          };
-
-          mediaRecorder.start();
-        } catch {
-          setRecordingError("Không thể truy cập micrôphone. Hãy cấp quyền ghi âm để luyện nói.");
-          return;
         }
 
         const recognition = new SpeechRecognitionCtor();
@@ -1499,7 +1416,18 @@ export default function LessonDetail() {
         };
 
         recognition.onend = () => {
-          if (!manualStopRequestedRef.current && isRecording) {
+          if (recognitionErrorRef.current) {
+            setRecordingSeconds(0);
+            setIsRecording(false);
+            if (recordingTimerRef.current) {
+              window.clearInterval(recordingTimerRef.current);
+              recordingTimerRef.current = null;
+            }
+            recordingStartedAtRef.current = null;
+            return;
+          }
+
+          if (!manualStopRequestedRef.current) {
             try {
               recognition.start();
             } catch {
@@ -1511,7 +1439,7 @@ export default function LessonDetail() {
           const scriptText = selectedAudioScript.speakers.map((speaker) => speaker.chinese).join(" ");
           const finalTranscript = spokenText.trim();
           if (!finalTranscript) {
-            setRecordingError("Không nhận diện được nội dung đọc. Hãy thử lại khi kết nối nhận diện giọng nói ổn định.");
+            setRecordingError("Chưa nhận diện được nội dung. Hãy thử đọc lại.");
             setRecordingSeconds(0);
             setIsRecording(false);
             if (recordingTimerRef.current) {
@@ -1519,16 +1447,13 @@ export default function LessonDetail() {
               recordingTimerRef.current = null;
             }
             recordingStartedAtRef.current = null;
-            pendingPronunciationRef.current = null;
-            if (mediaRecorderRef.current?.state === "recording") {
-              mediaRecorderRef.current.stop();
-            }
             return;
           }
 
           const score = computePronunciationScore(scriptText, finalTranscript);
           const finalScore = Number.isFinite(score) ? Math.min(100, Math.max(0, score)) : 0;
           setPhoneticScore(finalScore);
+          setRecognizedTranscript(finalTranscript);
           setPronunciationFeedback(buildPronunciationFeedback(finalScore));
           setRecordingSeconds(0);
           setIsRecording(false);
@@ -1538,15 +1463,6 @@ export default function LessonDetail() {
             recordingTimerRef.current = null;
           }
           recordingStartedAtRef.current = null;
-          pendingPronunciationRef.current = {
-            scriptId: selectedAudioScript.id,
-            scriptText,
-            score: finalScore,
-            transcript: finalTranscript,
-          };
-          if (mediaRecorderRef.current?.state === "recording") {
-            mediaRecorderRef.current.stop();
-          }
         };
 
         recognition.onerror = (event: any) => {
@@ -1554,7 +1470,10 @@ export default function LessonDetail() {
             return;
           }
           setRecordingError("Không nhận dạng được giọng nói. Hãy thử lại sau vài giây.");
+          recognitionErrorRef.current = true;
           manualStopRequestedRef.current = true;
+          setRecognizedTranscript("");
+          setPronunciationFeedback(null);
           setIsRecording(false);
         };
 
@@ -1564,7 +1483,13 @@ export default function LessonDetail() {
         setRecordingSeconds(0);
         setIsRecording(true);
         recordingStartedAtRef.current = Date.now();
-        recognition.start();
+        try {
+          recognition.start();
+        } catch {
+          setRecordingError("Không thể bắt đầu nhận diện giọng nói. Vui lòng thử lại.");
+          setIsRecording(false);
+          return;
+        }
 
         recordingTimerRef.current = window.setInterval(() => {
           if (recordingStartedAtRef.current) {
@@ -1580,40 +1505,15 @@ export default function LessonDetail() {
         if (recognitionRef.current) {
           recognitionRef.current.stop();
         }
-        setIsRecording(false);
       };
 
-      const replayLastRecording = () => {
-        if (!recordedAudioUrl) {
-          setRecordingError("Bạn chưa có bản ghi âm nào để nghe lại.");
-          return;
-        }
-
-        if (replayAudioRef.current) {
-          replayAudioRef.current.pause();
-          replayAudioRef.current.currentTime = 0;
-          replayAudioRef.current = null;
-          setIsPlayingReplay(false);
-          return;
-        }
-
-        const audio = new Audio(recordedAudioUrl);
-        replayAudioRef.current = audio;
-        audio.onended = () => {
-          setIsPlayingReplay(false);
-          replayAudioRef.current = null;
-        };
-        audio.onerror = () => {
-          setRecordingError("Không thể phát lại âm thanh của bạn ngay lúc này.");
-          setIsPlayingReplay(false);
-          replayAudioRef.current = null;
-        };
-        setIsPlayingReplay(true);
-        audio.play().catch(() => {
-          setRecordingError("Không thể phát lại âm thanh của bạn ngay lúc này.");
-          setIsPlayingReplay(false);
-          replayAudioRef.current = null;
-        });
+      const submitPronunciation = () => {
+        if (!selectedAudioScript || !recognizedTranscript.trim() || isRecording || isSubmittingPronunciation) return;
+        const formData = new FormData();
+        formData.append("intent", "save-pronunciation-score");
+        formData.append("lessonAudioScriptId", selectedAudioScript.id);
+        formData.append("transcript", recognizedTranscript.trim());
+        pronunciationFetcher.submit(formData, { method: "post" });
       };
 
       if (!selectedAudioScript) {
@@ -1623,9 +1523,16 @@ export default function LessonDetail() {
       const bestPronunciationAssessment = pronunciationAssessments.find(
         (assessment) => assessment.lessonAudioScriptId === selectedAudioScript.id
       );
-      const displayedScore = bestPronunciationAssessment?.score ?? (recognizedTranscript.trim() ? phoneticScore : null);
-      const displayedEvaluation = bestPronunciationAssessment?.evaluation
-        ?? (displayedScore === null ? "CHƯA CÓ LƯỢT ĐỌC" : getPronunciationEvaluation(displayedScore));
+      const hasCurrentTranscript = !isRecording && Boolean(recognizedTranscript.trim());
+      const displayedScore = isRecording
+        ? null
+        : hasCurrentTranscript ? phoneticScore : bestPronunciationAssessment?.score ?? null;
+      const displayedEvaluation = isRecording
+        ? "CHỜ DỪNG ĐỌC"
+        : hasCurrentTranscript
+        ? displayedScore === null ? "CHƯA CÓ LƯỢT ĐỌC" : getPronunciationEvaluation(displayedScore)
+        : bestPronunciationAssessment?.evaluation
+          ?? (displayedScore === null ? "CHƯA CÓ LƯỢT ĐỌC" : getPronunciationEvaluation(displayedScore));
 
       return (
         <div className="mx-auto max-w-6xl space-y-3">
@@ -1741,22 +1648,19 @@ export default function LessonDetail() {
                   </Button>
                   <Button
                     type="button"
-                    variant="outline"
-                    onClick={replayLastRecording}
-                    disabled={!recordedAudioUrl}
+                    onClick={submitPronunciation}
+                    disabled={!recognizedTranscript.trim() || isRecording || isSubmittingPronunciation}
                   >
-                    {isPlayingReplay
-                      ? "Dừng lại"
-                      : bestPronunciationAssessment
-                        ? "Nghe bản ghi điểm cao nhất"
-                        : "Nghe lại bài đọc của tôi"}
+                    {isSubmittingPronunciation ? "Đang nộp..." : "Nộp bài"}
                   </Button>
                 </div>
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border p-3">
-                  <div className="text-xs font-bold uppercase text-muted-foreground">Điểm cao nhất</div>
+                    <div className="text-xs font-bold uppercase text-muted-foreground">
+                      {isRecording ? "Điểm" : hasCurrentTranscript ? "Điểm bài đọc hiện tại" : "Điểm cao nhất"}
+                    </div>
                   <div className="mt-2 flex items-center gap-2">
                     <span className="text-2xl font-bold text-primary tabular-nums">{displayedScore ?? "—"}</span>
                     <span className="text-xs text-muted-foreground">/ 100</span>
@@ -1788,7 +1692,7 @@ export default function LessonDetail() {
                 </div>
               )}
 
-              {bestPronunciationAssessment && (
+              {!isRecording && bestPronunciationAssessment && (
                 <div className="mt-4 space-y-3 rounded-lg border p-3 text-sm">
                   <div className="text-xs font-bold uppercase text-muted-foreground">
                     Kết quả tốt nhất · {new Date(bestPronunciationAssessment.createdAt).toLocaleString("vi-VN")}
@@ -1806,9 +1710,9 @@ export default function LessonDetail() {
                 </div>
               )}
 
-              {!bestPronunciationAssessment && recognizedTranscript && !isRecording && (
+              {recognizedTranscript && !isRecording && (
                 <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
-                  <div className="font-medium text-foreground">Bạn đã đọc:</div>
+                  <div className="font-medium text-foreground">Văn bản nhận diện:</div>
                   <p className="mt-1 text-muted-foreground">{recognizedTranscript}</p>
                 </div>
               )}
@@ -1816,7 +1720,7 @@ export default function LessonDetail() {
               {isRecording && (
                 <div className="mt-4 rounded-lg border border-success/30 bg-success/5 p-3 text-sm text-success">
                   <span className="font-bold">Đang lắng nghe...</span>
-                  <span className="ml-2 text-success/80">Đã nghe {recordingSeconds}s · đang so sánh với bài khóa.</span>
+                  <span className="ml-2 text-success/80">Đã nghe {recordingSeconds}s · đang nhận dạng giọng nói.</span>
                 </div>
               )}
             </section>
@@ -1842,7 +1746,7 @@ export default function LessonDetail() {
     />;
   };
 
-  const answerReviewControl = answerReviewEnabled ? (
+  const answerReviewControl = showAnswerReviewControls ? (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div>
         <p className="text-sm font-semibold">Đáp án chi tiết</p>
@@ -1945,18 +1849,18 @@ export default function LessonDetail() {
                     </div>
                   </section>
                 )}
-                {answerReviewEnabled && !activeScore && (
+                {showAnswerReviewControls && !activeScore && (
                   <section className="rounded-md border bg-card px-4 py-3">{answerReviewControl}</section>
                 )}
-                {showAnswerReview && answerReviewEnabled && <AnswerReviewDetails groups={activeReviewGroups} />}
+                {showAnswerReview && showAnswerReviewControls && <AnswerReviewDetails groups={activeReviewGroups} />}
                 <div>{renderTabContent()}</div>
               </div>
             ) : (
               <div className="max-w-6xl mx-auto space-y-3">
-                {answerReviewEnabled && (
+                {showAnswerReviewControls && (
                   <section className="rounded-md border bg-card px-4 py-3">{answerReviewControl}</section>
                 )}
-                {showAnswerReview && answerReviewEnabled && <AnswerReviewDetails groups={activeReviewGroups} />}
+                {showAnswerReview && showAnswerReviewControls && <AnswerReviewDetails groups={activeReviewGroups} />}
                 {renderTabContent()}
               </div>
             )}

@@ -27,6 +27,24 @@ export interface GrammarPracticeSummary {
   correctCount: number | null;
   totalCount: number | null;
   passed: boolean | null;
+  pendingReview?: boolean;
+}
+
+export interface GrammarAnswerReviewGroup {
+  targetKey: string;
+  score: number | null;
+  correctCount: number | null;
+  totalCount: number | null;
+  results: Array<{
+    id: string;
+    prompt: string;
+    given: string;
+    correctAnswer: string;
+    correct: boolean | null;
+    matchPercent: number | null;
+    hint: string | null;
+    teacherFeedback: string | null;
+  }>;
 }
 
 /**
@@ -41,15 +59,18 @@ export function GrammarSection({
   latestAttempts,
   lockedPracticeTypes = [],
   answerReviewEnabled = false,
+  answerReviewGroups = [],
 }: {
   section: GrammarSectionData;
   number: number;
   latestAttempts: Partial<Record<GrammarQuestionType, GrammarPracticeSummary>>;
   lockedPracticeTypes?: GrammarQuestionType[];
   answerReviewEnabled?: boolean;
+  answerReviewGroups?: GrammarAnswerReviewGroup[];
 }) {
   const [practicing, setPracticing] = useState(false);
   const [activeType, setActiveType] = useState<GrammarQuestionType>("SINGLE_CHOICE");
+  const [showAnswersFor, setShowAnswersFor] = useState<GrammarQuestionType | null>(null);
   const hasQuestions = section.questions.length > 0;
   const questionsByType: Record<GrammarQuestionType, GrammarPracticeQuestion[]> = {
     SINGLE_CHOICE: section.questions.filter((question) => question.type === "SINGLE_CHOICE"),
@@ -59,14 +80,20 @@ export function GrammarSection({
   const availablePracticeTabs = PRACTICE_TABS.filter((tab) => questionsByType[tab.type].length > 0);
   const latestPracticeTabs = availablePracticeTabs.filter((tab) => latestAttempts[tab.type]);
   const unattemptedPracticeTabs = availablePracticeTabs.filter((tab) => !latestAttempts[tab.type]);
+  const isPracticeLocked = (type: GrammarQuestionType) =>
+    lockedPracticeTypes.includes(type) || Boolean(latestAttempts[type]?.pendingReview);
 
   const openPractice = (type?: GrammarQuestionType) => {
     const selected = type
-      ? availablePracticeTabs.find((tab) => tab.type === type)
-      : availablePracticeTabs[0];
+      ? availablePracticeTabs.find((tab) => tab.type === type && !isPracticeLocked(tab.type))
+      : availablePracticeTabs.find((tab) => !isPracticeLocked(tab.type));
     if (selected) setActiveType(selected.type);
     setPracticing(true);
   };
+  const activeReviewGroup = showAnswersFor
+    ? answerReviewGroups.find((group) => group.targetKey === `${section.id}:${showAnswersFor}`)
+    : null;
+  const activeReviewLabel = PRACTICE_TABS.find((tab) => tab.type === showAnswersFor)?.label;
 
   return (
     <article className="overflow-hidden rounded-lg border bg-card">
@@ -145,41 +172,104 @@ export function GrammarSection({
           <p className="text-xs font-bold uppercase text-muted-foreground">Luyện tập theo dạng</p>
           {latestPracticeTabs.map((tab) => {
             const result = latestAttempts[tab.type];
+            const locked = isPracticeLocked(tab.type);
+            const reviewGroup = answerReviewGroups.find((group) => group.targetKey === `${section.id}:${tab.type}`);
+            const answersVisible = showAnswersFor === tab.type;
             return (
-              <div key={tab.type} className="flex flex-wrap items-center justify-between gap-3 rounded-md border px-3 py-2">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">{tab.label}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {result ? (
-                      <>
-                        {result.passed === true ? "Đạt" : "Chưa đạt"}
-                        {result.correctCount != null && result.totalCount != null
-                          ? ` · Đúng ${result.correctCount}/${result.totalCount} câu`
-                          : ""}
-                        {result.score != null ? ` · ${result.score}%` : ""}
-                      </>
-                    ) : "Chưa làm"}
-                  </p>
+              <div key={tab.type} className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{tab.label}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {result?.pendingReview ? "Chờ giáo viên chấm" : result ? (
+                        <>
+                          {result.passed === true ? "Đạt" : "Chưa đạt"}
+                          {result.correctCount != null && result.totalCount != null
+                            ? ` · Đúng ${result.correctCount}/${result.totalCount} câu`
+                            : ""}
+                          {result.score != null ? ` · ${result.score}%` : ""}
+                        </>
+                      ) : "Chưa làm"}
+                    </p>
+                  </div>
+                  {result?.pendingReview ? (
+                    <Button type="button" size="sm" variant="outline" disabled>Chờ chấm</Button>
+                  ) : locked ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={answersVisible ? "default" : "outline"}
+                      disabled={!reviewGroup}
+                      onClick={() => setShowAnswersFor(answersVisible ? null : tab.type)}
+                    >
+                      {answersVisible ? "Ẩn đáp án" : "Hiển thị đáp án kèm kết quả của học sinh"}
+                    </Button>
+                  ) : (
+                    <Button type="button" size="sm" variant="outline" onClick={() => openPractice(tab.type)}>
+                      {result ? "Làm lại" : "Luyện tập"}
+                    </Button>
+                  )}
                 </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  disabled={lockedPracticeTypes.includes(tab.type)}
-                  onClick={() => openPractice(tab.type)}
-                >
-                  {lockedPracticeTypes.includes(tab.type) ? "Đã chốt" : result ? "Làm lại" : "Luyện tập"}
-                </Button>
               </div>
             );
           })}
-          {unattemptedPracticeTabs.length > 0 && (
+          {unattemptedPracticeTabs.length > 0 && lockedPracticeTypes.length === 0 && (
             <Button type="button" variant="ghost" size="sm" onClick={() => openPractice(unattemptedPracticeTabs[0].type)}>
               <ListChecks className="mr-1.5 h-4 w-4" />
               {latestPracticeTabs.length > 0 ? "Luyện dạng khác" : "Bắt đầu luyện tập"}
             </Button>
           )}
         </div>
+      )}
+
+      {activeReviewGroup && showAnswersFor && (
+        <Overlay onClose={() => setShowAnswersFor(null)} className="max-w-3xl !p-0">
+          <div className="flex max-h-[85vh] flex-col overflow-hidden rounded-xl">
+            <header className="flex shrink-0 items-start justify-between gap-4 border-b px-5 py-4 sm:px-6">
+              <div className="min-w-0">
+                <h2 className="text-base font-bold">Đáp án và kết quả của học sinh</h2>
+                <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                  {section.title} · {activeReviewLabel}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Đóng đáp án"
+                onClick={() => setShowAnswersFor(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </header>
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-5 sm:p-6">
+              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b pb-3">
+                <p className="text-sm font-semibold">Kết quả lượt làm tốt nhất</p>
+                {activeReviewGroup.score != null && (
+                  <p className="text-sm font-medium tabular-nums text-muted-foreground">
+                    {activeReviewGroup.score}%{activeReviewGroup.correctCount != null && activeReviewGroup.totalCount != null
+                      ? ` · ${activeReviewGroup.correctCount}/${activeReviewGroup.totalCount} câu đúng`
+                      : ""}
+                  </p>
+                )}
+              </div>
+              {activeReviewGroup.results.map((answer, index) => {
+                const correct = answer.correct === true || answer.matchPercent === 100;
+                const incorrect = answer.correct === false || answer.matchPercent === 0;
+                return (
+                  <section key={answer.id} className="space-y-1.5 rounded-md border p-3 text-sm">
+                    <p className="font-medium">{index + 1}. {answer.prompt}</p>
+                    <p><span className="text-muted-foreground">Câu trả lời của bạn: </span>{answer.given || "Bỏ trống"}</p>
+                    <p className={correct ? "text-success" : incorrect ? "text-destructive" : "text-muted-foreground"}>
+                      Kết quả: {correct ? "Đúng" : incorrect ? "Sai" : "Chưa xác định"}
+                    </p>
+                    {answer.teacherFeedback && <p className="whitespace-pre-wrap text-muted-foreground">Giáo viên nhận xét: {answer.teacherFeedback}</p>}
+                  </section>
+                );
+              })}
+            </div>
+          </div>
+        </Overlay>
       )}
 
       {practicing && hasQuestions && (
@@ -210,6 +300,7 @@ export function GrammarSection({
                 {availablePracticeTabs.map((tab) => {
                   const Icon = tab.icon;
                   const selected = activeType === tab.type;
+                  const locked = isPracticeLocked(tab.type);
                   const tabId = `grammar-practice-tab-${section.id}-${tab.type}`;
                   return (
                     <button
@@ -219,10 +310,12 @@ export function GrammarSection({
                       role="tab"
                       aria-selected={selected}
                       aria-controls={`${tabId}-panel`}
-                      onClick={() => setActiveType(tab.type)}
+                      disabled={locked}
+                      onClick={() => !locked && setActiveType(tab.type)}
                       className={cn(
                         "flex min-h-[4.5rem] flex-col items-center justify-center gap-1 border-b-2 px-1 py-2 text-center text-xs font-medium leading-tight transition-colors sm:flex-row sm:gap-2 sm:text-sm",
-                        selected ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+                        selected ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground",
+                        locked && "cursor-not-allowed opacity-50"
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0" />

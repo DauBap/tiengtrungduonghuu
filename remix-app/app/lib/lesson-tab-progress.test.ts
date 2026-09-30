@@ -30,7 +30,8 @@ test("completed tab has a full snapshot", () => {
 test("review state takes priority over completion", () => {
   const snapshot = computeTabSnapshot({ opened: true, completed: true, percent: 100, needsReview: true });
   assert.equal(snapshot.state, "NEEDS_REVIEW");
-  assert.equal(snapshot.completed, true);
+  assert.equal(snapshot.completed, false);
+  assert.equal(snapshot.percent, 0);
 });
 
 test("scores and percentages are bounded", () => {

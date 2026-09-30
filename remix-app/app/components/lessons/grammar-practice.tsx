@@ -38,6 +38,7 @@ export function GrammarPractice({ questions, sectionId, answerReviewEnabled = fa
     score?: number;
     correctCount?: number;
     totalCount?: number;
+    reviewPending?: boolean;
     grammarError?: string;
   }>();
   const [index, setIndex] = useState(0);
@@ -221,14 +222,20 @@ export function GrammarPractice({ questions, sectionId, answerReviewEnabled = fa
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-muted/20 p-3">
         {savedResult ? (
           <div>
-            <p className="text-sm font-medium text-success">
-              Số câu đúng: {savedResult.correctCount}/{savedResult.totalCount} · {savedResult.score}%
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {answerReviewEnabled
-                ? "Đáp án chi tiết đã mở ở phần kết quả phía trên."
-                : "Đáp án chi tiết sẽ hiện khi giáo viên mở xem kết quả."}
-            </p>
+            {savedResult.reviewPending ? (
+              <p className="text-sm font-medium text-muted-foreground">Đã nộp. Đang chờ giáo viên chấm.</p>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-success">
+                  Số câu đúng: {savedResult.correctCount}/{savedResult.totalCount} · {savedResult.score}%
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {answerReviewEnabled
+                    ? "Đáp án chi tiết đã mở ở phần kết quả phía trên."
+                    : "Đáp án chi tiết sẽ hiện khi giáo viên mở xem kết quả."}
+                </p>
+              </>
+            )}
           </div>
         ) : fetcher.data?.grammarError && submitted ? (
           <p role="alert" className="text-sm text-destructive">{fetcher.data.grammarError}</p>

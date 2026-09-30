@@ -1,5 +1,6 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Link, redirect, useLoaderData, useSearchParams } from "react-router";
+import { useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import { getCourseById, getLessonsByCourse, isTeacherOfCourse } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
@@ -16,7 +17,7 @@ const TAB_LABELS: Record<string, string> = {
   VOCABULARY_TEST: "Ôn từ vựng",
   LISTENING: "Nghe",
   VOCABULARY: "Từ vựng",
-  LESSON: "Bài học",
+  LESSON: "Bài khóa",
   GRAMMAR: "Ngữ pháp",
   WORKBOOK: "Workbook",
 };
@@ -28,6 +29,10 @@ function getTabStateTone(state: string | null | undefined) {
     case "NEEDS_REVIEW": return "bg-rose-100 text-rose-700 border-rose-200";
     default: return "bg-slate-100 text-slate-600 border-slate-200";
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -138,9 +143,29 @@ export async function action({ request, params }: ActionFunctionArgs) {
 export default function TeacherStudentDetail() {
   const { user, course, student, lessons, progressRows } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
+  const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
   const returnLessonId = searchParams.get("lessonId");
   const returnTab = searchParams.get("tab") ?? "";
   const returnLesson = lessons.find((lesson) => lesson.id === returnLessonId);
+  const selectedLessonProgress = returnLesson && returnTab === "LESSON"
+    ? progressRows.find((row) => row.lessonId === returnLesson.id && row.tab === "LESSON")
+    : undefined;
+  const lessonAttempts = selectedLessonProgress?.attempts.filter((attempt) => attempt.tab === "LESSON") ?? [];
+  const lessonScriptGroups = new Map<string, { title: string; attempts: typeof lessonAttempts }>();
+  for (const attempt of lessonAttempts) {
+    const details = isRecord(attempt.details) ? attempt.details : {};
+    const title = typeof details.scriptTitle === "string" ? details.scriptTitle : "Bài khóa";
+    const scriptId = typeof details.lessonAudioScriptId === "string" ? details.lessonAudioScriptId : title;
+    const group = lessonScriptGroups.get(scriptId) ?? { title, attempts: [] };
+    group.attempts.push(attempt);
+    lessonScriptGroups.set(scriptId, group);
+  }
+  const orderedLessonScriptGroups = [...lessonScriptGroups.entries()]
+    .sort(([, first], [, second]) => first.title.localeCompare(second.title, "vi", { numeric: true, sensitivity: "base" }));
+  const activeScriptId = selectedScriptId && lessonScriptGroups.has(selectedScriptId)
+    ? selectedScriptId
+    : orderedLessonScriptGroups[0]?.[0] ?? null;
+  const activeScriptGroup = activeScriptId ? lessonScriptGroups.get(activeScriptId) : undefined;
   const returnToProgress = returnLesson && isLessonTabKey(returnTab)
     ? `/teacher/courses/${course.id}/lessons/${returnLesson.id}?tab=${returnTab}`
     : null;
@@ -176,11 +201,97 @@ export default function TeacherStudentDetail() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />Tiến độ khóa học: {course.title}
+              <BookOpen className="h-4 w-4" />
+              {returnLesson && returnTab === "LESSON"
+                ? `Lịch sử Bài khóa: ${returnLesson.title}`
+                : `Tiến độ khóa học: ${course.title}`}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {lessons.length === 0 ? (
+            {returnLesson && returnTab === "LESSON" ? (
+              lessonAttempts.length === 0 ? (
+                <EmptyState title="Chưa có bài nộp" message="Học viên chưa nộp lượt đọc nào cho bài khóa này." />
+              ) : (
+                <div className="space-y-4">
+                  <div role="tablist" aria-label="Lịch sử từng bài khóa" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2">
+                    {orderedLessonScriptGroups.map(([scriptId, group]) => {
+                      const selected = scriptId === activeScriptId;
+                      return (
+                        <button
+                          key={scriptId}
+                          id={`lesson-script-tab-${scriptId}`}
+                          type="button"
+                          role="tab"
+                          aria-selected={selected}
+                          aria-controls="lesson-script-history-panel"
+                          onClick={() => setSelectedScriptId(scriptId)}
+                          className={cn(
+                            "inline-flex shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors",
+                            selected
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
+                          )}
+                        >
+                          <span>{group.title}</span>
+                          <span className={cn("rounded px-1.5 py-0.5 text-[10px]", selected ? "bg-primary-foreground/15" : "bg-muted")}>
+                            {group.attempts.length}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {activeScriptGroup && (
+                    <section
+                      id="lesson-script-history-panel"
+                      role="tabpanel"
+                      aria-labelledby={`lesson-script-tab-${activeScriptId}`}
+                      className="divide-y"
+                    >
+                      {activeScriptGroup.attempts.map((attempt, index) => {
+                        const details = isRecord(attempt.details) ? attempt.details : {};
+                        const scriptText = typeof details.scriptText === "string" ? details.scriptText : "";
+                        const transcript = typeof details.transcript === "string" ? details.transcript : "";
+                        const evaluation = typeof details.evaluation === "string" ? details.evaluation : null;
+
+                        return (
+                          <article key={attempt.id} className="space-y-3 py-4 first:pt-0 last:pb-0">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <div>
+                                <h2 className="font-medium">Lượt {activeScriptGroup.attempts.length - index}</h2>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(attempt.completedAt)}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {evaluation && (
+                                  <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium", getTabStateTone(attempt.score != null && attempt.score >= 80 ? "COMPLETED" : "IN_PROGRESS"))}>
+                                    {evaluation}
+                                  </span>
+                                )}
+                                <span className="font-semibold tabular-nums">
+                                  {attempt.score != null ? `${Math.round(attempt.score)} / 100` : "— / 100"}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="grid gap-3 md:grid-cols-2">
+                              <div className="rounded-md border p-3">
+                                <h3 className="text-xs font-semibold text-muted-foreground">Script bài khóa</h3>
+                                <p className="mt-1 whitespace-pre-wrap text-sm">{scriptText || "—"}</p>
+                              </div>
+                              <div className="rounded-md border p-3">
+                                <h3 className="text-xs font-semibold text-muted-foreground">Học viên đã đọc</h3>
+                                <p className="mt-1 whitespace-pre-wrap text-sm">{transcript || "—"}</p>
+                              </div>
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </section>
+                  )}
+                </div>
+              )
+            ) : lessons.length === 0 ? (
               <EmptyState title="Chưa có bài học" message="Khóa học này chưa có nội dung để theo dõi." />
             ) : (
               <div className="space-y-4">

@@ -64,6 +64,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         correctCount: attempt.correctCount,
         totalCount: attempt.totalCount,
         passed: attempt.passed,
+        reviewPending: details.questionType === "FILL"
+          && details.reviewPending === true
+          && !isRecord(details.teacherGrading),
         completedAt: attempt.completedAt.toISOString(),
         sectionId: typeof details.sectionId === "string" ? details.sectionId : null,
         sectionTitle: typeof details.sectionTitle === "string" ? details.sectionTitle : "Ngữ pháp",
@@ -182,10 +185,10 @@ export default function TeacherGrammarHistory() {
                             <span className="text-muted-foreground">
                               {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(attempt.completedAt))}
                             </span>
-                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${attempt.passed ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
-                              {attempt.passed ? "Đạt" : "Chưa đạt"}
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${attempt.reviewPending ? "bg-amber-100 text-amber-700" : attempt.passed ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>
+                              {attempt.reviewPending ? "Chờ chấm" : attempt.passed ? "Đạt" : "Chưa đạt"}
                             </span>
-                            <span className="font-semibold tabular-nums">{attempt.score != null ? `${attempt.score}%` : "-"}</span>
+                            <span className="font-semibold tabular-nums">{!attempt.reviewPending && attempt.score != null ? `${attempt.score}%` : "-"}</span>
                           </div>
                           <Button asChild size="sm" variant="outline">
                             <Link to={`${historyUrl}/attempts/${attempt.id}`}>Chi tiết</Link>

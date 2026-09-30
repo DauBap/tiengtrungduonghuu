@@ -79,6 +79,45 @@ export interface GrammarAnswerable {
   acceptedAnswers?: string[];
 }
 
+export interface TeacherGrammarGrade {
+  questionId: string;
+  correct: boolean;
+  teacherFeedback: string;
+}
+
+export function applyTeacherGrammarGrades<T extends { id: string; correct: boolean; points: number }>(
+  results: readonly T[],
+  grades: readonly TeacherGrammarGrade[],
+) {
+  const gradeByQuestionId = new Map(grades.map((grade) => [grade.questionId, grade]));
+  if (results.length === 0
+    || gradeByQuestionId.size !== grades.length
+    || gradeByQuestionId.size !== results.length
+    || results.some((result) => !gradeByQuestionId.has(result.id))) {
+    return null;
+  }
+
+  const reviewedResults = results.map((result) => {
+    const grade = gradeByQuestionId.get(result.id)!;
+    return {
+      ...result,
+      correct: grade.correct,
+      points: result.points,
+      teacherFeedback: grade.teacherFeedback.trim() || null,
+    };
+  });
+  const correctCount = reviewedResults.filter((result) => result.correct).length;
+  const totalCount = reviewedResults.length;
+
+  return {
+    results: reviewedResults,
+    correctCount,
+    totalCount,
+    score: totalCount > 0 ? Math.round((correctCount / totalCount) * 10_000) / 100 : 0,
+    passed: totalCount > 0 && correctCount === totalCount,
+  };
+}
+
 /**
  * Chấm câu trả lời của học viên.
  *
