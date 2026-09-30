@@ -55,6 +55,7 @@ export default [
   route("teacher/courses", "routes/teacher.courses._index.tsx"),
   route("teacher/courses/:courseId", "routes/teacher.courses.$courseId.tsx"),
   route("teacher/courses/:courseId/lessons/:lessonId", "routes/teacher.courses.$courseId.lessons.$lessonId.tsx"),
+  route("teacher/courses/:courseId/lessons/:lessonId/grammar-report.xlsx", "routes/teacher.courses.$courseId.lessons.$lessonId.grammar-report.ts"),
   route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/vocabulary-history", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.vocabulary-history.tsx"),
   route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/listening-history", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.listening-history.tsx"),
   route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/listening-history/attempts/:attemptId", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.listening-history.attempts.$attemptId.tsx"),

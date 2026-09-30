@@ -1,7 +1,7 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Link, redirect, useLoaderData, useSearchParams } from "react-router";
 import { useState } from "react";
-import { ArrowLeft, BookOpen, Check, MessageSquareText, UserRound, X } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, Download, MessageSquareText, UserRound, X } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { EmptyState } from "~/components/common/empty-state";
 import { Button } from "~/components/ui/button";
@@ -385,6 +385,15 @@ export default function TeacherLessonProgress() {
                           <Button type="submit" size="sm">Mở đáp án và khóa làm lại</Button>
                         </form>
                       )}
+                    </div>
+                  )}
+                  {activeTab === "GRAMMAR" && (
+                    <div className="mb-3 flex justify-end">
+                      <Button asChild size="sm" variant="outline">
+                        <a href={`/teacher/courses/${course.id}/lessons/${lesson.id}/grammar-report.xlsx`}>
+                          <Download className="mr-1.5 h-4 w-4" />Xuất Excel
+                        </a>
+                      </Button>
                     </div>
                   )}
                   {activeTab === "FLASHCARD" || activeTab === "VOCABULARY" ? (
