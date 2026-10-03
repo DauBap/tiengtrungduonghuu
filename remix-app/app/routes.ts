@@ -59,6 +59,7 @@ export default [
   route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/vocabulary-history", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.vocabulary-history.tsx"),
   route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/listening-history", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.listening-history.tsx"),
   route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/listening-history/attempts/:attemptId", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.listening-history.attempts.$attemptId.tsx"),
+  route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/phonetics-history", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.phonetics-history.tsx"),
   route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/vocabulary-history/attempts/:attemptId", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.vocabulary-history.attempts.$attemptId.tsx"),
   route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/grammar-history", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.grammar-history.tsx"),
   route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/grammar-history/attempts/:attemptId", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.grammar-history.attempts.$attemptId.tsx"),

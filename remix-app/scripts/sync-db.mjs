@@ -48,6 +48,10 @@ try {
     stdio: "inherit",
     shell: true,
   });
+  execFileSync("npx", ["tsx", "prisma/migrate-phonetics-to-relational.ts"], {
+    stdio: "inherit",
+    shell: true,
+  });
   console.log("[sync-db] Schema đã khớp.");
 } catch {
   console.error(

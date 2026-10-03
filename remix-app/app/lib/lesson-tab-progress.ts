@@ -4,6 +4,7 @@ export const LESSON_TAB_KEYS = [
   "LISTENING",
   "VOCABULARY",
   "LESSON",
+  "PHONETICS",
   "GRAMMAR",
   "WORKBOOK",
 ] as const;

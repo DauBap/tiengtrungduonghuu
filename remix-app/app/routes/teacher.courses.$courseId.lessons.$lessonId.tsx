@@ -18,11 +18,12 @@ const TAB_LABELS: Record<string, string> = {
   LISTENING: "Nghe câu",
   VOCABULARY: "Từ vựng",
   LESSON: "Bài khóa",
+  PHONETICS: "Ngữ âm",
   GRAMMAR: "Ngữ pháp",
   WORKBOOK: "Workbook",
 };
 
-const ANSWER_REVIEW_TABS = new Set<LessonTab>(["VOCABULARY_TEST", "LISTENING", "GRAMMAR", "WORKBOOK"]);
+const ANSWER_REVIEW_TABS = new Set<LessonTab>(["VOCABULARY_TEST", "LISTENING", "PHONETICS", "GRAMMAR", "WORKBOOK"]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -150,10 +151,22 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     include: { user: { select: { id: true, name: true, email: true } } },
     orderBy: { user: { name: "asc" } },
   });
-  const answerReviewTabs = await prisma.lesson.findUnique({
-    where: { id: lesson.id },
-    select: { answerReviewTabs: true },
-  });
+  const [lessonTabContent, learningBlocks, phoneticsSectionCount] = await Promise.all([
+    prisma.lesson.findUnique({
+      where: { id: lesson.id },
+      select: {
+        answerReviewTabs: true,
+        _count: { select: { content: true, grammarSections: true, audioScripts: true } },
+      },
+    }),
+    prisma.learningBlock.findMany({
+      where: { lessonId: lesson.id, type: { not: "PHONETICS" } },
+      select: { type: true },
+    }),
+    prisma.phoneticsSection.count({
+      where: { lessonId: lesson.id, questions: { some: {} } },
+    }),
+  ]);
 
   const progressRows = students.length === 0
     ? []
@@ -164,7 +177,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         },
         include: {
           attempts: {
-            where: { tab: { in: ["VOCABULARY_TEST", "LISTENING", "GRAMMAR", "WORKBOOK"] } },
+            where: { tab: { in: ["VOCABULARY_TEST", "LISTENING", "PHONETICS", "GRAMMAR", "WORKBOOK"] } },
             orderBy: { completedAt: "desc" },
           },
           feedback: {
@@ -176,7 +189,24 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         orderBy: { userId: "asc" },
       });
 
-  return { user, course, lesson, students, progressRows, answerReviewTabs: answerReviewTabs?.answerReviewTabs ?? [] };
+  return {
+    user,
+    course,
+    lesson,
+    students,
+    progressRows,
+    availableTabs: {
+      FLASHCARD: learningBlocks.some((block) => block.type === "FLASHCARD"),
+      VOCABULARY_TEST: (lessonTabContent?._count.content ?? 0) > 0,
+      LISTENING: learningBlocks.some((block) => block.type === "LISTENING"),
+      VOCABULARY: (lessonTabContent?._count.content ?? 0) > 0,
+      LESSON: (lessonTabContent?._count.audioScripts ?? 0) > 0,
+      PHONETICS: phoneticsSectionCount > 0,
+      GRAMMAR: (lessonTabContent?._count.grammarSections ?? 0) > 0,
+      WORKBOOK: learningBlocks.some((block) => block.type === "WORKBOOK"),
+    },
+    answerReviewTabs: lessonTabContent?.answerReviewTabs ?? [],
+  };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -289,10 +319,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function TeacherLessonProgress() {
-  const { user, course, lesson, students, progressRows, answerReviewTabs } = useLoaderData<typeof loader>();
+  const { user, course, lesson, students, progressRows, availableTabs, answerReviewTabs } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab") ?? "";
-  const activeTab = isLessonTabKey(requestedTab) ? requestedTab : LESSON_TAB_KEYS[0];
+  const visibleTabs = LESSON_TAB_KEYS.filter((tab) => availableTabs[tab]);
+  const requestedLessonTab = isLessonTabKey(requestedTab) ? requestedTab : null;
+  const activeTab = requestedLessonTab && visibleTabs.includes(requestedLessonTab)
+    ? requestedLessonTab
+    : visibleTabs[0] ?? LESSON_TAB_KEYS[0];
   const progressByStudent = new Map<string, typeof progressRows>();
 
   for (const row of progressRows) {
@@ -332,7 +366,7 @@ export default function TeacherLessonProgress() {
             ) : (
               <>
                 <div role="tablist" aria-label="Tiến độ theo từng tab" className="-mx-1 mb-5 flex gap-2 overflow-x-auto px-1 pb-2">
-                  {LESSON_TAB_KEYS.map((tab) => {
+                  {visibleTabs.map((tab) => {
                     const completedCount = progressRows.filter((row) => {
                       if (row.tab !== tab) return false;
                       return tab === "VOCABULARY_TEST" ? row.attempts[0]?.passed === true : row.completed;
@@ -361,7 +395,12 @@ export default function TeacherLessonProgress() {
                   })}
                 </div>
 
-                <div role="tabpanel" aria-label={TAB_LABELS[activeTab]}>
+                {visibleTabs.length === 0 ? (
+                  <EmptyState
+                    title="Chưa có nội dung bài học"
+                    message="Bài học chưa có nội dung ở các tab để theo dõi."
+                  />
+                ) : <div role="tabpanel" aria-label={TAB_LABELS[activeTab]}>
                   {ANSWER_REVIEW_TABS.has(activeTab) && (
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border bg-muted/20 px-4 py-3">
                       <div>
@@ -626,6 +665,59 @@ export default function TeacherLessonProgress() {
                         </tbody>
                       </table>
                     </div>
+                  ) : activeTab === "PHONETICS" ? (
+                    <div className="overflow-hidden rounded-md border">
+                      <table className="w-full text-left text-sm">
+                        <thead className="bg-muted/40 text-xs text-muted-foreground">
+                          <tr>
+                            <th scope="col" className="w-16 px-4 py-3 font-medium">STT</th>
+                            <th scope="col" className="px-4 py-3 font-medium">Họ tên</th>
+                            <th scope="col" className="px-4 py-3 font-medium">Tiến độ</th>
+                            <th scope="col" className="px-4 py-3 text-right font-medium">Thao tác</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                          {students.map((enrollment, index) => {
+                            const student = enrollment.user;
+                            const row = (progressByStudent.get(student.id) ?? []).find((item) => item.tab === "PHONETICS");
+                            const state = row?.state ?? "NOT_STARTED";
+
+                            return (
+                              <tr key={student.id}>
+                                <td className="px-4 py-3 text-muted-foreground tabular-nums">{index + 1}</td>
+                                <td className="px-4 py-3 font-medium">{student.name ?? "Học viên"}</td>
+                                <td className="px-4 py-3">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium", getTabStateTone(state))}>
+                                      {state === "COMPLETED"
+                                        ? "Hoàn thành"
+                                        : state === "IN_PROGRESS"
+                                          ? "Đang làm"
+                                          : "Chưa bắt đầu"}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <TeacherTabComment
+                                      studentId={student.id}
+                                      studentName={student.name ?? "Học viên"}
+                                      tab="PHONETICS"
+                                      feedback={row?.feedback[0]}
+                                    />
+                                    <Button asChild size="sm" variant="outline">
+                                      <Link to={`/teacher/courses/${course.id}/lessons/${lesson.id}/students/${student.id}/phonetics-history`}>
+                                        Chi tiết
+                                      </Link>
+                                    </Button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   ) : activeTab === "GRAMMAR" ? (
                     <div className="overflow-hidden rounded-md border">
                       <table className="w-full text-left text-sm">
@@ -741,7 +833,7 @@ export default function TeacherLessonProgress() {
                       })}
                     </div>
                   )}
-                </div>
+                </div>}
               </>
             )}
           </CardContent>

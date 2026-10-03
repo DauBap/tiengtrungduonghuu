@@ -11,17 +11,22 @@ import {
   computeBlockStatuses,
   markBlockCompleted,
   syncLearningCompleted,
+  getPhoneticsConfig,
 } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { EmptyState } from "~/components/common/empty-state";
 import { BlockRenderer, isBlockLearnable, type ResolvedBlock } from "~/components/lessons/blocks/block-renderer";
-import { isLearningBlockType, parseListeningConfig, parseWorkbookConfig, type WorkbookConfig } from "~/lib/learning-blocks";
+import {
+  isLearningBlockType, parseListeningConfig, parseWorkbookConfig,
+  type WorkbookConfig, type PhoneticsConfig, type LearningBlockType as LearningBlockTypeKey,
+} from "~/lib/learning-blocks";
 import { LessonTabs, type LessonTab } from "~/components/lessons/lesson-tabs";
 import { LessonTabEmpty } from "~/components/lessons/lesson-tab-empty";
 import { VocabularyTable } from "~/components/lessons/vocabulary-table";
 import { GrammarSection, type GrammarPracticeSummary } from "~/components/lessons/grammar-section";
 import { WorkbookListeningTest } from "~/components/lessons/workbook-listening-test";
 import { VocabularyTest } from "~/components/lessons/vocabulary-test";
+import { PhoneticsPractice, type PhoneticsSectionScore } from "~/components/lessons/phonetics-practice";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -41,6 +46,7 @@ import { SettingsMenu } from "~/components/layout/settings-menu";
 import { isLessonTabKey, openLessonTab, recordLessonTabAttempt } from "~/lib/lesson-tab-progress.server";
 import type { LessonTab as ProgressTab } from "~/lib/lesson-tab-progress";
 import { computePronunciationScore } from "~/lib/pronunciation";
+import { gradePhoneticsSection, type PhoneticsAnswer } from "~/lib/phonetics";
 
 const FEEDBACK_TAB_LABELS: Record<string, string> = {
   FLASHCARD: "Flashcard",
@@ -48,6 +54,7 @@ const FEEDBACK_TAB_LABELS: Record<string, string> = {
   LISTENING: "Nghe câu",
   VOCABULARY: "Từ vựng",
   LESSON: "Bài học",
+  PHONETICS: "Ngữ âm",
   GRAMMAR: "Ngữ pháp",
   WORKBOOK: "Workbook",
 };
@@ -57,6 +64,7 @@ interface AnswerReviewResult {
   prompt: string;
   given: string;
   correctAnswer: string;
+  completeAnswer: string | null;
   correct: boolean | null;
   matchPercent: number | null;
   hint: string | null;
@@ -90,6 +98,7 @@ function makeAnswerReviewGroup(
   attempt: { details: unknown; score: number | null; correctCount: number | null; totalCount: number | null },
   targetKey: string,
   title: string,
+  isPhonetics = false,
 ): AnswerReviewGroup | null {
   const details = isRecord(attempt.details) ? attempt.details : null;
   if (!details || !Array.isArray(details.results)) return null;
@@ -111,8 +120,9 @@ function makeAnswerReviewGroup(
       prompt,
       given,
       correctAnswer: typeof value.correctAnswer === "string" ? value.correctAnswer : "",
+      completeAnswer: isPhonetics && typeof value.full === "string" ? value.full : null,
       correct: typeof value.correct === "boolean" ? value.correct : null,
-      matchPercent: typeof value.matchPercent === "number" ? value.matchPercent : null,
+      matchPercent: !isPhonetics && typeof value.matchPercent === "number" ? value.matchPercent : null,
       hint: typeof value.hint === "string" ? value.hint : null,
       teacherFeedback: typeof value.teacherFeedback === "string" ? value.teacherFeedback : null,
     }];
@@ -121,7 +131,7 @@ function makeAnswerReviewGroup(
   return {
     targetKey,
     title,
-    score: attempt.score,
+    score: isPhonetics ? null : attempt.score,
     correctCount: attempt.correctCount,
     totalCount: attempt.totalCount,
     results,
@@ -143,12 +153,15 @@ async function getAnswerReviewGate(
 
   const attempts = await prisma.lessonTabAttempt.findMany({
     where: { userId, lessonId, tab },
-    select: { details: true },
+    select: { mode: true, details: true },
   });
-  const isLocked = attempts.some(({ details }) => {
+  const isLocked = attempts.some(({ mode, details }) => {
     if (!isRecord(details)) return false;
     if (tab === "GRAMMAR") {
       return details.sectionId === target.sectionId && details.questionType === target.questionType;
+    }
+    if (tab === "PHONETICS") {
+      return String(details.sectionId ?? mode) === target.sectionId;
     }
     if (tab === "LISTENING" || tab === "WORKBOOK") return details.blockId === target.blockId;
     return true;
@@ -159,6 +172,7 @@ async function getAnswerReviewGate(
 function answerReviewLockError(tab: ProgressTab) {
   const message = "Giáo viên đã mở đáp án chi tiết. Bạn không thể nộp lại phần này.";
   if (tab === "GRAMMAR") return { grammarError: message };
+  if (tab === "PHONETICS") return { phoneticsError: message };
   if (tab === "LISTENING") return { listeningError: message };
   if (tab === "WORKBOOK") return { workbookError: message };
   return { testError: message };
@@ -206,6 +220,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     latestListeningAttempt,
     latestWorkbookAttempt,
     answerReviewSetting,
+    phoneticsConfig,
+    phoneticsAttempts,
   ] = await Promise.all([
     getLessonProgress(user.id, lesson.id),
     prisma.vocabItem.findMany({
@@ -270,6 +286,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       select: { score: true, correctCount: true, totalCount: true, passed: true },
     }),
     prisma.lesson.findUnique({ where: { id: lesson.id }, select: { answerReviewTabs: true } }),
+    getPhoneticsConfig(lesson.id),
+    prisma.lessonTabAttempt.findMany({
+      where: { userId: user.id, lessonId: lesson.id, tab: "PHONETICS", score: { not: null } },
+      orderBy: [{ score: "desc" }, { completedAt: "desc" }],
+      select: { mode: true, score: true, correctCount: true, totalCount: true },
+    }),
   ]);
   const answerReviewTabs = answerReviewSetting?.answerReviewTabs ?? [];
   const answerReviewAttempts = answerReviewTabs.length > 0
@@ -291,6 +313,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       ? `${String(details.sectionId ?? "")}:${String(details.questionType ?? attempt.mode ?? "")}`
       : attempt.tab === "VOCABULARY_TEST"
         ? "vocabulary-test"
+        : attempt.tab === "PHONETICS"
+          ? String(details.sectionId ?? attempt.mode ?? "")
         : typeof details.blockId === "string"
           ? details.blockId
           : "";
@@ -306,8 +330,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         ? details.blockTitle
         : attempt.tab === "VOCABULARY_TEST"
           ? "Ôn từ vựng"
+          : attempt.tab === "PHONETICS"
+            ? typeof details.sectionTitle === "string" ? details.sectionTitle : "Ngữ âm"
           : "Kết quả bài làm";
-    const group = makeAnswerReviewGroup(attempt, targetKey, title);
+    const group = makeAnswerReviewGroup(attempt, targetKey, title, attempt.tab === "PHONETICS");
     if (group) groups.push(group);
   }
   const grammarAttemptsBySection: Record<
@@ -333,6 +359,22 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       pendingReview,
     };
   }
+  // Ngữ âm: config đọc từ block riêng, không qua `blocks`. Mỗi section có điểm
+  // riêng nên `mode` của attempt mang id section (xem action submit-phonetics-attempt).
+  const phonetics = phoneticsConfig
+    ? { title: "Ngữ âm", config: phoneticsConfig }
+    : null;
+  const phoneticsSectionScores: Record<number, PhoneticsSectionScore> = {};
+  for (const attempt of phoneticsAttempts) {
+    const sectionId = Number(attempt.mode);
+    if (!Number.isInteger(sectionId) || phoneticsSectionScores[sectionId]) continue;
+    phoneticsSectionScores[sectionId] = {
+      score: attempt.score,
+      correctCount: attempt.correctCount,
+      totalCount: attempt.totalCount,
+    };
+  }
+
   const lessonStatus = computeLessonStatus(progress);
 
   // Resolve nội dung cho từng block ngay ở loader — component không tự query.
@@ -424,6 +466,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     answerReviewTabs,
     answerReviewGroups,
     answerReviewLockedTargets,
+    phonetics,
+    phoneticsSectionScores,
     latestTabScores: {
       vocabularyTest: latestVocabularyAttempt,
       listening: latestListeningAttempt,
@@ -467,7 +511,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
         ? { tab: "LISTENING" as const, target: { blockId: String(form.get("blockId") ?? "") } }
         : intent === "submit-workbook-attempt"
           ? { tab: "WORKBOOK" as const, target: { blockId: String(form.get("blockId") ?? "") } }
-          : null;
+          : intent === "submit-phonetics-attempt"
+            ? { tab: "PHONETICS" as const, target: { sectionId: String(form.get("sectionId") ?? "") } }
+            : null;
   let answerReviewOpen = false;
   if (reviewSubmission) {
     if (reviewSubmission.tab === "GRAMMAR" && reviewSubmission.target.questionType === "FILL") {
@@ -547,9 +593,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
   if (intent === "complete-block") {
     const blockId = String(form.get("blockId"));
     const block = await prisma.learningBlock.findFirst({
-      where: { id: blockId, lessonId: params.lessonId! },
+      where: { id: blockId, lessonId: params.lessonId!, type: { not: "PHONETICS" } },
       select: { id: true, type: true },
     });
+    // PHONETICS bị loại ở trên: block này nộp điểm qua submit-phonetics-attempt,
+    // không "đánh dấu đã xem" như các dạng lý thuyết khác.
     if (!block) return { error: "Không tìm thấy phần học" };
     if (block.type === "LISTENING") {
       return { error: "Phần nghe câu cần nộp kết quả chấm điểm." as const };
@@ -821,6 +869,97 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return { success: true as const, intent: "submit-listening-attempt" as const, score, correctCount, totalCount };
   }
 
+  // Ngữ âm: nộp theo từng section, mỗi section một lượt điểm riêng.
+  // `mode` lưu id section để loader dựng lại điểm cao nhất của từng phần.
+  if (intent === "submit-phonetics-attempt") {
+    const sectionId = Number(form.get("sectionId"));
+    if (!Number.isInteger(sectionId)) {
+      return { phoneticsError: "Phần ngữ âm không hợp lệ." as const };
+    }
+
+    let submitted: unknown;
+    try {
+      submitted = JSON.parse(String(form.get("answers") ?? ""));
+    } catch {
+      return { phoneticsError: "Không đọc được câu trả lời. Vui lòng thử lại." as const };
+    }
+    if (!Array.isArray(submitted)) {
+      return { phoneticsError: "Danh sách câu trả lời không hợp lệ." as const };
+    }
+
+    const config = await getPhoneticsConfig(params.lessonId!);
+    if (!config) throw new Response("Không tìm thấy phần ngữ âm", { status: 404 });
+
+    const section = config.sections.find((item) => item.id === sectionId);
+    if (!section) return { phoneticsError: "Không tìm thấy phần ngữ âm này." as const };
+
+    const answers = new Map<number, PhoneticsAnswer>();
+    for (const entry of submitted) {
+      if (!isRecord(entry)) return { phoneticsError: "Định dạng câu trả lời không hợp lệ." as const };
+      const itemId = Number(entry.itemId);
+      const answer = entry.answer;
+      if (!Number.isInteger(itemId) || typeof answer !== "string" || answers.has(itemId)) {
+        return { phoneticsError: "Câu trả lời không hợp lệ hoặc bị trùng." as const };
+      }
+      if (answer.length > 20) {
+        return { phoneticsError: "Câu trả lời quá dài." as const };
+      }
+      answers.set(itemId, answer);
+    }
+
+    const grade = gradePhoneticsSection(section, answers);
+    const completedAt = new Date();
+
+    // Tiến độ tab tính trên toàn bộ section: xong khi đã nộp hết, điểm tab là
+    // trung bình điểm tốt nhất của từng section (section chưa nộp tính 0).
+    const previousAttempts = await prisma.lessonTabAttempt.findMany({
+      where: { userId: user.id, lessonId: params.lessonId!, tab: "PHONETICS", score: { not: null } },
+      select: { mode: true, score: true },
+    });
+    const bestBySection = new Map<number, number>([[sectionId, grade.score]]);
+    for (const attempt of previousAttempts) {
+      const id = Number(attempt.mode);
+      if (!Number.isInteger(id) || attempt.score == null) continue;
+      bestBySection.set(id, Math.max(bestBySection.get(id) ?? 0, attempt.score));
+    }
+    const totalSections = config.sections.length;
+    const submittedSections = config.sections.filter((item) => bestBySection.has(item.id)).length;
+    const tabScore = config.sections.reduce((sum, item) => sum + (bestBySection.get(item.id) ?? 0), 0)
+      / Math.max(1, totalSections);
+
+    await recordLessonTabAttempt(prisma, {
+      userId: user.id,
+      lessonId: params.lessonId!,
+      tab: "PHONETICS",
+      mode: String(sectionId),
+      score: grade.score,
+      correctCount: grade.correctCount,
+      totalCount: grade.totalCount,
+      passed: grade.correctCount === grade.totalCount,
+      startedAt: completedAt,
+      completedAt,
+      details: {
+        sectionId,
+        sectionTitle: section.title,
+        results: grade.results,
+      },
+      progress: {
+        percent: Math.round((submittedSections / Math.max(1, totalSections)) * 100),
+        completed: submittedSections >= totalSections,
+        score: Math.round(tabScore * 100) / 100,
+      },
+    });
+
+    return {
+      success: true as const,
+      intent: "submit-phonetics-attempt" as const,
+      sectionId,
+      score: grade.score,
+      correctCount: grade.correctCount,
+      totalCount: grade.totalCount,
+    };
+  }
+
   if (intent === "submit-workbook-attempt") {
     const blockId = String(form.get("blockId") ?? "");
     let submittedAnswers: unknown;
@@ -1043,6 +1182,9 @@ function AnswerReviewDetails({ groups }: { groups: AnswerReviewGroup[] }) {
                   {result.correctAnswer && (
                     <p className="text-sm"><span className="text-muted-foreground">Đáp án đúng: </span>{result.correctAnswer}</p>
                   )}
+                  {result.completeAnswer && (
+                    <p className="text-sm"><span className="text-muted-foreground">Âm tiết hoàn chỉnh: </span>{result.completeAnswer}</p>
+                  )}
                   {result.teacherFeedback && (
                     <p className="whitespace-pre-wrap text-sm">
                       <span className="text-muted-foreground">Đáp án/Nhận xét của giáo viên: </span>{result.teacherFeedback}
@@ -1062,7 +1204,7 @@ function AnswerReviewDetails({ groups }: { groups: AnswerReviewGroup[] }) {
 }
 
 export default function LessonDetail() {
-  const { user, lesson, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewTabs, answerReviewGroups, answerReviewLockedTargets } = useLoaderData<typeof loader>();
+  const { user, lesson, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewTabs, answerReviewGroups, answerReviewLockedTargets, phonetics, phoneticsSectionScores } = useLoaderData<typeof loader>();
   const settings = useAppSettings();
   const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; lessonPinyin: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string; error?: string }>();
   const workbookFetcher = useFetcher<{
@@ -1074,16 +1216,22 @@ export default function LessonDetail() {
     workbookError?: string;
   }>();
   const pronunciationFetcher = useFetcher<{ success?: boolean; intent?: string; error?: string }>();
+  const phoneticsFetcher = useFetcher<{ phoneticsError?: string }>();
   const progressFetcher = useFetcher();
   const [activeTab, setActiveTab] = useState<LessonTab>("FLASHCARD");
   const hasGrammar = lesson.grammarSections.length > 0;
   const hasWorkbook = blocks.some((block) => block.type === "WORKBOOK");
+  const hasPhonetics = phonetics !== null;
 
   useEffect(() => {
-    if ((activeTab === "GRAMMAR" && !hasGrammar) || (activeTab === "WORKBOOK" && !hasWorkbook)) {
+    if (
+      (activeTab === "GRAMMAR" && !hasGrammar)
+      || (activeTab === "WORKBOOK" && !hasWorkbook)
+      || (activeTab === "PHONETICS" && !hasPhonetics)
+    ) {
       setActiveTab("FLASHCARD");
     }
-  }, [activeTab, hasGrammar, hasWorkbook]);
+  }, [activeTab, hasGrammar, hasWorkbook, hasPhonetics]);
 
   const feedbackTab = activeTab === "TEST" ? "VOCABULARY_TEST" : activeTab;
   const activeTabComment = feedbackTab === "FLASHCARD" || feedbackTab === "VOCABULARY"
@@ -1098,11 +1246,13 @@ export default function LessonDetail() {
         : null;
     const activeReviewTab: ProgressTab | null = activeTab === "TEST"
       ? "VOCABULARY_TEST"
-      : activeTab === "LISTENING" || activeTab === "GRAMMAR" || activeTab === "WORKBOOK"
+      : activeTab === "LISTENING" || activeTab === "PHONETICS" || activeTab === "GRAMMAR" || activeTab === "WORKBOOK"
         ? activeTab
         : null;
     const answerReviewEnabled = activeReviewTab !== null && answerReviewTabs.includes(activeReviewTab);
-    const showAnswerReviewControls = answerReviewEnabled && activeTab !== "GRAMMAR";
+    const showAnswerReviewControls = answerReviewEnabled
+      && activeTab !== "GRAMMAR"
+      && activeTab !== "PHONETICS";
     const activeReviewGroups = activeReviewTab ? answerReviewGroups[activeReviewTab] ?? [] : [];
     const activeLockedTargets = activeReviewTab ? answerReviewLockedTargets[activeReviewTab] ?? [] : [];
     const testRetakeLocked = answerReviewEnabled && activeLockedTargets.includes("vocabulary-test");
@@ -1202,18 +1352,43 @@ export default function LessonDetail() {
   // Dạng bài có mặt trong bài này. Dùng để làm mờ tab của dạng bài chưa soạn —
   // block đã tạo nhưng chưa chọn nội dung vẫn tính là có, để học viên bấm vào
   // và thấy lời nhắn cụ thể thay vì tưởng dạng đó không tồn tại.
-  const availableTypes = new Set(blocks.map((b) => b.type));
+  const availableTypes = new Set<LearningBlockTypeKey | "PHONETICS">(blocks.map((b) => b.type));
   // Từ vựng/Ngữ pháp hiện tab theo nội dung có sẵn, không qua LearningBlock —
   // khác với Flashcard/Nghe câu, admin cấu hình xong mới có block.
   if (lesson.content.length > 0) availableTypes.add("VOCABULARY");
   if (lesson.grammarSections.length > 0) availableTypes.add("GRAMMAR");
+  // Ngữ âm đọc từ block riêng, không nằm trong `blocks`.
+  if (hasPhonetics) availableTypes.add("PHONETICS");
 
   const isEmptyLesson =
     lesson.content.length === 0 &&
     lesson.grammarSections.length === 0 &&
+    !hasPhonetics &&
     !blocks.some(isBlockLearnable);
 
   const renderTabContent = () => {
+    // Ngữ âm — config từ block riêng, mỗi section nộp và lưu điểm độc lập.
+    if (activeTab === "PHONETICS") {
+      if (!phonetics) return <LessonTabEmpty tab="PHONETICS" />;
+      return (
+        <PhoneticsPractice
+          config={phonetics.config as PhoneticsConfig}
+          savedScores={phoneticsSectionScores}
+          lockedSectionIds={activeLockedTargets
+            .map(Number)
+            .filter(Number.isInteger)}
+          reviewGroups={answerReviewGroups.PHONETICS ?? []}
+          isSaving={phoneticsFetcher.state !== "idle"}
+          submissionError={phoneticsFetcher.data?.phoneticsError ?? null}
+          onSubmitSection={(sectionId, answers) => phoneticsFetcher.submit({
+            intent: "submit-phonetics-attempt",
+            sectionId: String(sectionId),
+            answers: JSON.stringify(answers),
+          }, { method: "post" })}
+        />
+      );
+    }
+
     // Từ vựng đọc trực tiếp kho từ của bài, không qua block.
     if (activeTab === "VOCABULARY") {
       return (
@@ -1870,4 +2045,3 @@ export default function LessonDetail() {
     </AppShell>
   );
 }
-

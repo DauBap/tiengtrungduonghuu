@@ -146,6 +146,61 @@ export const workbookConfigSchema = z.object({
   ).default([]),
 });
 
+/**
+ * Ngữ âm: nghe file mp3 rồi điền thanh mẫu / vận mẫu / thanh điệu.
+ *
+ * CỐ Ý không nằm trong `BLOCK_TYPES`: nội dung do script migrate sinh ra từ
+ * folder `Ngu_Am/`, admin không soạn trong trang bài học, nên dạng này không
+ * được hiện trong picker "Thêm dạng bài học" và không tính vào tiến độ bắt buộc
+ * của phần lý thuyết (`syncLearningCompleted`).
+ *
+ * Mỗi section là một bài tập riêng, có audio và điểm riêng.
+ */
+const phoneticsItemSchema = z.union([
+  z.object({
+    id: z.number().int(),
+    type: z.enum(["initial", "final"]),
+    /** Phần đã cho sẵn; học viên điền phần còn lại */
+    given: z.string().min(1),
+    answer: z.string().min(1),
+    full: z.string().min(1),
+    audioText: z.string().min(1),
+  }),
+  z.object({
+    id: z.number().int(),
+    type: z.literal("tone"),
+    /** Âm tiết không dấu, học viên chọn 1 trong 4 thanh */
+    syllable: z.string().min(1),
+    answerTone: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+    full: z.string().min(1),
+    audioText: z.string().min(1),
+  }),
+]);
+
+export const phoneticsConfigSchema = z.object({
+  sections: z
+    .array(
+      z.object({
+        id: z.number().int(),
+        title: z.string().min(1),
+        description: z.string().default(""),
+        audio: z.string().url().nullable().default(null),
+        items: z.array(phoneticsItemSchema).min(1, "Section ngữ âm cần ít nhất 1 câu"),
+      })
+    )
+    .min(1, "Cần ít nhất 1 section ngữ âm"),
+});
+
+export type PhoneticsConfig = z.infer<typeof phoneticsConfigSchema>;
+export type PhoneticsSection = PhoneticsConfig["sections"][number];
+export type PhoneticsItem = PhoneticsSection["items"][number];
+
+export function parsePhoneticsConfig(config: unknown): ParseResult<PhoneticsConfig> {
+  const result = phoneticsConfigSchema.safeParse(config);
+  if (result.success) return { ok: true, data: result.data };
+  return { ok: false, error: result.error.issues[0]?.message ?? "Cấu hình ngữ âm không hợp lệ" };
+}
+
 export const BLOCK_CONFIG_SCHEMAS = {
   FLASHCARD: flashcardConfigSchema,
   LISTENING: listeningConfigSchema,

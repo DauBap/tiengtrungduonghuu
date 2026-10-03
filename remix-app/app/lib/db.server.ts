@@ -3,6 +3,7 @@
  */
 import { prisma } from "~/lib/prisma.server";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
+import { parsePhoneticsConfig, type PhoneticsConfig } from "~/lib/learning-blocks";
 
 type TrackedTabProgressRow = {
   lessonId: string;
@@ -191,7 +192,7 @@ export async function getLessonById(id: string) {
         orderBy: { order: "asc" },
         include: { questions: { orderBy: { order: "asc" } } },
       },
-      learningBlocks: { orderBy: { order: "asc" } },
+      learningBlocks: { where: { type: { not: "PHONETICS" } }, orderBy: { order: "asc" } },
       exercise: true,
       // Chỉ đếm câu hỏi, KHÔNG kèm `questions` — `answer`/`hint` không được
       // xuống client trước khi học viên nộp bài kiểm tra.
@@ -373,7 +374,7 @@ export async function getLessonForAdmin(id: string) {
         orderBy: { order: "asc" },
         include: { questions: { orderBy: { order: "asc" } } },
       },
-      learningBlocks: { orderBy: { order: "asc" } },
+      learningBlocks: { where: { type: { not: "PHONETICS" } }, orderBy: { order: "asc" } },
       // Bài kiểm tra cuối bài — hệ riêng, không phải model Exam
       test: { select: { id: true, title: true, passScore: true, timeLimitMinutes: true } },
       course: true,
@@ -389,7 +390,7 @@ export async function getLessonsForAdmin(courseId: string) {
   return prisma.lesson.findMany({
     where: { courseId },
     include: {
-      _count: { select: { content: true, learningBlocks: true } },
+      _count: { select: { content: true, learningBlocks: { where: { type: { not: "PHONETICS" } } } } },
     },
     orderBy: { order: "asc" },
   });
@@ -397,8 +398,111 @@ export async function getLessonsForAdmin(courseId: string) {
 
 export async function getLearningBlocks(lessonId: string) {
   return prisma.learningBlock.findMany({
+    where: { lessonId, type: { not: "PHONETICS" } },
+    orderBy: { order: "asc" },
+  });
+}
+
+/**
+ * Block Ngữ âm của bài, nếu có.
+ *
+ * Dạng PHONETICS bị loại khỏi mọi query `learningBlocks` ở trên (nội dung do
+ * script migrate sinh ra, admin không soạn, không tính vào tiến độ bắt buộc)
+ * nên phải đọc bằng đường riêng. Mỗi bài tối đa một block — `@@unique([lessonId, type])`.
+ */
+export async function getPhoneticsBlock(lessonId: string) {
+  return prisma.learningBlock.findUnique({
+    where: { lessonId_type: { lessonId, type: "PHONETICS" } },
+    select: { id: true, title: true, description: true, config: true },
+  });
+}
+
+/** Load normalized phonetics content, falling back to legacy JSON until migrated. */
+export async function getPhoneticsConfig(lessonId: string): Promise<PhoneticsConfig | null> {
+  const sections = await prisma.phoneticsSection.findMany({
     where: { lessonId },
     orderBy: { order: "asc" },
+    include: { questions: { orderBy: { order: "asc" } } },
+  });
+
+  if (sections.length > 0) {
+    const parsed = parsePhoneticsConfig({
+      sections: sections
+        .filter((section) => section.questions.length > 0)
+        .map((section) => ({
+          id: section.sectionKey,
+          title: section.title,
+          description: section.description,
+          audio: section.audio,
+          items: section.questions.map((question) => question.type === "TONE"
+            ? {
+                id: question.questionKey,
+                type: "tone",
+                syllable: question.syllable ?? "",
+                answerTone: question.answerTone,
+                full: question.full,
+                audioText: question.audioText,
+              }
+            : {
+                id: question.questionKey,
+                type: question.type === "INITIAL" ? "initial" : "final",
+                given: question.given ?? "",
+                answer: question.answer ?? "",
+                full: question.full,
+                audioText: question.audioText,
+              }),
+        })),
+    });
+    return parsed.ok ? parsed.data : null;
+  }
+
+  const legacyBlock = await getPhoneticsBlock(lessonId);
+  if (!legacyBlock) return null;
+  const parsed = parsePhoneticsConfig(legacyBlock.config);
+  return parsed.ok ? parsed.data : null;
+}
+
+/** One-time, idempotent import from the former LearningBlock JSON format. */
+export async function migrateLegacyPhoneticsToDatabase(lessonId: string) {
+  const [existingSections, legacyBlock] = await Promise.all([
+    prisma.phoneticsSection.count({ where: { lessonId } }),
+    getPhoneticsBlock(lessonId),
+  ]);
+  if (existingSections > 0 || !legacyBlock) return;
+
+  const parsed = parsePhoneticsConfig(legacyBlock.config);
+  if (!parsed.ok) throw new Error(`Cấu hình Ngữ âm cũ không hợp lệ: ${parsed.error}`);
+
+  await prisma.$transaction(async (tx) => {
+    const sections = await tx.phoneticsSection.createManyAndReturn({
+      data: parsed.data.sections.map((section, order) => ({
+        lessonId,
+        sectionKey: section.id,
+        title: section.title,
+        description: section.description,
+        audio: section.audio,
+        order,
+      })),
+      select: { id: true, sectionKey: true },
+    });
+    const sectionIdByKey = new Map(sections.map((section) => [section.sectionKey, section.id]));
+
+    await tx.phoneticsQuestion.createMany({
+      data: parsed.data.sections.flatMap((section) => section.items.map((item, order) => ({
+        sectionId: sectionIdByKey.get(section.id)!,
+        questionKey: item.id,
+        type: item.type === "tone" ? "TONE" : item.type === "initial" ? "INITIAL" : "FINAL",
+        given: item.type === "tone" ? null : item.given,
+        answer: item.type === "tone" ? null : item.answer,
+        syllable: item.type === "tone" ? item.syllable : null,
+        answerTone: item.type === "tone" ? item.answerTone : null,
+        full: item.full,
+        audioText: item.audioText,
+        order,
+      }))),
+    });
+
+    await tx.learningBlock.delete({ where: { id: legacyBlock.id } });
   });
 }
 
@@ -429,7 +533,7 @@ export async function markBlockCompleted(userId: string, blockId: string) {
  */
 export async function syncLearningCompleted(userId: string, lessonId: string) {
   const candidates = await prisma.learningBlock.findMany({
-    where: { lessonId, required: true },
+    where: { lessonId, required: true, type: { not: "PHONETICS" } },
     select: { id: true, type: true, config: true },
   });
 

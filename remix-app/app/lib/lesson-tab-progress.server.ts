@@ -19,6 +19,22 @@ export interface AttemptInput {
   details?: Prisma.InputJsonValue;
   startedAt?: Date | null;
   completedAt?: Date;
+  /**
+   * Tiến độ của cả tab sau lượt này, cho tab gồm nhiều phần nộp riêng.
+   *
+   * Mặc định một lượt nộp là xong cả tab (percent 100). Tab Ngữ âm có nhiều
+   * section chấm điểm độc lập nên phải tự tính: nộp 1/3 section chưa phải xong.
+   */
+  progress?: {
+    percent: number;
+    completed: boolean;
+    /**
+     * Điểm của cả tab, nếu khác điểm của lượt nộp này. Không có thì tab lấy
+     * luôn `score` — đúng với tab nộp một lần, nhưng sai với tab nhiều phần:
+     * điểm tab phải là trung bình các phần, không phải điểm phần vừa nộp.
+     */
+    score?: number | null;
+  };
 }
 
 export interface ItemProgressInput {
@@ -169,16 +185,25 @@ export async function recordLessonTabAttempt(prisma: PrismaClient, input: Attemp
     });
     const score = normalizeScore(input.score);
     const completedAt = input.completedAt ?? new Date();
-    const completed = input.tab === "VOCABULARY_TEST" ? input.passed === true : true;
+    const completed = input.progress
+      ? input.progress.completed
+      : input.tab === "VOCABULARY_TEST"
+        ? input.passed === true
+        : true;
     const needsReview = input.needsReview === true || previous?.state === "NEEDS_REVIEW";
-    const bestScore = score == null
+    // Điểm hiện tại của tab: `progress.score` nếu tab tự tính, nếu không thì
+    // điểm của lượt vừa nộp.
+    const tabScore = input.progress && input.progress.score !== undefined
+      ? normalizeScore(input.progress.score)
+      : score;
+    const bestScore = tabScore == null
       ? previous?.bestScore ?? null
-      : Math.max(previous?.bestScore ?? 0, score);
+      : Math.max(previous?.bestScore ?? 0, tabScore);
     const snapshot = computeTabSnapshot({
       opened: true,
       completed,
-      percent: completed ? 100 : 0,
-      currentScore: needsReview ? null : score,
+      percent: input.progress ? input.progress.percent : completed ? 100 : 0,
+      currentScore: needsReview ? null : tabScore,
       bestScore,
       needsReview,
     });

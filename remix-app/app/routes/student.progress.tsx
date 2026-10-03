@@ -15,6 +15,7 @@ const TAB_LABELS: Record<(typeof LESSON_TAB_KEYS)[number], string> = {
   LISTENING: "Nghe câu",
   VOCABULARY: "Từ vựng",
   LESSON: "Bài học",
+  PHONETICS: "Ngữ âm",
   GRAMMAR: "Ngữ pháp",
   WORKBOOK: "Workbook",
 };

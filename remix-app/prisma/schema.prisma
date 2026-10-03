@@ -21,17 +21,17 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  enrollments            Enrollment[]
-  progresses             LessonProgress[]
-  blockProgresses        BlockProgress[]
-  examAttempts           ExamAttempt[]
-  authoredExams          Exam[]     @relation("ExamAuthor")
-  authoredQuestions      Question[] @relation("QuestionAuthor")
-  taughtClasses          Class[]    @relation("ClassTeacher")
+  enrollments              Enrollment[]
+  progresses               LessonProgress[]
+  blockProgresses          BlockProgress[]
+  examAttempts             ExamAttempt[]
+  authoredExams            Exam[]                    @relation("ExamAuthor")
+  authoredQuestions        Question[]                @relation("QuestionAuthor")
+  taughtClasses            Class[]                   @relation("ClassTeacher")
   pronunciationAssessments PronunciationAssessment[]
-  lessonTabProgresses    LessonTabProgress[]
-  lessonTabAttempts      LessonTabAttempt[]
-  lessonTabFeedback      LessonTabFeedback[] @relation("TeacherTabFeedback")
+  lessonTabProgresses      LessonTabProgress[]
+  lessonTabAttempts        LessonTabAttempt[]
+  lessonTabFeedback        LessonTabFeedback[]       @relation("TeacherTabFeedback")
 }
 
 enum Role {
@@ -81,24 +81,24 @@ model CourseReviewSet {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  course   Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course    Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
   questions CourseReviewQuestion[]
 
   @@index([courseId, order])
 }
 
 model CourseReviewQuestion {
-  id              String            @id @default(cuid())
+  id              String             @id @default(cuid())
   setId           String
   direction       ReviewDirection
   type            ReviewQuestionType @default(TRANSLATION)
   prompt          String
   answer          String
-  acceptedAnswers String[]          @default([])
+  acceptedAnswers String[]           @default([])
   explanation     String?
-  tokens          String[]          @default([])
+  tokens          String[]           @default([])
   lesson          Int?
-  order           Int               @default(0)
+  order           Int                @default(0)
 
   reviewSet CourseReviewSet @relation(fields: [setId], references: [id], onDelete: Cascade)
 
@@ -114,39 +114,40 @@ enum CourseStatus {
 // ─── Lessons ─────────────────────────────────────────────────────────────────
 
 model Lesson {
-  id       String @id @default(cuid())
-  courseId String
-  order    Int
-  title    String
-  subtitle String
+  id               String         @id @default(cuid())
+  courseId         String
+  order            Int
+  title            String
+  subtitle         String
   answerReviewTabs LessonTabKey[] @default([])
 
-  course          Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  content         VocabItem[]
-  sentences       SentenceItem[]
-  grammarSections GrammarSection[]
-  learningBlocks  LearningBlock[]
-  exercise       Exercise?
-  test           Test?
-  progresses     LessonProgress[]
-  tabProgresses  LessonTabProgress[]
-  tabAttempts    LessonTabAttempt[]
-  exams          Exam[]
-  audioScripts    LessonAudioScript[]
+  course            Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  content           VocabItem[]
+  sentences         SentenceItem[]
+  grammarSections   GrammarSection[]
+  phoneticsSections PhoneticsSection[]
+  learningBlocks    LearningBlock[]
+  exercise          Exercise?
+  test              Test?
+  progresses        LessonProgress[]
+  tabProgresses     LessonTabProgress[]
+  tabAttempts       LessonTabAttempt[]
+  exams             Exam[]
+  audioScripts      LessonAudioScript[]
 
   // Mọi truy vấn bài học đều lọc theo courseId rồi sắp xếp theo order.
   @@index([courseId, order])
 }
 
 model LessonAudioScript {
-  id          String  @id @default(cuid())
-  lessonId    String
-  title       String
-  audioUrl    String?
-  showScript  Boolean @default(true)
-  order       Int     @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  lessonId   String
+  title      String
+  audioUrl   String?
+  showScript Boolean  @default(true)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   lesson      Lesson                    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   speakers    LessonAudioSpeaker[]
@@ -156,13 +157,13 @@ model LessonAudioScript {
 }
 
 model LessonAudioSpeaker {
-  id                  String  @id @default(cuid())
+  id                  String @id @default(cuid())
   lessonAudioScriptId String
   speakerName         String
   chinese             String
   pinyin              String
   translation         String
-  order               Int     @default(0)
+  order               Int    @default(0)
 
   lessonAudioScript LessonAudioScript @relation(fields: [lessonAudioScriptId], references: [id], onDelete: Cascade)
 
@@ -187,21 +188,22 @@ model PronunciationAssessment {
   @@index([userId, lessonAudioScriptId, score])
   @@index([lessonAudioScriptId])
 }
+
 model VocabItem {
-  id                      String    @id @default(cuid())
+  id                      String     @id @default(cuid())
   lessonId                String
   chinese                 String
-  chineseAlternatives     String[]  @default([])
+  chineseAlternatives     String[]   @default([])
   pinyin                  String
-  pinyinAlternatives      String[]  @default([])
+  pinyinAlternatives      String[]   @default([])
   translation             String
-  translationAlternatives String[]  @default([])
+  translationAlternatives String[]   @default([])
   // từ loại: danh từ, động từ, tính từ... (tùy chọn)
   // Cho phép nhiều từ loại cho cùng một từ, vì một từ có thể dính nhiều lớp từ vựng.
   wordTypes               WordType[] @default([])
   audioUrl                String?
   note                    String?
-  order                   Int       @default(0)
+  order                   Int        @default(0)
 
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
@@ -226,16 +228,16 @@ enum WordType {
 /// Câu mẫu của bài, admin soạn riêng. Dùng làm nguồn cho block Nghe câu —
 /// tách khỏi VocabItem vì câu không có từ loại và không lên thẻ flashcard.
 model SentenceItem {
-  id                 String   @id @default(cuid())
-  lessonId           String
-  chinese            String
+  id                  String   @id @default(cuid())
+  lessonId            String
+  chinese             String
   chineseAlternatives String[] @default([])
-  pinyin             String
-  pinyinAlternatives String[] @default([])
-  translation        String
-  audioUrl           String?
-  note               String?
-  order              Int      @default(0)
+  pinyin              String
+  pinyinAlternatives  String[] @default([])
+  translation         String
+  audioUrl            String?
+  note                String?
+  order               Int      @default(0)
 
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
@@ -290,6 +292,52 @@ model GrammarQuestion {
   @@index([sectionId, order])
 }
 
+enum PhoneticsQuestionType {
+  INITIAL
+  FINAL
+  TONE
+}
+
+model PhoneticsSection {
+  id             String   @id @default(cuid())
+  lessonId       String
+  sectionKey     Int
+  title          String
+  description    String   @default("")
+  desktopColumns Int      @default(5)
+  audio          String?
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  lesson    Lesson              @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions PhoneticsQuestion[]
+
+  @@unique([lessonId, sectionKey])
+  @@index([lessonId, order])
+}
+
+model PhoneticsQuestion {
+  id          String                @id @default(cuid())
+  sectionId   String
+  questionKey Int
+  type        PhoneticsQuestionType
+  given       String?
+  answer      String?
+  syllable    String?
+  answerTone  Int?
+  full        String
+  audioText   String
+  order       Int                   @default(0)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  section PhoneticsSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([sectionId, questionKey])
+  @@index([sectionId, order])
+}
+
 // ─── Learning blocks (phần lý thuyết) ────────────────────────────────────────
 
 enum LearningBlockType {
@@ -298,6 +346,7 @@ enum LearningBlockType {
   VOCABULARY
   GRAMMAR
   WORKBOOK
+  PHONETICS
 }
 
 model LearningBlock {
@@ -333,13 +382,13 @@ model Exercise {
 /// thi chính thức có version/snapshot và dùng kho câu hỏi chung, còn bài kiểm
 /// tra chỉ thuộc về một bài học và admin soạn ngay trong trang bài học đó.
 model Test {
-  id       String @id @default(cuid())
-  lessonId String @unique
-  title    String
+  id               String @id @default(cuid())
+  lessonId         String @unique
+  title            String
   /// % tối thiểu để coi là đạt và đánh dấu hoàn thành bài học
-  passScore Int   @default(50)
+  passScore        Int    @default(50)
   /// Số phút làm bài; null = không giới hạn
-  timeLimitMinutes Int? @default(30)
+  timeLimitMinutes Int?   @default(30)
 
   lesson    Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   questions TestQuestion[]
@@ -405,9 +454,9 @@ model Enrollment {
   classId   String?
   createdAt DateTime @default(now())
 
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  class  Class?  @relation(fields: [classId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  class  Class? @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
   // `@@unique([userId, courseId])` chỉ phục vụ tra cứu theo userId. Trang admin
@@ -417,13 +466,13 @@ model Enrollment {
 }
 
 model LessonProgress {
-  id                  String   @id @default(cuid())
-  userId              String
-  lessonId            String
-  learningCompleted   Boolean  @default(false)
-  exerciseCompleted   Boolean  @default(false)
-  testCompleted       Boolean  @default(false)
-  updatedAt           DateTime @updatedAt
+  id                String   @id @default(cuid())
+  userId            String
+  lessonId          String
+  learningCompleted Boolean  @default(false)
+  exerciseCompleted Boolean  @default(false)
+  testCompleted     Boolean  @default(false)
+  updatedAt         DateTime @updatedAt
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
@@ -453,6 +502,7 @@ enum LessonTabKey {
   LISTENING
   VOCABULARY
   LESSON
+  PHONETICS
   GRAMMAR
   WORKBOOK
 }
@@ -465,23 +515,23 @@ enum LessonTabProgressState {
 }
 
 model LessonTabProgress {
-  id            String                  @id @default(cuid())
+  id            String                 @id @default(cuid())
   userId        String
   lessonId      String
   tab           LessonTabKey
-  state         LessonTabProgressState  @default(NOT_STARTED)
-  opened        Boolean                 @default(false)
-  completed     Boolean                 @default(false)
-  percent       Int                     @default(0)
+  state         LessonTabProgressState @default(NOT_STARTED)
+  opened        Boolean                @default(false)
+  completed     Boolean                @default(false)
+  percent       Int                    @default(0)
   currentScore  Float?
   bestScore     Float?
   lastAttemptAt DateTime?
   completedAt   DateTime?
-  createdAt     DateTime                @default(now())
-  updatedAt     DateTime                @updatedAt
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
 
-  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson    Lesson                 @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user     User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson   Lesson                  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   attempts LessonTabAttempt[]
   items    LessonTabItemProgress[]
   feedback LessonTabFeedback[]
@@ -492,7 +542,7 @@ model LessonTabProgress {
 }
 
 model LessonTabAttempt {
-  id           String        @id @default(cuid())
+  id           String       @id @default(cuid())
   userId       String
   lessonId     String
   tab          LessonTabKey
@@ -503,12 +553,12 @@ model LessonTabAttempt {
   passed       Boolean?
   details      Json?
   startedAt    DateTime?
-  completedAt  DateTime       @default(now())
-  createdAt    DateTime       @default(now())
+  completedAt  DateTime     @default(now())
+  createdAt    DateTime     @default(now())
 
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson      Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  tabProgress LessonTabProgress @relation(fields: [userId, lessonId, tab], references: [userId, lessonId, tab], onDelete: Cascade)
+  user        User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson                  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  tabProgress LessonTabProgress       @relation(fields: [userId, lessonId, tab], references: [userId, lessonId, tab], onDelete: Cascade)
   items       LessonTabItemProgress[]
 
   @@index([userId, lessonId, tab, completedAt])
@@ -516,18 +566,18 @@ model LessonTabAttempt {
 }
 
 model LessonTabItemProgress {
-  id             String                  @id @default(cuid())
-  tabProgressId  String
-  attemptId      String?
-  itemKey        String
-  state          LessonTabProgressState  @default(NOT_STARTED)
-  attempts       Int                     @default(0)
-  correct        Boolean?
-  score          Float?
-  lastAnswer     String?
-  viewedAt       DateTime?
-  completedAt    DateTime?
-  updatedAt      DateTime                @updatedAt
+  id            String                 @id @default(cuid())
+  tabProgressId String
+  attemptId     String?
+  itemKey       String
+  state         LessonTabProgressState @default(NOT_STARTED)
+  attempts      Int                    @default(0)
+  correct       Boolean?
+  score         Float?
+  lastAnswer    String?
+  viewedAt      DateTime?
+  completedAt   DateTime?
+  updatedAt     DateTime               @updatedAt
 
   tabProgress LessonTabProgress @relation(fields: [tabProgressId], references: [id], onDelete: Cascade)
   attempt     LessonTabAttempt? @relation(fields: [attemptId], references: [id], onDelete: Cascade)
@@ -548,7 +598,7 @@ model LessonTabFeedback {
   updatedAt     DateTime @updatedAt
 
   tabProgress LessonTabProgress @relation(fields: [tabProgressId], references: [id], onDelete: Cascade)
-  teacher     User             @relation("TeacherTabFeedback", fields: [teacherId], references: [id], onDelete: Cascade)
+  teacher     User              @relation("TeacherTabFeedback", fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@index([tabProgressId, createdAt])
   @@index([teacherId])

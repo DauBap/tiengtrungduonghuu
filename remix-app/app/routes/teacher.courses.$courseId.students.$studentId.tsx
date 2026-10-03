@@ -18,6 +18,7 @@ const TAB_LABELS: Record<string, string> = {
   LISTENING: "Nghe",
   VOCABULARY: "Từ vựng",
   LESSON: "Bài khóa",
+  PHONETICS: "Ngữ âm",
   GRAMMAR: "Ngữ pháp",
   WORKBOOK: "Workbook",
 };
