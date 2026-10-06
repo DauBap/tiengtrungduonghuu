@@ -211,6 +211,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   if (!lesson) throw new Response("Không tìm thấy", { status: 404 });
 
   const [
+    lessonNumber,
     progress,
     courseWords,
     teacherTabFeedback,
@@ -223,6 +224,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     phoneticsConfig,
     phoneticsAttempts,
   ] = await Promise.all([
+    prisma.lesson.count({
+      where: { courseId: lesson.courseId, order: { lte: lesson.order } },
+    }),
     getLessonProgress(user.id, lesson.id),
     prisma.vocabItem.findMany({
       where: { lesson: { courseId: lesson.courseId } },
@@ -455,6 +459,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   return {
     user,
     lesson: studentLesson,
+    lessonNumber,
     lessonStatus,
     blocks,
     blockStatuses,
@@ -1204,7 +1209,7 @@ function AnswerReviewDetails({ groups }: { groups: AnswerReviewGroup[] }) {
 }
 
 export default function LessonDetail() {
-  const { user, lesson, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewTabs, answerReviewGroups, answerReviewLockedTargets, phonetics, phoneticsSectionScores } = useLoaderData<typeof loader>();
+  const { user, lesson, lessonNumber, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewTabs, answerReviewGroups, answerReviewLockedTargets, phonetics, phoneticsSectionScores } = useLoaderData<typeof loader>();
   const settings = useAppSettings();
   const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; lessonPinyin: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string; error?: string }>();
   const workbookFetcher = useFetcher<{
@@ -1915,7 +1920,6 @@ export default function LessonDetail() {
       status={blockStatuses[blockIndex]}
       courseId={lesson.courseId}
       lessonId={lesson.id}
-      lessonName={lesson.title}
       isRetakeLocked={answerReviewEnabled && activeTab === "LISTENING" && activeLockedTargets.includes(blocks[blockIndex].id)}
       showAnswerDetails={answerReviewEnabled}
     />;
@@ -1948,7 +1952,7 @@ export default function LessonDetail() {
           </Button>
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-4">
             <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">HSK {lesson.course.hskLevel}</span>
-            <span>Bài {lesson.order}</span>
+            <span>Bài {lessonNumber}</span>
           </div>
           <div className="text-center">
             <h1 className="text-3xl font-bold tracking-tight">{lesson.title}</h1>

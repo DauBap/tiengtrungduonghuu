@@ -29,7 +29,6 @@ interface FlashcardBlockProps {
   lessonId: string;
   isCompleted: boolean;
   onComplete: () => void;
-  lessonName?: string;
   progressStorageKey?: string;
 }
 
@@ -42,7 +41,7 @@ function shuffled<T>(arr: T[]): T[] {
   return copy;
 }
 
-export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted, onComplete, lessonName, progressStorageKey }: FlashcardBlockProps) {
+export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted, onComplete, progressStorageKey }: FlashcardBlockProps) {
   const settings = useAppSettings();
   const storageKey = progressStorageKey ?? `flashcard-progress:${courseId}:${lessonId}`;
   const [round, setRound] = useState(0);
@@ -218,7 +217,6 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
         <div className={cn("relative h-72 w-full transition-transform duration-500 [transform-style:preserve-3d]", flipped && "[transform:rotateY(180deg)]")}>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/20 bg-primary/5 p-6 transition-colors [backface-visibility:hidden] group-hover:border-primary/40">
             <p className={cn("text-center font-semibold", frontIsChinese ? "text-5xl" : "text-2xl")}>{frontMain}</p>
-            {lessonName && <p className="text-xs text-muted-foreground">{lessonName}</p>}
             {frontIsChinese && config.showPinyinOnFront && settings.showPinyin && <p className="font-mono text-lg text-primary">{card.pinyin}</p>}
             <p className="absolute bottom-4 text-xs text-muted-foreground">Bấm để lật thẻ</p>
           </div>

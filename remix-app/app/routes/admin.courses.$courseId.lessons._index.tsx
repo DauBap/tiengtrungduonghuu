@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
-import { useLoaderData, useFetcher, Link } from "react-router";
+import { useLoaderData, useFetcher, Link, redirect } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { getCourseById, getLessonsForAdmin } from "~/lib/db.server";
 import { prisma } from "~/lib/prisma.server";
@@ -8,11 +8,12 @@ import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { Overlay } from "~/components/common/overlay";
-import { ArrowLeft, Plus, Pencil, Trash2, X, BookOpen, Loader2, Settings2, ClipboardCheck, GripVertical } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, X, BookOpen, Loader2, Settings2, ClipboardCheck, GripVertical, FileCheck2 } from "lucide-react";
 
 type LessonRow = {
   id: string;
@@ -38,19 +39,55 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const course = await getCourseById(params.courseId!);
   if (!course) throw new Response("Không tìm thấy khóa học", { status: 404 });
   const lessons = await getLessonsForAdmin(course.id);
-  const reviewSets = await prisma.courseReviewSet.findMany({
-    where: { courseId: course.id },
-    include: { _count: { select: { questions: true } } },
-    orderBy: { order: "asc" },
-  });
-  return { user, course, lessons, reviewSets };
+  const [reviewSets, mockExams] = await Promise.all([
+    prisma.courseReviewSet.findMany({
+      where: { courseId: course.id },
+      include: { _count: { select: { questions: true } } },
+      orderBy: { order: "asc" },
+    }),
+    prisma.mockExam.findMany({
+      where: { courseId: course.id },
+      orderBy: { createdAt: "asc" },
+      include: {
+        sections: { include: { _count: { select: { questions: true } } } },
+        _count: { select: { attempts: true } },
+      },
+    }),
+  ]);
+  return {
+    user,
+    course,
+    lessons,
+    reviewSets,
+    mockExams: mockExams.map((exam) => ({
+      ...exam,
+      sectionCount: exam.sections.length,
+      questionCount: exam.sections.reduce((count, section) => count + section._count.questions, 0),
+      sections: undefined,
+    })),
+  };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  await requireRole(request, ["admin"]);
+  const user = await requireRole(request, ["admin"]);
   const courseId = params.courseId!;
   const form = await request.formData();
   const intent = String(form.get("intent"));
+
+  if (intent === "create-mock-exam") {
+    const title = String(form.get("title") ?? "").trim();
+    const description = String(form.get("description") ?? "").trim();
+    if (!title) return { error: "Vui lòng nhập tên bài thi thử", field: "title" };
+
+    const course = await prisma.course.findUnique({ where: { id: courseId }, select: { id: true } });
+    if (!course) throw new Response("Không tìm thấy khóa học", { status: 404 });
+
+    const mockExam = await prisma.mockExam.create({
+      data: { courseId, createdById: user.id, title, description: description || null },
+      select: { id: true },
+    });
+    return redirect(`/admin/courses/${courseId}/mock-exams/${mockExam.id}`);
+  }
 
   if (intent === "create" || intent === "edit") {
     const title = String(form.get("title") ?? "").trim();
@@ -244,11 +281,67 @@ function LessonModal({
   );
 }
 
+function MockExamModal({
+  course,
+  onClose,
+}: {
+  course: { id: string; code: string; title: string };
+  onClose: () => void;
+}) {
+  const fetcher = useFetcher<{ error?: string; field?: string }>();
+  const isLoading = fetcher.state !== "idle";
+
+  return (
+    <Overlay onClose={onClose}>
+      <fetcher.Form method="post" noValidate className="space-y-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-lg font-bold">Tạo bài thi thử</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{course.code} · {course.title}</p>
+          </div>
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Đóng">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        {fetcher.data?.error && (
+          <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+            {fetcher.data.error}
+          </div>
+        )}
+        <input type="hidden" name="intent" value="create-mock-exam" />
+        <div className="space-y-2">
+          <Label htmlFor="mock-exam-title">Tên bài thi thử <span className="text-destructive">*</span></Label>
+          <Input
+            id="mock-exam-title"
+            name="title"
+            autoFocus
+            placeholder="HSK1 - Đề thi thử số 1"
+            aria-invalid={fetcher.data?.field === "title" || undefined}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="mock-exam-description">Mô tả</Label>
+          <Textarea id="mock-exam-description" name="description" rows={3} placeholder="Thông tin giới thiệu về đề thi thử" />
+        </div>
+        <p className="text-xs text-muted-foreground">Sau khi tạo, bạn sẽ được chuyển đến trang cài đặt để thêm phần thi và câu hỏi.</p>
+        <div className="flex justify-end gap-2 pt-2">
+          <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Hủy</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+            Tạo bài thi thử
+          </Button>
+        </div>
+      </fetcher.Form>
+    </Overlay>
+  );
+}
+
 export default function AdminCourseLessons() {
-  const { user, course, lessons, reviewSets } = useLoaderData<typeof loader>();
+  const { user, course, lessons, reviewSets, mockExams } = useLoaderData<typeof loader>();
   const moveFetcher = useFetcher();
   const reviewDeleteFetcher = useFetcher();
   const [modalMode, setModalMode] = useState<ModalMode>(null);
+  const [showMockExamModal, setShowMockExamModal] = useState(false);
   const [selected, setSelected] = useState<LessonRow | null>(null);
   const [draggingKey, setDraggingKey] = useState<string | null>(null);
 
@@ -291,9 +384,56 @@ export default function AdminCourseLessons() {
                 <h1 className="text-2xl font-bold tracking-tight">Bài học</h1>
                 <p className="text-muted-foreground text-sm mt-1">{course.code} - {course.title}</p>
               </div>
-              <Button onClick={() => open("create")}><Plus className="h-4 w-4 mr-1.5" />Thêm bài học</Button>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" onClick={() => setShowMockExamModal(true)}>
+                  <FileCheck2 className="h-4 w-4 mr-1.5" />Tạo bài thi thử
+                </Button>
+                <Button onClick={() => open("create")}><Plus className="h-4 w-4 mr-1.5" />Thêm bài học</Button>
+              </div>
             </div>
           </div>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Bài thi thử</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {mockExams.length === 0 ? (
+                <p className="px-6 pb-5 text-sm text-muted-foreground">
+                  Chưa có bài thi thử. Tạo bài thi bằng nút phía trên; đề thi thử được quản lý riêng, không nằm trong danh sách bài học.
+                </p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tên bài thi</TableHead>
+                      <TableHead>Nội dung</TableHead>
+                      <TableHead>Trạng thái</TableHead>
+                      <TableHead className="text-right">Thao tác</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockExams.map((exam) => (
+                      <TableRow key={exam.id}>
+                        <TableCell className="font-medium">{exam.title}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {exam.sectionCount} phần · {exam.questionCount} câu · {exam._count.attempts} lượt làm
+                        </TableCell>
+                        <TableCell className="text-sm">{exam.isPublished ? "Đang phát hành" : "Bản nháp"}</TableCell>
+                        <TableCell className="text-right">
+                          <Button asChild size="sm" variant="outline">
+                            <Link to={`/admin/courses/${course.id}/mock-exams/${exam.id}`}>
+                              <Settings2 className="mr-1.5 h-4 w-4" />Cài đặt đề
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
 
           {items.length === 0 ? (
             <EmptyState icon={<BookOpen className="h-10 w-10" />} title="Chưa có bài học"
@@ -412,6 +552,7 @@ export default function AdminCourseLessons() {
         nextOrder={nextOrder}
         onClose={close}
       />
+      {showMockExamModal && <MockExamModal course={course} onClose={() => setShowMockExamModal(false)} />}
     </>
   );
 }

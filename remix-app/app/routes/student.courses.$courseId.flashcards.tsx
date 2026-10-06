@@ -24,29 +24,37 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const lessonIds = [...new Set(requestedIds)];
   if (lessonIds.length === 0) throw redirect(`/student/courses/${courseId}`);
 
-  const lessons = await prisma.lesson.findMany({
-    where: { courseId, id: { in: lessonIds } },
-    orderBy: { order: "asc" },
-    select: {
-      id: true,
-      order: true,
-      title: true,
-      content: {
-        orderBy: { order: "asc" },
-        select: {
-          id: true,
-          chinese: true,
-          pinyin: true,
-          translation: true,
-          wordTypes: true,
-          audioUrl: true,
-          note: true,
+  const [lessons, courseLessons] = await Promise.all([
+    prisma.lesson.findMany({
+      where: { courseId, id: { in: lessonIds } },
+      orderBy: { order: "asc" },
+      select: {
+        id: true,
+        order: true,
+        title: true,
+        content: {
+          orderBy: { order: "asc" },
+          select: {
+            id: true,
+            chinese: true,
+            pinyin: true,
+            translation: true,
+            wordTypes: true,
+            audioUrl: true,
+            note: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.lesson.findMany({
+      where: { courseId },
+      select: { id: true },
+      orderBy: { order: "asc" },
+    }),
+  ]);
   if (lessons.length !== lessonIds.length) throw new Response("Bài học không thuộc khóa học này", { status: 404 });
 
+  const lessonNumbers = new Map(courseLessons.map((lesson, index) => [lesson.id, index + 1]));
   const items: FlashcardVocab[] = lessons.flatMap((lesson) => lesson.content.map((item) => ({
     id: item.id,
     chinese: item.chinese,
@@ -61,7 +69,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     user,
     courseId,
     courseTitle: course.title,
-    lessons: lessons.map(({ id, order, title }) => ({ id, order, title })),
+    lessons: lessons.map(({ id, title }) => ({ id, order: lessonNumbers.get(id) ?? 1, title })),
     items,
     selectionKey: [...lessonIds].sort().join("."),
   };

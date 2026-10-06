@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { getCourseById, getCourseReviewSetById } from "~/lib/db.server";
 import { requireRole } from "~/lib/session.server";
+import { isReviewAnswerCorrect } from "~/lib/review-answer";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
@@ -30,22 +31,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   };
 }
 
-function normalizeAnswer(value: string) {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 function isQuestionCorrect(question: { answer: string; acceptedAnswers?: string[] }, provided: string) {
-  const entered = normalizeAnswer(provided);
-  if (!entered) return false;
-
-  const accepted = [question.answer, ...(question.acceptedAnswers ?? [])].map((candidate) => normalizeAnswer(candidate));
-  return accepted.includes(entered) || accepted.some((candidate) => candidate.includes(entered) || entered.includes(candidate));
+  return isReviewAnswerCorrect(provided, [question.answer, ...(question.acceptedAnswers ?? [])]);
 }
 
 export default function StudentCourseReviewPage() {

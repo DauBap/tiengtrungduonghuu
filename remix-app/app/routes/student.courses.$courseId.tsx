@@ -9,7 +9,7 @@ import { ProgressBar } from "~/components/progress/progress-bar";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
-import { ArrowLeft, BookOpen, Layers } from "lucide-react";
+import { ArrowLeft, BookOpen, Layers, FileCheck2 } from "lucide-react";
 import type { ProgressStatus } from "~/types/progress";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
 import { prisma } from "~/lib/prisma.server";
@@ -40,6 +40,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       },
     }),
   ]);
+  const mockExamCount = await prisma.mockExam.count({
+    where: { courseId: course.id, isPublished: true },
+  });
   const progressMap = new Map(progressList.map((p) => [p.lessonId, p]));
   const courseProgress = computeTrackedCourseProgress(lessons.map((lesson) => lesson.id), tabProgressRows);
   const tabProgressByLesson = new Map<string, typeof tabProgressRows>();
@@ -75,11 +78,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     lessonsWithStatus,
     reviewSets,
     courseProgress,
+    mockExamCount,
   };
 }
 
 export default function StudentCourseDetail() {
-  const { user, course, lessonsWithStatus, reviewSets, courseProgress } = useLoaderData<typeof loader>();
+  const { user, course, lessonsWithStatus, reviewSets, courseProgress, mockExamCount } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const [showCombinedStudy, setShowCombinedStudy] = useState(false);
   const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([]);
@@ -123,6 +127,25 @@ export default function StudentCourseDetail() {
         <Card>
           <CardHeader><CardTitle className="text-base">Tiến độ khóa học</CardTitle></CardHeader>
           <CardContent><ProgressBar value={courseProgress} /></CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <FileCheck2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="font-semibold">Bài thi thử</h2>
+                <p className="text-sm text-muted-foreground">
+                  {mockExamCount} đề thi thử · Làm bài độc lập với các bài học
+                </p>
+              </div>
+            </div>
+            <Button asChild variant="outline">
+              <Link to={`/student/courses/${course.id}/mock-exams`}>Xem bài thi thử</Link>
+            </Button>
+          </CardContent>
         </Card>
 
         <div>
@@ -192,7 +215,7 @@ export default function StudentCourseDetail() {
                       className="h-4 w-4 accent-primary"
                     />
                     <span className="min-w-0">
-                      <span className="mr-2 text-xs font-medium text-muted-foreground">Bài {lesson.order}</span>
+                      <span className="mr-2 text-xs font-medium text-muted-foreground">Bài {lessonNumbers.get(lesson.id) ?? 1}</span>
                       <span className="text-sm font-medium">{lesson.title}</span>
                       {lesson.subtitle && <span className="mt-0.5 block text-xs text-muted-foreground">{lesson.subtitle}</span>}
                     </span>

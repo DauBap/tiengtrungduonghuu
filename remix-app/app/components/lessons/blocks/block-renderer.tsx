@@ -60,7 +60,7 @@ function listeningQuestions(
   }));
 }
 
-export function BlockRenderer({ block, status, courseId, lessonId, lessonName, isRetakeLocked = false, showAnswerDetails = false }: { block: ResolvedBlock; status: ProgressStatus; courseId: string; lessonId: string; lessonName?: string; isRetakeLocked?: boolean; showAnswerDetails?: boolean }) {
+export function BlockRenderer({ block, status, courseId, lessonId, isRetakeLocked = false, showAnswerDetails = false }: { block: ResolvedBlock; status: ProgressStatus; courseId: string; lessonId: string; isRetakeLocked?: boolean; showAnswerDetails?: boolean }) {
   const fetcher = useFetcher<{
     success?: boolean;
     intent?: string;
@@ -111,7 +111,7 @@ export function BlockRenderer({ block, status, courseId, lessonId, lessonName, i
 
     return (
       <BlockShell {...shellProps} showSettings>
-        <FlashcardBlock config={parsed.data} items={items} courseId={courseId} lessonId={lessonId} lessonName={lessonName} isCompleted={isCompleted} onComplete={markComplete} />
+        <FlashcardBlock config={parsed.data} items={items} courseId={courseId} lessonId={lessonId} isCompleted={isCompleted} onComplete={markComplete} />
       </BlockShell>
     );
   }
