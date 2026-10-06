@@ -55,6 +55,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [finished, setFinished] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const completionSubmitted = useRef(false);
 
   useEffect(() => {
     setSpeechReady(isSpeechSupported());
@@ -85,6 +86,25 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
       }
     }
   }, [hydrated, statuses, storageKey]);
+
+  const allKnown = items.length > 0 && items.every((item) => statuses[item.id] === "known");
+
+  useEffect(() => {
+    if (isCompleted) {
+      completionSubmitted.current = true;
+      return;
+    }
+    if (
+      !hydrated
+      || completionSubmitted.current
+      || !allKnown
+    ) {
+      return;
+    }
+
+    completionSubmitted.current = true;
+    onComplete();
+  }, [allKnown, hydrated, isCompleted, onComplete]);
 
   const card = cards.find((item) => item.id === queue[index]);
   const counts = useMemo(() => {
@@ -175,7 +195,11 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
         <CheckCircle2 className="mx-auto h-12 w-12 text-success" />
         <div>
           <h3 className="text-xl font-semibold">Hoàn thành lượt học</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Tiến độ của bài học đã được lưu trên thiết bị này.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {allKnown
+              ? "Bạn đã thuộc toàn bộ từ; tiến độ tab flashcard đã được cập nhật."
+              : "Tiến độ từ vựng được lưu trên thiết bị này. Hãy đánh dấu các từ đã thuộc để hoàn thành tab."}
+          </p>
         </div>
         <div className="grid grid-cols-3 gap-2 text-sm">
           <div className="rounded-lg border bg-success/5 p-3"><strong className="block text-lg text-success">{counts.known}</strong>Đã thuộc</div>
@@ -185,7 +209,6 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
         <div className="flex flex-wrap justify-center gap-2">
           <Button onClick={() => startSession("all")}><RefreshCw className="mr-1.5 h-4 w-4" />Học lại tất cả</Button>
           <Button variant="outline" onClick={() => startSession("unknown")} disabled={counts.unknown === 0}><CircleHelp className="mr-1.5 h-4 w-4" />Ôn từ chưa thuộc</Button>
-          {!isCompleted && <Button variant="secondary" onClick={onComplete}><CheckCircle2 className="mr-1.5 h-4 w-4" />Hoàn thành phần này</Button>}
         </div>
         <Button variant="ghost" size="sm" onClick={resetProgress}><Trash2 className="mr-1.5 h-4 w-4" />Đặt lại tiến độ</Button>
       </div>
