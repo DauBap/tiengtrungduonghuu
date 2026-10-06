@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { Overlay } from "~/components/common/overlay";
-import { ArrowLeft, Plus, Pencil, Trash2, X, BookOpen, Loader2, Settings2, ClipboardCheck, GripVertical, FileCheck2 } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, X, BookOpen, Loader2, Settings2, ClipboardCheck, GripVertical, FileCheck2, TriangleAlert } from "lucide-react";
 
 type LessonRow = {
   id: string;
@@ -29,9 +29,22 @@ type ReviewRow = {
   subtitle: string;
   _count: { questions: number };
 };
+type MockExamRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  isPublished: boolean;
+  sectionCount: number;
+  questionCount: number;
+  _count: { attempts: number };
+};
 type CourseItem =
   | { kind: "lesson"; data: LessonRow }
   | { kind: "review"; data: ReviewRow };
+type DeleteConfirmation =
+  | { kind: "mock-exam"; exam: MockExamRow }
+  | { kind: "review"; review: ReviewRow }
+  | null;
 type ModalMode = "create" | "edit" | "delete" | null;
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -89,6 +102,30 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return redirect(`/admin/courses/${courseId}/mock-exams/${mockExam.id}`);
   }
 
+  if (intent === "edit-mock-exam") {
+    const mockExamId = String(form.get("mockExamId") ?? "");
+    const title = String(form.get("title") ?? "").trim();
+    const description = String(form.get("description") ?? "").trim();
+    if (!title) return { error: "Vui lòng nhập tên bài thi thử", field: "title" };
+
+    const mockExam = await prisma.mockExam.findFirst({ where: { id: mockExamId, courseId }, select: { id: true } });
+    if (!mockExam) return { error: "Không tìm thấy bài thi thử" };
+
+    await prisma.mockExam.update({
+      where: { id: mockExam.id },
+      data: { title, description: description || null },
+    });
+    return { success: true };
+  }
+
+  if (intent === "delete-mock-exam") {
+    const mockExamId = String(form.get("mockExamId") ?? "");
+    const mockExam = await prisma.mockExam.findFirst({ where: { id: mockExamId, courseId }, select: { id: true } });
+    if (!mockExam) return { error: "Không tìm thấy bài thi thử", mockExamId };
+    await prisma.mockExam.delete({ where: { id: mockExam.id } });
+    return { success: true, deletedMockExamId: mockExam.id };
+  }
+
   if (intent === "create" || intent === "edit") {
     const title = String(form.get("title") ?? "").trim();
     const subtitle = String(form.get("subtitle") ?? "").trim();
@@ -123,9 +160,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
   if (intent === "delete-review") {
     const reviewId = String(form.get("reviewId") ?? "");
     const reviewSet = await prisma.courseReviewSet.findFirst({ where: { id: reviewId, courseId }, select: { id: true } });
-    if (!reviewSet) return { error: "Không tìm thấy bộ ôn tập" };
+    if (!reviewSet) return { error: "Không tìm thấy bộ ôn tập", reviewId };
     await prisma.courseReviewSet.delete({ where: { id: reviewSet.id } });
-    return { success: true };
+    return { success: true, deletedReviewId: reviewSet.id };
   }
 
   if (intent === "move") {
@@ -283,20 +320,27 @@ function LessonModal({
 
 function MockExamModal({
   course,
+  exam,
   onClose,
 }: {
   course: { id: string; code: string; title: string };
+  exam?: MockExamRow | null;
   onClose: () => void;
 }) {
-  const fetcher = useFetcher<{ error?: string; field?: string }>();
+  const fetcher = useFetcher<{ error?: string; field?: string; success?: boolean }>();
   const isLoading = fetcher.state !== "idle";
+  const isEdit = Boolean(exam);
+
+  useEffect(() => {
+    if (fetcher.state === "idle" && fetcher.data?.success) onClose();
+  }, [fetcher.state, fetcher.data, onClose]);
 
   return (
     <Overlay onClose={onClose}>
       <fetcher.Form method="post" noValidate className="space-y-4">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-lg font-bold">Tạo bài thi thử</h2>
+            <h2 className="text-lg font-bold">{isEdit ? "Sửa thông tin bài thi thử" : "Tạo bài thi thử"}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{course.code} · {course.title}</p>
           </div>
           <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Đóng">
@@ -308,27 +352,37 @@ function MockExamModal({
             {fetcher.data.error}
           </div>
         )}
-        <input type="hidden" name="intent" value="create-mock-exam" />
+        <input type="hidden" name="intent" value={isEdit ? "edit-mock-exam" : "create-mock-exam"} />
+        {exam && <input type="hidden" name="mockExamId" value={exam.id} />}
         <div className="space-y-2">
           <Label htmlFor="mock-exam-title">Tên bài thi thử <span className="text-destructive">*</span></Label>
           <Input
             id="mock-exam-title"
             name="title"
             autoFocus
+            defaultValue={exam?.title ?? ""}
             placeholder="HSK1 - Đề thi thử số 1"
             aria-invalid={fetcher.data?.field === "title" || undefined}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="mock-exam-description">Mô tả</Label>
-          <Textarea id="mock-exam-description" name="description" rows={3} placeholder="Thông tin giới thiệu về đề thi thử" />
+          <Textarea
+            id="mock-exam-description"
+            name="description"
+            rows={3}
+            defaultValue={exam?.description ?? ""}
+            placeholder="Thông tin giới thiệu về đề thi thử"
+          />
         </div>
-        <p className="text-xs text-muted-foreground">Sau khi tạo, bạn sẽ được chuyển đến trang cài đặt để thêm phần thi và câu hỏi.</p>
+        {!isEdit && (
+          <p className="text-xs text-muted-foreground">Sau khi tạo, bạn sẽ được chuyển đến trang cài đặt để thêm phần thi và câu hỏi.</p>
+        )}
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Hủy</Button>
           <Button type="submit" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
-            Tạo bài thi thử
+            {isEdit ? "Lưu thay đổi" : "Tạo bài thi thử"}
           </Button>
         </div>
       </fetcher.Form>
@@ -339,11 +393,39 @@ function MockExamModal({
 export default function AdminCourseLessons() {
   const { user, course, lessons, reviewSets, mockExams } = useLoaderData<typeof loader>();
   const moveFetcher = useFetcher();
-  const reviewDeleteFetcher = useFetcher();
+  const reviewDeleteFetcher = useFetcher<{ error?: string; success?: boolean; deletedReviewId?: string; reviewId?: string }>();
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [showMockExamModal, setShowMockExamModal] = useState(false);
+  const [editingMockExam, setEditingMockExam] = useState<MockExamRow | null>(null);
+  const mockExamDeleteFetcher = useFetcher<{ error?: string; success?: boolean; deletedMockExamId?: string; mockExamId?: string }>();
+  const [deleteConfirmation, setDeleteConfirmation] = useState<DeleteConfirmation>(null);
   const [selected, setSelected] = useState<LessonRow | null>(null);
   const [draggingKey, setDraggingKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (
+      deleteConfirmation?.kind === "mock-exam"
+      && mockExamDeleteFetcher.state === "idle"
+      && mockExamDeleteFetcher.data?.success === true
+      && mockExamDeleteFetcher.data?.deletedMockExamId === deleteConfirmation.exam.id
+    ) {
+      setDeleteConfirmation(null);
+    }
+    if (
+      deleteConfirmation?.kind === "review"
+      && reviewDeleteFetcher.state === "idle"
+      && reviewDeleteFetcher.data?.success === true
+      && reviewDeleteFetcher.data?.deletedReviewId === deleteConfirmation.review.id
+    ) {
+      setDeleteConfirmation(null);
+    }
+  }, [
+    deleteConfirmation,
+    mockExamDeleteFetcher.data,
+    mockExamDeleteFetcher.state,
+    reviewDeleteFetcher.data,
+    reviewDeleteFetcher.state,
+  ]);
 
   const open = (mode: ModalMode, l: LessonRow | null = null) => { setSelected(l); setModalMode(mode); };
   const close = useCallback(() => { setModalMode(null); setSelected(null); }, []);
@@ -421,11 +503,30 @@ export default function AdminCourseLessons() {
                         </TableCell>
                         <TableCell className="text-sm">{exam.isPublished ? "Đang phát hành" : "Bản nháp"}</TableCell>
                         <TableCell className="text-right">
-                          <Button asChild size="sm" variant="outline">
-                            <Link to={`/admin/courses/${course.id}/mock-exams/${exam.id}`}>
-                              <Settings2 className="mr-1.5 h-4 w-4" />Cài đặt đề
-                            </Link>
-                          </Button>
+                          <div className="flex justify-end gap-1">
+                            <Button asChild size="sm" variant="outline">
+                              <Link to={`/admin/courses/${course.id}/mock-exams/${exam.id}`}>
+                                <Settings2 className="mr-1.5 h-4 w-4" />Soạn nội dung
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Sửa thông tin"
+                              onClick={() => setEditingMockExam(exam)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Xóa bài thi thử"
+                              className="hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => setDeleteConfirmation({ kind: "mock-exam", exam })}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -522,14 +623,7 @@ export default function AdminCourseLessons() {
                                 size="icon"
                                 title="Xóa bộ ôn tập"
                                 className="hover:bg-destructive/10 hover:text-destructive"
-                                onClick={() => {
-                                  if (window.confirm(`Xóa bộ ôn tập "${item.data.title}"?`)) {
-                                    reviewDeleteFetcher.submit(
-                                      { intent: "delete-review", reviewId: item.data.id },
-                                      { method: "post" }
-                                    );
-                                  }
-                                }}
+                                onClick={() => setDeleteConfirmation({ kind: "review", review: item.data })}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -553,6 +647,113 @@ export default function AdminCourseLessons() {
         onClose={close}
       />
       {showMockExamModal && <MockExamModal course={course} onClose={() => setShowMockExamModal(false)} />}
+      {editingMockExam && (
+        <MockExamModal
+          key={`edit-mock-exam-${editingMockExam.id}`}
+          course={course}
+          exam={editingMockExam}
+          onClose={() => setEditingMockExam(null)}
+        />
+      )}
+      {deleteConfirmation && (
+        <Overlay
+          onClose={() => {
+            if (mockExamDeleteFetcher.state === "idle" && reviewDeleteFetcher.state === "idle") {
+              setDeleteConfirmation(null);
+            }
+          }}
+          className="max-w-lg"
+        >
+          {(() => {
+            const isMockExam = deleteConfirmation.kind === "mock-exam";
+            const title = isMockExam ? deleteConfirmation.exam.title : deleteConfirmation.review.title;
+            const isDeleting = isMockExam
+              ? mockExamDeleteFetcher.state !== "idle"
+              : reviewDeleteFetcher.state !== "idle";
+            const error = isMockExam
+              ? mockExamDeleteFetcher.data?.mockExamId === deleteConfirmation.exam.id
+                ? mockExamDeleteFetcher.data.error
+                : undefined
+              : reviewDeleteFetcher.data?.reviewId === deleteConfirmation.review.id
+                ? reviewDeleteFetcher.data.error
+                : undefined;
+
+            return (
+              <section role="alertdialog" aria-modal="true" aria-labelledby="delete-course-item-title" className="space-y-5">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                    <TriangleAlert className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 id="delete-course-item-title" className="text-lg font-semibold">
+                      {isMockExam ? "Xóa bài thi thử?" : "Xóa bộ ôn tập?"}
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Bạn đang xóa <span className="font-medium text-foreground">“{title}”</span>.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label="Đóng"
+                    disabled={isDeleting}
+                    onClick={() => setDeleteConfirmation(null)}
+                    className="text-muted-foreground hover:text-foreground disabled:opacity-50"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+                  <p className="text-sm text-destructive">
+                    {isMockExam
+                      ? `Toàn bộ phần thi, câu hỏi và ${deleteConfirmation.exam._count.attempts} lượt làm của học viên sẽ bị xóa.`
+                      : `Toàn bộ ${deleteConfirmation.review._count.questions} câu hỏi và lịch sử ôn tập của học viên sẽ bị xóa.`}
+                  </p>
+                  <p className="mt-2 text-xs font-medium text-destructive">Thao tác này không thể hoàn tác.</p>
+                </div>
+
+                {error && (
+                  <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                    {error}
+                  </p>
+                )}
+
+                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isDeleting}
+                    onClick={() => setDeleteConfirmation(null)}
+                  >
+                    Giữ lại
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    disabled={isDeleting}
+                    onClick={() => {
+                      if (deleteConfirmation.kind === "mock-exam") {
+                        mockExamDeleteFetcher.submit(
+                          { intent: "delete-mock-exam", mockExamId: deleteConfirmation.exam.id },
+                          { method: "post" },
+                        );
+                      } else {
+                        reviewDeleteFetcher.submit(
+                          { intent: "delete-review", reviewId: deleteConfirmation.review.id },
+                          { method: "post" },
+                        );
+                      }
+                    }}
+                  >
+                    {isDeleting && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+                    {isDeleting ? "Đang xóa..." : isMockExam ? "Xóa bài thi thử" : "Xóa bộ ôn tập"}
+                  </Button>
+                </div>
+              </section>
+            );
+          })()}
+        </Overlay>
+      )}
     </>
   );
 }

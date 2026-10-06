@@ -6,8 +6,9 @@ import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
-import { ArrowLeft, ArrowRight, BookOpen, FileText, Inbox, UsersRound } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, FileCheck2, FileText, Inbox, RotateCcw, UsersRound } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { prisma } from "~/lib/prisma.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
@@ -17,12 +18,27 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const allowed = await isTeacherOfCourse(user.id, course.id);
   if (!allowed) throw new Response("Không có quyền truy cập", { status: 403 });
 
-  const lessons = await getLessonsByCourse(course.id);
-  return { user, course, lessons };
+  const [lessons, reviewSets, mockExams] = await Promise.all([
+    getLessonsByCourse(course.id),
+    prisma.courseReviewSet.findMany({
+      where: { courseId: course.id },
+      orderBy: { order: "asc" },
+      include: { _count: { select: { questions: true } } },
+    }),
+    prisma.mockExam.findMany({
+      where: { courseId: course.id },
+      orderBy: { createdAt: "asc" },
+      include: {
+        sections: { include: { _count: { select: { questions: true } } } },
+        _count: { select: { attempts: true } },
+      },
+    }),
+  ]);
+  return { user, course, lessons, reviewSets, mockExams };
 }
 
 export default function TeacherCourseDetail() {
-  const { user, course, lessons } = useLoaderData<typeof loader>();
+  const { user, course, lessons, reviewSets, mockExams } = useLoaderData<typeof loader>();
 
   return (
     <AppShell user={user}>
@@ -85,6 +101,61 @@ export default function TeacherCourseDetail() {
                     );
                   })}
                 </div>}
+            {reviewSets.length > 0 && (
+              <section className="mt-6 space-y-3 border-t pt-5">
+                <h3 className="flex items-center gap-2 text-sm font-semibold">
+                  <RotateCcw className="h-4 w-4 text-primary" />Ôn tập ({reviewSets.length})
+                </h3>
+                {reviewSets.map((reviewSet) => (
+                  <Link
+                    key={reviewSet.id}
+                    to={`/teacher/courses/${course.id}/progress/reviews/${reviewSet.id}`}
+                    className="group flex items-center gap-4 rounded-lg border p-4 transition-colors hover:border-primary/40 hover:bg-muted/20"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <RotateCcw className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-semibold">{reviewSet.title}</h4>
+                      <p className="text-sm text-muted-foreground">{reviewSet.subtitle}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{reviewSet._count.questions} câu hỏi</p>
+                    </div>
+                    <span className="hidden shrink-0 items-center gap-1.5 text-xs font-medium text-muted-foreground sm:inline-flex">
+                      <UsersRound className="h-4 w-4" />Xem tiến độ
+                    </span>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                  </Link>
+                ))}
+              </section>
+            )}
+            {mockExams.length > 0 && (
+              <section className="mt-6 space-y-3 border-t pt-5">
+                <h3 className="flex items-center gap-2 text-sm font-semibold">
+                  <FileCheck2 className="h-4 w-4 text-primary" />Bài thi thử ({mockExams.length})
+                </h3>
+                {mockExams.map((mockExam, index) => (
+                  <Link
+                    key={mockExam.id}
+                    to={`/teacher/courses/${course.id}/progress/mock-exams/${mockExam.id}`}
+                    className="group flex items-center gap-4 rounded-lg border p-4 transition-colors hover:border-primary/40 hover:bg-muted/20"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <FileCheck2 className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-semibold">{mockExam.title || `Đề số ${index + 1}`}</h4>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {mockExam.sections.reduce((total, section) => total + section._count.questions, 0)} câu hỏi · {mockExam._count.attempts} lượt làm
+                      </p>
+                    </div>
+                    <span className="hidden shrink-0 items-center gap-1.5 text-xs font-medium text-muted-foreground sm:inline-flex">
+                      <UsersRound className="h-4 w-4" />Xem tiến độ
+                    </span>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                  </Link>
+                ))}
+              </section>
+            )}
           </CardContent>
         </Card>
       </div>

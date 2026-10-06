@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import { Form, Link, useFetcher, useLoaderData } from "react-router";
+import { Link, useFetcher, useLoaderData } from "react-router";
 import { ArrowLeft, Check, Clock3, Send } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
@@ -235,8 +235,13 @@ export default function StudentMockExamAttempt() {
     ? Math.max(0, Math.floor((new Date(data.attempt.expiresAt).getTime() - Date.now()) / 1000))
     : 0);
   const [didAutoSubmit, setDidAutoSubmit] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+  const stickyBarRef = useRef<HTMLDivElement | null>(null);
+  const listeningEndRef = useRef<HTMLDivElement | null>(null);
+  const [listeningInView, setListeningInView] = useState(true);
   const finished = data.attempt.status === "SUBMITTED";
   const answeredCount = questions.filter((question) => (answers[question.id]?.length ?? 0) > 0).length;
+  const unansweredCount = questions.length - answeredCount;
   const progress = questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
   const listeningAudioUrl = listeningSections.flatMap((section) => section.questions)
     .find((question) => question.audioUrl)?.audioUrl;
@@ -260,6 +265,23 @@ export default function StudentMockExamAttempt() {
     }, 1000);
     return () => window.clearInterval(timer);
   }, [data.attempt.expiresAt, didAutoSubmit, finished]);
+
+  useEffect(() => {
+    const sentinel = listeningEndRef.current;
+    if (!sentinel) return;
+    const update = () => {
+      const progressRow = stickyBarRef.current;
+      const threshold = progressRow ? progressRow.getBoundingClientRect().bottom : 0;
+      setListeningInView(sentinel.getBoundingClientRect().bottom > threshold);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [finished, listeningAudioUrl]);
 
   const toggleOption = (questionId: string, optionId: string, multiple: boolean) => {
     if (finished) return;
@@ -402,15 +424,30 @@ export default function StudentMockExamAttempt() {
           )}
         </section>
 
-        <Card>
-          <CardContent className="space-y-2 p-4 sm:p-5">
-            <div className="flex items-center justify-between gap-3 text-sm font-semibold">
-              <span>Đã làm {answeredCount} / {questions.length} câu</span>
-              <span>{Math.round(progress)}%</span>
-            </div>
-            <ProgressBar value={progress} />
-          </CardContent>
-        </Card>
+        <div className="sticky top-0 z-30 -mx-6 bg-background/95 px-6 py-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-8 lg:px-8">
+          <Card>
+            <CardContent className="space-y-2 p-4 sm:p-5">
+              <div ref={stickyBarRef} className="space-y-2">
+                <div className="flex items-center justify-between gap-3 text-sm font-semibold">
+                  <span>Đã làm {answeredCount} / {questions.length} câu</span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <ProgressBar value={progress} showLabel={false} />
+              </div>
+              {listeningAudioUrl && (
+                <audio
+                  controls
+                  preload="none"
+                  src={listeningAudioUrl}
+                  className={listeningInView ? "mt-1 w-full" : "hidden"}
+                  aria-label="Âm thanh toàn phần nghe"
+                >
+                  <track kind="captions" />
+                </audio>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         {[
           { title: `PHẦN 1: NGHE – ${listeningSections.reduce((count, section) => count + section.questions.length, 0)} câu`, sections: listeningSections },
@@ -421,12 +458,7 @@ export default function StudentMockExamAttempt() {
               <CardTitle className="text-xl">{part.title}</CardTitle>
               {part.sections === listeningSections && (
                 <>
-                  <p className="text-sm text-muted-foreground">Nghe và chọn đáp án. Bạn có thể kéo thanh thời gian để nghe lại.</p>
-                  {listeningAudioUrl && (
-                    <audio controls preload="none" src={listeningAudioUrl} className="mt-3 w-full" aria-label="Âm thanh toàn phần nghe">
-                      <track kind="captions" />
-                    </audio>
-                  )}
+                  <p className="text-sm text-muted-foreground">Nghe và chọn đáp án. Trình phát âm thanh được ghim ở đầu trang.</p>
                 </>
               )}
             </CardHeader>
@@ -467,22 +499,80 @@ export default function StudentMockExamAttempt() {
                 );
               })}
             </CardContent>
+            {part.sections === listeningSections && <div ref={listeningEndRef} aria-hidden />}
           </Card>
         ))}
 
         <Card>
           <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
             <p className="text-sm text-muted-foreground">Câu trả lời được lưu tự động.</p>
-            <Form method="post" onSubmit={(event) => { if (!window.confirm("Nộp bài thi thử ngay?")) event.preventDefault(); }}>
-              <input type="hidden" name="intent" value="submit" />
-              <input type="hidden" name="answers" value={JSON.stringify(answers)} />
-              <Button type="submit" disabled={fetcher.state !== "idle"}>
-                <Send className="mr-1.5 h-4 w-4" />Nộp bài
-              </Button>
-            </Form>
+            <Button type="button" disabled={fetcher.state !== "idle"} onClick={() => setShowSubmitConfirm(true)}>
+              <Send className="mr-1.5 h-4 w-4" />Nộp bài
+            </Button>
             {fetcher.data?.error && <p role="alert" className="w-full text-sm text-destructive">{fetcher.data.error}</p>}
           </CardContent>
         </Card>
+
+        {showSubmitConfirm && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setShowSubmitConfirm(false);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") setShowSubmitConfirm(false);
+            }}
+          >
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="submit-exam-title"
+              aria-describedby="submit-exam-description"
+              className="w-full max-w-md overflow-hidden rounded-xl border bg-background shadow-xl"
+            >
+              <div className="border-b bg-primary/5 p-5">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Send className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 id="submit-exam-title" className="text-lg font-semibold">Bạn đã sẵn sàng nộp bài?</h2>
+                    <p id="submit-exam-description" className="mt-1 text-sm text-muted-foreground">
+                      Sau khi nộp, bạn sẽ không thể thay đổi câu trả lời.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3 p-5">
+                <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3 text-sm">
+                  <span className="text-muted-foreground">Đã trả lời</span>
+                  <span className="font-semibold tabular-nums">{answeredCount}/{questions.length} câu</span>
+                </div>
+                {unansweredCount > 0 ? (
+                  <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    Bạn còn {unansweredCount} câu chưa trả lời. Vẫn có thể nộp bài, hoặc quay lại kiểm tra.
+                  </p>
+                ) : (
+                  <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    Bạn đã trả lời tất cả câu hỏi. Hãy xác nhận để nộp bài.
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-col-reverse gap-2 border-t bg-muted/20 p-4 sm:flex-row sm:justify-end">
+                <Button type="button" variant="outline" onClick={() => setShowSubmitConfirm(false)}>
+                  Tiếp tục làm bài
+                </Button>
+                <Button type="button" disabled={fetcher.state !== "idle"} onClick={() => {
+                  setShowSubmitConfirm(false);
+                  finalSubmit();
+                }}>
+                  <Send className="mr-1.5 h-4 w-4" />Xác nhận nộp bài
+                </Button>
+              </div>
+            </section>
+          </div>
+        )}
       </div>
     </AppShell>
   );

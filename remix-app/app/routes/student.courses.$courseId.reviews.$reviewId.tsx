@@ -1,19 +1,24 @@
-import type { LoaderFunctionArgs } from "react-router";
-import { Link, useLoaderData } from "react-router";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
+import { Link, useFetcher, useLoaderData } from "react-router";
 import { useMemo, useState } from "react";
 import { ArrowLeft, BookOpen, CheckCircle2, Clock3, Sparkles } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
-import { getCourseById, getCourseReviewSetById } from "~/lib/db.server";
+import { getCourseById, getCourseReviewSetById, isEnrolled } from "~/lib/db.server";
 import { requireRole } from "~/lib/session.server";
 import { isReviewAnswerCorrect } from "~/lib/review-answer";
+import { prisma } from "~/lib/prisma.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
-  const course = await getCourseById(params.courseId!);
+  const [course, enrolled] = await Promise.all([
+    getCourseById(params.courseId!),
+    isEnrolled(user.id, params.courseId!),
+  ]);
   if (!course) throw new Response("Không tìm thấy khóa học", { status: 404 });
+  if (!enrolled) throw new Response("Bạn không thuộc khóa học này", { status: 403 });
 
   const reviewSet = await getCourseReviewSetById(course.id, params.reviewId!);
   if (!reviewSet) throw new Response("Không tìm thấy bộ ôn tập", { status: 404 });
@@ -31,12 +36,70 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   };
 }
 
+function isStringRecord(value: unknown): value is Record<string, string> {
+  return typeof value === "object"
+    && value !== null
+    && !Array.isArray(value)
+    && Object.values(value).every((answer) => typeof answer === "string");
+}
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const user = await requireRole(request, ["student"]);
+  const course = await getCourseById(params.courseId!);
+  if (!course) throw new Response("Không tìm thấy khóa học", { status: 404 });
+  if (!await isEnrolled(user.id, course.id)) throw new Response("Bạn không thuộc khóa học này", { status: 403 });
+
+  const reviewSet = await getCourseReviewSetById(course.id, params.reviewId!);
+  if (!reviewSet) throw new Response("Không tìm thấy bộ ôn tập", { status: 404 });
+
+  const formData = await request.formData();
+  if (formData.get("intent") !== "submit-review") throw new Response("Yêu cầu không hợp lệ", { status: 400 });
+
+  const rawAnswers = formData.get("answers");
+  if (typeof rawAnswers !== "string") throw new Response("Thiếu câu trả lời", { status: 400 });
+
+  let parsedAnswers: unknown;
+  try {
+    parsedAnswers = JSON.parse(rawAnswers);
+  } catch (error) {
+    if (error instanceof SyntaxError) throw new Response("Dữ liệu câu trả lời không hợp lệ", { status: 400 });
+    throw error;
+  }
+  if (!isStringRecord(parsedAnswers)) {
+    throw new Response("Dữ liệu câu trả lời không hợp lệ", { status: 400 });
+  }
+
+  const answers = Object.fromEntries(reviewSet.questions.map((question) => [
+    question.id,
+    parsedAnswers[question.id] ?? "",
+  ]));
+  const correctCount = reviewSet.questions.filter((question) =>
+    isQuestionCorrect(question, answers[question.id] ?? ""),
+  ).length;
+  const totalQuestions = reviewSet.questions.length;
+  const percentage = totalQuestions === 0 ? 0 : Math.round((correctCount / totalQuestions) * 100);
+
+  await prisma.courseReviewAttempt.create({
+    data: {
+      reviewSetId: reviewSet.id,
+      userId: user.id,
+      answers,
+      totalQuestions,
+      correctCount,
+      percentage,
+    },
+  });
+
+  return { ok: true };
+}
+
 function isQuestionCorrect(question: { answer: string; acceptedAnswers?: string[] }, provided: string) {
   return isReviewAnswerCorrect(provided, [question.answer, ...(question.acceptedAnswers ?? [])]);
 }
 
 export default function StudentCourseReviewPage() {
   const { user, course, reviewSet } = useLoaderData<typeof loader>();
+  const fetcher = useFetcher<typeof action>();
   const [started, setStarted] = useState(false);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -73,6 +136,10 @@ export default function StudentCourseReviewPage() {
       setIndex((value) => value + 1);
       return;
     }
+    fetcher.submit(
+      { intent: "submit-review", answers: JSON.stringify(answers) },
+      { method: "post" },
+    );
     setSubmitted(true);
   };
 
@@ -192,6 +259,13 @@ export default function StudentCourseReviewPage() {
                   <p className="text-sm text-muted-foreground">Điểm số: {percentage}%</p>
                 </div>
               </div>
+              <p className="text-sm text-muted-foreground" role="status">
+                {fetcher.state !== "idle"
+                  ? "Đang lưu tiến độ..."
+                  : fetcher.data?.ok
+                    ? "Đã lưu tiến độ ôn tập."
+                    : "Đang lưu kết quả ôn tập."}
+              </p>
 
               <div className="space-y-3">
                 {orderedQuestions.map((question, questionIndex) => {

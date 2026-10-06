@@ -40,8 +40,29 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       },
     }),
   ]);
-  const mockExamCount = await prisma.mockExam.count({
+  const mockExams = await prisma.mockExam.findMany({
     where: { courseId: course.id, isPublished: true },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      sections: {
+        select: {
+          questions: { select: { type: true } },
+        },
+      },
+    },
+  });
+  const mockExamsWithLabels = mockExams.map((exam) => {
+    const questionTypes = exam.sections.flatMap((section) => section.questions.map((question) => question.type));
+    const labels = [
+      ...(questionTypes.includes("LISTENING") ? ["Nghe"] : []),
+      ...(questionTypes.some((type) => type !== "LISTENING") ? ["Đọc"] : []),
+    ];
+    return {
+      id: exam.id,
+      questionCount: questionTypes.length,
+      labels,
+    };
   });
   const progressMap = new Map(progressList.map((p) => [p.lessonId, p]));
   const courseProgress = computeTrackedCourseProgress(lessons.map((lesson) => lesson.id), tabProgressRows);
@@ -78,12 +99,12 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     lessonsWithStatus,
     reviewSets,
     courseProgress,
-    mockExamCount,
+    mockExams: mockExamsWithLabels,
   };
 }
 
 export default function StudentCourseDetail() {
-  const { user, course, lessonsWithStatus, reviewSets, courseProgress, mockExamCount } = useLoaderData<typeof loader>();
+  const { user, course, lessonsWithStatus, reviewSets, courseProgress, mockExams } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const [showCombinedStudy, setShowCombinedStudy] = useState(false);
   const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([]);
@@ -129,25 +150,6 @@ export default function StudentCourseDetail() {
           <CardContent><ProgressBar value={courseProgress} /></CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <FileCheck2 className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="font-semibold">Bài thi thử</h2>
-                <p className="text-sm text-muted-foreground">
-                  {mockExamCount} đề thi thử · Làm bài độc lập với các bài học
-                </p>
-              </div>
-            </div>
-            <Button asChild variant="outline">
-              <Link to={`/student/courses/${course.id}/mock-exams`}>Xem bài thi thử</Link>
-            </Button>
-          </CardContent>
-        </Card>
-
         <div>
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-lg font-semibold">Bài học</h2>
@@ -189,6 +191,39 @@ export default function StudentCourseDetail() {
                 })}
               </div>}
         </div>
+
+        <section className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <FileCheck2 className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="font-semibold">BÀI THI THỬ</h2>
+              <p className="text-sm text-muted-foreground">
+                {mockExams.length} đề thi thử · Làm bài độc lập với các bài học
+              </p>
+            </div>
+          </div>
+          {mockExams.length === 0
+            ? <EmptyState title="Chưa có bài thi thử" message="Khóa học này hiện chưa có bài thi thử được phát hành." />
+            : <div className="space-y-3">
+                {mockExams.map((exam, index) => (
+                  <Card key={exam.id}>
+                    <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
+                      <div>
+                        <h3 className="font-semibold">Đề số {index + 1}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {exam.questionCount} câu{exam.labels.length > 0 && ` · ${exam.labels.join(" + ")}`}
+                        </p>
+                      </div>
+                      <Button asChild variant="outline">
+                        <Link to={`/student/courses/${course.id}/mock-exams/${exam.id}`}>Xem bài thi thử</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>}
+        </section>
 
         {showCombinedStudy && (
           <div

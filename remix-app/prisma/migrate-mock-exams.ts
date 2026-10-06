@@ -9,6 +9,7 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..", "..");
 const sourceRoot = path.join(repoRoot, "de_thi_thu");
 const targetDatabaseUrl = process.env.TARGET_DATABASE_URL;
+const targetCourseCode = process.env.TARGET_COURSE_CODE?.trim();
 const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 
 type SourceOption = string | { hanzi: string; pinyin?: string }[];
@@ -45,7 +46,7 @@ interface SourceExam {
   questions: SourceQuestion[];
   answers: Record<string, string>;
   parts: SourcePart[];
-  content: Record<string, { text?: string; options?: SourceOption[] }>;
+  content: Record<string, { text?: SourceOption; options?: SourceOption[] }>;
   shared_options: Record<string, SourceOption[]>;
 }
 
@@ -192,7 +193,7 @@ async function main() {
   for (const entry of skipped) console.log(`${entry.id}: skipped (${entry.status || "no source status"}).`);
 
   if (!APPLY) {
-    console.log(`Dry run complete: ${exams.length} exam(s) ready. Set TARGET_DATABASE_URL and BLOB_READ_WRITE_TOKEN, then rerun with --apply to upload media and import into the database.`);
+    console.log(`Dry run complete: ${exams.length} exam(s) ready. Set TARGET_DATABASE_URL and BLOB_READ_WRITE_TOKEN${targetCourseCode ? ` (target course: ${targetCourseCode})` : ""}, then rerun with --apply to upload media and import into the database.`);
     return;
   }
 
@@ -200,11 +201,14 @@ async function main() {
   const prisma = new PrismaClient({ datasources: { db: { url: targetDatabaseUrl } } });
   try {
     const levels = [...new Set(exams.map(({ entry }) => Number(entry.level.replace(/\D/g, ""))))];
+    if (targetCourseCode && levels.length !== 1) {
+      throw new Error("TARGET_COURSE_CODE can only be used when importing exams for a single HSK level.");
+    }
+    const courseCodes = targetCourseCode ? [targetCourseCode] : levels.map((level) => `HSK-${level}`);
     const courses = await prisma.course.findMany({
-      where: { code: { in: levels.map((level) => `HSK-${level}`) } },
-      select: { id: true, code: true },
+      where: { code: { in: courseCodes } },
+      select: { id: true, code: true, hskLevel: true },
     });
-    const courseByCode = new Map(courses.map((course) => [course.code, course.id]));
     const existingExams = await prisma.mockExam.findMany({
       where: { id: { in: exams.map(({ entry }) => entry.id) } },
       select: { id: true, courseId: true, isPublished: true, _count: { select: { attempts: true } } },
@@ -213,8 +217,11 @@ async function main() {
 
     for (const { entry, data, directory } of exams) {
       const level = Number(entry.level.replace(/\D/g, ""));
-      const courseId = courseByCode.get(`HSK-${level}`);
-      if (!courseId) throw new Error(`${entry.id}: required course HSK-${level} is missing on the target database.`);
+      const courseCode = targetCourseCode ?? `HSK-${level}`;
+      const course = courses.find((item) => item.code === courseCode);
+      if (!course) throw new Error(`${entry.id}: required course ${courseCode} is missing on the target database.`);
+      if (course.hskLevel !== level) throw new Error(`${entry.id}: course ${courseCode} is not HSK-${level}.`);
+      const courseId = course.id;
       const existing = existingById.get(entry.id);
       if (existing && existing.courseId !== courseId) {
         throw new Error(`${entry.id}: stable exam ID is already used by another course.`);
@@ -257,7 +264,7 @@ async function main() {
             return {
               id: `${entry.id}_question_${question.number}`,
               type: question.number <= 20 ? "LISTENING" as const : "SINGLE_CHOICE" as const,
-              prompt: sourceContent?.text ?? "",
+              prompt: sourceContent?.text ? contentText(sourceContent.text) : "",
               imageUrl: imageFile ? imageUrls.get(imageFile) ?? null : null,
               audioUrl: question.number === 1 ? audioUrl : null,
               points: 5,
@@ -310,8 +317,8 @@ async function main() {
             sections: { create: sections },
           },
         });
-      });
-      console.log(`${entry.id}: imported into HSK-${level} as unpublished.`);
+      }, { timeout: 30_000 });
+      console.log(`${entry.id}: imported into ${courseCode} as unpublished.`);
     }
   } finally {
     await prisma.$disconnect();

@@ -31,6 +31,7 @@ model User {
   authoredQuestions        Question[]                @relation("QuestionAuthor")
   taughtClasses            Class[]                   @relation("ClassTeacher")
   pronunciationAssessments PronunciationAssessment[]
+  courseReviewAttempts     CourseReviewAttempt[]
   lessonTabProgresses      LessonTabProgress[]
   lessonTabAttempts        LessonTabAttempt[]
   lessonTabFeedback        LessonTabFeedback[]       @relation("TeacherTabFeedback")
@@ -86,6 +87,7 @@ model CourseReviewSet {
 
   course    Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
   questions CourseReviewQuestion[]
+  attempts  CourseReviewAttempt[]
 
   @@index([courseId, order])
 }
@@ -106,6 +108,23 @@ model CourseReviewQuestion {
   reviewSet CourseReviewSet @relation(fields: [setId], references: [id], onDelete: Cascade)
 
   @@index([setId, order])
+}
+
+model CourseReviewAttempt {
+  id             String   @id @default(cuid())
+  reviewSetId    String
+  userId         String
+  answers        Json
+  totalQuestions Int
+  correctCount   Int
+  percentage     Int
+  completedAt    DateTime @default(now())
+
+  reviewSet CourseReviewSet @relation(fields: [reviewSetId], references: [id], onDelete: Cascade)
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([reviewSetId, userId, completedAt])
+  @@index([userId, completedAt])
 }
 
 enum CourseStatus {
