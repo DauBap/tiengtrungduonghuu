@@ -6,11 +6,13 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
   useNavigation,
+  useLocation,
   useRouteError,
 } from "react-router";
 import type { LinksFunction } from "react-router";
 import { Loader2 } from "lucide-react";
 import { Toaster } from "~/components/ui/sonner";
+import { CourseStudyTracker } from "~/components/courses/course-study-tracker";
 import stylesheet from "~/globals.css?url";
 
 export const links: LinksFunction = () => [
@@ -37,7 +39,10 @@ export function meta() {
 
 export default function App() {
   const navigation = useNavigation();
+  const location = useLocation();
   const isLoading = navigation.state !== "idle";
+  const coursePathMatch = location.pathname.match(/^\/student\/courses\/([^/]+)/);
+  const trackedCourseId = coursePathMatch ? decodeURIComponent(coursePathMatch[1]) : null;
 
   return (
     <html lang="vi">
@@ -59,6 +64,7 @@ export default function App() {
             </div>
           </div>
         )}
+        {trackedCourseId && <CourseStudyTracker key={trackedCourseId} courseId={trackedCourseId} />}
         <Outlet />
         <Toaster />
         <ScrollRestoration />

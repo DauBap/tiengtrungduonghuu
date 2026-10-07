@@ -68,4 +68,8 @@ remix-app/
   hoặc chạy `npx prisma db push --skip-generate` rồi `npx prisma generate` sau.
 - **Loader data**: React Router 7 serialize bằng turbo-stream, nên `Date` đi qua loader nguyên vẹn —
   không cần `.toISOString()` và không được khai báo type là `string`.
+- **Bảng vàng giáo viên**: xếp hạng riêng theo khóa học và gộp học viên ở mọi lớp của khóa đó.
+  Thời gian học chỉ cộng khi trang thuộc khóa học đang hiển thị và có hoạt động trong 2 phút gần nhất;
+  một lượt truy cập mới được tính sau khi rời khóa hoặc không hoạt động ít nhất 30 phút.
+  Dữ liệu bắt đầu được ghi nhận sau khi cập nhật schema, không có số liệu lịch sử.
 - Xem thêm [AGENTS.md](AGENTS.md).

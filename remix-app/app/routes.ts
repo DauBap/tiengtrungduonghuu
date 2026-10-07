@@ -75,6 +75,7 @@ export default [
   route("student", "routes/student._index.tsx"),
   route("student/courses", "routes/student.courses._index.tsx"),
   route("student/courses/:courseId/flashcards", "routes/student.courses.$courseId.flashcards.tsx"),
+  route("student/courses/:courseId/activity", "routes/student.courses.$courseId.activity.ts"),
   route("student/courses/:courseId/mock-exams", "routes/student.courses.$courseId.mock-exams._index.tsx"),
   route("student/courses/:courseId/mock-exams/:mockExamId", "routes/student.courses.$courseId.mock-exams.$mockExamId.tsx"),
   route("student/courses/:courseId/mock-exams/:mockExamId/attempts/:attemptId", "routes/student.courses.$courseId.mock-exams.$mockExamId.attempts.$attemptId.tsx"),

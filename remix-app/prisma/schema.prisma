@@ -30,6 +30,7 @@ model User {
   authoredExams            Exam[]                    @relation("ExamAuthor")
   authoredQuestions        Question[]                @relation("QuestionAuthor")
   taughtClasses            Class[]                   @relation("ClassTeacher")
+  courseStudySessions      CourseStudySession[]
   pronunciationAssessments PronunciationAssessment[]
   courseReviewAttempts     CourseReviewAttempt[]
   lessonTabProgresses      LessonTabProgress[]
@@ -60,6 +61,7 @@ model Course {
   lessons         Lesson[]
   enrollments     Enrollment[]
   classes         Class[]
+  studySessions   CourseStudySession[]
   exams           Exam[]
   mockExams       MockExam[]
   examAccessRules ExamAccessRule[]
@@ -485,6 +487,22 @@ model Enrollment {
   // còn đếm/liệt kê học viên theo khóa và theo lớp, nên cần index riêng.
   @@index([courseId])
   @@index([classId])
+}
+
+model CourseStudySession {
+  id           String    @id
+  userId       String
+  courseId     String
+  startedAt    DateTime  @default(now())
+  lastActiveAt DateTime  @default(now())
+  totalSeconds Int       @default(0)
+  endedAt      DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId, userId])
+  @@index([courseId, totalSeconds])
 }
 
 model LessonProgress {
