@@ -28,7 +28,7 @@ export function LessonCard({ lesson, status, href, index, badgeText, variant = "
         ? "border-red-200 bg-red-50/70 hover:border-red-300 hover:bg-red-100/70"
         : "hover:border-primary/30"
     )}>
-      <CardContent className="flex items-center gap-4 p-4">
+      <CardContent className="flex items-center gap-4 p-4 sm:!p-4">
         <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
           isCompleted ? "bg-success/15 text-success" : "bg-primary/10 text-primary"
         )}>
