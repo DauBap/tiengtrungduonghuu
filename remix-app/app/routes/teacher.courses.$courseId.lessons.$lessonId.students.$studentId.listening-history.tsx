@@ -79,7 +79,7 @@ export default function TeacherListeningHistory() {
             {attempts.length === 0 ? (
               <EmptyState title="Chưa có lịch sử Nghe câu" message="Học viên chưa hoàn thành lượt Nghe câu nào trong bài này." />
             ) : (
-              <div className="overflow-hidden rounded-md border">
+              <div className="overflow-x-auto rounded-md border">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-muted/40 text-xs text-muted-foreground">
                     <tr>

@@ -81,7 +81,7 @@ export default function TeacherVocabularyTestHistory() {
             {attempts.length === 0 ? (
               <EmptyState title="Chưa có lịch sử làm bài" message="Học viên chưa làm bài Ôn từ vựng này." />
             ) : (
-              <div className="overflow-hidden rounded-md border">
+              <div className="overflow-x-auto rounded-md border">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-muted/40 text-xs text-muted-foreground">
                     <tr>

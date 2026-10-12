@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useFetcher } from "react-router";
 import { cn } from "~/lib/utils";
-import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, Languages, School, ListChecks, FileCheck2 } from "lucide-react";
+import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, Languages, School, ListChecks, FileCheck2, CalendarDays } from "lucide-react";
 import type { UserRole, SessionUser } from "~/lib/session.server";
 import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -19,14 +19,14 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
   ],
   teacher: [
     { label: "Bảng điều khiển", href: "/teacher", icon: LayoutDashboard },
+    { label: "Lịch dạy", href: "/teacher/schedule", icon: CalendarDays },
     { label: "Khóa học của tôi", href: "/teacher/courses", icon: BookOpen },
     { label: "Hồ sơ", href: "/teacher/profile", icon: User },
   ],
   student: [
     { label: "Bảng điều khiển", href: "/student", icon: LayoutDashboard },
+    { label: "Lịch học", href: "/student/schedule", icon: CalendarDays },
     { label: "Khóa học của tôi", href: "/student/courses", icon: BookOpen },
-    { label: "Tiến độ", href: "/student/progress", icon: TrendingUp },
-    { label: "Hồ sơ", href: "/student/profile", icon: User },
   ],
 };
 
@@ -40,6 +40,15 @@ export function AppSidebar({ user }: { user: SessionUser }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navItems = ROLE_NAV[user.role];
   const initials = user.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) ?? "U";
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [mobileOpen]);
 
   const SidebarContent = () => (
     <div className="flex h-full flex-col bg-sidebar-gradient text-sidebar-foreground">
@@ -97,16 +106,26 @@ export function AppSidebar({ user }: { user: SessionUser }) {
 
   return (
     <>
-      <button className="fixed left-4 top-4 z-50 lg:hidden flex h-10 w-10 items-center justify-center rounded-lg border bg-background shadow-sm"
-        onClick={() => setMobileOpen(true)} aria-label="Mở menu">
+      <button
+        type="button"
+        className="fixed left-3 top-3 z-50 flex h-11 w-11 items-center justify-center rounded-lg border bg-background shadow-sm lg:hidden"
+        onClick={() => setMobileOpen(true)}
+        aria-label="Mở menu"
+        aria-expanded={mobileOpen}
+      >
         <Menu className="h-5 w-5" />
       </button>
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-72">
-            <button className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-md text-sidebar-foreground hover:bg-sidebar-muted"
+        <div className="fixed inset-0 z-50 lg:hidden" role="presentation">
+          <button
+            type="button"
+            className="absolute inset-0 h-full w-full cursor-default bg-black/50"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Đóng menu"
+          />
+          <div className="absolute left-0 top-0 h-full w-[min(18rem,85vw)]">
+            <button type="button" className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-md text-sidebar-foreground hover:bg-sidebar-muted"
               onClick={() => setMobileOpen(false)}>
               <X className="h-5 w-5" />
             </button>

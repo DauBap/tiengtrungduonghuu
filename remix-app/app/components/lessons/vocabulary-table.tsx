@@ -20,10 +20,9 @@ interface VocabularyItem {
 
 interface VocabularyTableProps {
   items: VocabularyItem[];
-  lessonName?: string;
 }
 
-export function VocabularyTable({ items, lessonName }: VocabularyTableProps) {
+export function VocabularyTable({ items }: VocabularyTableProps) {
   const settings = useAppSettings();
   // Từ đang xem cách viết; null = đóng hộp thoại.
   const [strokeItem, setStrokeItem] = useState<VocabularyItem | null>(null);
@@ -31,26 +30,25 @@ export function VocabularyTable({ items, lessonName }: VocabularyTableProps) {
   if (items.length === 0) return <LessonTabEmpty tab="VOCABULARY" />;
 
   return (
-    <div className="border rounded-lg overflow-hidden">
-      <Table>
+    <div className="w-full min-w-0 max-w-full rounded-lg border">
+      <Table className="w-full min-w-[860px] table-fixed sm:min-w-[680px] sm:table-auto">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-12 text-center">STT</TableHead>
+            <TableHead className="w-10 px-2 text-center sm:w-12 sm:px-4">#</TableHead>
             {/* Chữ Hán + 2 nút cần chỗ: w-32 cũ làm chữ bị bẻ dòng giữa từ */}
-            <TableHead className="w-48">Chữ Hán</TableHead>
-            {settings.showPinyin && <TableHead className="w-32">Pinyin</TableHead>}
-            {lessonName && <TableHead>Bài học</TableHead>}
-            <TableHead className="w-20">Từ loại</TableHead>
-            <TableHead>Nghĩa tiếng Việt</TableHead>
+            <TableHead className="w-[240px] px-2 sm:w-48 sm:px-4">Chữ Hán</TableHead>
+            {settings.showPinyin && <TableHead className="w-28 whitespace-nowrap px-3 sm:w-32 sm:px-4">Pinyin</TableHead>}
+            <TableHead className="w-32 px-3 sm:w-36 sm:px-4">Từ loại</TableHead>
+            <TableHead className="w-[320px] px-3 sm:w-auto sm:px-4">Tiếng Việt</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {items.map((item, index) => (
             <TableRow key={item.id}>
-              <TableCell className="text-center font-mono text-sm text-muted-foreground tabular-nums">
+              <TableCell className="px-2 py-3 text-center font-mono text-sm text-muted-foreground tabular-nums sm:px-4 sm:py-4">
                 {index + 1}
               </TableCell>
-              <TableCell className="font-semibold text-lg">
+              <TableCell className="px-2 py-3 font-semibold text-lg sm:px-4 sm:py-4">
                 <div className="flex items-center gap-1.5">
                   {/* Chữ Hán ngắt dòng được ở mọi ký tự nên phải chặn tay */}
                   <span className="whitespace-nowrap">{item.chinese}</span>
@@ -77,9 +75,8 @@ export function VocabularyTable({ items, lessonName }: VocabularyTableProps) {
                   )}
                 </div>
               </TableCell>
-              {settings.showPinyin && <TableCell className="font-mono text-sm text-primary">{item.pinyin}</TableCell>}
-              {lessonName && <TableCell className="text-sm text-muted-foreground">{lessonName}</TableCell>}
-              <TableCell>
+              {settings.showPinyin && <TableCell className="w-28 whitespace-nowrap px-3 py-3 font-mono text-sm text-primary sm:w-32 sm:px-4 sm:py-4">{item.pinyin}</TableCell>}
+              <TableCell className="w-32 px-3 py-3 sm:w-36 sm:px-4 sm:py-4">
                 {item.wordTypes?.length ? (
                   <div className="flex flex-wrap gap-1">
                     {item.wordTypes.map((type) => (
@@ -92,7 +89,7 @@ export function VocabularyTable({ items, lessonName }: VocabularyTableProps) {
                   <span className="text-muted-foreground text-xs">—</span>
                 )}
               </TableCell>
-              <TableCell>{item.translation}</TableCell>
+              <TableCell className="w-[320px] break-words px-3 py-3 text-sm sm:w-auto sm:px-4 sm:py-4">{item.translation}</TableCell>
             </TableRow>
           ))}
         </TableBody>

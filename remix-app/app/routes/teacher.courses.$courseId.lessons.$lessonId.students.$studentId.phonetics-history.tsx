@@ -181,7 +181,7 @@ export default function TeacherPhoneticsHistory() {
                       <EmptyState title="Chưa có lượt nộp" message="Học viên chưa làm phần Ngữ âm này." />
                     ) : (
                       <div className="space-y-4">
-                        <div className="overflow-hidden rounded-md border">
+                        <div className="overflow-x-auto rounded-md border">
                           <table className="w-full text-left text-sm">
                             <thead className="bg-muted/40 text-xs text-muted-foreground">
                               <tr>

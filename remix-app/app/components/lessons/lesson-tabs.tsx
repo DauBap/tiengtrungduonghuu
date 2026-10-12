@@ -24,7 +24,7 @@ export function LessonTabs({ activeTab, onTabChange, availableTypes, hasQuiz }: 
 
   return (
     <div className="border-b border-border">
-      <div className="flex overflow-x-auto">
+      <div className="flex touch-pan-x overflow-x-auto scrollbar-none">
         {ordered.map((type) => {
             if (type === "TEST") {
               return (

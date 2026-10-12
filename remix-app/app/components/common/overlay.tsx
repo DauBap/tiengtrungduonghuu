@@ -9,9 +9,14 @@ export function Overlay({
   className?: string;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className={`relative w-full ${className} max-h-[90vh] overflow-y-auto rounded-xl border bg-background p-6 shadow-xl`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+      <button
+        type="button"
+        className="absolute inset-0 cursor-default bg-black/50"
+        onClick={onClose}
+        aria-label="Đóng hộp thoại"
+      />
+      <div className={`relative w-full ${className} max-h-[90vh] overflow-y-auto rounded-xl border bg-background p-4 shadow-xl sm:p-6`}>
         {children}
       </div>
     </div>

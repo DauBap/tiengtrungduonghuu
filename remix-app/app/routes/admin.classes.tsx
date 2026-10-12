@@ -525,14 +525,14 @@ export default function AdminClasses() {
     <>
       <AppShell user={user}>
         <div className="space-y-6 max-w-4xl">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Lớp học</h1>
               <p className="text-muted-foreground text-sm mt-1">
                 Tạo lớp, gán giáo viên và học sinh để kiểm soát quyền truy cập khóa học.
               </p>
             </div>
-            <Button onClick={() => openModal("create")}>
+            <Button className="w-full sm:w-auto" onClick={() => openModal("create")}>
               <Plus className="h-4 w-4 mr-1.5" />Tạo lớp mới
             </Button>
           </div>

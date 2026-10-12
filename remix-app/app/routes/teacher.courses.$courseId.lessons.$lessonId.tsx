@@ -436,7 +436,7 @@ export default function TeacherLessonProgress() {
                     </div>
                   )}
                   {activeTab === "FLASHCARD" || activeTab === "VOCABULARY" ? (
-                    <div className="overflow-hidden rounded-md border">
+                    <div className="overflow-x-auto rounded-md border">
                       <table className="w-full text-left text-sm">
                         <thead className="bg-muted/40 text-xs text-muted-foreground">
                           <tr>
@@ -476,7 +476,7 @@ export default function TeacherLessonProgress() {
                     </div>
                   ) : activeTab === "VOCABULARY_TEST" ? (
                     <>
-                      <div className="overflow-hidden rounded-md border">
+                      <div className="overflow-x-auto rounded-md border">
                         <table className="w-full text-left text-sm">
                           <thead className="bg-muted/40 text-xs text-muted-foreground">
                             <tr>
@@ -541,7 +541,7 @@ export default function TeacherLessonProgress() {
                       </div>
                     </>
                   ) : activeTab === "LISTENING" ? (
-                    <div className="overflow-hidden rounded-md border">
+                    <div className="overflow-x-auto rounded-md border">
                       <table className="w-full text-left text-sm">
                         <thead className="bg-muted/40 text-xs text-muted-foreground">
                           <tr>
@@ -607,7 +607,7 @@ export default function TeacherLessonProgress() {
                       </table>
                     </div>
                   ) : activeTab === "WORKBOOK" ? (
-                    <div className="overflow-hidden rounded-md border">
+                    <div className="overflow-x-auto rounded-md border">
                       <table className="w-full text-left text-sm">
                         <thead className="bg-muted/40 text-xs text-muted-foreground">
                           <tr>
@@ -666,7 +666,7 @@ export default function TeacherLessonProgress() {
                       </table>
                     </div>
                   ) : activeTab === "PHONETICS" ? (
-                    <div className="overflow-hidden rounded-md border">
+                    <div className="overflow-x-auto rounded-md border">
                       <table className="w-full text-left text-sm">
                         <thead className="bg-muted/40 text-xs text-muted-foreground">
                           <tr>
@@ -719,7 +719,7 @@ export default function TeacherLessonProgress() {
                       </table>
                     </div>
                   ) : activeTab === "GRAMMAR" ? (
-                    <div className="overflow-hidden rounded-md border">
+                    <div className="overflow-x-auto rounded-md border">
                       <table className="w-full text-left text-sm">
                         <thead className="bg-muted/40 text-xs text-muted-foreground">
                           <tr>

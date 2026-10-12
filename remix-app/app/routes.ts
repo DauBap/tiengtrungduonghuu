@@ -53,6 +53,7 @@ export default [
 
   // Teacher
   route("teacher", "routes/teacher._index.tsx"),
+  route("teacher/schedule", "routes/teacher.schedule.tsx"),
   route("teacher/courses", "routes/teacher.courses._index.tsx"),
   route("teacher/courses/:courseId", "routes/teacher.courses.$courseId.tsx"),
   route("teacher/courses/:courseId/progress/mock-exams/:itemId/students/:studentId/attempts/:attemptId", "routes/teacher.courses.$courseId.progress.mock-exams.$itemId.students.$studentId.attempts.$attemptId.tsx"),
@@ -73,6 +74,7 @@ export default [
 
   // Student
   route("student", "routes/student._index.tsx"),
+  route("student/schedule", "routes/student.schedule.tsx"),
   route("student/courses", "routes/student.courses._index.tsx"),
   route("student/courses/:courseId/flashcards", "routes/student.courses.$courseId.flashcards.tsx"),
   route("student/courses/:courseId/activity", "routes/student.courses.$courseId.activity.ts"),

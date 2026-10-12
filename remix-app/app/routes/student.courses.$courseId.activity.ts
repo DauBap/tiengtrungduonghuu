@@ -5,6 +5,7 @@ import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 
 const MAX_ACTIVE_SECONDS_PER_HEARTBEAT = 30;
+const MAX_ACTIVE_SECONDS_ON_END = 30 * 60;
 const VISIT_IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -87,9 +88,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   if (event === "end") {
+    const secondsValue = form.get("seconds");
+    const seconds = secondsValue === null ? 0 : Number(secondsValue);
+    if (!Number.isInteger(seconds) || seconds < 0 || seconds > MAX_ACTIVE_SECONDS_ON_END) {
+      throw new Response("Thời lượng phiên học không hợp lệ", { status: 400 });
+    }
+
     await prisma.courseStudySession.updateMany({
       where: { id: sessionId, userId: user.id, courseId, endedAt: null },
-      data: { endedAt: new Date() },
+      data: {
+        totalSeconds: { increment: seconds },
+        endedAt: new Date(),
+      },
     });
     return Response.json({ ok: true });
   }

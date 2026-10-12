@@ -93,7 +93,7 @@ export default function TeacherWorkbookHistory() {
             {attempts.length === 0 ? (
               <EmptyState title="Chưa có lịch sử Workbook" message="Học viên chưa nộp Sách bài tập trong bài này." />
             ) : (
-              <div className="overflow-hidden rounded-md border">
+              <div className="overflow-x-auto rounded-md border">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-muted/40 text-xs text-muted-foreground">
                     <tr>

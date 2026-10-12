@@ -3,7 +3,7 @@ import { Link, useLoaderData } from "react-router";
 import { useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import { getTeacherCourses, getLessonsByCourse } from "~/lib/db.server";
-import { formatSchedule, formatNextClass } from "~/lib/schedule-utils";
+import { formatSchedule, formatNextClass, getNextClassTime } from "~/lib/schedule-utils";
 import { AppShell } from "~/components/layout/app-shell";
 import { StatCard } from "~/components/common/stat-card";
 import { Card, CardContent } from "~/components/ui/card";
@@ -161,6 +161,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function TeacherIndex() {
   const { user, myCourses, myClasses, classSummaries, totalLessons, totalStudents } = useLoaderData<typeof loader>();
   const [openGradingClassId, setOpenGradingClassId] = useState<string | null>(null);
+  const upcomingClasses = myClasses
+    .flatMap((cls) => {
+      const nextClassTime = getNextClassTime(cls.schedule);
+      return nextClassTime ? [{ cls, nextClassTime }] : [];
+    })
+    .sort((a, b) => a.nextClassTime.getTime() - b.nextClassTime.getTime())
+    .slice(0, 1);
 
   return (
     <AppShell user={user}>
@@ -175,7 +182,7 @@ export default function TeacherIndex() {
           <StatCard label="Tổng bài học" value={totalLessons} icon={Layers} accent="accent" />
         </div>
 
-        {myClasses.length > 0 && (
+        {upcomingClasses.length > 0 && (
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-2 mb-4">
@@ -183,7 +190,7 @@ export default function TeacherIndex() {
                 <h3 className="font-semibold">Lịch giảng dạy</h3>
               </div>
               <div className="space-y-3">
-                {myClasses.map((cls) => (
+                {upcomingClasses.map(({ cls }) => (
                   <div key={cls.id} className="flex items-start gap-3 rounded-lg border p-3">
                     <Clock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                     <div className="flex-1 min-w-0">

@@ -1401,7 +1401,7 @@ export default function LessonDetail() {
           <div className="flex justify-end">
             <SettingsMenu align="right" />
           </div>
-          <VocabularyTable items={lesson.content} lessonName={lesson.title} />
+          <VocabularyTable items={lesson.content} />
         </div>
       );
     }

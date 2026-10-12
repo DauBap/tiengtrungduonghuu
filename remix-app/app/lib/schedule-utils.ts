@@ -75,23 +75,21 @@ export function getNextClassTime(schedule: unknown): Date | null {
   for (let daysAhead = 0; daysAhead <= 7; daysAhead++) {
     const targetDay = (currentDay + daysAhead) % 7;
 
-    for (const slot of slots) {
-      if (!slot.days.includes(targetDay)) continue;
+    const upcomingSlot = slots
+      .filter((slot) => slot.days.includes(targetDay))
+      .map((slot) => {
+        const [startHour, startMin] = slot.startTime.split(":").map(Number);
+        return { startHour, startMin, startTimeMinutes: startHour * 60 + startMin };
+      })
+      .filter(({ startTimeMinutes }) => daysAhead > 0 || startTimeMinutes > currentTime)
+      .sort((a, b) => a.startTimeMinutes - b.startTimeMinutes)[0];
 
-      const [startHour, startMin] = slot.startTime.split(":").map(Number);
-      const startTimeMinutes = startHour * 60 + startMin;
+    if (!upcomingSlot) continue;
 
-      // If checking today, only return if class hasn't started yet
-      if (daysAhead === 0 && startTimeMinutes <= currentTime) {
-        continue;
-      }
-
-      const nextDate = new Date(now);
-      nextDate.setDate(nextDate.getDate() + daysAhead);
-      nextDate.setHours(startHour, startMin, 0, 0);
-
-      return nextDate;
-    }
+    const nextDate = new Date(now);
+    nextDate.setDate(nextDate.getDate() + daysAhead);
+    nextDate.setHours(upcomingSlot.startHour, upcomingSlot.startMin, 0, 0);
+    return nextDate;
   }
 
   return null;

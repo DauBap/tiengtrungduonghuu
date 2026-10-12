@@ -151,7 +151,7 @@ export function WorkbookListeningTest({
     <div className="max-w-6xl mx-auto space-y-3">
       {/* Audio Player Header - Sticky */}
       <Card className="sticky top-0 z-10 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90">
-        <div className="p-6 space-y-4">
+        <div className="p-4 space-y-4 sm:p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Sách bài tập</h2>
             <div className="flex items-center gap-2">
@@ -166,7 +166,7 @@ export function WorkbookListeningTest({
           </div>
 
           {/* Playback Controls */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap sm:gap-4">
             {config.audioUrl && <audio
               ref={audioRef}
               src={config.audioUrl}
@@ -197,7 +197,7 @@ export function WorkbookListeningTest({
                 }
               }}
               disabled={config.maxReplays > 0 && audioPlayCount >= config.maxReplays && !isPlaying && currentTime === 0}
-              className="shrink-0"
+              className="shrink-0 sm:flex-none"
             >
               {isPlaying ? (
                 <>
@@ -213,7 +213,7 @@ export function WorkbookListeningTest({
             </Button>}
 
             {/* Speed Controls */}
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 sm:gap-2">
               {[0.8, 1, 1.5].map((s) => (
                 <Button
                   key={s}
@@ -225,7 +225,7 @@ export function WorkbookListeningTest({
                     if (audioRef.current) audioRef.current.playbackRate = nextSpeed;
                   }}
                   disabled={!config.audioUrl}
-                  className="min-w-[60px]"
+                  className="min-w-[48px] px-2 sm:min-w-[60px] sm:px-3"
                 >
                   {s}×
                 </Button>
@@ -233,7 +233,7 @@ export function WorkbookListeningTest({
             </div>
 
             {/* Time Display */}
-            <div className="ml-auto text-sm text-muted-foreground font-mono">
+            <div className="ml-auto w-full shrink-0 whitespace-nowrap text-right text-sm font-mono text-muted-foreground sm:w-auto">
               {formatTime(currentTime)} / {formatTime(duration)}
             </div>
           </div>
