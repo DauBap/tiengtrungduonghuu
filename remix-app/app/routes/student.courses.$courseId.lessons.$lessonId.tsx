@@ -1599,8 +1599,19 @@ export default function LessonDetail() {
         manualStopRequestedRef.current = false;
         recognitionErrorRef.current = false;
 
-        if (recognitionRef.current) {
-          recognitionRef.current.stop();
+        const previousRecognition = recognitionRef.current;
+        if (previousRecognition) {
+          recognitionRef.current = null;
+          previousRecognition.onstart = null;
+          previousRecognition.onresult = null;
+          previousRecognition.onnomatch = null;
+          previousRecognition.onerror = null;
+          previousRecognition.onend = null;
+          try {
+            previousRecognition.stop();
+          } catch (error) {
+            console.warn("[speech-recognition] Could not stop previous session", { error });
+          }
         }
 
         const recognition = new SpeechRecognitionCtor();
@@ -1614,10 +1625,12 @@ export default function LessonDetail() {
 
         let spokenText = "";
         recognition.onstart = () => {
+          if (recognitionRef.current !== recognition) return;
           console.info("[speech-recognition] Started", getSpeechDiagnosticContext(recognition.lang));
         };
 
         recognition.onresult = (event: any) => {
+          if (recognitionRef.current !== recognition) return;
           let transcript = "";
           for (let i = 0; i < event.results.length; i += 1) {
             transcript += event.results[i][0].transcript;
@@ -1627,6 +1640,7 @@ export default function LessonDetail() {
         };
 
         recognition.onnomatch = (event: any) => {
+          if (recognitionRef.current !== recognition) return;
           console.warn("[speech-recognition] No match", {
             ...getSpeechDiagnosticContext(recognition.lang),
             eventTimeStamp: event?.timeStamp,
@@ -1634,6 +1648,8 @@ export default function LessonDetail() {
         };
 
         recognition.onend = () => {
+          if (recognitionRef.current !== recognition) return;
+
           console.info("[speech-recognition] Ended", {
             ...getSpeechDiagnosticContext(recognition.lang),
             manualStopRequested: manualStopRequestedRef.current,
@@ -1642,6 +1658,7 @@ export default function LessonDetail() {
           });
 
           if (recognitionErrorRef.current) {
+            recognitionRef.current = null;
             setRecordingSeconds(0);
             setIsRecording(false);
             if (recordingTimerRef.current) {
@@ -1667,6 +1684,7 @@ export default function LessonDetail() {
           const scriptText = selectedAudioScript.speakers.map((speaker) => speaker.chinese).join(" ");
           const finalTranscript = spokenText.trim();
           if (!finalTranscript) {
+            recognitionRef.current = null;
             setRecordingError("Chưa nhận diện được nội dung. Hãy thử đọc lại.");
             setRecordingSeconds(0);
             setIsRecording(false);
@@ -1680,6 +1698,7 @@ export default function LessonDetail() {
 
           const score = computePronunciationScore(scriptText, finalTranscript);
           const finalScore = Number.isFinite(score) ? Math.min(100, Math.max(0, score)) : 0;
+          recognitionRef.current = null;
           setPhoneticScore(finalScore);
           setRecognizedTranscript(finalTranscript);
           setPronunciationFeedback(buildPronunciationFeedback(finalScore));
@@ -1694,6 +1713,7 @@ export default function LessonDetail() {
         };
 
         recognition.onerror = (event: any) => {
+          if (recognitionRef.current !== recognition) return;
           const errorCode = typeof event?.error === "string" ? event.error : "unknown";
           console.error("[speech-recognition] Error", {
             ...getSpeechDiagnosticContext(recognition.lang),
@@ -1725,6 +1745,7 @@ export default function LessonDetail() {
             ...getSpeechDiagnosticContext(recognition.lang),
             error,
           });
+          if (recognitionRef.current === recognition) recognitionRef.current = null;
           setRecordingError("Không thể bắt đầu nhận diện giọng nói. Xem log trình duyệt để biết chi tiết.");
           setIsRecording(false);
           return;
