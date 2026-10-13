@@ -201,6 +201,15 @@ function getPronunciationEvaluation(score: number) {
   return "CHƯA ĐẠT";
 }
 
+function getSpeechDiagnosticContext(lang: string) {
+  return {
+    lang,
+    userAgent: navigator.userAgent,
+    isSecureContext: window.isSecureContext,
+    online: navigator.onLine,
+  };
+}
+
 declare global {
   interface Window {
     SpeechRecognition?: new () => any;
@@ -1582,6 +1591,7 @@ export default function LessonDetail() {
 
         const SpeechRecognitionCtor = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!SpeechRecognitionCtor) {
+          console.error("[speech-recognition] API unavailable", getSpeechDiagnosticContext("zh-CN"));
           setRecordingError("Trình duyệt của bạn chưa hỗ trợ nhận dạng giọng nói. Hãy thử trên Chrome hoặc Edge.");
           return;
         }
@@ -1600,7 +1610,13 @@ export default function LessonDetail() {
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
 
+        console.info("[speech-recognition] Starting", getSpeechDiagnosticContext(recognition.lang));
+
         let spokenText = "";
+        recognition.onstart = () => {
+          console.info("[speech-recognition] Started", getSpeechDiagnosticContext(recognition.lang));
+        };
+
         recognition.onresult = (event: any) => {
           let transcript = "";
           for (let i = 0; i < event.results.length; i += 1) {
@@ -1610,7 +1626,21 @@ export default function LessonDetail() {
           setRecognizedTranscript(spokenText);
         };
 
+        recognition.onnomatch = (event: any) => {
+          console.warn("[speech-recognition] No match", {
+            ...getSpeechDiagnosticContext(recognition.lang),
+            eventTimeStamp: event?.timeStamp,
+          });
+        };
+
         recognition.onend = () => {
+          console.info("[speech-recognition] Ended", {
+            ...getSpeechDiagnosticContext(recognition.lang),
+            manualStopRequested: manualStopRequestedRef.current,
+            hadError: recognitionErrorRef.current,
+            receivedTranscript: Boolean(spokenText.trim()),
+          });
+
           if (recognitionErrorRef.current) {
             setRecordingSeconds(0);
             setIsRecording(false);
@@ -1625,8 +1655,11 @@ export default function LessonDetail() {
           if (!manualStopRequestedRef.current) {
             try {
               recognition.start();
-            } catch {
-              // Ignore restart race conditions.
+            } catch (error) {
+              console.error("[speech-recognition] Restart failed", {
+                ...getSpeechDiagnosticContext(recognition.lang),
+                error,
+              });
             }
             return;
           }
@@ -1661,10 +1694,17 @@ export default function LessonDetail() {
         };
 
         recognition.onerror = (event: any) => {
+          const errorCode = typeof event?.error === "string" ? event.error : "unknown";
+          console.error("[speech-recognition] Error", {
+            ...getSpeechDiagnosticContext(recognition.lang),
+            error: errorCode,
+            message: typeof event?.message === "string" ? event.message : undefined,
+            eventTimeStamp: event?.timeStamp,
+          });
           if (event?.error === "no-speech") {
             return;
           }
-          setRecordingError("Không nhận dạng được giọng nói. Hãy thử lại sau vài giây.");
+          setRecordingError(`Không nhận dạng được giọng nói (mã: ${errorCode}). Hãy thử lại sau vài giây.`);
           recognitionErrorRef.current = true;
           manualStopRequestedRef.current = true;
           setRecognizedTranscript("");
@@ -1680,8 +1720,12 @@ export default function LessonDetail() {
         recordingStartedAtRef.current = Date.now();
         try {
           recognition.start();
-        } catch {
-          setRecordingError("Không thể bắt đầu nhận diện giọng nói. Vui lòng thử lại.");
+        } catch (error) {
+          console.error("[speech-recognition] Start failed", {
+            ...getSpeechDiagnosticContext(recognition.lang),
+            error,
+          });
+          setRecordingError("Không thể bắt đầu nhận diện giọng nói. Xem log trình duyệt để biết chi tiết.");
           setIsRecording(false);
           return;
         }
