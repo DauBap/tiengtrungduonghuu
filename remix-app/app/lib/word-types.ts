@@ -12,6 +12,7 @@ export const WORD_TYPES = [
   "CONJUNCTION",
   "PARTICLE",
   "INTERJECTION",
+  "SUFFIX",
   "PHRASE",
 ] as const;
 
@@ -30,6 +31,7 @@ export const WORD_TYPE_META: Record<WordType, { label: string; short: string; ch
   CONJUNCTION: { label: "Liên từ", short: "LiT", chinese: "连词" },
   PARTICLE: { label: "Trợ từ", short: "TrT", chinese: "助词" },
   INTERJECTION: { label: "Thán từ", short: "ThT", chinese: "叹词" },
+  SUFFIX: { label: "Hậu tố", short: "HT", chinese: "后缀" },
   PHRASE: { label: "Cụm từ / mẫu câu", short: "CT", chinese: "词组" },
 };
 
