@@ -3,7 +3,7 @@ import { Play, Pause, Volume2, Check, X, Clock } from "lucide-react";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
-import { Progress } from "~/components/ui/progress";
+import { AudioSeekBar } from "~/components/audio/audio-seek-bar";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 import type { WorkbookConfig } from "~/lib/learning-blocks";
@@ -118,8 +118,6 @@ export function WorkbookListeningTest({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const progress = duration ? (currentTime / duration) * 100 : 0;
-
   // Shuffle questions if enabled
   const sections = useMemo(() => {
     const rawSections = config.sections as Section[];
@@ -232,14 +230,18 @@ export function WorkbookListeningTest({
               ))}
             </div>
 
-            {/* Time Display */}
-            <div className="ml-auto w-full shrink-0 whitespace-nowrap text-right text-sm font-mono text-muted-foreground sm:w-auto">
-              {formatTime(currentTime)} / {formatTime(duration)}
-            </div>
           </div>
 
-          {/* Progress Bar */}
-          <Progress value={progress} className="h-2" />
+          {config.audioUrl && (
+            <AudioSeekBar
+              currentTime={currentTime}
+              duration={duration}
+              disabled={!duration}
+              onSeek={(time) => {
+                if (audioRef.current) audioRef.current.currentTime = time;
+              }}
+            />
+          )}
         </div>
       </Card>
 

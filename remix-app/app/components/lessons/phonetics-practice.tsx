@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { Check, Eye, Headphones, Pause, RotateCcw, X } from "lucide-react";
+import { AudioSeekBar } from "~/components/audio/audio-seek-bar";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { cn } from "~/lib/utils";
@@ -153,6 +154,8 @@ function PhoneticsSectionCard({
   const [showReview, setShowReview] = useState(false);
   const [playbackRate, setPlaybackRate] = useState<(typeof playbackRates)[number]>(1);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -306,9 +309,15 @@ function PhoneticsSectionCard({
             ref={audioRef}
             src={section.audio}
             preload="none"
+            onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
+            onDurationChange={(event) => setDuration(event.currentTarget.duration)}
+            onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
-            onEnded={() => setIsPlaying(false)}
+            onEnded={() => {
+              setIsPlaying(false);
+              setCurrentTime(0);
+            }}
             onError={() => {
               setIsPlaying(false);
               setPlaybackError("Không tải được file audio của phần này.");
@@ -337,6 +346,14 @@ function PhoneticsSectionCard({
             ))}
           </div>
           <span className="text-xs text-muted-foreground">Nghe được không giới hạn số lần</span>
+          <AudioSeekBar
+            className="basis-full"
+            currentTime={currentTime}
+            duration={duration}
+            onSeek={(time) => {
+              if (audioRef.current) audioRef.current.currentTime = time;
+            }}
+          />
         </div>
       ) : (
         <p className="mt-4 text-xs text-muted-foreground">Phần này chưa có file ghi âm.</p>

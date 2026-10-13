@@ -17,14 +17,31 @@ export interface ListeningQuestion {
   audioUrl: string | null;
 }
 
+export interface ListeningAnswerResult {
+  id: string;
+  prompt: string;
+  answerMode: "pinyin" | "chinese";
+  given: string;
+  correctAnswer: string;
+  chinese: string;
+  pinyin: string;
+  translation: string;
+  correct: boolean;
+  matchPercent: number;
+}
+
 interface ListeningBlockProps {
   config: ListeningConfig;
   questions: ListeningQuestion[];
   onComplete: (answers: { questionId: string; answer: string }[]) => void;
   isSubmitting?: boolean;
-  savedResult?: { score: number; correctCount: number; totalCount: number } | null;
+  savedResult?: {
+    score: number;
+    correctCount: number;
+    totalCount: number;
+    results: ListeningAnswerResult[];
+  } | null;
   submissionError?: string | null;
-  showAnswerDetails?: boolean;
 }
 
 /** Trộn mảng, không đụng vào mảng gốc */
@@ -49,7 +66,6 @@ export function ListeningBlock({
   isSubmitting = false,
   savedResult = null,
   submissionError = null,
-  showAnswerDetails = false,
 }: ListeningBlockProps) {
   const [round, setRound] = useState(0);
   const items = useMemo(
@@ -152,21 +168,41 @@ export function ListeningBlock({
                     </p>
                   </div>
                   <Progress value={savedResult.score} className="h-2" />
-                  {!showAnswerDetails && (
-                    <div className="flex justify-center">
-                      <Button type="button" variant="outline" size="sm" onClick={restart}>
-                        <RefreshCw className="mr-1.5 h-4 w-4" />Làm lại
-                      </Button>
-                    </div>
-                  )}
+                  <div className="flex justify-center">
+                    <Button type="button" variant="outline" size="sm" onClick={restart}>
+                      <RefreshCw className="mr-1.5 h-4 w-4" />Làm lại
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
-              <p className="rounded-md border bg-muted/20 p-3 text-sm text-muted-foreground">
-                {showAnswerDetails
-                  ? "Đáp án chi tiết đã được mở ở phía trên."
-                  : "Đáp án chi tiết sẽ hiện khi giáo viên mở xem kết quả."}
-              </p>
+              <section className="space-y-3" aria-label="Đáp án chi tiết phần nghe câu">
+                <h3 className="text-base font-semibold">Đáp án chi tiết</h3>
+                {savedResult.results.map((result) => (
+                  <Card key={result.id}>
+                    <CardContent className="space-y-2 p-4">
+                      <p className="font-semibold">{result.prompt}</p>
+                      <p className="text-sm">
+                        <span className="text-muted-foreground">Bạn trả lời: </span>
+                        <span className={cn(result.correct ? "text-success" : "text-destructive")}>
+                          {result.given.trim() || "Bỏ trống"}
+                        </span>
+                        <span className="ml-2 text-muted-foreground">({result.matchPercent}% khớp)</span>
+                      </p>
+                      <p className="text-sm">
+                        <span className="text-muted-foreground">Đáp án đúng: </span>
+                        <span className={result.answerMode === "chinese" ? "hanzi-display" : "pinyin-text"}>
+                          {result.correctAnswer}
+                        </span>
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        <span className="hanzi-display">{result.chinese}</span>
+                        {" · "}{result.pinyin} · {result.translation}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </section>
             </>
           ) : (
             <div className="flex items-center justify-center gap-2 rounded-md border bg-muted/30 px-4 py-8 text-sm text-muted-foreground">

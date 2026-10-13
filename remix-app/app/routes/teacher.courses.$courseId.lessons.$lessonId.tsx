@@ -23,7 +23,7 @@ const TAB_LABELS: Record<string, string> = {
   WORKBOOK: "Workbook",
 };
 
-const ANSWER_REVIEW_TABS = new Set<LessonTab>(["VOCABULARY_TEST", "LISTENING", "PHONETICS", "GRAMMAR", "WORKBOOK"]);
+const ANSWER_REVIEW_TABS = new Set<LessonTab>(["VOCABULARY_TEST", "PHONETICS", "GRAMMAR", "WORKBOOK"]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

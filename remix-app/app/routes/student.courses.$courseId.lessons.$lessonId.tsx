@@ -15,6 +15,7 @@ import {
 } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { EmptyState } from "~/components/common/empty-state";
+import { OpenInBrowserNotice, useInAppBrowser } from "~/components/common/open-in-browser-notice";
 import { BlockRenderer, isBlockLearnable, type ResolvedBlock } from "~/components/lessons/blocks/block-renderer";
 import {
   isLearningBlockType, parseListeningConfig, parseWorkbookConfig,
@@ -144,6 +145,8 @@ async function getAnswerReviewGate(
   tab: ProgressTab,
   target: ReviewTarget = {},
 ) {
+  if (tab === "LISTENING") return { isOpen: true, isLocked: false };
+
   const lesson = await prisma.lesson.findUnique({
     where: { id: lessonId },
     select: { answerReviewTabs: true },
@@ -163,7 +166,7 @@ async function getAnswerReviewGate(
     if (tab === "PHONETICS") {
       return String(details.sectionId ?? mode) === target.sectionId;
     }
-    if (tab === "LISTENING" || tab === "WORKBOOK") return details.blockId === target.blockId;
+    if (tab === "WORKBOOK") return details.blockId === target.blockId;
     return true;
   });
   return { isOpen, isLocked };
@@ -298,9 +301,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     }),
   ]);
   const answerReviewTabs = answerReviewSetting?.answerReviewTabs ?? [];
-  const answerReviewAttempts = answerReviewTabs.length > 0
+  const reviewableTabs = answerReviewTabs.filter((tab) => tab !== "LISTENING");
+  const answerReviewAttempts = reviewableTabs.length > 0
     ? await prisma.lessonTabAttempt.findMany({
-        where: { userId: user.id, lessonId: lesson.id, tab: { in: answerReviewTabs } },
+        where: { userId: user.id, lessonId: lesson.id, tab: { in: reviewableTabs } },
         orderBy: [{ score: "desc" }, { completedAt: "desc" }],
         select: { tab: true, mode: true, score: true, correctCount: true, totalCount: true, details: true },
       })
@@ -835,6 +839,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         answerMode,
         given,
         correctAnswer,
+        chinese: question.chinese,
         pinyin: question.pinyin,
         translation: question.translation,
         correct: matchPercent === 100,
@@ -871,7 +876,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
     await markBlockCompleted(user.id, block.id);
     await syncLearningCompleted(user.id, params.lessonId!);
 
-    return { success: true as const, intent: "submit-listening-attempt" as const, score, correctCount, totalCount };
+    return {
+      success: true as const,
+      intent: "submit-listening-attempt" as const,
+      score,
+      correctCount,
+      totalCount,
+      results,
+    };
   }
 
   // Ngữ âm: nộp theo từng section, mỗi section một lượt điểm riêng.
@@ -1254,7 +1266,9 @@ export default function LessonDetail() {
       : activeTab === "LISTENING" || activeTab === "PHONETICS" || activeTab === "GRAMMAR" || activeTab === "WORKBOOK"
         ? activeTab
         : null;
-    const answerReviewEnabled = activeReviewTab !== null && answerReviewTabs.includes(activeReviewTab);
+    const answerReviewEnabled = activeReviewTab !== null
+      && activeReviewTab !== "LISTENING"
+      && answerReviewTabs.includes(activeReviewTab);
     const showAnswerReviewControls = answerReviewEnabled
       && activeTab !== "GRAMMAR"
       && activeTab !== "PHONETICS";
@@ -1275,6 +1289,7 @@ export default function LessonDetail() {
   const recognitionRef = useRef<any>(null);
   const manualStopRequestedRef = useRef(false);
   const recognitionErrorRef = useRef(false);
+  const inAppBrowser = useInAppBrowser();
 
   const buildPronunciationFeedback = (score: number) => {
     if (score >= 90) {
@@ -1811,6 +1826,9 @@ export default function LessonDetail() {
               </section>
             </div>
 
+            {inAppBrowser ? (
+              <OpenInBrowserNotice info={inAppBrowser} />
+            ) : (
             <section className="rounded-xl border bg-muted/20 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -1904,6 +1922,7 @@ export default function LessonDetail() {
                 </div>
               )}
             </section>
+            )}
             </div>
           </div>
         </div>
@@ -1920,8 +1939,6 @@ export default function LessonDetail() {
       status={blockStatuses[blockIndex]}
       courseId={lesson.courseId}
       lessonId={lesson.id}
-      isRetakeLocked={answerReviewEnabled && activeTab === "LISTENING" && activeLockedTargets.includes(blocks[blockIndex].id)}
-      showAnswerDetails={answerReviewEnabled}
     />;
   };
 

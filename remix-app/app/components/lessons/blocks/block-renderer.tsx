@@ -5,7 +5,7 @@ import { ListeningBlock, type ListeningQuestion } from "./listening-block";
 import { parseFlashcardConfig, parseListeningConfig, type LearningBlockType } from "~/lib/learning-blocks";
 import { LessonTabEmpty } from "../lesson-tab-empty";
 import type { ProgressStatus } from "~/types/progress";
-import { Lock } from "lucide-react";
+import type { ListeningAnswerResult } from "./listening-block";
 
 /** Block đã được loader resolve sẵn từ vựng — component không tự query */
 export interface ResolvedBlock {
@@ -60,13 +60,14 @@ function listeningQuestions(
   }));
 }
 
-export function BlockRenderer({ block, status, courseId, lessonId, isRetakeLocked = false, showAnswerDetails = false }: { block: ResolvedBlock; status: ProgressStatus; courseId: string; lessonId: string; isRetakeLocked?: boolean; showAnswerDetails?: boolean }) {
+export function BlockRenderer({ block, status, courseId, lessonId }: { block: ResolvedBlock; status: ProgressStatus; courseId: string; lessonId: string }) {
   const fetcher = useFetcher<{
     success?: boolean;
     intent?: string;
     score?: number;
     correctCount?: number;
     totalCount?: number;
+    results?: ListeningAnswerResult[];
     listeningError?: string;
   }>();
   const effectiveStatus = status === "LOCKED" ? "AVAILABLE" : status;
@@ -129,16 +130,6 @@ export function BlockRenderer({ block, status, courseId, lessonId, isRetakeLocke
 
     if (items.length === 0) return <LessonTabEmpty tab="LISTENING" />;
 
-    if (isRetakeLocked) {
-      return (
-        <BlockShell {...shellProps}>
-          <p className="rounded-md border bg-muted/30 p-4 text-sm text-muted-foreground">
-            Phần làm bài đã bị khóa. Xem đáp án chi tiết ở phía trên.
-          </p>
-        </BlockShell>
-      );
-    }
-
     return (
       <BlockShell {...shellProps}>
         <ListeningBlock
@@ -151,10 +142,10 @@ export function BlockRenderer({ block, status, courseId, lessonId, isRetakeLocke
                 score: fetcher.data.score,
                 correctCount: fetcher.data.correctCount,
                 totalCount: fetcher.data.totalCount,
+                results: fetcher.data.results ?? [],
               }
             : null}
           submissionError={fetcher.data?.listeningError ?? null}
-          showAnswerDetails={showAnswerDetails}
           onComplete={submitListeningAttempt}
         />
       </BlockShell>

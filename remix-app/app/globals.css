@@ -127,6 +127,22 @@
 }
 
 @layer utilities {
+  main :is(p, li, td, dd, blockquote).text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+    @apply text-sm;
+  }
+
+  main :is(p, li, td, dd, blockquote).text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+    @apply text-base;
+  }
+
+  main :is(p, li, td, dd, blockquote).text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+    @apply text-lg;
+  }
+
+  main :is(p, li, td, dd, blockquote).text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+    @apply text-xl;
+  }
+
   .hanzi-display,
   .header-name,
   .hero-title,
@@ -136,6 +152,40 @@
 
   .pinyin-text {
     font-family: Arial, sans-serif;
+  }
+
+  .audio-seek-bar {
+    appearance: none;
+    height: 6px;
+    border-radius: 9999px;
+    background: linear-gradient(
+      to right,
+      hsl(var(--primary)) 0 var(--audio-progress),
+      hsl(var(--muted)) var(--audio-progress) 100%
+    );
+    cursor: pointer;
+  }
+
+  .audio-seek-bar:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .audio-seek-bar::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 0;
+    border-radius: 50%;
+    background: hsl(var(--primary));
+  }
+
+  .audio-seek-bar::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border: 0;
+    border-radius: 50%;
+    background: hsl(var(--primary));
   }
 
   /* Gradient sidebar — thay cho linear-gradient(180deg, #C2272D, #8E1D22) */
