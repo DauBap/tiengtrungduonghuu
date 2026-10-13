@@ -11,6 +11,7 @@ import { isLessonTabKey, LESSON_TAB_KEYS, type LessonTab } from "~/lib/lesson-ta
 import { cn } from "~/lib/utils";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
+import { getListeningGrade } from "~/lib/listening-score";
 
 const TAB_LABELS: Record<string, string> = {
   FLASHCARD: "Flashcard",
@@ -548,6 +549,7 @@ export default function TeacherLessonProgress() {
                             <th scope="col" className="w-16 px-4 py-3 font-medium">STT</th>
                             <th scope="col" className="px-4 py-3 font-medium">Họ tên</th>
                             <th scope="col" className="px-4 py-3 font-medium">Kết quả mới nhất</th>
+                            <th scope="col" className="px-4 py-3 font-medium">Điểm</th>
                             <th scope="col" className="px-4 py-3 font-medium">Số câu đúng / tổng</th>
                             <th scope="col" className="px-4 py-3 font-medium">Số lần làm</th>
                             <th scope="col" className="px-4 py-3 text-right font-medium">Thao tác</th>
@@ -561,9 +563,7 @@ export default function TeacherLessonProgress() {
                             const latestAttempt = attempts[0];
                             const latestResult = latestAttempt == null
                               ? "Chưa làm"
-                              : latestAttempt.passed === true
-                                ? "Đạt"
-                                : "Chưa đạt";
+                              : getListeningGrade(latestAttempt.score)?.message ?? "Chưa có điểm";
                             const latestState = latestAttempt == null
                               ? "NOT_STARTED"
                               : latestAttempt.passed === true
@@ -578,6 +578,9 @@ export default function TeacherLessonProgress() {
                                   <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium", getTabStateTone(latestState))}>
                                     {latestResult}
                                   </span>
+                                </td>
+                                <td className="px-4 py-3 font-medium tabular-nums">
+                                  {getListeningGrade(latestAttempt?.score ?? null)?.points ?? "-"} / 10
                                 </td>
                                 <td className="px-4 py-3 font-medium tabular-nums">
                                   {latestAttempt?.correctCount != null && latestAttempt.totalCount != null

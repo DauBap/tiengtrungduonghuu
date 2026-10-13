@@ -2,6 +2,7 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Link, redirect, useLoaderData, useSearchParams } from "react-router";
 import { useState } from "react";
 import { requireRole } from "~/lib/session.server";
+import { getListeningGrade } from "~/lib/listening-score";
 import { getCourseById, getLessonsByCourse, isTeacherOfCourse } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
@@ -335,7 +336,9 @@ export default function TeacherStudentDetail() {
                           return (
                             <div key={`${lesson.id}-${tab}`} className={cn("inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-medium", getTabStateTone(state))}>
                               <span>{TAB_LABELS[tab] ?? tab}</span>
-                              <span>{score != null ? `${Math.round(score)}%` : "-"}</span>
+                              <span>{tab === "LISTENING"
+                                ? `${getListeningGrade(score)?.points ?? "-"} / 10`
+                                : score != null ? `${Math.round(score)}%` : "-"}</span>
                             </div>
                           );
                         })}

@@ -48,6 +48,7 @@ import { isLessonTabKey, openLessonTab, recordLessonTabAttempt } from "~/lib/les
 import type { LessonTab as ProgressTab } from "~/lib/lesson-tab-progress";
 import { computePronunciationScore } from "~/lib/pronunciation";
 import { gradePhoneticsSection, type PhoneticsAnswer } from "~/lib/phonetics";
+import { getListeningGrade } from "~/lib/listening-score";
 
 const FEEDBACK_TAB_LABELS: Record<string, string> = {
   FLASHCARD: "Flashcard",
@@ -1270,6 +1271,9 @@ export default function LessonDetail() {
       : activeTab === "WORKBOOK"
         ? latestTabScores.workbook
         : null;
+  const activeListeningGrade = activeTab === "LISTENING"
+    ? getListeningGrade(activeScore?.score ?? null)
+    : null;
     const activeReviewTab: ProgressTab | null = activeTab === "TEST"
       ? "VOCABULARY_TEST"
       : activeTab === "LISTENING" || activeTab === "PHONETICS" || activeTab === "GRAMMAR" || activeTab === "WORKBOOK"
@@ -1874,11 +1878,11 @@ export default function LessonDetail() {
                           <span className="text-sm font-bold">{speaker.speakerName || `Người ${idx + 1}`}</span>
                         </div>
                         <div className="mt-2 text-base">
-                          <p className="content-text hanzi-display text-xl font-medium text-foreground">{speaker.chinese}</p>
+                          <p className="content-text hanzi-display !text-[30px] font-medium text-foreground">{speaker.chinese}</p>
                           {settings.showPinyin && (
-                            <p className="content-text pinyin-text text-lg text-muted-foreground mt-1">{speaker.pinyin}</p>
+                            <p className="content-text pinyin-text !text-[26px] text-muted-foreground mt-1">{speaker.pinyin}</p>
                           )}
-                          <p className="content-text text-base text-muted-foreground mt-1">{speaker.translation}</p>
+                          <p className="content-text !text-[26px] text-muted-foreground mt-1">{speaker.translation}</p>
                         </div>
                       </div>
                     ))}
@@ -2089,7 +2093,9 @@ export default function LessonDetail() {
                       <div>
                         <p className="text-xs font-medium text-muted-foreground">Điểm cao nhất</p>
                         <p className="mt-0.5 text-lg font-bold tabular-nums">
-                          {activeScore.score != null ? `${Math.round(activeScore.score)}%` : "-"}
+                          {activeTab === "LISTENING"
+                            ? activeListeningGrade ? `${activeListeningGrade.points} / 10` : "-"
+                            : activeScore.score != null ? `${Math.round(activeScore.score)}%` : "-"}
                         </p>
                       </div>
                       <div>
@@ -2102,8 +2108,21 @@ export default function LessonDetail() {
                       </div>
                       <div>
                         <p className="text-xs font-medium text-muted-foreground">Kết quả</p>
-                        <p className={cn("mt-0.5 text-sm font-semibold", activeScore.passed ? "text-success" : "text-destructive")}>
-                          {activeScore.passed ? "Đạt" : "Chưa đạt"}
+                        <p className={cn(
+                          "mt-0.5 text-sm font-semibold",
+                          activeTab === "LISTENING"
+                            ? activeScore.score == null
+                              ? "text-muted-foreground"
+                              : activeScore.score >= 80
+                                ? "text-success"
+                                : activeScore.score < 50
+                                  ? "text-destructive"
+                                  : "text-primary"
+                            : activeScore.passed ? "text-success" : "text-destructive",
+                        )}>
+                          {activeTab === "LISTENING"
+                            ? activeListeningGrade?.message ?? "Chưa có kết quả"
+                            : activeScore.passed ? "Đạt" : "Chưa đạt"}
                         </p>
                       </div>
                       {answerReviewControl}

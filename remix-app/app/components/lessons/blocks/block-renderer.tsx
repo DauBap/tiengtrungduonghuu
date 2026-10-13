@@ -60,7 +60,17 @@ function listeningQuestions(
   }));
 }
 
-export function BlockRenderer({ block, status, courseId, lessonId }: { block: ResolvedBlock; status: ProgressStatus; courseId: string; lessonId: string }) {
+export function BlockRenderer({
+  block,
+  status,
+  courseId,
+  lessonId,
+}: {
+  block: ResolvedBlock;
+  status: ProgressStatus;
+  courseId: string;
+  lessonId: string;
+}) {
   const fetcher = useFetcher<{
     success?: boolean;
     intent?: string;

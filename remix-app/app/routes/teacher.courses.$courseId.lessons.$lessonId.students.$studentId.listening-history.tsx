@@ -9,6 +9,7 @@ import { getCourseById, getLessonsByCourse, isTeacherOfCourse } from "~/lib/db.s
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 import { cn } from "~/lib/utils";
+import { getListeningGrade } from "~/lib/listening-score";
 
 const ANSWER_MODE_LABELS: Record<string, string> = {
   chinese: "Chữ Hán",
@@ -106,7 +107,7 @@ export default function TeacherListeningHistory() {
                           {attempt.correctCount != null && attempt.totalCount != null ? `${attempt.correctCount}/${attempt.totalCount}` : "-"}
                         </td>
                         <td className="px-4 py-3 font-medium tabular-nums">
-                          {attempt.score != null ? `${Math.round(attempt.score)}%` : "-"}
+                          {getListeningGrade(attempt.score)?.points ?? "-"} / 10
                         </td>
                         <td className="px-4 py-3">
                           <span className={cn(
@@ -117,7 +118,7 @@ export default function TeacherListeningHistory() {
                                 ? "bg-emerald-100 text-emerald-700"
                                 : "bg-amber-100 text-amber-700",
                           )}>
-                            {attempt.passed == null ? "Chưa xác định" : attempt.passed ? "Đạt" : "Chưa đạt"}
+                            {getListeningGrade(attempt.score)?.message ?? "Chưa xác định"}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-right">

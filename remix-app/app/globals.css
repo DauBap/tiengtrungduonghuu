@@ -174,7 +174,9 @@
   .content-text:not(.text-xs):not(.text-sm):not(.text-base):not(.text-lg):not(.text-xl):not(.text-2xl):not(.text-3xl):not(.text-4xl):not(.text-5xl):not(.text-6xl):not(.text-7xl):not(.text-8xl):not(.text-9xl) {
     font-size: 1.25rem;
   }
+}
 
+@layer base {
   main p.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
   main li.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
   main td.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
@@ -237,6 +239,14 @@
   main dd.content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
   main blockquote.content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     font-size: 1.875rem;
+  }
+}
+
+@layer utilities {
+  .content-text,
+  .content-text * {
+    overflow-wrap: break-word;
+    word-break: normal;
   }
 
   .hanzi-display,

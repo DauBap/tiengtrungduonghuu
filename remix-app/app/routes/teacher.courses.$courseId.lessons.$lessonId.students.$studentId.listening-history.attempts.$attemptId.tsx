@@ -10,6 +10,7 @@ import { getCourseById, getLessonsByCourse, isTeacherOfCourse } from "~/lib/db.s
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 import { cn } from "~/lib/utils";
+import { getListeningGrade } from "~/lib/listening-score";
 
 type ListeningQuestionResult = {
   id: string;
@@ -97,7 +98,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 export default function TeacherListeningAttemptDetail() {
   const { user, course, lesson, student, attempt } = useLoaderData<typeof loader>();
   const historyUrl = `/teacher/courses/${course.id}/lessons/${lesson.id}/students/${student.id}/listening-history`;
-  const score = Math.round(attempt.score ?? 0);
+  const grade = getListeningGrade(attempt.score);
+  const progressPercent = Math.max(0, Math.min(100, attempt.score ?? 0));
   const passed = attempt.passed === true;
 
   return (
@@ -134,7 +136,8 @@ export default function TeacherListeningAttemptDetail() {
               <p className={cn("text-lg font-bold", passed ? "text-emerald-700" : "text-rose-700")}>
                 {passed ? "Đạt tất cả câu" : "Còn câu chưa đúng"}
               </p>
-              <p className="mt-1 text-4xl font-bold tabular-nums">{score}%</p>
+              <p className="mt-1 text-4xl font-bold tabular-nums">{grade?.points ?? "0.0"} / 10</p>
+              <p className="text-base font-semibold text-primary">{grade?.message}</p>
               <p className="text-sm text-muted-foreground tabular-nums">
                 Đúng {attempt.correctCount ?? 0}/{attempt.totalCount ?? 0} câu · {attempt.answerMode === "pinyin" ? "Pinyin" : "Chữ Hán"}
               </p>
@@ -142,7 +145,7 @@ export default function TeacherListeningAttemptDetail() {
                 {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(attempt.completedAt))}
               </p>
             </div>
-            <Progress value={score} className="h-2" />
+            <Progress value={progressPercent} className="h-2" />
           </CardContent>
         </Card>
 

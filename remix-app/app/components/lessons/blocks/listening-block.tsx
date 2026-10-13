@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Volume2, CheckCircle2, ArrowLeft, ArrowRight, RefreshCw, Loader2, Send } from "lucide-react";
 import { speakChinese, isSpeechSupported } from "~/lib/speech";
 import type { ListeningConfig } from "~/lib/learning-blocks";
+import { getListeningGrade } from "~/lib/listening-score";
 
 /** Một câu hỏi nghe — đã được loader phẳng hoá từ VocabItem hoặc SentenceItem. */
 export interface ListeningQuestion {
@@ -87,6 +88,7 @@ export function ListeningBlock({
   const isLast = index === items.length - 1;
   const answer = question ? answersByQuestion[question.id] ?? "" : "";
   const replays = question ? replaysByQuestion[question.id] ?? 0 : 0;
+  const savedGrade = getListeningGrade(savedResult?.score ?? null);
 
   const outOfReplays = config.maxReplays > 0 && replays >= config.maxReplays;
 
@@ -162,7 +164,8 @@ export function ListeningBlock({
                       ? <CheckCircle2 className="h-10 w-10 text-success" />
                       : <CheckCircle2 className="h-10 w-10 text-primary" />}
                     <p className="text-lg font-bold">Đã lưu kết quả Nghe câu</p>
-                    <p className="text-4xl font-bold tabular-nums">{savedResult.score}%</p>
+                    <p className="text-4xl font-bold tabular-nums">{savedGrade?.points ?? "0.0"} / 10</p>
+                    <p className="text-base font-semibold text-primary">{savedGrade?.message}</p>
                     <p className="text-sm text-muted-foreground tabular-nums">
                       Khớp hoàn toàn {savedResult.correctCount}/{savedResult.totalCount} câu
                     </p>
@@ -178,7 +181,7 @@ export function ListeningBlock({
 
               <section className="space-y-3" aria-label="Đáp án chi tiết phần nghe câu">
                 <h3 className="text-base font-semibold">Đáp án chi tiết</h3>
-                {savedResult.results.map((result) => (
+                {savedResult.results.length > 0 ? savedResult.results.map((result) => (
                   <Card key={result.id}>
                     <CardContent className="space-y-2 p-4">
                       <p className="content-text font-semibold">{result.prompt}</p>
@@ -201,7 +204,11 @@ export function ListeningBlock({
                       </p>
                     </CardContent>
                   </Card>
-                ))}
+                )) : (
+                  <p className="rounded-md border bg-muted/30 p-4 text-sm text-muted-foreground">
+                    Lượt làm này chưa lưu được đáp án chi tiết.
+                  </p>
+                )}
               </section>
             </>
           ) : (

@@ -164,11 +164,11 @@ export function VocabularyTest({
         <span className="font-mono tabular-nums">{questionIndex + 1}.</span>
         <span>{question.direction === "zh2vi" ? "Trung → Việt" : "Việt → Trung"}</span>
       </div>
-      <div className="flex min-h-36 flex-col items-center justify-center gap-2 rounded-lg border bg-card px-5 py-6 text-center">
-        <p className={cn("content-text font-semibold leading-tight", question.direction === "zh2vi" ? "hanzi-display text-5xl" : "text-2xl")}>
+      <div className="flex w-full min-h-36 max-w-full flex-col items-center justify-center gap-2 rounded-lg border bg-card px-5 py-6 text-center">
+        <p className={cn("content-text w-full max-w-full break-words font-semibold leading-tight", question.direction === "zh2vi" ? "hanzi-display text-5xl" : "text-2xl") }>
           {question.prompt}
         </p>
-        {settings.showPinyin && question.promptDetail && <p className="content-text pinyin-text text-sm text-muted-foreground">{question.promptDetail}</p>}
+        {settings.showPinyin && question.promptDetail && <p className="content-text w-full max-w-full break-words pinyin-text text-sm text-muted-foreground">{question.promptDetail}</p>}
         {question.wordTypeLabels.length > 0 && (
           <div className="flex flex-wrap justify-center gap-1.5">
             {question.wordTypeLabels.map((label) => (
@@ -195,7 +195,7 @@ export function VocabularyTest({
                 }
               }}
               className={cn(
-                "content-text min-h-14 rounded-md border px-4 py-3 text-center text-sm transition-colors",
+                "content-text min-h-14 w-full max-w-full break-words rounded-md border px-4 py-3 text-center !text-[26px] transition-colors",
                 question.direction === "vi2zh" && "hanzi-display",
                 selected ? "border-primary bg-primary/10 text-primary" : "hover:border-primary/50 hover:bg-muted/40"
               )}
