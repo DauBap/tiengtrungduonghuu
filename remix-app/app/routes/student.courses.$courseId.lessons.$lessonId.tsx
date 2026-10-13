@@ -1874,7 +1874,7 @@ export default function LessonDetail() {
                           <span className="text-sm font-bold">{speaker.speakerName || `Người ${idx + 1}`}</span>
                         </div>
                         <div className="mt-2 text-base">
-                          <p className="content-text hanzi-display font-medium text-foreground">{speaker.chinese}</p>
+                          <p className="content-text hanzi-display text-xl font-medium text-foreground">{speaker.chinese}</p>
                           {settings.showPinyin && (
                             <p className="content-text pinyin-text text-lg text-muted-foreground mt-1">{speaker.pinyin}</p>
                           )}
