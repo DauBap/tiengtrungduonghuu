@@ -258,7 +258,7 @@ export default function TestPage() {
                     <div className="flex-1 min-w-0 space-y-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono text-xs text-muted-foreground tabular-nums">{i + 1}.</span>
-                        <p className="hanzi-display font-medium">{q.prompt}</p>
+                        <p className="content-text hanzi-display font-medium">{q.prompt}</p>
                         <Badge variant="outline" className="bg-background/60 text-muted-foreground text-[10px]">
                           {q.typeLabel}
                         </Badge>
@@ -266,14 +266,14 @@ export default function TestPage() {
                           {q.correct ? q.points : 0}/{q.points} điểm
                         </span>
                       </div>
-                      <p className="text-sm">
+                      <p className="content-text text-sm">
                         <span className="text-muted-foreground">Bạn trả lời: </span>
                         {q.given
                           ? <span className={q.correct ? "text-success" : "text-destructive"}>{q.given}</span>
                           : <span className="italic text-muted-foreground">bỏ trống</span>}
                       </p>
                       {!q.correct && (
-                        <p className="text-sm">
+                        <p className="content-text text-sm">
                           <span className="text-muted-foreground">Đáp án đúng: </span>
                           <span className="font-medium">{q.correctAnswer}</span>
                         </p>

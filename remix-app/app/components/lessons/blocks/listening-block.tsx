@@ -181,21 +181,21 @@ export function ListeningBlock({
                 {savedResult.results.map((result) => (
                   <Card key={result.id}>
                     <CardContent className="space-y-2 p-4">
-                      <p className="font-semibold">{result.prompt}</p>
-                      <p className="text-sm">
+                      <p className="content-text font-semibold">{result.prompt}</p>
+                      <p className="content-text text-sm">
                         <span className="text-muted-foreground">Bạn trả lời: </span>
                         <span className={cn(result.correct ? "text-success" : "text-destructive")}>
                           {result.given.trim() || "Bỏ trống"}
                         </span>
                         <span className="ml-2 text-muted-foreground">({result.matchPercent}% khớp)</span>
                       </p>
-                      <p className="text-sm">
+                      <p className="content-text text-sm">
                         <span className="text-muted-foreground">Đáp án đúng: </span>
                         <span className={result.answerMode === "chinese" ? "hanzi-display" : "pinyin-text"}>
                           {result.correctAnswer}
                         </span>
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="content-text text-sm text-muted-foreground">
                         <span className="hanzi-display">{result.chinese}</span>
                         {" · "}{result.pinyin} · {result.translation}
                       </p>

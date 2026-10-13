@@ -219,7 +219,7 @@ export default function StudentCourseReviewPage() {
                     <p className="text-sm text-muted-foreground">Sắp xếp các từ thành câu đúng:</p>
                   </div>
                 ) : (
-                  <p className="hanzi-display mt-3 text-xl font-semibold leading-relaxed">{currentQuestion.prompt}</p>
+                  <p className="content-text hanzi-display mt-3 text-xl font-semibold leading-relaxed">{currentQuestion.prompt}</p>
                 )}
               </div>
 
@@ -277,9 +277,9 @@ export default function StudentCourseReviewPage() {
                         <p className="font-medium">Câu {questionIndex + 1}</p>
                         <span className={isCorrect ? "text-green-600" : "text-red-600"}> {isCorrect ? "Đúng" : "Sai"}</span>
                       </div>
-                      <p className="hanzi-display mt-2 text-sm text-muted-foreground">{question.prompt}</p>
-                      <p className="mt-2 text-sm"><span className="font-medium">Câu trả lời của bạn:</span> {answer || "(chưa trả lời)"}</p>
-                      <p className="mt-1 text-sm"><span className="font-medium">Đáp án:</span> {question.answer}</p>
+                      <p className="content-text hanzi-display mt-2 text-sm text-muted-foreground">{question.prompt}</p>
+                      <p className="content-text mt-2 text-sm"><span className="font-medium">Câu trả lời của bạn:</span> {answer || "(chưa trả lời)"}</p>
+                      <p className="content-text mt-1 text-sm"><span className="font-medium">Đáp án:</span> {question.answer}</p>
                     </div>
                   );
                 })}

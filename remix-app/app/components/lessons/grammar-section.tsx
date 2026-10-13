@@ -138,7 +138,7 @@ export function GrammarSection({
               {isFormula ? (
                 <div className="space-y-1.5">
                   {value.split("\n").map((line, index) => line.trim() && (
-                    <p key={index} className="hanzi-display whitespace-pre-line text-base font-semibold leading-6">
+                    <p key={index} className="content-text hanzi-display whitespace-pre-line text-base font-semibold leading-6">
                       {line.trim()}
                     </p>
                   ))}
@@ -149,9 +149,9 @@ export function GrammarSection({
                     const [chinese, ...translations] = example.split("\n").map((line) => line.trim()).filter(Boolean);
                     return (
                       <div key={index} className={cn(index > 0 && "border-t pt-3")}>
-                        <p className="hanzi-display whitespace-pre-line text-[15px] font-medium leading-6">{chinese}</p>
+                        <p className="content-text hanzi-display whitespace-pre-line text-base font-medium leading-6">{chinese}</p>
                         {translations.length > 0 && (
-                          <p className="mt-0.5 whitespace-pre-line text-sm leading-6 text-muted-foreground">
+                          <p className="content-text mt-0.5 whitespace-pre-line text-sm leading-6 text-muted-foreground">
                             {translations.join("\n")}
                           </p>
                         )}
@@ -258,7 +258,7 @@ export function GrammarSection({
                 const incorrect = answer.correct === false || answer.matchPercent === 0;
                 return (
                   <section key={answer.id} className="space-y-1.5 rounded-md border p-3 text-sm">
-                    <p className="hanzi-display font-medium">{index + 1}. {answer.prompt}</p>
+                    <p className="content-text hanzi-display font-medium">{index + 1}. {answer.prompt}</p>
                     <p><span className="text-muted-foreground">Câu trả lời của bạn: </span>{answer.given || "Bỏ trống"}</p>
                     <p className={correct ? "text-success" : incorrect ? "text-destructive" : "text-muted-foreground"}>
                       Kết quả: {correct ? "Đúng" : incorrect ? "Sai" : "Chưa xác định"}

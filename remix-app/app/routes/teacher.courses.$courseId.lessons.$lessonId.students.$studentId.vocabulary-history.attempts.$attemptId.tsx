@@ -186,9 +186,9 @@ export default function TeacherVocabularyAttemptDetail() {
                     <div className="min-w-0 flex-1 space-y-1.5">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-mono text-xs tabular-nums text-muted-foreground">{index + 1}.</span>
-                        <p className={question.typeLabel === "Trung → Việt" ? "hanzi-display font-medium" : "font-medium"}>{question.prompt}</p>
+                        <p className={cn("content-text font-medium", question.typeLabel === "Trung → Việt" && "hanzi-display")}>{question.prompt}</p>
                         {question.lessonPinyin && question.typeLabel === "Trung → Việt" && (
-                          <p className="pinyin-text w-full pl-5 text-xs text-muted-foreground">{question.lessonPinyin}</p>
+                          <p className="content-text pinyin-text w-full pl-5 text-xs text-muted-foreground">{question.lessonPinyin}</p>
                         )}
                         {question.typeLabel && (
                           <span className="rounded-full border bg-background/60 px-2 py-0.5 text-[10px] text-muted-foreground">{question.typeLabel}</span>

@@ -274,9 +274,9 @@ export default function TeacherPhoneticsHistory() {
                 {activeAttempt.results.map((result, resultIndex) => (
                   <div key={`${activeAttempt.id}-${resultIndex}`} className="grid gap-2 px-3 py-3 text-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                     <div>
-                      <p className="pinyin-text font-medium">{result.prompt}{result.full ? ` · ${result.full}` : ""}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Học viên: <span className="pinyin-text font-medium text-foreground">{result.given || "Bỏ trống"}</span>
+                      <p className="content-text pinyin-text font-medium">{result.prompt}{result.full ? ` · ${result.full}` : ""}</p>
+                      <p className="content-text mt-1 text-xs text-muted-foreground">
+                        Học viên: <span className="content-text pinyin-text font-medium text-foreground">{result.given || "Bỏ trống"}</span>
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2">

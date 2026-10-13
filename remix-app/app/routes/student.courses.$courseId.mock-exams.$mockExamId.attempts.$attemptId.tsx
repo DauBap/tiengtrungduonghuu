@@ -313,7 +313,7 @@ export default function StudentMockExamAttempt() {
             {index + 1}
           </span>
           Câu {index + 1}
-          {question.prompt && <span className="hanzi-display mt-2 block whitespace-pre-line pl-10 font-normal leading-relaxed">{question.prompt}</span>}
+          {question.prompt && <span className="content-text hanzi-display mt-2 block whitespace-pre-line pl-10 font-normal leading-relaxed">{question.prompt}</span>}
         </legend>
         {question.imageUrl && (
           <img
@@ -340,7 +340,7 @@ export default function StudentMockExamAttempt() {
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-sm font-semibold">
                   {String.fromCharCode(65 + optionIndex)}
                 </span>
-                <span className="hanzi-display min-w-0 flex-1 whitespace-pre-line">{option.content}</span>
+                <span className="content-text hanzi-display min-w-0 flex-1 whitespace-pre-line">{option.content}</span>
                 {correct && <Check className="h-4 w-4 text-green-700" />}
               </button>
             );
@@ -380,8 +380,8 @@ export default function StudentMockExamAttempt() {
               <CardContent className="space-y-5">
                 {section.questions.map((question, index) => (
                   <div key={question.id} className="space-y-2 border-b pb-4 last:border-0">
-                    <p className="hanzi-display font-medium">{index + 1}. {question.prompt}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="content-text hanzi-display font-medium">{index + 1}. {question.prompt}</p>
+                    <p className="content-text text-sm text-muted-foreground">
                       Đáp án đúng: {question.options
                         .filter((option) => "isCorrect" in option && option.isCorrect)
                         .map((option) => option.content)

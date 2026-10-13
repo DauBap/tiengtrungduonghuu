@@ -239,13 +239,13 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
       <button type="button" onClick={flip} disabled={isTransitioning} className="group relative block w-full [perspective:1200px]" aria-label={flipped ? "Xem mặt trước" : "Xem mặt sau"}>
         <div className={cn("relative h-72 w-full transition-transform duration-500 [transform-style:preserve-3d]", flipped && "[transform:rotateY(180deg)]")}>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/20 bg-primary/5 p-6 transition-colors [backface-visibility:hidden] group-hover:border-primary/40">
-            <p className={cn("text-center font-semibold", frontIsChinese ? "hanzi-display text-5xl" : "text-2xl")}>{frontMain}</p>
-            {frontIsChinese && config.showPinyinOnFront && settings.showPinyin && <p className="pinyin-text text-lg text-primary">{card.pinyin}</p>}
+            <p className={cn("content-text text-center font-semibold", frontIsChinese ? "hanzi-display text-5xl" : "text-2xl")}>{frontMain}</p>
+            {frontIsChinese && config.showPinyinOnFront && settings.showPinyin && <p className="content-text pinyin-text text-lg text-primary">{card.pinyin}</p>}
             <p className="absolute bottom-4 text-xs text-muted-foreground">Bấm để lật thẻ</p>
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/30 bg-primary/10 p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-            <p className={cn("text-center font-semibold", frontIsChinese ? "text-2xl" : "hanzi-display text-5xl")}>{backMain}</p>
-            {settings.showPinyin && <p className="pinyin-text text-base text-primary">{card.pinyin}</p>}
+            <p className={cn("content-text text-center font-semibold", frontIsChinese ? "text-2xl" : "hanzi-display text-5xl")}>{backMain}</p>
+            {settings.showPinyin && <p className="content-text pinyin-text text-base text-primary">{card.pinyin}</p>}
             {!!card.wordTypes?.length && <div className="flex flex-wrap justify-center gap-1">{card.wordTypes.map((type) => <span key={type} className="rounded-full border border-border bg-background/60 px-2.5 py-0.5 text-xs text-muted-foreground">{WORD_TYPE_META[type].label}</span>)}</div>}
             {card.note && <p className="mt-1 max-w-xs text-center text-sm text-muted-foreground">{card.note}</p>}
           </div>

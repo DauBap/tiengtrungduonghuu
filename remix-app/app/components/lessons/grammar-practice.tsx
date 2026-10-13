@@ -122,7 +122,7 @@ export function GrammarPractice({ questions, sectionId, answerReviewEnabled = fa
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {GRAMMAR_QUESTION_META[question.type].studentHint}
           </p>
-          <p className="hanzi-display text-base font-medium mt-1 whitespace-pre-line">{question.prompt}</p>
+          <p className="content-text hanzi-display text-base font-medium mt-1 whitespace-pre-line">{question.prompt}</p>
         </div>
 
         {question.type === "SINGLE_CHOICE" && (
@@ -144,7 +144,7 @@ export function GrammarPractice({ questions, sectionId, answerReviewEnabled = fa
                     chosen && "border-primary")}>
                     {chosen && <span className="h-2.5 w-2.5 rounded-full bg-primary" />}
                   </span>
-                  <span className="hanzi-display text-base">{opt}</span>
+                  <span className="content-text hanzi-display text-base">{opt}</span>
                 </button>
               );
             })}
@@ -161,7 +161,7 @@ export function GrammarPractice({ questions, sectionId, answerReviewEnabled = fa
                 state.picked.map((t, i) => (
                   <button key={`${t}-${i}`} type="button" disabled={locked}
                     onClick={() => update({ picked: state.picked.filter((_, j) => j !== i) })}
-                    className={cn("hanzi-display rounded-md border border-primary/40 bg-primary/10 px-3 py-1.5 text-base font-medium",
+                    className={cn("content-text hanzi-display rounded-md border border-primary/40 bg-primary/10 px-3 py-1.5 text-base font-medium",
                       locked ? "cursor-not-allowed" : "hover:bg-primary/20 transition-colors")}>
                     {t}
                   </button>
@@ -173,7 +173,7 @@ export function GrammarPractice({ questions, sectionId, answerReviewEnabled = fa
               {remainingTokens.map((t, i) => (
                 <button key={`${t}-${i}`} type="button" disabled={locked}
                   onClick={() => update({ picked: [...state.picked, t] })}
-                  className={cn("hanzi-display rounded-md border px-3 py-1.5 text-base font-medium",
+                  className={cn("content-text hanzi-display rounded-md border px-3 py-1.5 text-base font-medium",
                     locked ? "cursor-not-allowed opacity-50" : "hover:bg-muted/50 transition-colors")}>
                   {t}
                 </button>

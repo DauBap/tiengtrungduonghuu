@@ -281,19 +281,19 @@ function PhoneticsSectionCard({
                       : "border-destructive/30 bg-destructive/5",
                   )}
                 >
-                  <p className="pinyin-text font-medium">{index + 1}. {result.prompt}</p>
+                  <p className="content-text pinyin-text font-medium">{index + 1}. {result.prompt}</p>
                   <p className="mt-1 text-sm">
                     <span className="text-muted-foreground">Bạn trả lời: </span>
-                    <span className="pinyin-text">{result.given || "Bỏ trống"}</span>
+                    <span className="content-text pinyin-text">{result.given || "Bỏ trống"}</span>
                   </p>
                   <p className="text-sm">
                     <span className="text-muted-foreground">Đáp án đúng: </span>
-                    <span className="pinyin-text">{result.correctAnswer || "—"}</span>
+                    <span className="content-text pinyin-text">{result.correctAnswer || "—"}</span>
                   </p>
                   {result.completeAnswer && (
                     <p className="text-sm">
                       <span className="text-muted-foreground">Âm tiết hoàn chỉnh: </span>
-                      <span className="pinyin-text">{result.completeAnswer}</span>
+                      <span className="content-text pinyin-text">{result.completeAnswer}</span>
                     </p>
                   )}
                 </div>

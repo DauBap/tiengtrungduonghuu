@@ -335,7 +335,7 @@ export default function TeacherGrammarAttemptDetail() {
                         <div className="min-w-0 flex-1 space-y-1.5">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="font-mono text-xs tabular-nums text-muted-foreground">{index + 1}.</span>
-                            <p className="hanzi-display font-medium">{result.prompt}</p>
+                            <p className="content-text hanzi-display font-medium">{result.prompt}</p>
                             <span className="rounded-full border bg-background/60 px-2 py-0.5 text-[10px] text-muted-foreground">
                               {GRAMMAR_QUESTION_META[result.type].label}
                             </span>
@@ -346,7 +346,7 @@ export default function TeacherGrammarAttemptDetail() {
                           {result.type === "ARRANGE" && result.givenTokens && (
                             <p className="pl-5 text-xs text-muted-foreground">Từ đã chọn: {result.givenTokens.join(" / ")}</p>
                           )}
-                          <p className="text-sm">
+                          <p className="content-text text-sm">
                             <span className="text-muted-foreground">Học viên trả lời: </span>
                             {result.given || <span className="italic text-muted-foreground">bỏ trống</span>}
                           </p>

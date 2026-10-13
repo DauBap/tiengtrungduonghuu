@@ -197,23 +197,23 @@ export default function TeacherWorkbookAttemptDetail() {
                       <div className="min-w-0 flex-1 space-y-1.5">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-mono text-xs tabular-nums text-muted-foreground">Câu {result.number}</span>
-                          <p className="hanzi-display font-medium">{result.prompt || result.passage || "Câu hỏi"}</p>
+                          <p className="content-text hanzi-display font-medium">{result.prompt || result.passage || "Câu hỏi"}</p>
                           <span className="text-xs text-muted-foreground">
                             {result.correct === null ? "Không tính điểm" : result.correct ? "Đúng · 1 điểm" : "Sai · 0 điểm"}
                           </span>
                         </div>
-                        {result.passage && result.prompt && <p className="hanzi-display whitespace-pre-line text-sm">{result.passage}</p>}
-                        <p className="text-sm">
+                        {result.passage && result.prompt && <p className="content-text hanzi-display whitespace-pre-line text-sm">{result.passage}</p>}
+                        <p className="content-text text-sm">
                           <span className="text-muted-foreground">Học viên chọn: </span>
                           {result.givenLabel || <span className="italic text-muted-foreground">bỏ trống</span>}
                         </p>
                         {result.gradable && result.correct !== true && (
-                          <p className="text-sm">
+                          <p className="content-text text-sm">
                             <span className="text-muted-foreground">Đáp án đúng: </span>
                             <span className="font-medium">{result.correctAnswer}</span>
                           </p>
                         )}
-                        {result.translation && <p className="text-xs text-muted-foreground">{result.translation}</p>}
+                        {result.translation && <p className="content-text text-xs text-muted-foreground">{result.translation}</p>}
                       </div>
                     </div>
                   </div>

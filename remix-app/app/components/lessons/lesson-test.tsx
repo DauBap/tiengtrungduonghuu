@@ -138,7 +138,7 @@ export function LessonTest({ questions, isSubmitting = false }: { questions: Les
             </p>
             <span className="text-xs text-muted-foreground">· {question.points} điểm</span>
           </div>
-          <p className="hanzi-display text-base font-medium mt-1 whitespace-pre-line">{question.prompt}</p>
+          <p className="content-text hanzi-display text-base font-medium mt-1 whitespace-pre-line">{question.prompt}</p>
         </div>
 
         {question.type === "SINGLE_CHOICE" && (
@@ -154,7 +154,7 @@ export function LessonTest({ questions, isSubmitting = false }: { questions: Les
                   {chosen
                     ? <CircleDot className="h-5 w-5 shrink-0 text-primary" />
                     : <Circle className="h-5 w-5 shrink-0 text-muted-foreground" />}
-                  <span className="hanzi-display text-base">{opt}</span>
+                  <span className="content-text hanzi-display text-base">{opt}</span>
                 </button>
               );
             })}
@@ -171,7 +171,7 @@ export function LessonTest({ questions, isSubmitting = false }: { questions: Les
                 answer.picked.map((t, i) => (
                   <button key={`${t}-${i}`} type="button"
                     onClick={() => update({ picked: answer.picked.filter((_, j) => j !== i) })}
-                    className="hanzi-display rounded-md border border-primary/40 bg-primary/10 px-3 py-1.5 text-base font-medium hover:bg-primary/20 transition-colors">
+                    className="content-text hanzi-display rounded-md border border-primary/40 bg-primary/10 px-3 py-1.5 text-base font-medium hover:bg-primary/20 transition-colors">
                     {t}
                   </button>
                 ))
@@ -182,7 +182,7 @@ export function LessonTest({ questions, isSubmitting = false }: { questions: Les
               {remainingTokens.map((t, i) => (
                 <button key={`${t}-${i}`} type="button"
                   onClick={() => update({ picked: [...answer.picked, t] })}
-                  className="hanzi-display rounded-md border px-3 py-1.5 text-base font-medium hover:bg-muted/50 transition-colors">
+                  className="content-text hanzi-display rounded-md border px-3 py-1.5 text-base font-medium hover:bg-muted/50 transition-colors">
                   {t}
                 </button>
               ))}

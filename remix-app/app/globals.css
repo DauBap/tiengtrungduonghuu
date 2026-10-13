@@ -127,20 +127,116 @@
 }
 
 @layer utilities {
-  main :is(p, li, td, dd, blockquote).text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+  .content-text.text-xs {
+    font-size: 1rem;
+  }
+
+  .content-text.text-sm {
+    font-size: 1.125rem;
+  }
+
+  .content-text.text-base {
+    font-size: 1.25rem;
+  }
+
+  .content-text.text-lg {
+    font-size: 1.5rem;
+  }
+
+  .content-text.text-xl {
+    font-size: 1.875rem;
+  }
+
+  .content-text.text-2xl {
+    font-size: 2.25rem;
+  }
+
+  .content-text.text-3xl {
+    font-size: 3rem;
+  }
+
+  .content-text.text-4xl {
+    font-size: 3.75rem;
+  }
+
+  .content-text.text-5xl {
+    font-size: 4.5rem;
+  }
+
+  .content-text.text-6xl {
+    font-size: 6rem;
+  }
+
+  .content-text.text-7xl {
+    font-size: 8rem;
+  }
+
+  .content-text:not(.text-xs):not(.text-sm):not(.text-base):not(.text-lg):not(.text-xl):not(.text-2xl):not(.text-3xl):not(.text-4xl):not(.text-5xl):not(.text-6xl):not(.text-7xl):not(.text-8xl):not(.text-9xl) {
+    font-size: 1.25rem;
+  }
+
+  main p.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main li.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main td.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main dd.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main blockquote.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     @apply text-sm;
   }
 
-  main :is(p, li, td, dd, blockquote).text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+  main p.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main li.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main td.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main dd.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main blockquote.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     @apply text-base;
   }
 
-  main :is(p, li, td, dd, blockquote).text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+  main p.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main li.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main td.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main dd.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main blockquote.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     @apply text-lg;
   }
 
-  main :is(p, li, td, dd, blockquote).text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+  main p.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main li.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main td.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main dd.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main blockquote.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     @apply text-xl;
+  }
+
+  main p.content-text.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main li.content-text.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main td.content-text.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main dd.content-text.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main blockquote.content-text.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+    font-size: 1.125rem;
+  }
+
+  main p.content-text.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main li.content-text.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main td.content-text.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main dd.content-text.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main blockquote.content-text.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+    font-size: 1.25rem;
+  }
+
+  main p.content-text.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main li.content-text.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main td.content-text.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main dd.content-text.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main blockquote.content-text.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+    font-size: 1.5rem;
+  }
+
+  main p.content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main li.content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main td.content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main dd.content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
+  main blockquote.content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+    font-size: 1.875rem;
   }
 
   .hanzi-display,
