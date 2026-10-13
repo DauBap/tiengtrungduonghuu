@@ -1179,7 +1179,7 @@ function AnswerReviewDetails({ groups }: { groups: AnswerReviewGroup[] }) {
                     ? <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
                     : null}
                 <div className="min-w-0 space-y-1.5">
-                  <p className="font-medium">{index + 1}. {result.prompt}</p>
+                  <p className="hanzi-display font-medium">{index + 1}. {result.prompt}</p>
                   <p className="text-sm">
                     <span className="text-muted-foreground">Bạn trả lời: </span>{result.given || "Bỏ trống"}
                     {result.matchPercent != null ? ` · Khớp ${result.matchPercent}%` : ""}
@@ -1794,9 +1794,9 @@ export default function LessonDetail() {
                           <span className="text-sm font-bold">{speaker.speakerName || `Người ${idx + 1}`}</span>
                         </div>
                         <div className="mt-2 text-base">
-                          <p className="font-medium text-foreground">{speaker.chinese}</p>
+                          <p className="hanzi-display font-medium text-foreground">{speaker.chinese}</p>
                           {settings.showPinyin && (
-                            <p className="text-lg font-mono text-muted-foreground mt-1">{speaker.pinyin}</p>
+                            <p className="pinyin-text text-lg text-muted-foreground mt-1">{speaker.pinyin}</p>
                           )}
                           <p className="text-base text-muted-foreground mt-1">{speaker.translation}</p>
                         </div>

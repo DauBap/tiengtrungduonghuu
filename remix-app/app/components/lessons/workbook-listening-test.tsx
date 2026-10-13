@@ -274,8 +274,8 @@ export function WorkbookListeningTest({
                   <div className="font-medium text-accent">Ví dụ</div>
                   {(section.example.chinese || (showPinyin && section.example.pinyin) || (config.showTranslation && section.example.translation)) && (
                     <div className="space-y-1">
-                      {section.example.chinese && <p className="font-medium">{section.example.chinese}</p>}
-                      {showPinyin && section.example.pinyin && <p className="text-sm text-muted-foreground">{section.example.pinyin}</p>}
+                      {section.example.chinese && <p className="hanzi-display font-medium">{section.example.chinese}</p>}
+                      {showPinyin && section.example.pinyin && <p className="pinyin-text text-sm text-muted-foreground">{section.example.pinyin}</p>}
                       {config.showTranslation && section.example.translation && <p className="text-sm italic">{section.example.translation}</p>}
                     </div>
                   )}
@@ -295,8 +295,8 @@ export function WorkbookListeningTest({
                         </div>
                         {(option.text || (showPinyin && option.pinyin)) && (
                           <span className="min-w-0 flex-1">
-                            {option.text && <span className="block">{option.text}</span>}
-                            {showPinyin && option.pinyin && <span className="block text-xs text-muted-foreground">{option.pinyin}</span>}
+                            {option.text && <span className="hanzi-display block">{option.text}</span>}
+                            {showPinyin && option.pinyin && <span className="pinyin-text block text-xs text-muted-foreground">{option.pinyin}</span>}
                           </span>
                         )}
                         {option.id === section.example?.correctAnswer && (
@@ -394,8 +394,8 @@ function QuestionCard({
       </div>
 
       {question.passage && <p className="whitespace-pre-line font-medium leading-relaxed">{question.passage}</p>}
-      {question.prompt && <p className="whitespace-pre-line font-medium leading-relaxed">{question.prompt}</p>}
-      {showPinyin && question.pinyin && <p className="whitespace-pre-line text-sm text-muted-foreground">{question.pinyin}</p>}
+      {question.prompt && <p className="hanzi-display whitespace-pre-line font-medium leading-relaxed">{question.prompt}</p>}
+      {showPinyin && question.pinyin && <p className="pinyin-text whitespace-pre-line text-sm text-muted-foreground">{question.pinyin}</p>}
       {showTranslation && question.translation && <p className="whitespace-pre-line text-sm italic text-muted-foreground">{question.translation}</p>}
 
       {/* Single Image Question */}
@@ -421,8 +421,8 @@ function QuestionCard({
           {question.dialogue && (
             <Card className="bg-muted/50 p-4 space-y-2">
               <div className="font-medium text-sm text-muted-foreground">Hội thoại:</div>
-              {question.dialogue.chinese && <p className="font-medium">{question.dialogue.chinese}</p>}
-              {showPinyin && question.dialogue.pinyin && <p className="text-sm text-muted-foreground">{question.dialogue.pinyin}</p>}
+              {question.dialogue.chinese && <p className="hanzi-display font-medium">{question.dialogue.chinese}</p>}
+              {showPinyin && question.dialogue.pinyin && <p className="pinyin-text text-sm text-muted-foreground">{question.dialogue.pinyin}</p>}
               {showTranslation && question.dialogue.translation && <p className="text-sm italic">{question.dialogue.translation}</p>}
             </Card>
           )}
@@ -468,8 +468,8 @@ function QuestionCard({
               </div>
               {(option.text || (showPinyin && option.pinyin)) && (
                 <span className="min-w-0 flex-1">
-                  {option.text && <span className="block">{option.text}</span>}
-                  {showPinyin && option.pinyin && <span className="block text-xs text-muted-foreground">{option.pinyin}</span>}
+                  {option.text && <span className="hanzi-display block">{option.text}</span>}
+                  {showPinyin && option.pinyin && <span className="pinyin-text block text-xs text-muted-foreground">{option.pinyin}</span>}
                 </span>
               )}
               {showAsCorrect && <Check className="ml-auto h-5 w-5" />}

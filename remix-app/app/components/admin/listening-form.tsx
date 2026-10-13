@@ -162,8 +162,8 @@ export function ListeningForm({ vocabOptions, sentenceOptions, initial, error, f
                     </button>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-medium truncate">{o.chinese}</p>
-                    <p className="text-xs text-primary font-mono truncate">{o.pinyin}</p>
+                    <p className="hanzi-display text-base font-medium truncate">{o.chinese}</p>
+                    <p className="pinyin-text text-xs text-primary truncate">{o.pinyin}</p>
                   </div>
                   <Button type="button" variant="ghost" size="icon" title="Nghe thử"
                     onClick={() => speakChinese(o.chinese, o.audioUrl)}>
@@ -185,8 +185,8 @@ export function ListeningForm({ vocabOptions, sentenceOptions, initial, error, f
                   className="flex w-full items-center gap-3 rounded-lg border p-2.5 text-left hover:bg-muted/50 transition-colors">
                   <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded border" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-medium truncate">{o.chinese}</p>
-                    <p className="text-xs text-primary font-mono truncate">{o.pinyin}</p>
+                    <p className="hanzi-display text-base font-medium truncate">{o.chinese}</p>
+                    <p className="pinyin-text text-xs text-primary truncate">{o.pinyin}</p>
                   </div>
                 </button>
               ))}

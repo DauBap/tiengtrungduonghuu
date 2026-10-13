@@ -136,8 +136,8 @@ export function FlashcardForm({ vocabOptions, initial, error, field, cancelTo }:
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className="text-lg font-medium">{v.chinese}</span>
-                      <span className="text-sm text-primary font-mono">{v.pinyin}</span>
+                      <span className="hanzi-display text-lg font-medium">{v.chinese}</span>
+                      <span className="pinyin-text text-sm text-primary">{v.pinyin}</span>
                       {(v.wordTypes ?? []).map((type) => (
                         <Badge key={type} variant="outline" className="text-[10px] font-normal px-1.5 py-0">
                           {WORD_TYPE_META[type].label}
@@ -167,8 +167,8 @@ export function FlashcardForm({ vocabOptions, initial, error, field, cancelTo }:
                   <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded border" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className="text-lg font-medium">{v.chinese}</span>
-                      <span className="text-sm text-primary font-mono">{v.pinyin}</span>
+                      <span className="hanzi-display text-lg font-medium">{v.chinese}</span>
+                      <span className="pinyin-text text-sm text-primary">{v.pinyin}</span>
                       {(v.wordTypes ?? []).map((type) => (
                         <Badge key={type} variant="outline" className="text-[10px] font-normal px-1.5 py-0">
                           {WORD_TYPE_META[type].label}
@@ -236,11 +236,11 @@ export function FlashcardForm({ vocabOptions, initial, error, field, cancelTo }:
           </CardHeader>
           <CardContent>
             <div className="flex h-40 flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/20 bg-primary/5">
-              <p className={cn("font-semibold text-center", frontSide === "chinese" ? "text-4xl" : "text-xl")}>
+              <p className={cn("font-semibold text-center", frontSide === "chinese" ? "hanzi-display text-4xl" : "text-xl")}>
                 {frontSide === "chinese" ? selected[0].chinese : selected[0].translation}
               </p>
               {frontSide === "chinese" && showPinyinOnFront && (
-                <p className="text-base text-primary font-mono">{selected[0].pinyin}</p>
+                <p className="pinyin-text text-base text-primary">{selected[0].pinyin}</p>
               )}
             </div>
           </CardContent>

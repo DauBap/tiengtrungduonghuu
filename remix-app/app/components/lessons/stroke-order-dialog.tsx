@@ -115,9 +115,9 @@ export function StrokeOrderDialog({ chinese, pinyin, translation, showPinyin = t
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-bold leading-tight">{chinese}</h2>
+            <h2 className="hanzi-display text-2xl font-bold leading-tight">{chinese}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              {showPinyin && <span className="font-mono text-primary">{pinyin}{translation ? " · " : ""}</span>}
+              {showPinyin && <span className="pinyin-text text-primary">{pinyin}{translation ? " · " : ""}</span>}
               {translation}
             </p>
           </div>

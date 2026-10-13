@@ -241,7 +241,7 @@ export default function AdminQuestionBank() {
                           <Icon className="h-4.5 w-4.5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium line-clamp-2">{q.prompt}</p>
+                          <p className="hanzi-display font-medium line-clamp-2">{q.prompt}</p>
                           <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
                             <Badge variant="outline" className="text-[10px] font-normal">
                               {meta.label}

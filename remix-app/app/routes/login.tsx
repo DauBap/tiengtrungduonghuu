@@ -83,17 +83,17 @@ export default function LoginPage() {
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-foreground/20 backdrop-blur-sm">
               <Languages className="h-6 w-6" />
             </div>
-            <span className="text-xl font-bold">TIẾNG TRUNG DƯƠNG HỮU</span>
+            <span className="header-name text-xl font-bold">TIẾNG TRUNG DƯƠNG HỮU</span>
           </div>
           <div className="space-y-6">
-            <h1 className="text-4xl font-bold leading-tight">Học tiếng Trung<br />từng bước một.</h1>
+            <h1 className="hero-title text-4xl font-bold leading-tight">Học tiếng Trung<br />từng bước một.</h1>
             <p className="text-lg text-primary-foreground/80 max-w-md">
               Nền tảng học có cấu trúc theo hệ thống HSK chính thức, từ mới bắt đầu đến thành thạo.
             </p>
             <div className="flex gap-8">
-              <div><p className="text-3xl font-bold">6</p><p className="text-sm text-primary-foreground/70">Cấp độ HSK</p></div>
-              <div><p className="text-3xl font-bold">100+</p><p className="text-sm text-primary-foreground/70">Bài học</p></div>
-              <div><p className="text-3xl font-bold">5.000+</p><p className="text-sm text-primary-foreground/70">Từ vựng</p></div>
+              <div><p className="stat-num text-3xl font-bold">6</p><p className="text-sm text-primary-foreground/70">Cấp độ HSK</p></div>
+              <div><p className="stat-num text-3xl font-bold">100+</p><p className="text-sm text-primary-foreground/70">Bài học</p></div>
+              <div><p className="stat-num text-3xl font-bold">5.000+</p><p className="text-sm text-primary-foreground/70">Từ vựng</p></div>
             </div>
           </div>
           <p className="text-sm text-primary-foreground/60">HSK 1 đến HSK 6 - Chuẩn quốc tế</p>
@@ -107,7 +107,7 @@ export default function LoginPage() {
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground mb-3">
               <Languages className="h-6 w-6" />
             </div>
-            <h1 className="text-xl font-bold">TIẾNG TRUNG DƯƠNG HỮU</h1>
+            <h1 className="header-name text-xl font-bold">TIẾNG TRUNG DƯƠNG HỮU</h1>
           </div>
 
           <Card>

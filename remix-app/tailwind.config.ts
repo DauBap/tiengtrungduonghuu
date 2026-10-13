@@ -5,6 +5,9 @@ export default {
   content: ["./app/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Be Vietnam Pro", "Inter Variable", "sans-serif"],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

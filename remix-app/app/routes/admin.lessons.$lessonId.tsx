@@ -784,7 +784,7 @@ function VocabModal({
             name="pinyin"
             defaultValue={vocab?.pinyin}
             placeholder="nǐ hǎo"
-            className="font-mono"
+            className="pinyin-text"
             aria-invalid={fetcher.data?.field === "pinyin" || undefined}
           />
         </div>
@@ -801,6 +801,7 @@ function VocabModal({
             defaultValue={vocab?.pinyinAlternatives.join("\n")}
             rows={2}
             placeholder="Biến thể phiên âm khác"
+            className="pinyin-text"
           />
         </div>
         <div className="space-y-2">
@@ -1042,7 +1043,7 @@ function SentenceModal({
             name="pinyin"
             defaultValue={sentence?.pinyin}
             placeholder="nǐ hǎo, wǒ jiào xiǎo míng."
-            className="font-mono"
+            className="pinyin-text"
             aria-invalid={fetcher.data?.field === "pinyin" || undefined}
           />
         </div>
@@ -1059,6 +1060,7 @@ function SentenceModal({
             defaultValue={sentence?.pinyinAlternatives.join("\n")}
             rows={2}
             placeholder="Biến thể phiên âm khác"
+            className="pinyin-text"
           />
         </div>
         <div className="space-y-2">
@@ -1472,7 +1474,7 @@ function LessonAudioScriptModal({
                     name="speakerPinyin"
                     defaultValue={sp.pinyin ?? ""}
                     placeholder="nǐ hǎo"
-                    className="font-mono"
+                    className="pinyin-text"
                   />
                 </div>
                 <div className="space-y-2">
@@ -1702,8 +1704,8 @@ export default function AdminLessonDetail() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-baseline gap-2 flex-wrap">
-                          <p className="text-xl font-medium">{v.chinese}</p>
-                          <p className="text-sm text-primary font-mono">
+                          <p className="hanzi-display text-xl font-medium">{v.chinese}</p>
+                          <p className="pinyin-text text-sm text-primary">
                             {v.pinyin}
                           </p>
                           {(
@@ -1962,8 +1964,8 @@ export default function AdminLessonDetail() {
                           </button>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-lg font-medium">{s.chinese}</p>
-                          <p className="text-sm text-primary font-mono">
+                          <p className="hanzi-display text-lg font-medium">{s.chinese}</p>
+                          <p className="pinyin-text text-sm text-primary">
                             {s.pinyin}
                           </p>
                           <p className="text-sm text-muted-foreground">

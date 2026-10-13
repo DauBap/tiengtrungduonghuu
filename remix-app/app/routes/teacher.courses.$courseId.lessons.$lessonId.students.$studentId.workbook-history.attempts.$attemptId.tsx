@@ -197,12 +197,12 @@ export default function TeacherWorkbookAttemptDetail() {
                       <div className="min-w-0 flex-1 space-y-1.5">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-mono text-xs tabular-nums text-muted-foreground">Câu {result.number}</span>
-                          <p className="font-medium">{result.prompt || result.passage || "Câu hỏi"}</p>
+                          <p className="hanzi-display font-medium">{result.prompt || result.passage || "Câu hỏi"}</p>
                           <span className="text-xs text-muted-foreground">
                             {result.correct === null ? "Không tính điểm" : result.correct ? "Đúng · 1 điểm" : "Sai · 0 điểm"}
                           </span>
                         </div>
-                        {result.passage && result.prompt && <p className="whitespace-pre-line text-sm">{result.passage}</p>}
+                        {result.passage && result.prompt && <p className="hanzi-display whitespace-pre-line text-sm">{result.passage}</p>}
                         <p className="text-sm">
                           <span className="text-muted-foreground">Học viên chọn: </span>
                           {result.givenLabel || <span className="italic text-muted-foreground">bỏ trống</span>}

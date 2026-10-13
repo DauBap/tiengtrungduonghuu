@@ -51,7 +51,7 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
               <TableCell className="px-2 py-3 font-semibold text-lg sm:px-4 sm:py-4">
                 <div className="flex items-center gap-1.5">
                   {/* Chữ Hán ngắt dòng được ở mọi ký tự nên phải chặn tay */}
-                  <span className="whitespace-nowrap">{item.chinese}</span>
+                  <span className="hanzi-display whitespace-nowrap">{item.chinese}</span>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -75,7 +75,7 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
                   )}
                 </div>
               </TableCell>
-              {settings.showPinyin && <TableCell className="w-28 whitespace-nowrap px-3 py-3 font-mono text-sm text-primary sm:w-32 sm:px-4 sm:py-4">{item.pinyin}</TableCell>}
+              {settings.showPinyin && <TableCell className="pinyin-text w-28 whitespace-nowrap px-3 py-3 text-sm text-primary sm:w-32 sm:px-4 sm:py-4">{item.pinyin}</TableCell>}
               <TableCell className="w-32 px-3 py-3 sm:w-36 sm:px-4 sm:py-4">
                 {item.wordTypes?.length ? (
                   <div className="flex flex-wrap gap-1">

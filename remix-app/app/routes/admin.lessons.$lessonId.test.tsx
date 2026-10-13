@@ -683,7 +683,7 @@ export default function AdminLessonTest() {
                       </span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-medium">{q.prompt}</p>
+                          <p className="hanzi-display font-medium">{q.prompt}</p>
                           <Badge variant="outline" className="bg-muted/50 text-muted-foreground text-[10px]">
                             {GRAMMAR_QUESTION_META[q.type].label}
                           </Badge>
@@ -692,11 +692,11 @@ export default function AdminLessonTest() {
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Đáp án: <span className="text-foreground">{grammarAnswerText(q)}</span>
+                          Đáp án: <span className="hanzi-display text-foreground">{grammarAnswerText(q)}</span>
                         </p>
                         {q.type === "SINGLE_CHOICE" && (
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            {q.options.length} lựa chọn: {q.options.join(" / ")}
+                            {q.options.length} lựa chọn: <span className="hanzi-display">{q.options.join(" / ")}</span>
                           </p>
                         )}
                         {q.type === "ARRANGE" && (

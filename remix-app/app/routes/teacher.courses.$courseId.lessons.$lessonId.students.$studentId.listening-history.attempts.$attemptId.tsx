@@ -173,7 +173,7 @@ export default function TeacherListeningAttemptDetail() {
                     <div className="min-w-0 flex-1 space-y-1.5">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-mono text-xs tabular-nums text-muted-foreground">{index + 1}.</span>
-                        <p className="font-medium">{question.prompt || `Câu ${index + 1}`}</p>
+                        <p className="hanzi-display font-medium">{question.prompt || `Câu ${index + 1}`}</p>
                         <span className="rounded-full border bg-background/60 px-2 py-0.5 text-[10px] text-muted-foreground">
                           {question.answerMode === "pinyin" ? "Pinyin" : "Chữ Hán"}
                         </span>
@@ -181,17 +181,20 @@ export default function TeacherListeningAttemptDetail() {
                           {question.correct ? question.points : 0}/{question.points} điểm
                         </span>
                       </div>
-                      {question.pinyin && <p className="pl-5 font-mono text-xs text-muted-foreground">{question.pinyin}</p>}
+                      {question.pinyin && <p className="pinyin-text pl-5 text-xs text-muted-foreground">{question.pinyin}</p>}
                       <p className="text-sm">
                         <span className="text-muted-foreground">Bạn trả lời: </span>
                         {question.given
-                          ? <span className={question.correct ? "text-emerald-700" : "text-rose-700"}>{question.given}</span>
+                          ? <span className={cn(
+                              question.answerMode === "pinyin" ? "pinyin-text" : "hanzi-display",
+                              question.correct ? "text-emerald-700" : "text-rose-700",
+                            )}>{question.given}</span>
                           : <span className="italic text-muted-foreground">bỏ trống</span>}
                       </p>
                       {!question.correct && (
                         <p className="text-sm">
                           <span className="text-muted-foreground">Đáp án đúng: </span>
-                          <span className="font-medium">{question.correctAnswer}</span>
+                          <span className={cn("font-medium", question.answerMode === "pinyin" ? "pinyin-text" : "hanzi-display")}>{question.correctAnswer}</span>
                         </p>
                       )}
                       {question.translation && <p className="text-xs text-muted-foreground">{question.translation}</p>}

@@ -258,7 +258,7 @@ export default function TestPage() {
                     <div className="flex-1 min-w-0 space-y-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono text-xs text-muted-foreground tabular-nums">{i + 1}.</span>
-                        <p className="font-medium">{q.prompt}</p>
+                        <p className="hanzi-display font-medium">{q.prompt}</p>
                         <Badge variant="outline" className="bg-background/60 text-muted-foreground text-[10px]">
                           {q.typeLabel}
                         </Badge>

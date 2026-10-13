@@ -158,7 +158,7 @@ function QuestionEditor({
         <Input value={question.prompt} onChange={(e) => onChange({ ...question, prompt: e.target.value })}
           placeholder="Câu hỏi / câu cần điền" className="h-8 text-sm" />
         <Input value={question.pinyin} onChange={(e) => onChange({ ...question, pinyin: e.target.value })}
-          placeholder="Pinyin" className="h-8 text-sm" />
+          placeholder="Pinyin" className="pinyin-text h-8 text-sm" />
         <Input value={question.translation} onChange={(e) => onChange({ ...question, translation: e.target.value })}
           placeholder="Bản dịch (tùy chọn)" className="h-8 text-sm sm:col-span-2" />
         <Input value={question.passage} onChange={(e) => onChange({ ...question, passage: e.target.value })}
@@ -235,7 +235,7 @@ function QuestionEditor({
                 value={opt.pinyin}
                 onChange={(e) => updateOption(opt.id, "pinyin", e.target.value)}
                 placeholder={`Pinyin ${opt.label} (tùy chọn)`}
-                className="h-8 text-sm"
+                className="pinyin-text h-8 text-sm"
               />
             </div>
             {question.options.length > 2 && (

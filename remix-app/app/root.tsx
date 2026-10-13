@@ -18,14 +18,10 @@ import stylesheet from "~/globals.css?url";
 export const links: LinksFunction = () => [
   { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
+  { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap",
   },
   { rel: "stylesheet", href: stylesheet },
 ];
@@ -52,7 +48,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body style={{ fontFamily: "Inter, sans-serif" }}>
+      <body>
         {isLoading && (
           <div className="pointer-events-none fixed inset-x-0 top-0 z-[100]" role="status" aria-live="polite">
             <div className="h-1 w-full overflow-hidden bg-primary/15">
@@ -85,7 +81,7 @@ export function ErrorBoundary() {
         <title>Lỗi</title>
         <Links />
       </head>
-      <body style={{ fontFamily: "Inter, sans-serif" }}>
+      <body>
         <div
           style={{
             display: "flex",

@@ -335,7 +335,7 @@ export default function TeacherGrammarAttemptDetail() {
                         <div className="min-w-0 flex-1 space-y-1.5">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="font-mono text-xs tabular-nums text-muted-foreground">{index + 1}.</span>
-                            <p className="font-medium">{result.prompt}</p>
+                            <p className="hanzi-display font-medium">{result.prompt}</p>
                             <span className="rounded-full border bg-background/60 px-2 py-0.5 text-[10px] text-muted-foreground">
                               {GRAMMAR_QUESTION_META[result.type].label}
                             </span>
