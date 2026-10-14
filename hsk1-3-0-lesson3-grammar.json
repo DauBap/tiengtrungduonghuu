@@ -1,0 +1,1626 @@
+{
+  "title": "BÀI 3: GIỚI THIỆU QUỐC TỊCH",
+  "points": [
+    {
+      "id": "shi",
+      "title": "“是”字句 – Câu chữ “是”",
+      "explanation": "Dùng để xác định hoặc giới thiệu người, quốc tịch, nghề nghiệp và sự vật.",
+      "formulas": [
+        "Khẳng định: Chủ ngữ + 是 + danh từ",
+        "Phủ định: Chủ ngữ + 不是 + danh từ",
+        "Nghi vấn: Chủ ngữ + 是 + danh từ + 吗？"
+      ],
+      "examples": [
+        {
+          "chinese": "我是越南人。",
+          "vietnamese": "Tôi là người Việt Nam."
+        },
+        {
+          "chinese": "他是中国人。",
+          "vietnamese": "Anh ấy là người Trung Quốc."
+        },
+        {
+          "chinese": "她不是美国人。",
+          "vietnamese": "Cô ấy không phải là người Mỹ."
+        },
+        {
+          "chinese": "你是老师吗？",
+          "vietnamese": "Bạn là giáo viên phải không?"
+        }
+      ],
+      "notes": [
+        "Không dùng “不” đứng một mình trước danh từ. Dạng phủ định đúng là “不是”."
+      ],
+      "exercises": [
+        {
+          "id": "shi-choice",
+          "title": "1. Chọn đáp án đúng",
+          "type": "choice",
+          "questions": [
+            {
+              "id": "sc1",
+              "prompt": "Chọn câu đúng với nghĩa “Tôi là người Việt Nam.”",
+              "answer": "我是越南人。",
+              "options": [
+                "我是越南人。",
+                "我越南人。",
+                "我不是越南人。"
+              ],
+              "meaning": "Tôi là người Việt Nam.",
+              "explanation": "Dùng 是 để nối chủ ngữ 我 với danh từ 越南人 trong câu khẳng định.",
+              "optionExplanations": {
+                "我是越南人。": "Đúng cấu trúc Chủ ngữ + 是 + danh từ.",
+                "我越南人。": "Thiếu động từ 是.",
+                "我不是越南人。": "不是 làm nghĩa câu thành phủ định."
+              },
+              "completedSentence": "我是越南人。"
+            },
+            {
+              "id": "sc2",
+              "prompt": "Chọn câu đúng với nghĩa “Cô ấy không phải là người Trung Quốc.”",
+              "answer": "她不是中国人。",
+              "options": [
+                "她不中国人。",
+                "她不是中国人。",
+                "她是中国人不是。"
+              ],
+              "meaning": "Cô ấy không phải là người Trung Quốc.",
+              "explanation": "Phủ định của 是 là 不是 và 不是 đứng trước danh từ.",
+              "optionExplanations": {
+                "她不中国人。": "Không dùng 不 trực tiếp trước danh từ.",
+                "她不是中国人。": "Đúng cấu trúc Chủ ngữ + 不是 + danh từ.",
+                "她是中国人不是。": "不是 bị đặt sai ở cuối câu."
+              },
+              "completedSentence": "她不是中国人。"
+            },
+            {
+              "id": "sc3",
+              "prompt": "Mary nói: “他是老师。” Chọn câu có cùng nghĩa.",
+              "answer": "他是老师。",
+              "options": [
+                "他老师是。",
+                "他是老师。",
+                "是他老师。"
+              ],
+              "meaning": "Anh ấy là giáo viên.",
+              "explanation": "是 đứng giữa chủ ngữ 他 và danh từ 老师.",
+              "optionExplanations": {
+                "他老师是。": "是 không đặt ở cuối câu.",
+                "他是老师。": "Đúng trật tự Chủ ngữ + 是 + danh từ.",
+                "是他老师。": "Câu giới thiệu này không đặt 是 trước chủ ngữ."
+              },
+              "completedSentence": "他是老师。"
+            },
+            {
+              "id": "sc4",
+              "prompt": "Người nói xác nhận “Chúng tôi là học sinh.” Chọn câu đúng.",
+              "answer": "我们是学生。",
+              "options": [
+                "我们不是学生。",
+                "我们学生。",
+                "我们是学生。"
+              ],
+              "meaning": "Chúng tôi là học sinh.",
+              "explanation": "Đây là câu khẳng định nên dùng 是.",
+              "optionExplanations": {
+                "我们不是学生。": "Câu này mang nghĩa phủ định, trái ngữ cảnh.",
+                "我们学生。": "Thiếu 是 giữa chủ ngữ và danh từ.",
+                "我们是学生。": "Đúng ngữ pháp và đúng nghĩa."
+              },
+              "completedSentence": "我们是学生。"
+            },
+            {
+              "id": "sc5",
+              "prompt": "Chọn câu đúng với nghĩa “Bạn không phải là người Mỹ.”",
+              "answer": "你不是美国人。",
+              "options": [
+                "你是美国人。",
+                "你不美国人。",
+                "你不是美国人。"
+              ],
+              "meaning": "Bạn không phải là người Mỹ.",
+              "explanation": "Dùng 不是 cho câu danh từ phủ định.",
+              "optionExplanations": {
+                "你是美国人。": "Câu này là khẳng định, trái nghĩa đề bài.",
+                "你不美国人。": "Không dùng 不 trực tiếp trước danh từ.",
+                "你不是美国人。": "Đúng cấu trúc phủ định."
+              },
+              "completedSentence": "你不是美国人。"
+            },
+            {
+              "id": "sc6",
+              "prompt": "Chọn câu đúng với nghĩa “Cô ấy là bạn học của tôi.”",
+              "answer": "她是我的同学。",
+              "options": [
+                "她我的同学。",
+                "她是我的同学。",
+                "她不是我的同学。"
+              ],
+              "meaning": "Cô ấy là bạn học của tôi.",
+              "explanation": "是 giới thiệu thân phận; 我的同学 là cụm danh từ.",
+              "optionExplanations": {
+                "她我的同学。": "Thiếu động từ 是.",
+                "她是我的同学。": "Đúng cấu trúc và đúng nghĩa.",
+                "她不是我的同学。": "不是 làm câu thành phủ định."
+              },
+              "completedSentence": "她是我的同学。"
+            },
+            {
+              "id": "sc7",
+              "prompt": "Theo thông tin “他是法国人，不是英国人”, chọn câu đúng.",
+              "answer": "他不是英国人。",
+              "options": [
+                "他不是英国人。",
+                "他不英国人。",
+                "他是英国人。"
+              ],
+              "meaning": "Anh ấy không phải là người Anh.",
+              "explanation": "Ngữ cảnh xác nhận anh ấy là người Pháp, vì vậy câu phủ định về quốc tịch Anh phù hợp.",
+              "optionExplanations": {
+                "他不是英国人。": "Đúng cả ngữ pháp và ngữ cảnh.",
+                "他不英国人。": "Sai cấu trúc phủ định trước danh từ.",
+                "他是英国人。": "Trái với thông tin đã cho."
+              },
+              "completedSentence": "他不是英国人。"
+            },
+            {
+              "id": "sc8",
+              "prompt": "Chọn câu giới thiệu đúng: “Họ là bạn của tôi.”",
+              "answer": "他们是我的朋友。",
+              "options": [
+                "他们我的朋友是。",
+                "他们是我的朋友。",
+                "他们吗我的朋友。"
+              ],
+              "meaning": "Họ là bạn của tôi.",
+              "explanation": "是 nối chủ ngữ 他们 với cụm danh từ 我的朋友.",
+              "optionExplanations": {
+                "他们我的朋友是。": "Trật tự từ sai; 是 không đứng cuối.",
+                "他们是我的朋友。": "Đúng cấu trúc câu chữ 是.",
+                "他们吗我的朋友。": "吗 không thay thế được động từ 是."
+              },
+              "completedSentence": "他们是我的朋友。"
+            },
+            {
+              "id": "sc9",
+              "prompt": "Chọn câu đúng với nghĩa “Cô ấy không phải là giáo viên.”",
+              "answer": "她不是老师。",
+              "options": [
+                "她是老师不是。",
+                "她不是老师。",
+                "她的老师。"
+              ],
+              "meaning": "Cô ấy không phải là giáo viên.",
+              "explanation": "不是 phải đứng trước danh từ 老师.",
+              "optionExplanations": {
+                "她是老师不是。": "Sai vị trí của 不是.",
+                "她不是老师。": "Đúng cấu trúc phủ định.",
+                "她的老师。": "Đây là cụm “giáo viên của cô ấy”, không phải câu phủ định."
+              },
+              "completedSentence": "她不是老师。"
+            },
+            {
+              "id": "sc10",
+              "prompt": "Chọn câu đúng để xác nhận “Các bạn là người Trung Quốc.”",
+              "answer": "你们是中国人。",
+              "options": [
+                "你们中国人吗。",
+                "是你们中国人。",
+                "你们是中国人。"
+              ],
+              "meaning": "Các bạn là người Trung Quốc.",
+              "explanation": "Câu xác nhận dùng trật tự Chủ ngữ + 是 + danh từ.",
+              "optionExplanations": {
+                "你们中国人吗。": "Thiếu 是 và lại biến thành câu hỏi.",
+                "是你们中国人。": "是 đặt sai trước chủ ngữ.",
+                "你们是中国人。": "Đúng ngữ pháp và đúng nghĩa."
+              },
+              "completedSentence": "你们是中国人。"
+            }
+          ]
+        },
+        {
+          "id": "shi-arrange",
+          "title": "2. Sắp xếp từ thành câu",
+          "type": "arrange",
+          "questions": [
+            {
+              "id": "sa1",
+              "prompt": "Tôi là người Việt Nam.",
+              "answer": "我是越南人",
+              "tokens": [
+                "越南人",
+                "我",
+                "是"
+              ],
+              "completedSentence": "我是越南人",
+              "meaning": "Tôi là người Việt Nam.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "sa2",
+              "prompt": "Anh ấy là người Trung Quốc.",
+              "answer": "他是中国人",
+              "tokens": [
+                "中国人",
+                "是",
+                "他"
+              ],
+              "completedSentence": "他是中国人",
+              "meaning": "Anh ấy là người Trung Quốc.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "sa3",
+              "prompt": "Cô ấy không phải người Mỹ.",
+              "answer": "她不是美国人",
+              "tokens": [
+                "美国人",
+                "她",
+                "不是"
+              ],
+              "completedSentence": "她不是美国人",
+              "meaning": "Cô ấy không phải người Mỹ.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "sa4",
+              "prompt": "Chúng tôi là học sinh.",
+              "answer": "我们是学生",
+              "tokens": [
+                "学生",
+                "是",
+                "我们"
+              ],
+              "completedSentence": "我们是学生",
+              "meaning": "Chúng tôi là học sinh.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "sa5",
+              "prompt": "Bạn là giáo viên phải không?",
+              "answer": "你是老师吗",
+              "tokens": [
+                "老师",
+                "吗",
+                "你",
+                "是"
+              ],
+              "completedSentence": "你是老师吗",
+              "meaning": "Bạn là giáo viên phải không?",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "sa6",
+              "prompt": "Họ là bạn của tôi.",
+              "answer": "他们是我的朋友",
+              "tokens": [
+                "朋友",
+                "他们",
+                "我的",
+                "是"
+              ],
+              "completedSentence": "他们是我的朋友",
+              "meaning": "Họ là bạn của tôi.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "sa7",
+              "prompt": "Bạn là người Nhật Bản.",
+              "answer": "你是日本人",
+              "tokens": [
+                "日本人",
+                "你",
+                "是"
+              ],
+              "completedSentence": "你是日本人",
+              "meaning": "Bạn là người Nhật Bản.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "sa8",
+              "prompt": "Họ không phải là người Hàn Quốc.",
+              "answer": "他们不是韩国人",
+              "tokens": [
+                "韩国人",
+                "不是",
+                "他们"
+              ],
+              "completedSentence": "他们不是韩国人",
+              "meaning": "Họ không phải là người Hàn Quốc.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            }
+          ]
+        },
+        {
+          "id": "shi-translate",
+          "title": "3. Dịch Việt sang Trung",
+          "type": "input",
+          "questions": [
+            {
+              "id": "st1",
+              "prompt": "Tôi là người Trung Quốc.",
+              "answer": "我是中国人",
+              "completedSentence": "我是中国人",
+              "meaning": "Tôi là người Trung Quốc.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "st2",
+              "prompt": "Cô ấy là giáo viên.",
+              "answer": "她是老师",
+              "completedSentence": "她是老师",
+              "meaning": "Cô ấy là giáo viên.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "st3",
+              "prompt": "Anh ấy không phải là học sinh.",
+              "answer": "他不是学生",
+              "completedSentence": "他不是学生",
+              "meaning": "Anh ấy không phải là học sinh.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "st4",
+              "prompt": "Chúng tôi là người Việt Nam.",
+              "answer": "我们是越南人",
+              "completedSentence": "我们是越南人",
+              "meaning": "Chúng tôi là người Việt Nam.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "st5",
+              "prompt": "Bạn là người Mỹ phải không?",
+              "answer": "你是美国人吗",
+              "completedSentence": "你是美国人吗",
+              "meaning": "Bạn là người Mỹ phải không?",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "st6",
+              "prompt": "Họ là người Nhật Bản.",
+              "answer": "他们是日本人",
+              "completedSentence": "他们是日本人",
+              "meaning": "Họ là người Nhật Bản.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "st7",
+              "prompt": "Cô ấy là bạn của tôi.",
+              "answer": "她是我的朋友",
+              "completedSentence": "她是我的朋友",
+              "meaning": "Cô ấy là bạn của tôi.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "st8",
+              "prompt": "Bạn không phải là giáo viên.",
+              "answer": "你不是老师",
+              "completedSentence": "你不是老师",
+              "meaning": "Bạn không phải là giáo viên.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            }
+          ]
+        },
+        {
+          "id": "shi-negative",
+          "title": "4. Chuyển câu khẳng định thành câu phủ định",
+          "type": "input",
+          "questions": [
+            {
+              "id": "sn1",
+              "prompt": "我是越南人。",
+              "answer": "我不是越南人",
+              "completedSentence": "我不是越南人",
+              "meaning": "我是越南人。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "sn2",
+              "prompt": "他是中国人。",
+              "answer": "他不是中国人",
+              "completedSentence": "他不是中国人",
+              "meaning": "他是中国人。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "sn3",
+              "prompt": "她是老师。",
+              "answer": "她不是老师",
+              "completedSentence": "她不是老师",
+              "meaning": "她是老师。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "sn4",
+              "prompt": "我们是学生。",
+              "answer": "我们不是学生",
+              "completedSentence": "我们不是学生",
+              "meaning": "我们是学生。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "sn5",
+              "prompt": "你是我的朋友。",
+              "answer": "你不是我的朋友",
+              "completedSentence": "你不是我的朋友",
+              "meaning": "你是我的朋友。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "sn6",
+              "prompt": "他们是韩国人。",
+              "answer": "他们不是韩国人",
+              "completedSentence": "他们不是韩国人",
+              "meaning": "他们是韩国人。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "sn7",
+              "prompt": "她是我的朋友。",
+              "answer": "她不是我的朋友",
+              "completedSentence": "她不是我的朋友",
+              "meaning": "她是我的朋友。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "sn8",
+              "prompt": "你是日本人。",
+              "answer": "你不是日本人",
+              "completedSentence": "你不是日本人",
+              "meaning": "你是日本人。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "de",
+      "title": "结构助词“的” – Trợ từ kết cấu “的”",
+      "explanation": "“的” được đặt giữa định ngữ và trung tâm ngữ, thường biểu thị quan hệ sở hữu hoặc bổ nghĩa. Trong tiếng Việt thường tương đương với từ “của”.",
+      "formulas": [
+        "Đại từ/danh từ + 的 + danh từ",
+        "Định ngữ + 的 + trung tâm ngữ"
+      ],
+      "examples": [
+        {
+          "chinese": "我的老师",
+          "vietnamese": "Giáo viên của tôi."
+        },
+        {
+          "chinese": "他的朋友",
+          "vietnamese": "Bạn của anh ấy."
+        },
+        {
+          "chinese": "她是我的同学。",
+          "vietnamese": "Cô ấy là bạn học của tôi."
+        },
+        {
+          "chinese": "他是老师的学生。",
+          "vietnamese": "Anh ấy là học sinh của giáo viên."
+        },
+        {
+          "chinese": "这是玛丽的书。",
+          "vietnamese": "Đây là sách của Mary."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-position",
+          "title": "1. Chọn đáp án đúng",
+          "type": "choice",
+          "questions": [
+            {
+              "id": "dp1",
+              "prompt": "Chọn cụm từ có nghĩa “giáo viên của tôi”.",
+              "answer": "我的老师",
+              "options": [
+                "我的老师",
+                "我是老师",
+                "我吗老师"
+              ],
+              "meaning": "Giáo viên của tôi.",
+              "explanation": "的 đứng giữa người sở hữu 我 và danh từ 老师.",
+              "optionExplanations": {
+                "我的老师": "Đúng cấu trúc Đại từ + 的 + danh từ.",
+                "我是老师": "Nghĩa là “Tôi là giáo viên”, không biểu thị sở hữu.",
+                "我吗老师": "吗 đặt sai và không tạo quan hệ sở hữu."
+              },
+              "completedSentence": "我的老师"
+            },
+            {
+              "id": "dp2",
+              "prompt": "Chọn cụm từ có nghĩa “bạn của anh ấy”.",
+              "answer": "他的朋友",
+              "options": [
+                "他朋友的",
+                "他的朋友",
+                "他是朋友"
+              ],
+              "meaning": "Bạn của anh ấy.",
+              "explanation": "的 phải đứng sau 他 và trước trung tâm ngữ 朋友.",
+              "optionExplanations": {
+                "他朋友的": "的 đứng cuối, thiếu trung tâm ngữ theo sau.",
+                "他的朋友": "Đúng vị trí của 的.",
+                "他是朋友": "Đây là câu “Anh ấy là bạn”, không phải cụm sở hữu."
+              },
+              "completedSentence": "他的朋友"
+            },
+            {
+              "id": "dp3",
+              "prompt": "Chọn cụm từ có nghĩa “học sinh của giáo viên”.",
+              "answer": "老师的学生",
+              "options": [
+                "老师学生的",
+                "的老师学生",
+                "老师的学生"
+              ],
+              "meaning": "Học sinh của giáo viên.",
+              "explanation": "老师 là định ngữ sở hữu, 学生 là trung tâm ngữ; 的 nằm giữa hai phần.",
+              "optionExplanations": {
+                "老师学生的": "的 đứng cuối và thiếu trung tâm ngữ sau nó.",
+                "的老师学生": "的 không đứng trước định ngữ 老师.",
+                "老师的学生": "Đúng trật tự định ngữ + 的 + trung tâm ngữ."
+              },
+              "completedSentence": "老师的学生"
+            },
+            {
+              "id": "dp4",
+              "prompt": "Chọn câu đúng với nghĩa “Cô ấy là bạn học của tôi.”",
+              "answer": "她是我的同学。",
+              "options": [
+                "她是我的同学。",
+                "她的我是同学。",
+                "她是我同学的。"
+              ],
+              "meaning": "Cô ấy là bạn học của tôi.",
+              "explanation": "Trong 我的同学, 的 nối 我 với danh từ 同学.",
+              "optionExplanations": {
+                "她是我的同学。": "Đúng vị trí của 的 và đúng nghĩa.",
+                "她的我是同学。": "的 gắn sai vào 她 và trật tự câu sai.",
+                "她是我同学的。": "的 đứng cuối, không có trung tâm ngữ theo sau."
+              },
+              "completedSentence": "她是我的同学。"
+            },
+            {
+              "id": "dp5",
+              "prompt": "Chọn câu đúng với nghĩa “Đây là sách của Mary.”",
+              "answer": "这是玛丽的书。",
+              "options": [
+                "这是玛丽书的。",
+                "这是的玛丽书。",
+                "这是玛丽的书。"
+              ],
+              "meaning": "Đây là sách của Mary.",
+              "explanation": "的 đứng giữa 玛丽 và danh từ 书.",
+              "optionExplanations": {
+                "这是玛丽书的。": "的 đứng cuối và thiếu trung tâm ngữ.",
+                "这是的玛丽书。": "的 không đứng trước người sở hữu 玛丽.",
+                "这是玛丽的书。": "Đúng cấu trúc sở hữu."
+              },
+              "completedSentence": "这是玛丽的书。"
+            },
+            {
+              "id": "dp6",
+              "prompt": "Chọn cụm từ đúng: “tên của bạn”.",
+              "answer": "你的名字",
+              "options": [
+                "你名字的",
+                "你的名字",
+                "你是名字"
+              ],
+              "meaning": "Tên của bạn.",
+              "explanation": "你的 bổ nghĩa cho danh từ 名字.",
+              "optionExplanations": {
+                "你名字的": "的 đứng sai ở cuối cụm.",
+                "你的名字": "Đúng cấu trúc sở hữu.",
+                "你是名字": "Nghĩa thành “Bạn là tên”, không hợp lý."
+              },
+              "completedSentence": "你的名字"
+            },
+            {
+              "id": "dp7",
+              "prompt": "Chọn câu đúng với nghĩa “Anh ấy là học sinh của cô ấy.”",
+              "answer": "他是她的学生。",
+              "options": [
+                "他是她的学生。",
+                "他她的是学生。",
+                "他的她学生。"
+              ],
+              "meaning": "Anh ấy là học sinh của cô ấy.",
+              "explanation": "她的学生 là cụm danh từ “học sinh của cô ấy”.",
+              "optionExplanations": {
+                "他是她的学生。": "Đúng vị trí 的 và đúng trật tự câu.",
+                "他她的是学生。": "Sai trật tự; cụm sở hữu bị tách khỏi danh từ.",
+                "他的她学生。": "的 gắn với 他 làm sai quan hệ sở hữu."
+              },
+              "completedSentence": "他是她的学生。"
+            },
+            {
+              "id": "dp8",
+              "prompt": "Chọn cụm từ có nghĩa “bạn học của chúng tôi”.",
+              "answer": "我们的同学",
+              "options": [
+                "我们同学的",
+                "的我们同学",
+                "我们的同学"
+              ],
+              "meaning": "Bạn học của chúng tôi.",
+              "explanation": "的 nằm giữa đại từ 我们 và danh từ 同学.",
+              "optionExplanations": {
+                "我们同学的": "的 đứng cuối, thiếu trung tâm ngữ.",
+                "的我们同学": "的 đứng sai trước định ngữ.",
+                "我们的同学": "Đúng cấu trúc sở hữu."
+              },
+              "completedSentence": "我们的同学"
+            },
+            {
+              "id": "dp9",
+              "prompt": "Chọn câu đúng với nghĩa “Cô ấy là bạn của giáo viên.”",
+              "answer": "她是老师的朋友。",
+              "options": [
+                "她是老师朋友的。",
+                "她是老师的朋友。",
+                "她的老师是朋友。"
+              ],
+              "meaning": "Cô ấy là bạn của giáo viên.",
+              "explanation": "老师的朋友 là “bạn của giáo viên”.",
+              "optionExplanations": {
+                "她是老师朋友的。": "的 đứng cuối và không có trung tâm ngữ.",
+                "她是老师的朋友。": "Đúng cấu trúc và đúng nghĩa.",
+                "她的老师是朋友。": "Nghĩa đổi thành “Giáo viên của cô ấy là bạn”."
+              },
+              "completedSentence": "她是老师的朋友。"
+            },
+            {
+              "id": "dp10",
+              "prompt": "Chọn cụm từ đúng với nghĩa “người bạn Trung Quốc của tôi”.",
+              "answer": "我的中国朋友",
+              "options": [
+                "我中国的朋友",
+                "我的中国朋友",
+                "中国朋友我的"
+              ],
+              "meaning": "Người bạn Trung Quốc của tôi.",
+              "explanation": "我的 bổ nghĩa cho cụm trung tâm 中国朋友.",
+              "optionExplanations": {
+                "我中国的朋友": "的 đặt sau 中国 làm sai quan hệ “của tôi”.",
+                "我的中国朋友": "Đúng trật tự sở hữu và bổ nghĩa.",
+                "中国朋友我的": "Cụm sở hữu bị đảo sai trật tự."
+              },
+              "completedSentence": "我的中国朋友"
+            }
+          ]
+        },
+        {
+          "id": "de-match",
+          "title": "2. Nối hai vế tạo thành cụm từ hoặc câu đúng",
+          "type": "choice",
+          "questions": [
+            {
+              "id": "dm1",
+              "prompt": "Nối “我” để tạo cụm “giáo viên của tôi”.",
+              "answer": "的老师",
+              "options": [
+                "的老师",
+                "老师的",
+                "是老师"
+              ],
+              "meaning": "我的老师 — Giáo viên của tôi.",
+              "explanation": "Sau người sở hữu 我 cần 的 + trung tâm ngữ 老师.",
+              "optionExplanations": {
+                "的老师": "Ghép thành 我的老师, đúng nghĩa.",
+                "老师的": "Ghép thành 我老师的, 的 đứng cuối.",
+                "是老师": "Ghép thành 我是老师, nghĩa là “Tôi là giáo viên”."
+              },
+              "completedSentence": "我的老师"
+            },
+            {
+              "id": "dm2",
+              "prompt": "Nối “他” để tạo cụm “bạn của anh ấy”.",
+              "answer": "的朋友",
+              "options": [
+                "朋友的",
+                "的朋友",
+                "吗朋友"
+              ],
+              "meaning": "他的朋友 — Bạn của anh ấy.",
+              "explanation": "Sau 他 dùng 的朋友 để tạo quan hệ sở hữu.",
+              "optionExplanations": {
+                "朋友的": "的 đứng cuối sau khi ghép.",
+                "的朋友": "Ghép thành 他的朋友, đúng.",
+                "吗朋友": "吗 không biểu thị sở hữu."
+              },
+              "completedSentence": "他的朋友"
+            },
+            {
+              "id": "dm3",
+              "prompt": "Nối “老师” để tạo cụm “học sinh của giáo viên”.",
+              "answer": "的学生",
+              "options": [
+                "是学生",
+                "学生的",
+                "的学生"
+              ],
+              "meaning": "老师的学生 — Học sinh của giáo viên.",
+              "explanation": "的学生 đặt sau 老师 tạo cụm sở hữu hoàn chỉnh.",
+              "optionExplanations": {
+                "是学生": "Tạo câu “Giáo viên là học sinh”, sai nghĩa.",
+                "学生的": "的 đứng cuối, thiếu trung tâm ngữ.",
+                "的学生": "Ghép đúng thành 老师的学生."
+              },
+              "completedSentence": "老师的学生"
+            },
+            {
+              "id": "dm4",
+              "prompt": "Nối “玛丽” để tạo cụm “sách của Mary”.",
+              "answer": "的书",
+              "options": [
+                "的书",
+                "书的",
+                "是书"
+              ],
+              "meaning": "玛丽的书 — Sách của Mary.",
+              "explanation": "的 đứng giữa 玛丽 và danh từ 书.",
+              "optionExplanations": {
+                "的书": "Ghép đúng thành 玛丽的书.",
+                "书的": "的 đứng cuối cụm.",
+                "是书": "Tạo câu “Mary là sách”, sai nghĩa."
+              },
+              "completedSentence": "玛丽的书"
+            },
+            {
+              "id": "dm5",
+              "prompt": "Nối “她” để tạo cụm “bạn học của cô ấy”.",
+              "answer": "的同学",
+              "options": [
+                "同学的",
+                "是同学",
+                "的同学"
+              ],
+              "meaning": "她的同学 — Bạn học của cô ấy.",
+              "explanation": "的同学 hoàn thiện cụm sở hữu sau 她.",
+              "optionExplanations": {
+                "同学的": "的 đứng cuối, thiếu danh từ trung tâm.",
+                "是同学": "Tạo câu “Cô ấy là bạn học”, không phải cụm sở hữu.",
+                "的同学": "Ghép đúng thành 她的同学."
+              },
+              "completedSentence": "她的同学"
+            },
+            {
+              "id": "dm6",
+              "prompt": "Nối “你” để tạo cụm “tên của bạn”.",
+              "answer": "的名字",
+              "options": [
+                "名字的",
+                "的名字",
+                "吗名字"
+              ],
+              "meaning": "你的名字 — Tên của bạn.",
+              "explanation": "的名字 đứng sau 你 tạo cụm sở hữu.",
+              "optionExplanations": {
+                "名字的": "的 đặt sai ở cuối.",
+                "的名字": "Ghép đúng thành 你的名字.",
+                "吗名字": "吗 là trợ từ nghi vấn, không chỉ sở hữu."
+              },
+              "completedSentence": "你的名字"
+            },
+            {
+              "id": "dm7",
+              "prompt": "Nối “我们” để tạo cụm “bạn của chúng tôi”.",
+              "answer": "的朋友",
+              "options": [
+                "是朋友",
+                "的朋友",
+                "朋友吗"
+              ],
+              "meaning": "我们的朋友 — Bạn của chúng tôi.",
+              "explanation": "的连接 我们 với danh từ 朋友.",
+              "optionExplanations": {
+                "是朋友": "Tạo câu khẳng định, không phải cụm sở hữu.",
+                "的朋友": "Ghép đúng thành 我们的朋友.",
+                "朋友吗": "吗 tạo sắc thái hỏi và không biểu thị sở hữu."
+              },
+              "completedSentence": "我们的朋友"
+            },
+            {
+              "id": "dm8",
+              "prompt": "Nối “中国” để tạo cụm “người Trung Quốc”.",
+              "answer": "人",
+              "options": [
+                "的人",
+                "人",
+                "是人"
+              ],
+              "meaning": "中国人 — Người Trung Quốc.",
+              "explanation": "中国人 là từ ghép chỉ quốc tịch; trường hợp này không dùng 的.",
+              "optionExplanations": {
+                "的人": "中国的人 có nghĩa “người của/ở Trung Quốc”, không phải từ chỉ quốc tịch cần chọn.",
+                "人": "Ghép đúng thành 中国人.",
+                "是人": "Tạo câu thiếu chủ ngữ rõ ràng, không phải từ chỉ quốc tịch."
+              },
+              "completedSentence": "中国人"
+            },
+            {
+              "id": "dm9",
+              "prompt": "Nối “法国” để tạo cụm “người bạn Pháp của tôi”: 我的法国 + …",
+              "answer": "朋友",
+              "options": [
+                "的朋友",
+                "朋友",
+                "是朋友"
+              ],
+              "meaning": "我的法国朋友 — Người bạn Pháp của tôi.",
+              "explanation": "法国 trực tiếp bổ nghĩa cho 朋友; 的 đã xuất hiện sau 我.",
+              "optionExplanations": {
+                "的朋友": "Thêm 的 sau 法国 không phù hợp với cụm từ cơ bản này.",
+                "朋友": "Ghép đúng thành 我的法国朋友.",
+                "是朋友": "是 không đặt bên trong cụm danh từ."
+              },
+              "completedSentence": "我的法国朋友"
+            },
+            {
+              "id": "dm10",
+              "prompt": "Nối “美国人” để hoàn thành câu “Cô ấy là người Mỹ”: 她 + …",
+              "answer": "是美国人",
+              "options": [
+                "美国人的",
+                "吗美国人",
+                "是美国人"
+              ],
+              "meaning": "她是美国人 — Cô ấy là người Mỹ.",
+              "explanation": "Sau chủ ngữ 她 dùng 是 + danh từ 美国人.",
+              "optionExplanations": {
+                "美国人的": "Thiếu 是 và 的 đứng cuối.",
+                "吗美国人": "吗 sai vị trí và câu thiếu 是.",
+                "是美国人": "Ghép thành câu khẳng định đúng."
+              },
+              "completedSentence": "她是美国人"
+            }
+          ]
+        },
+        {
+          "id": "de-arrange",
+          "title": "3. Sắp xếp từ thành câu",
+          "type": "arrange",
+          "questions": [
+            {
+              "id": "da1",
+              "prompt": "Giáo viên của tôi",
+              "answer": "我的老师",
+              "tokens": [
+                "老师",
+                "的",
+                "我"
+              ],
+              "completedSentence": "我的老师",
+              "meaning": "Giáo viên của tôi",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "da2",
+              "prompt": "Bạn của anh ấy",
+              "answer": "他的朋友",
+              "tokens": [
+                "朋友",
+                "他",
+                "的"
+              ],
+              "completedSentence": "他的朋友",
+              "meaning": "Bạn của anh ấy",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "da3",
+              "prompt": "Cô ấy là bạn học của tôi.",
+              "answer": "她是我的同学",
+              "tokens": [
+                "同学",
+                "她",
+                "的",
+                "我",
+                "是"
+              ],
+              "completedSentence": "她是我的同学",
+              "meaning": "Cô ấy là bạn học của tôi.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "da4",
+              "prompt": "Anh ấy là học sinh của giáo viên.",
+              "answer": "他是老师的学生",
+              "tokens": [
+                "学生",
+                "的",
+                "老师",
+                "是",
+                "他"
+              ],
+              "completedSentence": "他是老师的学生",
+              "meaning": "Anh ấy là học sinh của giáo viên.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "da5",
+              "prompt": "Đây là sách của Mary.",
+              "answer": "这是玛丽的书",
+              "tokens": [
+                "书",
+                "玛丽",
+                "的",
+                "这",
+                "是"
+              ],
+              "completedSentence": "这是玛丽的书",
+              "meaning": "Đây là sách của Mary.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "da6",
+              "prompt": "Bạn của họ.",
+              "answer": "他们的朋友",
+              "tokens": [
+                "朋友",
+                "他们",
+                "的"
+              ],
+              "completedSentence": "他们的朋友",
+              "meaning": "Bạn của họ.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "da7",
+              "prompt": "Cô ấy là giáo viên của tôi.",
+              "answer": "她是我的老师",
+              "tokens": [
+                "我的",
+                "老师",
+                "她",
+                "是"
+              ],
+              "completedSentence": "她是我的老师",
+              "meaning": "Cô ấy là giáo viên của tôi.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "da8",
+              "prompt": "Đây là bạn học của họ.",
+              "answer": "这是他们的同学",
+              "tokens": [
+                "同学",
+                "他们",
+                "这",
+                "的",
+                "是"
+              ],
+              "completedSentence": "这是他们的同学",
+              "meaning": "Đây là bạn học của họ.",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            }
+          ]
+        },
+        {
+          "id": "de-translate",
+          "title": "4. Dịch Việt sang Trung",
+          "type": "input",
+          "questions": [
+            {
+              "id": "dt1",
+              "prompt": "Giáo viên của tôi",
+              "answer": "我的老师",
+              "completedSentence": "我的老师",
+              "meaning": "Giáo viên của tôi",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "dt2",
+              "prompt": "Bạn của cô ấy",
+              "answer": "她的朋友",
+              "completedSentence": "她的朋友",
+              "meaning": "Bạn của cô ấy",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "dt3",
+              "prompt": "Anh ấy là bạn học của tôi.",
+              "answer": "他是我的同学",
+              "completedSentence": "他是我的同学",
+              "meaning": "Anh ấy là bạn học của tôi.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "dt4",
+              "prompt": "Cô ấy là học sinh của giáo viên.",
+              "answer": "她是老师的学生",
+              "completedSentence": "她是老师的学生",
+              "meaning": "Cô ấy là học sinh của giáo viên.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "dt5",
+              "prompt": "Đây là sách của bạn.",
+              "answer": "这是你的书",
+              "completedSentence": "这是你的书",
+              "meaning": "Đây là sách của bạn.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "dt6",
+              "prompt": "Bạn của họ.",
+              "answer": "他们的朋友",
+              "completedSentence": "他们的朋友",
+              "meaning": "Bạn của họ.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "dt7",
+              "prompt": "Cô ấy là giáo viên của tôi.",
+              "answer": "她是我的老师",
+              "completedSentence": "她是我的老师",
+              "meaning": "Cô ấy là giáo viên của tôi.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "dt8",
+              "prompt": "Đây là bạn học của họ.",
+              "answer": "这是他们的同学",
+              "completedSentence": "这是他们的同学",
+              "meaning": "Đây là bạn học của họ.",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ma",
+      "title": "用“吗”的是非问句 – Câu hỏi “có…không” với “吗”",
+      "explanation": "Đặt “吗” ở cuối câu trần thuật để biến câu đó thành câu hỏi “có…không/phải không”.",
+      "formulas": [
+        "Câu trần thuật + 吗？",
+        "Chủ ngữ + 是 + danh từ + 吗？"
+      ],
+      "examples": [
+        {
+          "chinese": "你是越南人吗？",
+          "vietnamese": "Bạn là người Việt Nam phải không?"
+        },
+        {
+          "chinese": "她是老师吗？",
+          "vietnamese": "Cô ấy là giáo viên phải không?"
+        },
+        {
+          "chinese": "他是你的朋友吗？",
+          "vietnamese": "Anh ấy là bạn của bạn phải không?"
+        }
+      ],
+      "answers": [
+        "是，我是越南人。",
+        "对，我是越南人。",
+        "不，我不是越南人。"
+      ],
+      "notes": [
+        "“吗” đặt ở cuối câu.",
+        "Không dùng đồng thời “吗” và đại từ nghi vấn như “谁、什么” trong cùng một câu hỏi thông thường."
+      ],
+      "exercises": [
+        {
+          "id": "ma-choice",
+          "title": "2. Chọn câu hỏi đúng",
+          "type": "choice",
+          "questions": [
+            {
+              "id": "mc1",
+              "prompt": "Chọn câu đúng với nghĩa “Bạn là người Việt Nam phải không?”",
+              "answer": "你是越南人吗？",
+              "options": [
+                "你吗是越南人？",
+                "你是越南人吗？",
+                "吗你是越南人？"
+              ],
+              "meaning": "Bạn là người Việt Nam phải không?",
+              "explanation": "Đặt 吗 ở cuối câu trần thuật hoàn chỉnh.",
+              "optionExplanations": {
+                "你吗是越南人？": "吗 chen sai giữa chủ ngữ và 是.",
+                "你是越南人吗？": "Đúng: câu trần thuật + 吗.",
+                "吗你是越南人？": "吗 không đặt ở đầu câu."
+              },
+              "completedSentence": "你是越南人吗？"
+            },
+            {
+              "id": "mc2",
+              "prompt": "Chọn câu đúng với nghĩa “Cô ấy là giáo viên phải không?”",
+              "answer": "她是老师吗？",
+              "options": [
+                "她是吗老师？",
+                "她吗是老师？",
+                "她是老师吗？"
+              ],
+              "meaning": "Cô ấy là giáo viên phải không?",
+              "explanation": "吗 phải đứng cuối câu, sau danh từ 老师.",
+              "optionExplanations": {
+                "她是吗老师？": "吗 đứng sai trước danh từ.",
+                "她吗是老师？": "吗 đứng sai trước 是.",
+                "她是老师吗？": "Đúng cấu trúc Chủ ngữ + 是 + danh từ + 吗."
+              },
+              "completedSentence": "她是老师吗？"
+            },
+            {
+              "id": "mc3",
+              "prompt": "Chọn câu đúng với nghĩa “Anh ấy là bạn của bạn phải không?”",
+              "answer": "他是你的朋友吗？",
+              "options": [
+                "他是你的朋友吗？",
+                "他吗是你的朋友？",
+                "他是你吗的朋友？"
+              ],
+              "meaning": "Anh ấy là bạn của bạn phải không?",
+              "explanation": "Giữ nguyên câu 他是你的朋友 rồi thêm 吗 ở cuối.",
+              "optionExplanations": {
+                "他是你的朋友吗？": "Đúng vị trí của 吗.",
+                "他吗是你的朋友？": "吗 chen sai sau chủ ngữ.",
+                "他是你吗的朋友？": "吗 phá vỡ cụm sở hữu 你的朋友."
+              },
+              "completedSentence": "他是你的朋友吗？"
+            },
+            {
+              "id": "mc4",
+              "prompt": "Chọn câu đúng với nghĩa “Các bạn là học sinh phải không?”",
+              "answer": "你们是学生吗？",
+              "options": [
+                "你们是吗学生？",
+                "你们是学生吗？",
+                "你们学生吗？"
+              ],
+              "meaning": "Các bạn là học sinh phải không?",
+              "explanation": "Câu danh từ cần 是; 吗 đứng cuối.",
+              "optionExplanations": {
+                "你们是吗学生？": "吗 sai vị trí.",
+                "你们是学生吗？": "Đúng và đủ 是, 吗.",
+                "你们学生吗？": "Thiếu 是 trong mẫu câu đang học."
+              },
+              "completedSentence": "你们是学生吗？"
+            },
+            {
+              "id": "mc5",
+              "prompt": "Chọn câu đúng với nghĩa “Cô ấy là người Mỹ phải không?”",
+              "answer": "她是美国人吗？",
+              "options": [
+                "她是美国人吗？",
+                "她吗美国人？",
+                "她是吗美国人？"
+              ],
+              "meaning": "Cô ấy là người Mỹ phải không?",
+              "explanation": "Thêm 吗 cuối câu 她是美国人.",
+              "optionExplanations": {
+                "她是美国人吗？": "Đúng cấu trúc.",
+                "她吗美国人？": "Thiếu 是 và 吗 sai vị trí.",
+                "她是吗美国人？": "吗 không đứng giữa 是 và danh từ."
+              },
+              "completedSentence": "她是美国人吗？"
+            },
+            {
+              "id": "mc6",
+              "prompt": "Muốn hỏi “Đây là sách của Mary phải không?”, chọn câu đúng.",
+              "answer": "这是玛丽的书吗？",
+              "options": [
+                "这吗是玛丽的书？",
+                "这是玛丽吗的书？",
+                "这是玛丽的书吗？"
+              ],
+              "meaning": "Đây là sách của Mary phải không?",
+              "explanation": "吗 đứng cuối toàn bộ câu, không chen vào cụm 玛丽的书.",
+              "optionExplanations": {
+                "这吗是玛丽的书？": "吗 đứng sai sau chủ ngữ.",
+                "这是玛丽吗的书？": "吗 làm sai cụm sở hữu.",
+                "这是玛丽的书吗？": "Đúng vị trí của 吗."
+              },
+              "completedSentence": "这是玛丽的书吗？"
+            },
+            {
+              "id": "mc7",
+              "prompt": "Câu nào là câu hỏi “Họ là người Trung Quốc phải không?”",
+              "answer": "他们是中国人吗？",
+              "options": [
+                "他们是中国人吗？",
+                "他们中国人是吗？",
+                "吗他们是中国人？"
+              ],
+              "meaning": "Họ là người Trung Quốc phải không?",
+              "explanation": "Dùng câu trần thuật 他们是中国人 và thêm 吗 cuối câu.",
+              "optionExplanations": {
+                "他们是中国人吗？": "Đúng ngữ pháp.",
+                "他们中国人是吗？": "是 bị đảo ra sau danh từ.",
+                "吗他们是中国人？": "吗 không đặt đầu câu."
+              },
+              "completedSentence": "他们是中国人吗？"
+            },
+            {
+              "id": "mc8",
+              "prompt": "Chọn câu hỏi đúng để hỏi “Ai là giáo viên?”",
+              "answer": "谁是老师？",
+              "options": [
+                "谁是老师吗？",
+                "谁吗是老师？",
+                "谁是老师？"
+              ],
+              "meaning": "Ai là giáo viên?",
+              "explanation": "谁 đã là đại từ nghi vấn nên không dùng thêm 吗.",
+              "optionExplanations": {
+                "谁是老师吗？": "Dùng đồng thời 谁 và 吗 không phù hợp.",
+                "谁吗是老师？": "Vừa thừa 吗 vừa sai vị trí.",
+                "谁是老师？": "Đúng câu hỏi với 谁."
+              },
+              "completedSentence": "谁是老师？"
+            },
+            {
+              "id": "mc9",
+              "prompt": "Chọn câu hỏi đúng để hỏi “Tên bạn là gì?”",
+              "answer": "你的名字是什么？",
+              "options": [
+                "你的名字是什么吗？",
+                "你的名字吗是什么？",
+                "你的名字是什么？"
+              ],
+              "meaning": "Tên bạn là gì?",
+              "explanation": "什么 là từ nghi vấn; không thêm 吗.",
+              "optionExplanations": {
+                "你的名字是什么吗？": "Không dùng đồng thời 什么 và 吗 trong câu hỏi này.",
+                "你的名字吗是什么？": "吗 sai vị trí và thừa.",
+                "你的名字是什么？": "Đúng câu hỏi với 什么."
+              },
+              "completedSentence": "你的名字是什么？"
+            },
+            {
+              "id": "mc10",
+              "prompt": "Chọn câu đúng với nghĩa “Anh ấy không phải là học sinh phải không?”",
+              "answer": "他不是学生吗？",
+              "options": [
+                "他不学生吗？",
+                "他不是学生吗？",
+                "他吗不是学生？"
+              ],
+              "meaning": "Anh ấy không phải là học sinh phải không?",
+              "explanation": "Câu phủ định hoàn chỉnh dùng 不是, sau đó thêm 吗 ở cuối.",
+              "optionExplanations": {
+                "他不学生吗？": "Không dùng 不 trực tiếp trước danh từ.",
+                "他不是学生吗？": "Đúng cấu trúc phủ định + 吗.",
+                "他吗不是学生？": "吗 sai vị trí sau chủ ngữ."
+              },
+              "completedSentence": "他不是学生吗？"
+            }
+          ]
+        },
+        {
+          "id": "ma-transform",
+          "title": "1. Chuyển câu trần thuật thành câu hỏi với “吗”",
+          "type": "input",
+          "questions": [
+            {
+              "id": "mt1",
+              "prompt": "你是越南人。",
+              "answer": "你是越南人吗",
+              "completedSentence": "你是越南人吗",
+              "meaning": "你是越南人。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mt2",
+              "prompt": "她是老师。",
+              "answer": "她是老师吗",
+              "completedSentence": "她是老师吗",
+              "meaning": "她是老师。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mt3",
+              "prompt": "他是你的朋友。",
+              "answer": "他是你的朋友吗",
+              "completedSentence": "他是你的朋友吗",
+              "meaning": "他是你的朋友。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mt4",
+              "prompt": "你们是学生。",
+              "answer": "你们是学生吗",
+              "completedSentence": "你们是学生吗",
+              "meaning": "你们是学生。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mt5",
+              "prompt": "她是中国人。",
+              "answer": "她是中国人吗",
+              "completedSentence": "她是中国人吗",
+              "meaning": "她是中国人。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mt6",
+              "prompt": "他们是日本人。",
+              "answer": "他们是日本人吗",
+              "completedSentence": "他们是日本人吗",
+              "meaning": "他们是日本人。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mt7",
+              "prompt": "你不是学生。",
+              "answer": "你不是学生吗",
+              "completedSentence": "你不是学生吗",
+              "meaning": "你不是学生。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mt8",
+              "prompt": "她是我的同学。",
+              "answer": "她是我的同学吗",
+              "completedSentence": "她是我的同学吗",
+              "meaning": "她是我的同学。",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            }
+          ]
+        },
+        {
+          "id": "ma-arrange",
+          "title": "3. Sắp xếp từ thành câu hỏi",
+          "type": "arrange",
+          "questions": [
+            {
+              "id": "mr1",
+              "prompt": "Bạn là người Việt Nam phải không?",
+              "answer": "你是越南人吗",
+              "tokens": [
+                "吗",
+                "越南人",
+                "你",
+                "是"
+              ],
+              "completedSentence": "你是越南人吗",
+              "meaning": "Bạn là người Việt Nam phải không?",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "mr2",
+              "prompt": "Cô ấy là giáo viên phải không?",
+              "answer": "她是老师吗",
+              "tokens": [
+                "老师",
+                "吗",
+                "是",
+                "她"
+              ],
+              "completedSentence": "她是老师吗",
+              "meaning": "Cô ấy là giáo viên phải không?",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "mr3",
+              "prompt": "Anh ấy là bạn của bạn phải không?",
+              "answer": "他是你的朋友吗",
+              "tokens": [
+                "朋友",
+                "吗",
+                "你的",
+                "是",
+                "他"
+              ],
+              "completedSentence": "他是你的朋友吗",
+              "meaning": "Anh ấy là bạn của bạn phải không?",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "mr4",
+              "prompt": "Các bạn là học sinh phải không?",
+              "answer": "你们是学生吗",
+              "tokens": [
+                "吗",
+                "学生",
+                "你们",
+                "是"
+              ],
+              "completedSentence": "你们是学生吗",
+              "meaning": "Các bạn là học sinh phải không?",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "mr5",
+              "prompt": "Cô ấy là người Trung Quốc phải không?",
+              "answer": "她是中国人吗",
+              "tokens": [
+                "中国人",
+                "她",
+                "吗",
+                "是"
+              ],
+              "completedSentence": "她是中国人吗",
+              "meaning": "Cô ấy là người Trung Quốc phải không?",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "mr6",
+              "prompt": "Họ là người Nhật Bản phải không?",
+              "answer": "他们是日本人吗",
+              "tokens": [
+                "日本人",
+                "吗",
+                "他们",
+                "是"
+              ],
+              "completedSentence": "他们是日本人吗",
+              "meaning": "Họ là người Nhật Bản phải không?",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "mr7",
+              "prompt": "Bạn không phải là giáo viên phải không?",
+              "answer": "你不是老师吗",
+              "tokens": [
+                "老师",
+                "你",
+                "吗",
+                "不是"
+              ],
+              "completedSentence": "你不是老师吗",
+              "meaning": "Bạn không phải là giáo viên phải không?",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            },
+            {
+              "id": "mr8",
+              "prompt": "Cô ấy là bạn học của tôi phải không?",
+              "answer": "她是我的同学吗",
+              "tokens": [
+                "吗",
+                "我的",
+                "同学",
+                "她",
+                "是"
+              ],
+              "completedSentence": "她是我的同学吗",
+              "meaning": "Cô ấy là bạn học của tôi phải không?",
+              "explanation": "Sắp xếp các từ theo đúng trật tự của cấu trúc câu tiếng Trung.",
+              "formula": "Chủ ngữ + thành phần ngữ pháp + danh từ/cụm danh từ."
+            }
+          ]
+        },
+        {
+          "id": "ma-translate",
+          "title": "5. Dịch câu hỏi Việt sang Trung",
+          "type": "input",
+          "questions": [
+            {
+              "id": "mtr1",
+              "prompt": "Bạn là người Việt Nam phải không?",
+              "answer": "你是越南人吗",
+              "completedSentence": "你是越南人吗",
+              "meaning": "Bạn là người Việt Nam phải không?",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mtr2",
+              "prompt": "Cô ấy là giáo viên phải không?",
+              "answer": "她是老师吗",
+              "completedSentence": "她是老师吗",
+              "meaning": "Cô ấy là giáo viên phải không?",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mtr3",
+              "prompt": "Anh ấy là bạn của bạn phải không?",
+              "answer": "他是你的朋友吗",
+              "completedSentence": "他是你的朋友吗",
+              "meaning": "Anh ấy là bạn của bạn phải không?",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mtr4",
+              "prompt": "Các bạn là học sinh phải không?",
+              "answer": "你们是学生吗",
+              "completedSentence": "你们是学生吗",
+              "meaning": "Các bạn là học sinh phải không?",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mtr5",
+              "prompt": "Cô ấy là người Trung Quốc phải không?",
+              "answer": "她是中国人吗",
+              "completedSentence": "她是中国人吗",
+              "meaning": "Cô ấy là người Trung Quốc phải không?",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mtr6",
+              "prompt": "Họ là người Nhật Bản phải không?",
+              "answer": "他们是日本人吗",
+              "completedSentence": "他们是日本人吗",
+              "meaning": "Họ là người Nhật Bản phải không?",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mtr7",
+              "prompt": "Bạn không phải là giáo viên phải không?",
+              "answer": "你不是老师吗",
+              "completedSentence": "你不是老师吗",
+              "meaning": "Bạn không phải là giáo viên phải không?",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            },
+            {
+              "id": "mtr8",
+              "prompt": "Cô ấy là bạn học của tôi phải không?",
+              "answer": "她是我的同学吗",
+              "completedSentence": "她是我的同学吗",
+              "meaning": "Cô ấy là bạn học của tôi phải không?",
+              "explanation": "Câu trả lời giữ đúng trật tự từ và cấu trúc ngữ pháp của đề bài.",
+              "formula": "Theo công thức của điểm ngữ pháp này."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

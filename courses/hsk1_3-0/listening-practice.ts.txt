@@ -1,0 +1,21 @@
+import type { ListeningPracticeQuestion } from "$lib/data/listening-practice";
+
+export const hsk1ThreeListeningQuestions: Record<number, ListeningPracticeQuestion[]> = {
+	2: [
+		{ zh: "没事。", pinyin: "Méi shì.", translation: "Không sao." },
+		{ zh: "对不起！", pinyin: "Duìbuqǐ!", translation: "Xin lỗi!" },
+		{ zh: "没关系！", pinyin: "Méi guānxi!", translation: "Không sao đâu!" },
+		{ zh: "我没事。", pinyin: "Wǒ méi shì.", translation: "Tôi không sao." },
+		{ zh: "我很好。", pinyin: "Wǒ hěn hǎo.", translation: "Tôi rất khỏe / Tôi rất ổn." },
+		{ zh: "我很高兴。", pinyin: "Wǒ hěn gāoxìng.", translation: "Tôi rất vui." },
+		{ zh: "我叫李文。", pinyin: "Wǒ jiào Lǐ Wén.", translation: "Tôi tên là Lý Văn." },
+		{ zh: "我也是学生。", pinyin: "Wǒ yě shì xuésheng.", translation: "Tôi cũng là học sinh." },
+		{ zh: "没关系，你好。", pinyin: "Méi guānxi, nǐ hǎo.", translation: "Không sao, chào bạn." },
+		{ zh: "你叫什么名字？", pinyin: "Nǐ jiào shénme míngzi?", translation: "Bạn tên là gì?" },
+		{ zh: "很高兴认识你。", pinyin: "Hěn gāoxìng rènshi nǐ.", translation: "Rất vui được làm quen với bạn." },
+		{ zh: "我的名字叫李文。", pinyin: "Wǒ de míngzi jiào Lǐ Wén.", translation: "Tên tôi là Lý Văn." },
+		{ zh: "请问，你是老师吗？", pinyin: "Qǐngwèn, nǐ shì lǎoshī ma?", translation: "Xin hỏi, bạn là giáo viên phải không?" },
+		{ zh: "请问，你叫什么名字？", pinyin: "Qǐngwèn, nǐ jiào shénme míngzi?", translation: "Xin hỏi, bạn tên là gì?" },
+		{ zh: "我也很高兴认识你。", pinyin: "Wǒ yě hěn gāoxìng rènshi nǐ.", translation: "Tôi cũng rất vui được làm quen với bạn." }
+	]
+};

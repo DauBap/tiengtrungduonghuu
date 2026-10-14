@@ -30,10 +30,10 @@ export default function StudentCourses() {
         </div>
         {myCourses.length === 0
           ? <EmptyState icon={<BookOpen className="h-10 w-10" />} title="Chưa đăng ký khóa học nào" message="Bạn chưa đăng ký khóa học nào." />
-          : <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          : <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
               {myCourses.map((c) => (
                 <CourseCard key={c.id} course={{ ...c, createdAt: c.createdAt.toISOString(), updatedAt: c.updatedAt.toISOString() }}
-                  href={`/student/courses/${c.id}`} progress={courseProgress[c.id]} ctaLabel="Tiếp tục học" />
+                  href={`/student/courses/${c.id}`} progress={courseProgress[c.id]} ctaLabel="Tiếp tục học" compactOnMobile />
               ))}
             </div>}
       </div>

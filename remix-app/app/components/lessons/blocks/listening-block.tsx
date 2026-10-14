@@ -183,7 +183,7 @@ export function ListeningBlock({
                 <h3 className="text-base font-semibold">Đáp án chi tiết</h3>
                 {savedResult.results.length > 0 ? savedResult.results.map((result) => (
                   <Card key={result.id}>
-                    <CardContent className="space-y-2 p-4">
+                    <CardContent className="space-y-2 p-4 sm:pt-4">
                       <p className="content-text font-semibold">{result.prompt}</p>
                       <p className="content-text text-sm leading-7">
                         <span className="text-muted-foreground">Bạn trả lời: </span>
@@ -198,11 +198,20 @@ export function ListeningBlock({
                           {result.correctAnswer}
                         </span>
                       </p>
-                      {(result.chinese || result.pinyin || result.translation) && (
+                      {((result.answerMode !== "chinese" && result.chinese)
+                        || (result.answerMode !== "pinyin" && result.pinyin)
+                        || result.translation) && (
                         <p className="content-text text-sm leading-7 text-muted-foreground">
-                          {result.chinese && <span className="hanzi-display">{result.chinese}</span>}
-                          {result.pinyin && <>{result.chinese ? " · " : ""}{result.pinyin}</>}
-                          {result.translation && <>{result.chinese || result.pinyin ? " · " : ""}{result.translation}</>}
+                          {result.answerMode !== "chinese" && result.chinese && (
+                            <span className="hanzi-display">{result.chinese}</span>
+                          )}
+                          {result.answerMode !== "pinyin" && result.pinyin && (
+                            <>{result.answerMode !== "chinese" && result.chinese ? " · " : ""}{result.pinyin}</>
+                          )}
+                          {result.translation && (
+                            <>{(result.answerMode !== "chinese" && result.chinese)
+                              || (result.answerMode !== "pinyin" && result.pinyin) ? " · " : ""}{result.translation}</>
+                          )}
                         </p>
                       )}
                     </CardContent>
