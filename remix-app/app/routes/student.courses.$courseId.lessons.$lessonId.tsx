@@ -2080,70 +2080,60 @@ export default function LessonDetail() {
               </aside>
             )}
 
-            {activeTab === "TEST" || activeScore ? (
-              <div className="mx-auto max-w-6xl space-y-3">
-                {activeTab === "TEST" && (testResult || vocabularyQuestionSets.sameWordType.length > 0) && (
-                  <div className="flex justify-end">
-                    <SettingsMenu align="right" />
-                  </div>
-                )}
-                {activeScore && (
-                  <section className="rounded-md border bg-card px-4 py-3" aria-label="Điểm cao nhất">
-                    <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Điểm cao nhất</p>
-                        <p className="mt-0.5 text-lg font-bold tabular-nums">
-                          {activeTab === "LISTENING"
-                            ? activeListeningGrade ? `${activeListeningGrade.points} / 10` : "-"
-                            : activeScore.score != null ? `${Math.round(activeScore.score)}%` : "-"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Số câu đúng / tổng số</p>
-                        <p className="mt-0.5 text-sm font-semibold tabular-nums">
-                          {activeScore.correctCount != null && activeScore.totalCount != null
-                            ? `${activeScore.correctCount}/${activeScore.totalCount}`
-                            : "-"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Kết quả</p>
-                        <p className={cn(
-                          "mt-0.5 text-sm font-semibold",
-                          activeTab === "LISTENING"
-                            ? activeScore.score == null
-                              ? "text-muted-foreground"
-                              : activeScore.score >= 80
-                                ? "text-success"
-                                : activeScore.score < 50
-                                  ? "text-destructive"
-                                  : "text-primary"
-                            : activeScore.passed ? "text-success" : "text-destructive",
-                        )}>
-                          {activeTab === "LISTENING"
-                            ? activeListeningGrade?.message ?? "Chưa có kết quả"
-                            : activeScore.passed ? "Đạt" : "Chưa đạt"}
-                        </p>
-                      </div>
-                      {answerReviewControl}
+            <div className="mx-auto max-w-6xl space-y-3">
+              {activeTab === "TEST" && (testResult || vocabularyQuestionSets.sameWordType.length > 0) && (
+                <div className="flex justify-end">
+                  <SettingsMenu align="right" />
+                </div>
+              )}
+              {activeScore && (
+                <section className="rounded-md border bg-card px-4 py-3" aria-label="Điểm cao nhất">
+                  <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground">Điểm cao nhất</p>
+                      <p className="mt-0.5 text-lg font-bold tabular-nums">
+                        {activeTab === "LISTENING"
+                          ? activeListeningGrade ? `${activeListeningGrade.points} / 10` : "-"
+                          : activeScore.score != null ? `${Math.round(activeScore.score)}%` : "-"}
+                      </p>
                     </div>
-                  </section>
-                )}
-                {showAnswerReviewControls && !activeScore && (
-                  <section className="rounded-md border bg-card px-4 py-3">{answerReviewControl}</section>
-                )}
-                {showAnswerReview && showAnswerReviewControls && <AnswerReviewDetails groups={activeReviewGroups} />}
-                <div>{renderTabContent()}</div>
-              </div>
-            ) : (
-              <div className="max-w-6xl mx-auto space-y-3">
-                {showAnswerReviewControls && (
-                  <section className="rounded-md border bg-card px-4 py-3">{answerReviewControl}</section>
-                )}
-                {showAnswerReview && showAnswerReviewControls && <AnswerReviewDetails groups={activeReviewGroups} />}
-                {renderTabContent()}
-              </div>
-            )}
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground">Số câu đúng / tổng số</p>
+                      <p className="mt-0.5 text-sm font-semibold tabular-nums">
+                        {activeScore.correctCount != null && activeScore.totalCount != null
+                          ? `${activeScore.correctCount}/${activeScore.totalCount}`
+                          : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground">Kết quả</p>
+                      <p className={cn(
+                        "mt-0.5 text-sm font-semibold",
+                        activeTab === "LISTENING"
+                          ? activeScore.score == null
+                            ? "text-muted-foreground"
+                            : activeScore.score >= 80
+                              ? "text-success"
+                              : activeScore.score < 50
+                                ? "text-destructive"
+                                : "text-primary"
+                          : activeScore.passed ? "text-success" : "text-destructive",
+                      )}>
+                        {activeTab === "LISTENING"
+                          ? activeListeningGrade?.message ?? "Chưa có kết quả"
+                          : activeScore.passed ? "Đạt" : "Chưa đạt"}
+                      </p>
+                    </div>
+                    {answerReviewControl}
+                  </div>
+                </section>
+              )}
+              {showAnswerReviewControls && !activeScore && (
+                <section className="rounded-md border bg-card px-4 py-3">{answerReviewControl}</section>
+              )}
+              {showAnswerReview && showAnswerReviewControls && <AnswerReviewDetails groups={activeReviewGroups} />}
+              <div key="active-tab-content">{renderTabContent()}</div>
+            </div>
           </>
         )}
       </div>
