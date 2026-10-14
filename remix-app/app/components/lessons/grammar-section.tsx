@@ -97,8 +97,8 @@ export function GrammarSection({
 
   return (
     <article className="overflow-hidden rounded-lg border bg-card">
-      <header className="flex items-start gap-3 border-b bg-muted/20 px-5 py-4 sm:px-6">
-        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+      <header className="flex items-start gap-3 border-b bg-destructive/10 px-5 py-4 sm:px-6">
+        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-destructive/10 text-destructive">
           <BookOpen className="h-4 w-4" />
         </span>
         <div className="min-w-0">
@@ -214,7 +214,7 @@ export function GrammarSection({
             );
           })}
           {unattemptedPracticeTabs.length > 0 && lockedPracticeTypes.length === 0 && (
-            <Button type="button" variant="ghost" size="sm" onClick={() => openPractice(unattemptedPracticeTabs[0].type)}>
+            <Button type="button" variant="destructive" size="sm" onClick={() => openPractice(unattemptedPracticeTabs[0].type)}>
               <ListChecks className="mr-1.5 h-4 w-4" />
               {latestPracticeTabs.length > 0 ? "Luyện dạng khác" : "Bắt đầu luyện tập"}
             </Button>
