@@ -1877,12 +1877,12 @@ export default function LessonDetail() {
                           <span className="h-2 w-2 rounded-full bg-primary" />
                           <span className="text-sm font-bold">{speaker.speakerName || `Người ${idx + 1}`}</span>
                         </div>
-                        <div className="mt-2 text-base">
-                          <p className="content-text hanzi-display !text-[30px] font-medium text-foreground">{speaker.chinese}</p>
+                        <div className="mt-2 space-y-2 text-base">
+                          <p className="content-text hanzi-display !text-[30px] font-medium leading-relaxed text-foreground">{speaker.chinese}</p>
                           {settings.showPinyin && (
-                            <p className="content-text pinyin-text !text-[26px] text-muted-foreground mt-1">{speaker.pinyin}</p>
+                            <p className="content-text pinyin-text !text-[26px] leading-relaxed text-muted-foreground">{speaker.pinyin}</p>
                           )}
-                          <p className="content-text !text-[26px] text-muted-foreground mt-1">{speaker.translation}</p>
+                          <p className="content-text !text-[26px] leading-relaxed text-muted-foreground">{speaker.translation}</p>
                         </div>
                       </div>
                     ))}
