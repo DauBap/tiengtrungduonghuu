@@ -31,27 +31,26 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
 
   return (
     <div className="w-full min-w-0 max-w-full rounded-lg border">
-      <Table className="w-full min-w-[860px] table-fixed sm:min-w-[680px] sm:table-auto">
+      <Table className="w-max table-auto">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-10 px-2 text-center sm:w-12 sm:px-4">#</TableHead>
-            {/* Chữ Hán + 2 nút cần chỗ: w-32 cũ làm chữ bị bẻ dòng giữa từ */}
-            <TableHead className="w-[240px] px-2 sm:w-48 sm:px-4">Chữ Hán</TableHead>
-            {settings.showPinyin && <TableHead className="w-28 whitespace-nowrap px-3 sm:w-32 sm:px-4">Pinyin</TableHead>}
-            <TableHead className="w-32 px-3 sm:w-36 sm:px-4">Từ loại</TableHead>
-            <TableHead className="w-[320px] px-3 sm:w-auto sm:px-4">Tiếng Việt</TableHead>
+            <TableHead className="sticky left-0 z-30 w-10 whitespace-nowrap bg-background px-2 text-center shadow-[2px_0_4px_-2px_hsl(var(--border))] sm:w-12 sm:px-4">#</TableHead>
+            <TableHead className="sticky left-10 z-20 whitespace-nowrap bg-background px-2 shadow-[2px_0_4px_-2px_hsl(var(--border))] sm:left-12 sm:px-4">Chữ Hán</TableHead>
+            {settings.showPinyin && <TableHead className="whitespace-nowrap px-3 sm:px-4">Pinyin</TableHead>}
+            <TableHead className="whitespace-nowrap px-3 sm:px-4">Từ loại</TableHead>
+            <TableHead className="whitespace-nowrap px-3 sm:px-4">Tiếng Việt</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {items.map((item, index) => (
             <TableRow key={item.id}>
-              <TableCell className="px-2 py-3 text-center font-mono text-sm text-muted-foreground tabular-nums sm:px-4 sm:py-4">
+              <TableCell className="sticky left-0 z-20 w-10 bg-background px-2 py-3 text-center font-mono text-sm text-muted-foreground shadow-[2px_0_4px_-2px_hsl(var(--border))] tabular-nums sm:w-12 sm:px-4 sm:py-4">
                 {index + 1}
               </TableCell>
-              <TableCell className="px-2 py-3 font-semibold text-lg sm:px-4 sm:py-4">
-                <div className="flex items-center gap-1.5">
+              <TableCell className="sticky left-10 z-10 bg-background px-2 py-3 font-semibold text-lg shadow-[2px_0_4px_-2px_hsl(var(--border))] sm:left-12 sm:px-4 sm:py-4">
+                <div className="flex w-max items-center gap-1.5 whitespace-nowrap">
                   {/* Chữ Hán ngắt dòng được ở mọi ký tự nên phải chặn tay */}
-                  <span className="content-text hanzi-display text-lg whitespace-nowrap">{item.chinese}</span>
+                  <span className="content-text hanzi-display !text-[20px] whitespace-nowrap">{item.chinese}</span>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -75,10 +74,10 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
                   )}
                 </div>
               </TableCell>
-              {settings.showPinyin && <TableCell className="content-text pinyin-text w-28 whitespace-nowrap px-3 py-3 text-sm text-primary sm:w-32 sm:px-4 sm:py-4">{item.pinyin}</TableCell>}
-              <TableCell className="w-32 px-3 py-3 sm:w-36 sm:px-4 sm:py-4">
+              {settings.showPinyin && <TableCell className="content-text pinyin-text !text-[16px] whitespace-nowrap px-3 py-3 text-primary sm:px-4 sm:py-4">{item.pinyin}</TableCell>}
+              <TableCell className="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4">
                 {item.wordTypes?.length ? (
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex w-max gap-1">
                     {item.wordTypes.map((type) => (
                       <Badge key={type} variant="outline" className="text-xs whitespace-nowrap">
                         {WORD_TYPE_META[type].label}
@@ -89,7 +88,7 @@ export function VocabularyTable({ items }: VocabularyTableProps) {
                   <span className="text-muted-foreground text-xs">—</span>
                 )}
               </TableCell>
-              <TableCell className="content-text w-[320px] break-words px-3 py-3 text-sm sm:w-auto sm:px-4 sm:py-4">{item.translation}</TableCell>
+              <TableCell className="content-text !text-[16px] whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4">{item.translation}</TableCell>
             </TableRow>
           ))}
         </TableBody>

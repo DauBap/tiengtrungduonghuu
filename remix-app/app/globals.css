@@ -177,67 +177,35 @@
 }
 
 @layer base {
-  main p.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main li.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main td.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main dd.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main blockquote.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+  main :is(p, li, td, dd, blockquote).text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     @apply text-sm;
   }
 
-  main p.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main li.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main td.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main dd.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main blockquote.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+  main :is(p, li, td, dd, blockquote).text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     @apply text-base;
   }
 
-  main p.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main li.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main td.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main dd.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main blockquote.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+  main :is(p, li, td, dd, blockquote).text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     @apply text-lg;
   }
 
-  main p.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main li.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main td.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main dd.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main blockquote.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+  main :is(p, li, td, dd, blockquote).text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     @apply text-xl;
   }
 
-  main p.content-text.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main li.content-text.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main td.content-text.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main dd.content-text.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main blockquote.content-text.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+  main :is(p, li, td, dd, blockquote).content-text.text-xs:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     font-size: 1.125rem;
   }
 
-  main p.content-text.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main li.content-text.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main td.content-text.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main dd.content-text.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main blockquote.content-text.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+  main :is(p, li, td, dd, blockquote).content-text.text-sm:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     font-size: 1.25rem;
   }
 
-  main p.content-text.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main li.content-text.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main td.content-text.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main dd.content-text.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main blockquote.content-text.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+  main :is(p, li, td, dd, blockquote).content-text.text-base:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     font-size: 1.5rem;
   }
 
-  main p.content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main li.content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main td.content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main dd.content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold),
-  main blockquote.content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
+  main :is(p, li, td, dd, blockquote).content-text.text-lg:not(.font-semibold):not(.font-bold):not(.font-extrabold) {
     font-size: 1.875rem;
   }
 }
