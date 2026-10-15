@@ -79,6 +79,8 @@ export const workbookConfigSchema = z.object({
   shuffleQuestions: z.boolean().default(false),
   /** Hiển thị kết quả ngay sau khi chọn đáp án */
   showResultsImmediately: z.boolean().default(false),
+  /** Cho học viên xem đáp án của câu tự chấm sau khi nộp bài */
+  showAnswersAfterSubmit: z.boolean().default(false),
   /** Hiển thị phần dịch trong câu hỏi */
   showTranslation: z.boolean().default(true),
   /** Hiển thị pinyin */
@@ -134,6 +136,8 @@ export const workbookConfigSchema = z.object({
             pinyin: z.string().default(""),
           })).default([]),
           gradable: z.boolean().default(true),
+          /** Chuyển câu này sang giáo viên chấm thủ công */
+          teacherReview: z.boolean().default(false),
           correctAnswer: z.string().default(""),
           acceptedAnswers: z.array(z.string()).default([]),
         }).refine((question) => question.kind === "input" || question.options.length > 0, {

@@ -47,6 +47,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         correctCount: attempt.correctCount,
         totalCount: attempt.totalCount,
         passed: attempt.passed,
+        reviewPending: details.reviewPending === true,
         completedAt: attempt.completedAt.toISOString(),
         blockTitle: typeof details.blockTitle === "string" ? details.blockTitle : "Sách bài tập",
       };
@@ -119,7 +120,7 @@ export default function TeacherWorkbookHistory() {
                         </td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${attempt.passed ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
-                            {attempt.passed ? "Đạt" : "Chưa đạt"}
+                            {attempt.reviewPending ? "Chờ chấm" : attempt.passed ? "Đạt" : "Chưa đạt"}
                           </span>
                         </td>
                         <td className="px-4 py-3 font-medium tabular-nums">{attempt.score != null ? `${attempt.score}%` : "-"}</td>

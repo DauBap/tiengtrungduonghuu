@@ -48,6 +48,7 @@ function emptyQuestion(number: number): Question {
     translation: "",
     passage: "",
     gradable: true,
+    teacherReview: false,
     imageUrl: "",
     images: undefined,
     dialogue: undefined,
@@ -134,6 +135,19 @@ function QuestionEditor({
           className="text-muted-foreground hover:text-destructive transition-colors">
           <Trash2 className="h-4 w-4" />
         </button>
+      </div>
+
+      <div className="flex items-center justify-between gap-4 rounded-md border bg-muted/20 px-3 py-2">
+        <div className="space-y-0.5">
+          <Label htmlFor={`teacher-review-${question.id}`} className="text-xs">Giáo viên chấm câu này</Label>
+          <p className="text-xs text-muted-foreground">Đáp án sẽ không hiện cho học viên cho đến khi giáo viên chấm.</p>
+        </div>
+        <Switch
+          id={`teacher-review-${question.id}`}
+          checked={question.teacherReview}
+          onCheckedChange={(checked) => onChange({ ...question, teacherReview: checked })}
+          disabled={!question.gradable}
+        />
       </div>
 
       <div className="flex gap-2" role="group" aria-label="Loại câu hỏi">
@@ -424,6 +438,7 @@ export function WorkbookForm({ initial, error, cancelTo }: WorkbookFormProps) {
   const [maxReplays, setMaxReplays] = useState(initial?.config.maxReplays ?? 0);
   const [shuffleQuestions, setShuffleQuestions] = useState(initial?.config.shuffleQuestions ?? false);
   const [showResultsImmediately, setShowResultsImmediately] = useState(initial?.config.showResultsImmediately ?? false);
+  const [showAnswersAfterSubmit, setShowAnswersAfterSubmit] = useState(initial?.config.showAnswersAfterSubmit ?? false);
   const [showTranslation, setShowTranslation] = useState(initial?.config.showTranslation ?? true);
   const [showPinyin, setShowPinyin] = useState(initial?.config.showPinyin ?? true);
   const [sections, setSections] = useState<Section[]>(initial?.config.sections ?? []);
@@ -449,6 +464,7 @@ export function WorkbookForm({ initial, error, cancelTo }: WorkbookFormProps) {
     maxReplays,
     shuffleQuestions,
     showResultsImmediately,
+    showAnswersAfterSubmit,
     showTranslation,
     showPinyin,
     sections,
@@ -564,6 +580,18 @@ export function WorkbookForm({ initial, error, cancelTo }: WorkbookFormProps) {
                 id="wb-instant"
                 checked={showResultsImmediately}
                 onCheckedChange={setShowResultsImmediately}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="wb-answer-key">Hiện đáp án sau khi nộp</Label>
+                <p className="text-xs text-muted-foreground">Chỉ hiện đáp án của câu tự chấm; câu chờ giáo viên chấm luôn được ẩn.</p>
+              </div>
+              <Switch
+                id="wb-answer-key"
+                checked={showAnswersAfterSubmit}
+                onCheckedChange={setShowAnswersAfterSubmit}
               />
             </div>
 

@@ -38,6 +38,12 @@ function isPendingGrammarReview(attempt: { passed: boolean | null; details: unkn
     && !isRecord(details.teacherGrading);
 }
 
+function isPendingWorkbookReview(attempt: { passed: boolean | null; details: unknown } | undefined) {
+  if (!attempt || attempt.passed !== null) return false;
+  const details = isRecord(attempt.details) ? attempt.details : {};
+  return details.reviewPending === true;
+}
+
 function getTabStateTone(state: string | null | undefined) {
   switch (state) {
     case "COMPLETED": return "bg-emerald-100 text-emerald-700 border-emerald-200";
@@ -628,6 +634,7 @@ export default function TeacherLessonProgress() {
                             const row = (progressByStudent.get(student.id) ?? []).find((item) => item.tab === "WORKBOOK");
                             const attempts = row?.attempts.filter((attempt) => attempt.tab === "WORKBOOK") ?? [];
                             const latestAttempt = attempts[0];
+                            const reviewPending = isPendingWorkbookReview(latestAttempt);
                             const latestState = latestAttempt == null
                               ? "NOT_STARTED"
                               : latestAttempt.passed === true
@@ -640,7 +647,7 @@ export default function TeacherLessonProgress() {
                                 <td className="px-4 py-3 font-medium">{student.name ?? "Học viên"}</td>
                                 <td className="px-4 py-3">
                                   <span className={cn("inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium", getTabStateTone(latestState))}>
-                                    {latestAttempt == null ? "Chưa làm" : latestAttempt.passed ? "Đạt" : "Chưa đạt"}
+                                    {latestAttempt == null ? "Chưa làm" : reviewPending ? "Chờ chấm" : latestAttempt.passed ? "Đạt" : "Chưa đạt"}
                                   </span>
                                 </td>
                                 <td className="px-4 py-3 font-medium tabular-nums">

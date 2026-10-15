@@ -92,6 +92,32 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function isWorkbookSubmissionResponse(value: unknown): value is {
+  intent: "submit-workbook-attempt";
+  success: true;
+  score: number | null;
+  correctCount: number;
+  totalCount: number;
+  pendingReviewCount: number;
+  answerReview: { id: string; correct: boolean | null; correctAnswer: string }[];
+  answers: { id: string; given: string }[];
+} {
+  return isRecord(value)
+    && value.intent === "submit-workbook-attempt"
+    && value.success === true
+    && (typeof value.score === "number" || value.score === null)
+    && typeof value.correctCount === "number"
+    && typeof value.totalCount === "number"
+    && typeof value.pendingReviewCount === "number"
+    && Array.isArray(value.answers)
+    && value.answers.every((item) => isRecord(item) && typeof item.id === "string" && typeof item.given === "string")
+    && Array.isArray(value.answerReview)
+    && value.answerReview.every((item) => isRecord(item)
+      && typeof item.id === "string"
+      && (typeof item.correct === "boolean" || item.correct === null)
+      && typeof item.correctAnswer === "string");
+}
+
 function hasTeacherGrade(details: Record<string, unknown>) {
   return isRecord(details.teacherGrading) && typeof details.teacherGrading.gradedAt === "string";
 }
@@ -233,6 +259,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     latestVocabularyAttempt,
     latestListeningAttempt,
     latestWorkbookAttempt,
+    workbookSubmissionAttempts,
     answerReviewSetting,
     phoneticsConfig,
     phoneticsAttempts,
@@ -302,6 +329,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       orderBy: [{ score: "desc" }, { completedAt: "desc" }],
       select: { score: true, correctCount: true, totalCount: true, passed: true },
     }),
+    prisma.lessonTabAttempt.findMany({
+      where: { userId: user.id, lessonId: lesson.id, tab: "WORKBOOK" },
+      orderBy: { completedAt: "desc" },
+      select: { score: true, correctCount: true, totalCount: true, details: true },
+    }),
     prisma.lesson.findUnique({ where: { id: lesson.id }, select: { answerReviewTabs: true } }),
     getPhoneticsConfig(lesson.id),
     prisma.lessonTabAttempt.findMany({
@@ -351,7 +383,20 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
           : attempt.tab === "PHONETICS"
             ? typeof details.sectionTitle === "string" ? details.sectionTitle : "Ngữ âm"
           : "Kết quả bài làm";
-    const group = makeAnswerReviewGroup(attempt, targetKey, title, attempt.tab === "PHONETICS");
+    const reviewAttempt = attempt.tab === "WORKBOOK" && details.reviewPending === true
+      ? {
+          ...attempt,
+          details: {
+            ...details,
+            results: Array.isArray(details.results)
+              ? details.results.map((result) => isRecord(result) && result.teacherReviewPending === true
+                ? { ...result, correctAnswer: "", correct: null }
+                : result)
+              : [],
+          },
+        }
+      : attempt;
+    const group = makeAnswerReviewGroup(reviewAttempt, targetKey, title, attempt.tab === "PHONETICS");
     if (group) groups.push(group);
   }
   const grammarAttemptsBySection: Record<
@@ -439,6 +484,44 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     });
 
   const blocks = allBlocks.map((b) => ({ ...b, required: b.required && isBlockLearnable(b) }));
+  const workbookSubmissions: Record<string, {
+    score: number | null;
+    correctCount: number;
+    totalCount: number;
+    pendingReviewCount: number;
+    answers: { id: string; given: string }[];
+    answerReview: { id: string; correct: boolean | null; correctAnswer: string }[];
+  }> = {};
+  for (const attempt of workbookSubmissionAttempts) {
+    const details = isRecord(attempt.details) ? attempt.details : {};
+    const blockId = typeof details.blockId === "string" ? details.blockId : "";
+    if (!blockId || workbookSubmissions[blockId] || !Array.isArray(details.results)) continue;
+    const savedResults = details.results.flatMap((item): (Record<string, unknown> & { id: string; given: string })[] =>
+      isRecord(item) && typeof item.id === "string" && typeof item.given === "string"
+        ? [{ ...item, id: item.id, given: item.given }]
+        : []
+    );
+    const block = lesson.learningBlocks.find((item) => item.id === blockId && item.type === "WORKBOOK");
+    const parsedConfig = block ? parseWorkbookConfig(block.config) : null;
+    const showAnswers = parsedConfig?.ok === true && parsedConfig.data.showAnswersAfterSubmit;
+    workbookSubmissions[blockId] = {
+      score: attempt.score,
+      correctCount: attempt.correctCount ?? 0,
+      totalCount: attempt.totalCount ?? 0,
+      pendingReviewCount: savedResults.filter((item) => item.teacherReviewPending === true).length,
+      answers: savedResults.map((item) => ({ id: item.id, given: item.given })),
+      answerReview: showAnswers
+        ? savedResults.flatMap((item) =>
+            item.gradable === true
+              && item.teacherReviewPending !== true
+              && typeof item.correctAnswer === "string"
+              && (typeof item.correct === "boolean" || item.correct === null)
+              ? [{ id: item.id, correct: item.correct, correctAnswer: item.correctAnswer }]
+              : []
+          )
+        : [],
+    };
+  }
   const studentLesson = {
     ...lesson,
     grammarSections: lesson.grammarSections.map((section) => ({
@@ -492,6 +575,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       listening: latestListeningAttempt,
       workbook: latestWorkbookAttempt,
     },
+    workbookSubmissions,
     pronunciationAssessments: pronunciationAssessments
       .filter((assessment) => assessment.scriptText?.trim() && assessment.transcript?.trim())
       .map((assessment) => ({ ...assessment, createdAt: assessment.createdAt.toISOString() })),
@@ -1016,6 +1100,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
     });
     if (!block) return { workbookError: "Không tìm thấy sách bài tập này." as const };
 
+    const existingAttempts = await prisma.lessonTabAttempt.findMany({
+      where: { userId: user.id, lessonId: params.lessonId!, tab: "WORKBOOK" },
+      select: { details: true },
+    });
+    const alreadyPending = existingAttempts.some((attempt) => {
+      const details = isRecord(attempt.details) ? attempt.details : {};
+      return details.blockId === block.id && details.reviewPending === true;
+    });
+    if (alreadyPending) return { workbookError: "Bài này đang chờ giáo viên chấm, bạn chưa thể nộp lại." as const };
+
     const parsedConfig = parseWorkbookConfig(block.config);
     if (!parsedConfig.ok) return { workbookError: "Cấu hình sách bài tập không hợp lệ." as const };
 
@@ -1049,7 +1143,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
         : undefined;
       const correct = !question.gradable
         ? null
-        : question.kind === "input"
+        : question.teacherReview
+          ? null
+          : question.kind === "input"
           ? isAnswerCorrectForAny(given, answerVariants(question.correctAnswer, question.acceptedAnswers), "chinese")
           : given === question.correctAnswer;
 
@@ -1063,6 +1159,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         translation: question.translation,
         kind: question.kind,
         gradable: question.gradable,
+        teacherReviewPending: question.gradable && question.teacherReview,
         given,
         givenLabel: selectedOption ? `${selectedOption.label}${selectedOption.text ? ` · ${selectedOption.text}` : ""}` : given,
         correctAnswer: question.kind === "choice" && correctOption
@@ -1079,7 +1176,16 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const savedResults = results.filter((result): result is NonNullable<typeof result> => result !== null);
     const correctCount = savedResults.filter((result) => result.correct === true).length;
     const totalCount = gradableQuestions.length;
-    const score = Math.round((correctCount / totalCount) * 10000) / 100;
+    const pendingReviewCount = savedResults.filter((result) => result.teacherReviewPending).length;
+    const score = pendingReviewCount > 0 ? null : Math.round((correctCount / totalCount) * 10000) / 100;
+    const showAnswersAfterSubmit = parsedConfig.data.showAnswersAfterSubmit;
+    const answerReview = showAnswersAfterSubmit
+      ? savedResults.filter((result) => result.gradable && !result.teacherReviewPending).map((result) => ({
+          id: result.id,
+          correct: result.correct,
+          correctAnswer: result.correctAnswer,
+        }))
+      : [];
     const completedAt = new Date();
 
     await recordLessonTabAttempt(prisma, {
@@ -1090,18 +1196,25 @@ export async function action({ request, params }: ActionFunctionArgs) {
       score,
       correctCount,
       totalCount,
-      passed: correctCount === totalCount,
+      passed: pendingReviewCount > 0 ? null : correctCount === totalCount,
+      needsReview: pendingReviewCount > 0,
+      progress: pendingReviewCount > 0
+        ? { percent: 0, completed: false, score: null }
+        : { percent: 100, completed: true, score },
       startedAt: completedAt,
       completedAt,
       details: {
         blockId: block.id,
         blockTitle: block.title,
         ungradableCount: questions.length - totalCount,
+        reviewPending: pendingReviewCount > 0,
         results: savedResults,
       },
     });
-    await markBlockCompleted(user.id, block.id);
-    await syncLearningCompleted(user.id, params.lessonId!);
+    if (pendingReviewCount === 0) {
+      await markBlockCompleted(user.id, block.id);
+      await syncLearningCompleted(user.id, params.lessonId!);
+    }
 
     return {
       success: true as const,
@@ -1109,6 +1222,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
       score,
       correctCount,
       totalCount,
+      pendingReviewCount,
+      answerReview,
+      answers: savedResults.map((result) => ({ id: result.id, given: result.given })),
     };
   }
 
@@ -1231,7 +1347,7 @@ function AnswerReviewDetails({ groups }: { groups: AnswerReviewGroup[] }) {
 }
 
 export default function LessonDetail() {
-  const { user, lesson, lessonNumber, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewTabs, answerReviewGroups, answerReviewLockedTargets, phonetics, phoneticsSectionScores } = useLoaderData<typeof loader>();
+  const { user, lesson, lessonNumber, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewTabs, answerReviewGroups, answerReviewLockedTargets, phonetics, phoneticsSectionScores, workbookSubmissions } = useLoaderData<typeof loader>();
   const settings = useAppSettings();
   const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; lessonPinyin: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string; error?: string }>();
   const workbookFetcher = useFetcher<{
@@ -1470,14 +1586,17 @@ export default function LessonDetail() {
         <WorkbookListeningTest
           config={workbookBlock.config as WorkbookConfig}
           isSaving={workbookFetcher.state !== "idle"}
-          savedResult={workbookFetcher.data?.intent === "submit-workbook-attempt" && workbookFetcher.data.success
-            && workbookFetcher.data.score != null && workbookFetcher.data.correctCount != null && workbookFetcher.data.totalCount != null
+          answerReviewEnabled={(workbookBlock.config as WorkbookConfig).showAnswersAfterSubmit}
+          savedResult={isWorkbookSubmissionResponse(workbookFetcher.data)
             ? {
                 score: workbookFetcher.data.score,
                 correctCount: workbookFetcher.data.correctCount,
                 totalCount: workbookFetcher.data.totalCount,
+                pendingReviewCount: workbookFetcher.data.pendingReviewCount,
+                answerReview: workbookFetcher.data.answerReview,
+                answers: workbookFetcher.data.answers,
               }
-            : null}
+            : workbookSubmissions[workbookBlock.id] ?? null}
           submissionError={workbookFetcher.data?.workbookError ?? null}
           onSubmitAttempt={(answers) => workbookFetcher.submit({
             intent: "submit-workbook-attempt",
@@ -1878,11 +1997,11 @@ export default function LessonDetail() {
                           <span className="text-sm font-bold">{speaker.speakerName || `Người ${idx + 1}`}</span>
                         </div>
                         <div className="mt-2 space-y-2 text-base">
-                          <p className="content-text hanzi-display !text-[30px] font-medium leading-relaxed text-foreground">{speaker.chinese}</p>
+                          <p className="content-text hanzi-display !text-[26px] font-medium leading-relaxed text-foreground">{speaker.chinese}</p>
                           {settings.showPinyin && (
-                            <p className="content-text pinyin-text !text-[26px] leading-relaxed text-muted-foreground">{speaker.pinyin}</p>
+                            <p className="content-text pinyin-text !text-[24px] leading-relaxed text-muted-foreground">{speaker.pinyin}</p>
                           )}
-                          <p className="content-text !text-[26px] leading-relaxed text-muted-foreground">{speaker.translation}</p>
+                          <p className="content-text !text-[24px] leading-relaxed text-muted-foreground">{speaker.translation}</p>
                         </div>
                       </div>
                     ))}

@@ -22,7 +22,7 @@ import { cn } from "~/lib/utils";
 // đi qua nguyên vẹn, không bị đổi thành string như JSON.stringify.
 // role dùng nguyên enum Role của Prisma; loader đã lọc `in: ["teacher","student"]`
 // nhưng TS không suy ra được điều đó từ kiểu trả về.
-type UserRecord = { id: string; email: string; name: string; role: Role; isActive: boolean; createdAt: Date };
+type UserRecord = { id: string; email: string; name: string; phone: string | null; role: Role; isActive: boolean; createdAt: Date };
 type ModalMode = "create" | "edit" | "delete" | "toggle" | null;
 
 const ROLE_LABEL: Record<string, string> = { teacher: "Giáo viên", student: "Học viên" };
@@ -32,11 +32,20 @@ function formatDate(value: Date | string) {
   return new Date(value).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
+function parsePhone(value: FormDataEntryValue | null) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return { phone: null, error: null };
+  if (!/^[+\d\s().-]+$/.test(raw)) return { phone: null, error: "Số điện thoại chỉ được chứa chữ số và ký tự định dạng hợp lệ." };
+  const phone = raw.replace(/\D/g, "");
+  if (phone.length < 9 || phone.length > 15) return { phone: null, error: "Số điện thoại cần có từ 9 đến 15 chữ số." };
+  return { phone, error: null };
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
   const users = await prisma.user.findMany({
     where: { role: { in: ["teacher", "student"] }, deletedAt: null },
-    select: { id: true, email: true, name: true, role: true, isActive: true, createdAt: true },
+    select: { id: true, email: true, name: true, phone: true, role: true, isActive: true, createdAt: true },
     orderBy: { createdAt: "desc" },
   });
   return { user, users };
@@ -52,9 +61,11 @@ export async function action({ request }: ActionFunctionArgs) {
     const name = String(formData.get("name")).trim();
     const password = String(formData.get("password"));
     const role = String(formData.get("role")) as "teacher" | "student";
+    const { phone, error } = parsePhone(formData.get("phone"));
+    if (error) return { error };
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) return { error: "Email đã được sử dụng" };
-    await prisma.user.create({ data: { email, name, password: await bcrypt.hash(password, 10), role } });
+    await prisma.user.create({ data: { email, name, phone, password: await bcrypt.hash(password, 10), role } });
     return { success: true };
   }
 
@@ -64,7 +75,9 @@ export async function action({ request }: ActionFunctionArgs) {
     const name = String(formData.get("name")).trim();
     const password = String(formData.get("password"));
     const role = String(formData.get("role")) as "teacher" | "student";
-    const data: Record<string, unknown> = { email, name, role };
+    const { phone, error } = parsePhone(formData.get("phone"));
+    if (error) return { error };
+    const data: Record<string, unknown> = { email, name, phone, role };
     if (password.trim()) data.password = await bcrypt.hash(password, 10);
     await prisma.user.update({ where: { id: userId }, data });
     return { success: true };
@@ -171,6 +184,13 @@ function Modal({ mode, user, onClose }: { mode: ModalMode; user: UserRecord | nu
           <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
           <Input id="email" name="email" type="email" defaultValue={user?.email} placeholder="nguyen@example.com" required />
         </div>
+        {role === "student" && (
+          <div className="space-y-2">
+            <Label htmlFor="phone">Số điện thoại Zalo</Label>
+            <Input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" defaultValue={user?.phone ?? ""} placeholder="0912 345 678" />
+            <p className="text-xs text-muted-foreground">Dùng để mở cuộc trò chuyện Zalo từ bảng điều khiển giáo viên.</p>
+          </div>
+        )}
         <div className="space-y-2">
           <Label htmlFor="password">
             Mật khẩu {isEdit ? <span className="text-muted-foreground font-normal text-xs">(để trống nếu không đổi)</span> : <span className="text-destructive">*</span>}

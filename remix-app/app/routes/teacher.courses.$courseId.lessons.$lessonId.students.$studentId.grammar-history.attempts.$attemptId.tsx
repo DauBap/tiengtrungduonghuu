@@ -73,7 +73,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
   if (!enrollment) throw new Response("Học viên không thuộc khóa học này", { status: 404 });
 
   const form = await request.formData();
-  if (form.get("intent") !== "grade-grammar-fill") return null;
+  const intent = form.get("intent");
+  if (intent !== "grade-grammar-fill" && intent !== "grade-grammar-fill-dashboard") return null;
 
   const attempt = await prisma.lessonTabAttempt.findFirst({
     where: {
@@ -185,6 +186,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     });
   });
 
+  if (intent === "grade-grammar-fill-dashboard") return { success: true };
   return redirect(`/teacher/courses/${course.id}/lessons/${lesson.id}/students/${enrollment.userId}/grammar-history/attempts/${attempt.id}`);
 }
 
@@ -222,6 +224,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     lesson,
     student: enrollment.user,
     attempt: {
+      id: attempt.id,
       score: attempt.score,
       correctCount: attempt.correctCount,
       totalCount: attempt.totalCount,

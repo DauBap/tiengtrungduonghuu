@@ -22,6 +22,7 @@ interface Question {
   number: number;
   kind: "choice" | "input";
   gradable: boolean;
+  teacherReview?: boolean;
   prompt: string;
   pinyin: string;
   translation: string;
@@ -64,7 +65,14 @@ export function WorkbookListeningTest({
   onSubmitAttempt: (answers: Record<string, string>) => void;
   isSaving?: boolean;
   answerReviewEnabled?: boolean;
-  savedResult?: { score: number; correctCount: number; totalCount: number } | null;
+  savedResult?: {
+    score: number | null;
+    correctCount: number;
+    totalCount: number;
+    pendingReviewCount: number;
+    answerReview: { id: string; correct: boolean | null; correctAnswer: string }[];
+    answers: { id: string; given: string }[];
+  } | null;
   submissionError?: string | null;
 }) {
   const appSettings = useAppSettings();
@@ -73,10 +81,12 @@ export function WorkbookListeningTest({
   const [speed, setSpeed] = useState<0.8 | 1 | 1.5>(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>(() =>
+    Object.fromEntries((savedResult?.answers ?? []).map((answer) => [answer.id, answer.given]))
+  );
   const [audioPlayCount, setAudioPlayCount] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(config.timeLimit ? config.timeLimit * 60 : 0);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(savedResult != null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const submitAttemptRef = useRef<() => void>(() => undefined);
 
@@ -111,6 +121,10 @@ export function WorkbookListeningTest({
     }
   }, [config.timeLimit, timeRemaining, isSubmitted]);
 
+  useEffect(() => {
+    if (submissionError && !isSaving) setIsSubmitted(false);
+  }, [submissionError, isSaving]);
+
   const formatTime = (seconds: number) => {
     const wholeSeconds = Math.floor(seconds);
     const mins = Math.floor(wholeSeconds / 60);
@@ -138,6 +152,7 @@ export function WorkbookListeningTest({
 
   const questions = sections.flatMap((section) => section.questions);
   const gradableQuestions = questions.filter((question) => question.gradable);
+  const reviewResults = new Map((savedResult?.answerReview ?? []).map((result) => [result.id, result]));
   const correctCount = gradableQuestions.filter((question) => {
     const answer = answers[question.id]?.trim();
     return answer && (question.kind === "input"
@@ -321,6 +336,8 @@ export function WorkbookListeningTest({
                 showTranslation={config.showTranslation}
                 showPinyin={showPinyin}
                 isSubmitted={isSubmitted}
+                answerReviewEnabled={answerReviewEnabled}
+                reviewResult={reviewResults.get(question.id)}
               />
             ))}
           </div>
@@ -330,13 +347,19 @@ export function WorkbookListeningTest({
         {isSubmitted ? (
           <div>
             <p className="text-sm font-medium">
-              {savedResult
-                ? `Đã lưu kết quả: ${savedResult.correctCount}/${savedResult.totalCount} câu · ${savedResult.score}%`
-                : `Kết quả: ${correctCount}/${gradableQuestions.length} câu có đáp án`}
+              {savedResult && !isSaving
+                ? savedResult.pendingReviewCount > 0
+                  ? `Đã nộp bài · ${savedResult.pendingReviewCount} câu đang chờ giáo viên chấm`
+                  : `Đã lưu kết quả: ${savedResult.correctCount}/${savedResult.totalCount} câu · ${savedResult.score}%`
+                : isSaving
+                  ? "Đang lưu kết quả bài làm..."
+                  : `Kết quả: ${correctCount}/${gradableQuestions.length} câu có đáp án`}
             </p>
-            {savedResult && (
+            {savedResult && !isSaving && (
               <p className="mt-1 text-xs text-muted-foreground">
-                {answerReviewEnabled
+                {savedResult.pendingReviewCount > 0
+                  ? "Kết quả cuối cùng sẽ được cập nhật sau khi giáo viên chấm."
+                  : answerReviewEnabled
                   ? "Đáp án chi tiết đã mở ở phần kết quả phía trên."
                   : "Đáp án chi tiết sẽ hiện khi giáo viên mở xem kết quả."}
               </p>
@@ -350,7 +373,14 @@ export function WorkbookListeningTest({
         ) : (
           <p className="text-sm text-muted-foreground">Đã trả lời {Object.values(answers).filter(Boolean).length}/{questions.length} câu</p>
         )}
-        <Button type="button" onClick={submitAttempt} disabled={isSubmitted || isSaving}>Nộp bài</Button>
+        {!isSubmitted
+          ? <Button type="button" onClick={submitAttempt} disabled={isSaving}>Nộp bài</Button>
+          : savedResult && savedResult.pendingReviewCount === 0 && !isSaving
+            ? <Button type="button" variant="outline" onClick={() => {
+                setAnswers({});
+                setIsSubmitted(false);
+              }}>Làm lại</Button>
+            : null}
       </Card>
     </div>
   );
@@ -363,6 +393,8 @@ function QuestionCard({
   showTranslation = true,
   showPinyin = true,
   isSubmitted = false,
+  answerReviewEnabled = false,
+  reviewResult,
 }: {
   question: Question;
   selectedAnswer?: string;
@@ -370,12 +402,12 @@ function QuestionCard({
   showTranslation?: boolean;
   showPinyin?: boolean;
   isSubmitted?: boolean;
+  answerReviewEnabled?: boolean;
+  reviewResult?: { correct: boolean | null; correctAnswer: string } | undefined;
 }) {
   const isAnswered = !!selectedAnswer;
-  const isCorrect = question.gradable && (question.kind === "input"
-    ? selectedAnswer?.trim() === question.correctAnswer.trim()
-    : selectedAnswer === question.correctAnswer);
-  const showResults = question.gradable && isAnswered && isSubmitted && Boolean(question.correctAnswer);
+  const isCorrect = reviewResult?.correct === true;
+  const showResults = isSubmitted && answerReviewEnabled && reviewResult != null;
 
   return (
     <Card className="p-4 space-y-4">
@@ -392,6 +424,9 @@ function QuestionCard({
         )}
         {isSubmitted && !question.gradable && (
           <Badge variant="outline" className="ml-auto">Chưa có answer key</Badge>
+        )}
+        {isSubmitted && question.teacherReview && (
+          <Badge variant="outline" className="ml-auto">Chờ giáo viên chấm</Badge>
         )}
       </div>
 
@@ -433,17 +468,23 @@ function QuestionCard({
 
       {/* Options */}
       {question.kind === "input" ? (
-        <Input
-          value={selectedAnswer ?? ""}
-          onChange={(event) => onAnswer(event.target.value)}
-          placeholder="Nhập đáp án"
-          disabled={isSubmitted}
-          aria-label={`Đáp án câu ${question.number}`}
-        />
+        <div className="space-y-2">
+          <Input
+            value={selectedAnswer ?? ""}
+            onChange={(event) => onAnswer(event.target.value)}
+            placeholder="Nhập đáp án"
+            disabled={isSubmitted}
+            aria-label={`Đáp án câu ${question.number}`}
+          />
+          {showResults && reviewResult?.correctAnswer && (
+            <p className="text-sm text-success-foreground"><span className="text-muted-foreground">Đáp án đúng: </span>{reviewResult.correctAnswer}</p>
+          )}
+        </div>
       ) : <div className="space-y-2">
         {question.options.map((option) => {
           const isSelected = selectedAnswer === option.id;
-          const isCorrectOption = option.id === question.correctAnswer;
+          const isCorrectOption = reviewResult?.correctAnswer.startsWith(`${option.label} ·`) === true
+            || reviewResult?.correctAnswer === option.label;
           const showAsCorrect = showResults && isCorrectOption;
           const showAsIncorrect = showResults && isSelected && !isCorrect;
 
@@ -480,6 +521,9 @@ function QuestionCard({
           );
         })}
       </div>}
+      {showResults && question.kind === "choice" && reviewResult?.correctAnswer && (
+        <p className="text-sm text-success-foreground"><span className="text-muted-foreground">Đáp án đúng: </span>{reviewResult.correctAnswer}</p>
+      )}
     </Card>
   );
 }
