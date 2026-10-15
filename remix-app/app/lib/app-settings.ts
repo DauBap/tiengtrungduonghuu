@@ -1,11 +1,13 @@
 import { useSyncExternalStore } from "react";
 
-export type SpeechEngine = "edge" | "local";
-export type SpeechStatus = "idle" | "edge" | "local" | "fallback";
+export type SpeechEngine = "edge" | "azure" | "local";
+export type SpeechVoice = "xiaoxiao" | "xiaoyi" | "liaoning";
+export type SpeechStatus = "idle" | "edge" | "azure" | "local" | "fallback";
 
 export interface AppSettings {
   showPinyin: boolean;
   speechEngine: SpeechEngine;
+  speechVoice: SpeechVoice;
 }
 
 const STORAGE_KEY = "chinese-study-settings";
@@ -13,6 +15,7 @@ const STORAGE_KEY = "chinese-study-settings";
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   showPinyin: true,
   speechEngine: "edge",
+  speechVoice: "xiaoxiao",
 };
 
 let settings = DEFAULT_APP_SETTINGS;
@@ -29,7 +32,12 @@ function parseSettings(raw: string | null): AppSettings {
     const saved = value as Partial<AppSettings>;
     return {
       showPinyin: typeof saved.showPinyin === "boolean" ? saved.showPinyin : true,
-      speechEngine: saved.speechEngine === "local" ? "local" : "edge",
+      speechEngine: saved.speechEngine === "local" || saved.speechEngine === "azure"
+        ? saved.speechEngine
+        : "edge",
+      speechVoice: saved.speechVoice === "xiaoyi" || saved.speechVoice === "liaoning"
+        ? saved.speechVoice
+        : "xiaoxiao",
     };
   } catch {
     return DEFAULT_APP_SETTINGS;

@@ -28,6 +28,16 @@ let activeAudio: HTMLAudioElement | null = null;
 let activeObjectUrl: string | null = null;
 let activeController: AbortController | null = null;
 let speechRequestId = 0;
+let edgeTtsCooldownUntil = 0;
+
+function retryDelayMs(retryAfter: string | null): number {
+  if (!retryAfter) return 30_000;
+  const seconds = Number(retryAfter);
+  const delay = Number.isFinite(seconds)
+    ? seconds * 1_000
+    : Date.parse(retryAfter) - Date.now();
+  return Number.isFinite(delay) ? Math.max(1_000, Math.min(delay, 5 * 60_000)) : 30_000;
+}
 
 export function speakChinese(
   text: string,
@@ -62,14 +72,26 @@ export function speakChinese(
 function speakSelectedTts(text: string): boolean {
   if (getAppSettings().speechEngine === "edge") {
     const requestId = speechRequestId;
-    void speakWithEdgeTts(text, requestId);
+    void speakWithSelectedTts(text, requestId);
+    return true;
+  }
+  if (getAppSettings().speechEngine === "azure") {
+    const requestId = speechRequestId;
+    void speakWithSelectedTts(text, requestId);
     return true;
   }
   setSpeechStatus("local");
   return speakWithTts(text);
 }
 
-async function speakWithEdgeTts(text: string, requestId: number) {
+async function speakWithSelectedTts(text: string, requestId: number) {
+  const engine = getAppSettings().speechEngine;
+  if (engine === "edge" && Date.now() < edgeTtsCooldownUntil) {
+    setSpeechStatus("fallback");
+    speakWithTts(text);
+    return;
+  }
+
   const controller = new AbortController();
   let fallbackStarted = false;
   activeController = controller;
@@ -77,10 +99,20 @@ async function speakWithEdgeTts(text: string, requestId: number) {
     const response = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({
+        text,
+        engine,
+        voice: getAppSettings().speechVoice,
+      }),
       signal: controller.signal,
     });
-    if (!response.ok) throw new Error("Edge TTS request failed");
+    if (!response.ok) {
+      const retryAfter = response.headers.get("Retry-After");
+      if (engine === "edge" && (response.status === 429 || retryAfter)) {
+        edgeTtsCooldownUntil = Date.now() + retryDelayMs(retryAfter);
+      }
+      throw new Error(response.status === 429 ? "Edge TTS rate limit reached" : "Edge TTS request failed");
+    }
     const audioBlob = await response.blob();
     if (audioBlob.size === 0) throw new Error("Edge TTS returned empty audio");
     const objectUrl = URL.createObjectURL(audioBlob);
@@ -89,7 +121,7 @@ async function speakWithEdgeTts(text: string, requestId: number) {
       return;
     }
     activeObjectUrl = objectUrl;
-    setSpeechStatus("edge");
+    setSpeechStatus(engine === "azure" ? "azure" : "edge");
     const audio = new Audio(objectUrl);
     activeAudio = audio;
     audio.onended = releaseActiveAudio;

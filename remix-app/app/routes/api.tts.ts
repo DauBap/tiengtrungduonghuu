@@ -4,8 +4,93 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { requireRole } from "~/lib/session.server";
+import type { SpeechVoice } from "~/lib/app-settings";
+import { buildAzureSpeechSsml } from "~/lib/azure-speech";
+import { getEdgeVoice, SPEECH_VOICES } from "~/lib/speech-voices";
 
 const MAX_TEXT_LENGTH = 2_000;
+const DEFAULT_VOICE: SpeechVoice = "xiaoxiao";
+const EDGE_TTS_RETRY_DELAY_SECONDS = 30;
+let edgeTtsCooldownUntil = 0;
+
+function unavailableResponse(status: 429 | 503) {
+  edgeTtsCooldownUntil = Date.now() + EDGE_TTS_RETRY_DELAY_SECONDS * 1_000;
+  return Response.json(
+    { error: status === 429 ? "Edge TTS is temporarily rate limited" : "Edge TTS is temporarily unavailable" },
+    {
+      status,
+      headers: { "Retry-After": String(EDGE_TTS_RETRY_DELAY_SECONDS) },
+    }
+  );
+}
+
+function getHttpStatusCode(error: unknown): number | null {
+  if (typeof error !== "object" || error === null || !("statusCode" in error)) return null;
+  return typeof error.statusCode === "number" ? error.statusCode : null;
+}
+
+class AzureSpeechError extends Error {
+  constructor(
+    message: string,
+    readonly statusCode: number,
+    readonly retryAfter: string | null = null,
+  ) {
+    super(message);
+  }
+}
+
+async function synthesizeSpeech(text: string, voice: SpeechVoice): Promise<Buffer> {
+  const tts = new EdgeTTS({
+    voice: getEdgeVoice(voice),
+    lang: "zh-CN",
+    rate: "-15%",
+    timeout: 15_000,
+  });
+  const tempDirectory = await mkdtemp(join(tmpdir(), "chinese-edge-tts-"));
+  try {
+    const audioPath = join(tempDirectory, "speech.mp3");
+    await tts.ttsPromise(text, audioPath);
+    return await readFile(audioPath);
+  } finally {
+    await rm(tempDirectory, { recursive: true, force: true });
+  }
+}
+
+async function synthesizeAzureSpeech(text: string): Promise<Buffer> {
+  const key = process.env.AZURE_SPEECH_KEY?.trim();
+  const region = process.env.AZURE_SPEECH_REGION?.trim().toLowerCase();
+  if (!key || !region) {
+    throw new AzureSpeechError("Azure Speech is not configured", 503);
+  }
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(region)) {
+    throw new AzureSpeechError("Azure Speech region is invalid", 500);
+  }
+
+  const response = await fetch(
+    `https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/ssml+xml",
+        "Ocp-Apim-Subscription-Key": key,
+        "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3",
+        "User-Agent": "TiengTrungDuongHuu",
+      },
+      body: buildAzureSpeechSsml(text),
+      signal: AbortSignal.timeout(20_000),
+    }
+  );
+  if (!response.ok) {
+    throw new AzureSpeechError(
+      "Azure Speech synthesis failed",
+      response.status,
+      response.headers.get("Retry-After"),
+    );
+  }
+  const audio = Buffer.from(await response.arrayBuffer());
+  if (audio.length === 0) throw new AzureSpeechError("Azure Speech returned empty audio", 502);
+  return audio;
+}
 
 export async function action({ request }: ActionFunctionArgs) {
   await requireRole(request, ["student", "teacher", "admin"]);
@@ -27,18 +112,69 @@ export async function action({ request }: ActionFunctionArgs) {
     return Response.json({ error: "Text must be between 1 and 2000 characters" }, { status: 400 });
   }
 
-  let tempDirectory: string | null = null;
+  const requestedEngine = body && typeof body === "object" && "engine" in body
+    ? body.engine
+    : "edge";
+  if (requestedEngine !== "edge" && requestedEngine !== "azure") {
+    return Response.json({ error: "Unsupported speech engine" }, { status: 400 });
+  }
+
+  if (requestedEngine === "azure") {
+    try {
+      const audio = await synthesizeAzureSpeech(text);
+      return new Response(new Uint8Array(audio), {
+        headers: {
+          "Content-Type": "audio/mpeg",
+          "Cache-Control": "no-store",
+        },
+      });
+    } catch (error) {
+      if (error instanceof AzureSpeechError) {
+        if (error.statusCode === 429) {
+          return Response.json(
+            { error: "Azure Speech is temporarily rate limited" },
+            {
+              status: 429,
+              ...(error.retryAfter ? { headers: { "Retry-After": error.retryAfter } } : {}),
+            }
+          );
+        }
+        if (error.statusCode === 503 && error.message === "Azure Speech is not configured") {
+          return Response.json(
+            { error: "Configure AZURE_SPEECH_KEY and AZURE_SPEECH_REGION to use Azure Speech" },
+            { status: 503 }
+          );
+        }
+      }
+      console.error("Azure Speech synthesis failed:", error);
+      return Response.json({ error: "Azure Speech is unavailable" }, { status: 503 });
+    }
+  }
+
+  const requestedVoice = body && typeof body === "object" && "voice" in body
+    ? body.voice
+    : DEFAULT_VOICE;
+  const voice = typeof requestedVoice === "string"
+    ? SPEECH_VOICES.find((option) => option.id === requestedVoice)?.id
+    : undefined;
+  if (!voice) {
+    return Response.json({ error: "Unsupported Chinese voice" }, { status: 400 });
+  }
+
+  if (Date.now() < edgeTtsCooldownUntil) {
+    return Response.json(
+      { error: "Edge TTS is temporarily unavailable" },
+      {
+        status: 503,
+        headers: {
+          "Retry-After": String(Math.ceil((edgeTtsCooldownUntil - Date.now()) / 1_000)),
+        },
+      }
+    );
+  }
+
   try {
-    tempDirectory = await mkdtemp(join(tmpdir(), "chinese-edge-tts-"));
-    const audioPath = join(tempDirectory, "speech.mp3");
-    const edgeTts = new EdgeTTS({
-      voice: "zh-CN-XiaoxiaoNeural",
-      lang: "zh-CN",
-      rate: "-15%",
-      timeout: 15_000,
-    });
-    await edgeTts.ttsPromise(text, audioPath);
-    const audio = await readFile(audioPath);
+    const audio = await synthesizeSpeech(text, voice);
     if (audio.length === 0) throw new Error("Edge TTS returned an empty audio stream");
     return new Response(new Uint8Array(audio), {
       headers: {
@@ -47,9 +183,10 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     });
   } catch (error) {
+    if (getHttpStatusCode(error) === 429) {
+      return unavailableResponse(429);
+    }
     console.error("Edge TTS synthesis failed:", error);
-    return Response.json({ error: "Edge TTS is unavailable" }, { status: 503 });
-  } finally {
-    if (tempDirectory) await rm(tempDirectory, { recursive: true, force: true });
+    return unavailableResponse(503);
   }
 }

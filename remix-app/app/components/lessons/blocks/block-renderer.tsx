@@ -141,7 +141,7 @@ export function BlockRenderer({
     if (items.length === 0) return <LessonTabEmpty tab="LISTENING" />;
 
     return (
-      <BlockShell {...shellProps}>
+      <BlockShell {...shellProps} showSettings>
         <ListeningBlock
           config={parsed.data}
           questions={items}

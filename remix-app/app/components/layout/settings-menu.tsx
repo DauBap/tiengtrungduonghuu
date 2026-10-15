@@ -7,6 +7,7 @@ import {
   useSpeechStatus,
   type SpeechEngine,
 } from "~/lib/app-settings";
+import { SPEECH_VOICES } from "~/lib/speech-voices";
 import { cn } from "~/lib/utils";
 
 function SettingsSwitch({
@@ -99,7 +100,8 @@ export function SettingsMenu({ align = "left" }: { align?: "left" | "right" }) {
           <fieldset className="mt-2 border-t pt-2">
             <legend className="px-2 text-xs font-semibold text-muted-foreground">Giọng đọc</legend>
             {([
-              ["edge", "Edge TTS", "Giọng Neural Xiaoxiao"],
+              ["edge", "Edge TTS", "Giọng Edge Neural"],
+              ["azure", "Azure AI Speech", "Giọng Neural tự nhiên (cần cấu hình Azure)"],
               ["local", "Local TTS", "Giọng có sẵn trên thiết bị"],
             ] as const).map(([value, label, description]) => (
               <label
@@ -121,9 +123,38 @@ export function SettingsMenu({ align = "left" }: { align?: "left" | "right" }) {
               </label>
             ))}
           </fieldset>
-          {settings.speechEngine === "edge" && speechStatus === "fallback" && (
+          {settings.speechEngine === "azure" && (
+            <p className="mt-2 rounded-md border bg-muted/40 px-2.5 py-2 text-xs leading-5 text-muted-foreground">
+              Cần cấu hình <code>AZURE_SPEECH_KEY</code> và <code>AZURE_SPEECH_REGION</code> trên máy chủ.
+            </p>
+          )}
+          {settings.speechEngine === "edge" && (
+            <fieldset className="mt-2 border-t pt-2">
+              <legend className="px-2 text-xs font-semibold text-muted-foreground">Chọn giọng nữ</legend>
+              {SPEECH_VOICES.map((voice) => (
+                <label
+                  key={voice.id}
+                  className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted/60"
+                >
+                  <input
+                    type="radio"
+                    name="speech-voice"
+                    value={voice.id}
+                    checked={settings.speechVoice === voice.id}
+                    onChange={() => updateAppSetting("speechVoice", voice.id)}
+                    className="h-4 w-4 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  />
+                  <span className="min-w-0">
+                    <span className="block">{voice.name}</span>
+                    <span className="block text-xs text-muted-foreground">{voice.description}</span>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+          )}
+          {(settings.speechEngine === "edge" || settings.speechEngine === "azure") && speechStatus === "fallback" && (
             <p role="status" className="mt-2 rounded-md border border-warning/30 bg-warning/10 px-2.5 py-2 text-xs leading-5 text-foreground">
-              Edge TTS không trả được audio. Đang dùng giọng đọc của trình duyệt.
+              Dịch vụ TTS không trả được audio. Đang dùng giọng đọc của trình duyệt.
             </p>
           )}
         </section>

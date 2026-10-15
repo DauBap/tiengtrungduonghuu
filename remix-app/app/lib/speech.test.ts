@@ -90,10 +90,16 @@ test("Edge selection overrides vocabulary audio but listening can prefer its rec
     const { speakChinese, stopSpeaking } = await import("~/lib/speech");
     const { updateAppSetting } = await import("~/lib/app-settings");
     updateAppSetting("speechEngine", "edge");
+    updateAppSetting("speechVoice", "xiaoyi");
 
     speakChinese("你好", "/audio/vocabulary.mp3");
     await new Promise((resolve) => setTimeout(resolve, 0));
     assert.equal(requests.length, 1);
+    assert.deepEqual(JSON.parse(String(requests[0].body)), {
+      text: "你好",
+      engine: "edge",
+      voice: "xiaoyi",
+    });
 
     speakChinese("你好", "/audio/listening-question.mp3", { preferAudio: true });
     assert.equal(requests.length, 1);
@@ -104,6 +110,68 @@ test("Edge selection overrides vocabulary audio but listening can prefer its rec
     else Reflect.deleteProperty(globalThis, "window");
     if (originalAudio) Object.defineProperty(globalThis, "Audio", originalAudio);
     else Reflect.deleteProperty(globalThis, "Audio");
+    if (originalFetch) Object.defineProperty(globalThis, "fetch", originalFetch);
+    else Reflect.deleteProperty(globalThis, "fetch");
+  }
+});
+
+test("Edge temporary failures fall back locally and pause further Edge requests", async () => {
+  const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+  const originalUtterance = Object.getOwnPropertyDescriptor(globalThis, "SpeechSynthesisUtterance");
+  const originalFetch = Object.getOwnPropertyDescriptor(globalThis, "fetch");
+  let requestCount = 0;
+  let localSpeechCount = 0;
+
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: {
+      speechSynthesis: {
+        cancel() {},
+        getVoices: () => [],
+        speak() { localSpeechCount += 1; },
+      },
+      localStorage: { getItem: () => null, setItem() {} },
+      addEventListener() {},
+    },
+  });
+  Object.defineProperty(globalThis, "SpeechSynthesisUtterance", {
+    configurable: true,
+    value: class {
+      lang = "";
+      rate = 1;
+      voice: unknown;
+      constructor(public text: string) {}
+    },
+  });
+  Object.defineProperty(globalThis, "fetch", {
+    configurable: true,
+    value: async () => {
+      requestCount += 1;
+      return Response.json({ error: "Edge TTS is temporarily unavailable" }, {
+        status: 503,
+        headers: { "Retry-After": "30" },
+      });
+    },
+  });
+
+  try {
+    const { speakChinese, stopSpeaking } = await import("~/lib/speech");
+    const { updateAppSetting } = await import("~/lib/app-settings");
+    updateAppSetting("speechEngine", "edge");
+
+    speakChinese("你好");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    speakChinese("再见");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    assert.equal(requestCount, 1);
+    assert.equal(localSpeechCount, 2);
+    stopSpeaking();
+  } finally {
+    if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
+    else Reflect.deleteProperty(globalThis, "window");
+    if (originalUtterance) Object.defineProperty(globalThis, "SpeechSynthesisUtterance", originalUtterance);
+    else Reflect.deleteProperty(globalThis, "SpeechSynthesisUtterance");
     if (originalFetch) Object.defineProperty(globalThis, "fetch", originalFetch);
     else Reflect.deleteProperty(globalThis, "fetch");
   }
