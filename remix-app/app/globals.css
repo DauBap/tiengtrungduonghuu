@@ -6,6 +6,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     /* Nền & chữ: stone ấm, hợp với tông đỏ thương hiệu */
     --background: 60 9% 98%;
     --foreground: 20 14% 12%;
@@ -65,6 +66,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     /* Charcoal ấm trung tính — sang và không xanh lạnh */
     --background: 20 14% 7%;
     --foreground: 60 9% 96%;

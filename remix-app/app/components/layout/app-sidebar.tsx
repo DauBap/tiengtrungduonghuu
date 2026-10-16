@@ -5,6 +5,7 @@ import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, Languages
 import type { UserRole, SessionUser } from "~/lib/session.server";
 import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { AppearanceMenu } from "~/components/layout/appearance-menu";
 
 interface NavItem { label: string; href: string; icon: React.ComponentType<{ className?: string }>; }
 
@@ -93,13 +94,20 @@ export function AppSidebar({ user }: { user: SessionUser }) {
             <p className="text-xs text-sidebar-muted-foreground truncate">{user.email}</p>
           </div>
         </div>
-        <fetcher.Form method="post" action="/logout">
-          <Button type="submit" variant="ghost" size="sm"
-            className="w-full mt-2 justify-start text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground">
-            <LogOut className="h-4 w-4 mr-2" />
-            Đăng xuất
-          </Button>
-        </fetcher.Form>
+        <div className="mt-2 space-y-1">
+          <AppearanceMenu
+            side="top"
+            triggerLabel="Giao diện"
+            triggerClassName="h-10 w-full justify-start gap-2 rounded-lg px-3 text-sm text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground"
+          />
+          <fetcher.Form method="post" action="/logout">
+            <Button type="submit" variant="ghost" size="sm"
+              className="h-10 w-full justify-start text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground">
+              <LogOut className="h-4 w-4 mr-2" />
+              Đăng xuất
+            </Button>
+          </fetcher.Form>
+        </div>
       </div>
     </div>
   );

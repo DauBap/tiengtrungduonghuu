@@ -134,7 +134,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
                 where: { tab: { in: DASHBOARD_ACTIVITIES.map((activity) => activity.tab) } },
                 orderBy: { completedAt: "desc" },
                 take: 1,
-                select: { score: true, passed: true, completedAt: true },
+                select: { score: true, passed: true, completedAt: true, correctCount: true, totalCount: true },
               },
             },
           }),
@@ -237,7 +237,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
             tab,
             status,
             score: Math.round(attempt?.score ?? progress?.currentScore ?? progress?.bestScore ?? progress?.percent ?? 0),
-            percent: Math.max(0, Math.min(100, Math.round(progress?.percent ?? attempt?.score ?? 0))),
+            percent: Math.max(0, Math.min(100, Math.round(progress?.percent ?? 0))),
+            correctCount: attempt?.correctCount,
+            totalCount: attempt?.totalCount,
           };
         }),
       }));
@@ -314,6 +316,12 @@ function activityTone(status: string, isPastLesson: boolean) {
   if (status === "unavailable") return "bg-muted/40 text-muted-foreground";
   if (isPastLesson) return "border border-dashed border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-300";
   return "bg-muted text-muted-foreground";
+}
+
+function lessonProgressTone(percent: number) {
+  if (percent === 0) return "bg-muted text-muted-foreground";
+  if (percent <= 80) return "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300";
+  return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300";
 }
 
 export default function TeacherIndex() {
@@ -617,7 +625,7 @@ export default function TeacherIndex() {
                                               setProgressView("lesson");
                                             }}
                                             title={`${lesson.title}: ${progress.percent}%${hasPendingGrade ? " · Có bài chờ chấm" : ""}`}
-                                            className={`relative min-w-12 rounded-md px-1.5 py-2 text-xs font-semibold ${activityTone(progress.percent === 100 ? "completed" : progress.percent > 0 ? "partial" : "missing", lesson.order < (selectedLesson?.order ?? 0))}`}
+                                            className={`relative min-w-12 rounded-md px-1.5 py-2 text-xs font-semibold ${lessonProgressTone(progress.percent)}`}
                                           >
                                             {progress.percent}%
                                             {hasPendingGrade && <span className="ml-0.5 text-[10px] text-blue-700 dark:text-blue-300">✎</span>}
@@ -725,6 +733,9 @@ export default function TeacherIndex() {
                                                   <span className="font-semibold">
                                                     {result.status === "completed" ? `${result.score}%` : result.status === "partial" ? `${result.percent}%` : selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0) ? "Bỏ sót" : "Chưa làm"}
                                                   </span>
+                                                  {result.correctCount != null && result.totalCount != null && result.totalCount > 0 && (
+                                                    <span className="text-[10px]">{result.correctCount}/{result.totalCount}</span>
+                                                  )}
                                                   <span className="text-[10px]">
                                                     {result.status === "completed" ? "Đã xong" : result.status === "partial" ? "Đang làm" : selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0) ? "Cần hoàn thành" : "Chưa bắt đầu"}
                                                   </span>
@@ -813,12 +824,6 @@ export default function TeacherIndex() {
                                 </div>
                               </div>
                               <div className="flex shrink-0 flex-wrap gap-2">
-                                <Link
-                                  to={`/teacher/courses/${selectedClass.courseId}/students/${student.student.id}`}
-                                  className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"
-                                >
-                                  Xem tiến độ <ArrowUpRight className="h-3.5 w-3.5" />
-                                </Link>
                                 {student.student.zaloUrl ? (
                                   <a
                                     href={student.student.zaloUrl}

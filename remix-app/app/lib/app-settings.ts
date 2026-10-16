@@ -3,11 +3,13 @@ import { useSyncExternalStore } from "react";
 export type SpeechEngine = "edge" | "azure" | "local";
 export type SpeechVoice = "xiaoxiao" | "xiaoyi" | "liaoning";
 export type SpeechStatus = "idle" | "edge" | "azure" | "local" | "fallback";
+export type ThemePreference = "light" | "dark" | "system";
 
 export interface AppSettings {
   showPinyin: boolean;
   speechEngine: SpeechEngine;
   speechVoice: SpeechVoice;
+  themePreference: ThemePreference;
 }
 
 const STORAGE_KEY = "chinese-study-settings";
@@ -16,6 +18,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   showPinyin: true,
   speechEngine: "edge",
   speechVoice: "xiaoxiao",
+  themePreference: "system",
 };
 
 let settings = DEFAULT_APP_SETTINGS;
@@ -38,6 +41,9 @@ function parseSettings(raw: string | null): AppSettings {
       speechVoice: saved.speechVoice === "xiaoyi" || saved.speechVoice === "liaoning"
         ? saved.speechVoice
         : "xiaoxiao",
+      themePreference: saved.themePreference === "light" || saved.themePreference === "dark"
+        ? saved.themePreference
+        : "system",
     };
   } catch {
     return DEFAULT_APP_SETTINGS;
@@ -52,10 +58,22 @@ function notifySpeechStatus() {
   speechListeners.forEach((listener) => listener());
 }
 
+function applyThemePreference() {
+  if (typeof document === "undefined" || typeof window === "undefined") return;
+  const isDark = settings.themePreference === "dark"
+    || (settings.themePreference === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.classList.toggle("dark", isDark);
+}
+
+function onSystemThemeChange() {
+  if (settings.themePreference === "system") applyThemePreference();
+}
+
 function onStorage(event: StorageEvent) {
   if (event.key !== STORAGE_KEY && event.key !== null) return;
   settings = parseSettings(event.key === null ? null : event.newValue);
   speechStatus = settings.speechEngine === "local" ? "local" : "idle";
+  applyThemePreference();
   initialized = true;
   notify();
   notifySpeechStatus();
@@ -70,6 +88,8 @@ export function initializeAppSettings() {
   }
   initialized = true;
   window.addEventListener("storage", onStorage);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", onSystemThemeChange);
+  applyThemePreference();
   notify();
 }
 
@@ -80,6 +100,7 @@ export function getAppSettings(): AppSettings {
 export function updateAppSetting<Key extends keyof AppSettings>(key: Key, value: AppSettings[Key]) {
   initializeAppSettings();
   settings = { ...settings, [key]: value };
+  if (key === "themePreference") applyThemePreference();
   if (key === "speechEngine") {
     speechStatus = value === "local" ? "local" : "idle";
     notifySpeechStatus();

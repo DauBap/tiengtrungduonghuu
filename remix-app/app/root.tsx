@@ -10,10 +10,25 @@ import {
   useRouteError,
 } from "react-router";
 import type { LinksFunction } from "react-router";
+import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Toaster } from "~/components/ui/sonner";
 import { CourseStudyTracker } from "~/components/courses/course-study-tracker";
+import { initializeAppSettings } from "~/lib/app-settings";
 import stylesheet from "~/globals.css?url";
+
+const THEME_BOOTSTRAP_SCRIPT = `(() => {
+  try {
+    const settings = JSON.parse(localStorage.getItem("chinese-study-settings") || "{}");
+    const preference = settings?.themePreference;
+    const isDark = preference === "dark" || (
+      preference !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches
+    );
+    document.documentElement.classList.toggle("dark", isDark);
+  } catch {
+    document.documentElement.classList.toggle("dark", window.matchMedia("(prefers-color-scheme: dark)").matches);
+  }
+})();`;
 
 export const links: LinksFunction = () => [
   { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
@@ -40,11 +55,16 @@ export default function App() {
   const coursePathMatch = location.pathname.match(/^\/student\/courses\/([^/]+)/);
   const trackedCourseId = coursePathMatch ? decodeURIComponent(coursePathMatch[1]) : null;
 
+  useEffect(() => {
+    initializeAppSettings();
+  }, []);
+
   return (
-    <html lang="vi">
+    <html lang="vi" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
         <Meta />
         <Links />
       </head>
@@ -74,10 +94,11 @@ export function ErrorBoundary() {
   const error = useRouteError();
 
   return (
-    <html lang="vi">
+    <html lang="vi" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
         <title>Lỗi</title>
         <Links />
       </head>

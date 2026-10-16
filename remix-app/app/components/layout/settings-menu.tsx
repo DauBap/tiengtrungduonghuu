@@ -40,7 +40,17 @@ function SettingsSwitch({
   );
 }
 
-export function SettingsMenu({ align = "left" }: { align?: "left" | "right" }) {
+export function SettingsMenu({
+  align = "left",
+  side = "bottom",
+  triggerClassName,
+  triggerLabel,
+}: {
+  align?: "left" | "right";
+  side?: "top" | "bottom";
+  triggerClassName?: string;
+  triggerLabel?: string;
+}) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const settings = useAppSettings();
@@ -76,16 +86,21 @@ export function SettingsMenu({ align = "left" }: { align?: "left" | "right" }) {
         aria-expanded={open}
         aria-haspopup="dialog"
         onClick={() => setOpen((value) => !value)}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className={cn(
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          triggerClassName
+        )}
       >
         <Settings className="h-4 w-4" />
+        {triggerLabel && <span>{triggerLabel}</span>}
       </button>
       {open && (
         <section
           role="dialog"
           aria-label="Cài đặt học tập"
           className={cn(
-            "absolute top-full z-[60] mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-md border bg-popover p-3 text-popover-foreground shadow-lg",
+            "absolute z-[60] w-[min(18rem,calc(100vw-2rem))] rounded-md border bg-popover p-3 text-popover-foreground shadow-lg",
+            side === "top" ? "bottom-full mb-2" : "top-full mt-2",
             align === "right" ? "right-0" : "left-0"
           )}
         >
