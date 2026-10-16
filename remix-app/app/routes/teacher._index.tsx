@@ -29,6 +29,9 @@ import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 
 const DASHBOARD_ACTIVITIES = [
+  { tab: "FLASHCARD", label: "Flashcard" },
+  { tab: "LESSON", label: "Bài khóa" },
+  { tab: "PHONETICS", label: "Ngữ âm" },
   { tab: "VOCABULARY_TEST", label: "Ôn từ vựng" },
   { tab: "LISTENING", label: "Nghe câu" },
   { tab: "GRAMMAR", label: "Ngữ pháp" },
@@ -91,7 +94,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           id: true,
           order: true,
           title: true,
-          _count: { select: { content: true, grammarSections: true } },
+          _count: { select: { content: true, grammarSections: true, phoneticsSections: true, audioScripts: true } },
           learningBlocks: { select: { type: true, required: true } },
         },
         orderBy: { order: "asc" },
@@ -188,6 +191,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
       order: lesson.order,
       title: lesson.title,
       availableActivities: {
+        FLASHCARD: lesson.learningBlocks.some((block) => block.type === "FLASHCARD" && block.required),
+        LESSON: lesson._count.audioScripts > 0,
+        PHONETICS: lesson._count.phoneticsSections > 0,
         VOCABULARY_TEST: lesson._count.content > 0,
         LISTENING: lesson.learningBlocks.some((block) => block.type === "LISTENING" && block.required),
         GRAMMAR: lesson._count.grammarSections > 0,
@@ -327,6 +333,9 @@ export default function TeacherIndex() {
   const selectedLesson = selectedClass?.lessons.find((lesson) => lesson.id === selectedLessonId)
     ?? selectedClass?.lessons.find((lesson) => lesson.id === selectedClass.suggestedLessonId)
     ?? selectedClass?.lessons[0];
+  const selectedLessonActivities = selectedLesson
+    ? DASHBOARD_ACTIVITIES.filter(({ tab }) => selectedLesson.availableActivities[tab])
+    : [];
   const selectedStudent = selectedClass?.activityData.find((item) => item.student.id === selectedStudentId);
   const upcomingClasses = myClasses
     .flatMap((cls) => {
@@ -674,7 +683,7 @@ export default function TeacherIndex() {
                                 <thead className="bg-muted/50 text-xs text-muted-foreground">
                                   <tr>
                                     <th scope="col" className="min-w-44 px-3 py-3 font-medium">Học viên</th>
-                                    {DASHBOARD_ACTIVITIES.map((activity) => (
+                                    {selectedLessonActivities.map((activity) => (
                                       <th scope="col" key={activity.tab} className="min-w-28 px-2 py-3 text-center font-medium">{activity.label}</th>
                                     ))}
                                   </tr>
@@ -694,7 +703,7 @@ export default function TeacherIndex() {
                                               : "Chưa có hoạt động"}
                                           </span>
                                         </th>
-                                        {DASHBOARD_ACTIVITIES.map((activity) => {
+                                        {selectedLessonActivities.map((activity) => {
                                           const result = lesson?.activities.find((item) => item.tab === activity.tab);
                                           const pending = activity.tab === "GRAMMAR" && result?.status === "waiting"
                                             ? selectedClass.pendingGrammarAttempts.find((attempt) => attempt.userId === student.student.id && attempt.lessonId === selectedLesson.id)

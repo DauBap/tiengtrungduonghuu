@@ -9,7 +9,7 @@ import { LessonTabEmpty } from "./lesson-tab-empty";
 import { StrokeOrderDialog, splitHanCharacters } from "./stroke-order-dialog";
 import { useAppSettings } from "~/lib/app-settings";
 
-interface VocabularyItem {
+export interface VocabularyItem {
   id: string;
   chinese: string;
   pinyin: string;

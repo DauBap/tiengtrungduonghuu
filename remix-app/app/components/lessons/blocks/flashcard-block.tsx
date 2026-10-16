@@ -7,6 +7,7 @@ import { speakChinese, isSpeechSupported } from "~/lib/speech";
 import type { FlashcardConfig } from "~/lib/learning-blocks";
 import { WORD_TYPE_META, type WordType } from "~/lib/word-types";
 import { useAppSettings } from "~/lib/app-settings";
+import { VocabularyTable } from "~/components/lessons/vocabulary-table";
 
 export interface FlashcardVocab {
   id: string;
@@ -114,8 +115,19 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
   const counts = useMemo(() => {
     const knownCount = items.filter((item) => statuses[item.id] === "known").length;
     const unknownCount = items.filter((item) => statuses[item.id] === "unknown").length;
-    return { known: knownCount, unknown: unknownCount, total: items.length };
+    const unreviewedCount = items.filter((item) => statuses[item.id] === undefined).length;
+    return {
+      known: knownCount,
+      unknown: unknownCount,
+      unreviewed: unreviewedCount,
+      toReview: unknownCount + unreviewedCount,
+      total: items.length,
+    };
   }, [items, statuses]);
+  const unknownItems = useMemo(
+    () => items.filter((item) => statuses[item.id] === "unknown"),
+    [items, statuses],
+  );
 
   const speak = useCallback((item: FlashcardVocab) => speakChinese(item.chinese, item.audioUrl), []);
   const interacted = useRef(false);
@@ -130,7 +142,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
   const startSession = useCallback((nextMode: StudyMode) => {
     const nextCards = config.shuffle ? shuffled(items) : items;
     const nextQueue = nextMode === "unknown"
-      ? nextCards.filter((item) => statuses[item.id] === "unknown").map((item) => item.id)
+      ? nextCards.filter((item) => statuses[item.id] !== "known").map((item) => item.id)
       : nextCards.map((item) => item.id);
     setMode(nextMode);
     setQueue(nextQueue);
@@ -255,26 +267,35 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
 
   if (finished) {
     return (
-      <div className="space-y-5 text-center">
-        <CheckCircle2 className="mx-auto h-12 w-12 text-success" />
-        <div>
-          <h3 className="text-xl font-semibold">Hoàn thành lượt học</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {allKnown
-              ? "Bạn đã thuộc toàn bộ từ; tiến độ tab flashcard đã được cập nhật."
-              : "Tiến độ từ vựng được lưu trên thiết bị này. Hãy đánh dấu các từ đã thuộc để hoàn thành tab."}
-          </p>
+      <div className="space-y-6">
+        <div className="space-y-5 text-center">
+          <CheckCircle2 className="mx-auto h-12 w-12 text-success" />
+          <div>
+            <h3 className="text-xl font-semibold">Hoàn thành lượt học</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {allKnown
+                ? "Bạn đã thuộc toàn bộ từ; tiến độ tab flashcard đã được cập nhật."
+                : "Tiến độ từ vựng được lưu trên thiết bị này. Hãy đánh dấu các từ đã thuộc để hoàn thành tab."}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+            <div className="rounded-lg border bg-success/5 p-3"><strong className="block text-lg text-success">{counts.known}</strong>Đã thuộc</div>
+            <div className="rounded-lg border bg-destructive/5 p-3"><strong className="block text-lg text-destructive">{counts.unknown}</strong>Chưa thuộc</div>
+            <div className="rounded-lg border bg-muted/40 p-3"><strong className="block text-lg">{counts.unreviewed}</strong>Chưa đánh giá</div>
+            <div className="rounded-lg border bg-muted/40 p-3"><strong className="block text-lg">{counts.total}</strong>Tổng số</div>
+          </div>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button onClick={() => startSession("all")}><RefreshCw className="mr-1.5 h-4 w-4" />Học lại tất cả</Button>
+            <Button variant="outline" onClick={() => startSession("unknown")} disabled={counts.toReview === 0}><CircleHelp className="mr-1.5 h-4 w-4" />Ôn từ chưa thuộc</Button>
+          </div>
+          <Button variant="ghost" size="sm" onClick={resetProgress}><Trash2 className="mr-1.5 h-4 w-4" />Đặt lại tiến độ</Button>
         </div>
-        <div className="grid grid-cols-3 gap-2 text-sm">
-          <div className="rounded-lg border bg-success/5 p-3"><strong className="block text-lg text-success">{counts.known}</strong>Đã thuộc</div>
-          <div className="rounded-lg border bg-destructive/5 p-3"><strong className="block text-lg text-destructive">{counts.unknown}</strong>Chưa thuộc</div>
-          <div className="rounded-lg border bg-muted/40 p-3"><strong className="block text-lg">{counts.total}</strong>Tổng số</div>
-        </div>
-        <div className="flex flex-wrap justify-center gap-2">
-          <Button onClick={() => startSession("all")}><RefreshCw className="mr-1.5 h-4 w-4" />Học lại tất cả</Button>
-          <Button variant="outline" onClick={() => startSession("unknown")} disabled={counts.unknown === 0}><CircleHelp className="mr-1.5 h-4 w-4" />Ôn từ chưa thuộc</Button>
-        </div>
-        <Button variant="ghost" size="sm" onClick={resetProgress}><Trash2 className="mr-1.5 h-4 w-4" />Đặt lại tiến độ</Button>
+        {mode === "unknown" && unknownItems.length > 0 && (
+          <section className="space-y-3 text-left">
+            <h3 className="text-lg font-semibold">Từ chưa thuộc ({unknownItems.length})</h3>
+            <VocabularyTable items={unknownItems} />
+          </section>
+        )}
       </div>
     );
   }
@@ -291,9 +312,9 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex gap-1 rounded-md border p-1">
           <Button size="sm" variant={mode === "all" ? "destructive" : "ghost"} onClick={() => startSession("all")} disabled={isTransitioning}>TẤT CẢ TỪ</Button>
-          <Button size="sm" variant={mode === "unknown" ? "destructive" : "ghost"} onClick={() => startSession("unknown")} disabled={isTransitioning}>TỪ CHƯA THUỘC</Button>
+          <Button size="sm" variant={mode === "unknown" ? "destructive" : "ghost"} onClick={() => startSession("unknown")} disabled={isTransitioning || counts.toReview === 0}>TỪ CHƯA THUỘC</Button>
         </div>
-        <span className="ml-auto text-xs text-muted-foreground tabular-nums">Đã thuộc {counts.known} · Chưa thuộc {counts.unknown} · Tổng {counts.total}</span>
+        <span className="ml-auto text-xs text-muted-foreground tabular-nums">Đã thuộc {counts.known} · Chưa thuộc {counts.unknown} · Chưa đánh giá {counts.unreviewed} · Tổng {counts.total}</span>
       </div>
       <div className="flex items-center gap-3">
         <Progress value={(position / queue.length) * 100} className="h-1.5 flex-1" />
@@ -346,6 +367,12 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
         <Button variant="ghost" size="sm" onClick={() => startSession(mode)} disabled={isTransitioning}><RefreshCw className="mr-1.5 h-4 w-4" />Học lại lượt này</Button>
         <Button variant="ghost" size="sm" onClick={resetProgress} disabled={isTransitioning}><Trash2 className="mr-1.5 h-4 w-4" />Đặt lại tiến độ</Button>
       </div>
+      {mode === "unknown" && unknownItems.length > 0 && (
+        <section className="space-y-3 border-t pt-4">
+          <h3 className="text-lg font-semibold">Từ chưa thuộc ({unknownItems.length})</h3>
+          <VocabularyTable items={unknownItems} />
+        </section>
+      )}
     </div>
   );
 }
