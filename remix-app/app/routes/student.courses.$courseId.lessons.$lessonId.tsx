@@ -46,7 +46,11 @@ import { useAppSettings } from "~/lib/app-settings";
 import { SettingsMenu } from "~/components/layout/settings-menu";
 import { isLessonTabKey, openLessonTab, recordLessonTabAttempt } from "~/lib/lesson-tab-progress.server";
 import type { LessonTab as ProgressTab } from "~/lib/lesson-tab-progress";
-import { computePronunciationScore } from "~/lib/pronunciation";
+import {
+  chooseClosestRecognitionCandidate,
+  computePronunciationScore,
+  mergeRecognitionTranscript,
+} from "~/lib/pronunciation";
 import { gradePhoneticsSection, type PhoneticsAnswer } from "~/lib/phonetics";
 import { getListeningGrade } from "~/lib/listening-score";
 
@@ -1418,6 +1422,9 @@ export default function LessonDetail() {
   const recognitionRef = useRef<any>(null);
   const manualStopRequestedRef = useRef(false);
   const recognitionErrorRef = useRef(false);
+  const finalTranscriptRef = useRef("");
+  const recognitionRestartTimerRef = useRef<number | null>(null);
+  const recognitionRetryCountRef = useRef(0);
   const inAppBrowser = useInAppBrowser();
 
   const buildPronunciationFeedback = (score: number) => {
@@ -1461,6 +1468,9 @@ export default function LessonDetail() {
     return () => {
       if (recordingTimerRef.current) {
         window.clearInterval(recordingTimerRef.current);
+      }
+      if (recognitionRestartTimerRef.current) {
+        window.clearTimeout(recognitionRestartTimerRef.current);
       }
       recognitionRef.current?.stop();
     };
@@ -1721,6 +1731,12 @@ export default function LessonDetail() {
 
         manualStopRequestedRef.current = false;
         recognitionErrorRef.current = false;
+        finalTranscriptRef.current = "";
+        recognitionRetryCountRef.current = 0;
+        if (recognitionRestartTimerRef.current) {
+          window.clearTimeout(recognitionRestartTimerRef.current);
+          recognitionRestartTimerRef.current = null;
+        }
 
         const previousRecognition = recognitionRef.current;
         if (previousRecognition) {
@@ -1740,13 +1756,15 @@ export default function LessonDetail() {
         const recognition = new SpeechRecognitionCtor();
         recognitionRef.current = recognition;
         recognition.lang = "zh-CN";
-        recognition.continuous = true;
+        recognition.continuous = false;
         recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
+        recognition.maxAlternatives = 5;
 
         console.info("[speech-recognition] Starting", getSpeechDiagnosticContext(recognition.lang));
 
-        let spokenText = "";
+        const scriptText = selectedAudioScript.speakers.map((speaker) => speaker.chinese).join(" ");
+        let sessionFinalText = "";
+        let sessionInterimText = "";
         recognition.onstart = () => {
           if (recognitionRef.current !== recognition) return;
           console.info("[speech-recognition] Started", getSpeechDiagnosticContext(recognition.lang));
@@ -1754,12 +1772,30 @@ export default function LessonDetail() {
 
         recognition.onresult = (event: any) => {
           if (recognitionRef.current !== recognition) return;
-          let transcript = "";
+          let finalText = "";
+          let interimText = "";
           for (let i = 0; i < event.results.length; i += 1) {
-            transcript += event.results[i][0].transcript;
+            const result = event.results[i];
+            const recognizedSoFar = mergeRecognitionTranscript(
+              mergeRecognitionTranscript(finalTranscriptRef.current, finalText),
+              interimText,
+            );
+            const candidates = Array.from(result as ArrayLike<{ transcript: string }>, (candidate) => candidate.transcript);
+            const candidate = chooseClosestRecognitionCandidate(candidates, scriptText, recognizedSoFar);
+            if (result.isFinal) {
+              finalText = mergeRecognitionTranscript(finalText, candidate);
+            } else {
+              interimText = mergeRecognitionTranscript(interimText, candidate);
+            }
           }
-          spokenText = transcript.trim();
-          setRecognizedTranscript(spokenText);
+          sessionFinalText = finalText;
+          sessionInterimText = interimText;
+          const visibleTranscript = mergeRecognitionTranscript(
+            mergeRecognitionTranscript(finalTranscriptRef.current, sessionFinalText),
+            sessionInterimText,
+          );
+          setRecognizedTranscript(visibleTranscript);
+          if (visibleTranscript) recognitionRetryCountRef.current = 0;
         };
 
         recognition.onnomatch = (event: any) => {
@@ -1773,15 +1809,23 @@ export default function LessonDetail() {
         recognition.onend = () => {
           if (recognitionRef.current !== recognition) return;
 
+          const sessionTranscript = sessionFinalText || sessionInterimText;
+          if (sessionTranscript) {
+            finalTranscriptRef.current = mergeRecognitionTranscript(finalTranscriptRef.current, sessionTranscript);
+            setRecognizedTranscript(finalTranscriptRef.current);
+            recognitionRetryCountRef.current = 0;
+          }
+
           console.info("[speech-recognition] Ended", {
             ...getSpeechDiagnosticContext(recognition.lang),
             manualStopRequested: manualStopRequestedRef.current,
             hadError: recognitionErrorRef.current,
-            receivedTranscript: Boolean(spokenText.trim()),
+            receivedTranscript: Boolean(sessionTranscript.trim()),
           });
 
           if (recognitionErrorRef.current) {
             recognitionRef.current = null;
+            setRecognizedTranscript(finalTranscriptRef.current);
             setRecordingSeconds(0);
             setIsRecording(false);
             if (recordingTimerRef.current) {
@@ -1793,19 +1837,38 @@ export default function LessonDetail() {
           }
 
           if (!manualStopRequestedRef.current) {
-            try {
-              recognition.start();
-            } catch (error) {
-              console.error("[speech-recognition] Restart failed", {
-                ...getSpeechDiagnosticContext(recognition.lang),
-                error,
-              });
-            }
+            const retryDelay = sessionTranscript
+              ? 100
+              : Math.min(250 * (2 ** recognitionRetryCountRef.current), 4_000);
+            if (!sessionTranscript) recognitionRetryCountRef.current += 1;
+            sessionFinalText = "";
+            sessionInterimText = "";
+            recognitionRestartTimerRef.current = window.setTimeout(() => {
+              recognitionRestartTimerRef.current = null;
+              if (recognitionRef.current !== recognition || manualStopRequestedRef.current) return;
+              try {
+                recognition.start();
+              } catch (error) {
+                console.error("[speech-recognition] Restart failed", {
+                  ...getSpeechDiagnosticContext(recognition.lang),
+                  error,
+                });
+                recognitionRef.current = null;
+                setRecordingError("Không thể tiếp tục nhận diện giọng nói. Hãy thử bắt đầu lại.");
+                setRecognizedTranscript(finalTranscriptRef.current);
+                setRecordingSeconds(0);
+                setIsRecording(false);
+                if (recordingTimerRef.current) {
+                  window.clearInterval(recordingTimerRef.current);
+                  recordingTimerRef.current = null;
+                }
+                recordingStartedAtRef.current = null;
+              }
+            }, retryDelay);
             return;
           }
 
-          const scriptText = selectedAudioScript.speakers.map((speaker) => speaker.chinese).join(" ");
-          const finalTranscript = spokenText.trim();
+          const finalTranscript = finalTranscriptRef.current.trim();
           if (!finalTranscript) {
             recognitionRef.current = null;
             setRecordingError("Chưa nhận diện được nội dung. Hãy thử đọc lại.");
@@ -1850,7 +1913,7 @@ export default function LessonDetail() {
           setRecordingError(`Không nhận dạng được giọng nói (mã: ${errorCode}). Hãy thử lại sau vài giây.`);
           recognitionErrorRef.current = true;
           manualStopRequestedRef.current = true;
-          setRecognizedTranscript("");
+          setRecognizedTranscript(finalTranscriptRef.current);
           setPronunciationFeedback(null);
           setIsRecording(false);
         };
@@ -1885,8 +1948,39 @@ export default function LessonDetail() {
       const stopRecording = () => {
         manualStopRequestedRef.current = true;
 
+        if (recognitionRestartTimerRef.current) {
+          window.clearTimeout(recognitionRestartTimerRef.current);
+          recognitionRestartTimerRef.current = null;
+          recognitionRef.current = null;
+          const finalTranscript = finalTranscriptRef.current.trim();
+          if (!finalTranscript) {
+            setRecordingError("Chưa nhận diện được nội dung. Hãy thử đọc lại.");
+          } else {
+            const scriptText = selectedAudioScript?.speakers.map((speaker) => speaker.chinese).join(" ") ?? "";
+            const score = computePronunciationScore(scriptText, finalTranscript);
+            setPhoneticScore(Number.isFinite(score) ? Math.min(100, Math.max(0, score)) : 0);
+            setRecognizedTranscript(finalTranscript);
+            setPronunciationFeedback(buildPronunciationFeedback(score));
+          }
+          setRecordingSeconds(0);
+          setIsRecording(false);
+          if (recordingTimerRef.current) {
+            window.clearInterval(recordingTimerRef.current);
+            recordingTimerRef.current = null;
+          }
+          recordingStartedAtRef.current = null;
+          return;
+        }
+
         if (recognitionRef.current) {
-          recognitionRef.current.stop();
+          try {
+            recognitionRef.current.stop();
+          } catch (error) {
+            console.warn("[speech-recognition] Could not stop recognition", {
+              ...getSpeechDiagnosticContext("zh-CN"),
+              error,
+            });
+          }
         }
       };
 
