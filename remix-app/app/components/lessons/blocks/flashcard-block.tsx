@@ -57,6 +57,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
   const [finished, setFinished] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const completionSubmitted = useRef(false);
+  const transitionTimerRef = useRef<number | null>(null);
   const pointerStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
   const isDragging = useRef(false);
   const suppressCardClick = useRef(false);
@@ -91,6 +92,12 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
       }
     }
   }, [hydrated, statuses, storageKey]);
+
+  useEffect(() => () => {
+    if (transitionTimerRef.current !== null) {
+      window.clearTimeout(transitionTimerRef.current);
+    }
+  }, []);
 
   const allKnown = items.length > 0 && items.every((item) => statuses[item.id] === "known");
 
@@ -167,20 +174,24 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
     speak(card);
   }, [card, isTransitioning, speak]);
 
-  const mark = useCallback((status: VocabStatus) => {
+  const mark = useCallback((status: VocabStatus, swipeDirection = status === "known" ? -1 : 1) => {
     if (!card || isTransitioning) return;
     setStatuses((previous) => ({ ...previous, [card.id]: status }));
     setIsTransitioning(true);
-    window.setTimeout(() => {
+    setDragX(swipeDirection * Math.max(window.innerWidth, 500));
+    transitionTimerRef.current = window.setTimeout(() => {
+      transitionTimerRef.current = null;
       setFlipped(false);
-      setDragX(0);
       if (index >= queue.length - 1) {
+        setDragX(0);
         setFinished(true);
       } else {
         setIndex((value) => value + 1);
+        setDragX(-swipeDirection * Math.min(window.innerWidth * 0.16, 96));
+        window.setTimeout(() => setDragX(0), 20);
       }
       setIsTransitioning(false);
-    }, 350);
+    }, 260);
   }, [card, index, isTransitioning, queue.length]);
 
   const handleCardPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
@@ -224,7 +235,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
     }
     const direction = deltaX < 0 ? -1 : 1;
     setDragX(direction * event.currentTarget.clientWidth);
-    mark(direction < 0 ? "known" : "unknown");
+    mark(direction < 0 ? "known" : "unknown", direction);
   };
 
   const cancelCardPointer = (event: ReactPointerEvent<HTMLButtonElement>) => {
@@ -329,8 +340,15 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
         onPointerUp={finishCardPointer}
         onPointerCancel={cancelCardPointer}
         disabled={isTransitioning}
-        className={cn("group relative block w-full touch-pan-y select-none [perspective:1200px]", isDragging.current ? "transition-none" : "transition-transform duration-300")}
-        style={{ transform: `translate3d(${dragX}px, 0, 0) rotate(${dragX / 24}deg)` }}
+        className="group relative block w-full touch-none select-none [perspective:1200px]"
+        style={{
+          transform: `translate3d(${dragX}px, 0, 0) rotate(${dragX / 24}deg)`,
+          opacity: Math.max(0, 1 - Math.abs(dragX) / Math.max(window.innerWidth, 500)),
+          transition: isDragging.current
+            ? "none"
+            : "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease-out",
+          willChange: "transform, opacity",
+        }}
         aria-label={flipped ? "Xem mặt trước; vuốt trái để đánh dấu đã thuộc, vuốt phải để đánh dấu chưa thuộc" : "Xem mặt sau; vuốt trái để đánh dấu đã thuộc, vuốt phải để đánh dấu chưa thuộc"}
       >
         <div className={cn("relative h-72 w-full transition-transform duration-500 [transform-style:preserve-3d]", flipped && "[transform:rotateY(180deg)]")}>
