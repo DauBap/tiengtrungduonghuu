@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link } from "react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import { getEnrolledCoursesWithClass, getStudentDashboardStats } from "~/lib/db.server";
 import { formatSchedule, formatNextClass, getNextClassTime } from "~/lib/schedule-utils";
@@ -97,6 +97,8 @@ export default function StudentIndex() {
     useLoaderData<typeof loader>();
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const [selectedLeaderboardClassId, setSelectedLeaderboardClassId] = useState<string | null>(null);
+  const leaderboardDialogRef = useRef<HTMLElement>(null);
+  const leaderboardCloseButtonRef = useRef<HTMLButtonElement>(null);
   const selectedLeaderboard = classLeaderboards.find((item) => item.id === selectedLeaderboardClassId)
     ?? classLeaderboards[0];
   const nextScheduledEnrollment = enrollments
@@ -107,42 +109,100 @@ export default function StudentIndex() {
     })
     .sort((a, b) => a.nextClassTime.getTime() - b.nextClassTime.getTime())[0];
 
+  useEffect(() => {
+    if (!isLeaderboardOpen) return;
+
+    const dialog = leaderboardDialogRef.current;
+    if (!dialog) return;
+
+    const previouslyFocusedElement = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    leaderboardCloseButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setIsLeaderboardOpen(false);
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusableElements = dialog.querySelectorAll<HTMLElement>(
+        'a[href], button:not(:disabled), [tabindex]:not([tabindex="-1"])',
+      );
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (!firstElement || !lastElement) {
+        event.preventDefault();
+        dialog.focus();
+      } else if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    dialog.addEventListener("keydown", handleKeyDown);
+    return () => {
+      dialog.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousBodyOverflow;
+      if (previouslyFocusedElement?.isConnected) previouslyFocusedElement.focus();
+    };
+  }, [isLeaderboardOpen]);
+
   return (
     <AppShell user={user}>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Bảng điều khiển học viên</h1>
-          <p className="text-muted-foreground text-sm mt-1">Tiếp tục hành trình học tiếng Trung của bạn.</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">Không gian học tập</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Chào mừng bạn trở lại</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Mỗi bài học hôm nay là một bước tiến mới.</p>
         </div>
-        <div className="grid grid-cols-2 divide-x rounded-lg border bg-card sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
           {[
             { label: "Khóa học", value: myCourses.length, icon: BookOpen, tone: "text-primary bg-primary/10" },
             { label: "Tiến độ", value: `${overallProgress}%`, icon: TrendingUp, tone: "text-success bg-success/10" },
             { label: "Bài hoàn thành", value: totalCompleted, icon: CheckCircle2, tone: "text-accent bg-accent/10" },
             { label: "Bài hiện tại", value: currentLesson ? `Bài ${currentLesson.order}` : "Hoàn thành", icon: PlayCircle, tone: "text-warning bg-warning/10" },
           ].map(({ label, value, icon: Icon, tone }) => (
-            <div key={label} className="flex min-w-0 items-center gap-2.5 px-3 py-3 sm:px-4">
-              <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${tone}`}>
-                <Icon className="h-4 w-4" />
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-xs text-muted-foreground">{label}</p>
-                <p className="truncate text-lg font-semibold leading-tight">{value}</p>
-              </div>
-            </div>
+            <Card key={label} className="shadow-none">
+              <CardContent className="flex min-w-0 items-center gap-3 p-3 sm:p-4">
+                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${tone}`}>
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-xs text-muted-foreground sm:text-sm">{label}</p>
+                  <p className="truncate text-lg font-semibold leading-tight tabular-nums sm:text-xl">{value}</p>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
         {currentLesson && (
-          <Card className="border-primary/30 bg-primary/5">
-            <CardContent className="flex items-center justify-between gap-3 p-4 sm:p-4">
-              <div>
-                <p className="text-[11px] font-semibold text-primary">TIẾP TỤC HỌC</p>
-                <h3 className="mt-0.5 font-semibold">{currentLesson.title}</h3>
-                <p className="text-xs text-muted-foreground font-mono">{currentLesson.subtitle}</p>
+          <Card className="relative overflow-hidden border-0 bg-brand-gradient text-primary-foreground shadow-md">
+            <span aria-hidden="true" className="pointer-events-none absolute -right-2 -top-9 select-none font-serif text-[10rem] leading-none text-white/[0.08]">
+              学
+            </span>
+            <CardContent className="relative flex flex-col items-start justify-between gap-5 p-5 sm:flex-row sm:items-center sm:p-7">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground/75">Bài học đang tiếp tục</p>
+                <h2 className="mt-2 text-xl font-semibold leading-snug sm:text-2xl">{currentLesson.title}</h2>
+                <p className="mt-1 text-sm text-primary-foreground/75">{currentLesson.subtitle}</p>
               </div>
-              <Button asChild size="sm">
-                <Link to={`/student/courses/${currentLesson.courseId}/lessons/${currentLesson.id}`}>Tiếp tục</Link>
+              <Button asChild className="shrink-0 bg-white text-primary hover:bg-white/90">
+                <Link to={`/student/courses/${currentLesson.courseId}/lessons/${currentLesson.id}`}>
+                  <PlayCircle className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Tiếp tục học
+                  <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -176,36 +236,66 @@ export default function StudentIndex() {
         )}
 
         <div>
-          <div className="mb-2.5 flex items-center justify-between">
-            <h2 className="text-base font-semibold">Khóa học</h2>
-            <Link to="/student/courses" className="text-xs text-primary hover:underline">Xem tất cả</Link>
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold">Khóa học của bạn</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Theo dõi tiến độ và tiếp tục bài học.</p>
+            </div>
+            <Link to="/student/courses" className="shrink-0 rounded-sm text-sm font-medium text-primary hover:underline">
+              Xem tất cả <span aria-hidden="true">→</span>
+            </Link>
           </div>
-          <div className="space-y-2">
-            {myCourses.map((course) => (
-              <Link
-                key={course.id}
-                to={`/student/courses/${course.id}`}
-                className="group flex items-center gap-3 rounded-lg border bg-card px-3 py-2.5 transition-colors hover:border-primary/30 hover:bg-primary/[0.02]"
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                  <BookOpen className="h-4 w-4" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex flex-wrap items-center gap-x-2">
-                    <span className="truncate text-sm font-medium">{course.title}</span>
-                    <span className="text-[11px] text-muted-foreground">{course.code}</span>
-                  </span>
-                  <span className="mt-1 flex items-center gap-2">
-                    <span className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
-                      <span className="block h-full rounded-full bg-primary" style={{ width: `${courseProgress[course.id] ?? 0}%` }} />
+          {myCourses.length === 0 ? (
+            <div className="rounded-xl border border-dashed bg-card/60 px-5 py-8 text-center">
+              <BookOpen className="mx-auto h-8 w-8 text-muted-foreground/70" aria-hidden="true" />
+              <p className="mt-3 font-medium">Chưa có khóa học</p>
+              <p className="mt-1 text-sm text-muted-foreground">Các khóa học được ghi danh sẽ xuất hiện tại đây.</p>
+            </div>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2">
+              {myCourses.map((course) => {
+                const progress = courseProgress[course.id] ?? 0;
+                const safeProgress = Math.min(100, Math.max(0, progress));
+                return (
+                  <Link
+                    key={course.id}
+                    to={`/student/courses/${course.id}`}
+                    className="group rounded-xl border bg-card p-4 transition-colors hover:border-primary/40 hover:bg-primary/[0.02] focus-visible:rounded-xl sm:p-5"
+                  >
+                    <span className="flex items-start gap-3">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <BookOpen className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="min-w-0 flex-1 truncate font-semibold">{course.title}</span>
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">HSK {course.hskLevel}</span>
+                        </span>
+                        <span className="mt-1 block truncate text-xs text-muted-foreground">{course.code}</span>
+                      </span>
+                      <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
                     </span>
-                    <span className="text-[10px] tabular-nums text-muted-foreground">{courseProgress[course.id] ?? 0}%</span>
-                  </span>
-                </span>
-                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-              </Link>
-            ))}
-          </div>
+                    <span className="mt-5 block">
+                      <span className="mb-2 flex items-center justify-between gap-2 text-xs">
+                        <span className="text-muted-foreground">Tiến độ khóa học</span>
+                        <span className="font-semibold tabular-nums">{safeProgress}%</span>
+                      </span>
+                      <span
+                        className="block h-2 overflow-hidden rounded-full bg-muted"
+                        role="progressbar"
+                        aria-label={`Tiến độ khóa học ${course.title}`}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={safeProgress}
+                      >
+                        <span className="block h-full rounded-full bg-primary transition-[width]" style={{ width: `${safeProgress}%` }} />
+                      </span>
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {classLeaderboards.length > 0 && (
@@ -215,6 +305,8 @@ export default function StudentIndex() {
               size="icon"
               className="fixed bottom-5 right-5 z-40 h-12 w-12 rounded-full shadow-lg"
               aria-label="Mở bảng vàng"
+              aria-haspopup="dialog"
+              aria-expanded={isLeaderboardOpen}
               title="Bảng vàng"
               onClick={() => setIsLeaderboardOpen(true)}
             >
@@ -232,6 +324,8 @@ export default function StudentIndex() {
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="student-leaderboard-title"
+                  ref={leaderboardDialogRef}
+                  tabIndex={-1}
                   className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-2xl"
                 >
                   <header className="flex shrink-0 items-center justify-between border-b px-4 py-3">
@@ -244,6 +338,7 @@ export default function StudentIndex() {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
+                      ref={leaderboardCloseButtonRef}
                       aria-label="Đóng bảng vàng"
                       onClick={() => setIsLeaderboardOpen(false)}
                     >

@@ -14,8 +14,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 20 14% 12%;
 
-    /* Đỏ Trung Hoa #C2272D — màu thương hiệu chủ đạo */
-    --primary: 358 66% 46%;
+    /* Đỏ Trung Hoa đậm hơn, vẫn giữ tương phản AA với chữ trắng */
+    --primary: 358 72% 37%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 60 5% 96%;
@@ -39,7 +39,7 @@
 
     --border: 20 6% 90%;
     --input: 20 6% 90%;
-    --ring: 358 66% 46%;
+    --ring: 358 72% 37%;
     --radius: 0.625rem;
 
     /* Dải sắc thái khóa học: HSK1 -> HSK3 -> Giao tiếp (nhạt tới đậm).
@@ -52,12 +52,12 @@
 
     /* Gradient banner tách riêng khỏi brand-*: banner luôn cần nền ĐẬM để chữ
        trắng đọc được, còn brand-* phải sáng lên ở dark mode để làm màu chữ. */
-    --banner-from: 0 74% 42%;
-    --banner-to: 0 63% 31%;
+    --banner-from: 0 74% 36%;
+    --banner-to: 0 68% 26%;
 
     /* Sidebar: gradient đỏ đậm dần từ trên xuống */
-    --sidebar: 358 66% 46%;
-    --sidebar-to: 357 66% 34%;
+    --sidebar: 358 70% 39%;
+    --sidebar-to: 357 72% 27%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-muted: 357 60% 30%;
     --sidebar-muted-foreground: 355 45% 93%;
@@ -123,6 +123,22 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  a:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
