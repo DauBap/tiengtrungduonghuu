@@ -87,6 +87,16 @@ export function BlockRenderer({
     fetcher.submit({ intent: "complete-block", blockId: block.id }, { method: "post" });
   };
 
+  const markFlashcardIncomplete = (knownCount: number, totalCount: number) => {
+    if (!isCompleted) return;
+    fetcher.submit({
+      intent: "mark-flashcard-incomplete",
+      blockId: block.id,
+      knownCount: String(knownCount),
+      totalCount: String(totalCount),
+    }, { method: "post" });
+  };
+
   const submitListeningAttempt = (answers: { questionId: string; answer: string }[]) => {
     fetcher.submit(
       {
@@ -122,7 +132,15 @@ export function BlockRenderer({
 
     return (
       <BlockShell {...shellProps} showSettings>
-        <FlashcardBlock config={parsed.data} items={items} courseId={courseId} lessonId={lessonId} isCompleted={isCompleted} onComplete={markComplete} />
+        <FlashcardBlock
+          config={parsed.data}
+          items={items}
+          courseId={courseId}
+          lessonId={lessonId}
+          isCompleted={isCompleted}
+          onComplete={markComplete}
+          onIncomplete={markFlashcardIncomplete}
+        />
       </BlockShell>
     );
   }

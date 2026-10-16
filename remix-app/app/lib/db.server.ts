@@ -552,10 +552,8 @@ export async function syncLearningCompleted(userId: string, lessonId: string) {
 
   const progressMap = await getBlockProgressMap(userId, requiredBlocks.map((b) => b.id));
   const allDone = requiredBlocks.every((b) => progressMap.get(b.id) === true);
-  if (!allDone) return false;
-
-  await upsertLessonProgress(userId, lessonId, { learningCompleted: true });
-  return true;
+  await upsertLessonProgress(userId, lessonId, { learningCompleted: allDone });
+  return allDone;
 }
 
 /**

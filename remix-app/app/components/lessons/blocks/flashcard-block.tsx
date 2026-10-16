@@ -30,6 +30,7 @@ interface FlashcardBlockProps {
   lessonId: string;
   isCompleted: boolean;
   onComplete: () => void;
+  onIncomplete?: (knownCount: number, totalCount: number) => void;
   progressStorageKey?: string;
 }
 
@@ -42,7 +43,7 @@ function shuffled<T>(arr: T[]): T[] {
   return copy;
 }
 
-export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted, onComplete, progressStorageKey }: FlashcardBlockProps) {
+export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted, onComplete, onIncomplete, progressStorageKey }: FlashcardBlockProps) {
   const settings = useAppSettings();
   const storageKey = progressStorageKey ?? `flashcard-progress:${courseId}:${lessonId}`;
   const [round, setRound] = useState(0);
@@ -58,6 +59,9 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
   const [hydrated, setHydrated] = useState(false);
   const completionSubmitted = useRef(false);
   const transitionTimerRef = useRef<number | null>(null);
+  const cardElementRef = useRef<HTMLButtonElement>(null);
+  const cardAnimationRef = useRef<Animation | null>(null);
+  const previousCardIdRef = useRef<string | null>(null);
   const pointerStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
   const isDragging = useRef(false);
   const suppressCardClick = useRef(false);
@@ -97,6 +101,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
     if (transitionTimerRef.current !== null) {
       window.clearTimeout(transitionTimerRef.current);
     }
+    cardAnimationRef.current?.cancel();
   }, []);
 
   const allKnown = items.length > 0 && items.every((item) => statuses[item.id] === "known");
@@ -141,6 +146,19 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
   const lastSpokenId = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!card) return;
+    const previousCardId = previousCardIdRef.current;
+    previousCardIdRef.current = card.id;
+    if (!previousCardId || previousCardId === card.id || !cardElementRef.current) return;
+
+    cardAnimationRef.current?.cancel();
+    cardAnimationRef.current = cardElementRef.current.animate(
+      [{ opacity: 0 }, { opacity: 1 }],
+      { duration: 520, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "both" },
+    );
+  }, [card]);
+
+  useEffect(() => {
     if (!card || lastSpokenId.current === card.id) return;
     lastSpokenId.current = card.id;
     if (config.autoSpeak && interacted.current) speak(card);
@@ -176,7 +194,13 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
 
   const mark = useCallback((status: VocabStatus, swipeDirection = status === "known" ? -1 : 1) => {
     if (!card || isTransitioning) return;
-    setStatuses((previous) => ({ ...previous, [card.id]: status }));
+    if (cardElementRef.current) {
+      cardElementRef.current.style.transition = "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease-out";
+    }
+    const nextStatuses = { ...statuses, [card.id]: status };
+    const knownCount = items.filter((item) => nextStatuses[item.id] === "known").length;
+    setStatuses(nextStatuses);
+    if (status === "unknown") onIncomplete?.(knownCount, items.length);
     setIsTransitioning(true);
     setDragX(swipeDirection * Math.max(window.innerWidth, 500));
     transitionTimerRef.current = window.setTimeout(() => {
@@ -187,12 +211,11 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
         setFinished(true);
       } else {
         setIndex((value) => value + 1);
-        setDragX(-swipeDirection * Math.min(window.innerWidth * 0.16, 96));
-        window.setTimeout(() => setDragX(0), 20);
+        setDragX(0);
       }
       setIsTransitioning(false);
-    }, 260);
-  }, [card, index, isTransitioning, queue.length]);
+    }, 280);
+  }, [card, index, isTransitioning, items, onIncomplete, queue.length, statuses]);
 
   const handleCardPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (!event.isPrimary || isTransitioning) return;
@@ -211,7 +234,10 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
     }
     if (isDragging.current) {
       event.preventDefault();
-      setDragX(deltaX);
+      const element = event.currentTarget;
+      element.style.transition = "none";
+      element.style.transform = `translate3d(${deltaX}px, 0, 0) rotate(${deltaX / 24}deg)`;
+      element.style.opacity = String(Math.max(0, 1 - Math.abs(deltaX) / Math.max(window.innerWidth, 500)));
     }
   };
 
@@ -230,11 +256,14 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
     const deltaX = event.clientX - start.x;
     const threshold = Math.max(70, event.currentTarget.clientWidth * 0.2);
     if (Math.abs(deltaX) < threshold) {
-      setDragX(0);
+      const element = event.currentTarget;
+      element.style.transition = "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease-out";
+      element.style.transform = "translate3d(0, 0, 0) rotate(0deg)";
+      element.style.opacity = "1";
       return;
     }
     const direction = deltaX < 0 ? -1 : 1;
-    setDragX(direction * event.currentTarget.clientWidth);
+    event.currentTarget.style.transition = "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease-out";
     mark(direction < 0 ? "known" : "unknown", direction);
   };
 
@@ -243,6 +272,10 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
     pointerStart.current = null;
     isDragging.current = false;
     setDragX(0);
+    const element = event.currentTarget;
+    element.style.transition = "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease-out";
+    element.style.transform = "translate3d(0, 0, 0) rotate(0deg)";
+    element.style.opacity = "1";
   };
 
   const handleCardClick = () => {
@@ -280,13 +313,15 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
     return (
       <div className="space-y-6">
         <div className="space-y-5 text-center">
-          <CheckCircle2 className="mx-auto h-12 w-12 text-success" />
+          {allKnown
+            ? <CheckCircle2 className="mx-auto h-12 w-12 text-success" />
+            : <X className="mx-auto h-12 w-12 text-destructive" />}
           <div>
-            <h3 className="text-xl font-semibold">Hoàn thành lượt học</h3>
+            <h3 className="text-xl font-semibold">{allKnown ? "Hoàn thành lượt học" : "Đã kết thúc lượt học"}</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               {allKnown
                 ? "Bạn đã thuộc toàn bộ từ; tiến độ tab flashcard đã được cập nhật."
-                : "Tiến độ từ vựng được lưu trên thiết bị này. Hãy đánh dấu các từ đã thuộc để hoàn thành tab."}
+                : "Vẫn còn từ chưa thuộc hoặc chưa đánh giá. Lượt học này chưa được tính là hoàn thành."}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
@@ -333,6 +368,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
       </div>
 
       <button
+        key={card.id}
         type="button"
         onClick={handleCardClick}
         onPointerDown={handleCardPointerDown}
@@ -340,13 +376,14 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
         onPointerUp={finishCardPointer}
         onPointerCancel={cancelCardPointer}
         disabled={isTransitioning}
+        ref={cardElementRef}
         className="group relative block w-full touch-none select-none [perspective:1200px]"
         style={{
           transform: `translate3d(${dragX}px, 0, 0) rotate(${dragX / 24}deg)`,
           opacity: Math.max(0, 1 - Math.abs(dragX) / Math.max(window.innerWidth, 500)),
           transition: isDragging.current
             ? "none"
-            : "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease-out",
+            : "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease-out",
           willChange: "transform, opacity",
         }}
         aria-label={flipped ? "Xem mặt trước; vuốt trái để đánh dấu đã thuộc, vuốt phải để đánh dấu chưa thuộc" : "Xem mặt sau; vuốt trái để đánh dấu đã thuộc, vuốt phải để đánh dấu chưa thuộc"}

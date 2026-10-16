@@ -18,7 +18,7 @@ import { EmptyState } from "~/components/common/empty-state";
 import { OpenInBrowserNotice, useInAppBrowser } from "~/components/common/open-in-browser-notice";
 import { BlockRenderer, isBlockLearnable, type ResolvedBlock } from "~/components/lessons/blocks/block-renderer";
 import {
-  isLearningBlockType, parseListeningConfig, parseWorkbookConfig,
+  isLearningBlockType, parseFlashcardConfig, parseListeningConfig, parseWorkbookConfig,
   type WorkbookConfig, type PhoneticsConfig, type LearningBlockType as LearningBlockTypeKey,
 } from "~/lib/learning-blocks";
 import { LessonTabs, type LessonTab } from "~/components/lessons/lesson-tabs";
@@ -695,6 +695,44 @@ export async function action({ request, params }: ActionFunctionArgs) {
       },
     });
     return { success: true, intent: "save-pronunciation-score" as const };
+  }
+
+  if (intent === "mark-flashcard-incomplete") {
+    const blockId = String(form.get("blockId") ?? "");
+    const knownCount = Number(form.get("knownCount"));
+    const block = await prisma.learningBlock.findFirst({
+      where: { id: blockId, lessonId: params.lessonId!, type: "FLASHCARD" },
+      select: { id: true, config: true },
+    });
+    if (!block) throw new Response("Không tìm thấy flashcard trong bài học này", { status: 404 });
+
+    const parsedConfig = parseFlashcardConfig(block.config);
+    if (!parsedConfig.ok) throw new Response("Cấu hình flashcard không hợp lệ", { status: 400 });
+    const totalCount = await prisma.vocabItem.count({
+      where: { id: { in: parsedConfig.data.vocabItemIds }, lessonId: params.lessonId! },
+    });
+    if (!Number.isInteger(knownCount) || knownCount < 0 || knownCount > totalCount || totalCount === 0) {
+      throw new Response("Tiến độ flashcard không hợp lệ", { status: 400 });
+    }
+
+    const now = new Date();
+    await prisma.blockProgress.updateMany({
+      where: { userId: user.id, blockId: block.id, completed: true },
+      data: { completed: false },
+    });
+    await prisma.lessonTabProgress.updateMany({
+      where: { userId: user.id, lessonId: params.lessonId!, tab: "FLASHCARD" },
+      data: {
+        state: "IN_PROGRESS",
+        completed: false,
+        percent: Math.round((knownCount / totalCount) * 100),
+        currentScore: null,
+        completedAt: null,
+        lastAttemptAt: now,
+      },
+    });
+    await syncLearningCompleted(user.id, params.lessonId!);
+    return { success: true, intent: "mark-flashcard-incomplete" as const };
   }
 
   if (intent === "complete-block") {
