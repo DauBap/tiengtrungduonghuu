@@ -30,8 +30,8 @@ test("compares homophonic Chinese characters by pinyin", () => {
   assert.deepEqual(
     comparePronunciationPinyin("他去了", "她去了"),
     [
-      { scriptPinyin: "ta", spokenPinyin: "ta", status: "correct" },
-      { scriptPinyin: "qu", spokenPinyin: "qu", status: "correct" },
+      { scriptPinyin: "tā", spokenPinyin: "tā", status: "correct" },
+      { scriptPinyin: "qù", spokenPinyin: "qù", status: "correct" },
       { scriptPinyin: "le", spokenPinyin: "le", status: "correct" },
     ],
   );
@@ -46,9 +46,9 @@ test("treats recognized Arabic numerals as their spoken Chinese number", () => {
   assert.deepEqual(
     comparePronunciationPinyin("两个人", "2个人"),
     [
-      { scriptPinyin: "liang", spokenPinyin: "er", status: "correct" },
-      { scriptPinyin: "ge", spokenPinyin: "ge", status: "correct" },
-      { scriptPinyin: "ren", spokenPinyin: "ren", status: "correct" },
+      { scriptPinyin: "liǎng", spokenPinyin: "èr", status: "correct" },
+      { scriptPinyin: "gè", spokenPinyin: "gè", status: "correct" },
+      { scriptPinyin: "rén", spokenPinyin: "rén", status: "correct" },
     ],
   );
 });
@@ -57,18 +57,28 @@ test("aligns pinyin syllables with correct, incorrect, missing, and extra speech
   assert.deepEqual(
     comparePronunciationPinyin("你好世界", "你候世"),
     [
-      { scriptPinyin: "ni", spokenPinyin: "ni", status: "correct" },
-      { scriptPinyin: "hao", spokenPinyin: "hou", status: "incorrect" },
-      { scriptPinyin: "shi", spokenPinyin: "shi", status: "correct" },
-      { scriptPinyin: "jie", spokenPinyin: null, status: "missing" },
+      { scriptPinyin: "nǐ", spokenPinyin: "nǐ", status: "correct" },
+      { scriptPinyin: "hǎo", spokenPinyin: "hòu", status: "incorrect" },
+      { scriptPinyin: "shì", spokenPinyin: "shì", status: "correct" },
+      { scriptPinyin: "jiè", spokenPinyin: null, status: "missing" },
     ],
   );
   assert.deepEqual(
     comparePronunciationPinyin("你好", "你很好"),
     [
-      { scriptPinyin: "ni", spokenPinyin: "ni", status: "correct" },
-      { scriptPinyin: null, spokenPinyin: "hen", status: "extra" },
-      { scriptPinyin: "hao", spokenPinyin: "hao", status: "correct" },
+      { scriptPinyin: "nǐ", spokenPinyin: "nǐ", status: "correct" },
+      { scriptPinyin: null, spokenPinyin: "hěn", status: "extra" },
+      { scriptPinyin: "hǎo", spokenPinyin: "hǎo", status: "correct" },
+    ],
+  );
+});
+
+test("shows tone marks without using them to decide pronunciation matches", () => {
+  assert.deepEqual(
+    comparePronunciationPinyin("你好", "你号"),
+    [
+      { scriptPinyin: "nǐ", spokenPinyin: "nǐ", status: "correct" },
+      { scriptPinyin: "hǎo", spokenPinyin: "hào", status: "correct" },
     ],
   );
 });

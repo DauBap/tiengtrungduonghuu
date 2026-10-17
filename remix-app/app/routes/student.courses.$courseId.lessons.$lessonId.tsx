@@ -2403,8 +2403,8 @@ export default function LessonDetail() {
                     <p className="font-medium text-foreground">Đối chiếu pinyin</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {isRecording
-                        ? "Đối chiếu cập nhật theo âm tiết được nhận diện. Thanh điệu chưa được chấm."
-                        : "Xanh: khớp · Đỏ: khác hoặc thiếu · Cam: đọc thừa. Chữ đồng âm và cách viết số/chữ được tính theo cách đọc."}
+                        ? "Đối chiếu cập nhật theo âm tiết được nhận diện. Dấu thanh được suy ra từ chữ nhận diện để tham khảo, không phải thanh điệu thu âm."
+                        : "Xanh: khớp · Đỏ: khác hoặc thiếu · Cam: đọc thừa. Dấu thanh được suy ra từ chữ nhận diện để tham khảo, không phải thanh điệu thu âm."}
                     </p>
                   </div>
                   {visiblePronunciationComparison.length > 0 ? (

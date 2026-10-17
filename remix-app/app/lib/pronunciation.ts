@@ -77,10 +77,13 @@ function normalizeSyllable(value: string) {
     .replaceAll("v", "u");
 }
 
-function textToPinyinSyllables(value: string) {
+function textToToneMarkedPinyin(value: string) {
   return pinyin(normalizeSpokenNumbers(value), { type: "array", toneType: "symbol" })
-    .map(normalizeSyllable)
-    .filter(Boolean);
+    .filter((syllable) => normalizeSyllable(syllable));
+}
+
+function textToPinyinSyllables(value: string) {
+  return textToToneMarkedPinyin(value).map(normalizeSyllable);
 }
 
 function normalizePronunciationText(value: string) {
@@ -173,8 +176,10 @@ export function comparePronunciationPinyin(
   scriptText: string,
   spokenText: string,
 ): PronunciationPinyinComparison[] {
-  const expected = textToPinyinSyllables(scriptText);
-  const actual = textToPinyinSyllables(spokenText);
+  const expectedPinyin = textToToneMarkedPinyin(scriptText);
+  const actualPinyin = textToToneMarkedPinyin(spokenText);
+  const expected = expectedPinyin.map(normalizeSyllable);
+  const actual = actualPinyin.map(normalizeSyllable);
   const distances = Array.from(
     { length: expected.length + 1 },
     () => Array<number>(actual.length + 1).fill(0),
@@ -203,18 +208,18 @@ export function comparePronunciationPinyin(
       && pinyinEquivalent(expected[i - 1], actual[j - 1])
       && distances[i][j] === distances[i - 1][j - 1]
     ) {
-      comparison.push({ scriptPinyin: expected[i - 1], spokenPinyin: actual[j - 1], status: "correct" });
+      comparison.push({ scriptPinyin: expectedPinyin[i - 1], spokenPinyin: actualPinyin[j - 1], status: "correct" });
       i -= 1;
       j -= 1;
     } else if (i > 0 && j > 0 && distances[i][j] === distances[i - 1][j - 1] + 1) {
-      comparison.push({ scriptPinyin: expected[i - 1], spokenPinyin: actual[j - 1], status: "incorrect" });
+      comparison.push({ scriptPinyin: expectedPinyin[i - 1], spokenPinyin: actualPinyin[j - 1], status: "incorrect" });
       i -= 1;
       j -= 1;
     } else if (i > 0 && distances[i][j] === distances[i - 1][j] + 1) {
-      comparison.push({ scriptPinyin: expected[i - 1], spokenPinyin: null, status: "missing" });
+      comparison.push({ scriptPinyin: expectedPinyin[i - 1], spokenPinyin: null, status: "missing" });
       i -= 1;
     } else {
-      comparison.push({ scriptPinyin: null, spokenPinyin: actual[j - 1], status: "extra" });
+      comparison.push({ scriptPinyin: null, spokenPinyin: actualPinyin[j - 1], status: "extra" });
       j -= 1;
     }
   }
