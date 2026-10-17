@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  comparePronunciationText,
+  comparePronunciationTextParts,
   chooseClosestRecognitionCandidate,
   comparePronunciationPinyin,
   computePronunciationScore,
@@ -79,6 +81,58 @@ test("shows tone marks without using them to decide pronunciation matches", () =
     [
       { scriptPinyin: "nǐ", spokenPinyin: "nǐ", status: "correct" },
       { scriptPinyin: "hǎo", spokenPinyin: "hào", status: "correct" },
+    ],
+  );
+});
+
+test("aligns expected and recognized Chinese text and marks both sides of mistakes", () => {
+  assert.deepEqual(
+    comparePronunciationText("小语你好", "小雨你好"),
+    [
+      { scriptCharacter: "小", spokenCharacter: "小", status: "correct" },
+      { scriptCharacter: "语", spokenCharacter: "雨", status: "incorrect" },
+      { scriptCharacter: "你", spokenCharacter: "你", status: "correct" },
+      { scriptCharacter: "好", spokenCharacter: "好", status: "correct" },
+    ],
+  );
+  assert.deepEqual(
+    comparePronunciationText("你好世界", "你侯世"),
+    [
+      { scriptCharacter: "你", spokenCharacter: "你", status: "correct" },
+      { scriptCharacter: "好", spokenCharacter: "侯", status: "incorrect" },
+      { scriptCharacter: "世", spokenCharacter: "世", status: "correct" },
+      { scriptCharacter: "界", spokenCharacter: null, status: "missing" },
+    ],
+  );
+  assert.deepEqual(
+    comparePronunciationText("你好", "你很好"),
+    [
+      { scriptCharacter: "你", spokenCharacter: "你", status: "correct" },
+      { scriptCharacter: null, spokenCharacter: "很", status: "extra" },
+      { scriptCharacter: "好", spokenCharacter: "好", status: "correct" },
+    ],
+  );
+});
+
+test("keeps text comparisons grouped by script part, including extra recognized characters", () => {
+  assert.deepEqual(
+    comparePronunciationTextParts(["你好", "世界"], "你很好师界"),
+    [
+      {
+        scriptText: "你好",
+        comparison: [
+          { scriptCharacter: "你", spokenCharacter: "你", status: "correct" },
+          { scriptCharacter: null, spokenCharacter: "很", status: "extra" },
+          { scriptCharacter: "好", spokenCharacter: "好", status: "correct" },
+        ],
+      },
+      {
+        scriptText: "世界",
+        comparison: [
+          { scriptCharacter: "世", spokenCharacter: "师", status: "incorrect" },
+          { scriptCharacter: "界", spokenCharacter: "界", status: "correct" },
+        ],
+      },
     ],
   );
 });

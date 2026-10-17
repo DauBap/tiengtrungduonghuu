@@ -47,7 +47,7 @@ import { SettingsMenu } from "~/components/layout/settings-menu";
 import { isLessonTabKey, openLessonTab, recordLessonTabAttempt } from "~/lib/lesson-tab-progress.server";
 import type { LessonTab as ProgressTab } from "~/lib/lesson-tab-progress";
 import {
-  comparePronunciationPinyin,
+  comparePronunciationTextParts,
   chooseClosestRecognitionCandidate,
   computePronunciationScore,
   mergeRecognitionTranscript,
@@ -2184,17 +2184,21 @@ export default function LessonDetail() {
       const bestPronunciationAssessment = pronunciationAssessments.find(
         (assessment) => assessment.lessonAudioScriptId === selectedAudioScript.id
       );
-      const pronunciationComparison = comparePronunciationPinyin(
-        scriptSpeakers.map((speaker) => speaker.chinese).join(""),
+      const pronunciationComparison = comparePronunciationTextParts(
+        scriptSpeakers.map((speaker) => speaker.chinese),
         recognizedTranscript,
       );
-      const lastRecognizedSyllableIndex = pronunciationComparison.reduce(
-        (lastIndex, item, index) => item.status === "missing" ? lastIndex : index,
+      const allComparisonItems = pronunciationComparison.flatMap((part) => part.comparison);
+      const lastRecognizedCharacterIndex = allComparisonItems.reduce(
+        (lastIndex, item, index) => item.spokenCharacter === null ? lastIndex : index,
         -1,
       );
-      const visiblePronunciationComparison = isRecording
-        ? pronunciationComparison.slice(0, lastRecognizedSyllableIndex + 1)
-        : pronunciationComparison;
+      let remainingVisibleItems = isRecording ? lastRecognizedCharacterIndex + 1 : Infinity;
+      const visiblePronunciationParts = pronunciationComparison.map((part, speakerIndex) => {
+        const visibleCount = Math.max(0, Math.min(part.comparison.length, remainingVisibleItems));
+        remainingVisibleItems -= part.comparison.length;
+        return { ...part, speakerIndex, comparison: part.comparison.slice(0, visibleCount) };
+      }).filter((part) => part.comparison.length > 0);
       const hasCurrentTranscript = !isRecording && Boolean(recognizedTranscript.trim());
       const displayedScore = isRecording
         ? null
@@ -2397,42 +2401,59 @@ export default function LessonDetail() {
                 <div
                   className="mt-4 space-y-3 rounded-lg border p-4"
                   aria-live="polite"
-                  aria-label="Đối chiếu từng âm tiết pinyin giữa script và lời đọc"
+                  aria-label="Đối chiếu văn bản chuẩn và lời đọc"
                 >
                   <div>
-                    <p className="font-medium text-foreground">Đối chiếu pinyin</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {isRecording
-                        ? "Đối chiếu cập nhật theo âm tiết được nhận diện. Dấu thanh được suy ra từ chữ nhận diện để tham khảo, không phải thanh điệu thu âm."
-                        : "Xanh: khớp · Đỏ: khác hoặc thiếu · Cam: đọc thừa. Dấu thanh được suy ra từ chữ nhận diện để tham khảo, không phải thanh điệu thu âm."}
-                    </p>
-                  </div>
-                  {visiblePronunciationComparison.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                      {visiblePronunciationComparison.map((item, index) => {
-                        const statusClass = item.status === "correct"
-                          ? "border-success/40 bg-success/10 text-success"
-                          : item.status === "extra"
-                            ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"
-                            : "border-destructive/40 bg-destructive/10 text-destructive";
-                        return (
-                          <div
-                            key={`${index}-${item.scriptPinyin ?? "extra"}-${item.spokenPinyin ?? "missing"}`}
-                            className={cn("min-w-14 rounded-md border px-2 py-1 text-center", statusClass)}
-                          >
-                            <div className="text-sm font-medium leading-6">{item.scriptPinyin ?? "—"}</div>
-                            <div className="border-t border-current/20 pt-0.5 text-xs">
-                              {item.spokenPinyin ?? "∅"}
-                            </div>
+                    {visiblePronunciationParts.length > 0 ? (
+                      <>
+                        <div>
+                          <p className="font-medium text-foreground">Văn bản chuẩn</p>
+                          <div className="mt-1 whitespace-pre-wrap break-words text-base leading-relaxed text-foreground">
+                            {visiblePronunciationParts.map((part, partIndex) => (
+                              <div key={`script-part-${partIndex}`}>
+                                {part.comparison.map((item, index) => item.scriptCharacter && (
+                                  <span
+                                    key={`script-${index}`}
+                                    className={item.status === "incorrect" || item.status === "missing"
+                                      ? "rounded-sm bg-destructive/10 px-0.5 font-semibold text-destructive"
+                                      : undefined}
+                                  >
+                                    {item.scriptCharacter}
+                                  </span>
+                                ))}
+                              </div>
+                            ))}
                           </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      {isRecording ? "Đang chờ nhận diện lời đọc..." : "Chưa có nội dung để đối chiếu."}
-                    </p>
-                  )}
+                        </div>
+                        <div className="mt-3">
+                          <p className="font-medium text-foreground">Bạn đọc</p>
+                          <div className="mt-1 whitespace-pre-wrap break-words text-base leading-relaxed text-foreground">
+                            {visiblePronunciationParts.map((part, partIndex) => (
+                              <div key={`spoken-part-${partIndex}`}>
+                                {part.comparison.map((item, index) => item.spokenCharacter && (
+                                  <span
+                                    key={`spoken-${index}`}
+                                    className={item.status === "incorrect" || item.status === "extra"
+                                      ? "rounded-sm bg-destructive/10 px-0.5 font-semibold text-destructive"
+                                      : undefined}
+                                  >
+                                    {item.spokenCharacter}
+                                  </span>
+                                ))}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-base text-muted-foreground">
+                        {isRecording ? "Đang chờ nhận diện lời đọc..." : "Chưa có nội dung để đối chiếu."}
+                      </p>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Phần chữ đỏ là nội dung khác, thiếu hoặc đọc thừa. Thanh điệu chưa được chấm theo giọng đọc.
+                  </p>
                 </div>
               )}
 

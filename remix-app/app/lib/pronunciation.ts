@@ -225,3 +225,118 @@ export function comparePronunciationPinyin(
   }
   return comparison.reverse();
 }
+
+export interface PronunciationTextComparison {
+  scriptCharacter: string | null;
+  spokenCharacter: string | null;
+  status: "correct" | "incorrect" | "missing" | "extra";
+}
+
+export interface PronunciationTextPartComparison {
+  scriptText: string;
+  comparison: PronunciationTextComparison[];
+}
+
+export function comparePronunciationText(
+  scriptText: string,
+  spokenText: string,
+): PronunciationTextComparison[] {
+  const expected = Array.from(scriptText.normalize("NFC"));
+  const actual = Array.from(spokenText.normalize("NFC"));
+  const distances = Array.from(
+    { length: expected.length + 1 },
+    () => Array<number>(actual.length + 1).fill(0),
+  );
+
+  for (let i = 0; i <= expected.length; i += 1) distances[i][0] = i;
+  for (let j = 0; j <= actual.length; j += 1) distances[0][j] = j;
+
+  for (let i = 1; i <= expected.length; i += 1) {
+    for (let j = 1; j <= actual.length; j += 1) {
+      distances[i][j] = Math.min(
+        distances[i - 1][j] + 1,
+        distances[i][j - 1] + 1,
+        distances[i - 1][j - 1] + (expected[i - 1] === actual[j - 1] ? 0 : 1),
+      );
+    }
+  }
+
+  const comparison: PronunciationTextComparison[] = [];
+  let i = expected.length;
+  let j = actual.length;
+  while (i > 0 || j > 0) {
+    if (
+      i > 0
+      && j > 0
+      && expected[i - 1] === actual[j - 1]
+      && distances[i][j] === distances[i - 1][j - 1]
+    ) {
+      comparison.push({
+        scriptCharacter: expected[i - 1],
+        spokenCharacter: actual[j - 1],
+        status: "correct",
+      });
+      i -= 1;
+      j -= 1;
+    } else if (i > 0 && j > 0 && distances[i][j] === distances[i - 1][j - 1] + 1) {
+      comparison.push({
+        scriptCharacter: expected[i - 1],
+        spokenCharacter: actual[j - 1],
+        status: "incorrect",
+      });
+      i -= 1;
+      j -= 1;
+    } else if (i > 0 && distances[i][j] === distances[i - 1][j] + 1) {
+      comparison.push({
+        scriptCharacter: expected[i - 1],
+        spokenCharacter: null,
+        status: "missing",
+      });
+      i -= 1;
+    } else {
+      comparison.push({
+        scriptCharacter: null,
+        spokenCharacter: actual[j - 1],
+        status: "extra",
+      });
+      j -= 1;
+    }
+  }
+
+  return comparison.reverse();
+}
+
+export function comparePronunciationTextParts(
+  scriptParts: readonly string[],
+  spokenText: string,
+): PronunciationTextPartComparison[] {
+  const parts = scriptParts.map((scriptText) => ({
+    scriptText,
+    comparison: [] as PronunciationTextComparison[],
+    expectedCharacterCount: Array.from(scriptText.normalize("NFC")).length,
+  }));
+  const comparison = comparePronunciationText(scriptParts.join(""), spokenText);
+  let partIndex = 0;
+  let expectedCharacterCount = 0;
+
+  for (const item of comparison) {
+    while (
+      partIndex < parts.length - 1
+      && expectedCharacterCount >= parts[partIndex].expectedCharacterCount
+      && item.scriptCharacter !== null
+    ) {
+      partIndex += 1;
+      expectedCharacterCount = 0;
+    }
+
+    if (parts[partIndex]) {
+      parts[partIndex].comparison.push(item);
+      if (item.scriptCharacter !== null) expectedCharacterCount += 1;
+    }
+  }
+
+  return parts.map(({ scriptText, comparison: partComparison }) => ({
+    scriptText,
+    comparison: partComparison,
+  }));
+}
