@@ -1,5 +1,118 @@
-export function normalizePronunciationText(value: string) {
-  return value.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+import { pinyin } from "pinyin-pro";
+
+const chineseDigits = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+const numberUnits = ["", "十", "百", "千"];
+const largeNumberUnits = ["", "万", "亿"];
+
+function numberGroupToChinese(value: number) {
+  const digits = String(value).padStart(4, "0");
+  let result = "";
+  let needsZero = false;
+
+  for (let index = 0; index < digits.length; index += 1) {
+    const digit = Number(digits[index]);
+    const unit = numberUnits[digits.length - index - 1];
+    if (digit === 0) {
+      if (result && digits.slice(index + 1).split("").some((next) => next !== "0")) needsZero = true;
+      continue;
+    }
+    if (needsZero) result += "零";
+    needsZero = false;
+    if (!(digit === 1 && unit === "十" && !result)) result += chineseDigits[digit];
+    result += unit;
+  }
+  return result;
+}
+
+function integerToChinese(value: string) {
+  const normalized = value.replace(/^0+(?=\d)/, "");
+  if (normalized === "0") return chineseDigits[0];
+  if (normalized.length > 12) return Array.from(normalized, (digit) => chineseDigits[Number(digit)]).join("");
+
+  const groups: number[] = [];
+  for (let end = normalized.length; end > 0; end -= 4) {
+    groups.push(Number(normalized.slice(Math.max(0, end - 4), end)));
+  }
+
+  let result = "";
+  let pendingZero = false;
+  for (let index = groups.length - 1; index >= 0; index -= 1) {
+    const group = groups[index];
+    if (group === 0) {
+      if (result) pendingZero = true;
+      continue;
+    }
+    if ((pendingZero || (result && group < 1000)) && !result.endsWith("零")) result += "零";
+    result += numberGroupToChinese(group) + largeNumberUnits[index];
+    pendingZero = false;
+  }
+  return result;
+}
+
+function normalizeSpokenNumbers(text: string) {
+  const normalizedText = text.replace(/[０-９]/gu, (digit) => String(digit.charCodeAt(0) - "０".charCodeAt(0)));
+  return normalizedText.replace(/\d{1,3}(?:[,，]\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?/g, (number, offset: number, source: string) => {
+    const normalizedNumber = number.replace(/[,，]/g, "");
+    if (normalizedNumber.includes(".")) {
+      const [integer, decimal] = normalizedNumber.split(".");
+      return `${integerToChinese(integer)}点${Array.from(decimal, (digit) => chineseDigits[Number(digit)]).join("")}`;
+    }
+
+    const nextCharacter = source[offset + number.length] ?? "";
+    if (/^\d{4}$/.test(normalizedNumber) && nextCharacter === "年") {
+      return Array.from(normalizedNumber, (digit) => chineseDigits[Number(digit)]).join("");
+    }
+
+    return integerToChinese(normalizedNumber);
+  });
+}
+
+function normalizeSyllable(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-züv]/g, "")
+    .replaceAll("ü", "u")
+    .replaceAll("v", "u");
+}
+
+function textToPinyinSyllables(value: string) {
+  return pinyin(normalizeSpokenNumbers(value), { type: "array", toneType: "symbol" })
+    .map(normalizeSyllable)
+    .filter(Boolean);
+}
+
+function normalizePronunciationText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]/gu, "");
+}
+
+function pinyinEquivalent(expected: string, actual: string) {
+  return expected === actual || (expected === "er" && actual === "liang") || (expected === "liang" && actual === "er");
+}
+
+function scoreSyllables(expected: readonly string[], actual: readonly string[]) {
+  if (expected.length === 0 || actual.length === 0) return 0;
+  let previousRow = Array.from({ length: actual.length + 1 }, (_, index) => index);
+
+  for (let i = 1; i <= expected.length; i += 1) {
+    const currentRow = [i];
+    for (let j = 1; j <= actual.length; j += 1) {
+      currentRow[j] = Math.min(
+        currentRow[j - 1] + 1,
+        previousRow[j] + 1,
+        previousRow[j - 1] + (pinyinEquivalent(expected[i - 1], actual[j - 1]) ? 0 : 1),
+      );
+    }
+    previousRow = currentRow;
+  }
+
+  const distance = previousRow[actual.length];
+  return Math.max(0, Math.round(((Math.max(expected.length, actual.length) - distance) / Math.max(expected.length, actual.length)) * 100));
 }
 
 export function chooseClosestRecognitionCandidate(
@@ -8,14 +121,14 @@ export function chooseClosestRecognitionCandidate(
   recognizedPrefix = "",
 ) {
   if (candidates.length === 0) return "";
-
-  const normalizedScript = Array.from(normalizePronunciationText(scriptText));
-  const recognizedLength = Array.from(normalizePronunciationText(recognizedPrefix)).length;
-  const remainingScript = normalizedScript.slice(recognizedLength).join("");
-  if (!remainingScript) return candidates[0];
+  const expected = textToPinyinSyllables(scriptText);
+  const recognizedLength = textToPinyinSyllables(recognizedPrefix).length;
+  const remaining = expected.slice(recognizedLength);
+  if (remaining.length === 0) return candidates[0];
 
   return candidates.reduce((best, candidate) => (
-    computePronunciationScore(remainingScript, candidate) > computePronunciationScore(remainingScript, best)
+    scoreSyllables(remaining, textToPinyinSyllables(candidate))
+      > scoreSyllables(remaining, textToPinyinSyllables(best))
       ? candidate
       : best
   ));
@@ -43,122 +156,67 @@ export function mergeRecognitionTranscript(existingText: string, nextText: strin
   }
 
   if (overlap === 0) return `${existing}${next}`;
-
-  let normalizedCount = 0;
-  let rawCharactersToRemove = 0;
-  for (const character of nextCharacters) {
-    rawCharactersToRemove += 1;
-    normalizedCount += Array.from(normalizePronunciationText(character)).length;
-    if (normalizedCount >= overlap) break;
-  }
-
-  return `${existing}${nextCharacters.slice(rawCharactersToRemove).join("")}`;
+  return `${existing}${nextCharacters.slice(overlap).join("")}`;
 }
 
 export function computePronunciationScore(scriptText: string, spokenText: string) {
-  const scriptCharacters = Array.from(normalizePronunciationText(scriptText));
-  const spokenCharacters = Array.from(normalizePronunciationText(spokenText));
-
-  if (scriptCharacters.length === 0 || spokenCharacters.length === 0) return 0;
-
-  let previousRow = Array.from({ length: spokenCharacters.length + 1 }, (_, index) => index);
-
-  for (let i = 1; i <= scriptCharacters.length; i += 1) {
-    const currentRow = [i];
-    for (let j = 1; j <= spokenCharacters.length; j += 1) {
-      currentRow[j] = Math.min(
-        currentRow[j - 1] + 1,
-        previousRow[j] + 1,
-        previousRow[j - 1] + (scriptCharacters[i - 1] === spokenCharacters[j - 1] ? 0 : 1)
-      );
-    }
-    previousRow = currentRow;
-  }
-
-  const distance = previousRow[spokenCharacters.length];
-  const length = Math.max(scriptCharacters.length, spokenCharacters.length);
-  return Math.max(0, Math.round(((length - distance) / length) * 100));
+  return scoreSyllables(textToPinyinSyllables(scriptText), textToPinyinSyllables(spokenText));
 }
 
-export interface PronunciationCharacterComparison {
-  scriptCharacter: string | null;
-  spokenCharacter: string | null;
+export interface PronunciationPinyinComparison {
+  scriptPinyin: string | null;
+  spokenPinyin: string | null;
   status: "correct" | "incorrect" | "missing" | "extra";
 }
 
-export function comparePronunciationCharacters(
+export function comparePronunciationPinyin(
   scriptText: string,
   spokenText: string,
-): PronunciationCharacterComparison[] {
-  const scriptCharacters = Array.from(scriptText).filter((character) => normalizePronunciationText(character));
-  const spokenCharacters = Array.from(spokenText).filter((character) => normalizePronunciationText(character));
-  const scriptLength = scriptCharacters.length;
-  const spokenLength = spokenCharacters.length;
+): PronunciationPinyinComparison[] {
+  const expected = textToPinyinSyllables(scriptText);
+  const actual = textToPinyinSyllables(spokenText);
   const distances = Array.from(
-    { length: scriptLength + 1 },
-    () => Array<number>(spokenLength + 1).fill(0),
+    { length: expected.length + 1 },
+    () => Array<number>(actual.length + 1).fill(0),
   );
 
-  for (let i = 0; i <= scriptLength; i += 1) distances[i][0] = i;
-  for (let j = 0; j <= spokenLength; j += 1) distances[0][j] = j;
+  for (let i = 0; i <= expected.length; i += 1) distances[i][0] = i;
+  for (let j = 0; j <= actual.length; j += 1) distances[0][j] = j;
 
-  for (let i = 1; i <= scriptLength; i += 1) {
-    for (let j = 1; j <= spokenLength; j += 1) {
-      const sameCharacter = normalizePronunciationText(scriptCharacters[i - 1])
-        === normalizePronunciationText(spokenCharacters[j - 1]);
+  for (let i = 1; i <= expected.length; i += 1) {
+    for (let j = 1; j <= actual.length; j += 1) {
       distances[i][j] = Math.min(
         distances[i - 1][j] + 1,
         distances[i][j - 1] + 1,
-        distances[i - 1][j - 1] + (sameCharacter ? 0 : 1),
+        distances[i - 1][j - 1] + (pinyinEquivalent(expected[i - 1], actual[j - 1]) ? 0 : 1),
       );
     }
   }
 
-  const comparison: PronunciationCharacterComparison[] = [];
-  let i = scriptLength;
-  let j = spokenLength;
+  const comparison: PronunciationPinyinComparison[] = [];
+  let i = expected.length;
+  let j = actual.length;
   while (i > 0 || j > 0) {
     if (
       i > 0
       && j > 0
-      && normalizePronunciationText(scriptCharacters[i - 1]) === normalizePronunciationText(spokenCharacters[j - 1])
+      && pinyinEquivalent(expected[i - 1], actual[j - 1])
       && distances[i][j] === distances[i - 1][j - 1]
     ) {
-      comparison.push({
-        scriptCharacter: scriptCharacters[i - 1],
-        spokenCharacter: spokenCharacters[j - 1],
-        status: "correct",
-      });
+      comparison.push({ scriptPinyin: expected[i - 1], spokenPinyin: actual[j - 1], status: "correct" });
       i -= 1;
       j -= 1;
-    } else if (
-      i > 0
-      && j > 0
-      && distances[i][j] === distances[i - 1][j - 1] + 1
-    ) {
-      comparison.push({
-        scriptCharacter: scriptCharacters[i - 1],
-        spokenCharacter: spokenCharacters[j - 1],
-        status: "incorrect",
-      });
+    } else if (i > 0 && j > 0 && distances[i][j] === distances[i - 1][j - 1] + 1) {
+      comparison.push({ scriptPinyin: expected[i - 1], spokenPinyin: actual[j - 1], status: "incorrect" });
       i -= 1;
       j -= 1;
     } else if (i > 0 && distances[i][j] === distances[i - 1][j] + 1) {
-      comparison.push({
-        scriptCharacter: scriptCharacters[i - 1],
-        spokenCharacter: null,
-        status: "missing",
-      });
+      comparison.push({ scriptPinyin: expected[i - 1], spokenPinyin: null, status: "missing" });
       i -= 1;
     } else {
-      comparison.push({
-        scriptCharacter: null,
-        spokenCharacter: spokenCharacters[j - 1],
-        status: "extra",
-      });
+      comparison.push({ scriptPinyin: null, spokenPinyin: actual[j - 1], status: "extra" });
       j -= 1;
     }
   }
-
   return comparison.reverse();
 }

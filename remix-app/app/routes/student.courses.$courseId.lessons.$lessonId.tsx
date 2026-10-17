@@ -47,7 +47,7 @@ import { SettingsMenu } from "~/components/layout/settings-menu";
 import { isLessonTabKey, openLessonTab, recordLessonTabAttempt } from "~/lib/lesson-tab-progress.server";
 import type { LessonTab as ProgressTab } from "~/lib/lesson-tab-progress";
 import {
-  comparePronunciationCharacters,
+  comparePronunciationPinyin,
   chooseClosestRecognitionCandidate,
   computePronunciationScore,
   mergeRecognitionTranscript,
@@ -2158,16 +2158,16 @@ export default function LessonDetail() {
       const bestPronunciationAssessment = pronunciationAssessments.find(
         (assessment) => assessment.lessonAudioScriptId === selectedAudioScript.id
       );
-      const pronunciationComparison = comparePronunciationCharacters(
+      const pronunciationComparison = comparePronunciationPinyin(
         scriptSpeakers.map((speaker) => speaker.chinese).join(""),
         recognizedTranscript,
       );
-      const lastRecognizedCharacterIndex = pronunciationComparison.reduce(
+      const lastRecognizedSyllableIndex = pronunciationComparison.reduce(
         (lastIndex, item, index) => item.status === "missing" ? lastIndex : index,
         -1,
       );
       const visiblePronunciationComparison = isRecording
-        ? pronunciationComparison.slice(0, lastRecognizedCharacterIndex + 1)
+        ? pronunciationComparison.slice(0, lastRecognizedSyllableIndex + 1)
         : pronunciationComparison;
       const hasCurrentTranscript = !isRecording && Boolean(recognizedTranscript.trim());
       const displayedScore = isRecording
@@ -2371,14 +2371,14 @@ export default function LessonDetail() {
                 <div
                   className="mt-4 space-y-3 rounded-lg border p-4"
                   aria-live="polite"
-                  aria-label="Đối chiếu từng chữ giữa script và lời đọc"
+                  aria-label="Đối chiếu từng âm tiết pinyin giữa script và lời đọc"
                 >
                   <div>
-                    <p className="font-medium text-foreground">Đối chiếu từng chữ</p>
+                    <p className="font-medium text-foreground">Đối chiếu pinyin</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {isRecording
-                        ? "Kết quả nhận diện và đối chiếu sẽ cập nhật khi bạn đọc."
-                        : "Xanh: khớp · Đỏ: khác hoặc thiếu · Cam: đọc thừa"}
+                        ? "Đối chiếu cập nhật theo âm tiết được nhận diện. Thanh điệu chưa được chấm."
+                        : "Xanh: khớp · Đỏ: khác hoặc thiếu · Cam: đọc thừa. Chữ đồng âm và cách viết số/chữ được tính theo cách đọc."}
                     </p>
                   </div>
                   {visiblePronunciationComparison.length > 0 ? (
@@ -2391,12 +2391,12 @@ export default function LessonDetail() {
                             : "border-destructive/40 bg-destructive/10 text-destructive";
                         return (
                           <div
-                            key={`${index}-${item.scriptCharacter ?? "extra"}-${item.spokenCharacter ?? "missing"}`}
-                            className={cn("min-w-10 rounded-md border px-2 py-1 text-center", statusClass)}
+                            key={`${index}-${item.scriptPinyin ?? "extra"}-${item.spokenPinyin ?? "missing"}`}
+                            className={cn("min-w-14 rounded-md border px-2 py-1 text-center", statusClass)}
                           >
-                            <div className="hanzi-display text-lg leading-6">{item.scriptCharacter ?? "—"}</div>
+                            <div className="text-sm font-medium leading-6">{item.scriptPinyin ?? "—"}</div>
                             <div className="border-t border-current/20 pt-0.5 text-xs">
-                              {item.spokenCharacter ?? "∅"}
+                              {item.spokenPinyin ?? "∅"}
                             </div>
                           </div>
                         );
