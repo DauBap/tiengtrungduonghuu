@@ -78,7 +78,7 @@ export default function LoginPage() {
       {/* Left panel */}
       <div className="hidden lg:flex lg:flex-1 bg-brand-gradient relative overflow-hidden">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
-        <div className="relative flex flex-col justify-between p-12 text-primary-foreground">
+        <div className="relative flex flex-col justify-between p-12 text-white">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-foreground/20 backdrop-blur-sm">
               <Languages className="h-6 w-6" />
@@ -87,16 +87,16 @@ export default function LoginPage() {
           </div>
           <div className="space-y-6">
             <h1 className="hero-title text-4xl font-bold leading-tight">Học tiếng Trung<br />từng bước một.</h1>
-            <p className="text-lg text-primary-foreground/80 max-w-md">
+            <p className="text-lg text-white/80 max-w-md">
               Nền tảng học có cấu trúc theo hệ thống HSK chính thức, từ mới bắt đầu đến thành thạo.
             </p>
             <div className="flex gap-8">
-              <div><p className="stat-num text-3xl font-bold">6</p><p className="text-sm text-primary-foreground/70">Cấp độ HSK</p></div>
-              <div><p className="stat-num text-3xl font-bold">100+</p><p className="text-sm text-primary-foreground/70">Bài học</p></div>
-              <div><p className="stat-num text-3xl font-bold">5.000+</p><p className="text-sm text-primary-foreground/70">Từ vựng</p></div>
+              <div><p className="stat-num text-3xl font-bold">6</p><p className="text-sm text-white/70">Cấp độ HSK</p></div>
+              <div><p className="stat-num text-3xl font-bold">100+</p><p className="text-sm text-white/70">Bài học</p></div>
+              <div><p className="stat-num text-3xl font-bold">5.000+</p><p className="text-sm text-white/70">Từ vựng</p></div>
             </div>
           </div>
-          <p className="text-sm text-primary-foreground/60">HSK 1 đến HSK 6 - Chuẩn quốc tế</p>
+          <p className="text-sm text-white/60">HSK 1 đến HSK 6 - Chuẩn quốc tế</p>
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   chooseClosestRecognitionCandidate,
+  comparePronunciationCharacters,
   mergeRecognitionTranscript,
 } from "./pronunciation";
 
@@ -22,4 +23,24 @@ test("merges recognition sessions without duplicating overlapping characters", (
   assert.equal(mergeRecognitionTranscript("你好", "再见"), "你好再见");
   assert.equal(mergeRecognitionTranscript("", " 你好 "), "你好");
   assert.equal(mergeRecognitionTranscript("你好", ""), "你好");
+});
+
+test("aligns spoken characters with correct, incorrect, missing, and extra script characters", () => {
+  assert.deepEqual(
+    comparePronunciationCharacters("你好世界", "你号世"),
+    [
+      { scriptCharacter: "你", spokenCharacter: "你", status: "correct" },
+      { scriptCharacter: "好", spokenCharacter: "号", status: "incorrect" },
+      { scriptCharacter: "世", spokenCharacter: "世", status: "correct" },
+      { scriptCharacter: "界", spokenCharacter: null, status: "missing" },
+    ],
+  );
+  assert.deepEqual(
+    comparePronunciationCharacters("你好", "你很好"),
+    [
+      { scriptCharacter: "你", spokenCharacter: "你", status: "correct" },
+      { scriptCharacter: null, spokenCharacter: "很", status: "extra" },
+      { scriptCharacter: "好", spokenCharacter: "好", status: "correct" },
+    ],
+  );
 });

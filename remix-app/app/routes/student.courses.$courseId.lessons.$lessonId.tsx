@@ -47,6 +47,7 @@ import { SettingsMenu } from "~/components/layout/settings-menu";
 import { isLessonTabKey, openLessonTab, recordLessonTabAttempt } from "~/lib/lesson-tab-progress.server";
 import type { LessonTab as ProgressTab } from "~/lib/lesson-tab-progress";
 import {
+  comparePronunciationCharacters,
   chooseClosestRecognitionCandidate,
   computePronunciationScore,
   mergeRecognitionTranscript,
@@ -1450,13 +1451,20 @@ export default function LessonDetail() {
   const [showScript, setShowScript] = useState(true);
   const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [isPreparingRecording, setIsPreparingRecording] = useState(false);
   const [phoneticScore, setPhoneticScore] = useState(0);
   const [recordingError, setRecordingError] = useState<string | null>(null);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [recognizedTranscript, setRecognizedTranscript] = useState("");
   const [pronunciationFeedback, setPronunciationFeedback] = useState<React.ReactNode | null>(null);
+  const [recordingAudioUrl, setRecordingAudioUrl] = useState<string | null>(null);
+  const [recordingAudioScriptId, setRecordingAudioScriptId] = useState<string | null>(null);
   const recordingTimerRef = useRef<number | null>(null);
   const recordingStartedAtRef = useRef<number | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const recordingChunksRef = useRef<Blob[]>([]);
+  const recordingAudioUrlRef = useRef<string | null>(null);
   const recognitionRef = useRef<any>(null);
   const manualStopRequestedRef = useRef(false);
   const recognitionErrorRef = useRef(false);
@@ -1511,6 +1519,13 @@ export default function LessonDetail() {
         window.clearTimeout(recognitionRestartTimerRef.current);
       }
       recognitionRef.current?.stop();
+      if (mediaRecorderRef.current?.state === "recording") {
+        mediaRecorderRef.current.ondataavailable = null;
+        mediaRecorderRef.current.onstop = null;
+        mediaRecorderRef.current.stop();
+      }
+      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+      if (recordingAudioUrlRef.current) URL.revokeObjectURL(recordingAudioUrlRef.current);
     };
   }, []);
 
@@ -1531,6 +1546,14 @@ export default function LessonDetail() {
     setRecognizedTranscript(best?.transcript ?? "");
     setPronunciationFeedback(best ? buildPronunciationFeedback(best.score) : null);
   }, [pronunciationAssessments, selectedScriptId]);
+
+  useEffect(() => {
+    if (recordingAudioScriptId === selectedScriptId) return;
+    if (recordingAudioUrlRef.current) URL.revokeObjectURL(recordingAudioUrlRef.current);
+    recordingAudioUrlRef.current = null;
+    setRecordingAudioUrl(null);
+    setRecordingAudioScriptId(null);
+  }, [recordingAudioScriptId, selectedScriptId]);
 
   useEffect(() => {
     const selected = lessonAudioScripts.find((script) => script.id === selectedScriptId) ?? lessonAudioScripts[0];
@@ -1757,6 +1780,17 @@ export default function LessonDetail() {
       const selectedAudioScript = lessonAudioScripts.find((script) => script.id === selectedScriptId) ?? lessonAudioScripts[0] ?? null;
       const scriptSpeakers = selectedAudioScript?.speakers ?? [];
 
+      const stopAudioCapture = () => {
+        const recorder = mediaRecorderRef.current;
+        if (recorder?.state === "recording") {
+          recorder.stop();
+          return;
+        }
+        mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+        mediaRecorderRef.current = null;
+      };
+
       const startRecording = async () => {
         if (!selectedAudioScript) return;
 
@@ -1764,6 +1798,88 @@ export default function LessonDetail() {
         if (!SpeechRecognitionCtor) {
           console.error("[speech-recognition] API unavailable", getSpeechDiagnosticContext("zh-CN"));
           setRecordingError("Trình duyệt của bạn chưa hỗ trợ nhận dạng giọng nói. Hãy thử trên Chrome hoặc Edge.");
+          return;
+        }
+
+        if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+          setRecordingError("Trình duyệt chưa hỗ trợ ghi âm. Hãy thử trên Chrome hoặc Edge và cho phép truy cập micro.");
+          return;
+        }
+
+        if (recordingAudioUrlRef.current) URL.revokeObjectURL(recordingAudioUrlRef.current);
+        recordingAudioUrlRef.current = null;
+        setRecordingAudioUrl(null);
+        setRecordingAudioScriptId(null);
+        recordingChunksRef.current = [];
+
+        setIsPreparingRecording(true);
+        let stream: MediaStream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (error) {
+          setIsPreparingRecording(false);
+          console.error("[speech-recognition] Microphone access failed", {
+            ...getSpeechDiagnosticContext("zh-CN"),
+            error,
+          });
+          setRecordingError("Không thể truy cập micro. Hãy kiểm tra quyền micro của trình duyệt rồi thử lại.");
+          return;
+        }
+        setIsPreparingRecording(false);
+
+        let mediaRecorder: MediaRecorder;
+        try {
+          const mimeType = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"]
+            .find((type) => MediaRecorder.isTypeSupported(type));
+          mediaRecorder = mimeType
+            ? new MediaRecorder(stream, { mimeType })
+            : new MediaRecorder(stream);
+        } catch (error) {
+          stream.getTracks().forEach((track) => track.stop());
+          console.error("[speech-recognition] Audio recorder initialization failed", {
+            ...getSpeechDiagnosticContext("zh-CN"),
+            error,
+          });
+          setRecordingError("Không thể khởi tạo ghi âm trên trình duyệt này. Hãy thử Chrome hoặc Edge.");
+          return;
+        }
+
+        mediaStreamRef.current = stream;
+        mediaRecorderRef.current = mediaRecorder;
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) recordingChunksRef.current.push(event.data);
+        };
+        mediaRecorder.onerror = (event) => {
+          console.error("[speech-recognition] Audio capture failed", {
+            ...getSpeechDiagnosticContext("zh-CN"),
+            event,
+          });
+          setRecordingError("Bản ghi âm bị gián đoạn. Hãy kiểm tra micro rồi thử lại.");
+          stopAudioCapture();
+        };
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(recordingChunksRef.current, { type: mediaRecorder.mimeType });
+          recordingChunksRef.current = [];
+          stream.getTracks().forEach((track) => track.stop());
+          if (mediaStreamRef.current === stream) mediaStreamRef.current = null;
+          if (mediaRecorderRef.current === mediaRecorder) mediaRecorderRef.current = null;
+          if (audioBlob.size === 0) return;
+
+          const audioUrl = URL.createObjectURL(audioBlob);
+          if (recordingAudioUrlRef.current) URL.revokeObjectURL(recordingAudioUrlRef.current);
+          recordingAudioUrlRef.current = audioUrl;
+          setRecordingAudioUrl(audioUrl);
+          setRecordingAudioScriptId(selectedAudioScript.id);
+        };
+        try {
+          mediaRecorder.start();
+        } catch (error) {
+          stopAudioCapture();
+          console.error("[speech-recognition] Audio capture failed to start", {
+            ...getSpeechDiagnosticContext("zh-CN"),
+            error,
+          });
+          setRecordingError("Không thể bắt đầu ghi âm. Hãy kiểm tra micro rồi thử lại.");
           return;
         }
 
@@ -1892,6 +2008,7 @@ export default function LessonDetail() {
                   error,
                 });
                 recognitionRef.current = null;
+                stopAudioCapture();
                 setRecordingError("Không thể tiếp tục nhận diện giọng nói. Hãy thử bắt đầu lại.");
                 setRecognizedTranscript(finalTranscriptRef.current);
                 setRecordingSeconds(0);
@@ -1951,6 +2068,7 @@ export default function LessonDetail() {
           setRecordingError(`Không nhận dạng được giọng nói (mã: ${errorCode}). Hãy thử lại sau vài giây.`);
           recognitionErrorRef.current = true;
           manualStopRequestedRef.current = true;
+          stopAudioCapture();
           setRecognizedTranscript(finalTranscriptRef.current);
           setPronunciationFeedback(null);
           setIsRecording(false);
@@ -1970,6 +2088,7 @@ export default function LessonDetail() {
             error,
           });
           if (recognitionRef.current === recognition) recognitionRef.current = null;
+          stopAudioCapture();
           setRecordingError("Không thể bắt đầu nhận diện giọng nói. Xem log trình duyệt để biết chi tiết.");
           setIsRecording(false);
           return;
@@ -1985,6 +2104,7 @@ export default function LessonDetail() {
 
       const stopRecording = () => {
         manualStopRequestedRef.current = true;
+        stopAudioCapture();
 
         if (recognitionRestartTimerRef.current) {
           window.clearTimeout(recognitionRestartTimerRef.current);
@@ -2038,6 +2158,17 @@ export default function LessonDetail() {
       const bestPronunciationAssessment = pronunciationAssessments.find(
         (assessment) => assessment.lessonAudioScriptId === selectedAudioScript.id
       );
+      const pronunciationComparison = comparePronunciationCharacters(
+        scriptSpeakers.map((speaker) => speaker.chinese).join(""),
+        recognizedTranscript,
+      );
+      const lastRecognizedCharacterIndex = pronunciationComparison.reduce(
+        (lastIndex, item, index) => item.status === "missing" ? lastIndex : index,
+        -1,
+      );
+      const visiblePronunciationComparison = isRecording
+        ? pronunciationComparison.slice(0, lastRecognizedCharacterIndex + 1)
+        : pronunciationComparison;
       const hasCurrentTranscript = !isRecording && Boolean(recognizedTranscript.trim());
       const displayedScore = isRecording
         ? null
@@ -2067,8 +2198,9 @@ export default function LessonDetail() {
                     key={script.id}
                     type="button"
                     onClick={() => setSelectedScriptId(script.id)}
+                    disabled={isRecording || isPreparingRecording}
                     className={cn(
-                      "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                      "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
                       script.id === selectedAudioScript.id
                         ? "border-primary bg-primary/10 text-primary"
                         : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-primary"
@@ -2083,7 +2215,7 @@ export default function LessonDetail() {
 
             <div className="space-y-5 p-6">
             <div className="grid gap-4 lg:grid-cols-[minmax(280px,0.95fr)_minmax(420px,1.05fr)]">
-              <section className="rounded-xl border bg-muted/20 p-4">
+              <section className="self-start rounded-xl border bg-muted/20 p-4 lg:sticky lg:top-20">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="text-sm font-bold uppercase tracking-wide text-primary">File nghe</span>
                   <span className="rounded-full bg-success/10 px-2 py-1 text-[11px] font-bold text-success">Audio</span>
@@ -2155,19 +2287,19 @@ export default function LessonDetail() {
                   <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Đọc theo script</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button type="button" variant={isRecording ? "destructive" : "default"} onClick={async () => {
+                  <Button type="button" variant={isRecording ? "destructive" : "default"} disabled={isPreparingRecording} onClick={async () => {
                     if (isRecording) {
                       stopRecording();
                     } else {
                       await startRecording();
                     }
                   }}>
-                    {isRecording ? "Dừng đọc" : "Bắt đầu đọc"}
+                    {isRecording ? "Dừng đọc" : isPreparingRecording ? "Đang kết nối micro..." : "Bắt đầu đọc"}
                   </Button>
                   <Button
                     type="button"
                     onClick={submitPronunciation}
-                    disabled={!recognizedTranscript.trim() || isRecording || isSubmittingPronunciation}
+                    disabled={!recognizedTranscript.trim() || isRecording || isPreparingRecording || isSubmittingPronunciation}
                   >
                     {isSubmittingPronunciation ? "Đang nộp..." : "Nộp bài"}
                   </Button>
@@ -2232,6 +2364,58 @@ export default function LessonDetail() {
                 <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
                   <div className="font-medium text-foreground">Văn bản nhận diện:</div>
                   <p className="mt-1 text-muted-foreground">{recognizedTranscript}</p>
+                </div>
+              )}
+
+              {showScript && (recognizedTranscript || isRecording) && (
+                <div
+                  className="mt-4 space-y-3 rounded-lg border p-4"
+                  aria-live="polite"
+                  aria-label="Đối chiếu từng chữ giữa script và lời đọc"
+                >
+                  <div>
+                    <p className="font-medium text-foreground">Đối chiếu từng chữ</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {isRecording
+                        ? "Kết quả nhận diện và đối chiếu sẽ cập nhật khi bạn đọc."
+                        : "Xanh: khớp · Đỏ: khác hoặc thiếu · Cam: đọc thừa"}
+                    </p>
+                  </div>
+                  {visiblePronunciationComparison.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {visiblePronunciationComparison.map((item, index) => {
+                        const statusClass = item.status === "correct"
+                          ? "border-success/40 bg-success/10 text-success"
+                          : item.status === "extra"
+                            ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                            : "border-destructive/40 bg-destructive/10 text-destructive";
+                        return (
+                          <div
+                            key={`${index}-${item.scriptCharacter ?? "extra"}-${item.spokenCharacter ?? "missing"}`}
+                            className={cn("min-w-10 rounded-md border px-2 py-1 text-center", statusClass)}
+                          >
+                            <div className="hanzi-display text-lg leading-6">{item.scriptCharacter ?? "—"}</div>
+                            <div className="border-t border-current/20 pt-0.5 text-xs">
+                              {item.spokenCharacter ?? "∅"}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {isRecording ? "Đang chờ nhận diện lời đọc..." : "Chưa có nội dung để đối chiếu."}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {recordingAudioUrl && recordingAudioScriptId === selectedAudioScript.id && (
+                <div className="mt-4 space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                  <p className="text-sm font-medium text-foreground">Nghe lại bài nói của bạn</p>
+                  <audio controls preload="metadata" className="w-full" src={recordingAudioUrl}>
+                    Trình duyệt không hỗ trợ phát lại bản ghi âm.
+                  </audio>
                 </div>
               )}
 
