@@ -187,15 +187,15 @@ export default function StudentIndex() {
         </div>
 
         {currentLesson && (
-          <Card className="relative overflow-hidden border-0 bg-brand-gradient text-primary-foreground shadow-md">
+          <Card className="relative overflow-hidden border-0 bg-brand-gradient text-primary-foreground shadow-md dark:text-white">
             <span aria-hidden="true" className="pointer-events-none absolute -right-2 -top-9 select-none font-serif text-[10rem] leading-none text-white/[0.08]">
               学
             </span>
             <CardContent className="relative flex flex-col items-start justify-between gap-5 p-5 sm:flex-row sm:items-center sm:p-7">
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground/75">Bài học đang tiếp tục</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground/75 dark:text-white/80">Bài học đang tiếp tục</p>
                 <h2 className="mt-2 text-xl font-semibold leading-snug sm:text-2xl">{currentLesson.title}</h2>
-                <p className="mt-1 text-sm text-primary-foreground/75">{currentLesson.subtitle}</p>
+                <p className="mt-1 text-sm text-primary-foreground/75 dark:text-white/80">{currentLesson.subtitle}</p>
               </div>
               <Button asChild className="shrink-0 bg-white text-primary hover:bg-white/90">
                 <Link to={`/student/courses/${currentLesson.courseId}/lessons/${currentLesson.id}`}>

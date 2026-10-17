@@ -18,6 +18,7 @@ test("Edge TTS failure falls back to the browser Chinese voice", async () => {
       speechSynthesis,
       localStorage: { getItem: () => null, setItem() {} },
       addEventListener() {},
+      matchMedia: () => ({ addEventListener() {} }),
     },
   });
   Object.defineProperty(globalThis, "SpeechSynthesisUtterance", {
@@ -75,6 +76,7 @@ test("Edge selection overrides vocabulary audio but listening can prefer its rec
       speechSynthesis,
       localStorage: { getItem: () => null, setItem() {} },
       addEventListener() {},
+      matchMedia: () => ({ addEventListener() {} }),
     },
   });
   Object.defineProperty(globalThis, "Audio", { configurable: true, value: MockAudio });
@@ -132,6 +134,7 @@ test("Edge temporary failures fall back locally and pause further Edge requests"
       },
       localStorage: { getItem: () => null, setItem() {} },
       addEventListener() {},
+      matchMedia: () => ({ addEventListener() {} }),
     },
   });
   Object.defineProperty(globalThis, "SpeechSynthesisUtterance", {

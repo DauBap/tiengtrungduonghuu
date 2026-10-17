@@ -1,8 +1,8 @@
 import { useSyncExternalStore } from "react";
 
-export type SpeechEngine = "edge" | "azure" | "local";
+export type SpeechEngine = "edge" | "local";
 export type SpeechVoice = "xiaoxiao" | "xiaoyi" | "liaoning";
-export type SpeechStatus = "idle" | "edge" | "azure" | "local" | "fallback";
+export type SpeechStatus = "idle" | "edge" | "local" | "fallback";
 export type ThemePreference = "light" | "dark" | "system";
 
 export interface AppSettings {
@@ -35,9 +35,7 @@ function parseSettings(raw: string | null): AppSettings {
     const saved = value as Partial<AppSettings>;
     return {
       showPinyin: typeof saved.showPinyin === "boolean" ? saved.showPinyin : true,
-      speechEngine: saved.speechEngine === "local" || saved.speechEngine === "azure"
-        ? saved.speechEngine
-        : "edge",
+      speechEngine: saved.speechEngine === "local" ? "local" : "edge",
       speechVoice: saved.speechVoice === "xiaoyi" || saved.speechVoice === "liaoning"
         ? saved.speechVoice
         : "xiaoxiao",

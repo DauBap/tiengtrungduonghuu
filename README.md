@@ -17,18 +17,6 @@ npm run seed
 npm run dev               # http://localhost:5173
 ```
 
-Để bật Azure AI Speech, điền thêm `AZURE_SPEECH_KEY` và `AZURE_SPEECH_REGION`
-trong `remix-app/.env`. Khóa chỉ được dùng phía máy chủ. Trong ứng dụng, chọn
-**Cài đặt → Giọng đọc → Azure AI Speech**. Azure dùng giọng Neural
-`zh-CN-XiaoxiaoNeural` với style hội thoại `chat`; mức sử dụng có thể phát sinh phí.
-
-```env
-AZURE_SPEECH_KEY="khóa-tài-nguyên-speech"
-AZURE_SPEECH_REGION="eastus"
-```
-
-Tạo resource Speech trong Azure Portal để lấy key và region. Xem thêm [tài liệu REST Text to Speech](https://learn.microsoft.com/azure/ai-services/speech-service/rest-text-to-speech) và [danh sách ngôn ngữ/giọng đọc](https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=tts).
-
 Tài khoản sau khi seed:
 
 | Vai trò | Email | Mật khẩu |

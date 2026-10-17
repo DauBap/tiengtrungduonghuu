@@ -75,18 +75,12 @@ function speakSelectedTts(text: string): boolean {
     void speakWithSelectedTts(text, requestId);
     return true;
   }
-  if (getAppSettings().speechEngine === "azure") {
-    const requestId = speechRequestId;
-    void speakWithSelectedTts(text, requestId);
-    return true;
-  }
   setSpeechStatus("local");
   return speakWithTts(text);
 }
 
 async function speakWithSelectedTts(text: string, requestId: number) {
-  const engine = getAppSettings().speechEngine;
-  if (engine === "edge" && Date.now() < edgeTtsCooldownUntil) {
+  if (Date.now() < edgeTtsCooldownUntil) {
     setSpeechStatus("fallback");
     speakWithTts(text);
     return;
@@ -101,14 +95,14 @@ async function speakWithSelectedTts(text: string, requestId: number) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         text,
-        engine,
+        engine: "edge",
         voice: getAppSettings().speechVoice,
       }),
       signal: controller.signal,
     });
     if (!response.ok) {
       const retryAfter = response.headers.get("Retry-After");
-      if (engine === "edge" && (response.status === 429 || retryAfter)) {
+      if (response.status === 429 || retryAfter) {
         edgeTtsCooldownUntil = Date.now() + retryDelayMs(retryAfter);
       }
       throw new Error(response.status === 429 ? "Edge TTS rate limit reached" : "Edge TTS request failed");
@@ -121,7 +115,7 @@ async function speakWithSelectedTts(text: string, requestId: number) {
       return;
     }
     activeObjectUrl = objectUrl;
-    setSpeechStatus(engine === "azure" ? "azure" : "edge");
+    setSpeechStatus("edge");
     const audio = new Audio(objectUrl);
     activeAudio = audio;
     audio.onended = releaseActiveAudio;
