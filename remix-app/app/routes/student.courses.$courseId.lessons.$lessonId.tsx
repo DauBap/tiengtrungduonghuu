@@ -1829,7 +1829,12 @@ export default function LessonDetail() {
 
         let mediaRecorder: MediaRecorder;
         try {
-          const mimeType = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"]
+          const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent)
+            || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+          const preferredMimeTypes = isIOSDevice
+            ? ["audio/mp4", "audio/webm;codecs=opus", "audio/webm"]
+            : ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
+          const mimeType = preferredMimeTypes
             .find((type) => MediaRecorder.isTypeSupported(type));
           mediaRecorder = mimeType
             ? new MediaRecorder(stream, { mimeType })
@@ -1948,6 +1953,7 @@ export default function LessonDetail() {
             mergeRecognitionTranscript(finalTranscriptRef.current, sessionFinalText),
             sessionInterimText,
           );
+          finalTranscriptRef.current = mergeRecognitionTranscript(finalTranscriptRef.current, sessionFinalText);
           setRecognizedTranscript(visibleTranscript);
           if (visibleTranscript) recognitionRetryCountRef.current = 0;
         };
@@ -2063,6 +2069,26 @@ export default function LessonDetail() {
             eventTimeStamp: event?.timeStamp,
           });
           if (event?.error === "no-speech") {
+            return;
+          }
+          if (event?.error === "aborted" && manualStopRequestedRef.current) {
+            const finalTranscript = finalTranscriptRef.current.trim();
+            recognitionRef.current = null;
+            stopAudioCapture();
+            setRecordingError(null);
+            setRecognizedTranscript(finalTranscript);
+            if (finalTranscript) {
+              const score = computePronunciationScore(scriptText, finalTranscript);
+              setPhoneticScore(score);
+              setPronunciationFeedback(buildPronunciationFeedback(score));
+            }
+            setRecordingSeconds(0);
+            setIsRecording(false);
+            if (recordingTimerRef.current) {
+              window.clearInterval(recordingTimerRef.current);
+              recordingTimerRef.current = null;
+            }
+            recordingStartedAtRef.current = null;
             return;
           }
           setRecordingError(`Không nhận dạng được giọng nói (mã: ${errorCode}). Hãy thử lại sau vài giây.`);
@@ -2413,7 +2439,14 @@ export default function LessonDetail() {
               {recordingAudioUrl && recordingAudioScriptId === selectedAudioScript.id && (
                 <div className="mt-4 space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
                   <p className="text-sm font-medium text-foreground">Nghe lại bài nói của bạn</p>
-                  <audio controls preload="metadata" className="w-full" src={recordingAudioUrl}>
+                  <audio
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="w-full"
+                    src={recordingAudioUrl}
+                    onError={() => setRecordingError("Điện thoại không phát được định dạng bản ghi. Hãy cập nhật Safari rồi ghi âm lại.")}
+                  >
                     Trình duyệt không hỗ trợ phát lại bản ghi âm.
                   </audio>
                 </div>
