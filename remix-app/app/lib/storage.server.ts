@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { put } from "@vercel/blob";
 
 export type AssetKind = "workbook-image" | "lesson-audio";
 
@@ -32,17 +33,28 @@ export async function saveUploadedAsset(file: File | null, options: SaveAssetOpt
     ? sanitizeSegment(options.sectionId ?? options.questionId ?? "question", "question")
     : sanitizeSegment(options.speakerId ?? "speaker", "speaker");
 
-  const fileExt = extFromName(file.name);
+  const fileExt = path.extname(file.name) || (kind === "lesson-audio" ? ".audio" : ".png");
   const safeFileName = `${Date.now()}-${uniqueStem}${fileExt}`;
 
-  const publicDirByKind: Record<AssetKind, string> = {
+  if (kind === "lesson-audio") {
+    const blob = await put(
+      `audio/lessons/${safeLesson}/${safeFileName}`,
+      file,
+      {
+        access: "public",
+        addRandomSuffix: true,
+        contentType: file.type,
+      },
+    );
+    return blob.url;
+  }
+
+  const publicDirByKind: Record<"workbook-image", string> = {
     "workbook-image": path.join("images", "workbooks", safeLesson),
-    "lesson-audio": path.join("audio", "lessons", safeLesson),
   };
 
-  const publicUrlByKind: Record<AssetKind, string> = {
+  const publicUrlByKind: Record<"workbook-image", string> = {
     "workbook-image": `/images/workbooks/${safeLesson}/${safeFileName}`,
-    "lesson-audio": `/audio/lessons/${safeLesson}/${safeFileName}`,
   };
 
   const dir = path.join(process.cwd(), "public", publicDirByKind[kind]);

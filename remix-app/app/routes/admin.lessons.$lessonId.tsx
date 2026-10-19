@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useFetcher, Link } from "react-router";
+import { BlobAccessError } from "@vercel/blob";
 import { requireRole } from "~/lib/session.server";
 import {
   getLessonForAdmin,
@@ -296,13 +297,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const title = String(form.get("title") ?? "").trim();
     const audioUrl = String(form.get("audioUrl") ?? "").trim();
     const uploadedFile = form.get("audioFile");
-    const uploadedAudioUrl = await saveUploadedAsset(
-      uploadedFile instanceof File ? uploadedFile : null,
-      {
-        kind: "lesson-audio",
-        lessonId,
-      },
-    );
+    const uploadedAudioFile =
+      uploadedFile instanceof File && uploadedFile.name ? uploadedFile : null;
     const showScript =
       form.get("showScript") === "on" || form.get("showScript") === "true";
     const scriptId = String(form.get("lessonAudioScriptId") ?? "");
@@ -310,16 +306,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!title)
       return { error: "Vui lòng nhập tiêu đề bài khóa", field: "title" };
     if (
-      uploadedAudioUrl &&
-      !/^https?:\/\/.+/i.test(uploadedAudioUrl) &&
-      !uploadedAudioUrl.startsWith("/audio/")
+      uploadedAudioFile &&
+      (!uploadedAudioFile.type.startsWith("audio/") || uploadedAudioFile.size === 0)
     ) {
       return {
-        error: "Link audio phải bắt đầu bằng http:// hoặc https://",
+        error: "Vui lòng chọn file audio hợp lệ",
         field: "audioUrl",
       };
     }
-    if (audioUrl && !/^https?:\/\/.+/i.test(audioUrl)) {
+    if (!uploadedAudioFile && audioUrl && !/^https?:\/\/.+/i.test(audioUrl)) {
       return {
         error: "Link audio phải bắt đầu bằng http:// hoặc https://",
         field: "audioUrl",
@@ -352,6 +347,21 @@ export async function action({ request, params }: ActionFunctionArgs) {
         error:
           "Vui lòng nhập đầy đủ từng dòng người nói: chữ Hán, pinyin và nghĩa tiếng Việt.",
         field: "speaker",
+      };
+    }
+
+    let uploadedAudioUrl: string | null;
+    try {
+      uploadedAudioUrl = await saveUploadedAsset(uploadedAudioFile, {
+        kind: "lesson-audio",
+        lessonId,
+      });
+    } catch (error) {
+      if (!(error instanceof BlobAccessError)) throw error;
+      return {
+        error:
+          "Vercel Blob từ chối quyền truy cập. Hãy cập nhật BLOB_READ_WRITE_TOKEN bằng token Read/Write của đúng Blob store, rồi khởi động lại server.",
+        field: "audioUrl",
       };
     }
 
