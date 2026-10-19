@@ -510,8 +510,9 @@ function QuestionCard({
                 horizontalChoices ? "gap-1 p-1.5" : "gap-3 p-3",
                 showAsCorrect && "border-success bg-success/10 text-success-foreground",
                 showAsIncorrect && "border-destructive bg-destructive/10 text-destructive-foreground",
-                !showResults && !isSelected && "border-border bg-background hover:border-primary hover:bg-primary/5",
-                !showResults && isSelected && "border-primary bg-primary/5"
+                !showResults && (isSubmitted || !isSelected) && "border-border bg-background",
+                !showResults && !isSubmitted && !isSelected && "hover:border-primary hover:bg-primary/5",
+                !showResults && !isSubmitted && isSelected && "border-primary bg-primary/5"
               )}
               disabled={showResults || isSubmitted}
             >
