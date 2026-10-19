@@ -6,7 +6,7 @@ import { Badge } from "~/components/ui/badge";
 import { AudioSeekBar } from "~/components/audio/audio-seek-bar";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
-import type { WorkbookConfig } from "~/lib/learning-blocks";
+import { isHorizontalWorkbookChoice, type WorkbookConfig } from "~/lib/learning-blocks";
 import { useAppSettings } from "~/lib/app-settings";
 import { answerVariants, isAnswerCorrectForAny } from "~/lib/listening-answer";
 
@@ -55,6 +55,7 @@ interface Section {
 
 export function WorkbookListeningTest({
   config,
+  blockTitle,
   onSubmitAttempt,
   isSaving = false,
   answerReviewEnabled = false,
@@ -62,6 +63,7 @@ export function WorkbookListeningTest({
   submissionError = null,
 }: {
   config: WorkbookConfig;
+  blockTitle: string;
   onSubmitAttempt: (answers: Record<string, string>) => void;
   isSaving?: boolean;
   answerReviewEnabled?: boolean;
@@ -296,24 +298,22 @@ export function WorkbookListeningTest({
                       {config.showTranslation && section.example.translation && <p className="content-text text-sm italic">{section.example.translation}</p>}
                     </div>
                   )}
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="space-y-2">
                     {section.example.options.map((option) => (
                       <div
                         key={option.id}
                         className={cn(
-                          "flex min-w-0 items-center gap-2 rounded-lg border-2 p-2 transition-colors",
+                          "flex items-center gap-3 rounded-lg border-2 p-3 transition-colors",
                           option.id === section.example?.correctAnswer
                             ? "border-success bg-success/10 text-success-foreground"
                             : "border-border bg-background"
                         )}
                       >
-                        <div className={cn(
-                          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-current text-xs font-medium",
-                        )}>
+                        <div                         className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-current font-medium">
                           {option.label}
                         </div>
                         {(option.text || (showPinyin && option.pinyin)) && (
-                          <span className="min-w-0 flex-1 break-words">
+                          <span className="min-w-0 flex-1">
                             {option.text && <span className="content-text hanzi-display block">{option.text}</span>}
                             {showPinyin && option.pinyin && <span className="content-text pinyin-text block text-xs text-muted-foreground">{option.pinyin}</span>}
                           </span>
@@ -335,6 +335,10 @@ export function WorkbookListeningTest({
                 question={question}
                 selectedAnswer={answers[question.id]}
                 onAnswer={(optId) => setAnswers((prev) => ({ ...prev, [question.id]: optId }))}
+                horizontalChoices={
+                  question.kind === "choice"
+                  && isHorizontalWorkbookChoice(blockTitle, question.number)
+                }
                 showTranslation={config.showTranslation}
                 showPinyin={showPinyin}
                 isSubmitted={isSubmitted}
@@ -392,6 +396,7 @@ function QuestionCard({
   question,
   selectedAnswer,
   onAnswer,
+  horizontalChoices,
   showTranslation = true,
   showPinyin = true,
   isSubmitted = false,
@@ -401,6 +406,7 @@ function QuestionCard({
   question: Question;
   selectedAnswer?: string;
   onAnswer: (optId: string) => void;
+  horizontalChoices: boolean;
   showTranslation?: boolean;
   showPinyin?: boolean;
   isSubmitted?: boolean;
@@ -482,7 +488,12 @@ function QuestionCard({
             <p className="text-sm text-success-foreground"><span className="text-muted-foreground">Đáp án đúng: </span>{reviewResult.correctAnswer}</p>
           )}
         </div>
-      ) : <div className="grid grid-cols-3 gap-2">
+      ) : <div
+        className={cn(horizontalChoices ? "grid gap-1.5" : "space-y-2")}
+        style={horizontalChoices
+          ? { gridTemplateColumns: `repeat(${question.options.length}, minmax(0, 1fr))` }
+          : undefined}
+      >
         {question.options.map((option) => {
           const isSelected = selectedAnswer === option.id;
           const isCorrectOption = reviewResult?.correctAnswer.startsWith(`${option.label} ·`) === true
@@ -495,7 +506,8 @@ function QuestionCard({
               key={option.id}
               onClick={() => !showResults && !isSubmitted && onAnswer(option.id)}
               className={cn(
-                "w-full min-w-0 flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-colors",
+                "w-full min-w-0 flex items-center rounded-lg border-2 text-left transition-colors",
+                horizontalChoices ? "gap-1 p-1.5" : "gap-3 p-3",
                 showAsCorrect && "border-success bg-success/10 text-success-foreground",
                 showAsIncorrect && "border-destructive bg-destructive/10 text-destructive-foreground",
                 !showResults && !isSelected && "border-border bg-background hover:border-primary hover:bg-primary/5",
@@ -504,7 +516,8 @@ function QuestionCard({
               disabled={showResults || isSubmitted}
             >
               <div className={cn(
-                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors",
+                "option-label flex shrink-0 items-center justify-center rounded-full border-2 font-medium transition-colors",
+                horizontalChoices ? "h-5 w-5 text-xs" : "h-8 w-8 text-sm",
                 showAsCorrect && "border-success bg-success text-success-foreground",
                 showAsIncorrect && "border-destructive bg-destructive text-destructive-foreground",
                 !showAsCorrect && !showAsIncorrect && "border-current"
@@ -512,13 +525,17 @@ function QuestionCard({
                 {option.label}
               </div>
               {(option.text || (showPinyin && option.pinyin)) && (
-                <span className="min-w-0 flex-1">
+                <span className={cn("min-w-0 flex-1", horizontalChoices && "break-words text-xs")}>
                   {option.text && <span className="content-text hanzi-display block">{option.text}</span>}
-                  {showPinyin && option.pinyin && <span className="content-text pinyin-text block text-xs text-muted-foreground">{option.pinyin}</span>}
+                  {showPinyin && option.pinyin && <span className={cn("option-pinyin content-text pinyin-text block text-xs text-muted-foreground", horizontalChoices && "text-[10px]")}>{option.pinyin}</span>}
                 </span>
               )}
-              {showAsCorrect && <Check className="ml-auto h-5 w-5" />}
-              {showAsIncorrect && <X className="ml-auto h-5 w-5" />}
+              {showAsCorrect && (
+                <Check className={cn("ml-auto shrink-0", horizontalChoices ? "h-3.5 w-3.5" : "h-5 w-5")} />
+              )}
+              {showAsIncorrect && (
+                <X className={cn("ml-auto shrink-0", horizontalChoices ? "h-3.5 w-3.5" : "h-5 w-5")} />
+              )}
             </button>
           );
         })}

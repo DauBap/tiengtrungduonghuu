@@ -219,6 +219,14 @@ export type VocabularyConfig = z.infer<typeof vocabularyConfigSchema>;
 export type GrammarConfig = z.infer<typeof grammarConfigSchema>;
 export type WorkbookConfig = z.infer<typeof workbookConfigSchema>;
 
+export function isHorizontalWorkbookChoice(blockTitle: string, questionNumber: number): boolean {
+  const match = blockTitle.match(/\bHSK\s*([1-3])\b/i);
+  if (!match) return false;
+
+  const horizontalQuestionCount = match[1] === "2" ? 6 : 3;
+  return questionNumber >= 1 && questionNumber <= horizontalQuestionCount;
+}
+
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
 export interface BlockMeta {

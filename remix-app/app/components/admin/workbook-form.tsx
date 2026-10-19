@@ -7,7 +7,7 @@ import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Switch } from "~/components/ui/switch";
-import { BLOCK_META, type WorkbookConfig } from "~/lib/learning-blocks";
+import { BLOCK_META, isHorizontalWorkbookChoice, type WorkbookConfig } from "~/lib/learning-blocks";
 import { cn } from "~/lib/utils";
 import {
   Save, Loader2, Plus, Trash2, ChevronUp, ChevronDown,
@@ -105,6 +105,7 @@ interface WorkbookFormProps {
 
 function QuestionEditor({
   question,
+  workbookTitle,
   index,
   total,
   onChange,
@@ -112,12 +113,16 @@ function QuestionEditor({
   onMove,
 }: {
   question: Question;
+  workbookTitle: string;
   index: number;
   total: number;
   onChange: (q: Question) => void;
   onDelete: () => void;
   onMove: (dir: -1 | 1) => void;
 }) {
+  const horizontalChoices = question.kind === "choice"
+    && isHorizontalWorkbookChoice(workbookTitle, question.number);
+
   const updateOption = (optId: string, field: "text" | "pinyin", value: string) =>
     onChange({
       ...question,
@@ -242,15 +247,27 @@ function QuestionEditor({
         </div>
       ) : <div className="space-y-1.5">
         <Label className="text-xs">Đáp án</Label>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div
+          className={cn("gap-2", horizontalChoices ? "grid" : "flex flex-col")}
+          style={horizontalChoices
+            ? { gridTemplateColumns: `repeat(${question.options.length}, minmax(0, 1fr))` }
+            : undefined}
+        >
           {question.options.map((opt) => (
-            <div key={opt.id} className="min-w-0 space-y-2 rounded-md border p-2">
+            <div
+              key={opt.id}
+              className={cn(
+                "min-w-0 rounded-md border",
+                horizontalChoices ? "space-y-1 p-1" : "space-y-2 p-2",
+              )}
+            >
               <div className="flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => onChange({ ...question, gradable: true, correctAnswer: opt.id })}
                   className={cn(
-                    "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold transition-colors",
+                    "flex shrink-0 items-center justify-center rounded-full border-2 font-bold transition-colors",
+                    horizontalChoices ? "h-6 w-6 text-[10px]" : "h-7 w-7 text-xs",
                     question.correctAnswer === opt.id
                       ? "border-success bg-success text-success-foreground"
                       : "border-muted-foreground/40 hover:border-primary"
@@ -265,7 +282,10 @@ function QuestionEditor({
                   <button
                     type="button"
                     onClick={() => removeOption(opt.id)}
-                    className="shrink-0 text-muted-foreground hover:text-destructive"
+                    className={cn(
+                      "shrink-0 text-muted-foreground hover:text-destructive",
+                      horizontalChoices && "scale-75",
+                    )}
                     aria-label={`Xóa đáp án ${opt.label}`}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -276,13 +296,13 @@ function QuestionEditor({
                 value={opt.text}
                 onChange={(e) => updateOption(opt.id, "text", e.target.value)}
                 placeholder={`Đáp án ${opt.label}`}
-                className="h-8 text-sm"
+                className={cn("text-sm", horizontalChoices ? "h-7 px-1.5 text-xs" : "h-8")}
               />
               <Input
                 value={opt.pinyin}
                 onChange={(e) => updateOption(opt.id, "pinyin", e.target.value)}
                 placeholder={`Pinyin ${opt.label} (tùy chọn)`}
-                className="pinyin-text h-8 text-sm"
+                className={cn("pinyin-text text-sm", horizontalChoices ? "h-7 px-1.5 text-xs" : "h-8")}
               />
             </div>
           ))}
@@ -304,6 +324,7 @@ function QuestionEditor({
 
 function SectionEditor({
   section,
+  workbookTitle,
   index,
   total,
   onChange,
@@ -311,6 +332,7 @@ function SectionEditor({
   onMove,
 }: {
   section: Section;
+  workbookTitle: string;
   index: number;
   total: number;
   onChange: (s: Section) => void;
@@ -428,6 +450,7 @@ function SectionEditor({
               <QuestionEditor
                 key={q.id}
                 question={q}
+                workbookTitle={workbookTitle}
                 index={i}
                 total={section.questions.length}
                 onChange={(updated) => updateQuestion(i, updated)}
@@ -668,6 +691,7 @@ export function WorkbookForm({ initial, error, cancelTo }: WorkbookFormProps) {
             <SectionEditor
               key={s.id}
               section={s}
+              workbookTitle={title}
               index={i}
               total={sections.length}
               onChange={(updated) => updateSection(i, updated)}

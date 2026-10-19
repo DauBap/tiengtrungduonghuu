@@ -1656,6 +1656,7 @@ export default function LessonDetail() {
       return (
         <WorkbookListeningTest
           config={workbookBlock.config as WorkbookConfig}
+          blockTitle={workbookBlock.title}
           isSaving={workbookFetcher.state !== "idle"}
           answerReviewEnabled={(workbookBlock.config as WorkbookConfig).showAnswersAfterSubmit}
           savedResult={isWorkbookSubmissionResponse(workbookFetcher.data)
