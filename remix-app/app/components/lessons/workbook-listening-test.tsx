@@ -296,23 +296,19 @@ export function WorkbookListeningTest({
                       {config.showTranslation && section.example.translation && <p className="content-text text-sm italic">{section.example.translation}</p>}
                     </div>
                   )}
-                  <div className={cn(
-                    config.optionLayout === "horizontal" ? "grid grid-cols-3 gap-2" : "space-y-2",
-                  )}>
+                  <div className="grid grid-cols-3 gap-2">
                     {section.example.options.map((option) => (
                       <div
                         key={option.id}
                         className={cn(
-                          "flex min-w-0 items-center rounded-lg border-2 transition-colors",
-                          config.optionLayout === "horizontal" ? "gap-2 p-2" : "gap-3 p-3",
+                          "flex min-w-0 items-center gap-2 rounded-lg border-2 p-2 transition-colors",
                           option.id === section.example?.correctAnswer
                             ? "border-success bg-success/10 text-success-foreground"
                             : "border-border bg-background"
                         )}
                       >
                         <div className={cn(
-                          "flex shrink-0 items-center justify-center rounded-full border-2 border-current font-medium",
-                          config.optionLayout === "horizontal" ? "h-5 w-5 text-xs" : "h-6 w-6",
+                          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-current text-xs font-medium",
                         )}>
                           {option.label}
                         </div>
@@ -341,7 +337,6 @@ export function WorkbookListeningTest({
                 onAnswer={(optId) => setAnswers((prev) => ({ ...prev, [question.id]: optId }))}
                 showTranslation={config.showTranslation}
                 showPinyin={showPinyin}
-                optionLayout={config.optionLayout}
                 isSubmitted={isSubmitted}
                 answerReviewEnabled={answerReviewEnabled}
                 reviewResult={reviewResults.get(question.id)}
@@ -399,7 +394,6 @@ function QuestionCard({
   onAnswer,
   showTranslation = true,
   showPinyin = true,
-  optionLayout = "vertical",
   isSubmitted = false,
   answerReviewEnabled = false,
   reviewResult,
@@ -409,7 +403,6 @@ function QuestionCard({
   onAnswer: (optId: string) => void;
   showTranslation?: boolean;
   showPinyin?: boolean;
-  optionLayout?: WorkbookConfig["optionLayout"];
   isSubmitted?: boolean;
   answerReviewEnabled?: boolean;
   reviewResult?: { correct: boolean | null; correctAnswer: string } | undefined;
@@ -489,9 +482,7 @@ function QuestionCard({
             <p className="text-sm text-success-foreground"><span className="text-muted-foreground">Đáp án đúng: </span>{reviewResult.correctAnswer}</p>
           )}
         </div>
-      ) : <div className={cn(
-        optionLayout === "horizontal" ? "grid grid-cols-3 gap-2" : "space-y-2",
-      )}>
+      ) : <div className="grid grid-cols-3 gap-2">
         {question.options.map((option) => {
           const isSelected = selectedAnswer === option.id;
           const isCorrectOption = reviewResult?.correctAnswer.startsWith(`${option.label} ·`) === true
@@ -504,8 +495,7 @@ function QuestionCard({
               key={option.id}
               onClick={() => !showResults && !isSubmitted && onAnswer(option.id)}
               className={cn(
-                "w-full min-w-0 flex items-center rounded-lg border-2 transition-colors text-left",
-                optionLayout === "horizontal" ? "gap-2 p-2" : "gap-3 p-3",
+                "w-full min-w-0 flex items-center gap-2 rounded-lg border-2 p-2 text-left transition-colors",
                 showAsCorrect && "border-success bg-success/10 text-success-foreground",
                 showAsIncorrect && "border-destructive bg-destructive/10 text-destructive-foreground",
                 !showResults && !isSelected && "border-border bg-background hover:border-primary hover:bg-primary/5",
@@ -514,8 +504,7 @@ function QuestionCard({
               disabled={showResults || isSubmitted}
             >
               <div className={cn(
-                "flex shrink-0 items-center justify-center rounded-full border-2 font-medium transition-colors",
-                optionLayout === "horizontal" ? "h-6 w-6 text-sm" : "h-8 w-8",
+                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors",
                 showAsCorrect && "border-success bg-success text-success-foreground",
                 showAsIncorrect && "border-destructive bg-destructive text-destructive-foreground",
                 !showAsCorrect && !showAsIncorrect && "border-current"
