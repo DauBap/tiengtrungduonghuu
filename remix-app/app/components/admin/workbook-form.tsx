@@ -205,15 +205,7 @@ function QuestionEditor({
           placeholder="Đoạn văn / ngữ cảnh (tùy chọn)" className="h-8 text-sm sm:col-span-2" />
       </div>
 
-      {/* URL ảnh đơn */}
-      <div className="space-y-1">
-        <Label className="text-xs">URL ảnh <span className="text-muted-foreground font-normal">(tùy chọn)</span></Label>
-        <Input
-          placeholder="https://..."
-          value={question.imageUrl ?? ""}
-          onChange={(e) => onChange({ ...question, imageUrl: e.target.value })}
-          className="h-8 text-sm"
-        />
+      <div>
         <ImageUrlPreview src={question.imageUrl ?? ""} alt={`Ảnh câu ${question.number}`} />
       </div>
       <div className="space-y-1">
@@ -406,15 +398,8 @@ function SectionEditor({
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1">
-              <Label className="text-xs">Ảnh dùng chung cho phần (URL)</Label>
-              <Input
-                value={section.imageUrl ?? ""}
-                onChange={(e) => onChange({ ...section, imageUrl: e.target.value })}
-                placeholder="https://... hoặc /images/..."
-                className="h-8 text-sm"
-              />
+          <div className="space-y-1">
+            <div>
               <ImageUrlPreview src={section.imageUrl ?? ""} alt={`Ảnh dùng chung: ${section.title}`} />
             </div>
             <div className="space-y-1">
