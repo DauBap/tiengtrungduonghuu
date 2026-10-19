@@ -1,4 +1,3 @@
-import { promises as fs } from "node:fs";
 import path from "node:path";
 import { put } from "@vercel/blob";
 
@@ -36,32 +35,14 @@ export async function saveUploadedAsset(file: File | null, options: SaveAssetOpt
   const fileExt = path.extname(file.name) || (kind === "lesson-audio" ? ".audio" : ".png");
   const safeFileName = `${Date.now()}-${uniqueStem}${fileExt}`;
 
-  if (kind === "lesson-audio") {
-    const blob = await put(
-      `audio/lessons/${safeLesson}/${safeFileName}`,
-      file,
-      {
-        access: "public",
-        addRandomSuffix: true,
-        contentType: file.type,
-      },
-    );
-    return blob.url;
-  }
+  const blobFolder = kind === "lesson-audio"
+    ? path.posix.join("audio", "lessons", safeLesson)
+    : path.posix.join("images", "workbooks", safeLesson);
+  const blob = await put(path.posix.join(blobFolder, safeFileName), file, {
+    access: "public",
+    addRandomSuffix: true,
+    contentType: file.type,
+  });
 
-  const publicDirByKind: Record<"workbook-image", string> = {
-    "workbook-image": path.join("images", "workbooks", safeLesson),
-  };
-
-  const publicUrlByKind: Record<"workbook-image", string> = {
-    "workbook-image": `/images/workbooks/${safeLesson}/${safeFileName}`,
-  };
-
-  const dir = path.join(process.cwd(), "public", publicDirByKind[kind]);
-  await fs.mkdir(dir, { recursive: true });
-
-  const targetPath = path.join(dir, safeFileName);
-  await fs.writeFile(targetPath, Buffer.from(await file.arrayBuffer()));
-
-  return publicUrlByKind[kind];
+  return blob.url;
 }
