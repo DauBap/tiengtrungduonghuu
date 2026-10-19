@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useFetcher, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
@@ -53,6 +53,8 @@ import {
   Settings,
   BookMarked,
   AudioLines,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import { speakChinese } from "~/lib/speech";
 import { parseAnswerVariants } from "~/lib/listening-answer";
@@ -1211,6 +1213,131 @@ function ListeningBlockPreview({
   );
 }
 
+function ExpandableTextField({
+  id,
+  name,
+  defaultValue,
+  placeholder,
+  className,
+  ariaInvalid,
+}: {
+  id?: string;
+  name: string;
+  defaultValue?: string | null;
+  placeholder?: string;
+  className?: string;
+  ariaInvalid?: boolean;
+}) {
+  const [value, setValue] = useState(defaultValue ?? "");
+  const [expanded, setExpanded] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (expanded) textareaRef.current?.focus();
+  }, [expanded]);
+
+  return (
+    <>
+      {expanded && (
+        <button
+          type="button"
+          className="fixed inset-0 z-[60] cursor-default bg-black/50"
+          onClick={() => setExpanded(false)}
+          aria-label="Đóng chế độ phóng to"
+        />
+      )}
+      <div
+        role={expanded ? "dialog" : undefined}
+        aria-modal={expanded ? true : undefined}
+        aria-label={expanded ? "Ô nhập văn bản mở rộng" : undefined}
+        onFocusCapture={() => setFocused(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setFocused(false);
+          }
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && expanded) setExpanded(false);
+        }}
+        className={
+          expanded
+            ? "fixed inset-x-4 top-[20%] bottom-[20%] z-[61] flex flex-col gap-2 rounded-xl border bg-background p-3 shadow-xl sm:left-1/2 sm:right-auto sm:top-1/2 sm:bottom-auto sm:h-1/2 sm:w-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-4"
+            : "flex flex-col gap-1"
+        }
+      >
+        {expanded ? (
+          <>
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1.5 px-2 text-xs"
+                onClick={() => setExpanded(false)}
+                aria-label="Thu nhỏ ô nhập"
+                title="Thu nhỏ ô nhập"
+              >
+                <Minimize2 className="h-3.5 w-3.5" />
+                Thu nhỏ
+              </Button>
+            </div>
+            <textarea
+              id={id}
+              ref={textareaRef}
+              name={name}
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+              placeholder={placeholder}
+              aria-invalid={ariaInvalid || undefined}
+              rows={8}
+              className={[
+                "flex min-h-0 w-full flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive",
+                className,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            />
+          </>
+        ) : (
+          <div className="relative">
+            <textarea
+              id={id}
+              ref={textareaRef}
+              name={name}
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+              placeholder={placeholder}
+              aria-invalid={ariaInvalid || undefined}
+              rows={1}
+              className={[
+                "flex h-10 min-h-10 w-full resize-none overflow-hidden whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive",
+                className,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            />
+            {focused && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1 h-8 w-8 border border-input bg-background shadow-sm hover:bg-muted"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => setExpanded(true)}
+                aria-label="Phóng to ô nhập"
+                title="Phóng to ô nhập"
+              >
+                <Maximize2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
 function LessonAudioScriptModal({
   mode,
   script,
@@ -1352,13 +1479,13 @@ function LessonAudioScriptModal({
           <Label htmlFor="lesson-script-title">
             Tiêu đề bài khóa <span className="text-destructive">*</span>
           </Label>
-          <Input
+          <ExpandableTextField
             id="lesson-script-title"
             name="title"
             defaultValue={script?.title ?? ""}
             placeholder="Bài khóa 1"
             className="text-lg"
-            aria-invalid={fetcher.data?.field === "title" || undefined}
+            ariaInvalid={fetcher.data?.field === "title"}
           />
         </div>
 
@@ -1369,12 +1496,12 @@ function LessonAudioScriptModal({
               (tùy chọn)
             </span>
           </Label>
-          <Input
+          <ExpandableTextField
             id="lesson-script-audioUrl"
             name="audioUrl"
             defaultValue={script?.audioUrl ?? ""}
             placeholder="https://..."
-            aria-invalid={fetcher.data?.field === "audioUrl" || undefined}
+            ariaInvalid={fetcher.data?.field === "audioUrl"}
           />
         </div>
 
@@ -1448,7 +1575,7 @@ function LessonAudioScriptModal({
                       (tùy chọn)
                     </span>
                   </Label>
-                  <Input
+                  <ExpandableTextField
                     name="speakerName"
                     defaultValue={sp.speakerName ?? `Người ${i + 1}`}
                     placeholder="Người 1"
@@ -1458,7 +1585,7 @@ function LessonAudioScriptModal({
                   <Label>
                     Chữ Hán <span className="text-destructive">*</span>
                   </Label>
-                  <Input
+                  <ExpandableTextField
                     name="speakerChinese"
                     defaultValue={sp.chinese ?? ""}
                     placeholder="你好"
@@ -1470,7 +1597,7 @@ function LessonAudioScriptModal({
                   <Label>
                     Pinyin <span className="text-destructive">*</span>
                   </Label>
-                  <Input
+                  <ExpandableTextField
                     name="speakerPinyin"
                     defaultValue={sp.pinyin ?? ""}
                     placeholder="nǐ hǎo"
@@ -1481,7 +1608,7 @@ function LessonAudioScriptModal({
                   <Label>
                     Nghĩa tiếng Việt <span className="text-destructive">*</span>
                   </Label>
-                  <Input
+                  <ExpandableTextField
                     name="speakerTranslation"
                     defaultValue={sp.translation ?? ""}
                     placeholder="Xin chào"
