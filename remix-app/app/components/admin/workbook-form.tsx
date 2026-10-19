@@ -449,6 +449,9 @@ export function WorkbookForm({ initial, error, cancelTo }: WorkbookFormProps) {
   const [audioUrl, setAudioUrl] = useState(initial?.config.audioUrl ?? "");
   const [timeLimit, setTimeLimit] = useState(initial?.config.timeLimit ?? 0);
   const [maxReplays, setMaxReplays] = useState(initial?.config.maxReplays ?? 0);
+  const [optionLayout, setOptionLayout] = useState<WorkbookConfig["optionLayout"]>(
+    initial?.config.optionLayout ?? "vertical",
+  );
   const [shuffleQuestions, setShuffleQuestions] = useState(initial?.config.shuffleQuestions ?? false);
   const [showResultsImmediately, setShowResultsImmediately] = useState(initial?.config.showResultsImmediately ?? false);
   const [showAnswersAfterSubmit, setShowAnswersAfterSubmit] = useState(initial?.config.showAnswersAfterSubmit ?? false);
@@ -475,6 +478,7 @@ export function WorkbookForm({ initial, error, cancelTo }: WorkbookFormProps) {
     audioUrl: audioUrl || undefined,
     timeLimit,
     maxReplays,
+    optionLayout,
     shuffleQuestions,
     showResultsImmediately,
     showAnswersAfterSubmit,
@@ -632,6 +636,35 @@ export function WorkbookForm({ initial, error, cancelTo }: WorkbookFormProps) {
               />
             </div>
           </div>
+          <fieldset className="space-y-2 border-t pt-4">
+            <legend className="text-sm font-medium">Cách hiển thị đáp án</legend>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {([
+                ["horizontal", "Ngang", "A  B  C"],
+                ["vertical", "Dọc", "A\nB\nC"],
+              ] as const).map(([value, label, sample]) => (
+                <label
+                  key={value}
+                  className="flex cursor-pointer items-start gap-2 rounded-md border p-3 text-sm hover:bg-muted/40"
+                >
+                  <input
+                    type="radio"
+                    name="wb-option-layout"
+                    value={value}
+                    checked={optionLayout === value}
+                    onChange={() => setOptionLayout(value)}
+                    className="mt-0.5 h-4 w-4 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  />
+                  <span>
+                    <span className="block font-medium">{label}</span>
+                    <span className="mt-1 block whitespace-pre-line font-mono text-xs text-muted-foreground">
+                      {sample}
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
         </CardContent>
       </Card>
 

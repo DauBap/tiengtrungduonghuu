@@ -75,6 +75,8 @@ export const workbookConfigSchema = z.object({
   timeLimit: z.number().int().min(0).default(0),
   /** Số lần được phát lại audio; 0 = không giới hạn */
   maxReplays: z.number().int().min(0).default(0),
+  /** Cách sắp xếp các lựa chọn trắc nghiệm */
+  optionLayout: z.enum(["horizontal", "vertical"]).default("vertical"),
   /** Xáo trộn thứ tự câu hỏi */
   shuffleQuestions: z.boolean().default(false),
   /** Hiển thị kết quả ngay sau khi chọn đáp án */
