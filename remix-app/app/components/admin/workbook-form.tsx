@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigation, Form, Link } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -21,6 +21,32 @@ type Question = WorkbookConfig["sections"][number]["questions"][number];
 type Section = WorkbookConfig["sections"][number];
 
 const OPTION_LABELS = ["A", "B", "C", "D", "E", "F"] as const;
+
+function ImageUrlPreview({ src, alt }: { src: string; alt: string }) {
+  const [hasError, setHasError] = useState(false);
+  const imageUrl = src.trim();
+
+  useEffect(() => {
+    setHasError(false);
+  }, [imageUrl]);
+
+  if (!imageUrl) return null;
+
+  return (
+    <div className="pt-2">
+      {hasError ? (
+        <p className="text-xs text-destructive">Không tải được ảnh từ đường dẫn này.</p>
+      ) : (
+        <img
+          src={imageUrl}
+          alt={alt}
+          onError={() => setHasError(true)}
+          className="max-h-56 max-w-full rounded-md border bg-white object-contain p-1"
+        />
+      )}
+    </div>
+  );
+}
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -188,6 +214,7 @@ function QuestionEditor({
           onChange={(e) => onChange({ ...question, imageUrl: e.target.value })}
           className="h-8 text-sm"
         />
+        <ImageUrlPreview src={question.imageUrl ?? ""} alt={`Ảnh câu ${question.number}`} />
       </div>
       <div className="space-y-1">
         <Label className="text-xs">Upload ảnh câu hỏi <span className="text-muted-foreground font-normal">(tùy chọn)</span></Label>
@@ -388,6 +415,7 @@ function SectionEditor({
                 placeholder="https://... hoặc /images/..."
                 className="h-8 text-sm"
               />
+              <ImageUrlPreview src={section.imageUrl ?? ""} alt={`Ảnh dùng chung: ${section.title}`} />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Upload ảnh dùng chung</Label>
