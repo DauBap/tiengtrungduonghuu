@@ -5,6 +5,7 @@ import { getUserFromSession } from "~/lib/session.server";
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getUserFromSession(request);
   if (!user) return redirect("/login");
+  if (user.mustChangePassword) return redirect("/change-password");
   const dest = { admin: "/admin", teacher: "/teacher", student: "/student" };
   return redirect(dest[user.role]);
 }

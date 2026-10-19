@@ -65,7 +65,16 @@ export async function action({ request }: ActionFunctionArgs) {
     if (error) return { error };
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) return { error: "Email đã được sử dụng" };
-    await prisma.user.create({ data: { email, name, phone, password: await bcrypt.hash(password, 10), role } });
+    await prisma.user.create({
+      data: {
+        email,
+        name,
+        phone,
+        password: await bcrypt.hash(password, 10),
+        role,
+        mustChangePassword: true,
+      },
+    });
     return { success: true };
   }
 
@@ -196,6 +205,7 @@ function Modal({ mode, user, onClose }: { mode: ModalMode; user: UserRecord | nu
             Mật khẩu {isEdit ? <span className="text-muted-foreground font-normal text-xs">(để trống nếu không đổi)</span> : <span className="text-destructive">*</span>}
           </Label>
           <Input id="password" name="password" type="password" placeholder={isEdit ? "••••••••" : "Nhập mật khẩu"} required={!isEdit} />
+          {!isEdit && <p className="text-xs text-muted-foreground">Tài khoản sẽ được yêu cầu đổi mật khẩu sau lần đăng nhập đầu tiên.</p>}
         </div>
         <div className="space-y-2">
           <Label>Vai trò <span className="text-destructive">*</span></Label>

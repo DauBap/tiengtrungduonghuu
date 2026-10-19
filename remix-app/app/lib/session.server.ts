@@ -7,6 +7,7 @@ export interface SessionUser {
   email: string;
   name: string;
   role: UserRole;
+  mustChangePassword?: boolean;
 }
 
 const sessionSecret = process.env.SESSION_SECRET;
@@ -37,6 +38,7 @@ export async function getUserFromSession(request: Request): Promise<SessionUser 
 export async function requireUser(request: Request): Promise<SessionUser> {
   const user = await getUserFromSession(request);
   if (!user) throw redirect("/login");
+  if (user.mustChangePassword) throw redirect("/change-password");
   return user;
 }
 

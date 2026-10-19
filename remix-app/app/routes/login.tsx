@@ -15,6 +15,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getUserFromSession(request);
   if (user) {
+    if (user.mustChangePassword) return redirect("/change-password");
     const dest = { admin: "/admin", teacher: "/teacher", student: "/student" };
     return redirect(dest[user.role]);
   }
@@ -54,9 +55,10 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   const dest = { admin: "/admin", teacher: "/teacher", student: "/student" };
+  const redirectTo = user.mustChangePassword ? "/change-password" : dest[user.role];
   return createUserSession(
-    { id: user.id, email: user.email, name: user.name, role: user.role },
-    dest[user.role]
+    { id: user.id, email: user.email, name: user.name, role: user.role, mustChangePassword: user.mustChangePassword },
+    redirectTo
   );
 }
 
