@@ -58,7 +58,6 @@ export function WorkbookListeningTest({
   blockTitle,
   onSubmitAttempt,
   isSaving = false,
-  answerReviewEnabled = false,
   savedResult = null,
   submissionError = null,
 }: {
@@ -66,7 +65,6 @@ export function WorkbookListeningTest({
   blockTitle: string;
   onSubmitAttempt: (answers: Record<string, string>) => void;
   isSaving?: boolean;
-  answerReviewEnabled?: boolean;
   savedResult?: {
     score: number | null;
     correctCount: number;
@@ -342,7 +340,6 @@ export function WorkbookListeningTest({
                 showTranslation={config.showTranslation}
                 showPinyin={showPinyin}
                 isSubmitted={isSubmitted}
-                answerReviewEnabled={answerReviewEnabled}
                 reviewResult={reviewResults.get(question.id)}
               />
             ))}
@@ -365,9 +362,7 @@ export function WorkbookListeningTest({
               <p className="mt-1 text-xs text-muted-foreground">
                 {savedResult.pendingReviewCount > 0
                   ? "Kết quả cuối cùng sẽ được cập nhật sau khi giáo viên chấm."
-                  : answerReviewEnabled
-                  ? "Đáp án chi tiết đã mở ở phần kết quả phía trên."
-                  : "Đáp án chi tiết sẽ hiện khi giáo viên mở xem kết quả."}
+                  : "Đáp án đúng/sai đã hiển thị ở từng câu phía trên."}
               </p>
             )}
             {isSaving && <p className="mt-1 text-xs text-muted-foreground">Đang lưu kết quả...</p>}
@@ -400,7 +395,6 @@ function QuestionCard({
   showTranslation = true,
   showPinyin = true,
   isSubmitted = false,
-  answerReviewEnabled = false,
   reviewResult,
 }: {
   question: Question;
@@ -410,12 +404,11 @@ function QuestionCard({
   showTranslation?: boolean;
   showPinyin?: boolean;
   isSubmitted?: boolean;
-  answerReviewEnabled?: boolean;
   reviewResult?: { correct: boolean | null; correctAnswer: string } | undefined;
 }) {
   const isAnswered = !!selectedAnswer;
   const isCorrect = reviewResult?.correct === true;
-  const showResults = isSubmitted && answerReviewEnabled && reviewResult != null;
+  const showResults = isSubmitted && reviewResult != null;
 
   return (
     <Card className="p-4 space-y-4">

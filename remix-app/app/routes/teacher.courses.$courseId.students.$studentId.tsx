@@ -21,7 +21,7 @@ const TAB_LABELS: Record<string, string> = {
   LESSON: "Bài khóa",
   PHONETICS: "Ngữ âm",
   GRAMMAR: "Ngữ pháp",
-  WORKBOOK: "Workbook",
+  WORKBOOK: "Sách bài tập",
 };
 
 function getTabStateTone(state: string | null | undefined) {

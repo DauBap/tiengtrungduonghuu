@@ -7,7 +7,7 @@ import { EmptyState } from "~/components/common/empty-state";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { getCourseById, getLessonsByCourse, isTeacherOfCourse } from "~/lib/db.server";
-import { isLessonTabKey, LESSON_TAB_KEYS, type LessonTab } from "~/lib/lesson-tab-progress";
+import { isLessonTabKey, LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
 import { cn } from "~/lib/utils";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
@@ -21,10 +21,8 @@ const TAB_LABELS: Record<string, string> = {
   LESSON: "Bài khóa",
   PHONETICS: "Ngữ âm",
   GRAMMAR: "Ngữ pháp",
-  WORKBOOK: "Workbook",
+  WORKBOOK: "Sách bài tập",
 };
-
-const ANSWER_REVIEW_TABS = new Set<LessonTab>(["VOCABULARY_TEST", "PHONETICS", "GRAMMAR", "WORKBOOK"]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -162,7 +160,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     prisma.lesson.findUnique({
       where: { id: lesson.id },
       select: {
-        answerReviewTabs: true,
         _count: { select: { content: true, grammarSections: true, audioScripts: true } },
       },
     }),
@@ -212,7 +209,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       GRAMMAR: (lessonTabContent?._count.grammarSections ?? 0) > 0,
       WORKBOOK: learningBlocks.some((block) => block.type === "WORKBOOK"),
     },
-    answerReviewTabs: lessonTabContent?.answerReviewTabs ?? [],
   };
 }
 
@@ -235,24 +231,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const rawScore = Number(form.get("score") ?? 0);
   const score = Number.isFinite(rawScore) ? Math.max(0, Math.min(100, Math.round(rawScore))) : 0;
   const comment = String(form.get("comment") ?? "").trim();
-
-  if (intent === "open-answer-review") {
-    if (!isLessonTabKey(tab) || !ANSWER_REVIEW_TABS.has(tab)) {
-      return redirect(`/teacher/courses/${course.id}/lessons/${lesson.id}`);
-    }
-    const current = await prisma.lesson.findUnique({
-      where: { id: lesson.id },
-      select: { answerReviewTabs: true },
-    });
-    if (!current) throw new Response("Không tìm thấy bài học", { status: 404 });
-    if (!current.answerReviewTabs.includes(tab)) {
-      await prisma.lesson.update({
-        where: { id: lesson.id },
-        data: { answerReviewTabs: { push: tab } },
-      });
-    }
-    return redirect(`/teacher/courses/${course.id}/lessons/${lesson.id}?tab=${tab}`);
-  }
 
   if (!studentId || !isLessonTabKey(tab)) {
     return redirect(`/teacher/courses/${course.id}/lessons/${lesson.id}`);
@@ -326,7 +304,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function TeacherLessonProgress() {
-  const { user, course, lesson, students, progressRows, availableTabs, answerReviewTabs } = useLoaderData<typeof loader>();
+  const { user, course, lesson, students, progressRows, availableTabs } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab") ?? "";
   const visibleTabs = LESSON_TAB_KEYS.filter((tab) => availableTabs[tab]);
@@ -408,31 +386,6 @@ export default function TeacherLessonProgress() {
                     message="Bài học chưa có nội dung ở các tab để theo dõi."
                   />
                 ) : <div role="tabpanel" aria-label={TAB_LABELS[activeTab]}>
-                  {ANSWER_REVIEW_TABS.has(activeTab) && (
-                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border bg-muted/20 px-4 py-3">
-                      <div>
-                        <p className="text-sm font-semibold">
-                          {answerReviewTabs.includes(activeTab) ? "Đã mở xem đáp án chi tiết" : "Đáp án chi tiết đang đóng"}
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {answerReviewTabs.includes(activeTab)
-                            ? "Học sinh đã có lượt làm sẽ không thể nộp lại phần này."
-                            : "Mở đáp án sẽ khóa các lượt làm lại của học sinh ở tab này."}
-                        </p>
-                      </div>
-                      {answerReviewTabs.includes(activeTab) ? (
-                        <span className="rounded-md border border-success/30 bg-success/5 px-3 py-2 text-sm font-medium text-success">
-                          Đã mở
-                        </span>
-                      ) : (
-                        <form method="post">
-                          <input type="hidden" name="intent" value="open-answer-review" />
-                          <input type="hidden" name="tab" value={activeTab} />
-                          <Button type="submit" size="sm">Mở đáp án và khóa làm lại</Button>
-                        </form>
-                      )}
-                    </div>
-                  )}
                   {activeTab === "GRAMMAR" && (
                     <div className="mb-3 flex justify-end">
                       <Button asChild size="sm" variant="outline">

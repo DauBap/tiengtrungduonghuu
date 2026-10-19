@@ -31,7 +31,7 @@ interface QuestionState {
 
 const EMPTY: QuestionState = { text: "", picked: [] };
 
-export function GrammarPractice({ questions, sectionId, answerReviewEnabled = false }: { questions: GrammarPracticeQuestion[]; sectionId: string; answerReviewEnabled?: boolean }) {
+export function GrammarPractice({ questions, sectionId }: { questions: GrammarPracticeQuestion[]; sectionId: string }) {
   const fetcher = useFetcher<{
     intent?: string;
     success?: boolean;
@@ -40,6 +40,7 @@ export function GrammarPractice({ questions, sectionId, answerReviewEnabled = fa
     totalCount?: number;
     reviewPending?: boolean;
     grammarError?: string;
+    results?: { id: string; prompt: string; given: string; correctAnswer: string; correct: boolean; hint: string | null }[];
   }>();
   const [index, setIndex] = useState(0);
   const [states, setStates] = useState<Record<string, QuestionState>>({});
@@ -230,9 +231,7 @@ export function GrammarPractice({ questions, sectionId, answerReviewEnabled = fa
                   Số câu đúng: {savedResult.correctCount}/{savedResult.totalCount} · {savedResult.score}%
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {answerReviewEnabled
-                    ? "Đáp án chi tiết đã mở ở phần kết quả phía trên."
-                    : "Đáp án chi tiết sẽ hiện khi giáo viên mở xem kết quả."}
+                  Đáp án chi tiết được hiển thị ngay bên dưới.
                 </p>
               </>
             )}
@@ -251,6 +250,36 @@ export function GrammarPractice({ questions, sectionId, answerReviewEnabled = fa
           {fetcher.state !== "idle" ? "Đang nộp..." : savedResult ? "Đã nộp kết quả" : submitted && fetcher.data?.grammarError ? "Thử nộp lại" : "Nộp kết quả"}
         </Button>
       </div>
+
+      {savedResult && !savedResult.reviewPending && savedResult.results && (
+        <section className="space-y-2" aria-label="Kết quả chi tiết">
+          {savedResult.results.map((result, resultIndex) => (
+            <div
+              key={result.id}
+              className={cn(
+                "rounded-md border p-3",
+                result.correct ? "border-success/30 bg-success/5" : "border-destructive/30 bg-destructive/5",
+              )}
+            >
+              <div className="flex items-start gap-2">
+                {result.correct
+                  ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                  : <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />}
+                <div className="min-w-0 space-y-1">
+                  <p className="content-text hanzi-display font-medium">{resultIndex + 1}. {result.prompt}</p>
+                  <p className="content-text text-sm">
+                    <span className="text-muted-foreground">Bạn trả lời: </span>{result.given || "Bỏ trống"}
+                  </p>
+                  <p className="content-text text-sm">
+                    <span className="text-muted-foreground">Đáp án đúng: </span>{result.correctAnswer}
+                  </p>
+                  {result.hint && <p className="whitespace-pre-line text-xs text-muted-foreground">{result.hint}</p>}
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
 
     </div>
   );

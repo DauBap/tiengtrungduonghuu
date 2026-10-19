@@ -57,15 +57,11 @@ export function GrammarSection({
   section,
   number,
   latestAttempts,
-  lockedPracticeTypes = [],
-  answerReviewEnabled = false,
   answerReviewGroups = [],
 }: {
   section: GrammarSectionData;
   number: number;
   latestAttempts: Partial<Record<GrammarQuestionType, GrammarPracticeSummary>>;
-  lockedPracticeTypes?: GrammarQuestionType[];
-  answerReviewEnabled?: boolean;
   answerReviewGroups?: GrammarAnswerReviewGroup[];
 }) {
   const [practicing, setPracticing] = useState(false);
@@ -80,8 +76,7 @@ export function GrammarSection({
   const availablePracticeTabs = PRACTICE_TABS.filter((tab) => questionsByType[tab.type].length > 0);
   const latestPracticeTabs = availablePracticeTabs.filter((tab) => latestAttempts[tab.type]);
   const unattemptedPracticeTabs = availablePracticeTabs.filter((tab) => !latestAttempts[tab.type]);
-  const isPracticeLocked = (type: GrammarQuestionType) =>
-    lockedPracticeTypes.includes(type) || Boolean(latestAttempts[type]?.pendingReview);
+  const isPracticeLocked = (type: GrammarQuestionType) => Boolean(latestAttempts[type]?.pendingReview);
 
   const openPractice = (type?: GrammarQuestionType) => {
     const selected = type
@@ -172,7 +167,6 @@ export function GrammarSection({
           <p className="text-xs font-bold uppercase text-muted-foreground">Luyện tập theo dạng</p>
           {latestPracticeTabs.map((tab) => {
             const result = latestAttempts[tab.type];
-            const locked = isPracticeLocked(tab.type);
             const reviewGroup = answerReviewGroups.find((group) => group.targetKey === `${section.id}:${tab.type}`);
             const answersVisible = showAnswersFor === tab.type;
             return (
@@ -194,26 +188,28 @@ export function GrammarSection({
                   </div>
                   {result?.pendingReview ? (
                     <Button type="button" size="sm" variant="outline" disabled>Chờ chấm</Button>
-                  ) : locked ? (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={answersVisible ? "default" : "outline"}
-                      disabled={!reviewGroup}
-                      onClick={() => setShowAnswersFor(answersVisible ? null : tab.type)}
-                    >
-                      {answersVisible ? "Ẩn đáp án" : "Hiển thị đáp án kèm kết quả của học sinh"}
-                    </Button>
                   ) : (
-                    <Button type="button" size="sm" variant="outline" onClick={() => openPractice(tab.type)}>
-                      {result ? "Làm lại" : "Luyện tập"}
-                    </Button>
+                    <div className="flex flex-wrap gap-2">
+                      {reviewGroup && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={answersVisible ? "default" : "outline"}
+                          onClick={() => setShowAnswersFor(answersVisible ? null : tab.type)}
+                        >
+                          {answersVisible ? "Ẩn đáp án" : "Xem chi tiết"}
+                        </Button>
+                      )}
+                      <Button type="button" size="sm" variant="outline" onClick={() => openPractice(tab.type)}>
+                        {result ? "Làm lại" : "Luyện tập"}
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
             );
           })}
-          {unattemptedPracticeTabs.length > 0 && lockedPracticeTypes.length === 0 && (
+          {unattemptedPracticeTabs.length > 0 && (
             <Button type="button" variant="destructive" size="sm" onClick={() => openPractice(unattemptedPracticeTabs[0].type)}>
               <ListChecks className="mr-1.5 h-4 w-4" />
               {latestPracticeTabs.length > 0 ? "Luyện dạng khác" : "Bắt đầu luyện tập"}
@@ -339,7 +335,7 @@ export function GrammarSection({
                     aria-labelledby={tabId}
                     hidden={activeType !== tab.type}
                   >
-                      <GrammarPractice questions={questions} sectionId={section.id} answerReviewEnabled={answerReviewEnabled} />
+                      <GrammarPractice questions={questions} sectionId={section.id} />
                   </section>
                 );
               })}

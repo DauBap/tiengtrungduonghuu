@@ -35,7 +35,7 @@ const DASHBOARD_ACTIVITIES = [
   { tab: "VOCABULARY_TEST", label: "Ôn từ vựng" },
   { tab: "LISTENING", label: "Nghe câu" },
   { tab: "GRAMMAR", label: "Ngữ pháp" },
-  { tab: "WORKBOOK", label: "Workbook" },
+  { tab: "WORKBOOK", label: "Sách bài tập" },
 ] as const;
 
 type DashboardActivityTab = (typeof DASHBOARD_ACTIVITIES)[number]["tab"];

@@ -35,8 +35,8 @@ interface PhoneticsPracticeProps {
   config: PhoneticsConfig;
   /** Điểm cao nhất mỗi section, key = `section.id` */
   savedScores: Record<number, PhoneticsSectionScore>;
-  lockedSectionIds: number[];
   reviewGroups: PhoneticsSectionReview[];
+  submissionResult: PhoneticsSectionReview | null;
   isSaving: boolean;
   submissionError: string | null;
   onSubmitSection: (sectionId: number, answers: { itemId: number; answer: string }[]) => void;
@@ -136,7 +136,6 @@ function PhoneticsSectionCard({
   section,
   number,
   savedScore,
-  isRetakeLocked,
   reviewGroup,
   isSaving,
   onSubmit,
@@ -144,7 +143,6 @@ function PhoneticsSectionCard({
   section: PhoneticsSection;
   number: number;
   savedScore: PhoneticsSectionScore | null;
-  isRetakeLocked: boolean;
   reviewGroup: PhoneticsSectionReview | null;
   isSaving: boolean;
   onSubmit: (answers: { itemId: number; answer: string }[]) => void;
@@ -209,11 +207,13 @@ function PhoneticsSectionCard({
             <p className="mt-1 text-sm text-muted-foreground">{section.description}</p>
           )}
         </div>
-        {savedScore?.correctCount != null && savedScore.totalCount != null && (
+        {(savedScore || reviewGroup) && (
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="shrink-0">
-              Điểm cao nhất {savedScore.correctCount}/{savedScore.totalCount}
-            </Badge>
+            {savedScore?.correctCount != null && savedScore.totalCount != null && (
+              <Badge variant="outline" className="shrink-0">
+                Điểm cao nhất {savedScore.correctCount}/{savedScore.totalCount}
+              </Badge>
+            )}
             {reviewGroup && (
               <Button
                 type="button"
@@ -359,12 +359,6 @@ function PhoneticsSectionCard({
         <p className="mt-4 text-xs text-muted-foreground">Phần này chưa có file ghi âm.</p>
       )}
 
-      {isRetakeLocked && (
-        <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-          Giáo viên đã mở đáp án phần này. Bạn có thể xem kết quả chi tiết phía trên và không thể nộp lại.
-        </p>
-      )}
-
       {playbackError && (
         <p role="alert" className="mt-2 text-sm text-destructive">{playbackError}</p>
       )}
@@ -377,7 +371,7 @@ function PhoneticsSectionCard({
             number={index + 1}
             value={answers[item.id]}
             checked={checked}
-            disabled={isRetakeLocked || isSaving}
+            disabled={isSaving}
             onChange={(value) => {
               setAnswers((previous) => ({ ...previous, [item.id]: value }));
               setChecked(false);
@@ -387,11 +381,11 @@ function PhoneticsSectionCard({
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button type="button" size="sm" onClick={submit} disabled={isRetakeLocked || isSaving || answeredCount === 0}>
+        <Button type="button" size="sm" onClick={submit} disabled={isSaving || answeredCount === 0}>
           <Check className="mr-1.5 h-4 w-4" />
           {isSaving ? "Đang lưu…" : "Kiểm tra và lưu điểm"}
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={reset} disabled={isRetakeLocked || isSaving}>
+        <Button type="button" variant="outline" size="sm" onClick={reset} disabled={isSaving}>
           <RotateCcw className="mr-1.5 h-4 w-4" />
           Làm lại
         </Button>
@@ -409,8 +403,8 @@ function PhoneticsSectionCard({
 export function PhoneticsPractice({
   config,
   savedScores,
-  lockedSectionIds,
   reviewGroups,
+  submissionResult,
   isSaving,
   submissionError,
   onSubmitSection,
@@ -434,8 +428,11 @@ export function PhoneticsPractice({
           section={section}
           number={index + 1}
           savedScore={savedScores[section.id] ?? null}
-          isRetakeLocked={lockedSectionIds.includes(section.id)}
-          reviewGroup={reviewGroups.find((group) => group.targetKey === String(section.id)) ?? null}
+          reviewGroup={
+            submissionResult?.targetKey === String(section.id)
+              ? submissionResult
+              : reviewGroups.find((group) => group.targetKey === String(section.id)) ?? null
+          }
           isSaving={isSaving}
           onSubmit={(answers) => onSubmitSection(section.id, answers)}
         />

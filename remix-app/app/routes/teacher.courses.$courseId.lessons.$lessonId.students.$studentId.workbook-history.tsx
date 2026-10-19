@@ -65,7 +65,7 @@ export default function TeacherWorkbookHistory() {
       <div className="sticky top-0 z-30 -mx-6 -mt-6 mb-6 border-b bg-background/95 px-6 py-3 backdrop-blur lg:-mx-8 lg:-mt-8 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <Button asChild variant="ghost" size="sm">
-            <Link to={progressUrl}><ArrowLeft className="mr-1.5 h-4 w-4" />Quay lại tiến độ Workbook</Link>
+            <Link to={progressUrl}><ArrowLeft className="mr-1.5 h-4 w-4" />Quay lại tiến độ Sách bài tập</Link>
           </Button>
         </div>
       </div>
@@ -92,7 +92,7 @@ export default function TeacherWorkbookHistory() {
           </CardHeader>
           <CardContent>
             {attempts.length === 0 ? (
-              <EmptyState title="Chưa có lịch sử Workbook" message="Học viên chưa nộp Sách bài tập trong bài này." />
+              <EmptyState title="Chưa có lịch sử Sách bài tập" message="Học viên chưa nộp Sách bài tập trong bài này." />
             ) : (
               <div className="overflow-x-auto rounded-md border">
                 <table className="w-full text-left text-sm">
@@ -100,7 +100,7 @@ export default function TeacherWorkbookHistory() {
                     <tr>
                       <th scope="col" className="w-16 px-4 py-3 font-medium">Lần</th>
                       <th scope="col" className="px-4 py-3 font-medium">Thời gian</th>
-                      <th scope="col" className="px-4 py-3 font-medium">Workbook</th>
+                      <th scope="col" className="px-4 py-3 font-medium">Sách bài tập</th>
                       <th scope="col" className="px-4 py-3 font-medium">Đúng / có đáp án</th>
                       <th scope="col" className="px-4 py-3 font-medium">Kết quả</th>
                       <th scope="col" className="px-4 py-3 font-medium">Điểm</th>
