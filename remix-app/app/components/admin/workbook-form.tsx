@@ -242,22 +242,36 @@ function QuestionEditor({
         </div>
       ) : <div className="space-y-1.5">
         <Label className="text-xs">Đáp án</Label>
-        {question.options.map((opt) => (
-          <div key={opt.id} className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onChange({ ...question, gradable: true, correctAnswer: opt.id })}
-              className={cn(
-                "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold transition-colors",
-                question.correctAnswer === opt.id
-                  ? "border-success bg-success text-success-foreground"
-                  : "border-muted-foreground/40 hover:border-primary"
-              )}
-              title="Đánh dấu là đáp án đúng"
-            >
-              {opt.label}
-            </button>
-            <div className="min-w-0 flex-1 space-y-1">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {question.options.map((opt) => (
+            <div key={opt.id} className="min-w-0 space-y-2 rounded-md border p-2">
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => onChange({ ...question, gradable: true, correctAnswer: opt.id })}
+                  className={cn(
+                    "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold transition-colors",
+                    question.correctAnswer === opt.id
+                      ? "border-success bg-success text-success-foreground"
+                      : "border-muted-foreground/40 hover:border-primary"
+                  )}
+                  title="Đánh dấu là đáp án đúng"
+                  aria-label={`Chọn đáp án ${opt.label} là đáp án đúng`}
+                  aria-pressed={question.correctAnswer === opt.id}
+                >
+                  {opt.label}
+                </button>
+                {question.options.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => removeOption(opt.id)}
+                    className="shrink-0 text-muted-foreground hover:text-destructive"
+                    aria-label={`Xóa đáp án ${opt.label}`}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
               <Input
                 value={opt.text}
                 onChange={(e) => updateOption(opt.id, "text", e.target.value)}
@@ -271,14 +285,8 @@ function QuestionEditor({
                 className="pinyin-text h-8 text-sm"
               />
             </div>
-            {question.options.length > 2 && (
-              <button type="button" onClick={() => removeOption(opt.id)}
-                className="text-muted-foreground hover:text-destructive shrink-0">
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
         {question.options.length < 6 && (
           <Button type="button" variant="ghost" size="sm" onClick={addOption}>
             <Plus className="h-3.5 w-3.5 mr-1" />Thêm đáp án
