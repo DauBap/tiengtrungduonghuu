@@ -179,10 +179,11 @@ function makeStudentWorkbookConfig(config: unknown): WorkbookConfig | null {
 }
 
 function getPronunciationEvaluation(score: number) {
-  if (score >= 90) return "TỐT";
-  if (score >= 75) return "KHÁ";
-  if (score >= 60) return "CẦN CẢI THIỆN";
-  return "CHƯA ĐẠT";
+  if (score >= 90) return "XUẤT SẮC";
+  if (score >= 80) return "GIỎI";
+  if (score >= 70) return "KHÁ, CỐ LÊN";
+  if (score >= 50) return "TRUNG BÌNH, CẦN CỐ GẮNG HƠN";
+  return "CHƯA ĐẠT, VUI LÒNG ĐỌC LẠI";
 }
 
 function getSpeechDiagnosticContext(lang: string) {
@@ -1408,33 +1409,41 @@ export default function LessonDetail() {
     if (score >= 90) {
       return (
         <div className="text-sm">
-          <p className="mt-1">Nội dung đọc khớp tốt với bài khóa.<br />Tiếp tục giữ độ chính xác này.</p>
+          <p className="mt-1">Nội dung đọc khớp rất tốt với bài khóa.<br />Hãy tiếp tục duy trì phong độ này.</p>
         </div>
       );
     }
 
-    if (score >= 75) {
+    if (score >= 80) {
       return (
         <div className="text-sm">
-          <p className="mt-1">Bạn đọc đúng phần lớn nội dung,<br />nhưng vẫn còn một số chỗ chưa khớp.</p>
+          <p className="mt-1">Bạn đọc đúng phần lớn nội dung bài khóa.<br />Hãy tiếp tục luyện tập để đạt kết quả xuất sắc.</p>
+        </div>
+      );
+    }
+
+    if (score >= 70) {
+      return (
+        <div className="text-sm">
+          <p className="mt-1">Bạn đã đọc khá tốt, hãy cố lên.</p>
           <p className="mt-1">Hãy xem lại phần được đánh dấu và đọc lại.</p>
         </div>
       );
     }
 
-    if (score >= 60) {
+    if (score >= 50) {
       return (
         <div className="text-sm">
-          <p className="mt-1">Còn khá nhiều nội dung chưa được nhận diện đúng.</p>
-          <p className="mt-1">Nghe lại bài khóa,<br />xem phần chưa khớp và thử lại.</p>
+          <p className="mt-1">Kết quả ở mức trung bình, bạn cần cố gắng hơn.</p>
+          <p className="mt-1">Hãy xem lại phần được đánh dấu và luyện đọc thêm.</p>
         </div>
       );
     }
 
     return (
       <div className="text-sm">
-        <p className="mt-1">Nội dung đọc còn khác nhiều so với bài khóa.</p>
-        <p className="mt-1">Hãy nghe lại từng câu<br />và luyện lại chậm hơn.</p>
+        <p className="mt-1">Bạn chưa đạt, vui lòng đọc lại bài khóa.</p>
+        <p className="mt-1">Hãy nghe lại từng câu và luyện đọc chậm hơn.</p>
       </div>
     );
   };
@@ -2173,8 +2182,7 @@ export default function LessonDetail() {
         ? "CHỜ DỪNG ĐỌC"
         : hasCurrentTranscript
         ? displayedScore === null ? "CHƯA CÓ LƯỢT ĐỌC" : getPronunciationEvaluation(displayedScore)
-        : bestPronunciationAssessment?.evaluation
-          ?? (displayedScore === null ? "CHƯA CÓ LƯỢT ĐỌC" : getPronunciationEvaluation(displayedScore));
+        : displayedScore === null ? "CHƯA CÓ LƯỢT ĐỌC" : getPronunciationEvaluation(displayedScore);
 
       return (
         <div className="mx-auto max-w-6xl space-y-3">
