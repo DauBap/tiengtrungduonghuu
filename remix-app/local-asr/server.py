@@ -189,17 +189,18 @@ class ASRHandler(BaseHTTPRequestHandler):
                         "--backend", BACKEND,
                     ],
                     capture_output=True,
-                    text=True,
                     timeout=45,
                     check=False,
                     creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
                 )
                 if result.returncode != 0:
-                    print(f"[asr] inference failed with exit code {result.returncode}: {result.stderr[-2000:]}", flush=True)
+                    error_detail = result.stderr.decode("utf-8", errors="replace")
+                    print(f"[asr] inference failed with exit code {result.returncode}: {error_detail[-2000:]}", flush=True)
                     self._send_json(502, {"error": "Speech recognition failed"})
                     return
 
-                transcript = re.sub(r"<\|[^|]+\|>", "", result.stdout).strip()
+                model_output = result.stdout.decode("utf-8", errors="replace")
+                transcript = re.sub(r"<\|[^|]+\|>", "", model_output).strip()
                 if not transcript:
                     self._send_json(422, {"error": "No speech was recognized"})
                     return
