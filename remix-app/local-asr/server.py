@@ -59,7 +59,7 @@ if BACKEND not in {"cpu", "cuda", "vulkan"}:
 
 
 def json_bytes(payload: dict) -> bytes:
-    return json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    return json.dumps(payload, ensure_ascii=True).encode("ascii")
 
 
 class ASRHandler(BaseHTTPRequestHandler):
