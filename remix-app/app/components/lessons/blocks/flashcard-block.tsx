@@ -380,7 +380,15 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
         className="group relative block w-full touch-none select-none [perspective:1200px]"
         style={{
           transform: `translate3d(${dragX}px, 0, 0) rotate(${dragX / 24}deg)`,
-          opacity: Math.max(0, 1 - Math.abs(dragX) / Math.max(window.innerWidth, 500)),
+          opacity: Math.max(
+            0,
+            1 -
+              Math.abs(dragX) /
+                Math.max(
+                  typeof window === "undefined" ? 500 : window.innerWidth,
+                  500,
+                ),
+          ),
           transition: isDragging.current
             ? "none"
             : "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease-out",
