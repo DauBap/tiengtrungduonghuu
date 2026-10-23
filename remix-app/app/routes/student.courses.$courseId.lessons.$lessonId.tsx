@@ -1915,7 +1915,10 @@ export default function LessonDetail() {
       const startRecording = async () => {
         if (!selectedAudioScript) return;
 
-        const SpeechRecognitionCtor = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+        const enableBrowserSpeechRecognition = false;
+        const SpeechRecognitionCtor = enableBrowserSpeechRecognition
+          ? window.SpeechRecognition || (window as any).webkitSpeechRecognition
+          : undefined;
 
         if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
           setRecordingError("Trình duyệt chưa hỗ trợ ghi âm. Hãy thử trên Chrome hoặc Edge và cho phép truy cập micro.");
@@ -2020,8 +2023,7 @@ export default function LessonDetail() {
         }
 
         if (!SpeechRecognitionCtor) {
-          console.info("[speech-recognition] API unavailable; recording for SenseVoice fallback", getSpeechDiagnosticContext("zh-CN"));
-          setRecordingError("Trình duyệt không hỗ trợ nhận dạng trực tiếp. Hãy dừng ghi âm rồi chọn “Nhận dạng bằng SenseVoice”.");
+          setRecordingError("Đã ghi âm. Hãy bấm “Nhận dạng bằng SenseVoice” để chuyển lời nói thành văn bản.");
           setRecordingSeconds(0);
           setIsRecording(true);
           recordingStartedAtRef.current = Date.now();
