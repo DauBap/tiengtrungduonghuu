@@ -341,6 +341,25 @@ export default function TeacherIndex() {
   const selectedLesson = selectedClass?.lessons.find((lesson) => lesson.id === selectedLessonId)
     ?? selectedClass?.lessons.find((lesson) => lesson.id === selectedClass.suggestedLessonId)
     ?? selectedClass?.lessons[0];
+  const sortedActivityData = selectedClass
+    ? selectedClass.activityData
+        .map((student) => {
+          const lessons = progressView === "lesson"
+            ? student.lessons.filter((lesson) => lesson.id === selectedLesson?.id)
+            : student.lessons;
+          const completedCount = lessons.reduce(
+            (sum, lesson) => sum + getLessonProgress(lesson.activities).completed,
+            0,
+          );
+          return { student, completedCount };
+        })
+        .sort((a, b) => (
+          b.completedCount - a.completedCount
+          || (a.student.student.name ?? a.student.student.email)
+            .localeCompare(b.student.student.name ?? b.student.student.email, "vi")
+        ))
+        .map(({ student }) => student)
+    : [];
   const selectedLessonActivities = selectedLesson
     ? DASHBOARD_ACTIVITIES.filter(({ tab }) => selectedLesson.availableActivities[tab])
     : [];
@@ -541,6 +560,9 @@ export default function TeacherIndex() {
                       <div>
                         <h2 className="font-semibold">Tiến độ học tập · {selectedClass.name}</h2>
                         <p className="mt-1 text-sm text-muted-foreground">{selectedClass.course.title} · {selectedClass.activityData.length} học viên</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Xếp theo số hoạt động hoàn thành giảm dần{progressView === "lesson" && selectedLesson ? ` trong Bài ${selectedLesson.order}` : ""}
+                        </p>
                       </div>
                       <div className="flex rounded-lg bg-muted p-1" role="tablist" aria-label="Cách xem tiến độ lớp">
                         <button
@@ -593,7 +615,7 @@ export default function TeacherIndex() {
                             </tr>
                           </thead>
                           <tbody>
-                            {selectedClass.activityData.map((student) => {
+                            {sortedActivityData.map((student) => {
                               const lessonScores = student.lessons.map((lesson) => getLessonProgress(lesson.activities));
                               const total = lessonScores.reduce((sum, item) => sum + (item.total ? item.percent : 0), 0);
                               const totalAvailable = lessonScores.filter((item) => item.total > 0).length;
@@ -697,7 +719,7 @@ export default function TeacherIndex() {
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y">
-                                  {selectedClass.activityData.map((student) => {
+                                  {sortedActivityData.map((student) => {
                                     const lesson = student.lessons.find((item) => item.id === selectedLesson.id);
                                     return (
                                       <tr key={student.student.id}>
