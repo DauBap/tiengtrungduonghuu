@@ -1022,13 +1022,13 @@ function SentenceModal({
           <Label htmlFor="s-chinese">
             Câu tiếng Trung <span className="text-destructive">*</span>
           </Label>
-          <Input
+          <ExpandableTextField
             id="s-chinese"
             name="chinese"
             defaultValue={sentence?.chinese}
             placeholder="你好，我叫小明。"
             className="text-lg"
-            aria-invalid={fetcher.data?.field === "chinese" || undefined}
+            ariaInvalid={fetcher.data?.field === "chinese"}
           />
         </div>
         <div className="space-y-2">
@@ -1038,7 +1038,7 @@ function SentenceModal({
               (mỗi đáp án một dòng)
             </span>
           </Label>
-          <Textarea
+          <ExpandableTextField
             id="s-chineseAlternatives"
             name="chineseAlternatives"
             defaultValue={sentence?.chineseAlternatives.join("\n")}
@@ -1050,13 +1050,13 @@ function SentenceModal({
           <Label htmlFor="s-pinyin">
             Pinyin <span className="text-destructive">*</span>
           </Label>
-          <Input
+          <ExpandableTextField
             id="s-pinyin"
             name="pinyin"
             defaultValue={sentence?.pinyin}
             placeholder="nǐ hǎo, wǒ jiào xiǎo míng."
             className="pinyin-text"
-            aria-invalid={fetcher.data?.field === "pinyin" || undefined}
+            ariaInvalid={fetcher.data?.field === "pinyin"}
           />
         </div>
         <div className="space-y-2">
@@ -1066,7 +1066,7 @@ function SentenceModal({
               (mỗi đáp án một dòng)
             </span>
           </Label>
-          <Textarea
+          <ExpandableTextField
             id="s-pinyinAlternatives"
             name="pinyinAlternatives"
             defaultValue={sentence?.pinyinAlternatives.join("\n")}
@@ -1079,12 +1079,12 @@ function SentenceModal({
           <Label htmlFor="s-translation">
             Nghĩa tiếng Việt <span className="text-destructive">*</span>
           </Label>
-          <Input
+          <ExpandableTextField
             id="s-translation"
             name="translation"
             defaultValue={sentence?.translation}
             placeholder="Xin chào, tôi tên là Tiểu Minh."
-            aria-invalid={fetcher.data?.field === "translation" || undefined}
+            ariaInvalid={fetcher.data?.field === "translation"}
           />
         </div>
         <div className="space-y-2">
@@ -1094,7 +1094,7 @@ function SentenceModal({
               (tùy chọn)
             </span>
           </Label>
-          <Input
+          <ExpandableTextField
             id="s-note"
             name="note"
             defaultValue={sentence?.note ?? ""}
@@ -1108,12 +1108,12 @@ function SentenceModal({
               (tùy chọn)
             </span>
           </Label>
-          <Input
+          <ExpandableTextField
             id="s-audioUrl"
             name="audioUrl"
             defaultValue={sentence?.audioUrl ?? ""}
             placeholder="https://..."
-            aria-invalid={fetcher.data?.field === "audioUrl" || undefined}
+            ariaInvalid={fetcher.data?.field === "audioUrl"}
           />
           <p className="text-xs text-muted-foreground">
             Để trống thì dùng giọng đọc tự động của trình duyệt.
@@ -1228,6 +1228,7 @@ function ExpandableTextField({
   name,
   defaultValue,
   placeholder,
+  rows = 1,
   className,
   ariaInvalid,
 }: {
@@ -1235,6 +1236,7 @@ function ExpandableTextField({
   name: string;
   defaultValue?: string | null;
   placeholder?: string;
+  rows?: number;
   className?: string;
   ariaInvalid?: boolean;
 }) {
@@ -1300,7 +1302,7 @@ function ExpandableTextField({
               onChange={(event) => setValue(event.target.value)}
               placeholder={placeholder}
               aria-invalid={ariaInvalid || undefined}
-              rows={8}
+              rows={Math.max(rows, 8)}
               className={[
                 "flex min-h-0 w-full flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive",
                 className,
@@ -1319,9 +1321,11 @@ function ExpandableTextField({
               onChange={(event) => setValue(event.target.value)}
               placeholder={placeholder}
               aria-invalid={ariaInvalid || undefined}
-              rows={1}
+              rows={rows}
               className={[
-                "flex h-10 min-h-10 w-full resize-none overflow-hidden whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive",
+                rows === 1
+                  ? "flex h-10 min-h-10 w-full resize-none overflow-hidden whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive"
+                  : "flex min-h-0 w-full resize-none rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive",
                 className,
               ]
                 .filter(Boolean)
