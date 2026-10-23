@@ -1593,12 +1593,19 @@ export default function LessonDetail() {
     }
   }, [lessonAudioScripts, selectedScriptId]);
 
+  const pronunciationAssessmentsRef = useRef(pronunciationAssessments);
   useEffect(() => {
-    const best = pronunciationAssessments.find((assessment) => assessment.lessonAudioScriptId === selectedScriptId);
+    pronunciationAssessmentsRef.current = pronunciationAssessments;
+  }, [pronunciationAssessments]);
+
+  useEffect(() => {
+    const best = pronunciationAssessmentsRef.current.find(
+      (assessment) => assessment.lessonAudioScriptId === selectedScriptId,
+    );
     setPhoneticScore(best?.score ?? 0);
     setRecognizedTranscript(best?.transcript ?? "");
     setPronunciationFeedback(best ? buildPronunciationFeedback(best.score) : null);
-  }, [pronunciationAssessments, selectedScriptId]);
+  }, [selectedScriptId]);
 
   useEffect(() => {
     if (recordingAudioScriptId === selectedScriptId) return;
