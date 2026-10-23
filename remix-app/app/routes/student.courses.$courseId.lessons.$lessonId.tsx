@@ -531,6 +531,109 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const form = await request.formData();
   const intent = String(form.get("intent") ?? "complete-learning");
 
+  if (intent === "transcribe-pronunciation-audio") {
+    const scriptId = String(form.get("lessonAudioScriptId") ?? "");
+    const audio = form.get("audio");
+    if (!scriptId) return { intent, error: "Thiếu đoạn nghe cần nhận diện." };
+    if (!(audio instanceof File) || audio.size === 0) {
+      return { intent, error: "Không nhận được file ghi âm. Hãy ghi âm lại." };
+    }
+    if (audio.size > 3_000_000) {
+      return { intent, error: "Bản ghi quá lớn. Hãy đọc ngắn hơn rồi thử lại." };
+    }
+    const allowedAudioTypes = new Set([
+      "audio/aac",
+      "audio/mp4",
+      "audio/mpeg",
+      "audio/mp3",
+      "audio/ogg",
+      "audio/wav",
+      "audio/x-wav",
+      "audio/x-m4a",
+      "audio/webm",
+      "video/mp4",
+    ]);
+    if (!allowedAudioTypes.has(audio.type.toLowerCase().split(";", 1)[0])) {
+      return { intent, error: "Định dạng ghi âm này chưa được hỗ trợ." };
+    }
+    const script = await prisma.lessonAudioScript.findUnique({
+      where: { id: scriptId },
+      select: {
+        id: true,
+        lessonId: true,
+        speakers: { orderBy: { order: "asc" }, select: { chinese: true } },
+      },
+    });
+    if (!script || script.lessonId !== params.lessonId) {
+      return { intent, error: "Không tìm thấy đoạn nghe trong bài học này." };
+    }
+
+    const localAsrUrl = process.env.LOCAL_ASR_URL;
+    const localAsrToken = process.env.LOCAL_ASR_TOKEN;
+    if (!localAsrUrl || !localAsrToken) {
+      console.error("[local-asr] LOCAL_ASR_URL or LOCAL_ASR_TOKEN is not configured");
+      return { intent, error: "Dịch vụ nhận dạng chưa được cấu hình." };
+    }
+
+    let endpoint: URL;
+    try {
+      endpoint = new URL("/transcribe", localAsrUrl);
+      if (endpoint.protocol !== "https:") {
+        console.error("[local-asr] LOCAL_ASR_URL must use HTTPS");
+        return { intent, error: "Địa chỉ dịch vụ nhận dạng chưa an toàn (cần HTTPS)." };
+      }
+    } catch (error) {
+      console.error("[local-asr] Invalid LOCAL_ASR_URL", error);
+      return { intent, error: "Địa chỉ dịch vụ nhận dạng không hợp lệ." };
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localAsrToken}`,
+          "Content-Type": audio.type.toLowerCase().split(";", 1)[0],
+        },
+        body: audio,
+        signal: AbortSignal.timeout(55_000),
+      });
+    } catch (error) {
+      console.error("[local-asr] Could not reach local service", error);
+      return {
+        intent,
+        error: "Không kết nối được dịch vụ nhận dạng trên máy chủ. Hãy kiểm tra máy local và tunnel.",
+      };
+    }
+
+    let result: unknown;
+    try {
+      result = await response.json();
+    } catch (error) {
+      console.error("[local-asr] Invalid response from local service", error);
+      return { intent, error: "Dịch vụ nhận dạng trả về dữ liệu không hợp lệ." };
+    }
+    if (!isRecord(result)) {
+      console.error("[local-asr] Local service response is not a JSON object");
+      return { intent, error: "Dịch vụ nhận dạng trả về dữ liệu không hợp lệ." };
+    }
+    if (!response.ok) {
+      console.error("[local-asr] Local service returned an error", { status: response.status });
+      return {
+        intent,
+        error: typeof result.error === "string"
+          ? `Nhận dạng thất bại: ${result.error}`
+          : "Dịch vụ nhận dạng không xử lý được bản ghi.",
+      };
+    }
+    const transcript = typeof result.transcript === "string" ? result.transcript.trim() : "";
+    if (!transcript) return { intent, error: "Không nhận diện được nội dung. Hãy thử đọc lại." };
+
+    const scriptText = script.speakers.map((speaker) => speaker.chinese).join(" ");
+    const score = computePronunciationScore(scriptText, transcript);
+    return { intent, scriptId, transcript, score };
+  }
+
   if (intent === "open-tab") {
     const rawTab = String(form.get("tab") ?? "");
     const tab = rawTab === "TEST" ? "VOCABULARY_TEST" : rawTab;
@@ -1323,6 +1426,13 @@ export default function LessonDetail() {
     workbookError?: string;
   }>();
   const pronunciationFetcher = useFetcher<{ success?: boolean; intent?: string; error?: string }>();
+  const transcriptionFetcher = useFetcher<{
+    intent?: string;
+    scriptId?: string;
+    transcript?: string;
+    score?: number;
+    error?: string;
+  }>();
   const phoneticsFetcher = useFetcher<{
     intent?: string;
     success?: boolean;
@@ -1391,6 +1501,7 @@ export default function LessonDetail() {
   const [pronunciationFeedback, setPronunciationFeedback] = useState<React.ReactNode | null>(null);
   const [recordingAudioUrl, setRecordingAudioUrl] = useState<string | null>(null);
   const [recordingAudioScriptId, setRecordingAudioScriptId] = useState<string | null>(null);
+  const recordingBlobRef = useRef<Blob | null>(null);
   const recordingTimerRef = useRef<number | null>(null);
   const recordingStartedAtRef = useRef<number | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -1491,9 +1602,25 @@ export default function LessonDetail() {
     if (recordingAudioScriptId === selectedScriptId) return;
     if (recordingAudioUrlRef.current) URL.revokeObjectURL(recordingAudioUrlRef.current);
     recordingAudioUrlRef.current = null;
+    recordingBlobRef.current = null;
     setRecordingAudioUrl(null);
     setRecordingAudioScriptId(null);
   }, [recordingAudioScriptId, selectedScriptId]);
+
+  useEffect(() => {
+    const result = transcriptionFetcher.data;
+    if (result?.intent !== "transcribe-pronunciation-audio") return;
+    if (result.error) {
+      setRecordingError(result.error);
+      return;
+    }
+    if (!result.transcript || result.scriptId !== recordingAudioScriptId) return;
+
+    setRecordingError(null);
+    setRecognizedTranscript(result.transcript);
+    setPhoneticScore(result.score ?? 0);
+    setPronunciationFeedback(buildPronunciationFeedback(result.score ?? 0));
+  }, [recordingAudioScriptId, transcriptionFetcher.data]);
 
   useEffect(() => {
     const selected = lessonAudioScripts.find((script) => script.id === selectedScriptId) ?? lessonAudioScripts[0];
@@ -1507,6 +1634,7 @@ export default function LessonDetail() {
   const testError = testFetcher.data && "testError" in testFetcher.data ? testFetcher.data.testError : null;
   const pronunciationSaveError = pronunciationFetcher.data?.error ?? null;
   const isSubmittingPronunciation = pronunciationFetcher.state !== "idle";
+  const isTranscribingPronunciation = transcriptionFetcher.state !== "idle";
   const isSubmittingTest = testFetcher.state !== "idle";
 
   // Dạng bài có mặt trong bài này. Dùng để làm mờ tab của dạng bài chưa soạn —
@@ -1766,15 +1894,26 @@ export default function LessonDetail() {
         mediaRecorderRef.current = null;
       };
 
+      const transcribeRecording = (audioBlob: Blob, scriptId: string) => {
+        if (audioBlob.size > 3_000_000) {
+          setRecordingError("Bản ghi quá lớn. Hãy đọc ngắn hơn rồi thử lại.");
+          return;
+        }
+        const formData = new FormData();
+        formData.append("intent", "transcribe-pronunciation-audio");
+        formData.append("lessonAudioScriptId", scriptId);
+        formData.append("audio", audioBlob, "pronunciation-recording");
+        setRecordingError(null);
+        transcriptionFetcher.submit(formData, {
+          method: "post",
+          encType: "multipart/form-data",
+        });
+      };
+
       const startRecording = async () => {
         if (!selectedAudioScript) return;
 
         const SpeechRecognitionCtor = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
-        if (!SpeechRecognitionCtor) {
-          console.error("[speech-recognition] API unavailable", getSpeechDiagnosticContext("zh-CN"));
-          setRecordingError("Trình duyệt của bạn chưa hỗ trợ nhận dạng giọng nói. Hãy thử trên Chrome hoặc Edge.");
-          return;
-        }
 
         if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
           setRecordingError("Trình duyệt chưa hỗ trợ ghi âm. Hãy thử trên Chrome hoặc Edge và cho phép truy cập micro.");
@@ -1783,8 +1922,13 @@ export default function LessonDetail() {
 
         if (recordingAudioUrlRef.current) URL.revokeObjectURL(recordingAudioUrlRef.current);
         recordingAudioUrlRef.current = null;
+        recordingBlobRef.current = null;
         setRecordingAudioUrl(null);
         setRecordingAudioScriptId(null);
+        setRecordingError(null);
+        setRecognizedTranscript("");
+        setPronunciationFeedback(null);
+        setPhoneticScore(0);
         recordingChunksRef.current = [];
 
         setIsPreparingRecording(true);
@@ -1848,6 +1992,7 @@ export default function LessonDetail() {
           const audioUrl = URL.createObjectURL(audioBlob);
           if (recordingAudioUrlRef.current) URL.revokeObjectURL(recordingAudioUrlRef.current);
           recordingAudioUrlRef.current = audioUrl;
+          recordingBlobRef.current = audioBlob;
           setRecordingAudioUrl(audioUrl);
           setRecordingAudioScriptId(selectedAudioScript.id);
         };
@@ -1870,6 +2015,21 @@ export default function LessonDetail() {
         if (recognitionRestartTimerRef.current) {
           window.clearTimeout(recognitionRestartTimerRef.current);
           recognitionRestartTimerRef.current = null;
+        }
+
+        if (!SpeechRecognitionCtor) {
+          console.info("[speech-recognition] API unavailable; recording for SenseVoice fallback", getSpeechDiagnosticContext("zh-CN"));
+          setRecordingError("Trình duyệt không hỗ trợ nhận dạng trực tiếp. Hãy dừng ghi âm rồi chọn “Nhận dạng bằng SenseVoice”.");
+          setRecordingSeconds(0);
+          setIsRecording(true);
+          recordingStartedAtRef.current = Date.now();
+          recordingTimerRef.current = window.setInterval(() => {
+            if (recordingStartedAtRef.current) {
+              const elapsed = Math.max(0, Math.floor((Date.now() - recordingStartedAtRef.current) / 1000));
+              setRecordingSeconds(elapsed);
+            }
+          }, 250);
+          return;
         }
 
         const previousRecognition = recognitionRef.current;
@@ -2106,6 +2266,20 @@ export default function LessonDetail() {
       const stopRecording = () => {
         manualStopRequestedRef.current = true;
         stopAudioCapture();
+
+        if (!recognitionRef.current && !recognitionRestartTimerRef.current) {
+          setRecordingSeconds(0);
+          setIsRecording(false);
+          if (recordingTimerRef.current) {
+            window.clearInterval(recordingTimerRef.current);
+            recordingTimerRef.current = null;
+          }
+          recordingStartedAtRef.current = null;
+          if (!finalTranscriptRef.current.trim()) {
+            setRecordingError("Đã lưu bản ghi. Hãy chọn “Nhận dạng bằng SenseVoice” để chuyển giọng nói thành văn bản.");
+          }
+          return;
+        }
 
         if (recognitionRestartTimerRef.current) {
           window.clearTimeout(recognitionRestartTimerRef.current);
@@ -2444,6 +2618,22 @@ export default function LessonDetail() {
                   >
                     Trình duyệt không hỗ trợ phát lại bản ghi âm.
                   </audio>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="min-h-11"
+                    disabled={isTranscribingPronunciation}
+                    onClick={() => {
+                      const audioBlob = recordingBlobRef.current;
+                      if (!audioBlob) {
+                        setRecordingError("Không tìm thấy bản ghi âm. Hãy ghi âm lại rồi thử.");
+                        return;
+                      }
+                      transcribeRecording(audioBlob, selectedAudioScript.id);
+                    }}
+                  >
+                    {isTranscribingPronunciation ? "Đang nhận dạng bằng SenseVoice..." : "Nhận dạng bằng SenseVoice"}
+                  </Button>
                 </div>
               )}
 
