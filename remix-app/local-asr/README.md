@@ -1,6 +1,6 @@
 # Local SenseVoice API
 
-The lesson pronunciation screen can send an existing recording to this API as an optional fallback when browser speech recognition does not work. The browser-recognition flow remains unchanged. The local API transcribes only; the lesson page compares the transcript with the selected script and the student submits it through the existing scoring flow.
+The lesson pronunciation screen can send an existing recording to this API as an optional fallback when browser speech recognition does not work. The browser-recognition flow remains unchanged. The local API returns a transcript; the lesson page displays it and the script as ASCII Pinyin, compares their syllables, and lets the student submit through the existing scoring flow.
 
 ## Requirements
 

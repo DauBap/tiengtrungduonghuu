@@ -77,9 +77,39 @@ function normalizeSyllable(value: string) {
     .replaceAll("v", "u");
 }
 
+function normalizePinyinDisplay(value: string) {
+  return value
+    .replaceAll("ü", "v")
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[1-5]/g, "")
+    .replace(/[^a-zv]/g, "");
+}
+
 function textToToneMarkedPinyin(value: string) {
-  return pinyin(normalizeSpokenNumbers(value), { type: "array", toneType: "symbol" })
+  const normalizedValue = normalizeSpokenNumbers(value);
+  if (!/\p{Script=Han}/u.test(normalizedValue)) {
+    return normalizedValue.match(/[\p{L}üv]+[1-5]?/giu) ?? [];
+  }
+
+  return pinyin(normalizedValue, { type: "array", toneType: "symbol" })
     .filter((syllable) => normalizeSyllable(syllable));
+}
+
+export function toPinyinText(value: string) {
+  const normalizedValue = normalizeSpokenNumbers(value);
+  if (!/\p{Script=Han}/u.test(normalizedValue)) {
+    return (normalizedValue.match(/[\p{L}üv]+[1-5]?/giu) ?? [])
+      .map(normalizePinyinDisplay)
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return pinyin(normalizedValue, { type: "array", toneType: "none" })
+    .map(normalizePinyinDisplay)
+    .filter(Boolean)
+    .join(" ");
 }
 
 function textToPinyinSyllables(value: string) {

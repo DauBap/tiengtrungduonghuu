@@ -47,10 +47,11 @@ import { SettingsMenu } from "~/components/layout/settings-menu";
 import { isLessonTabKey, openLessonTab, recordLessonTabAttempt } from "~/lib/lesson-tab-progress.server";
 import type { LessonTab as ProgressTab } from "~/lib/lesson-tab-progress";
 import {
-  comparePronunciationTextParts,
+  comparePronunciationPinyin,
   chooseClosestRecognitionCandidate,
   computePronunciationScore,
   mergeRecognitionTranscript,
+  toPinyinText,
 } from "~/lib/pronunciation";
 import { gradePhoneticsSection, type PhoneticsAnswer } from "~/lib/phonetics";
 import { getListeningGrade } from "~/lib/listening-score";
@@ -630,8 +631,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!transcript) return { intent, error: "Không nhận diện được nội dung. Hãy thử đọc lại." };
 
     const scriptText = script.speakers.map((speaker) => speaker.chinese).join(" ");
-    const score = computePronunciationScore(scriptText, transcript);
-    return { intent, scriptId, transcript, score };
+    const transcriptPinyin = toPinyinText(transcript);
+    const score = computePronunciationScore(scriptText, transcriptPinyin);
+    return { intent, scriptId, transcript: transcriptPinyin, score };
   }
 
   if (intent === "open-tab") {
@@ -2333,21 +2335,17 @@ export default function LessonDetail() {
       const bestPronunciationAssessment = pronunciationAssessments.find(
         (assessment) => assessment.lessonAudioScriptId === selectedAudioScript.id
       );
-      const pronunciationComparison = comparePronunciationTextParts(
-        scriptSpeakers.map((speaker) => speaker.chinese),
+      const pinyinComparison = comparePronunciationPinyin(
+        scriptSpeakers.map((speaker) => speaker.chinese).join(" "),
         recognizedTranscript,
       );
-      const allComparisonItems = pronunciationComparison.flatMap((part) => part.comparison);
-      const lastRecognizedCharacterIndex = allComparisonItems.reduce(
-        (lastIndex, item, index) => item.spokenCharacter === null ? lastIndex : index,
+      const lastRecognizedPinyinIndex = pinyinComparison.reduce(
+        (lastIndex, item, index) => item.spokenPinyin === null ? lastIndex : index,
         -1,
       );
-      let remainingVisibleItems = isRecording ? lastRecognizedCharacterIndex + 1 : Infinity;
-      const visiblePronunciationParts = pronunciationComparison.map((part, speakerIndex) => {
-        const visibleCount = Math.max(0, Math.min(part.comparison.length, remainingVisibleItems));
-        remainingVisibleItems -= part.comparison.length;
-        return { ...part, speakerIndex, comparison: part.comparison.slice(0, visibleCount) };
-      }).filter((part) => part.comparison.length > 0);
+      const visiblePinyinComparison = isRecording
+        ? pinyinComparison.slice(0, lastRecognizedPinyinIndex + 1)
+        : pinyinComparison;
       const hasCurrentTranscript = !isRecording && Boolean(recognizedTranscript.trim());
       const displayedScore = isRecording
         ? null
@@ -2532,7 +2530,9 @@ export default function LessonDetail() {
                   <div>
                     <div className="font-medium text-foreground">Bạn đã đọc</div>
                     <p className="mt-1 text-muted-foreground">
-                      {bestPronunciationAssessment.transcript || "Không nhận diện được nội dung trong lượt đọc này."}
+                      {bestPronunciationAssessment.transcript
+                        ? toPinyinText(bestPronunciationAssessment.transcript)
+                        : "Không nhận diện được nội dung trong lượt đọc này."}
                     </p>
                   </div>
                 </div>
@@ -2540,8 +2540,8 @@ export default function LessonDetail() {
 
               {recognizedTranscript && !isRecording && (
                 <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
-                  <div className="font-medium text-foreground">Văn bản nhận diện:</div>
-                  <p className="mt-1 text-muted-foreground">{recognizedTranscript}</p>
+                  <div className="font-medium text-foreground">Phiên âm nhận diện (Pinyin):</div>
+                  <p className="mt-1 text-muted-foreground">{toPinyinText(recognizedTranscript)}</p>
                 </div>
               )}
 
@@ -2549,46 +2549,37 @@ export default function LessonDetail() {
                 <div
                   className="mt-4 space-y-3 rounded-lg border p-4"
                   aria-live="polite"
-                  aria-label="Đối chiếu văn bản chuẩn và lời đọc"
+                  aria-label="Đối chiếu pinyin chuẩn và pinyin nhận diện"
                 >
-                  <div>
-                    {visiblePronunciationParts.length > 0 ? (
+                  {visiblePinyinComparison.length > 0 ? (
                       <>
                         <div>
-                          <p className="font-medium text-foreground">Văn bản chuẩn</p>
+                          <p className="font-medium text-foreground">Pinyin chuẩn</p>
                           <div className="mt-1 whitespace-pre-wrap break-words text-base leading-relaxed text-foreground">
-                            {visiblePronunciationParts.map((part, partIndex) => (
-                              <div key={`script-part-${partIndex}`}>
-                                {part.comparison.map((item, index) => item.scriptCharacter && (
-                                  <span
-                                    key={`script-${index}`}
-                                    className={item.status === "incorrect" || item.status === "missing"
-                                      ? "rounded-sm bg-destructive/10 px-0.5 font-semibold text-destructive"
-                                      : undefined}
-                                  >
-                                    {item.scriptCharacter}
-                                  </span>
-                                ))}
-                              </div>
+                            {visiblePinyinComparison.map((item, index) => item.scriptPinyin && (
+                              <span
+                                key={`script-pinyin-${index}`}
+                                className={item.status === "incorrect" || item.status === "missing"
+                                  ? "rounded-sm bg-destructive/10 px-0.5 font-semibold text-destructive"
+                                  : undefined}
+                              >
+                                {toPinyinText(item.scriptPinyin)}{" "}
+                              </span>
                             ))}
                           </div>
                         </div>
                         <div className="mt-3">
-                          <p className="font-medium text-foreground">Bạn đọc</p>
+                          <p className="font-medium text-foreground">Bạn đọc (Pinyin)</p>
                           <div className="mt-1 whitespace-pre-wrap break-words text-base leading-relaxed text-foreground">
-                            {visiblePronunciationParts.map((part, partIndex) => (
-                              <div key={`spoken-part-${partIndex}`}>
-                                {part.comparison.map((item, index) => item.spokenCharacter && (
-                                  <span
-                                    key={`spoken-${index}`}
-                                    className={item.status === "incorrect" || item.status === "extra"
-                                      ? "rounded-sm bg-destructive/10 px-0.5 font-semibold text-destructive"
-                                      : undefined}
-                                  >
-                                    {item.spokenCharacter}
-                                  </span>
-                                ))}
-                              </div>
+                            {visiblePinyinComparison.map((item, index) => item.spokenPinyin && (
+                              <span
+                                key={`spoken-pinyin-${index}`}
+                                className={item.status === "incorrect" || item.status === "extra"
+                                  ? "rounded-sm bg-destructive/10 px-0.5 font-semibold text-destructive"
+                                  : undefined}
+                              >
+                                {toPinyinText(item.spokenPinyin)}{" "}
+                              </span>
                             ))}
                           </div>
                         </div>
@@ -2598,9 +2589,8 @@ export default function LessonDetail() {
                         {isRecording ? "Đang chờ nhận diện lời đọc..." : "Chưa có nội dung để đối chiếu."}
                       </p>
                     )}
-                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Phần chữ đỏ là nội dung khác, thiếu hoặc đọc thừa. Thanh điệu chưa được chấm theo giọng đọc.
+                    Phần đỏ là âm tiết khác, thiếu hoặc đọc thừa. Điểm hiện tại so khớp âm tiết, chưa chấm thanh điệu hay chất lượng phát âm.
                   </p>
                 </div>
               )}

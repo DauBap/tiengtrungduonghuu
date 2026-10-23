@@ -8,6 +8,7 @@ import {
   comparePronunciationPinyin,
   computePronunciationScore,
   mergeRecognitionTranscript,
+  toPinyinText,
 } from "./pronunciation";
 
 test("chooses the recognition candidate closest to the remaining pinyin script", () => {
@@ -81,6 +82,23 @@ test("shows tone marks without using them to decide pronunciation matches", () =
     [
       { scriptPinyin: "nǐ", spokenPinyin: "nǐ", status: "correct" },
       { scriptPinyin: "hǎo", spokenPinyin: "hào", status: "correct" },
+    ],
+  );
+});
+
+test("converts recognized Hanzi to ASCII Pinyin", () => {
+  assert.equal(toPinyinText("\u6211\u7231\u4f60\u3002"), "wo ai ni");
+  assert.equal(toPinyinText("wǒ ài nǐ"), "wo ai ni");
+  assert.equal(toPinyinText("\u5973"), "nv");
+});
+
+test("scores and aligns recognized pinyin directly against the Hanzi script", () => {
+  assert.equal(computePronunciationScore("\u6211\u7231\u4f60", "wǒ ài nǐ"), 100);
+  assert.deepEqual(
+    comparePronunciationPinyin("\u4f60\u597d", "nǐ hòu"),
+    [
+      { scriptPinyin: "nǐ", spokenPinyin: "nǐ", status: "correct" },
+      { scriptPinyin: "hǎo", spokenPinyin: "hòu", status: "incorrect" },
     ],
   );
 });
