@@ -81,12 +81,15 @@ export function WorkbookListeningTest({
   const [speed, setSpeed] = useState<0.8 | 1 | 1.5>(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const isAwaitingTeacherReview = (savedResult?.pendingReviewCount ?? 0) > 0;
   const [answers, setAnswers] = useState<Record<string, string>>(() =>
-    Object.fromEntries((savedResult?.answers ?? []).map((answer) => [answer.id, answer.given]))
+    isAwaitingTeacherReview
+      ? Object.fromEntries((savedResult?.answers ?? []).map((answer) => [answer.id, answer.given]))
+      : {}
   );
   const [audioPlayCount, setAudioPlayCount] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(config.timeLimit ? config.timeLimit * 60 : 0);
-  const [isSubmitted, setIsSubmitted] = useState(savedResult != null);
+  const [isSubmitted, setIsSubmitted] = useState(isAwaitingTeacherReview);
   const audioRef = useRef<HTMLAudioElement>(null);
   const submitAttemptRef = useRef<() => void>(() => undefined);
 
@@ -259,6 +262,17 @@ export function WorkbookListeningTest({
           )}
         </div>
       </Card>
+
+      {isAwaitingTeacherReview && isSubmitted && (
+        <Card className="border-amber-500/40 bg-amber-500/5 p-4">
+          <p className="text-sm font-medium">
+            Lượt làm trước có {savedResult?.pendingReviewCount} câu đang chờ giáo viên chấm.
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Bạn có thể làm lại sau khi giáo viên hoàn tất chấm điểm.
+          </p>
+        </Card>
+      )}
 
       {/* Test Content */}
       {sections.map((section) => (

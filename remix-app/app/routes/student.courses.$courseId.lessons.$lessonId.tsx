@@ -32,7 +32,7 @@ import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
-import { ArrowLeft, BookOpen, PartyPopper, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2, MessageSquareText } from "lucide-react";
+import { ArrowLeft, BookOpen, PartyPopper, X, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2, MessageSquareText } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
 import { createVocabularyTest, gradeVocabularyTest } from "~/lib/vocabulary-test";
 import { answerVariants, bestAnswerMatchPercent, isAnswerCorrectForAny } from "~/lib/listening-answer";
@@ -2674,8 +2674,15 @@ export default function LessonDetail() {
         </p>
       </div>
       {activeReviewGroups.length > 0 && (
-        <Button type="button" variant="outline" size="sm" onClick={() => setShowAnswerReview((visible) => !visible)}>
-          {showAnswerReview ? "Ẩn kết quả" : "Xem kết quả chi tiết"}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          aria-haspopup="dialog"
+          aria-expanded={showAnswerReview}
+          onClick={() => setShowAnswerReview(true)}
+        >
+          Xem kết quả chi tiết
         </Button>
       )}
     </div>
@@ -2783,7 +2790,45 @@ export default function LessonDetail() {
               {showAnswerReviewControls && !activeScore && (
                 <section className="rounded-md border bg-card px-4 py-3">{answerReviewControl}</section>
               )}
-              {showAnswerReview && showAnswerReviewControls && <AnswerReviewDetails groups={activeReviewGroups} />}
+              {showAnswerReview && showAnswerReviewControls && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+                  role="presentation"
+                  onMouseDown={(event) => {
+                    if (event.target === event.currentTarget) setShowAnswerReview(false);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") setShowAnswerReview(false);
+                  }}
+                >
+                  <section
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="answer-review-title"
+                    className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl border bg-background p-5 shadow-xl"
+                  >
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <div>
+                        <h2 id="answer-review-title" className="text-lg font-semibold">Kết quả chi tiết</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Câu trả lời và đáp án đúng của lượt làm tốt nhất.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        aria-label="Đóng kết quả chi tiết"
+                        autoFocus
+                        onClick={() => setShowAnswerReview(false)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <AnswerReviewDetails groups={activeReviewGroups} />
+                  </section>
+                </div>
+              )}
               <div key="active-tab-content">{renderTabContent()}</div>
             </div>
           </>
