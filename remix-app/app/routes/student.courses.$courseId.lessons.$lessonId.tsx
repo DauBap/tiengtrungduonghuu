@@ -1711,7 +1711,7 @@ export default function LessonDetail() {
           <div className="flex justify-end">
             <SettingsMenu align="right" />
           </div>
-          <VocabularyTable items={lesson.content} />
+          <VocabularyTable items={lesson.content} searchable />
         </div>
       );
     }
