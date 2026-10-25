@@ -2,6 +2,10 @@ import type { Config } from "@react-router/dev/config";
 
 export default {
   ssr: true,
+  allowedActionOrigins: [
+    "tiengtrungduonghuu.edu.vn",
+    "www.tiengtrungduonghuu.edu.vn",
+  ],
   future: {
     v8_middleware: true,
     v8_splitRouteModules: true,
