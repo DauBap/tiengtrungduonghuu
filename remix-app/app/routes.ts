@@ -7,6 +7,7 @@ export default [
   route("logout", "routes/logout.tsx"),
   route("api/tts", "routes/api.tts.ts"),
   route("api/pronunciation-recordings/:assessmentId", "routes/api.pronunciation-recordings.$assessmentId.ts"),
+  route("uploads/*", "routes/uploads.$.ts"),
 
   // Admin
   route("admin", "routes/admin.tsx", [

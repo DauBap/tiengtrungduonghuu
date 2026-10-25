@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { get } from "@vercel/blob";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
+import { serveStoredAsset } from "~/lib/storage.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
@@ -11,10 +11,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   });
   if (!assessment?.audioUrl) throw new Response("Không tìm thấy bản ghi", { status: 404 });
 
-  const blob = await get(assessment.audioUrl, { access: "public" });
-  if (!blob || blob.statusCode !== 200) throw new Response("Không tìm thấy bản ghi", { status: 404 });
-
-  const headers = new Headers(blob.headers);
+  const response = await serveStoredAsset(request, assessment.audioUrl);
+  const headers = new Headers(response.headers);
   headers.set("Cache-Control", "private, no-store");
-  return new Response(blob.stream, { status: 200, headers });
+  return new Response(response.body, { status: response.status, headers });
 }

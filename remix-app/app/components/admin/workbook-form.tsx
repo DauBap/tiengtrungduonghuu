@@ -559,7 +559,7 @@ export function WorkbookForm({ initial, error, cancelTo }: WorkbookFormProps) {
               id="wb-audio"
               value={audioUrl}
               onChange={(e) => setAudioUrl(e.target.value)}
-              placeholder="https://..."
+              placeholder="https://... hoặc /uploads/audio/..."
             />
             <p className="text-xs text-muted-foreground">File audio phát khi học viên mở tab Sách bài tập.</p>
           </div>

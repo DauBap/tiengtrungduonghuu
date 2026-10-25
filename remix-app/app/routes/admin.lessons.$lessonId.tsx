@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useFetcher, Link } from "react-router";
-import { BlobAccessError } from "@vercel/blob";
 import { requireRole } from "~/lib/session.server";
 import {
   getLessonForAdmin,
@@ -103,6 +102,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   return { user, lesson, lessonNumber: previousLessons + 1, phoneticsSections };
 }
 
+function isHttpOrLocalPath(value: string) {
+  return /^https?:\/\/.+/i.test(value) || (value.startsWith("/") && !value.startsWith("//"));
+}
+
 export async function action({ request, params }: ActionFunctionArgs) {
   await requireRole(request, ["admin"]);
   const lessonId = params.lessonId!;
@@ -127,12 +130,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
       const audioValue = String(form.get("audio") ?? "").trim();
       if (!title)
         return { phoneticsError: "Tên phần Ngữ âm không được để trống." };
-      if (audioValue) {
-        try {
-          new URL(audioValue);
-        } catch {
-          return { phoneticsError: "Audio phải là URL hợp lệ hoặc để trống." };
-        }
+      if (audioValue && !isHttpOrLocalPath(audioValue)) {
+        return { phoneticsError: "Audio phải là URL http(s), đường dẫn trong site hoặc để trống." };
       }
 
       if (intent === "phonetics-section-create") {
@@ -314,9 +313,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
         field: "audioUrl",
       };
     }
-    if (!uploadedAudioFile && audioUrl && !/^https?:\/\/.+/i.test(audioUrl)) {
+    if (!uploadedAudioFile && audioUrl && !isHttpOrLocalPath(audioUrl)) {
       return {
-        error: "Link audio phải bắt đầu bằng http:// hoặc https://",
+        error: "Link audio phải là URL http(s) hoặc đường dẫn trong site",
         field: "audioUrl",
       };
     }
@@ -350,20 +349,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
       };
     }
 
-    let uploadedAudioUrl: string | null;
-    try {
-      uploadedAudioUrl = await saveUploadedAsset(uploadedAudioFile, {
-        kind: "lesson-audio",
-        lessonId,
-      });
-    } catch (error) {
-      if (!(error instanceof BlobAccessError)) throw error;
-      return {
-        error:
-          "Vercel Blob từ chối quyền truy cập. Hãy cập nhật BLOB_READ_WRITE_TOKEN bằng token Read/Write của đúng Blob store, rồi khởi động lại server.",
-        field: "audioUrl",
-      };
-    }
+    const uploadedAudioUrl = await saveUploadedAsset(uploadedAudioFile, {
+      kind: "lesson-audio",
+      lessonId,
+    });
 
     if (intent === "lesson-script-edit") {
       await prisma.lessonAudioScript.update({
@@ -443,9 +432,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!pinyin) return { error: "Vui lòng nhập pinyin", field: "pinyin" };
     if (!translation)
       return { error: "Vui lòng nhập nghĩa tiếng Việt", field: "translation" };
-    if (audioUrl && !/^https?:\/\/.+/i.test(audioUrl)) {
+    if (audioUrl && !isHttpOrLocalPath(audioUrl)) {
       return {
-        error: "Link audio phải bắt đầu bằng http:// hoặc https://",
+        error: "Link audio phải là URL http(s) hoặc đường dẫn trong site",
         field: "audioUrl",
       };
     }
@@ -562,9 +551,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!pinyin) return { error: "Vui lòng nhập pinyin", field: "pinyin" };
     if (!translation)
       return { error: "Vui lòng nhập nghĩa tiếng Việt", field: "translation" };
-    if (audioUrl && !/^https?:\/\/.+/i.test(audioUrl)) {
+    if (audioUrl && !isHttpOrLocalPath(audioUrl)) {
       return {
-        error: "Link audio phải bắt đầu bằng http:// hoặc https://",
+        error: "Link audio phải là URL http(s) hoặc đường dẫn trong site",
         field: "audioUrl",
       };
     }

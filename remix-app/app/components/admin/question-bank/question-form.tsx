@@ -164,7 +164,7 @@ export function QuestionForm({
                 id="audioUrl"
                 name="audioUrl"
                 defaultValue={payloadField(question?.payload, "audioUrl")}
-                placeholder="https://... hoặc /audio/hsk1-01.mp3"
+                placeholder="https://..., /uploads/audio/... hoặc /audio/..."
                 aria-invalid={invalidField === "audioUrl" || undefined}
               />
             </div>
