@@ -1,15 +1,17 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link, useNavigate } from "react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import { getCourseById, getLessonSummariesByCourse, getCourseReviewSetSummaries, getAllProgressForCourse, computeLessonStatus, computeTrackedCourseProgress, isEnrolled } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { LessonCard } from "~/components/lessons/lesson-card";
 import { ProgressBar } from "~/components/progress/progress-bar";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
-import { ArrowLeft, BookOpen, Layers, FileCheck2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Layers, FileCheck2, Search, X } from "lucide-react";
 import type { ProgressStatus } from "~/types/progress";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
 import { prisma } from "~/lib/prisma.server";
@@ -108,6 +110,7 @@ export default function StudentCourseDetail() {
   const navigate = useNavigate();
   const [showCombinedStudy, setShowCombinedStudy] = useState(false);
   const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([]);
+  const [lessonSearchQuery, setLessonSearchQuery] = useState("");
 
   const orderedCourseItems = [
     ...lessonsWithStatus.map((lesson) => ({
@@ -122,6 +125,29 @@ export default function StudentCourseDetail() {
     })),
   ].sort((a, b) => a.order - b.order);
   const lessonNumbers = new Map(lessonsWithStatus.map((lesson, index) => [lesson.id, index + 1]));
+  const filteredLessons = useMemo(() => {
+    const query = lessonSearchQuery
+      .trim()
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase()
+      .replace(/đ/g, "d");
+    if (!query) return lessonsWithStatus;
+
+    return lessonsWithStatus.filter((lesson, index) => {
+      const searchableText = [
+        `bai ${index + 1}`,
+        lesson.title,
+        lesson.subtitle,
+      ]
+        .join(" ")
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .toLowerCase()
+        .replace(/đ/g, "d");
+      return searchableText.includes(query);
+    });
+  }, [lessonSearchQuery, lessonsWithStatus]);
 
   return (
     <AppShell user={user}>
@@ -238,8 +264,43 @@ export default function StudentCourseDetail() {
                 <h2 id="combined-study-title" className="text-lg font-semibold">Học tổng hợp</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Chọn các bài học trong khóa {course.title}.</p>
               </div>
-              <div className="max-h-[55vh] space-y-1 overflow-y-auto p-3">
-                {lessonsWithStatus.map((lesson) => (
+              <div className="space-y-3 border-b p-4">
+                <Label htmlFor="combined-study-lesson-search">Tìm kiếm bài học</Label>
+                <div className="relative">
+                  <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="combined-study-lesson-search"
+                    type="text"
+                    value={lessonSearchQuery}
+                    onChange={(event) => setLessonSearchQuery(event.target.value)}
+                    placeholder="Tên bài, nội dung hoặc số bài..."
+                    className="h-11 pl-9 pr-12"
+                  />
+                  {lessonSearchQuery && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-1/2 h-11 w-11 -translate-y-1/2"
+                      onClick={() => setLessonSearchQuery("")}
+                      aria-label="Xóa nội dung tìm kiếm bài học"
+                    >
+                      <X aria-hidden="true" className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground" aria-live="polite">
+                  {lessonSearchQuery.trim()
+                    ? `Tìm thấy ${filteredLessons.length}/${lessonsWithStatus.length} bài học`
+                    : `${lessonsWithStatus.length} bài học trong khóa`}
+                </p>
+              </div>
+              <div className="max-h-[45vh] space-y-1 overflow-y-auto p-3">
+                {filteredLessons.length === 0 ? (
+                  <div role="status" className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+                    Không tìm thấy bài học phù hợp.
+                  </div>
+                ) : filteredLessons.map((lesson) => (
                   <label key={lesson.id} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 hover:bg-muted/60">
                     <input
                       type="checkbox"

@@ -1,0 +1,4 @@
+"id","level","type","lesson_number","lesson_title","questions_file","audio_file","question_count","image_count","status"
+"hsk1_mock_test_01","HSK1","mock_test","","HSK1 - Đề thi thử số 1","hsk1_mock_test_01_questions.json","hsk1_mock_test_01_audio.mp3","40","8","questions_and_audio"
+"hsk1_mock_test_02","HSK1","mock_test","","HSK1 - Đề thi thử số 2","hsk1_mock_test_02_questions.json","hsk1_mock_test_02_audio.mp3","40","8","questions_and_audio"
+"hsk2_mock_test_01","HSK2","mock_test","","HSK2 - Đề thi thử số 1 (chưa có câu hỏi)","","hsk2_mock_test_01_audio.mp3","0","0","audio_only"

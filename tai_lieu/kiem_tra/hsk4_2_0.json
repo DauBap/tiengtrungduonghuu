@@ -1,0 +1,4554 @@
+{
+  "course_id": "HSK4_2-0",
+  "course_name": "HSK 4 (2.0)",
+  "exam_tab": {
+    "title": "Thi tổng hợp",
+    "vocabularySource": "lesson.data",
+    "lessonSelection": "Học viên chọn một hoặc nhiều bài học trước khi bắt đầu thi.",
+    "directions": [
+      {
+        "id": "zh2vi",
+        "label": "Trung → Việt"
+      },
+      {
+        "id": "vi2zh",
+        "label": "Việt → Trung"
+      },
+      {
+        "id": "mixed",
+        "label": "Hỗn hợp"
+      }
+    ],
+    "questionLength": {
+      "selectorShownWhenSelectedVocabularyCountAtLeast": 20,
+      "short": "floor(totalVocabulary / 3)",
+      "medium": "floor(totalVocabulary * 2 / 3)",
+      "full": "totalVocabulary"
+    },
+    "note": "Câu hỏi và phương án nhiễu được tạo ngẫu nhiên khi thi; bản xuất lưu từ vựng nguồn, không có bộ đề/đáp án cố định."
+  },
+  "lessons": [
+    {
+      "id": 1,
+      "title": "简单的爱情",
+      "short_vi": "N/A",
+      "vocabulary_count": 32,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "法律",
+          "pinyin": "fǎlǜ",
+          "adj": 2,
+          "vi": "pháp luật, luật"
+        },
+        {
+          "pos": 2,
+          "hanzi": "俩",
+          "pinyin": "liǎ",
+          "adj": [
+            null,
+            21
+          ],
+          "vi": "hai"
+        },
+        {
+          "pos": 3,
+          "hanzi": "印象",
+          "pinyin": "yìnxiàng",
+          "adj": 2,
+          "vi": "ấn tượng"
+        },
+        {
+          "pos": 4,
+          "hanzi": "深",
+          "pinyin": "shēn",
+          "adj": 6,
+          "vi": "sâu sắc"
+        },
+        {
+          "pos": 5,
+          "hanzi": "熟悉",
+          "pinyin": "shúxi",
+          "adj": 4,
+          "vi": "hiểu rõ"
+        },
+        {
+          "pos": 6,
+          "hanzi": "不仅",
+          "pinyin": "bùjǐn",
+          "adj": 10,
+          "vi": "không những, chẳng những"
+        },
+        {
+          "pos": 7,
+          "hanzi": "性格",
+          "pinyin": "xìnggé",
+          "adj": 2,
+          "vi": "tính cách, tính nết"
+        },
+        {
+          "pos": 8,
+          "hanzi": "开玩笑",
+          "pinyin": "kāi wánxiào",
+          "adj": 4,
+          "vi": "nói đùa, đùa"
+        },
+        {
+          "pos": 9,
+          "hanzi": "从来",
+          "pinyin": "cónglái",
+          "adj": 7,
+          "vi": "từ trước đến nay, từ trước đến giờ"
+        },
+        {
+          "pos": 10,
+          "hanzi": "最好",
+          "pinyin": "zuìhǎo",
+          "adj": 7,
+          "vi": "tốt nhất"
+        },
+        {
+          "pos": 11,
+          "hanzi": "共同",
+          "pinyin": "gòngtóng",
+          "adj": 6,
+          "vi": "chung, cùng"
+        },
+        {
+          "pos": 12,
+          "hanzi": "适合",
+          "pinyin": "shìhé",
+          "adj": 4,
+          "vi": "phù hợp"
+        },
+        {
+          "pos": 13,
+          "hanzi": "幸福",
+          "pinyin": "xìngfú",
+          "adj": 6,
+          "vi": "hạnh phúc"
+        },
+        {
+          "pos": 14,
+          "hanzi": "生活",
+          "pinyin": "shēnghuó",
+          "adj": [
+            2,
+            4
+          ],
+          "vi": "cuộc sống; sống"
+        },
+        {
+          "pos": 15,
+          "hanzi": "刚",
+          "pinyin": "gāng",
+          "adj": 7,
+          "vi": "vừa, vừa mới"
+        },
+        {
+          "pos": 16,
+          "hanzi": "浪漫",
+          "pinyin": "làngmàn",
+          "adj": 6,
+          "vi": "lãng mạn"
+        },
+        {
+          "pos": 17,
+          "hanzi": "够",
+          "pinyin": "gòu",
+          "adj": 4,
+          "vi": "đủ"
+        },
+        {
+          "pos": 18,
+          "hanzi": "缺点",
+          "pinyin": "quēdiǎn",
+          "adj": 2,
+          "vi": "khuyết điểm, thiếu sót"
+        },
+        {
+          "pos": 19,
+          "hanzi": "接受",
+          "pinyin": "jiēshòu",
+          "adj": 4,
+          "vi": "chấp nhận"
+        },
+        {
+          "pos": 20,
+          "hanzi": "羡慕",
+          "pinyin": "xiànmù",
+          "adj": 4,
+          "vi": "ước ao, ngưỡng mộ"
+        },
+        {
+          "pos": 21,
+          "hanzi": "爱情",
+          "pinyin": "àiqíng",
+          "adj": 2,
+          "vi": "tình yêu (giữa nam và nữ)"
+        },
+        {
+          "pos": 22,
+          "hanzi": "星星",
+          "pinyin": "xīngxing",
+          "adj": 2,
+          "vi": "ngôi sao"
+        },
+        {
+          "pos": 23,
+          "hanzi": "即使",
+          "pinyin": "jíshǐ",
+          "adj": 10,
+          "vi": "cho dù"
+        },
+        {
+          "pos": 24,
+          "hanzi": "加班",
+          "pinyin": "jiā bān",
+          "adj": 4,
+          "vi": "tăng ca, làm thêm giờ"
+        },
+        {
+          "pos": 25,
+          "hanzi": "亮",
+          "pinyin": "liàng",
+          "adj": 4,
+          "vi": "chiếu sáng, tỏa sáng"
+        },
+        {
+          "pos": 26,
+          "hanzi": "感动",
+          "pinyin": "gǎndòng",
+          "adj": 4,
+          "vi": "cảm động, làm xúc động"
+        },
+        {
+          "pos": 27,
+          "hanzi": "自然",
+          "pinyin": "zìrán",
+          "adj": 7,
+          "vi": "đương nhiên, hiển nhiên"
+        },
+        {
+          "pos": 28,
+          "hanzi": "原因",
+          "pinyin": "yuányīn",
+          "adj": 2,
+          "vi": "nguyên nhân"
+        },
+        {
+          "pos": 29,
+          "hanzi": "互相",
+          "pinyin": "hùxiāng",
+          "adj": 7,
+          "vi": "lẫn nhau, qua lại"
+        },
+        {
+          "pos": 30,
+          "hanzi": "吸引",
+          "pinyin": "xīyǐn",
+          "adj": 4,
+          "vi": "hấp dẫn, thu hút"
+        },
+        {
+          "pos": 31,
+          "hanzi": "幽默",
+          "pinyin": "yōumò",
+          "adj": 6,
+          "vi": "hóm hỉnh, khôi hài"
+        },
+        {
+          "pos": 32,
+          "hanzi": "脾气",
+          "pinyin": "píqi",
+          "adj": 2,
+          "vi": "tính tình, tính khí"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "真正的朋友",
+      "short_vi": "N/A",
+      "vocabulary_count": 30,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "适应",
+          "pinyin": "shìyìng",
+          "adj": 4,
+          "vi": "thích nghi"
+        },
+        {
+          "pos": 2,
+          "hanzi": "交",
+          "pinyin": "jiāo",
+          "adj": 4,
+          "vi": "kết giao"
+        },
+        {
+          "pos": 3,
+          "hanzi": "平时",
+          "pinyin": "píngshí",
+          "adj": 2,
+          "vi": "lúc thường, ngày thường"
+        },
+        {
+          "pos": 4,
+          "hanzi": "逛",
+          "pinyin": "guàng",
+          "adj": 4,
+          "vi": "đi dạo"
+        },
+        {
+          "pos": 5,
+          "hanzi": "短信",
+          "pinyin": "duǎnxìn",
+          "adj": 2,
+          "vi": "tin nhắn"
+        },
+        {
+          "pos": 6,
+          "hanzi": "正好",
+          "pinyin": "zhènghǎo",
+          "adj": 7,
+          "vi": "đúng lúc, được dịp, gặp dịp"
+        },
+        {
+          "pos": 7,
+          "hanzi": "聚会",
+          "pinyin": "jùhuì",
+          "adj": [
+            4,
+            2
+          ],
+          "vi": "gặp gỡ; cuộc họp mặt"
+        },
+        {
+          "pos": 8,
+          "hanzi": "联系",
+          "pinyin": "liánxì",
+          "adj": 4,
+          "vi": "liên hệ"
+        },
+        {
+          "pos": 9,
+          "hanzi": "差不多",
+          "pinyin": "chàbuduō",
+          "adj": 7,
+          "vi": "gần như, hầu như"
+        },
+        {
+          "pos": 10,
+          "hanzi": "专门",
+          "pinyin": "zhuānmén",
+          "adj": 7,
+          "vi": "đặc biệt, riêng biệt"
+        },
+        {
+          "pos": 11,
+          "hanzi": "毕业",
+          "pinyin": "bì yè",
+          "adj": 4,
+          "vi": "tốt nghiệp"
+        },
+        {
+          "pos": 12,
+          "hanzi": "麻烦",
+          "pinyin": "máfan",
+          "adj": 4,
+          "vi": "làm phiền"
+        },
+        {
+          "pos": 13,
+          "hanzi": "好像",
+          "pinyin": "hǎoxiàng",
+          "adj": 7,
+          "vi": "giống như, dường như"
+        },
+        {
+          "pos": 14,
+          "hanzi": "重新",
+          "pinyin": "chóngxīn",
+          "adj": 7,
+          "vi": "lần nữa, lại một lần nữa"
+        },
+        {
+          "pos": 15,
+          "hanzi": "尽管",
+          "pinyin": "jǐnguǎn",
+          "adj": 10,
+          "vi": "cho dù, mặc dù"
+        },
+        {
+          "pos": 16,
+          "hanzi": "真正",
+          "pinyin": "zhēnzhèng",
+          "adj": 6,
+          "vi": "chân chính, thật sự"
+        },
+        {
+          "pos": 17,
+          "hanzi": "友谊",
+          "pinyin": "yǒuyì",
+          "adj": 2,
+          "vi": "tình bạn"
+        },
+        {
+          "pos": 18,
+          "hanzi": "丰富",
+          "pinyin": "fēngfù",
+          "adj": 4,
+          "vi": "làm phong phú"
+        },
+        {
+          "pos": 19,
+          "hanzi": "无聊",
+          "pinyin": "wúliáo",
+          "adj": 6,
+          "vi": "vô vị, nhàm chán"
+        },
+        {
+          "pos": 20,
+          "hanzi": "讨厌",
+          "pinyin": "tǎoyàn",
+          "adj": 4,
+          "vi": "ghét, không thích"
+        },
+        {
+          "pos": 21,
+          "hanzi": "却",
+          "pinyin": "què",
+          "adj": 7,
+          "vi": "lại, nhưng mà"
+        },
+        {
+          "pos": 22,
+          "hanzi": "周围",
+          "pinyin": "zhōuwéi",
+          "adj": 2,
+          "vi": "xung quanh"
+        },
+        {
+          "pos": 23,
+          "hanzi": "交流",
+          "pinyin": "jiāoliú",
+          "adj": 4,
+          "vi": "giao lưu, trao đổi"
+        },
+        {
+          "pos": 24,
+          "hanzi": "理解",
+          "pinyin": "lǐjiě",
+          "adj": 4,
+          "vi": "hiểu"
+        },
+        {
+          "pos": 25,
+          "hanzi": "镜子",
+          "pinyin": "jìngzi",
+          "adj": 2,
+          "vi": "gương, gương soi"
+        },
+        {
+          "pos": 26,
+          "hanzi": "而",
+          "pinyin": "ér",
+          "adj": 10,
+          "vi": "(chỉ sự tương phản) trong khi đó, mà"
+        },
+        {
+          "pos": 27,
+          "hanzi": "当",
+          "pinyin": "dāng",
+          "adj": 13,
+          "vi": "khi"
+        },
+        {
+          "pos": 28,
+          "hanzi": "困难",
+          "pinyin": "kùnnan",
+          "adj": 2,
+          "vi": "khó khăn"
+        },
+        {
+          "pos": 29,
+          "hanzi": "及时",
+          "pinyin": "jíshí",
+          "adj": 7,
+          "vi": "đúng lúc, kịp thời"
+        },
+        {
+          "pos": 30,
+          "hanzi": "陪",
+          "pinyin": "péi",
+          "adj": 4,
+          "vi": "đi cùng, ở bên cạnh"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "经理对我印象不错",
+      "short_vi": "N/A",
+      "vocabulary_count": 31,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "挺",
+          "pinyin": "tǐng",
+          "adj": 7,
+          "vi": "rất"
+        },
+        {
+          "pos": 2,
+          "hanzi": "紧张",
+          "pinyin": "jǐnzhāng",
+          "adj": 6,
+          "vi": "hồi hộp, căng thẳng"
+        },
+        {
+          "pos": 3,
+          "hanzi": "信心",
+          "pinyin": "xìnxīn",
+          "adj": 2,
+          "vi": "lòng tin, sự tự tin"
+        },
+        {
+          "pos": 4,
+          "hanzi": "能力",
+          "pinyin": "nénglì",
+          "adj": 2,
+          "vi": "năng lực, khả năng"
+        },
+        {
+          "pos": 5,
+          "hanzi": "招聘",
+          "pinyin": "zhāopìn",
+          "adj": 4,
+          "vi": "tuyển dụng"
+        },
+        {
+          "pos": 6,
+          "hanzi": "提供",
+          "pinyin": "tígōng",
+          "adj": 4,
+          "vi": "cung cấp"
+        },
+        {
+          "pos": 7,
+          "hanzi": "负责",
+          "pinyin": "fùzé",
+          "adj": 4,
+          "vi": "phụ trách, chịu trách nhiệm"
+        },
+        {
+          "pos": 8,
+          "hanzi": "本来",
+          "pinyin": "běnlái",
+          "adj": 7,
+          "vi": "lúc đầu, trước đây"
+        },
+        {
+          "pos": 9,
+          "hanzi": "应聘",
+          "pinyin": "yìngpìn",
+          "adj": 4,
+          "vi": "xin việc"
+        },
+        {
+          "pos": 10,
+          "hanzi": "材料",
+          "pinyin": "cáiliào",
+          "adj": 2,
+          "vi": "tư liệu, tài liệu"
+        },
+        {
+          "pos": 11,
+          "hanzi": "符合",
+          "pinyin": "fúhé",
+          "adj": 4,
+          "vi": "phù hợp"
+        },
+        {
+          "pos": 12,
+          "hanzi": "通知",
+          "pinyin": "tōngzhī",
+          "adj": 4,
+          "vi": "báo tin, thông báo"
+        },
+        {
+          "pos": 13,
+          "hanzi": "律师",
+          "pinyin": "lǜshī",
+          "adj": 2,
+          "vi": "luật sư"
+        },
+        {
+          "pos": 14,
+          "hanzi": "专业",
+          "pinyin": "zhuānyè",
+          "adj": 2,
+          "vi": "chuyên ngành"
+        },
+        {
+          "pos": 15,
+          "hanzi": "另外",
+          "pinyin": "lìngwài",
+          "adj": 10,
+          "vi": "ngoài ra"
+        },
+        {
+          "pos": 16,
+          "hanzi": "收入",
+          "pinyin": "shōurù",
+          "adj": 2,
+          "vi": "thu nhập"
+        },
+        {
+          "pos": 17,
+          "hanzi": "咱们",
+          "pinyin": "zánmen",
+          "adj": 2,
+          "vi": "chúng ta, chúng mình"
+        },
+        {
+          "pos": 18,
+          "hanzi": "安排",
+          "pinyin": "ānpái",
+          "adj": 4,
+          "vi": "sắp xếp"
+        },
+        {
+          "pos": 19,
+          "hanzi": "首先",
+          "pinyin": "shǒuxiān",
+          "adj": 2,
+          "vi": "trước hết, trước tiên"
+        },
+        {
+          "pos": 20,
+          "hanzi": "正式",
+          "pinyin": "zhèngshì",
+          "adj": 6,
+          "vi": "chính thức, trang trọng"
+        },
+        {
+          "pos": 21,
+          "hanzi": "留",
+          "pinyin": "liú",
+          "adj": 4,
+          "vi": "để lại"
+        },
+        {
+          "pos": 22,
+          "hanzi": "其次",
+          "pinyin": "qícì",
+          "adj": 2,
+          "vi": "thứ hai, sau đó"
+        },
+        {
+          "pos": 23,
+          "hanzi": "诚实",
+          "pinyin": "chéngshí",
+          "adj": 6,
+          "vi": "thành thật"
+        },
+        {
+          "pos": 24,
+          "hanzi": "改变",
+          "pinyin": "gǎibiàn",
+          "adj": 4,
+          "vi": "thay đổi"
+        },
+        {
+          "pos": 25,
+          "hanzi": "感觉",
+          "pinyin": "gǎnjué",
+          "adj": 2,
+          "vi": "cảm giác, cảm nghĩ"
+        },
+        {
+          "pos": 26,
+          "hanzi": "判断",
+          "pinyin": "pànduàn",
+          "adj": 4,
+          "vi": "nhận xét, đánh giá"
+        },
+        {
+          "pos": 27,
+          "hanzi": "顾客",
+          "pinyin": "gùkè",
+          "adj": 2,
+          "vi": "khách hàng"
+        },
+        {
+          "pos": 28,
+          "hanzi": "准时",
+          "pinyin": "zhǔnshí",
+          "adj": 6,
+          "vi": "đúng giờ"
+        },
+        {
+          "pos": 29,
+          "hanzi": "不管",
+          "pinyin": "bùguǎn",
+          "adj": 10,
+          "vi": "bất kể, bất luận"
+        },
+        {
+          "pos": 30,
+          "hanzi": "与",
+          "pinyin": "yǔ",
+          "adj": 13,
+          "vi": "với, và"
+        },
+        {
+          "pos": 31,
+          "hanzi": "约会",
+          "pinyin": "yuēhuì",
+          "adj": 4,
+          "vi": "hẹn gặp, hẹn hò"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "不要太着急赚钱",
+      "short_vi": "N/A",
+      "vocabulary_count": 31,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "提",
+          "pinyin": "tí",
+          "adj": 4,
+          "vi": "nhắc đến"
+        },
+        {
+          "pos": 2,
+          "hanzi": "以为",
+          "pinyin": "yǐwéi",
+          "adj": 4,
+          "vi": "cho rằng, tưởng là"
+        },
+        {
+          "pos": 3,
+          "hanzi": "份",
+          "pinyin": "fèn",
+          "adj": 8,
+          "vi": "(dùng cho công việc, báo chí...) tờ, bản"
+        },
+        {
+          "pos": 4,
+          "hanzi": "完全",
+          "pinyin": "wánquán",
+          "adj": 7,
+          "vi": "hoàn toàn"
+        },
+        {
+          "pos": 5,
+          "hanzi": "赚",
+          "pinyin": "zhuàn",
+          "adj": 4,
+          "vi": "kiếm (tiền)"
+        },
+        {
+          "pos": 6,
+          "hanzi": "调查",
+          "pinyin": "diàochá",
+          "adj": 4,
+          "vi": "điều tra, khảo sát"
+        },
+        {
+          "pos": 7,
+          "hanzi": "原来",
+          "pinyin": "yuánlái",
+          "adj": 6,
+          "vi": "ban đầu"
+        },
+        {
+          "pos": 8,
+          "hanzi": "计划",
+          "pinyin": "jìhuà",
+          "adj": [
+            2,
+            4
+          ],
+          "vi": "kế hoạch; vạch kế hoạch"
+        },
+        {
+          "pos": 9,
+          "hanzi": "提前",
+          "pinyin": "tíqián",
+          "adj": 4,
+          "vi": "làm việc gì đó sớm hơn quy định / trước thời hạn"
+        },
+        {
+          "pos": 10,
+          "hanzi": "保证",
+          "pinyin": "bǎozhèng",
+          "adj": 4,
+          "vi": "cam đoan, bảo đảm"
+        },
+        {
+          "pos": 11,
+          "hanzi": "提醒",
+          "pinyin": "tí xǐng",
+          "adj": 4,
+          "vi": "nhắc nhở"
+        },
+        {
+          "pos": 12,
+          "hanzi": "乱",
+          "pinyin": "luàn",
+          "adj": 6,
+          "vi": "lộn xộn, lúng túng"
+        },
+        {
+          "pos": 13,
+          "hanzi": "生意",
+          "pinyin": "shēngyi",
+          "adj": 2,
+          "vi": "việc kinh doanh / buôn bán"
+        },
+        {
+          "pos": 14,
+          "hanzi": "谈",
+          "pinyin": "tán",
+          "adj": 4,
+          "vi": "nói chuyện, thảo luận"
+        },
+        {
+          "pos": 15,
+          "hanzi": "并",
+          "pinyin": "bìng",
+          "adj": 7,
+          "vi": "dùng trước từ phủ định để nhấn mạnh"
+        },
+        {
+          "pos": 16,
+          "hanzi": "积累",
+          "pinyin": "jīlěi",
+          "adj": 4,
+          "vi": "tích lũy"
+        },
+        {
+          "pos": 17,
+          "hanzi": "经验",
+          "pinyin": "jīngyàn",
+          "adj": 2,
+          "vi": "kinh nghiệm"
+        },
+        {
+          "pos": 18,
+          "hanzi": "一切",
+          "pinyin": "yíqiè",
+          "adj": 2,
+          "vi": "tất cả"
+        },
+        {
+          "pos": 19,
+          "hanzi": "按照",
+          "pinyin": "ànzhào",
+          "adj": 13,
+          "vi": "theo"
+        },
+        {
+          "pos": 20,
+          "hanzi": "成功",
+          "pinyin": "chénggōng",
+          "adj": 6,
+          "vi": "thành công"
+        },
+        {
+          "pos": 21,
+          "hanzi": "顺利",
+          "pinyin": "shùnlì",
+          "adj": 6,
+          "vi": "thuận lợi, suôn sẻ"
+        },
+        {
+          "pos": 22,
+          "hanzi": "感谢",
+          "pinyin": "gǎnxiè",
+          "adj": 4,
+          "vi": "cảm ơn"
+        },
+        {
+          "pos": 23,
+          "hanzi": "消息",
+          "pinyin": "xiāoxi",
+          "adj": 2,
+          "vi": "tin tức"
+        },
+        {
+          "pos": 24,
+          "hanzi": "按时",
+          "pinyin": "ànshí",
+          "adj": 7,
+          "vi": "đúng hạn"
+        },
+        {
+          "pos": 25,
+          "hanzi": "奖金",
+          "pinyin": "jiǎngjīn",
+          "adj": 2,
+          "vi": "tiền thưởng"
+        },
+        {
+          "pos": 26,
+          "hanzi": "工资",
+          "pinyin": "gōngzī",
+          "adj": 2,
+          "vi": "tiền lương"
+        },
+        {
+          "pos": 27,
+          "hanzi": "方法",
+          "pinyin": "fāngfǎ",
+          "adj": 2,
+          "vi": "phương pháp, cách thức"
+        },
+        {
+          "pos": 28,
+          "hanzi": "知识",
+          "pinyin": "zhīshi",
+          "adj": 2,
+          "vi": "kiến thức"
+        },
+        {
+          "pos": 29,
+          "hanzi": "不得不",
+          "pinyin": "bù dé bù",
+          "adj": 7,
+          "vi": "phải, không thể không"
+        },
+        {
+          "pos": 30,
+          "hanzi": "甚至",
+          "pinyin": "shènzhì",
+          "adj": 10,
+          "vi": "thậm chí"
+        },
+        {
+          "pos": 31,
+          "hanzi": "责任",
+          "pinyin": "zérèn",
+          "adj": 2,
+          "vi": "trách nhiệm"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "只买对的，不买贵的",
+      "short_vi": "N/A",
+      "vocabulary_count": 31,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "家具",
+          "pinyin": "jiājù",
+          "adj": 2,
+          "vi": "đồ dùng trong nhà"
+        },
+        {
+          "pos": 2,
+          "hanzi": "沙发",
+          "pinyin": "shāfā",
+          "adj": 2,
+          "vi": "ghế sôpha"
+        },
+        {
+          "pos": 3,
+          "hanzi": "打折",
+          "pinyin": "dǎ zhé",
+          "adj": 4,
+          "vi": "giảm giá"
+        },
+        {
+          "pos": 4,
+          "hanzi": "价格",
+          "pinyin": "jiàgé",
+          "adj": 2,
+          "vi": "giá cả"
+        },
+        {
+          "pos": 5,
+          "hanzi": "质量",
+          "pinyin": "zhìliàng",
+          "adj": 2,
+          "vi": "chất lượng"
+        },
+        {
+          "pos": 6,
+          "hanzi": "肯定",
+          "pinyin": "kěndìng",
+          "adj": 7,
+          "vi": "chắc chắn, nhất định"
+        },
+        {
+          "pos": 7,
+          "hanzi": "流行",
+          "pinyin": "liúxíng",
+          "adj": 4,
+          "vi": "được nhiều người ưa chuộng"
+        },
+        {
+          "pos": 8,
+          "hanzi": "顺便",
+          "pinyin": "shùnbiàn",
+          "adj": 7,
+          "vi": "nhân tiện"
+        },
+        {
+          "pos": 9,
+          "hanzi": "台",
+          "pinyin": "tái",
+          "adj": 8,
+          "vi": "(dùng cho máy móc) cái, chiếc"
+        },
+        {
+          "pos": 10,
+          "hanzi": "光",
+          "pinyin": "guāng",
+          "adj": 7,
+          "vi": "chỉ"
+        },
+        {
+          "pos": 11,
+          "hanzi": "实在",
+          "pinyin": "shízài",
+          "adj": 7,
+          "vi": "kỳ thực, quả thực"
+        },
+        {
+          "pos": 12,
+          "hanzi": "制冷",
+          "pinyin": "zhìlěng",
+          "adj": 4,
+          "vi": "làm lạnh, ướp lạnh"
+        },
+        {
+          "pos": 13,
+          "hanzi": "效果",
+          "pinyin": "xiàoguǒ",
+          "adj": 2,
+          "vi": "hiệu quả"
+        },
+        {
+          "pos": 14,
+          "hanzi": "现金",
+          "pinyin": "xiànjīn",
+          "adj": 2,
+          "vi": "tiền mặt"
+        },
+        {
+          "pos": 15,
+          "hanzi": "邀请",
+          "pinyin": "yāoqǐng",
+          "adj": 4,
+          "vi": "mời"
+        },
+        {
+          "pos": 16,
+          "hanzi": "葡萄",
+          "pinyin": "pútao",
+          "adj": 2,
+          "vi": "quả nho"
+        },
+        {
+          "pos": 17,
+          "hanzi": "艺术",
+          "pinyin": "yìshù",
+          "adj": [
+            2,
+            6
+          ],
+          "vi": "nghệ thuật; có tính nghệ thuật"
+        },
+        {
+          "pos": 18,
+          "hanzi": "广告",
+          "pinyin": "guǎnggào",
+          "adj": 2,
+          "vi": "quảng cáo"
+        },
+        {
+          "pos": 19,
+          "hanzi": "味道",
+          "pinyin": "wèidào",
+          "adj": 2,
+          "vi": "mùi vị"
+        },
+        {
+          "pos": 20,
+          "hanzi": "优点",
+          "pinyin": "yōudiǎn",
+          "adj": 2,
+          "vi": "ưu điểm"
+        },
+        {
+          "pos": 21,
+          "hanzi": "实际",
+          "pinyin": "shíjì",
+          "adj": 2,
+          "vi": "thực tế"
+        },
+        {
+          "pos": 22,
+          "hanzi": "考虑",
+          "pinyin": "kǎolù",
+          "adj": 4,
+          "vi": "suy xét, cân nhắc"
+        },
+        {
+          "pos": 23,
+          "hanzi": "标准",
+          "pinyin": "biāozhǔn",
+          "adj": 2,
+          "vi": "tiêu chuẩn, chuẩn mực"
+        },
+        {
+          "pos": 24,
+          "hanzi": "样子",
+          "pinyin": "yàngzi",
+          "adj": 2,
+          "vi": "kiểu dáng"
+        },
+        {
+          "pos": 25,
+          "hanzi": "年龄",
+          "pinyin": "niánlíng",
+          "adj": 2,
+          "vi": "tuổi"
+        },
+        {
+          "pos": 26,
+          "hanzi": "浪费",
+          "pinyin": "làngfèi",
+          "adj": 4,
+          "vi": "lãng phí, hoang phí"
+        },
+        {
+          "pos": 27,
+          "hanzi": "购物",
+          "pinyin": "gòu wù",
+          "adj": 4,
+          "vi": "mua sắm, mua hàng"
+        },
+        {
+          "pos": 28,
+          "hanzi": "尤其",
+          "pinyin": "yóuqí",
+          "adj": 7,
+          "vi": "đặc biệt là, nhất là"
+        },
+        {
+          "pos": 29,
+          "hanzi": "受到",
+          "pinyin": "shòudào",
+          "adj": 4,
+          "vi": "nhận được"
+        },
+        {
+          "pos": 30,
+          "hanzi": "任何",
+          "pinyin": "rènhé",
+          "adj": 2,
+          "vi": "bất cứ, bất kỳ"
+        },
+        {
+          "pos": 31,
+          "hanzi": "寄",
+          "pinyin": "jì",
+          "adj": 4,
+          "vi": "gửi"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "一分钱，一分货",
+      "short_vi": "N/A",
+      "vocabulary_count": 31,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "果汁",
+          "pinyin": "guǒzhī",
+          "adj": 2,
+          "vi": "nước trái cây"
+        },
+        {
+          "pos": 2,
+          "hanzi": "售货员",
+          "pinyin": "shòuhuòyuán",
+          "adj": 2,
+          "vi": "nhân viên bán hàng"
+        },
+        {
+          "pos": 3,
+          "hanzi": "袜子",
+          "pinyin": "wàzi",
+          "adj": 2,
+          "vi": "tất, vớ"
+        },
+        {
+          "pos": 4,
+          "hanzi": "打扰",
+          "pinyin": "dǎrǎo",
+          "adj": 4,
+          "vi": "quấy rầy, làm phiền"
+        },
+        {
+          "pos": 5,
+          "hanzi": "竟然",
+          "pinyin": "jìngrán",
+          "adj": 7,
+          "vi": "(diễn tả sự bất ngờ) không ngờ, mà, vậy mà"
+        },
+        {
+          "pos": 6,
+          "hanzi": "西红柿",
+          "pinyin": "xīhóngshì",
+          "adj": 2,
+          "vi": "cà chua"
+        },
+        {
+          "pos": 7,
+          "hanzi": "百分之",
+          "pinyin": "bǎi fēn zhī",
+          "adj": 2,
+          "vi": "phần trăm"
+        },
+        {
+          "pos": 8,
+          "hanzi": "倍",
+          "pinyin": "bèi",
+          "adj": 8,
+          "vi": "lần"
+        },
+        {
+          "pos": 9,
+          "hanzi": "皮肤",
+          "pinyin": "pífū",
+          "adj": 2,
+          "vi": "da"
+        },
+        {
+          "pos": 10,
+          "hanzi": "好处",
+          "pinyin": "hǎochù",
+          "adj": 2,
+          "vi": "lợi ích, điều tốt"
+        },
+        {
+          "pos": 11,
+          "hanzi": "尝",
+          "pinyin": "cháng",
+          "adj": 4,
+          "vi": "thưởng thức, nếm"
+        },
+        {
+          "pos": 12,
+          "hanzi": "轻",
+          "pinyin": "qīng",
+          "adj": 6,
+          "vi": "nhẹ"
+        },
+        {
+          "pos": 13,
+          "hanzi": "方面",
+          "pinyin": "fāngmiàn",
+          "adj": 2,
+          "vi": "khía cạnh, phương diện"
+        },
+        {
+          "pos": 14,
+          "hanzi": "值得",
+          "pinyin": "zhídé",
+          "adj": 4,
+          "vi": "đáng"
+        },
+        {
+          "pos": 15,
+          "hanzi": "活动",
+          "pinyin": "huódòng",
+          "adj": 2,
+          "vi": "hoạt động"
+        },
+        {
+          "pos": 16,
+          "hanzi": "内",
+          "pinyin": "nèi",
+          "adj": 2,
+          "vi": "(bên) trong"
+        },
+        {
+          "pos": 17,
+          "hanzi": "免费",
+          "pinyin": "miǎn fèi",
+          "adj": 4,
+          "vi": "miễn phí"
+        },
+        {
+          "pos": 18,
+          "hanzi": "修理",
+          "pinyin": "xiūlǐ",
+          "adj": 4,
+          "vi": "sửa chữa"
+        },
+        {
+          "pos": 19,
+          "hanzi": "支持",
+          "pinyin": "zhīchí",
+          "adj": 4,
+          "vi": "ủng hộ"
+        },
+        {
+          "pos": 20,
+          "hanzi": "举行",
+          "pinyin": "jǔxíng",
+          "adj": 4,
+          "vi": "tổ chức (hội họp, thi đấu...)"
+        },
+        {
+          "pos": 21,
+          "hanzi": "满",
+          "pinyin": "mǎn",
+          "adj": 4,
+          "vi": "(đạt chỉ tiêu hay giới hạn) đủ, đầy, tròn"
+        },
+        {
+          "pos": 22,
+          "hanzi": "其中",
+          "pinyin": "qízhōng",
+          "adj": 2,
+          "vi": "trong đó"
+        },
+        {
+          "pos": 23,
+          "hanzi": "小说",
+          "pinyin": "xiǎoshuō",
+          "adj": 2,
+          "vi": "tiểu thuyết"
+        },
+        {
+          "pos": 24,
+          "hanzi": "会员卡",
+          "pinyin": "huìyuánkǎ",
+          "adj": 2,
+          "vi": "thẻ hội viên"
+        },
+        {
+          "pos": 25,
+          "hanzi": "所有",
+          "pinyin": "suǒyǒu",
+          "adj": 6,
+          "vi": "tất cả, toàn bộ"
+        },
+        {
+          "pos": 26,
+          "hanzi": "获得",
+          "pinyin": "huòdé",
+          "adj": 4,
+          "vi": "được, lấy được"
+        },
+        {
+          "pos": 27,
+          "hanzi": "情况",
+          "pinyin": "qíngkuàng",
+          "adj": 2,
+          "vi": "tình hình, tình huống"
+        },
+        {
+          "pos": 28,
+          "hanzi": "例如",
+          "pinyin": "lìrú",
+          "adj": 4,
+          "vi": "lấy ví dụ"
+        },
+        {
+          "pos": 29,
+          "hanzi": "举办",
+          "pinyin": "jǔbàn",
+          "adj": 4,
+          "vi": "tổ chức, tiến hành"
+        },
+        {
+          "pos": 30,
+          "hanzi": "各",
+          "pinyin": "gè",
+          "adj": 2,
+          "vi": "các, mọi"
+        },
+        {
+          "pos": 31,
+          "hanzi": "降低",
+          "pinyin": "jiàngdī",
+          "adj": 4,
+          "vi": "giảm, hạ"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "最好的医生是自己",
+      "short_vi": "N/A",
+      "vocabulary_count": 33,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "流血",
+          "pinyin": "liú xiě",
+          "adj": 4,
+          "vi": "chảy máu"
+        },
+        {
+          "pos": 2,
+          "hanzi": "擦",
+          "pinyin": "cā",
+          "adj": 4,
+          "vi": "lau, chùi"
+        },
+        {
+          "pos": 3,
+          "hanzi": "气候",
+          "pinyin": "qìhòu",
+          "adj": 2,
+          "vi": "khí hậu"
+        },
+        {
+          "pos": 4,
+          "hanzi": "估计",
+          "pinyin": "gūjì",
+          "adj": 4,
+          "vi": "đoán chừng, dự đoán"
+        },
+        {
+          "pos": 5,
+          "hanzi": "咳嗽",
+          "pinyin": "késou",
+          "adj": 4,
+          "vi": "ho"
+        },
+        {
+          "pos": 6,
+          "hanzi": "严重",
+          "pinyin": "yánzhòng",
+          "adj": 6,
+          "vi": "nghiêm trọng"
+        },
+        {
+          "pos": 7,
+          "hanzi": "窗户",
+          "pinyin": "chuānghu",
+          "adj": 2,
+          "vi": "cửa sổ"
+        },
+        {
+          "pos": 8,
+          "hanzi": "空气",
+          "pinyin": "kōngqì",
+          "adj": 2,
+          "vi": "không khí"
+        },
+        {
+          "pos": 9,
+          "hanzi": "抽烟",
+          "pinyin": "chōu yān",
+          "adj": 4,
+          "vi": "hút thuốc"
+        },
+        {
+          "pos": 10,
+          "hanzi": "动作",
+          "pinyin": "dòngzuò",
+          "adj": 2,
+          "vi": "động tác, hành động"
+        },
+        {
+          "pos": 11,
+          "hanzi": "帅",
+          "pinyin": "shuài",
+          "adj": 6,
+          "vi": "đẹp"
+        },
+        {
+          "pos": 12,
+          "hanzi": "出现",
+          "pinyin": "chūxiàn",
+          "adj": 4,
+          "vi": "xuất hiện, nảy sinh"
+        },
+        {
+          "pos": 13,
+          "hanzi": "后悔",
+          "pinyin": "hòuhuǐ",
+          "adj": 4,
+          "vi": "ân hận"
+        },
+        {
+          "pos": 14,
+          "hanzi": "来不及",
+          "pinyin": "láibují",
+          "adj": 4,
+          "vi": "không kịp"
+        },
+        {
+          "pos": 15,
+          "hanzi": "反对",
+          "pinyin": "fǎnduì",
+          "adj": 4,
+          "vi": "phản đối"
+        },
+        {
+          "pos": 16,
+          "hanzi": "大夫",
+          "pinyin": "dàifu",
+          "adj": 2,
+          "vi": "bác sĩ"
+        },
+        {
+          "pos": 17,
+          "hanzi": "植物",
+          "pinyin": "zhíwù",
+          "adj": 2,
+          "vi": "thực vật"
+        },
+        {
+          "pos": 18,
+          "hanzi": "研究",
+          "pinyin": "yánjiū",
+          "adj": 4,
+          "vi": "nghiên cứu"
+        },
+        {
+          "pos": 19,
+          "hanzi": "超过",
+          "pinyin": "chāoguò",
+          "adj": 4,
+          "vi": "vượt quá"
+        },
+        {
+          "pos": 20,
+          "hanzi": "散步",
+          "pinyin": "sàn bù",
+          "adj": 4,
+          "vi": "đi dạo"
+        },
+        {
+          "pos": 21,
+          "hanzi": "指",
+          "pinyin": "zhǐ",
+          "adj": 4,
+          "vi": "chỉ về, nói đến"
+        },
+        {
+          "pos": 22,
+          "hanzi": "精神",
+          "pinyin": "jīngshén",
+          "adj": 2,
+          "vi": "tinh thần"
+        },
+        {
+          "pos": 23,
+          "hanzi": "教授",
+          "pinyin": "jiàoshòu",
+          "adj": 2,
+          "vi": "giáo sư"
+        },
+        {
+          "pos": 24,
+          "hanzi": "数字",
+          "pinyin": "shùzì",
+          "adj": 2,
+          "vi": "con số"
+        },
+        {
+          "pos": 25,
+          "hanzi": "说明",
+          "pinyin": "shuōmíng",
+          "adj": 4,
+          "vi": "giải thích rõ, nói rõ"
+        },
+        {
+          "pos": 26,
+          "hanzi": "要是",
+          "pinyin": "yàoshi",
+          "adj": 10,
+          "vi": "nếu như, nếu"
+        },
+        {
+          "pos": 27,
+          "hanzi": "既",
+          "pinyin": "jì",
+          "adj": 7,
+          "vi": "(kết hợp với 又) đã...lại..., vừa...vừa..."
+        },
+        {
+          "pos": 28,
+          "hanzi": "减肥",
+          "pinyin": "jiǎn féi",
+          "adj": 4,
+          "vi": "giảm cân"
+        },
+        {
+          "pos": 29,
+          "hanzi": "辛苦",
+          "pinyin": "xīnkǔ",
+          "adj": 6,
+          "vi": "vất vả, cực nhọc"
+        },
+        {
+          "pos": 30,
+          "hanzi": "肚子",
+          "pinyin": "dùzi",
+          "adj": 2,
+          "vi": "bụng"
+        },
+        {
+          "pos": 31,
+          "hanzi": "感情",
+          "pinyin": "gǎnqíng",
+          "adj": 2,
+          "vi": "tình cảm"
+        },
+        {
+          "pos": 32,
+          "hanzi": "烦恼",
+          "pinyin": "fánnǎo",
+          "adj": 6,
+          "vi": "phiền muộn, buồn phiền"
+        },
+        {
+          "pos": 33,
+          "hanzi": "掉",
+          "pinyin": "diào",
+          "adj": 4,
+          "vi": "(dùng sau động từ chỉ kết quả hành động) mất, đi, hết"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "生活中不缺少美",
+      "short_vi": "N/A",
+      "vocabulary_count": 29,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "巧克力",
+          "pinyin": "qiǎokèlì",
+          "adj": 2,
+          "vi": "sôcôla"
+        },
+        {
+          "pos": 2,
+          "hanzi": "亲戚",
+          "pinyin": "qīnqi",
+          "adj": 2,
+          "vi": "họ hàng thân thích"
+        },
+        {
+          "pos": 3,
+          "hanzi": "伤心",
+          "pinyin": "shāng xīn",
+          "adj": 6,
+          "vi": "đau lòng"
+        },
+        {
+          "pos": 4,
+          "hanzi": "使",
+          "pinyin": "shǐ",
+          "adj": 4,
+          "vi": "khiến cho, làm cho"
+        },
+        {
+          "pos": 5,
+          "hanzi": "心情",
+          "pinyin": "xīnqíng",
+          "adj": 2,
+          "vi": "tâm trạng"
+        },
+        {
+          "pos": 6,
+          "hanzi": "愉快",
+          "pinyin": "yúkuài",
+          "adj": 6,
+          "vi": "vui vẻ"
+        },
+        {
+          "pos": 7,
+          "hanzi": "景色",
+          "pinyin": "jǐngsè",
+          "adj": 2,
+          "vi": "phong cảnh, cảnh vật"
+        },
+        {
+          "pos": 8,
+          "hanzi": "放松",
+          "pinyin": "fàngsōng",
+          "adj": 4,
+          "vi": "thả lỏng, thư giãn"
+        },
+        {
+          "pos": 9,
+          "hanzi": "压力",
+          "pinyin": "yālì",
+          "adj": 2,
+          "vi": "áp lực"
+        },
+        {
+          "pos": 10,
+          "hanzi": "回忆",
+          "pinyin": "huíyì",
+          "adj": 4,
+          "vi": "nhớ lại"
+        },
+        {
+          "pos": 11,
+          "hanzi": "发生",
+          "pinyin": "fāshēng",
+          "adj": 4,
+          "vi": "xảy ra"
+        },
+        {
+          "pos": 12,
+          "hanzi": "成为",
+          "pinyin": "chéngwéi",
+          "adj": 4,
+          "vi": "trở thành"
+        },
+        {
+          "pos": 13,
+          "hanzi": "只要",
+          "pinyin": "zhǐyào",
+          "adj": 10,
+          "vi": "chỉ cần, miễn là"
+        },
+        {
+          "pos": 14,
+          "hanzi": "师傅",
+          "pinyin": "shīfu",
+          "adj": 2,
+          "vi": "sư phụ (cách gọi kính trọng dành cho người có tay nghề)"
+        },
+        {
+          "pos": 15,
+          "hanzi": "大使馆",
+          "pinyin": "dàshǐguǎn",
+          "adj": 2,
+          "vi": "đại sứ quán"
+        },
+        {
+          "pos": 16,
+          "hanzi": "堵车",
+          "pinyin": "dǔ chē",
+          "adj": 4,
+          "vi": "kẹt xe"
+        },
+        {
+          "pos": 17,
+          "hanzi": "距离",
+          "pinyin": "jùlí",
+          "adj": 2,
+          "vi": "khoảng cách"
+        },
+        {
+          "pos": 18,
+          "hanzi": "耐心",
+          "pinyin": "nàixīn",
+          "adj": 2,
+          "vi": "lòng kiên nhẫn, sự nhẫn nại"
+        },
+        {
+          "pos": 19,
+          "hanzi": "生命",
+          "pinyin": "shēngmìng",
+          "adj": 2,
+          "vi": "sự sống, tính mệnh"
+        },
+        {
+          "pos": 20,
+          "hanzi": "缺少",
+          "pinyin": "quēshǎo",
+          "adj": 4,
+          "vi": "thiếu"
+        },
+        {
+          "pos": 21,
+          "hanzi": "到处",
+          "pinyin": "dàochù",
+          "adj": 7,
+          "vi": "khắp nơi, đâu đâu"
+        },
+        {
+          "pos": 22,
+          "hanzi": "态度",
+          "pinyin": "tàidù",
+          "adj": 2,
+          "vi": "thái độ"
+        },
+        {
+          "pos": 23,
+          "hanzi": "因此",
+          "pinyin": "yīncǐ",
+          "adj": 10,
+          "vi": "do đó, vì vậy"
+        },
+        {
+          "pos": 24,
+          "hanzi": "科学",
+          "pinyin": "kēxué",
+          "adj": 2,
+          "vi": "khoa học"
+        },
+        {
+          "pos": 25,
+          "hanzi": "证明",
+          "pinyin": "zhèngmíng",
+          "adj": 4,
+          "vi": "chứng minh"
+        },
+        {
+          "pos": 26,
+          "hanzi": "往往",
+          "pinyin": "wǎngwǎng",
+          "adj": 7,
+          "vi": "thường thường"
+        },
+        {
+          "pos": 27,
+          "hanzi": "阳光",
+          "pinyin": "yángguāng",
+          "adj": 6,
+          "vi": "lạc quan, vui vẻ"
+        },
+        {
+          "pos": 28,
+          "hanzi": "积极",
+          "pinyin": "jījí",
+          "adj": 6,
+          "vi": "tích cực"
+        },
+        {
+          "pos": 29,
+          "hanzi": "特点",
+          "pinyin": "tèdiǎn",
+          "adj": 2,
+          "vi": "đặc điểm"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "阳光总在风雨后",
+      "short_vi": "N/A",
+      "vocabulary_count": 31,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "饼干",
+          "pinyin": "bǐnggān",
+          "adj": 2,
+          "vi": "bánh quy"
+        },
+        {
+          "pos": 2,
+          "hanzi": "难道",
+          "pinyin": "nándào",
+          "adj": 7,
+          "vi": "dùng trong câu hỏi tu từ để nhấn mạnh"
+        },
+        {
+          "pos": 3,
+          "hanzi": "得",
+          "pinyin": "děi",
+          "adj": 5,
+          "vi": "phải"
+        },
+        {
+          "pos": 4,
+          "hanzi": "坚持",
+          "pinyin": "jiānchí",
+          "adj": 4,
+          "vi": "kiên trì, khăng khăng giữ"
+        },
+        {
+          "pos": 5,
+          "hanzi": "放弃",
+          "pinyin": "fàngqì",
+          "adj": 4,
+          "vi": "từ bỏ, bỏ"
+        },
+        {
+          "pos": 6,
+          "hanzi": "主意",
+          "pinyin": "zhǔyi",
+          "adj": 2,
+          "vi": "ý định, ý kiến"
+        },
+        {
+          "pos": 7,
+          "hanzi": "网球",
+          "pinyin": "wǎngqiú",
+          "adj": 2,
+          "vi": "quần vợt"
+        },
+        {
+          "pos": 8,
+          "hanzi": "国际",
+          "pinyin": "guójì",
+          "adj": 2,
+          "vi": "quốc tế"
+        },
+        {
+          "pos": 9,
+          "hanzi": "轻松",
+          "pinyin": "qīngsōng",
+          "adj": 6,
+          "vi": "nhẹ nhàng, dễ dàng"
+        },
+        {
+          "pos": 10,
+          "hanzi": "赢",
+          "pinyin": "yíng",
+          "adj": 4,
+          "vi": "thắng"
+        },
+        {
+          "pos": 11,
+          "hanzi": "随便",
+          "pinyin": "suíbiàn",
+          "adj": 6,
+          "vi": "tình cờ, tùy tiện"
+        },
+        {
+          "pos": 12,
+          "hanzi": "汗",
+          "pinyin": "hàn",
+          "adj": 2,
+          "vi": "mồ hôi"
+        },
+        {
+          "pos": 13,
+          "hanzi": "通过",
+          "pinyin": "tōngguò",
+          "adj": 13,
+          "vi": "qua, nhờ vào"
+        },
+        {
+          "pos": 14,
+          "hanzi": "篇",
+          "pinyin": "piān",
+          "adj": 8,
+          "vi": "(dùng cho bài văn, giấy...) bài, tờ..."
+        },
+        {
+          "pos": 15,
+          "hanzi": "作家",
+          "pinyin": "zuòjiā",
+          "adj": 2,
+          "vi": "nhà văn"
+        },
+        {
+          "pos": 16,
+          "hanzi": "当时",
+          "pinyin": "dāngshí",
+          "adj": 2,
+          "vi": "lúc đó"
+        },
+        {
+          "pos": 17,
+          "hanzi": "可是",
+          "pinyin": "kěshì",
+          "adj": 10,
+          "vi": "nhưng"
+        },
+        {
+          "pos": 18,
+          "hanzi": "正确",
+          "pinyin": "zhèngquè",
+          "adj": 6,
+          "vi": "đúng, chính xác"
+        },
+        {
+          "pos": 19,
+          "hanzi": "理想",
+          "pinyin": "lǐxiǎng",
+          "adj": 2,
+          "vi": "lý tưởng"
+        },
+        {
+          "pos": 20,
+          "hanzi": "勇敢",
+          "pinyin": "yǒnggǎn",
+          "adj": 6,
+          "vi": "dũng cảm, gan dạ"
+        },
+        {
+          "pos": 21,
+          "hanzi": "结果",
+          "pinyin": "jiéguǒ",
+          "adj": 2,
+          "vi": "kết quả"
+        },
+        {
+          "pos": 22,
+          "hanzi": "失败",
+          "pinyin": "shībài",
+          "adj": 4,
+          "vi": "thất bại"
+        },
+        {
+          "pos": 23,
+          "hanzi": "过程",
+          "pinyin": "guòchéng",
+          "adj": 2,
+          "vi": "quá trình"
+        },
+        {
+          "pos": 24,
+          "hanzi": "至少",
+          "pinyin": "zhìshǎo",
+          "adj": 7,
+          "vi": "ít nhất"
+        },
+        {
+          "pos": 25,
+          "hanzi": "总结",
+          "pinyin": "zǒngjié",
+          "adj": 4,
+          "vi": "tổng kết"
+        },
+        {
+          "pos": 26,
+          "hanzi": "取",
+          "pinyin": "qǔ",
+          "adj": 4,
+          "vi": "đạt được"
+        },
+        {
+          "pos": 27,
+          "hanzi": "经历",
+          "pinyin": "jīnglì",
+          "adj": 4,
+          "vi": "trải qua"
+        },
+        {
+          "pos": 28,
+          "hanzi": "许多",
+          "pinyin": "xǔduō",
+          "adj": 21,
+          "vi": "rất nhiều"
+        },
+        {
+          "pos": 29,
+          "hanzi": "区别",
+          "pinyin": "qūbié",
+          "adj": 2,
+          "vi": "sự khác biệt"
+        },
+        {
+          "pos": 30,
+          "hanzi": "暂时",
+          "pinyin": "zànshí",
+          "adj": 2,
+          "vi": "tạm thời, nhất thời"
+        },
+        {
+          "pos": 31,
+          "hanzi": "面对",
+          "pinyin": "miànduì",
+          "adj": 4,
+          "vi": "đương đầu, đối mặt"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "幸福的标准",
+      "short_vi": "N/A",
+      "vocabulary_count": 30,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "礼拜天",
+          "pinyin": "lǐbàitiān",
+          "adj": 2,
+          "vi": "chủ nhật"
+        },
+        {
+          "pos": 2,
+          "hanzi": "空儿",
+          "pinyin": "kòngr",
+          "adj": 2,
+          "vi": "thời gian rỗi"
+        },
+        {
+          "pos": 3,
+          "hanzi": "母亲",
+          "pinyin": "mǔqīn",
+          "adj": 2,
+          "vi": "mẹ"
+        },
+        {
+          "pos": 4,
+          "hanzi": "不过",
+          "pinyin": "búguò",
+          "adj": 10,
+          "vi": "nhưng, song"
+        },
+        {
+          "pos": 5,
+          "hanzi": "永远",
+          "pinyin": "yǒngyuǎn",
+          "adj": 7,
+          "vi": "vĩnh viễn, mãi mãi"
+        },
+        {
+          "pos": 6,
+          "hanzi": "方向",
+          "pinyin": "fāngxiàng",
+          "adj": 2,
+          "vi": "phương hướng, sự định hướng"
+        },
+        {
+          "pos": 7,
+          "hanzi": "优秀",
+          "pinyin": "yōuxiù",
+          "adj": 6,
+          "vi": "xuất sắc, ưu tú"
+        },
+        {
+          "pos": 8,
+          "hanzi": "硕士",
+          "pinyin": "shuòshì",
+          "adj": 2,
+          "vi": "thạc sĩ"
+        },
+        {
+          "pos": 9,
+          "hanzi": "翻译",
+          "pinyin": "fānyì",
+          "adj": 2,
+          "vi": "phiên dịch viên"
+        },
+        {
+          "pos": 10,
+          "hanzi": "确实",
+          "pinyin": "quèshí",
+          "adj": 7,
+          "vi": "thực sự"
+        },
+        {
+          "pos": 11,
+          "hanzi": "兴奋",
+          "pinyin": "xīngfèn",
+          "adj": 6,
+          "vi": "hăng hái, phấn khởi"
+        },
+        {
+          "pos": 12,
+          "hanzi": "拉",
+          "pinyin": "lā",
+          "adj": 4,
+          "vi": "kéo, lôi, dắt"
+        },
+        {
+          "pos": 13,
+          "hanzi": "建议",
+          "pinyin": "jiànyì",
+          "adj": 2,
+          "vi": "kiến nghị, sự đề nghị"
+        },
+        {
+          "pos": 14,
+          "hanzi": "职业",
+          "pinyin": "zhíyè",
+          "adj": 2,
+          "vi": "nghề nghiệp"
+        },
+        {
+          "pos": 15,
+          "hanzi": "关键",
+          "pinyin": "guānjiàn",
+          "adj": 2,
+          "vi": "điều quan trọng, điểm mấu chốt"
+        },
+        {
+          "pos": 16,
+          "hanzi": "将来",
+          "pinyin": "jiānglái",
+          "adj": 2,
+          "vi": "tương lai"
+        },
+        {
+          "pos": 17,
+          "hanzi": "发展",
+          "pinyin": "fāzhǎn",
+          "adj": 4,
+          "vi": "phát triển"
+        },
+        {
+          "pos": 18,
+          "hanzi": "躺",
+          "pinyin": "tǎng",
+          "adj": 4,
+          "vi": "nằm"
+        },
+        {
+          "pos": 19,
+          "hanzi": "困",
+          "pinyin": "kùn",
+          "adj": 6,
+          "vi": "buồn ngủ"
+        },
+        {
+          "pos": 20,
+          "hanzi": "经济",
+          "pinyin": "jīngjì",
+          "adj": 2,
+          "vi": "kinh tế"
+        },
+        {
+          "pos": 21,
+          "hanzi": "条件",
+          "pinyin": "tiáojiàn",
+          "adj": 2,
+          "vi": "điều kiện"
+        },
+        {
+          "pos": 22,
+          "hanzi": "富",
+          "pinyin": "fù",
+          "adj": 6,
+          "vi": "giàu"
+        },
+        {
+          "pos": 23,
+          "hanzi": "穷",
+          "pinyin": "qióng",
+          "adj": 6,
+          "vi": "nghèo"
+        },
+        {
+          "pos": 24,
+          "hanzi": "等",
+          "pinyin": "děng",
+          "adj": 11,
+          "vi": "vân vân"
+        },
+        {
+          "pos": 25,
+          "hanzi": "由于",
+          "pinyin": "yóuyú",
+          "adj": 10,
+          "vi": "vì, bởi vì"
+        },
+        {
+          "pos": 26,
+          "hanzi": "比如",
+          "pinyin": "bǐrú",
+          "adj": 4,
+          "vi": "ví dụ, chẳng hạn"
+        },
+        {
+          "pos": 27,
+          "hanzi": "橡皮",
+          "pinyin": "xiàngpí",
+          "adj": 2,
+          "vi": "(cục) gôm, tẩy"
+        },
+        {
+          "pos": 28,
+          "hanzi": "糖",
+          "pinyin": "táng",
+          "adj": 2,
+          "vi": "kẹo"
+        },
+        {
+          "pos": 29,
+          "hanzi": "低",
+          "pinyin": "dī",
+          "adj": 6,
+          "vi": "thấp"
+        },
+        {
+          "pos": 30,
+          "hanzi": "答案",
+          "pinyin": "dá'àn",
+          "adj": 2,
+          "vi": "đáp án, câu trả lời, lời giải"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "用心发现世界",
+      "short_vi": "N/A",
+      "vocabulary_count": 30,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "流利",
+          "pinyin": "liúlì",
+          "adj": 6,
+          "vi": "lưu loát, trôi chảy"
+        },
+        {
+          "pos": 2,
+          "hanzi": "厉害",
+          "pinyin": "lìhai",
+          "adj": 6,
+          "vi": "lợi hại"
+        },
+        {
+          "pos": 3,
+          "hanzi": "语法",
+          "pinyin": "yǔfǎ",
+          "adj": 2,
+          "vi": "ngữ pháp"
+        },
+        {
+          "pos": 4,
+          "hanzi": "准确",
+          "pinyin": "zhǔnquè",
+          "adj": 6,
+          "vi": "chính xác, đúng"
+        },
+        {
+          "pos": 5,
+          "hanzi": "词语",
+          "pinyin": "cíyǔ",
+          "adj": 2,
+          "vi": "từ ngữ, cách diễn đạt"
+        },
+        {
+          "pos": 6,
+          "hanzi": "连",
+          "pinyin": "lián",
+          "adj": 13,
+          "vi": "ngay cả"
+        },
+        {
+          "pos": 7,
+          "hanzi": "阅读",
+          "pinyin": "yuèdú",
+          "adj": 4,
+          "vi": "đọc"
+        },
+        {
+          "pos": 8,
+          "hanzi": "来得及",
+          "pinyin": "láidejí",
+          "adj": 4,
+          "vi": "kịp, còn kịp"
+        },
+        {
+          "pos": 9,
+          "hanzi": "复杂",
+          "pinyin": "fùzá",
+          "adj": 6,
+          "vi": "phức tạp, rắc rối"
+        },
+        {
+          "pos": 10,
+          "hanzi": "只好",
+          "pinyin": "zhǐhǎo",
+          "adj": 7,
+          "vi": "đành phải, buộc phải"
+        },
+        {
+          "pos": 11,
+          "hanzi": "填空",
+          "pinyin": "tián kòng",
+          "adj": 4,
+          "vi": "vào chỗ trống"
+        },
+        {
+          "pos": 12,
+          "hanzi": "猜",
+          "pinyin": "cāi",
+          "adj": 4,
+          "vi": "đoán"
+        },
+        {
+          "pos": 13,
+          "hanzi": "否则",
+          "pinyin": "fǒuzé",
+          "adj": 10,
+          "vi": "nếu không thì, bằng không"
+        },
+        {
+          "pos": 14,
+          "hanzi": "客厅",
+          "pinyin": "kètīng",
+          "adj": 2,
+          "vi": "phòng khách"
+        },
+        {
+          "pos": 15,
+          "hanzi": "无论",
+          "pinyin": "wúlùn",
+          "adj": 10,
+          "vi": "bất kể"
+        },
+        {
+          "pos": 16,
+          "hanzi": "杂志",
+          "pinyin": "zázhì",
+          "adj": 2,
+          "vi": "tạp chí"
+        },
+        {
+          "pos": 17,
+          "hanzi": "著名",
+          "pinyin": "zhùmíng",
+          "adj": 6,
+          "vi": "nổi tiếng"
+        },
+        {
+          "pos": 18,
+          "hanzi": "页",
+          "pinyin": "yè",
+          "adj": 8,
+          "vi": "trang"
+        },
+        {
+          "pos": 19,
+          "hanzi": "增加",
+          "pinyin": "zēngjiā",
+          "adj": 4,
+          "vi": "tăng thêm"
+        },
+        {
+          "pos": 20,
+          "hanzi": "文章",
+          "pinyin": "wénzhāng",
+          "adj": 2,
+          "vi": "bài văn, bài báo"
+        },
+        {
+          "pos": 21,
+          "hanzi": "之",
+          "pinyin": "zhī",
+          "adj": 11,
+          "vi": "dùng để nối từ bổ nghĩa và từ được bổ nghĩa"
+        },
+        {
+          "pos": 22,
+          "hanzi": "内容",
+          "pinyin": "nèiróng",
+          "adj": 2,
+          "vi": "nội dung"
+        },
+        {
+          "pos": 23,
+          "hanzi": "然而",
+          "pinyin": "rán'ér",
+          "adj": 10,
+          "vi": "nhưng, song"
+        },
+        {
+          "pos": 24,
+          "hanzi": "看法",
+          "pinyin": "kànfǎ",
+          "adj": 2,
+          "vi": "quan điểm, cách nhìn"
+        },
+        {
+          "pos": 25,
+          "hanzi": "相同",
+          "pinyin": "xiāngtóng",
+          "adj": 6,
+          "vi": "giống nhau, như nhau"
+        },
+        {
+          "pos": 26,
+          "hanzi": "顺序",
+          "pinyin": "shùnxù",
+          "adj": 2,
+          "vi": "trật tự, thứ tự"
+        },
+        {
+          "pos": 27,
+          "hanzi": "表示",
+          "pinyin": "biǎoshì",
+          "adj": 4,
+          "vi": "có ý nghĩa, biểu thị"
+        },
+        {
+          "pos": 28,
+          "hanzi": "养成",
+          "pinyin": "yǎngchéng",
+          "adj": 4,
+          "vi": "hình thành/tạo (thói quen)"
+        },
+        {
+          "pos": 29,
+          "hanzi": "同时",
+          "pinyin": "tóngshí",
+          "adj": 10,
+          "vi": "đồng thời, hơn nữa"
+        },
+        {
+          "pos": 30,
+          "hanzi": "精彩",
+          "pinyin": "jīngcǎi",
+          "adj": 6,
+          "vi": "tuyệt vời, xuất sắc"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "用心发现世界",
+      "short_vi": "N/A",
+      "vocabulary_count": 32,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "规定",
+          "pinyin": "guīdìng",
+          "adj": 2,
+          "vi": "quy định"
+        },
+        {
+          "pos": 2,
+          "hanzi": "死",
+          "pinyin": "sǐ",
+          "adj": 6,
+          "vi": "cố định, cứng nhắc"
+        },
+        {
+          "pos": 3,
+          "hanzi": "可惜",
+          "pinyin": "kěxī",
+          "adj": 6,
+          "vi": "đáng tiếc"
+        },
+        {
+          "pos": 4,
+          "hanzi": "全部",
+          "pinyin": "quánbù",
+          "adj": 2,
+          "vi": "toàn bộ, tất cả"
+        },
+        {
+          "pos": 5,
+          "hanzi": "也许",
+          "pinyin": "yěxǔ",
+          "adj": 7,
+          "vi": "có lẽ, may ra"
+        },
+        {
+          "pos": 6,
+          "hanzi": "商量",
+          "pinyin": "shāngliáng",
+          "adj": 4,
+          "vi": "thương lượng, bàn bạc"
+        },
+        {
+          "pos": 7,
+          "hanzi": "并且",
+          "pinyin": "bìngqiě",
+          "adj": 10,
+          "vi": "đồng thời, và"
+        },
+        {
+          "pos": 8,
+          "hanzi": "盐",
+          "pinyin": "yán",
+          "adj": 2,
+          "vi": "muối"
+        },
+        {
+          "pos": 9,
+          "hanzi": "勺(子)",
+          "pinyin": "sháo(zi)",
+          "adj": 2,
+          "vi": "cái muối, cái thìa"
+        },
+        {
+          "pos": 10,
+          "hanzi": "保护",
+          "pinyin": "bǎohù",
+          "adj": 4,
+          "vi": "bảo vệ"
+        },
+        {
+          "pos": 11,
+          "hanzi": "作用",
+          "pinyin": "zuòyòng",
+          "adj": 2,
+          "vi": "tác dụng"
+        },
+        {
+          "pos": 12,
+          "hanzi": "无法",
+          "pinyin": "wúfǎ",
+          "adj": 4,
+          "vi": "không thể, không có cách gì"
+        },
+        {
+          "pos": 13,
+          "hanzi": "节",
+          "pinyin": "jié",
+          "adj": 8,
+          "vi": "tiết (học)"
+        },
+        {
+          "pos": 14,
+          "hanzi": "详细",
+          "pinyin": "xiángxì",
+          "adj": 6,
+          "vi": "chi tiết, tỉ mỉ"
+        },
+        {
+          "pos": 15,
+          "hanzi": "解释",
+          "pinyin": "jiěshì",
+          "adj": 4,
+          "vi": "giải thích"
+        },
+        {
+          "pos": 16,
+          "hanzi": "对于",
+          "pinyin": "duìyú",
+          "adj": 13,
+          "vi": "đối với"
+        },
+        {
+          "pos": 17,
+          "hanzi": "叶子",
+          "pinyin": "yèzi",
+          "adj": 2,
+          "vi": "lá cây"
+        },
+        {
+          "pos": 18,
+          "hanzi": "教育",
+          "pinyin": "jiàoyù",
+          "adj": 4,
+          "vi": "giáo dục, dạy dỗ"
+        },
+        {
+          "pos": 19,
+          "hanzi": "使用",
+          "pinyin": "shǐyòng",
+          "adj": 4,
+          "vi": "sử dụng"
+        },
+        {
+          "pos": 20,
+          "hanzi": "语言",
+          "pinyin": "yǔyán",
+          "adj": 2,
+          "vi": "ngôn ngữ"
+        },
+        {
+          "pos": 21,
+          "hanzi": "直接",
+          "pinyin": "zhíjiē",
+          "adj": 6,
+          "vi": "trực tiếp, thẳng"
+        },
+        {
+          "pos": 22,
+          "hanzi": "引起",
+          "pinyin": "yǐnqǐ",
+          "adj": 4,
+          "vi": "gây ra, dẫn đến"
+        },
+        {
+          "pos": 23,
+          "hanzi": "误会",
+          "pinyin": "wùhuì",
+          "adj": 2,
+          "vi": "sự hiểu lầm"
+        },
+        {
+          "pos": 24,
+          "hanzi": "友好",
+          "pinyin": "yǒuhǎo",
+          "adj": 6,
+          "vi": "thân thiện"
+        },
+        {
+          "pos": 25,
+          "hanzi": "事半功倍",
+          "pinyin": "shì bàn gōng bèi",
+          "adj": 7,
+          "vi": "làm chơi ăn thật"
+        },
+        {
+          "pos": 26,
+          "hanzi": "节约",
+          "pinyin": "jiéyuē",
+          "adj": 4,
+          "vi": "tiết kiệm"
+        },
+        {
+          "pos": 27,
+          "hanzi": "力气",
+          "pinyin": "lìqi",
+          "adj": 2,
+          "vi": "sức lực, hơi sức"
+        },
+        {
+          "pos": 28,
+          "hanzi": "相反",
+          "pinyin": "xiāngfǎn",
+          "adj": 10,
+          "vi": "trái lại, ngược lại"
+        },
+        {
+          "pos": 29,
+          "hanzi": "任务",
+          "pinyin": "rènwu",
+          "adj": 2,
+          "vi": "nhiệm vụ"
+        },
+        {
+          "pos": 30,
+          "hanzi": "意见",
+          "pinyin": "yìjiàn",
+          "adj": 2,
+          "vi": "ý kiến"
+        },
+        {
+          "pos": 31,
+          "hanzi": "仔细",
+          "pinyin": "zǐxì",
+          "adj": 6,
+          "vi": "thận trọng, kỹ lưỡng"
+        },
+        {
+          "pos": 32,
+          "hanzi": "达到",
+          "pinyin": "dádào",
+          "adj": 4,
+          "vi": "đạt được"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "喝着茶看京剧",
+      "short_vi": "N/A",
+      "vocabulary_count": 32,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "京剧",
+          "pinyin": "jīngjù",
+          "adj": 2,
+          "vi": "Kinh kịch"
+        },
+        {
+          "pos": 2,
+          "hanzi": "演员",
+          "pinyin": "yǎnyuán",
+          "adj": 2,
+          "vi": "diễn viên"
+        },
+        {
+          "pos": 3,
+          "hanzi": "观众",
+          "pinyin": "guānzhòng",
+          "adj": 2,
+          "vi": "khán giả"
+        },
+        {
+          "pos": 4,
+          "hanzi": "厚",
+          "pinyin": "hòu",
+          "adj": 6,
+          "vi": "dày, sâu nặng"
+        },
+        {
+          "pos": 5,
+          "hanzi": "演出",
+          "pinyin": "yǎnchū",
+          "adj": 4,
+          "vi": "biểu diễn"
+        },
+        {
+          "pos": 6,
+          "hanzi": "大概",
+          "pinyin": "dàgài",
+          "adj": 7,
+          "vi": "khoảng chừng, có lẽ"
+        },
+        {
+          "pos": 7,
+          "hanzi": "来自",
+          "pinyin": "láizì",
+          "adj": 4,
+          "vi": "đến từ"
+        },
+        {
+          "pos": 8,
+          "hanzi": "遍",
+          "pinyin": "biàn",
+          "adj": 8,
+          "vi": "(hành động từ đầu đến cuối) lần, lượt"
+        },
+        {
+          "pos": 9,
+          "hanzi": "偶尔",
+          "pinyin": "ǒu'ěr",
+          "adj": 7,
+          "vi": "thỉnh thoảng"
+        },
+        {
+          "pos": 10,
+          "hanzi": "吃惊",
+          "pinyin": "chī jīng",
+          "adj": 4,
+          "vi": "kinh ngạc"
+        },
+        {
+          "pos": 11,
+          "hanzi": "基础",
+          "pinyin": "jīchǔ",
+          "adj": 2,
+          "vi": "nền tảng, căn bản"
+        },
+        {
+          "pos": 12,
+          "hanzi": "表演",
+          "pinyin": "biǎoyǎn",
+          "adj": 4,
+          "vi": "biểu diễn, trình diễn"
+        },
+        {
+          "pos": 13,
+          "hanzi": "正常",
+          "pinyin": "zhèngcháng",
+          "adj": 6,
+          "vi": "bình thường, thông thường"
+        },
+        {
+          "pos": 14,
+          "hanzi": "申请",
+          "pinyin": "shēnqǐng",
+          "adj": 4,
+          "vi": "xin"
+        },
+        {
+          "pos": 15,
+          "hanzi": "有趣",
+          "pinyin": "yǒuqù",
+          "adj": 6,
+          "vi": "thú vị, lý thú"
+        },
+        {
+          "pos": 16,
+          "hanzi": "开心",
+          "pinyin": "kāixīn",
+          "adj": 6,
+          "vi": "vui vẻ"
+        },
+        {
+          "pos": 17,
+          "hanzi": "继续",
+          "pinyin": "jìxù",
+          "adj": 4,
+          "vi": "tiếp tục"
+        },
+        {
+          "pos": 18,
+          "hanzi": "由",
+          "pinyin": "yóu",
+          "adj": 13,
+          "vi": "do"
+        },
+        {
+          "pos": 19,
+          "hanzi": "讨论",
+          "pinyin": "tǎolùn",
+          "adj": 4,
+          "vi": "thảo luận, bàn bạc"
+        },
+        {
+          "pos": 20,
+          "hanzi": "大约",
+          "pinyin": "dàyuē",
+          "adj": 7,
+          "vi": "khoảng chừng, ước chừng"
+        },
+        {
+          "pos": 21,
+          "hanzi": "餐厅",
+          "pinyin": "cāntīng",
+          "adj": 2,
+          "vi": "nhà hàng"
+        },
+        {
+          "pos": 22,
+          "hanzi": "纸袋",
+          "pinyin": "zhǐdài",
+          "adj": 2,
+          "vi": "túi giấy"
+        },
+        {
+          "pos": 23,
+          "hanzi": "互联网",
+          "pinyin": "hùliánwǎng",
+          "adj": 2,
+          "vi": "mạng Internet"
+        },
+        {
+          "pos": 24,
+          "hanzi": "进行",
+          "pinyin": "jìnxíng",
+          "adj": 4,
+          "vi": "tiến hành, thực hiện"
+        },
+        {
+          "pos": 25,
+          "hanzi": "错误",
+          "pinyin": "cuòwù",
+          "adj": 6,
+          "vi": "sai"
+        },
+        {
+          "pos": 26,
+          "hanzi": "随着",
+          "pinyin": "suízhe",
+          "adj": 13,
+          "vi": "cùng với"
+        },
+        {
+          "pos": 27,
+          "hanzi": "十分",
+          "pinyin": "shífēn",
+          "adj": 7,
+          "vi": "rất, vô cùng"
+        },
+        {
+          "pos": 28,
+          "hanzi": "普遍",
+          "pinyin": "pǔbiàn",
+          "adj": 6,
+          "vi": "phổ biến"
+        },
+        {
+          "pos": 29,
+          "hanzi": "部分",
+          "pinyin": "bùfen",
+          "adj": 2,
+          "vi": "phần, bộ phận"
+        },
+        {
+          "pos": 30,
+          "hanzi": "稍微",
+          "pinyin": "shāowēi",
+          "adj": 7,
+          "vi": "hơi"
+        },
+        {
+          "pos": 31,
+          "hanzi": "苦",
+          "pinyin": "kǔ",
+          "adj": 6,
+          "vi": "đắng"
+        },
+        {
+          "pos": 32,
+          "hanzi": "省",
+          "pinyin": "shěng",
+          "adj": 2,
+          "vi": "tỉnh"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "保护地球母亲",
+      "short_vi": "N/A",
+      "vocabulary_count": 32,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "出差",
+          "pinyin": "chū chāi",
+          "adj": 4,
+          "vi": "đi công tác"
+        },
+        {
+          "pos": 2,
+          "hanzi": "毛巾",
+          "pinyin": "máojīn",
+          "adj": 2,
+          "vi": "khăn lau"
+        },
+        {
+          "pos": 3,
+          "hanzi": "牙膏",
+          "pinyin": "yágāo",
+          "adj": 2,
+          "vi": "kem đánh răng"
+        },
+        {
+          "pos": 4,
+          "hanzi": "重",
+          "pinyin": "zhòng",
+          "adj": 6,
+          "vi": "nặng"
+        },
+        {
+          "pos": 5,
+          "hanzi": "行",
+          "pinyin": "xíng",
+          "adj": 4,
+          "vi": "được, đồng ý"
+        },
+        {
+          "pos": 6,
+          "hanzi": "省",
+          "pinyin": "shěng",
+          "adj": 4,
+          "vi": "tiết kiệm"
+        },
+        {
+          "pos": 7,
+          "hanzi": "污染",
+          "pinyin": "wūrǎn",
+          "adj": 4,
+          "vi": "làm ô nhiễm"
+        },
+        {
+          "pos": 8,
+          "hanzi": "卫生间",
+          "pinyin": "wèishēngjiān",
+          "adj": 2,
+          "vi": "nhà vệ sinh"
+        },
+        {
+          "pos": 9,
+          "hanzi": "脏",
+          "pinyin": "zāng",
+          "adj": 6,
+          "vi": "bẩn, bẩn thỉu"
+        },
+        {
+          "pos": 10,
+          "hanzi": "抱歉",
+          "pinyin": "bàoqiàn",
+          "adj": 4,
+          "vi": "xin lỗi"
+        },
+        {
+          "pos": 11,
+          "hanzi": "空",
+          "pinyin": "kōng",
+          "adj": 6,
+          "vi": "trống, rỗng, không"
+        },
+        {
+          "pos": 12,
+          "hanzi": "盒子",
+          "pinyin": "hézi",
+          "adj": 2,
+          "vi": "hộp"
+        },
+        {
+          "pos": 13,
+          "hanzi": "扔",
+          "pinyin": "rēng",
+          "adj": 4,
+          "vi": "vứt bỏ"
+        },
+        {
+          "pos": 14,
+          "hanzi": "以",
+          "pinyin": "yǐ",
+          "adj": 13,
+          "vi": "dựa vào, bằng"
+        },
+        {
+          "pos": 15,
+          "hanzi": "速度",
+          "pinyin": "sùdù",
+          "adj": 2,
+          "vi": "tốc độ"
+        },
+        {
+          "pos": 16,
+          "hanzi": "地球",
+          "pinyin": "dìqiú",
+          "adj": 2,
+          "vi": "trái đất"
+        },
+        {
+          "pos": 17,
+          "hanzi": "既然",
+          "pinyin": "jìrán",
+          "adj": 10,
+          "vi": "vì, đã...thì..."
+        },
+        {
+          "pos": 18,
+          "hanzi": "停",
+          "pinyin": "tíng",
+          "adj": 4,
+          "vi": "ngừng, cúp, cắt"
+        },
+        {
+          "pos": 19,
+          "hanzi": "得意",
+          "pinyin": "déyì",
+          "adj": 6,
+          "vi": "hể hả, đắc chí"
+        },
+        {
+          "pos": 20,
+          "hanzi": "目的",
+          "pinyin": "mùdì",
+          "adj": 2,
+          "vi": "mục đích"
+        },
+        {
+          "pos": 21,
+          "hanzi": "暖",
+          "pinyin": "nuǎn",
+          "adj": 6,
+          "vi": "ấm, ấm áp"
+        },
+        {
+          "pos": 22,
+          "hanzi": "塑料袋",
+          "pinyin": "sùliàodài",
+          "adj": 2,
+          "vi": "túi nilông, túi nhựa"
+        },
+        {
+          "pos": 23,
+          "hanzi": "于是",
+          "pinyin": "yúshì",
+          "adj": 10,
+          "vi": "thế là"
+        },
+        {
+          "pos": 24,
+          "hanzi": "鼓励",
+          "pinyin": "gǔlì",
+          "adj": 4,
+          "vi": "khuyến khích"
+        },
+        {
+          "pos": 25,
+          "hanzi": "拒绝",
+          "pinyin": "jùjué",
+          "adj": 4,
+          "vi": "từ chối"
+        },
+        {
+          "pos": 26,
+          "hanzi": "减少",
+          "pinyin": "jiǎnshǎo",
+          "adj": 4,
+          "vi": "giảm bớt"
+        },
+        {
+          "pos": 27,
+          "hanzi": "数量",
+          "pinyin": "shùliàng",
+          "adj": 2,
+          "vi": "số lượng"
+        },
+        {
+          "pos": 28,
+          "hanzi": "温度",
+          "pinyin": "wēndù",
+          "adj": 2,
+          "vi": "nhiệt độ"
+        },
+        {
+          "pos": 29,
+          "hanzi": "乘坐",
+          "pinyin": "chéngzuò",
+          "adj": 4,
+          "vi": "đi, đáp (xe buýt...)"
+        },
+        {
+          "pos": 30,
+          "hanzi": "丢",
+          "pinyin": "diū",
+          "adj": 4,
+          "vi": "ném, vứt"
+        },
+        {
+          "pos": 31,
+          "hanzi": "垃圾桶",
+          "pinyin": "lājītǒng",
+          "adj": 2,
+          "vi": "thùng rác"
+        },
+        {
+          "pos": 32,
+          "hanzi": "美丽",
+          "pinyin": "měilì",
+          "adj": 6,
+          "vi": "đẹp"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "教育孩子的艺术",
+      "short_vi": "N/A",
+      "vocabulary_count": 32,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "弹钢琴",
+          "pinyin": "tán gāngqín",
+          "adj": 4,
+          "vi": "chơi đàn dương cầm"
+        },
+        {
+          "pos": 2,
+          "hanzi": "棒",
+          "pinyin": "bàng",
+          "adj": 6,
+          "vi": "xuất sắc, hay, giỏi"
+        },
+        {
+          "pos": 3,
+          "hanzi": "孙子",
+          "pinyin": "sūnzi",
+          "adj": 2,
+          "vi": "cháu nội, trai"
+        },
+        {
+          "pos": 4,
+          "hanzi": "寒假",
+          "pinyin": "hánjià",
+          "adj": 2,
+          "vi": "kỳ nghỉ đông"
+        },
+        {
+          "pos": 5,
+          "hanzi": "父亲",
+          "pinyin": "fùqīn",
+          "adj": 2,
+          "vi": "cha, bố"
+        },
+        {
+          "pos": 6,
+          "hanzi": "闹钟",
+          "pinyin": "nàozhōng",
+          "adj": 2,
+          "vi": "đồng hồ báo thức"
+        },
+        {
+          "pos": 7,
+          "hanzi": "响",
+          "pinyin": "xiǎng",
+          "adj": 4,
+          "vi": "reo, vang lên"
+        },
+        {
+          "pos": 8,
+          "hanzi": "醒",
+          "pinyin": "xǐng",
+          "adj": 4,
+          "vi": "thức dậy, tỉnh dậy"
+        },
+        {
+          "pos": 9,
+          "hanzi": "赶",
+          "pinyin": "gǎn",
+          "adj": 4,
+          "vi": "vội, gấp rút"
+        },
+        {
+          "pos": 10,
+          "hanzi": "厕所",
+          "pinyin": "cèsuǒ",
+          "adj": 2,
+          "vi": "nhà vệ sinh"
+        },
+        {
+          "pos": 11,
+          "hanzi": "批评",
+          "pinyin": "pīpíng",
+          "adj": 4,
+          "vi": "phê bình"
+        },
+        {
+          "pos": 12,
+          "hanzi": "弄",
+          "pinyin": "nòng",
+          "adj": 4,
+          "vi": "làm"
+        },
+        {
+          "pos": 13,
+          "hanzi": "管理",
+          "pinyin": "guǎnlǐ",
+          "adj": 4,
+          "vi": "quản lý"
+        },
+        {
+          "pos": 14,
+          "hanzi": "打针",
+          "pinyin": "dǎ zhēn",
+          "adj": 4,
+          "vi": "tiêm, chích"
+        },
+        {
+          "pos": 15,
+          "hanzi": "护士",
+          "pinyin": "hùshi",
+          "adj": 2,
+          "vi": "y tá"
+        },
+        {
+          "pos": 16,
+          "hanzi": "表扬",
+          "pinyin": "biǎoyáng",
+          "adj": 4,
+          "vi": "khen ngợi, biểu dương"
+        },
+        {
+          "pos": 17,
+          "hanzi": "千万",
+          "pinyin": "qiānwàn",
+          "adj": 7,
+          "vi": "nhất thiết phải"
+        },
+        {
+          "pos": 18,
+          "hanzi": "怀疑",
+          "pinyin": "huáiyí",
+          "adj": 4,
+          "vi": "nghi ngờ, hoài nghi"
+        },
+        {
+          "pos": 19,
+          "hanzi": "故意",
+          "pinyin": "gùyì",
+          "adj": 7,
+          "vi": "cố tình, cố ý"
+        },
+        {
+          "pos": 20,
+          "hanzi": "敲",
+          "pinyin": "qiāo",
+          "adj": 4,
+          "vi": "gõ, khua"
+        },
+        {
+          "pos": 21,
+          "hanzi": "整理",
+          "pinyin": "zhěnglǐ",
+          "adj": 4,
+          "vi": "thu dọn, dọn dẹp"
+        },
+        {
+          "pos": 22,
+          "hanzi": "合适",
+          "pinyin": "héshì",
+          "adj": 6,
+          "vi": "thích hợp"
+        },
+        {
+          "pos": 23,
+          "hanzi": "骗",
+          "pinyin": "piàn",
+          "adj": 4,
+          "vi": "lừa gạt"
+        },
+        {
+          "pos": 24,
+          "hanzi": "儿童",
+          "pinyin": "értóng",
+          "adj": 2,
+          "vi": "trẻ em"
+        },
+        {
+          "pos": 25,
+          "hanzi": "假",
+          "pinyin": "jiǎ",
+          "adj": 6,
+          "vi": "giả dối, không thật"
+        },
+        {
+          "pos": 26,
+          "hanzi": "左右",
+          "pinyin": "zuǒyòu",
+          "adj": 4,
+          "vi": "khoảng, khoảng chừng"
+        },
+        {
+          "pos": 27,
+          "hanzi": "懒",
+          "pinyin": "lǎn",
+          "adj": 6,
+          "vi": "lười, lười nhác"
+        },
+        {
+          "pos": 28,
+          "hanzi": "笨",
+          "pinyin": "bèn",
+          "adj": 6,
+          "vi": "đần, ngốc"
+        },
+        {
+          "pos": 29,
+          "hanzi": "粗心",
+          "pinyin": "cūxīn",
+          "adj": 6,
+          "vi": "cẩu thả"
+        },
+        {
+          "pos": 30,
+          "hanzi": "骄傲",
+          "pinyin": "jiāo'ào",
+          "adj": 6,
+          "vi": "kiêu ngạo"
+        },
+        {
+          "pos": 31,
+          "hanzi": "害羞",
+          "pinyin": "hàixiū",
+          "adj": 4,
+          "vi": "ngượng ngùng, thẹn thùng"
+        },
+        {
+          "pos": 32,
+          "hanzi": "省",
+          "pinyin": "shěng",
+          "adj": 4,
+          "vi": "tinh"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "生活可以更美好",
+      "short_vi": "N/A",
+      "vocabulary_count": 31,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "博士",
+          "pinyin": "bóshì",
+          "adj": 2,
+          "vi": "tiến sĩ"
+        },
+        {
+          "pos": 2,
+          "hanzi": "签证",
+          "pinyin": "qiānzhèng",
+          "adj": 2,
+          "vi": "thị thực, visa"
+        },
+        {
+          "pos": 3,
+          "hanzi": "报名",
+          "pinyin": "bàomíng",
+          "adj": 4,
+          "vi": "ghi danh, đăng ký"
+        },
+        {
+          "pos": 4,
+          "hanzi": "表格",
+          "pinyin": "biǎogé",
+          "adj": 2,
+          "vi": "bản kê khai, mẫu đơn"
+        },
+        {
+          "pos": 5,
+          "hanzi": "传真",
+          "pinyin": "chuánzhēn",
+          "adj": 4,
+          "vi": "gửi fax"
+        },
+        {
+          "pos": 6,
+          "hanzi": "号码",
+          "pinyin": "hàomǎ",
+          "adj": 2,
+          "vi": "số"
+        },
+        {
+          "pos": 7,
+          "hanzi": "参观",
+          "pinyin": "cānguān",
+          "adj": 4,
+          "vi": "tham quan, đi thăm"
+        },
+        {
+          "pos": 8,
+          "hanzi": "激动",
+          "pinyin": "jīdòng",
+          "adj": 6,
+          "vi": "cảm động, xúc động"
+        },
+        {
+          "pos": 9,
+          "hanzi": "小伙子",
+          "pinyin": "xiǎohuǒzi",
+          "adj": 2,
+          "vi": "chàng trai"
+        },
+        {
+          "pos": 10,
+          "hanzi": "记者",
+          "pinyin": "jìzhě",
+          "adj": 2,
+          "vi": "phóng viên, nhà báo"
+        },
+        {
+          "pos": 11,
+          "hanzi": "代表",
+          "pinyin": "dàibiǎo",
+          "adj": 4,
+          "vi": "đại diện, thay mặt"
+        },
+        {
+          "pos": 12,
+          "hanzi": "恐怕",
+          "pinyin": "kǒngpà",
+          "adj": 7,
+          "vi": "e rằng, có lẽ"
+        },
+        {
+          "pos": 13,
+          "hanzi": "失望",
+          "pinyin": "shīwàng",
+          "adj": 4,
+          "vi": "thất vọng"
+        },
+        {
+          "pos": 14,
+          "hanzi": "郊区",
+          "pinyin": "jiāoqū",
+          "adj": 2,
+          "vi": "vùng ngoại ô"
+        },
+        {
+          "pos": 15,
+          "hanzi": "到底",
+          "pinyin": "dàodǐ",
+          "adj": 7,
+          "vi": "(nhấn mạnh trong câu hỏi) rốt cuộc"
+        },
+        {
+          "pos": 16,
+          "hanzi": "呀",
+          "pinyin": "ya",
+          "adj": 11,
+          "vi": "(biến thể của 啊, dùng cuối câu hỏi cho giọng nhẹ nhàng hơn)"
+        },
+        {
+          "pos": 17,
+          "hanzi": "导游",
+          "pinyin": "dǎoyóu",
+          "adj": 2,
+          "vi": "hướng dẫn viên du lịch"
+        },
+        {
+          "pos": 18,
+          "hanzi": "礼貌",
+          "pinyin": "lǐmào",
+          "adj": 6,
+          "vi": "lễ phép, lịch sự"
+        },
+        {
+          "pos": 19,
+          "hanzi": "原谅",
+          "pinyin": "yuánliàng",
+          "adj": 4,
+          "vi": "tha"
+        },
+        {
+          "pos": 20,
+          "hanzi": "挂",
+          "pinyin": "guà",
+          "adj": 4,
+          "vi": "treo, móc"
+        },
+        {
+          "pos": 21,
+          "hanzi": "同情",
+          "pinyin": "tóngqíng",
+          "adj": 4,
+          "vi": "thông cảm, đồng tình"
+        },
+        {
+          "pos": 22,
+          "hanzi": "推",
+          "pinyin": "tuī",
+          "adj": 4,
+          "vi": "hoãn lại, đẩy, triển khai"
+        },
+        {
+          "pos": 23,
+          "hanzi": "预习",
+          "pinyin": "yùxí",
+          "adj": 4,
+          "vi": "chuẩn bị bài"
+        },
+        {
+          "pos": 24,
+          "hanzi": "重点",
+          "pinyin": "zhòngdiǎn",
+          "adj": 2,
+          "vi": "trọng điểm, trọng tâm"
+        },
+        {
+          "pos": 25,
+          "hanzi": "马虎",
+          "pinyin": "mǎhu",
+          "adj": 6,
+          "vi": "cẩu thả, lơ đễnh"
+        },
+        {
+          "pos": 26,
+          "hanzi": "自信",
+          "pinyin": "zìxìn",
+          "adj": 6,
+          "vi": "tự tin"
+        },
+        {
+          "pos": 27,
+          "hanzi": "冷静",
+          "pinyin": "lěngjìng",
+          "adj": 6,
+          "vi": "bình tĩnh, điềm tĩnh"
+        },
+        {
+          "pos": 28,
+          "hanzi": "累",
+          "pinyin": "lèi",
+          "adj": 4,
+          "vi": "mệt"
+        },
+        {
+          "pos": 29,
+          "hanzi": "重视",
+          "pinyin": "zhòngshì",
+          "adj": 4,
+          "vi": "xem trọng, chú trọng"
+        },
+        {
+          "pos": 30,
+          "hanzi": "敢",
+          "pinyin": "gǎn",
+          "adj": 4,
+          "vi": "dám"
+        },
+        {
+          "pos": 31,
+          "hanzi": "尊重",
+          "pinyin": "zūnzhòng",
+          "adj": 4,
+          "vi": "tôn trọng"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "title": "人与自然",
+      "short_vi": "N/A",
+      "vocabulary_count": 29,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "凉快",
+          "pinyin": "liángkuai",
+          "adj": 6,
+          "vi": "mát mẻ"
+        },
+        {
+          "pos": 2,
+          "hanzi": "热闹",
+          "pinyin": "rènao",
+          "adj": 6,
+          "vi": "náo nhiệt"
+        },
+        {
+          "pos": 3,
+          "hanzi": "云",
+          "pinyin": "yún",
+          "adj": 2,
+          "vi": "mây"
+        },
+        {
+          "pos": 4,
+          "hanzi": "广播",
+          "pinyin": "guǎngbō",
+          "adj": 2,
+          "vi": "chương trình phát thanh/truyền hình"
+        },
+        {
+          "pos": 5,
+          "hanzi": "照",
+          "pinyin": "zhào",
+          "adj": 4,
+          "vi": "chụp (ảnh)"
+        },
+        {
+          "pos": 6,
+          "hanzi": "倒",
+          "pinyin": "dào",
+          "adj": 7,
+          "vi": "(chỉ sự tương phản) nhưng, lại"
+        },
+        {
+          "pos": 7,
+          "hanzi": "毛",
+          "pinyin": "máo",
+          "adj": 2,
+          "vi": "lông"
+        },
+        {
+          "pos": 8,
+          "hanzi": "抱",
+          "pinyin": "bào",
+          "adj": 4,
+          "vi": "bế, bồng, ôm"
+        },
+        {
+          "pos": 9,
+          "hanzi": "干",
+          "pinyin": "gàn",
+          "adj": 4,
+          "vi": "làm"
+        },
+        {
+          "pos": 10,
+          "hanzi": "严格",
+          "pinyin": "yángé",
+          "adj": 6,
+          "vi": "nghiêm khắc, nghiêm ngặt"
+        },
+        {
+          "pos": 11,
+          "hanzi": "难受",
+          "pinyin": "nánshòu",
+          "adj": 6,
+          "vi": "bực bội, buồn rầu"
+        },
+        {
+          "pos": 12,
+          "hanzi": "趟",
+          "pinyin": "tàng",
+          "adj": 8,
+          "vi": "(chỉ số lần đi lại) lần, chuyến"
+        },
+        {
+          "pos": 13,
+          "hanzi": "放暑假",
+          "pinyin": "fàng shǔjià",
+          "adj": 4,
+          "vi": "nghỉ hè"
+        },
+        {
+          "pos": 14,
+          "hanzi": "老虎",
+          "pinyin": "lǎohǔ",
+          "adj": 2,
+          "vi": "hổ, cọp"
+        },
+        {
+          "pos": 15,
+          "hanzi": "入口",
+          "pinyin": "rùkǒu",
+          "adj": 2,
+          "vi": "cổng vào"
+        },
+        {
+          "pos": 16,
+          "hanzi": "排队",
+          "pinyin": "pái duì",
+          "adj": 4,
+          "vi": "xếp hàng"
+        },
+        {
+          "pos": 17,
+          "hanzi": "活泼",
+          "pinyin": "huópō",
+          "adj": 6,
+          "vi": "hoạt bát, nhanh nhẹn"
+        },
+        {
+          "pos": 18,
+          "hanzi": "社会",
+          "pinyin": "shèhuì",
+          "adj": 2,
+          "vi": "xã hội"
+        },
+        {
+          "pos": 19,
+          "hanzi": "竞争",
+          "pinyin": "jìngzhēng",
+          "adj": 4,
+          "vi": "cạnh tranh"
+        },
+        {
+          "pos": 20,
+          "hanzi": "森林",
+          "pinyin": "sēnlín",
+          "adj": 2,
+          "vi": "rừng rậm"
+        },
+        {
+          "pos": 21,
+          "hanzi": "剩",
+          "pinyin": "shèng",
+          "adj": 4,
+          "vi": "còn lại"
+        },
+        {
+          "pos": 22,
+          "hanzi": "暖和",
+          "pinyin": "nuǎnhuo",
+          "adj": 6,
+          "vi": "ấm áp"
+        },
+        {
+          "pos": 23,
+          "hanzi": "海洋",
+          "pinyin": "hǎiyáng",
+          "adj": 2,
+          "vi": "biển, đại dương"
+        },
+        {
+          "pos": 24,
+          "hanzi": "底",
+          "pinyin": "dǐ",
+          "adj": 2,
+          "vi": "đáy"
+        },
+        {
+          "pos": 25,
+          "hanzi": "美人鱼",
+          "pinyin": "Měirényú",
+          "adj": 2,
+          "vi": "người cá"
+        },
+        {
+          "pos": 26,
+          "hanzi": "公里",
+          "pinyin": "gōnglǐ",
+          "adj": 8,
+          "vi": "kilômét"
+        },
+        {
+          "pos": 27,
+          "hanzi": "仍然",
+          "pinyin": "réngrán",
+          "adj": 7,
+          "vi": "vẫn"
+        },
+        {
+          "pos": 28,
+          "hanzi": "排列",
+          "pinyin": "páiliè",
+          "adj": 4,
+          "vi": "sắp xếp (theo thứ tự)"
+        },
+        {
+          "pos": 29,
+          "hanzi": "梦",
+          "pinyin": "mèng",
+          "adj": 2,
+          "vi": "giấc mơ"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "title": "科技与世界",
+      "short_vi": "N/A",
+      "vocabulary_count": 32,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "降落",
+          "pinyin": "jiàngluò",
+          "adj": 4,
+          "vi": "đáp xuống, hạ cánh"
+        },
+        {
+          "pos": 2,
+          "hanzi": "火",
+          "pinyin": "huǒ",
+          "adj": 6,
+          "vi": "chạy, đốt, được nhiều người ưa chuộng"
+        },
+        {
+          "pos": 3,
+          "hanzi": "作者",
+          "pinyin": "zuòzhě",
+          "adj": 2,
+          "vi": "tác giả"
+        },
+        {
+          "pos": 4,
+          "hanzi": "交通",
+          "pinyin": "jiāotōng",
+          "adj": 2,
+          "vi": "giao thông, thông tin liên lạc"
+        },
+        {
+          "pos": 5,
+          "hanzi": "技术",
+          "pinyin": "jìshù",
+          "adj": 2,
+          "vi": "kỹ thuật, công nghệ"
+        },
+        {
+          "pos": 6,
+          "hanzi": "是否",
+          "pinyin": "shìfǒu",
+          "adj": 7,
+          "vi": "hay không"
+        },
+        {
+          "pos": 7,
+          "hanzi": "秒",
+          "pinyin": "miǎo",
+          "adj": 8,
+          "vi": "giây"
+        },
+        {
+          "pos": 8,
+          "hanzi": "方式",
+          "pinyin": "fāngshì",
+          "adj": 2,
+          "vi": "phương thức, cách thức"
+        },
+        {
+          "pos": 9,
+          "hanzi": "受不了",
+          "pinyin": "shòubuliǎo",
+          "adj": 4,
+          "vi": "chịu không nổi, chịu không được"
+        },
+        {
+          "pos": 10,
+          "hanzi": "日记",
+          "pinyin": "rìjì",
+          "adj": 2,
+          "vi": "nhật ký"
+        },
+        {
+          "pos": 11,
+          "hanzi": "安全",
+          "pinyin": "ānquán",
+          "adj": 6,
+          "vi": "an toàn"
+        },
+        {
+          "pos": 12,
+          "hanzi": "密码",
+          "pinyin": "mìmǎ",
+          "adj": 2,
+          "vi": "mật mã"
+        },
+        {
+          "pos": 13,
+          "hanzi": "允许",
+          "pinyin": "yǔnxǔ",
+          "adj": 4,
+          "vi": "cho phép"
+        },
+        {
+          "pos": 14,
+          "hanzi": "座",
+          "pinyin": "zuò",
+          "adj": 8,
+          "vi": "(dùng cho cầu, núi, cao ốc...) tòa, hòn, cây"
+        },
+        {
+          "pos": 15,
+          "hanzi": "桥",
+          "pinyin": "qiáo",
+          "adj": 2,
+          "vi": "cầu"
+        },
+        {
+          "pos": 16,
+          "hanzi": "危险",
+          "pinyin": "wēixiǎn",
+          "adj": 6,
+          "vi": "nguy hiểm"
+        },
+        {
+          "pos": 17,
+          "hanzi": "接着",
+          "pinyin": "jiēzhe",
+          "adj": 7,
+          "vi": "ngay sau đó"
+        },
+        {
+          "pos": 18,
+          "hanzi": "警察",
+          "pinyin": "jǐngchá",
+          "adj": 2,
+          "vi": "cảnh sát"
+        },
+        {
+          "pos": 19,
+          "hanzi": "抓",
+          "pinyin": "zhuā",
+          "adj": 4,
+          "vi": "bắt, túm"
+        },
+        {
+          "pos": 20,
+          "hanzi": "咸",
+          "pinyin": "xián",
+          "adj": 6,
+          "vi": "mặn"
+        },
+        {
+          "pos": 21,
+          "hanzi": "矿泉水",
+          "pinyin": "kuàngquánshuǐ",
+          "adj": 2,
+          "vi": "nước suối"
+        },
+        {
+          "pos": 22,
+          "hanzi": "付款",
+          "pinyin": "fù kuǎn",
+          "adj": 4,
+          "vi": "trả tiền"
+        },
+        {
+          "pos": 23,
+          "hanzi": "举",
+          "pinyin": "jǔ",
+          "adj": 4,
+          "vi": "nêu, đưa ra"
+        },
+        {
+          "pos": 24,
+          "hanzi": "迷路",
+          "pinyin": "mí lù",
+          "adj": 4,
+          "vi": "lạc đường"
+        },
+        {
+          "pos": 25,
+          "hanzi": "地址",
+          "pinyin": "dìzhǐ",
+          "adj": 2,
+          "vi": "địa chỉ"
+        },
+        {
+          "pos": 26,
+          "hanzi": "地点",
+          "pinyin": "dìdiǎn",
+          "adj": 2,
+          "vi": "địa điểm, nơi"
+        },
+        {
+          "pos": 27,
+          "hanzi": "世纪",
+          "pinyin": "shìjì",
+          "adj": 2,
+          "vi": "thế kỷ"
+        },
+        {
+          "pos": 28,
+          "hanzi": "邮局",
+          "pinyin": "yóujú",
+          "adj": 2,
+          "vi": "bưu điện"
+        },
+        {
+          "pos": 29,
+          "hanzi": "收",
+          "pinyin": "shōu",
+          "adj": 4,
+          "vi": "nhận"
+        },
+        {
+          "pos": 30,
+          "hanzi": "信封",
+          "pinyin": "xìnfēng",
+          "adj": 2,
+          "vi": "phong thư, bì thư"
+        },
+        {
+          "pos": 31,
+          "hanzi": "网站",
+          "pinyin": "wǎngzhàn",
+          "adj": 2,
+          "vi": "trang web"
+        },
+        {
+          "pos": 32,
+          "hanzi": "信息",
+          "pinyin": "xìnxī",
+          "adj": 2,
+          "vi": "tin tức, thông tin"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "title": " 生活的味道",
+      "short_vi": "N/A",
+      "vocabulary_count": 32,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "学期",
+          "pinyin": "xuéqī",
+          "adj": 2,
+          "vi": "học kỳ"
+        },
+        {
+          "pos": 2,
+          "hanzi": "出生",
+          "pinyin": "chūshēng",
+          "adj": 4,
+          "vi": "ra đời, sinh ra"
+        },
+        {
+          "pos": 3,
+          "hanzi": "性别",
+          "pinyin": "xìngbié",
+          "adj": 2,
+          "vi": "giới tính"
+        },
+        {
+          "pos": 4,
+          "hanzi": "道歉",
+          "pinyin": "dào qiàn",
+          "adj": 4,
+          "vi": "xin lỗi"
+        },
+        {
+          "pos": 5,
+          "hanzi": "打印",
+          "pinyin": "dǎyìn",
+          "adj": 4,
+          "vi": "in"
+        },
+        {
+          "pos": 6,
+          "hanzi": "复印",
+          "pinyin": "fùyìn",
+          "adj": 4,
+          "vi": "photocopy, sao chụp"
+        },
+        {
+          "pos": 7,
+          "hanzi": "饺子",
+          "pinyin": "jiǎozi",
+          "adj": 2,
+          "vi": "bánh chẻo"
+        },
+        {
+          "pos": 8,
+          "hanzi": "刀",
+          "pinyin": "dǎo",
+          "adj": 2,
+          "vi": "con dao"
+        },
+        {
+          "pos": 9,
+          "hanzi": "破",
+          "pinyin": "pò",
+          "adj": 6,
+          "vi": "bị đứt, bị thủng"
+        },
+        {
+          "pos": 10,
+          "hanzi": "脱",
+          "pinyin": "tuō",
+          "adj": 4,
+          "vi": "cởi ra"
+        },
+        {
+          "pos": 11,
+          "hanzi": "理发",
+          "pinyin": "lǐfà",
+          "adj": 4,
+          "vi": "cắt tóc"
+        },
+        {
+          "pos": 12,
+          "hanzi": "包子",
+          "pinyin": "bāozi",
+          "adj": 2,
+          "vi": "bánh bao"
+        },
+        {
+          "pos": 13,
+          "hanzi": "零钱",
+          "pinyin": "língqián",
+          "adj": 2,
+          "vi": "tiền lẻ"
+        },
+        {
+          "pos": 14,
+          "hanzi": "打招呼",
+          "pinyin": "dǎ zhāohu",
+          "adj": 4,
+          "vi": "chào hỏi, chào"
+        },
+        {
+          "pos": 15,
+          "hanzi": "戴",
+          "pinyin": "dài",
+          "adj": 4,
+          "vi": "đeo, mang"
+        },
+        {
+          "pos": 16,
+          "hanzi": "眼镜",
+          "pinyin": "yǎnjìng",
+          "adj": 2,
+          "vi": "mắt kính"
+        },
+        {
+          "pos": 17,
+          "hanzi": "舞蹈",
+          "pinyin": "wǔdǎo",
+          "adj": 2,
+          "vi": "điệu múa"
+        },
+        {
+          "pos": 18,
+          "hanzi": "国籍",
+          "pinyin": "guójí",
+          "adj": 2,
+          "vi": "quốc tịch"
+        },
+        {
+          "pos": 19,
+          "hanzi": "抬",
+          "pinyin": "tái",
+          "adj": 4,
+          "vi": "giơ lên, đưa lên"
+        },
+        {
+          "pos": 20,
+          "hanzi": "胳膊",
+          "pinyin": "gēbo",
+          "adj": 2,
+          "vi": "cánh tay"
+        },
+        {
+          "pos": 21,
+          "hanzi": "转",
+          "pinyin": "zhuǎn",
+          "adj": 4,
+          "vi": "quay, xoay"
+        },
+        {
+          "pos": 22,
+          "hanzi": "租",
+          "pinyin": "zū",
+          "adj": 4,
+          "vi": "thuê, cho thuê"
+        },
+        {
+          "pos": 23,
+          "hanzi": "吵",
+          "pinyin": "chǎo",
+          "adj": 6,
+          "vi": "ồn ào"
+        },
+        {
+          "pos": 24,
+          "hanzi": "厨房",
+          "pinyin": "chúfáng",
+          "adj": 2,
+          "vi": "nhà bếp"
+        },
+        {
+          "pos": 25,
+          "hanzi": "房东",
+          "pinyin": "fángdōng",
+          "adj": 2,
+          "vi": "chủ nhà (nhà cho thuê)"
+        },
+        {
+          "pos": 26,
+          "hanzi": "占线",
+          "pinyin": "zhànxiàn",
+          "adj": 4,
+          "vi": "(đường dây điện thoại) bận"
+        },
+        {
+          "pos": 27,
+          "hanzi": "功夫",
+          "pinyin": "gōngfu",
+          "adj": 2,
+          "vi": "võ thuật, môn võ kung fu"
+        },
+        {
+          "pos": 28,
+          "hanzi": "乒乓球",
+          "pinyin": "pīngpāngqiú",
+          "adj": 2,
+          "vi": "bóng bàn"
+        },
+        {
+          "pos": 29,
+          "hanzi": "羽毛球",
+          "pinyin": "yǔmáoqiú",
+          "adj": 2,
+          "vi": "cầu lông"
+        },
+        {
+          "pos": 30,
+          "hanzi": "场",
+          "pinyin": "chǎng",
+          "adj": 8,
+          "vi": "(dùng cho thể thao, giải trí...) trận"
+        },
+        {
+          "pos": 31,
+          "hanzi": "禁止",
+          "pinyin": "jìnzhǐ",
+          "adj": 4,
+          "vi": "cấm"
+        },
+        {
+          "pos": 32,
+          "hanzi": "座位",
+          "pinyin": "zuòwèi",
+          "adj": 2,
+          "vi": "chỗ ngồi"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "路上的风景",
+      "short_vi": "N/A",
+      "vocabulary_count": 30,
+      "vocabulary": [
+        {
+          "pos": 1,
+          "hanzi": "加油站",
+          "pinyin": "jiāyóuzhàn",
+          "adj": 2,
+          "vi": "trạm xăng dầu"
+        },
+        {
+          "pos": 2,
+          "hanzi": "航班",
+          "pinyin": "hángbān",
+          "adj": 2,
+          "vi": "chuyến bay"
+        },
+        {
+          "pos": 3,
+          "hanzi": "推迟",
+          "pinyin": "tuīchí",
+          "adj": 4,
+          "vi": "hoãn lại"
+        },
+        {
+          "pos": 4,
+          "hanzi": "高速公路",
+          "pinyin": "gāosù gōnglù",
+          "adj": 2,
+          "vi": "đường cao tốc"
+        },
+        {
+          "pos": 5,
+          "hanzi": "登机牌",
+          "pinyin": "dēngjīpái",
+          "adj": 2,
+          "vi": "thẻ lên máy bay"
+        },
+        {
+          "pos": 6,
+          "hanzi": "首都",
+          "pinyin": "shǒudū",
+          "adj": 2,
+          "vi": "thủ đô"
+        },
+        {
+          "pos": 7,
+          "hanzi": "旅行",
+          "pinyin": "lǚxíng",
+          "adj": 4,
+          "vi": "du lịch"
+        },
+        {
+          "pos": 8,
+          "hanzi": "怪",
+          "pinyin": "guài",
+          "adj": 7,
+          "vi": "rất, vô cùng"
+        },
+        {
+          "pos": 9,
+          "hanzi": "可怜",
+          "pinyin": "kělián",
+          "adj": 6,
+          "vi": "đáng thương, tội nghiệp"
+        },
+        {
+          "pos": 10,
+          "hanzi": "对面",
+          "pinyin": "duìmiàn",
+          "adj": 2,
+          "vi": "đối diện, trước mặt"
+        },
+        {
+          "pos": 11,
+          "hanzi": "烤鸭",
+          "pinyin": "kǎoyā",
+          "adj": 2,
+          "vi": "vịt quay"
+        },
+        {
+          "pos": 12,
+          "hanzi": "祝贺",
+          "pinyin": "zhùhè",
+          "adj": 4,
+          "vi": "chúc mừng"
+        },
+        {
+          "pos": 13,
+          "hanzi": "合格",
+          "pinyin": "hégé",
+          "adj": 6,
+          "vi": "đạt tiêu chuẩn, đạt yêu cầu"
+        },
+        {
+          "pos": 14,
+          "hanzi": "干杯",
+          "pinyin": "gān bēi",
+          "adj": 4,
+          "vi": "cạn ly"
+        },
+        {
+          "pos": 15,
+          "hanzi": "民族",
+          "pinyin": "mínzú",
+          "adj": 2,
+          "vi": "dân tộc"
+        },
+        {
+          "pos": 16,
+          "hanzi": "打扮",
+          "pinyin": "dǎban",
+          "adj": 4,
+          "vi": "trang điểm"
+        },
+        {
+          "pos": 17,
+          "hanzi": "笑话",
+          "pinyin": "xiàohua",
+          "adj": 2,
+          "vi": "truyện cười"
+        },
+        {
+          "pos": 18,
+          "hanzi": "存",
+          "pinyin": "cún",
+          "adj": 4,
+          "vi": "gửi"
+        },
+        {
+          "pos": 19,
+          "hanzi": "钥匙",
+          "pinyin": "yàoshi",
+          "adj": 2,
+          "vi": "chìa khóa"
+        },
+        {
+          "pos": 20,
+          "hanzi": "究竟",
+          "pinyin": "jiūjìng",
+          "adj": 7,
+          "vi": "(nhấn mạnh trong câu hỏi) rốt cuộc"
+        },
+        {
+          "pos": 21,
+          "hanzi": "棵",
+          "pinyin": "kē",
+          "adj": 8,
+          "vi": "(dùng cho thực vật) cây, ngọn"
+        },
+        {
+          "pos": 22,
+          "hanzi": "汤",
+          "pinyin": "tāng",
+          "adj": 2,
+          "vi": "canh, súp"
+        },
+        {
+          "pos": 23,
+          "hanzi": "对话",
+          "pinyin": "duìhuà",
+          "adj": 4,
+          "vi": "đối thoại, tiếp xúc"
+        },
+        {
+          "pos": 24,
+          "hanzi": "普通话",
+          "pinyin": "pǔtōnghuà",
+          "adj": 2,
+          "vi": "tiếng phổ thông, tiếng Quan thoại"
+        },
+        {
+          "pos": 25,
+          "hanzi": "小吃",
+          "pinyin": "xiǎochī",
+          "adj": 2,
+          "vi": "món ăn vặt"
+        },
+        {
+          "pos": 26,
+          "hanzi": "收拾",
+          "pinyin": "shōushi",
+          "adj": 4,
+          "vi": "thu dọn, thu xếp"
+        },
+        {
+          "pos": 27,
+          "hanzi": "出发",
+          "pinyin": "chūfā",
+          "adj": 4,
+          "vi": "xuất phát, khởi hành"
+        },
+        {
+          "pos": 28,
+          "hanzi": "辣",
+          "pinyin": "là",
+          "adj": 6,
+          "vi": "cay"
+        },
+        {
+          "pos": 29,
+          "hanzi": "香",
+          "pinyin": "xiāng",
+          "adj": 6,
+          "vi": "thơm"
+        },
+        {
+          "pos": 30,
+          "hanzi": "酸",
+          "pinyin": "suān",
+          "adj": 6,
+          "vi": "chua"
+        }
+      ]
+    }
+  ]
+}

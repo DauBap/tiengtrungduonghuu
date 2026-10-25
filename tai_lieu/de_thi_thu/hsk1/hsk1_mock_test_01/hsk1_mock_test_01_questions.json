@@ -1,0 +1,710 @@
+{
+  "id": "hsk1_mock_test_01",
+  "level": "HSK1",
+  "type": "mock_test",
+  "question_count": 40,
+  "audio_file": "hsk1_mock_test_01_audio.mp3",
+  "image_files": [
+    "hsk1_mock_test_01_image_d1.jpg",
+    "hsk1_mock_test_01_image_n1.jpg",
+    "hsk1_mock_test_01_image_n2.jpg",
+    "hsk1_mock_test_01_image_n3.jpg",
+    "hsk1_mock_test_01_image_n4.jpg",
+    "hsk1_mock_test_01_image_n5.jpg",
+    "hsk1_mock_test_01_image_n11-15.jpg",
+    "hsk1_mock_test_01_image_vidu1.jpg"
+  ],
+  "questions": [
+    {
+      "number": 1,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "C"
+    },
+    {
+      "number": 2,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "A"
+    },
+    {
+      "number": 3,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "C"
+    },
+    {
+      "number": 4,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "B"
+    },
+    {
+      "number": 5,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "C"
+    },
+    {
+      "number": 6,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "B"
+    },
+    {
+      "number": 7,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "C"
+    },
+    {
+      "number": 8,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "B"
+    },
+    {
+      "number": 9,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "C"
+    },
+    {
+      "number": 10,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "A"
+    },
+    {
+      "number": 11,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "B"
+    },
+    {
+      "number": 12,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "D"
+    },
+    {
+      "number": 13,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "E"
+    },
+    {
+      "number": 14,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "A"
+    },
+    {
+      "number": 15,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "F"
+    },
+    {
+      "number": 16,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "A"
+    },
+    {
+      "number": 17,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "C"
+    },
+    {
+      "number": 18,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "A"
+    },
+    {
+      "number": 19,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "B"
+    },
+    {
+      "number": 20,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "B"
+    },
+    {
+      "number": 21,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "B"
+    },
+    {
+      "number": 22,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "D"
+    },
+    {
+      "number": 23,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "A"
+    },
+    {
+      "number": 24,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "C"
+    },
+    {
+      "number": 25,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "F"
+    },
+    {
+      "number": 26,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "C"
+    },
+    {
+      "number": 27,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "A"
+    },
+    {
+      "number": 28,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "E"
+    },
+    {
+      "number": 29,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "B"
+    },
+    {
+      "number": 30,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "D"
+    },
+    {
+      "number": 31,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "C"
+    },
+    {
+      "number": 32,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "E"
+    },
+    {
+      "number": 33,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "A"
+    },
+    {
+      "number": 34,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "B"
+    },
+    {
+      "number": 35,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "answer": "F"
+    },
+    {
+      "number": 36,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "C"
+    },
+    {
+      "number": 37,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "B"
+    },
+    {
+      "number": 38,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "C"
+    },
+    {
+      "number": 39,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "C"
+    },
+    {
+      "number": 40,
+      "options": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer": "B"
+    }
+  ],
+  "answers": {
+    "1": "C",
+    "2": "A",
+    "3": "C",
+    "4": "B",
+    "5": "C",
+    "6": "B",
+    "7": "C",
+    "8": "B",
+    "9": "C",
+    "10": "A",
+    "11": "B",
+    "12": "D",
+    "13": "E",
+    "14": "A",
+    "15": "F",
+    "16": "A",
+    "17": "C",
+    "18": "A",
+    "19": "B",
+    "20": "B",
+    "21": "B",
+    "22": "D",
+    "23": "A",
+    "24": "C",
+    "25": "F",
+    "26": "C",
+    "27": "A",
+    "28": "E",
+    "29": "B",
+    "30": "D",
+    "31": "C",
+    "32": "E",
+    "33": "A",
+    "34": "B",
+    "35": "F",
+    "36": "C",
+    "37": "B",
+    "38": "C",
+    "39": "C",
+    "40": "B"
+  },
+  "parts": [
+    {
+      "start": 1,
+      "end": 5,
+      "title": "Nghe và chọn hình đúng",
+      "image_files": []
+    },
+    {
+      "start": 6,
+      "end": 10,
+      "title": "Nghe câu hỏi và chọn A / B / C",
+      "image_files": []
+    },
+    {
+      "start": 11,
+      "end": 15,
+      "title": "Nghe hội thoại và chọn hình phù hợp",
+      "image_files": [
+        "hsk1_mock_test_01_image_n11-15.jpg"
+      ]
+    },
+    {
+      "start": 16,
+      "end": 20,
+      "title": "Nghe và chọn A / B / C",
+      "image_files": []
+    },
+    {
+      "start": 21,
+      "end": 25,
+      "title": "Chọn hình phù hợp với câu",
+      "image_files": [
+        "hsk1_mock_test_01_image_d1.jpg"
+      ]
+    },
+    {
+      "start": 26,
+      "end": 30,
+      "title": "Chọn câu trả lời phù hợp",
+      "image_files": []
+    },
+    {
+      "start": 31,
+      "end": 35,
+      "title": "Chọn từ điền vào chỗ trống",
+      "image_files": []
+    },
+    {
+      "start": 36,
+      "end": 40,
+      "title": "Đọc và chọn đáp án đúng",
+      "image_files": []
+    }
+  ],
+  "content": {
+    "6": {
+      "options": [
+        "哪里",
+        "打电话",
+        "做饭好吃"
+      ]
+    },
+    "7": {
+      "options": [
+        "白天",
+        "生病了",
+        "水果店"
+      ]
+    },
+    "8": {
+      "options": [
+        "八元",
+        "不是",
+        "便宜"
+      ]
+    },
+    "9": {
+      "options": [
+        "去年",
+        "很漂亮",
+        "我弟弟"
+      ]
+    },
+    "10": {
+      "options": [
+        "没有",
+        "再见",
+        "不要"
+      ]
+    },
+    "16": {
+      "options": [
+        "60岁",
+        "60多岁",
+        "70岁"
+      ]
+    },
+    "17": {
+      "options": [
+        "电脑",
+        "杯子",
+        "手机"
+      ]
+    },
+    "18": {
+      "options": [
+        "女儿",
+        "妹妹",
+        "高女士"
+      ]
+    },
+    "19": {
+      "options": [
+        "包子",
+        "面包",
+        "面条儿"
+      ]
+    },
+    "20": {
+      "options": [
+        "早上",
+        "中午",
+        "星期天"
+      ]
+    },
+    "21": {
+      "text": "王先生是医生。"
+    },
+    "22": {
+      "text": "姐姐上午去超市买了菜。"
+    },
+    "23": {
+      "text": "今天的早饭是牛奶和鸡蛋。"
+    },
+    "24": {
+      "text": "我家有四口人，爸爸、妈妈、弟弟和我。"
+    },
+    "25": {
+      "text": "她和好朋友都爱唱歌。"
+    },
+    "26": {
+      "text": "这是我的书，你的呢？"
+    },
+    "27": {
+      "text": "你去哪儿买苹果？"
+    },
+    "28": {
+      "text": "昨天天气怎么样？"
+    },
+    "29": {
+      "text": "你和谁打电话呢？"
+    },
+    "30": {
+      "text": "你下班了吗？"
+    },
+    "31": {
+      "text": "大家都没吃（　　）呢。"
+    },
+    "32": {
+      "text": "在今天的中文课上，我学了很多（　　）。"
+    },
+    "33": {
+      "text": "对不起，我不（　　）这个人。"
+    },
+    "34": {
+      "text": "我和家人（　　）在北京。"
+    },
+    "35": {
+      "text": "男：这些东西可以卖多少钱？\n女：80（　　）。"
+    },
+    "36": {
+      "text": "下雨了，我们坐出租车回家吧。\n★ 说话人想怎么回家？",
+      "options": [
+        "开车",
+        "坐飞机",
+        "坐出租车"
+      ]
+    },
+    "37": {
+      "text": "我儿子今年16岁了，正在上中学。\n★ 说话人的儿子是：",
+      "options": [
+        "小学生",
+        "中学生",
+        "大学生"
+      ]
+    },
+    "38": {
+      "text": "小猫和小狗都在房间外睡觉呢。\n★ 小狗在：",
+      "options": [
+        "桌子下",
+        "房间里",
+        "房间外"
+      ]
+    },
+    "39": {
+      "text": "我同学在这个学校工作很多年了，你有问题可以问他。\n★ 说话人的同学在哪儿上班？",
+      "options": [
+        "饭店",
+        "医院",
+        "学校"
+      ]
+    },
+    "40": {
+      "text": "这个小朋友写字真好看。\n★ 那个小朋友：",
+      "options": [
+        "名字好听",
+        "写字好看",
+        "正在读书"
+      ]
+    }
+  },
+  "shared_options": {
+    "26": [
+      "商店。",
+      "我学生。",
+      "在桌子上。",
+      "还没有。",
+      "下雪了。",
+      "好的，谢谢！"
+    ],
+    "31": [
+      "认识",
+      "住",
+      "晚饭",
+      "叫",
+      "汉字",
+      "块"
+    ]
+  }
+}
