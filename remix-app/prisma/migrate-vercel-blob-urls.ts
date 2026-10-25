@@ -19,10 +19,16 @@ type Column = {
   data_type: string;
 };
 
+type PrimaryKeyColumn = {
+  table_name: string;
+  column_name: string;
+  ordinal_position: number;
+};
+
 type PendingUpdate = {
   tableName: string;
   columnName: string;
-  rowId: string;
+  primaryKey: Array<{ columnName: string; value: unknown }>;
   dataType: string;
   value: unknown;
 };
@@ -130,19 +136,54 @@ function replaceBlobUrls(value: unknown, paths: Map<string, string>): { value: u
 async function main() {
   const paths = await loadManifest();
   const columns = await prisma.$queryRaw<Column[]>`
-    SELECT table_name, column_name, data_type
-    FROM information_schema.columns
-    WHERE table_schema = current_schema()
-      AND data_type IN ('text', 'character varying', 'json', 'jsonb')
-    ORDER BY table_name, ordinal_position
+    SELECT c.table_name, c.column_name, c.data_type
+    FROM information_schema.columns c
+    JOIN information_schema.tables t
+      ON t.table_schema = c.table_schema AND t.table_name = c.table_name
+    WHERE c.table_schema = current_schema()
+      AND t.table_type = 'BASE TABLE'
+      AND c.data_type IN ('text', 'character varying', 'json', 'jsonb')
+    ORDER BY c.table_name, c.ordinal_position
   `;
+  const primaryKeyColumns = await prisma.$queryRaw<PrimaryKeyColumn[]>`
+    SELECT tc.table_name, kcu.column_name, kcu.ordinal_position
+    FROM information_schema.table_constraints tc
+    JOIN information_schema.key_column_usage kcu
+      ON kcu.constraint_schema = tc.constraint_schema
+      AND kcu.constraint_name = tc.constraint_name
+      AND kcu.table_name = tc.table_name
+    WHERE tc.table_schema = current_schema()
+      AND tc.constraint_type = 'PRIMARY KEY'
+    ORDER BY tc.table_name, kcu.ordinal_position
+  `;
+  const primaryKeys = new Map<string, string[]>();
+  for (const key of primaryKeyColumns) {
+    const columnsForTable = primaryKeys.get(key.table_name) ?? [];
+    columnsForTable.push(key.column_name);
+    primaryKeys.set(key.table_name, columnsForTable);
+  }
   const updates: PendingUpdate[] = [];
 
   for (const column of columns) {
     const table = quoteIdentifier(column.table_name);
     const field = quoteIdentifier(column.column_name);
-    const candidates = await prisma.$queryRawUnsafe<Array<{ row_id: string; value: unknown }>>(
-      `SELECT ctid::text AS row_id, ${field} AS value FROM ${table} WHERE ${field}::text ILIKE '%blob.vercel-storage.com%'`,
+    const keyColumns = primaryKeys.get(column.table_name);
+    if (!keyColumns?.length) {
+      const [{ hasBlobUrl }] = await prisma.$queryRawUnsafe<Array<{ hasBlobUrl: boolean }>>(
+        `SELECT EXISTS (SELECT 1 FROM ${table} WHERE ${field}::text ILIKE '%blob.vercel-storage.com%') AS "hasBlobUrl"`,
+      );
+      if (hasBlobUrl) {
+        throw new Error(`Bảng ${column.table_name} có Blob URL nhưng không có khóa chính`);
+      }
+      continue;
+    }
+    const selectedKeys = keyColumns
+      .map((keyColumn) => `${quoteIdentifier(keyColumn)} AS ${quoteIdentifier(keyColumn)}`)
+      .join(", ");
+    const candidates = await prisma.$queryRawUnsafe<
+      Array<Record<string, unknown> & { value: unknown }>
+    >(
+      `SELECT ${selectedKeys}, ${field} AS value FROM ${table} WHERE ${field}::text ILIKE '%blob.vercel-storage.com%'`,
     );
     for (const row of candidates) {
       const result = replaceBlobUrls(row.value, paths);
@@ -150,7 +191,10 @@ async function main() {
         updates.push({
           tableName: column.table_name,
           columnName: column.column_name,
-          rowId: row.row_id,
+          primaryKey: keyColumns.map((keyColumn) => ({
+            columnName: keyColumn,
+            value: row[keyColumn],
+          })),
           dataType: column.data_type,
           value: result.value,
         });
@@ -176,15 +220,22 @@ async function main() {
       for (const update of updates) {
         const table = quoteIdentifier(update.tableName);
         const field = quoteIdentifier(update.columnName);
-        const valueCast = update.dataType === "json" ? "::json" : update.dataType === "jsonb" ? "::jsonb" : "";
+        const valueCast =
+          update.dataType === "json" ? "::json" : update.dataType === "jsonb" ? "::jsonb" : "";
         const value =
           update.dataType === "json" || update.dataType === "jsonb"
             ? JSON.stringify(update.value)
             : update.value;
+        const keyWhere = update.primaryKey
+          .map(
+            (key, index) =>
+              `${quoteIdentifier(key.columnName)} = $${index + 2}`,
+          )
+          .join(" AND ");
         const affectedRows = await transaction.$executeRawUnsafe(
-          `UPDATE ${table} SET ${field} = $1${valueCast} WHERE ctid = $2::tid`,
+          `UPDATE ${table} SET ${field} = $1${valueCast} WHERE ${keyWhere} AND ${field}::text ILIKE '%blob.vercel-storage.com%'`,
           value,
-          update.rowId,
+          ...update.primaryKey.map((key) => key.value),
         );
         if (affectedRows !== 1) {
           throw new Error(
