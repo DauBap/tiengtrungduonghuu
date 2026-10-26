@@ -45,6 +45,10 @@ export function meta() {
   return [
     { title: "TIẾNG TRUNG DƯƠNG HỮU - Học tiếng Trung" },
     { name: "description", content: "Nền tảng học tiếng Trung theo hệ thống HSK." },
+    {
+      name: "google-site-verification",
+      content: "AwvUI6P3a9Kfhm5KUl2o9mTCafr90EUYc2RzERmcJjg",
+    },
   ];
 }
 
