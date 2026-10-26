@@ -37,6 +37,18 @@ Chạy trong `remix-app/`:
 | `npm run typecheck` | `tsc` — phải sạch trước khi commit |
 | `npm run seed` | Nạp dữ liệu mẫu (idempotent) |
 
+## Cảnh báo server mất kết nối qua Telegram
+
+GitHub Actions kiểm tra `https://tiengtrungduonghuu.edu.vn/` mỗi 5 phút và chỉ gửi Telegram khi server chuyển trạng thái online/offline. Lần kiểm tra đầu tiên gửi trạng thái ban đầu. Workflow cần hai repository secrets, không lưu token trong Git:
+
+1. Vào **Settings → Secrets and variables → Actions → New repository secret**.
+2. Tạo `TELEGRAM_BOT_TOKEN` với token bot đang lưu trong `~/.config/tiengtrungduonghuu/telegram.env` trên Linux.
+3. Tạo `TELEGRAM_CHAT_ID` với chat ID Telegram đã cấu hình trên Linux.
+4. Trong **Settings → Actions → General → Workflow permissions**, cho phép workflow có quyền đọc và ghi repository actions/variables nếu cài đặt repository yêu cầu.
+5. Sau khi push workflow lên nhánh mặc định, mở **Actions → Server uptime monitor → Run workflow** để chạy thử.
+
+Workflow lưu trạng thái lần kiểm tra trước trong repository variable `TIENGTRUNG_SERVER_UPTIME`. Cảnh báo được phát hiện trong tối đa khoảng 5 phút cộng thời gian GitHub Actions khởi chạy; lịch chạy GitHub có thể trễ khi hệ thống bận. Nếu app không có URL công khai thì cần một thiết bị giám sát khác bên ngoài server.
+
 ## Cấu trúc
 
 ```
