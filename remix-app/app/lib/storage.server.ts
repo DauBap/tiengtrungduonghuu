@@ -112,15 +112,32 @@ export async function saveUploadedAsset(
 }
 
 export async function serveStoredAsset(request: Request, storedUrl: string) {
-  const filePath = safeStoredPath(storedUrl);
+  let filePath = safeStoredPath(storedUrl);
   let fileStat;
   try {
     fileStat = await stat(filePath);
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
-      throw new Response("Không tìm thấy tệp", { status: 404 });
+      const relativePath = path.relative(getUploadsDirectory(), filePath);
+      if (!relativePath.startsWith(`audio${path.sep}`)) {
+        throw new Response("Không tìm thấy tệp", { status: 404 });
+      }
+      filePath = path.resolve(process.cwd(), "public", relativePath);
+      try {
+        fileStat = await stat(filePath);
+      } catch (fallbackError) {
+        if (
+          fallbackError &&
+          typeof fallbackError === "object" &&
+          "code" in fallbackError &&
+          fallbackError.code === "ENOENT"
+        ) {
+          throw new Response("Không tìm thấy tệp", { status: 404 });
+        }
+        throw fallbackError;
+      }
     }
-    throw error;
+    else throw error;
   }
   if (!fileStat.isFile()) throw new Response("Không tìm thấy tệp", { status: 404 });
 

@@ -1,5 +1,6 @@
 import hmac
 import json
+import math
 import os
 import re
 import shutil
@@ -14,8 +15,10 @@ from urllib.parse import urlparse
 
 MAX_AUDIO_BYTES = 3_000_000
 MAX_AUDIO_SECONDS = 60
-MAX_CONCURRENT_REQUESTS = 2
+MAX_CONCURRENT_REQUESTS = 1
 REQUEST_SLOTS = threading.BoundedSemaphore(MAX_CONCURRENT_REQUESTS)
+MODEL_ID = os.environ.get("SENSEVOICE_MODEL_ID", "iic/SenseVoiceSmall")
+ASR_MODEL = None
 MIME_EXTENSIONS = {
     "audio/aac": ".aac",
     "audio/mp4": ".m4a",
@@ -30,32 +33,38 @@ MIME_EXTENSIONS = {
 }
 
 
-def required_path(name: str) -> Path:
-    value = os.environ.get(name, "").strip()
-    if not value:
-        raise RuntimeError(f"Missing required setting: {name}")
-    path = Path(value).expanduser().resolve()
-    if not path.is_file():
-        raise RuntimeError(f"{name} does not point to a file")
-    return path
-
-
 ASR_TOKEN = os.environ.get("ASR_TOKEN", "")
 if len(ASR_TOKEN) < 32:
     raise RuntimeError("ASR_TOKEN must contain at least 32 characters")
 
-SENSEVOICE_EXE = required_path("SENSEVOICE_EXE")
-SENSEVOICE_MODEL = required_path("SENSEVOICE_MODEL")
 FFMPEG = os.environ.get("FFMPEG_PATH") or shutil.which("ffmpeg")
 FFPROBE = os.environ.get("FFPROBE_PATH") or shutil.which("ffprobe")
 if not FFMPEG or not Path(FFMPEG).is_file():
-    raise RuntimeError("FFMPEG_PATH must point to an installed ffmpeg executable")
+    raise RuntimeError("FFmpeg must be installed and available on PATH")
 if not FFPROBE or not Path(FFPROBE).is_file():
-    raise RuntimeError("FFPROBE_PATH must point to an installed ffprobe executable")
+    raise RuntimeError("ffprobe must be installed and available on PATH")
 
-BACKEND = os.environ.get("SENSEVOICE_BACKEND", "cuda")
-if BACKEND not in {"cpu", "cuda", "vulkan"}:
-    raise RuntimeError("SENSEVOICE_BACKEND must be cpu, cuda, or vulkan")
+
+def load_model():
+    from funasr import AutoModel
+
+    return AutoModel(
+        model=MODEL_ID,
+        device="cpu",
+        disable_update=True,
+    )
+
+
+def get_transcript(result) -> str:
+    if isinstance(result, list):
+        model_output = " ".join(
+            item.get("text", "") for item in result if isinstance(item, dict)
+        )
+    elif isinstance(result, dict):
+        model_output = result.get("text", "")
+    else:
+        model_output = ""
+    return re.sub(r"<\|[^|]+\|>", "", model_output).strip()
 
 
 def json_bytes(payload: dict) -> bytes:
@@ -136,37 +145,12 @@ class ASRHandler(BaseHTTPRequestHandler):
                 wav_path = Path(temp_dir) / "converted.wav"
                 input_path.write_bytes(audio_bytes)
 
-                probe = subprocess.run(
-                    [
-                        str(FFPROBE),
-                        "-v", "error",
-                        "-show_entries", "format=duration",
-                        "-of", "default=noprint_wrappers=1:nokey=1",
-                        str(input_path),
-                    ],
-                    capture_output=True,
-                    text=True,
-                    timeout=10,
-                    check=False,
-                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-                )
-                if probe.returncode != 0:
-                    self._send_json(422, {"error": "Audio file could not be read"})
-                    return
-                try:
-                    duration = float(probe.stdout.strip())
-                except ValueError:
-                    self._send_json(422, {"error": "Audio duration could not be determined"})
-                    return
-                if duration <= 0 or duration > MAX_AUDIO_SECONDS:
-                    self._send_json(413, {"error": "Audio must be no longer than 60 seconds"})
-                    return
-
                 converted = subprocess.run(
                     [
                         str(FFMPEG),
                         "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
                         "-i", str(input_path),
+                        "-t", str(MAX_AUDIO_SECONDS + 1),
                         "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le",
                         str(wav_path),
                     ],
@@ -181,26 +165,47 @@ class ASRHandler(BaseHTTPRequestHandler):
                     self._send_json(422, {"error": "Audio could not be converted for recognition"})
                     return
 
-                result = subprocess.run(
+                probe = subprocess.run(
                     [
-                        str(SENSEVOICE_EXE),
-                        "-m", str(SENSEVOICE_MODEL),
-                        "-a", str(wav_path),
-                        "--backend", BACKEND,
+                        str(FFPROBE),
+                        "-v", "error",
+                        "-show_entries", "format=duration",
+                        "-of", "default=noprint_wrappers=1:nokey=1",
+                        str(wav_path),
                     ],
                     capture_output=True,
-                    timeout=45,
+                    text=True,
+                    timeout=10,
                     check=False,
                     creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
                 )
-                if result.returncode != 0:
-                    error_detail = result.stderr.decode("utf-8", errors="replace")
-                    print(f"[asr] inference failed with exit code {result.returncode}: {error_detail[-2000:]}", flush=True)
-                    self._send_json(502, {"error": "Speech recognition failed"})
+                if probe.returncode != 0:
+                    self._send_json(422, {"error": "Audio duration could not be determined"})
+                    return
+                try:
+                    duration = float(probe.stdout.strip())
+                except ValueError:
+                    self._send_json(422, {"error": "Audio duration could not be determined"})
+                    return
+                if not math.isfinite(duration) or duration <= 0:
+                    self._send_json(422, {"error": "Audio duration could not be determined"})
+                    return
+                if duration > MAX_AUDIO_SECONDS:
+                    self._send_json(413, {"error": "Audio must be no longer than 60 seconds"})
                     return
 
-                model_output = result.stdout.decode("utf-8", errors="replace")
-                transcript = re.sub(r"<\|[^|]+\|>", "", model_output).strip()
+                try:
+                    result = ASR_MODEL.generate(
+                        input=str(wav_path),
+                        language="zh",
+                        use_itn=True,
+                        batch_size_s=MAX_AUDIO_SECONDS,
+                    )
+                except Exception as error:
+                    print(f"[asr] inference failed: {error}", flush=True)
+                    self._send_json(502, {"error": "Speech recognition failed"})
+                    return
+                transcript = get_transcript(result)
                 if not transcript:
                     self._send_json(422, {"error": "No speech was recognized"})
                     return
@@ -220,10 +225,14 @@ class ASRHandler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
+    global ASR_MODEL
     host = os.environ.get("ASR_HOST", "127.0.0.1")
     if host not in {"127.0.0.1", "localhost"}:
         raise RuntimeError("ASR_HOST must remain loopback-only; expose it through an authenticated tunnel")
     port = int(os.environ.get("ASR_PORT", "8765"))
+    print(f"Loading FunASR model {MODEL_ID} on CPU...", flush=True)
+    ASR_MODEL = load_model()
+    print("FunASR model ready.", flush=True)
     server = ThreadingHTTPServer((host, port), ASRHandler)
     print(f"SenseVoice API listening on http://{host}:{port}", flush=True)
     print("Audio is processed in temporary files and deleted after each request.", flush=True)

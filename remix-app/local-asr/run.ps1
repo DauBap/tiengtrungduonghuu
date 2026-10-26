@@ -1,14 +1,13 @@
 $ErrorActionPreference = "Stop"
 
-$runtimeDir = "E:\SenseVoiceLocal"
-$tokenPath = Join-Path $runtimeDir "asr-token.txt"
+$tokenPath = Join-Path $PSScriptRoot ".asr-token"
 $servicePath = Join-Path $PSScriptRoot "server.py"
-$runtimePath = Join-Path $runtimeDir "runtime\llama-funasr-sensevoice.exe"
-$modelPath = Join-Path $runtimeDir "sensevoice-small-q8.gguf"
+$pythonPath = Join-Path $PSScriptRoot ".venv\Scripts\python.exe"
+$requirementsPath = Join-Path $PSScriptRoot "requirements-cpu.txt"
 
-foreach ($path in @($runtimePath, $modelPath, $servicePath)) {
+foreach ($path in @($pythonPath, $requirementsPath, $servicePath)) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
-        throw "Required file not found: $path"
+        throw "Required file not found: $path. Create the Python 3.12 environment and install requirements-cpu.txt first."
     }
 }
 
@@ -44,14 +43,12 @@ if (-not (Test-Path -LiteralPath $tokenPath -PathType Leaf)) {
 }
 
 $env:ASR_TOKEN = (Get-Content -LiteralPath $tokenPath -Raw).Trim()
-$env:SENSEVOICE_EXE = $runtimePath
-$env:SENSEVOICE_MODEL = $modelPath
-$env:SENSEVOICE_BACKEND = "cuda"
 $env:FFMPEG_PATH = $ffmpegPath
 $env:FFPROBE_PATH = $ffprobePath
 $env:ASR_HOST = "127.0.0.1"
 $env:ASR_PORT = "8765"
 
 Write-Host "Starting local SenseVoice API on 127.0.0.1:8765"
-Write-Host "Keep this window open while the service is in use. The API token is stored at $tokenPath"
-python $servicePath
+Write-Host "FunASR will load SenseVoiceSmall on CPU. Keep this window open while the service is in use."
+Write-Host "The API token is stored at $tokenPath"
+& $pythonPath $servicePath

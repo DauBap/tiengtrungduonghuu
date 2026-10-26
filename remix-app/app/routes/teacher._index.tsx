@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { Link, useFetcher, useLoaderData, useLocation, useRevalidator } from "react-router";
+import { Link, useFetcher, useLoaderData, useLocation, useNavigate, useRevalidator } from "react-router";
 import { useEffect, useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import { getTeacherCourses } from "~/lib/db.server";
@@ -85,7 +85,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 
   const courseIds = [...new Set(myClasses.map((cls) => cls.courseId))];
-  const [lessonCounts, lessonsByCourse] = await Promise.all([
+  const [lessonCounts, lessonsByCourse, reviewSetsByCourse] = await Promise.all([
     Promise.all(courseIds.map(async (courseId) => [courseId, await prisma.lesson.count({ where: { courseId } })] as const)),
     Promise.all(courseIds.map(async (courseId) => {
       const lessons = await prisma.lesson.findMany({
@@ -101,19 +101,36 @@ export async function loader({ request }: LoaderFunctionArgs) {
       });
       return [courseId, lessons] as const;
     })),
+    Promise.all(courseIds.map(async (courseId) => {
+      const reviewSets = await prisma.courseReviewSet.findMany({
+        where: { courseId },
+        select: {
+          id: true,
+          order: true,
+          title: true,
+          subtitle: true,
+          _count: { select: { questions: true } },
+        },
+        orderBy: { order: "asc" },
+      });
+      return [courseId, reviewSets] as const;
+    })),
   ]);
   const lessonCountByCourse = new Map(lessonCounts);
   const lessonMapByCourse = new Map(lessonsByCourse);
+  const reviewSetMapByCourse = new Map(reviewSetsByCourse);
   const totalLessons = myCourses.reduce((sum, course) => sum + (lessonCountByCourse.get(course.id) ?? 0), 0);
   const totalStudents = myClasses.reduce((sum, cls) => sum + cls.enrollments.length, 0);
 
   const classSummaries = await Promise.all(myClasses.map(async (cls) => {
     const courseLessons = lessonMapByCourse.get(cls.courseId) ?? [];
+    const courseReviewSets = reviewSetMapByCourse.get(cls.courseId) ?? [];
     const lessonIds = courseLessons.map((lesson) => lesson.id);
+    const reviewSetIds = courseReviewSets.map((reviewSet) => reviewSet.id);
     const userIds = cls.enrollments.map((enrollment) => enrollment.userId);
-    const [progressRows, grammarAttempts] = lessonIds.length > 0 && userIds.length > 0
+    const [progressRows, grammarAttempts, reviewAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0) && userIds.length > 0
       ? await Promise.all([
-          prisma.lessonTabProgress.findMany({
+          lessonIds.length > 0 ? prisma.lessonTabProgress.findMany({
             where: {
               lessonId: { in: lessonIds },
               userId: { in: userIds },
@@ -137,8 +154,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
                 select: { score: true, passed: true, completedAt: true, correctCount: true, totalCount: true },
               },
             },
-          }),
-          prisma.lessonTabAttempt.findMany({
+          }) : Promise.resolve([]),
+          lessonIds.length > 0 ? prisma.lessonTabAttempt.findMany({
             where: {
               lessonId: { in: lessonIds },
               userId: { in: userIds },
@@ -153,9 +170,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
               details: true,
             },
             orderBy: { completedAt: "desc" },
-          }),
+          }) : Promise.resolve([]),
+          reviewSetIds.length > 0 ? prisma.courseReviewAttempt.findMany({
+            where: {
+              reviewSetId: { in: reviewSetIds },
+              userId: { in: userIds },
+            },
+            select: {
+              userId: true,
+              reviewSetId: true,
+              percentage: true,
+              completedAt: true,
+            },
+            orderBy: { completedAt: "desc" },
+          }) : Promise.resolve([]),
         ])
-      : [[], []];
+      : [[], [], []];
 
     const enrollmentsByUserId = new Map(cls.enrollments.map((enrollment) => [enrollment.userId, enrollment]));
     const lessonsById = new Map(courseLessons.map((lesson) => [lesson.id, lesson]));
@@ -185,10 +215,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
     });
 
     const progressByKey = new Map(progressRows.map((row) => [`${row.userId}:${row.lessonId}:${row.tab}`, row]));
+    const reviewProgressByKey = new Map<string, (typeof reviewAttempts)[number]>();
+    for (const attempt of reviewAttempts) {
+      const key = `${attempt.userId}:${attempt.reviewSetId}`;
+      if (!reviewProgressByKey.has(key)) reviewProgressByKey.set(key, attempt);
+    }
     const pendingGrammarKeys = new Set(pendingGrammarAttempts.map((attempt) => `${attempt.userId}:${attempt.lessonId}`));
-    const lessons = courseLessons.map((lesson) => ({
+    const lessons = courseLessons.map((lesson, index) => ({
       id: lesson.id,
       order: lesson.order,
+      displayOrder: index + 1,
       title: lesson.title,
       availableActivities: {
         FLASHCARD: lesson.learningBlocks.some((block) => block.type === "FLASHCARD" && block.required),
@@ -200,6 +236,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
         WORKBOOK: lesson.learningBlocks.some((block) => block.type === "WORKBOOK" && block.required),
       },
     }));
+    const reviews = courseReviewSets.map((reviewSet, index) => ({
+      id: reviewSet.id,
+      order: reviewSet.order,
+      label: `Ôn tập ${index + 1}`,
+      title: reviewSet.title,
+      subtitle: reviewSet.subtitle,
+      questionCount: reviewSet._count.questions,
+    }));
+    const courseItems = [
+      ...lessons.map((lesson) => ({ kind: "lesson" as const, ...lesson })),
+      ...reviews.map((review) => ({ kind: "review" as const, ...review })),
+    ].sort((a, b) => a.order - b.order);
     const activityData = cls.enrollments.map((enrollment) => {
       const lastActivityAt = progressRows
         .filter((row) => row.userId === enrollment.userId)
@@ -207,9 +255,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
           const activityAt = row.lastAttemptAt ?? row.attempts[0]?.completedAt ?? row.updatedAt;
           return !latest || activityAt > latest ? activityAt : latest;
         }, null);
+      const lastReviewActivityAt = reviewAttempts
+        .filter((attempt) => attempt.userId === enrollment.userId)
+        .reduce<Date | null>((latest, attempt) => (
+          !latest || attempt.completedAt > latest ? attempt.completedAt : latest
+        ), null);
+      const latestActivityAt = lastActivityAt && lastReviewActivityAt
+        ? lastActivityAt > lastReviewActivityAt ? lastActivityAt : lastReviewActivityAt
+        : lastActivityAt ?? lastReviewActivityAt;
       const studentLessons = lessons.map((lesson) => ({
         id: lesson.id,
         order: lesson.order,
+        displayOrder: lesson.displayOrder,
         title: lesson.title,
         activities: DASHBOARD_ACTIVITIES.map(({ tab }) => {
           const progress = progressByKey.get(`${enrollment.userId}:${lesson.id}:${tab}`);
@@ -249,8 +306,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
           ...enrollment.user,
           zaloUrl: enrollment.user.phone ? `https://zalo.me/${enrollment.user.phone.replace(/\D/g, "")}` : null,
         },
-        lastActivityAt: lastActivityAt?.toISOString() ?? null,
+        lastActivityAt: latestActivityAt?.toISOString() ?? null,
         lessons: studentLessons,
+        reviews: reviews.map((review) => {
+          const attempt = reviewProgressByKey.get(`${enrollment.userId}:${review.id}`);
+          return {
+            id: review.id,
+            percentage: attempt?.percentage ?? 0,
+            hasAttempt: Boolean(attempt),
+          };
+        }),
       };
     });
 
@@ -287,6 +352,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return {
       ...cls,
       lessons,
+      courseItems,
       suggestedLessonId: latestProgress?.lessonId ?? lessons[0]?.id ?? null,
       overallPercent,
       pendingGrammarAttempts,
@@ -327,6 +393,7 @@ function lessonProgressTone(percent: number) {
 export default function TeacherIndex() {
   const { user, myCourses, myClasses, classSummaries, totalLessons, totalStudents } = useLoaderData<typeof loader>();
   const location = useLocation();
+  const navigate = useNavigate();
   const gradingFetcher = useFetcher<GrammarAttemptData & { success?: boolean }>();
   const gradeSubmitFetcher = useFetcher<{ success?: boolean; error?: string }>();
   const revalidator = useRevalidator();
@@ -350,7 +417,7 @@ export default function TeacherIndex() {
           const completedCount = lessons.reduce(
             (sum, lesson) => sum + getLessonProgress(lesson.activities).completed,
             0,
-          );
+          ) + (progressView === "overview" ? student.reviews.filter((review) => review.hasAttempt).length : 0);
           return { student, completedCount };
         })
         .sort((a, b) => (
@@ -414,7 +481,7 @@ export default function TeacherIndex() {
             .filter((activity) => activity.status === "missing" || activity.status === "partial")
             .map((activity) => ({
               lessonTitle: lesson.title,
-              lessonOrder: lesson.order,
+              lessonOrder: lesson.displayOrder,
               activity: DASHBOARD_ACTIVITIES.find((item) => item.tab === activity.tab)?.label ?? activity.tab,
               percent: activity.percent,
               isPast: lesson.order < selectedLesson.order,
@@ -561,7 +628,7 @@ export default function TeacherIndex() {
                         <h2 className="font-semibold">Tiến độ học tập · {selectedClass.name}</h2>
                         <p className="mt-1 text-sm text-muted-foreground">{selectedClass.course.title} · {selectedClass.activityData.length} học viên</p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Xếp theo số hoạt động hoàn thành giảm dần{progressView === "lesson" && selectedLesson ? ` trong Bài ${selectedLesson.order}` : ""}
+                          Xếp theo số hoạt động hoàn thành giảm dần{progressView === "lesson" && selectedLesson ? ` trong Bài ${selectedLesson.displayOrder}` : ""}
                         </p>
                       </div>
                       <div className="flex rounded-lg bg-muted p-1" role="tablist" aria-label="Cách xem tiến độ lớp">
@@ -572,7 +639,7 @@ export default function TeacherIndex() {
                           onClick={() => setProgressView("overview")}
                           className={`rounded-md px-3 py-1.5 text-sm ${progressView === "overview" ? "bg-background font-medium text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
                         >
-                          Tổng quan {selectedClass.lessons.length} bài
+                          Tổng quan {selectedClass.courseItems.length} mục
                         </button>
                         <button
                           type="button"
@@ -586,7 +653,7 @@ export default function TeacherIndex() {
                       </div>
                     </div>
 
-                    {selectedClass.lessons.length === 0 ? (
+                    {selectedClass.courseItems.length === 0 ? (
                       <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Khóa học này chưa có bài học để theo dõi.</p>
                     ) : selectedClass.activityData.length === 0 ? (
                       <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Lớp này chưa có học viên.</p>
@@ -596,18 +663,22 @@ export default function TeacherIndex() {
                           <thead className="bg-muted/50 text-xs text-muted-foreground">
                             <tr>
                               <th scope="col" className="sticky left-0 z-10 min-w-44 bg-muted/95 px-3 py-3 font-medium">Học viên</th>
-                              {selectedClass.lessons.map((lesson) => (
-                                <th scope="col" key={lesson.id} className="min-w-16 px-1 py-2 text-center font-medium">
+                              {selectedClass.courseItems.map((item) => (
+                                <th scope="col" key={`${item.kind}:${item.id}`} className="min-w-16 px-1 py-2 text-center font-medium">
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      setSelectedLessonId(lesson.id);
+                                      if (item.kind === "review") {
+                                        navigate(`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}`);
+                                        return;
+                                      }
+                                      setSelectedLessonId(item.id);
                                       setProgressView("lesson");
                                     }}
                                     className="rounded px-1.5 py-1 hover:bg-background hover:text-primary"
-                                    title={`Xem chi tiết ${lesson.title}`}
+                                    title={`Xem chi tiết ${item.kind === "review" ? item.label : `Bài ${item.displayOrder}`} · ${item.title}`}
                                   >
-                                    B{lesson.order}
+                                    {item.kind === "review" ? item.label : `B${item.displayOrder}`}
                                   </button>
                                 </th>
                               ))}
@@ -617,8 +688,13 @@ export default function TeacherIndex() {
                           <tbody>
                             {sortedActivityData.map((student) => {
                               const lessonScores = student.lessons.map((lesson) => getLessonProgress(lesson.activities));
-                              const total = lessonScores.reduce((sum, item) => sum + (item.total ? item.percent : 0), 0);
-                              const totalAvailable = lessonScores.filter((item) => item.total > 0).length;
+                              const reviewScores = student.reviews.map((review) => ({
+                                percent: review.percentage,
+                                total: selectedClass.courseItems.some((item) => item.kind === "review" && item.id === review.id && item.questionCount > 0) ? 1 : 0,
+                              }));
+                              const allScores = [...lessonScores, ...reviewScores];
+                              const total = allScores.reduce((sum, item) => sum + (item.total ? item.percent : 0), 0);
+                              const totalAvailable = allScores.filter((item) => item.total > 0).length;
                               const average = totalAvailable ? Math.round(total / totalAvailable) : 0;
                               return (
                                 <tr key={student.student.id} className="border-t">
@@ -632,21 +708,41 @@ export default function TeacherIndex() {
                                         : "Chưa có hoạt động"}
                                     </span>
                                   </th>
-                                  {student.lessons.map((lesson, index) => {
-                                    const progress = lessonScores[index];
-                                    const hasPendingGrade = lesson.activities.some((activity) => activity.status === "waiting");
+                                  {selectedClass.courseItems.map((item) => {
+                                    if (item.kind === "review") {
+                                      const review = student.reviews.find((entry) => entry.id === item.id);
+                                      return (
+                                        <td key={`review:${item.id}`} className="border-t px-1 py-2 text-center">
+                                          {item.questionCount === 0 ? (
+                                            <span className="text-muted-foreground">—</span>
+                                          ) : (
+                                            <button
+                                              type="button"
+                                              onClick={() => navigate(`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}`)}
+                                              title={`${item.label}: ${review?.percentage ?? 0}%`}
+                                              className={`min-w-12 rounded-md px-1.5 py-2 text-xs font-semibold ${lessonProgressTone(review?.percentage ?? 0)}`}
+                                            >
+                                              {review?.percentage ?? 0}%
+                                            </button>
+                                          )}
+                                        </td>
+                                      );
+                                    }
+                                    const lesson = student.lessons.find((entry) => entry.id === item.id);
+                                    const progress = lesson ? getLessonProgress(lesson.activities) : { percent: 0, total: 0 };
+                                    const hasPendingGrade = lesson?.activities.some((activity) => activity.status === "waiting") ?? false;
                                     return (
-                                      <td key={lesson.id} className="border-t px-1 py-2 text-center">
+                                      <td key={`lesson:${item.id}`} className="border-t px-1 py-2 text-center">
                                         {progress.total === 0 ? (
                                           <span className="text-muted-foreground">—</span>
                                         ) : (
                                           <button
                                             type="button"
                                             onClick={() => {
-                                              setSelectedLessonId(lesson.id);
+                                              setSelectedLessonId(item.id);
                                               setProgressView("lesson");
                                             }}
-                                            title={`${lesson.title}: ${progress.percent}%${hasPendingGrade ? " · Có bài chờ chấm" : ""}`}
+                                            title={`${item.title}: ${progress.percent}%${hasPendingGrade ? " · Có bài chờ chấm" : ""}`}
                                             className={`relative min-w-12 rounded-md px-1.5 py-2 text-xs font-semibold ${lessonProgressTone(progress.percent)}`}
                                           >
                                             {progress.percent}%
@@ -664,12 +760,19 @@ export default function TeacherIndex() {
                           <tfoot className="bg-muted/30 text-xs text-muted-foreground">
                             <tr>
                               <th scope="row" className="sticky left-0 bg-muted/95 px-3 py-2 text-left font-medium">Trung bình lớp</th>
-                              {selectedClass.lessons.map((lesson) => {
+                              {selectedClass.courseItems.map((item) => {
+                                if (item.kind === "review") {
+                                  const scores = selectedClass.activityData
+                                    .map((student) => student.reviews.find((review) => review.id === item.id))
+                                    .filter((review) => review && item.questionCount > 0);
+                                  const average = scores.length ? Math.round(scores.reduce((sum, review) => sum + (review?.percentage ?? 0), 0) / scores.length) : null;
+                                  return <td key={`review:${item.id}`} className="px-1 py-2 text-center">{average === null ? "—" : `${average}%`}</td>;
+                                }
                                 const scores = selectedClass.activityData
-                                  .map((student) => getLessonProgress(student.lessons.find((item) => item.id === lesson.id)?.activities ?? []))
+                                  .map((student) => getLessonProgress(student.lessons.find((lesson) => lesson.id === item.id)?.activities ?? []))
                                   .filter((item) => item.total > 0);
                                 const average = scores.length ? Math.round(scores.reduce((sum, item) => sum + item.percent, 0) / scores.length) : null;
-                                return <td key={lesson.id} className="px-1 py-2 text-center">{average === null ? "—" : `${average}%`}</td>;
+                                return <td key={`lesson:${item.id}`} className="px-1 py-2 text-center">{average === null ? "—" : `${average}%`}</td>;
                               })}
                               <td />
                             </tr>
@@ -679,7 +782,20 @@ export default function TeacherIndex() {
                     ) : (
                       <>
                         <div className="-mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-2" aria-label="Chọn bài học">
-                          {selectedClass.lessons.map((lesson) => {
+                          {selectedClass.courseItems.map((item) => {
+                            if (item.kind === "review") {
+                              return (
+                                <Link
+                                  key={`review:${item.id}`}
+                                  to={`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}`}
+                                  className="shrink-0 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+                                  title={item.title}
+                                >
+                                  {item.label}
+                                </Link>
+                              );
+                            }
+                            const lesson = item;
                             const hasGaps = selectedClass.activityData.some((student) =>
                               student.lessons.find((item) => item.id === lesson.id)?.activities.some((activity) => activity.status === "missing" || activity.status === "partial"),
                             );
@@ -691,7 +807,7 @@ export default function TeacherIndex() {
                                 onClick={() => setSelectedLessonId(lesson.id)}
                                 className={`shrink-0 rounded-md border px-3 py-1.5 text-sm ${selectedLesson?.id === lesson.id ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted"} ${hasGaps && selectedLesson?.id !== lesson.id ? "border-rose-300" : ""}`}
                               >
-                                Bài {lesson.order}
+                                Bài {lesson.displayOrder}
                                 {lesson.id === selectedClass.suggestedLessonId && <span className="ml-1.5 text-emerald-500" aria-label="Bài đang học">●</span>}
                               </button>
                             );
@@ -793,7 +909,7 @@ export default function TeacherIndex() {
                         <h2 className="font-semibold">Cần nhắc</h2>
                       </div>
                       <span className="text-sm text-muted-foreground">
-                        {selectedLesson ? `${reminderRows.length}/${selectedClass.activityData.length} học viên còn phần chưa xong đến Bài ${selectedLesson.order}` : "Chưa có bài học"}
+                        {selectedLesson ? `${reminderRows.length}/${selectedClass.activityData.length} học viên còn phần chưa xong đến Bài ${selectedLesson.displayOrder}` : "Chưa có bài học"}
                       </span>
                     </div>
                     {reminderRows.length === 0 ? (

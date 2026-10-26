@@ -4,12 +4,10 @@ The lesson pronunciation screen can send an existing recording to this API as an
 
 ## Requirements
 
-- Windows with the SenseVoice runtime and model in `E:\SenseVoiceLocal`:
-  - `runtime\llama-funasr-sensevoice.exe`
-  - `sensevoice-small-q8.gguf`
-- Python 3.10 or newer; the service uses only the Python standard library.
+- Python 3.10-3.12.
 - FFmpeg, including `ffprobe`, available on `PATH`.
 - An HTTPS tunnel from Vercel to local port `8765` (for example, ngrok).
+- FunASR downloads `iic/SenseVoiceSmall` on first startup and runs it with CPU-only PyTorch. No CUDA runtime or GPU is used.
 
 Install FFmpeg on Windows if needed:
 
@@ -17,22 +15,52 @@ Install FFmpeg on Windows if needed:
 winget install --id Gyan.FFmpeg.Shared --exact
 ```
 
+## Install
+
+From `remix-app/local-asr`, create a virtual environment and install the CPU-only dependencies.
+
+Linux:
+
+```bash
+uv venv --python 3.12 .venv
+uv pip install --python .venv/bin/python -r requirements-cpu.txt
+```
+
+Windows PowerShell:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-cpu.txt
+```
+
+The requirements pin PyTorch and torchaudio to CPU wheels. The SenseVoice model files are downloaded and cached by FunASR at first startup.
+
 ## Start the service
 
-From PowerShell:
+Linux:
 
-```powershell
-.\remix-app\local-asr\run.ps1
+```bash
+test -f .asr-token || (umask 077 && openssl rand -hex 32 > .asr-token)
+export ASR_TOKEN="$(<.asr-token)"
+.venv/bin/python server.py
 ```
 
-The script creates a 48-byte random bearer token at `E:\SenseVoiceLocal\asr-token.txt` the first time it runs, then starts an API bound to `127.0.0.1:8765`. Keep the window open while using the feature. The service accepts audio up to 3 MB and 60 seconds, converts it to mono 16 kHz WAV, runs SenseVoice, and deletes temporary files after each request.
-
-To check the service locally, use the same token from `asr-token.txt`:
+Windows PowerShell:
 
 ```powershell
-$token = (Get-Content E:\SenseVoiceLocal\asr-token.txt -Raw).Trim()
+./run.ps1
+```
+
+The Windows script creates a 48-byte random bearer token in `.asr-token` the first time it runs. Both commands start an API bound to `127.0.0.1:8765`. Keep the process open while using the feature. The service accepts audio up to 3 MB and 60 seconds, converts it to mono 16 kHz WAV, runs SenseVoice on CPU, and deletes temporary files after each request.
+
+To check the service locally, use the token stored in `.asr-token`:
+
+```powershell
+$token = (Get-Content .\.asr-token -Raw).Trim()
 Invoke-RestMethod http://127.0.0.1:8765/healthz -Headers @{ Authorization = "Bearer $token" }
 ```
+
+On Linux, read the token with `cat .asr-token` and send it as a bearer token to the same endpoint.
 
 ## Connect Vercel
 
@@ -45,7 +73,7 @@ ngrok http 8765
 Use the HTTPS forwarding origin printed by ngrok. Keep both the service and tunnel windows open while testing. Do not expose the Python server directly to the public network. Configure these server-side Vercel environment variables:
 
 - `LOCAL_ASR_URL`: the tunnel's HTTPS origin, for example `https://your-domain.ngrok-free.app` (no `/transcribe` suffix).
-- `LOCAL_ASR_TOKEN`: the exact token stored in `E:\SenseVoiceLocal\asr-token.txt`.
+- `LOCAL_ASR_TOKEN`: the exact token stored in `.asr-token`.
 
 Redeploy after changing environment variables. The lesson action sends audio only from the authenticated server-side route, with the bearer token kept off the browser.
 

@@ -187,6 +187,16 @@ function getPronunciationEvaluation(score: number) {
   return "CHƯA ĐẠT, VUI LÒNG ĐỌC LẠI";
 }
 
+function versionLessonAudioUrl(audioUrl: string | null) {
+  if (!audioUrl?.startsWith("/uploads/audio/")) return audioUrl;
+  const version =
+    process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12)
+    ?? process.env.VERCEL_DEPLOYMENT_ID
+    ?? "local";
+  const separator = audioUrl.includes("?") ? "&" : "?";
+  return `${audioUrl}${separator}v=${encodeURIComponent(version)}`;
+}
+
 function getSpeechDiagnosticContext(lang: string) {
   return {
     lang,
@@ -471,6 +481,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   }
   const studentLesson = {
     ...lesson,
+    audioScripts: lesson.audioScripts?.map((script) => ({
+      ...script,
+      audioUrl: versionLessonAudioUrl(script.audioUrl),
+    })),
     grammarSections: lesson.grammarSections.map((section) => ({
       ...section,
       questions: section.questions.map((question) => ({ ...question, answer: "", acceptedAnswers: [], hint: null })),

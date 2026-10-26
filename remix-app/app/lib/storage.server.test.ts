@@ -31,6 +31,17 @@ test("saves local uploads and serves byte ranges for audio", async (t) => {
   assert.equal(await response.text(), "audio");
 });
 
+test("serves legacy public audio files stored with an uploads URL", async () => {
+  const response = await serveStoredAsset(
+    new Request("http://localhost", { headers: { Range: "bytes=0-3" } }),
+    "/uploads/audio/workbooks/hsk1/bai9.mp3",
+  );
+
+  assert.equal(response.status, 206);
+  assert.equal(response.headers.get("Content-Type"), "audio/mpeg");
+  assert.equal((await response.arrayBuffer()).byteLength, 4);
+});
+
 test("rejects paths escaping the uploads directory", async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "local-assets-"));
   const previousDirectory = process.env.UPLOADS_DIR;
