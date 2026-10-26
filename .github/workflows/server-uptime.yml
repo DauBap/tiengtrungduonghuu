@@ -6,7 +6,6 @@ on:
   workflow_dispatch:
 
 permissions:
-  actions: write
   contents: read
 
 concurrency:
@@ -19,12 +18,23 @@ jobs:
     timeout-minutes: 2
     steps:
       - uses: actions/checkout@v4
+      - name: Restore previous server status
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/server-uptime-state
+          key: server-uptime-state-${{ github.run_id }}
+          restore-keys: server-uptime-state-
       - name: Check server and notify on status changes
         run: node .github/scripts/server-uptime.mjs
+        id: monitor
         env:
           SERVER_URL: https://tiengtrungduonghuu.edu.vn/
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_API_URL: ${{ github.api_url }}
+          UPTIME_STATE_FILE: ${{ runner.temp }}/server-uptime-state/status
+      - name: Save changed server status
+        if: steps.monitor.outputs.state-changed == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/server-uptime-state
+          key: server-uptime-state-${{ github.run_id }}

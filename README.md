@@ -47,7 +47,7 @@ GitHub Actions kiểm tra `https://tiengtrungduonghuu.edu.vn/` mỗi 5 phút và
 4. Trong **Settings → Actions → General → Workflow permissions**, cho phép workflow có quyền đọc và ghi repository actions/variables nếu cài đặt repository yêu cầu.
 5. Sau khi push workflow lên nhánh mặc định, mở **Actions → Server uptime monitor → Run workflow** để chạy thử.
 
-Workflow lưu trạng thái lần kiểm tra trước trong repository variable `TIENGTRUNG_SERVER_UPTIME`. Cảnh báo được phát hiện trong tối đa khoảng 5 phút cộng thời gian GitHub Actions khởi chạy; lịch chạy GitHub có thể trễ khi hệ thống bận. Nếu app không có URL công khai thì cần một thiết bị giám sát khác bên ngoài server.
+Workflow lưu trạng thái lần kiểm tra trước trong GitHub Actions cache để chỉ gửi tin khi trạng thái thay đổi; không cần token GitHub bổ sung hay quyền ghi repository. Cảnh báo được phát hiện trong tối đa khoảng 5 phút cộng thời gian GitHub Actions khởi chạy; lịch chạy GitHub có thể trễ khi hệ thống bận. Nếu app không có URL công khai thì cần một thiết bị giám sát khác bên ngoài server.
 
 ## Cấu trúc
 

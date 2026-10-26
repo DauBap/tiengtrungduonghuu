@@ -1,75 +1,32 @@
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
+
 const {
   SERVER_URL,
   TELEGRAM_BOT_TOKEN,
   TELEGRAM_CHAT_ID,
   TELEGRAM_API_URL = "https://api.telegram.org",
-  GITHUB_TOKEN,
-  GITHUB_REPOSITORY,
-  GITHUB_API_URL,
+  UPTIME_STATE_FILE = ".uptime-state/status",
 } = process.env;
 
 for (const [name, value] of Object.entries({
   SERVER_URL,
   TELEGRAM_BOT_TOKEN,
   TELEGRAM_CHAT_ID,
-  GITHUB_TOKEN,
-  GITHUB_REPOSITORY,
-  GITHUB_API_URL,
 })) {
   if (!value) throw new Error(`Missing required environment variable: ${name}`);
 }
 
-const variableName = "TIENGTRUNG_SERVER_UPTIME";
-const variableUrl = `${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/variables/${variableName}`;
-const headers = {
-  Accept: "application/vnd.github+json",
-  Authorization: `Bearer ${GITHUB_TOKEN}`,
-  "X-GitHub-Api-Version": "2022-11-28",
-};
-
-async function githubRequest(url, options = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: { ...headers, ...options.headers },
-    signal: AbortSignal.timeout(15_000),
-  });
-  const body = await response.json().catch(() => ({}));
-  return { response, body };
-}
-
 async function readPreviousStatus() {
-  const { response, body } = await githubRequest(variableUrl);
-  if (response.status === 404) return null;
-  if (!response.ok) {
-    throw new Error(`Could not read uptime state from GitHub (HTTP ${response.status}).`);
-  }
-  if (body.name !== variableName || !["up", "down"].includes(body.value)) {
-    throw new Error("The saved GitHub uptime state is invalid.");
-  }
-  return body.value;
-}
-
-async function saveStatus(status) {
-  const { response, body } = await githubRequest(variableUrl, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: variableName, value: status }),
-  });
-
-  if (response.status === 404) {
-    const create = await githubRequest(`${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/variables`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: variableName, value: status }),
-    });
-    if (!create.response.ok) {
-      throw new Error(`Could not create uptime state in GitHub (HTTP ${create.response.status}).`);
+  try {
+    const status = (await readFile(UPTIME_STATE_FILE, "utf8")).trim();
+    if (status !== "up" && status !== "down") {
+      throw new Error("The saved uptime state is invalid.");
     }
-    return;
-  }
-
-  if (!response.ok) {
-    throw new Error(`Could not save uptime state to GitHub (HTTP ${response.status}).`);
+    return status;
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
   }
 }
 
@@ -121,7 +78,11 @@ if (currentStatus !== previousStatus) {
       : `✅ Giám sát server Tiếng Trung Dương Hữu đã bắt đầu; server đang hoạt động (${detail}).`;
     await notifyTelegram(message);
   }
+  await mkdir(dirname(UPTIME_STATE_FILE), { recursive: true });
+  await writeFile(UPTIME_STATE_FILE, `${currentStatus}\n`, { mode: 0o600 });
+  if (process.env.GITHUB_OUTPUT) {
+    await writeFile(process.env.GITHUB_OUTPUT, "state-changed=true\n", { flag: "a" });
+  }
 }
 
-await saveStatus(currentStatus);
 console.log(`Server ${currentStatus}: ${detail}.`);
