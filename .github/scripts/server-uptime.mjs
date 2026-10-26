@@ -45,7 +45,10 @@ async function notifyTelegram(message) {
 
   const result = await response.json().catch(() => ({}));
   if (!response.ok || !result.ok) {
-    throw new Error(`Telegram rejected the server alert (HTTP ${response.status}).`);
+    const description = typeof result.description === "string"
+      ? result.description
+      : "Telegram could not deliver the server alert.";
+    throw new Error(`Telegram rejected the server alert (HTTP ${response.status}): ${description}`);
   }
 }
 
