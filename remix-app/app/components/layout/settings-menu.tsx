@@ -10,36 +10,6 @@ import {
 import { SPEECH_VOICES } from "~/lib/speech-voices";
 import { cn } from "~/lib/utils";
 
-function SettingsSwitch({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: (value: boolean) => void;
-}) {
-  return (
-    <label className="flex min-h-10 cursor-pointer items-center justify-between gap-3 rounded-md px-2 text-sm hover:bg-muted/60">
-      <span>{label}</span>
-      <input
-        type="checkbox"
-        role="switch"
-        checked={checked}
-        onChange={(event) => onChange(event.currentTarget.checked)}
-        className="peer sr-only"
-      />
-      <span
-        aria-hidden="true"
-        className={cn(
-          "relative h-5 w-9 shrink-0 rounded-full bg-muted transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-background after:shadow-sm after:transition-transform peer-checked:bg-primary peer-checked:after:translate-x-4 peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2",
-          !checked && "peer-focus-visible:ring-offset-background"
-        )}
-      />
-    </label>
-  );
-}
-
 export function SettingsMenu({
   align = "left",
   side = "bottom",
@@ -105,13 +75,6 @@ export function SettingsMenu({
           )}
         >
           <h2 className="px-2 pb-2 text-sm font-semibold">Cài đặt</h2>
-          <div className="space-y-0.5">
-            <SettingsSwitch
-              label="Hiện Pinyin"
-              checked={settings.showPinyin}
-              onChange={(value) => updateAppSetting("showPinyin", value)}
-            />
-          </div>
           <fieldset className="mt-2 border-t pt-2">
             <legend className="px-2 text-xs font-semibold text-muted-foreground">Giọng đọc</legend>
             {([

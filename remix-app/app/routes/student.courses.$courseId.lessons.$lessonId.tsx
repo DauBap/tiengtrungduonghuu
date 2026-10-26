@@ -1507,7 +1507,8 @@ export default function LessonDetail() {
     const activeReviewGroups = activeReviewTab ? answerReviewGroups[activeReviewTab] ?? [] : [];
     const [showAnswerReview, setShowAnswerReview] = useState(false);
   const [showScript, setShowScript] = useState(true);
-  const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
+  const [showLessonPinyin, setShowLessonPinyin] = useState(false);
+    const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isPreparingRecording, setIsPreparingRecording] = useState(false);
   const [phoneticScore, setPhoneticScore] = useState(0);
@@ -2444,11 +2445,22 @@ export default function LessonDetail() {
               </section>
 
               <section className="rounded-xl border bg-background p-4">
-                <div className="mb-3 flex items-center justify-between">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm font-bold uppercase tracking-wide text-primary">Script</span>
-                  <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary">
-                    {showScript ? "Hiển thị" : "Đã ẩn"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      aria-pressed={showLessonPinyin}
+                      onClick={() => setShowLessonPinyin((visible) => !visible)}
+                    >
+                      {showLessonPinyin ? "Ẩn pinyin" : "Hiện pinyin"}
+                    </Button>
+                    <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary">
+                      {showScript ? "Hiển thị" : "Đã ẩn"}
+                    </span>
+                  </div>
                 </div>
 
                 {showScript && scriptSpeakers.length > 0 ? (
@@ -2461,7 +2473,7 @@ export default function LessonDetail() {
                         </div>
                         <div className="mt-2 space-y-2 text-base">
                           <p className="content-text hanzi-display !text-[26px] font-medium leading-relaxed text-foreground">{speaker.chinese}</p>
-                          {settings.showPinyin && (
+                          {showLessonPinyin && (
                             <p className="content-text pinyin-text !text-[24px] leading-relaxed text-muted-foreground">{speaker.pinyin}</p>
                           )}
                           <p className="content-text !text-[24px] leading-relaxed text-muted-foreground">{speaker.translation}</p>
