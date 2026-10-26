@@ -85,7 +85,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 
   const courseIds = [...new Set(myClasses.map((cls) => cls.courseId))];
-  const [lessonCounts, lessonsByCourse, reviewSetsByCourse] = await Promise.all([
+  const [lessonCounts, lessonsByCourse, reviewSetsByCourse, mockExamsByCourse] = await Promise.all([
     Promise.all(courseIds.map(async (courseId) => [courseId, await prisma.lesson.count({ where: { courseId } })] as const)),
     Promise.all(courseIds.map(async (courseId) => {
       const lessons = await prisma.lesson.findMany({
@@ -115,20 +115,35 @@ export async function loader({ request }: LoaderFunctionArgs) {
       });
       return [courseId, reviewSets] as const;
     })),
+    Promise.all(courseIds.map(async (courseId) => {
+      const mockExams = await prisma.mockExam.findMany({
+        where: { courseId },
+        select: {
+          id: true,
+          title: true,
+          sections: { select: { _count: { select: { questions: true } } } },
+        },
+        orderBy: { createdAt: "asc" },
+      });
+      return [courseId, mockExams] as const;
+    })),
   ]);
   const lessonCountByCourse = new Map(lessonCounts);
   const lessonMapByCourse = new Map(lessonsByCourse);
   const reviewSetMapByCourse = new Map(reviewSetsByCourse);
+  const mockExamMapByCourse = new Map(mockExamsByCourse);
   const totalLessons = myCourses.reduce((sum, course) => sum + (lessonCountByCourse.get(course.id) ?? 0), 0);
   const totalStudents = myClasses.reduce((sum, cls) => sum + cls.enrollments.length, 0);
 
   const classSummaries = await Promise.all(myClasses.map(async (cls) => {
     const courseLessons = lessonMapByCourse.get(cls.courseId) ?? [];
     const courseReviewSets = reviewSetMapByCourse.get(cls.courseId) ?? [];
+    const courseMockExams = mockExamMapByCourse.get(cls.courseId) ?? [];
     const lessonIds = courseLessons.map((lesson) => lesson.id);
     const reviewSetIds = courseReviewSets.map((reviewSet) => reviewSet.id);
+    const mockExamIds = courseMockExams.map((mockExam) => mockExam.id);
     const userIds = cls.enrollments.map((enrollment) => enrollment.userId);
-    const [progressRows, grammarAttempts, reviewAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0) && userIds.length > 0
+    const [progressRows, grammarAttempts, reviewAttempts, mockExamAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0 || mockExamIds.length > 0) && userIds.length > 0
       ? await Promise.all([
           lessonIds.length > 0 ? prisma.lessonTabProgress.findMany({
             where: {
@@ -184,8 +199,25 @@ export async function loader({ request }: LoaderFunctionArgs) {
             },
             orderBy: { completedAt: "desc" },
           }) : Promise.resolve([]),
+          mockExamIds.length > 0 ? prisma.mockExamAttempt.findMany({
+            where: {
+              mockExamId: { in: mockExamIds },
+              userId: { in: userIds },
+            },
+            select: {
+              userId: true,
+              mockExamId: true,
+              attemptNumber: true,
+              status: true,
+              percentage: true,
+              passed: true,
+              startedAt: true,
+              submittedAt: true,
+            },
+            orderBy: { startedAt: "desc" },
+          }) : Promise.resolve([]),
         ])
-      : [[], [], []];
+      : [[], [], [], []];
 
     const enrollmentsByUserId = new Map(cls.enrollments.map((enrollment) => [enrollment.userId, enrollment]));
     const lessonsById = new Map(courseLessons.map((lesson) => [lesson.id, lesson]));
@@ -220,6 +252,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
       const key = `${attempt.userId}:${attempt.reviewSetId}`;
       if (!reviewProgressByKey.has(key)) reviewProgressByKey.set(key, attempt);
     }
+    const mockExamProgressByKey = new Map<string, (typeof mockExamAttempts)[number]>();
+    for (const attempt of mockExamAttempts) {
+      const key = `${attempt.userId}:${attempt.mockExamId}`;
+      if (!mockExamProgressByKey.has(key)) mockExamProgressByKey.set(key, attempt);
+    }
     const pendingGrammarKeys = new Set(pendingGrammarAttempts.map((attempt) => `${attempt.userId}:${attempt.lessonId}`));
     const lessons = courseLessons.map((lesson, index) => ({
       id: lesson.id,
@@ -248,6 +285,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
       ...lessons.map((lesson) => ({ kind: "lesson" as const, ...lesson })),
       ...reviews.map((review) => ({ kind: "review" as const, ...review })),
     ].sort((a, b) => a.order - b.order);
+    const progressItems = [
+      ...courseItems,
+      ...courseMockExams.map((mockExam, index) => ({
+        kind: "mockExam" as const,
+        id: mockExam.id,
+        label: `Thi thử ${index + 1}`,
+        title: mockExam.title,
+        questionCount: mockExam.sections.reduce((total, section) => total + section._count.questions, 0),
+      })),
+    ];
     const activityData = cls.enrollments.map((enrollment) => {
       const lastActivityAt = progressRows
         .filter((row) => row.userId === enrollment.userId)
@@ -260,9 +307,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
         .reduce<Date | null>((latest, attempt) => (
           !latest || attempt.completedAt > latest ? attempt.completedAt : latest
         ), null);
-      const latestActivityAt = lastActivityAt && lastReviewActivityAt
-        ? lastActivityAt > lastReviewActivityAt ? lastActivityAt : lastReviewActivityAt
-        : lastActivityAt ?? lastReviewActivityAt;
+      const lastMockExamActivityAt = mockExamAttempts
+        .filter((attempt) => attempt.userId === enrollment.userId)
+        .reduce<Date | null>((latest, attempt) => {
+          const activityAt = attempt.submittedAt ?? attempt.startedAt;
+          return !latest || activityAt > latest ? activityAt : latest;
+        }, null);
+      const activityDates = [lastActivityAt, lastReviewActivityAt, lastMockExamActivityAt]
+        .filter((date): date is Date => date !== null);
+      const latestActivityAt = activityDates.length > 0
+        ? activityDates.reduce((latest, date) => date > latest ? date : latest)
+        : null;
       const studentLessons = lessons.map((lesson) => ({
         id: lesson.id,
         order: lesson.order,
@@ -316,6 +371,25 @@ export async function loader({ request }: LoaderFunctionArgs) {
             hasAttempt: Boolean(attempt),
           };
         }),
+        mockExams: courseMockExams.map((mockExam, index) => {
+          const attempts = mockExamAttempts.filter((attempt) => (
+            attempt.userId === enrollment.userId && attempt.mockExamId === mockExam.id
+          ));
+          const latest = mockExamProgressByKey.get(`${enrollment.userId}:${mockExam.id}`);
+          return {
+            id: mockExam.id,
+            label: `Thi thử ${index + 1}`,
+            title: mockExam.title,
+            questionCount: mockExam.sections.reduce((total, section) => total + section._count.questions, 0),
+            attemptCount: attempts.length,
+            latest: latest ? {
+              status: latest.status,
+              percentage: latest.percentage,
+              passed: latest.passed,
+              attemptNumber: latest.attemptNumber,
+            } : null,
+          };
+        }),
       };
     });
 
@@ -352,7 +426,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return {
       ...cls,
       lessons,
-      courseItems,
+      courseItems: progressItems,
       suggestedLessonId: latestProgress?.lessonId ?? lessons[0]?.id ?? null,
       overallPercent,
       pendingGrammarAttempts,
@@ -417,7 +491,10 @@ export default function TeacherIndex() {
           const completedCount = lessons.reduce(
             (sum, lesson) => sum + getLessonProgress(lesson.activities).completed,
             0,
-          ) + (progressView === "overview" ? student.reviews.filter((review) => review.hasAttempt).length : 0);
+          ) + (progressView === "overview"
+            ? student.reviews.filter((review) => review.hasAttempt).length
+              + student.mockExams.filter((exam) => exam.latest?.status === "SUBMITTED").length
+            : 0);
           return { student, completedCount };
         })
         .sort((a, b) => (
@@ -654,7 +731,7 @@ export default function TeacherIndex() {
                     </div>
 
                     {selectedClass.courseItems.length === 0 ? (
-                      <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Khóa học này chưa có bài học để theo dõi.</p>
+                      <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Khóa học này chưa có nội dung để theo dõi.</p>
                     ) : selectedClass.activityData.length === 0 ? (
                       <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Lớp này chưa có học viên.</p>
                     ) : progressView === "overview" ? (
@@ -664,7 +741,7 @@ export default function TeacherIndex() {
                             <tr>
                               <th scope="col" className="sticky left-0 z-10 min-w-44 bg-muted/95 px-3 py-3 font-medium">Học viên</th>
                               {selectedClass.courseItems.map((item) => (
-                                <th scope="col" key={`${item.kind}:${item.id}`} className="min-w-16 px-1 py-2 text-center font-medium">
+                                <th scope="col" key={`${item.kind}:${item.id}`} className={`px-1 py-2 text-center font-medium ${item.kind === "mockExam" ? "min-w-20" : "min-w-16"}`}>
                                   <button
                                     type="button"
                                     onClick={() => {
@@ -672,13 +749,17 @@ export default function TeacherIndex() {
                                         navigate(`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}`);
                                         return;
                                       }
+                                      if (item.kind === "mockExam") {
+                                        navigate(`/teacher/courses/${selectedClass.courseId}/progress/mock-exams/${item.id}`);
+                                        return;
+                                      }
                                       setSelectedLessonId(item.id);
                                       setProgressView("lesson");
                                     }}
                                     className="rounded px-1.5 py-1 hover:bg-background hover:text-primary"
-                                    title={`Xem chi tiết ${item.kind === "review" ? item.label : `Bài ${item.displayOrder}`} · ${item.title}`}
+                                    title={`Xem chi tiết ${item.kind === "lesson" ? `Bài ${item.displayOrder}` : item.label} · ${item.title}`}
                                   >
-                                    {item.kind === "review" ? item.label : `B${item.displayOrder}`}
+                                    {item.kind === "lesson" ? `B${item.displayOrder}` : item.label}
                                   </button>
                                 </th>
                               ))}
@@ -692,7 +773,11 @@ export default function TeacherIndex() {
                                 percent: review.percentage,
                                 total: selectedClass.courseItems.some((item) => item.kind === "review" && item.id === review.id && item.questionCount > 0) ? 1 : 0,
                               }));
-                              const allScores = [...lessonScores, ...reviewScores];
+                              const mockExamScores = student.mockExams.map((exam) => ({
+                                percent: exam.latest?.percentage ?? 0,
+                                total: exam.questionCount > 0 ? 1 : 0,
+                              }));
+                              const allScores = [...lessonScores, ...reviewScores, ...mockExamScores];
                               const total = allScores.reduce((sum, item) => sum + (item.total ? item.percent : 0), 0);
                               const totalAvailable = allScores.filter((item) => item.total > 0).length;
                               const average = totalAvailable ? Math.round(total / totalAvailable) : 0;
@@ -723,6 +808,34 @@ export default function TeacherIndex() {
                                               className={`min-w-12 rounded-md px-1.5 py-2 text-xs font-semibold ${lessonProgressTone(review?.percentage ?? 0)}`}
                                             >
                                               {review?.percentage ?? 0}%
+                                            </button>
+                                          )}
+                                        </td>
+                                      );
+                                    }
+                                    if (item.kind === "mockExam") {
+                                      const exam = student.mockExams.find((entry) => entry.id === item.id);
+                                      const latest = exam?.latest;
+                                      const status = latest?.status === "IN_PROGRESS"
+                                        ? "Đang làm"
+                                        : latest?.percentage != null
+                                          ? `${Math.round(latest.percentage)}%`
+                                          : latest
+                                            ? "Đã nộp"
+                                            : "Chưa làm";
+                                      return (
+                                        <td key={`mockExam:${item.id}`} className="border-t px-1 py-2 text-center">
+                                          {item.questionCount === 0 ? (
+                                            <span className="text-muted-foreground">—</span>
+                                          ) : (
+                                            <button
+                                              type="button"
+                                              onClick={() => navigate(`/teacher/courses/${selectedClass.courseId}/progress/mock-exams/${item.id}`)}
+                                              title={`${item.title}: ${status}${exam?.attemptCount ? ` · ${exam.attemptCount} lượt làm` : ""}`}
+                                              className={`min-w-16 rounded-md px-1.5 py-2 text-xs font-semibold ${lessonProgressTone(latest?.percentage ?? 0)}`}
+                                            >
+                                              <span className="block">{status}</span>
+                                              {exam?.attemptCount ? <span className="block text-[10px] font-normal">Lần {latest?.attemptNumber}</span> : null}
                                             </button>
                                           )}
                                         </td>
@@ -768,6 +881,15 @@ export default function TeacherIndex() {
                                   const average = scores.length ? Math.round(scores.reduce((sum, review) => sum + (review?.percentage ?? 0), 0) / scores.length) : null;
                                   return <td key={`review:${item.id}`} className="px-1 py-2 text-center">{average === null ? "—" : `${average}%`}</td>;
                                 }
+                                if (item.kind === "mockExam") {
+                                  const scores = selectedClass.activityData
+                                    .map((student) => student.mockExams.find((exam) => exam.id === item.id))
+                                    .filter((exam) => exam && item.questionCount > 0);
+                                  const average = scores.length
+                                    ? Math.round(scores.reduce((sum, exam) => sum + (exam?.latest?.percentage ?? 0), 0) / scores.length)
+                                    : null;
+                                  return <td key={`mockExam:${item.id}`} className="px-1 py-2 text-center">{average === null ? "—" : `${average}%`}</td>;
+                                }
                                 const scores = selectedClass.activityData
                                   .map((student) => getLessonProgress(student.lessons.find((lesson) => lesson.id === item.id)?.activities ?? []))
                                   .filter((item) => item.total > 0);
@@ -788,6 +910,18 @@ export default function TeacherIndex() {
                                 <Link
                                   key={`review:${item.id}`}
                                   to={`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}`}
+                                  className="shrink-0 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+                                  title={item.title}
+                                >
+                                  {item.label}
+                                </Link>
+                              );
+                            }
+                            if (item.kind === "mockExam") {
+                              return (
+                                <Link
+                                  key={`mockExam:${item.id}`}
+                                  to={`/teacher/courses/${selectedClass.courseId}/progress/mock-exams/${item.id}`}
                                   className="shrink-0 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
                                   title={item.title}
                                 >
