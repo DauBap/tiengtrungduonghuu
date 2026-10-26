@@ -475,10 +475,12 @@ export default function TeacherIndex() {
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [progressView, setProgressView] = useState<"overview" | "lesson">("overview");
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [pendingGrammarClassId, setPendingGrammarClassId] = useState<string | null>(null);
   const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
   const [grades, setGrades] = useState<TeacherGrammarGrade[]>([]);
   const [initializedGradeAttemptId, setInitializedGradeAttemptId] = useState<string | null>(null);
   const selectedClass = classSummaries.find((cls) => cls.id === selectedClassId) ?? classSummaries[0];
+  const pendingGrammarClass = classSummaries.find((cls) => cls.id === pendingGrammarClassId);
   const selectedLesson = selectedClass?.lessons.find((lesson) => lesson.id === selectedLessonId)
     ?? selectedClass?.lessons.find((lesson) => lesson.id === selectedClass.suggestedLessonId)
     ?? selectedClass?.lessons[0];
@@ -521,16 +523,17 @@ export default function TeacherIndex() {
   }, [location.key]);
 
   useEffect(() => {
-    if (!selectedStudentId && !gradingAttemptId) return;
+    if (!selectedStudentId && !pendingGrammarClassId && !gradingAttemptId) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setSelectedStudentId(null);
+        setPendingGrammarClassId(null);
         setGradingAttemptId(null);
       }
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [selectedStudentId, gradingAttemptId]);
+  }, [selectedStudentId, pendingGrammarClassId, gradingAttemptId]);
 
   const gradingData = gradingFetcher.data?.attempt ? gradingFetcher.data : null;
   useEffect(() => {
@@ -632,34 +635,45 @@ export default function TeacherIndex() {
                 {classSummaries.map((cls) => {
                   const selected = cls.id === selectedClass?.id;
                   return (
-                    <button
+                    <div
                       key={cls.id}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => {
-                        setSelectedClassId(cls.id);
-                        setSelectedLessonId(null);
-                        setSelectedStudentId(null);
-                      }}
-                      className={`rounded-xl border bg-card p-4 text-left transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? "border-primary ring-1 ring-primary" : ""}`}
+                      className={`rounded-xl border bg-card p-4 transition-colors hover:border-primary/50 ${selected ? "border-primary ring-1 ring-primary" : ""}`}
                     >
-                      <div className="mb-3 flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="font-semibold">{cls.name}</p>
-                          <p className="mt-1 truncate text-xs text-muted-foreground">{cls.course.title} · HSK {cls.course.hskLevel}</p>
+                      <button
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => {
+                          setSelectedClassId(cls.id);
+                          setSelectedLessonId(null);
+                          setSelectedStudentId(null);
+                        }}
+                        className="mb-3 w-full rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <div className="mb-3 flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-semibold">{cls.name}</p>
+                            <p className="mt-1 truncate text-xs text-muted-foreground">{cls.course.title} · HSK {cls.course.hskLevel}</p>
+                          </div>
+                          <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">{cls.overallPercent}%</span>
                         </div>
-                        <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">{cls.overallPercent}%</span>
-                      </div>
-                      <div className="mb-2 h-2 overflow-hidden rounded-full bg-muted">
-                        <div className="h-full rounded-full bg-primary" style={{ width: `${cls.overallPercent}%` }} />
-                      </div>
+                        <div className="mb-2 h-2 overflow-hidden rounded-full bg-muted">
+                          <div className="h-full rounded-full bg-primary" style={{ width: `${cls.overallPercent}%` }} />
+                        </div>
+                      </button>
                       <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span>{cls.enrollments.length} học viên · {cls.lessons.length} bài học</span>
                         {cls.pendingGrammarAttempts.length > 0 && (
-                          <span className="font-medium text-amber-700 dark:text-amber-300">Cần chấm {cls.pendingGrammarAttempts.length} bài</span>
+                          <button
+                            type="button"
+                            onClick={() => setPendingGrammarClassId(cls.id)}
+                            className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-primary bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          >
+                            <ClipboardList className="h-3.5 w-3.5" aria-hidden="true" />
+                            Cần chấm {cls.pendingGrammarAttempts.length} bài
+                          </button>
                         )}
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -667,37 +681,6 @@ export default function TeacherIndex() {
 
             {selectedClass && (
               <>
-                {selectedClass.pendingGrammarAttempts.length > 0 && (
-                  <Card>
-                    <CardContent className="pt-5 sm:pt-5">
-                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <ClipboardList className="h-4 w-4 text-amber-600" />
-                          <h2 className="font-semibold">Bài ngữ pháp chờ chấm</h2>
-                        </div>
-                        <span className="text-sm text-muted-foreground">{selectedClass.pendingGrammarAttempts.length} bài · {selectedClass.name}</span>
-                      </div>
-                      <ul className="divide-y rounded-lg border">
-                        {selectedClass.pendingGrammarAttempts.slice(0, 5).map((attempt) => (
-                          <li key={attempt.id}>
-                            <button
-                              type="button"
-                              onClick={() => openGradingAttempt(selectedClass.courseId, attempt.lessonId, attempt.userId, attempt.id)}
-                              className="flex w-full flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 py-2.5 text-left text-sm hover:bg-muted/50"
-                            >
-                              <span className="min-w-0 font-medium">{attempt.studentName} · {attempt.lessonTitle} · {attempt.sectionTitle}</span>
-                              <span className="shrink-0 text-xs text-primary">Chấm bài <ArrowUpRight className="inline h-3.5 w-3.5" /></span>
-                            </button>
-                          </li>
-                        ))}
-                        {selectedClass.pendingGrammarAttempts.length > 5 && (
-                          <li className="px-3 py-2 text-xs text-muted-foreground">Còn {selectedClass.pendingGrammarAttempts.length - 5} bài khác đang chờ chấm.</li>
-                        )}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                )}
-
                 <Card>
                   <CardContent className="pt-5 sm:pt-5">
                     <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
@@ -1134,6 +1117,62 @@ export default function TeacherIndex() {
               <p className="mt-1 text-sm text-muted-foreground">Khi có lớp mới, thông tin tiến độ sẽ hiển thị tại đây.</p>
             </CardContent>
           </Card>
+        )}
+
+        {pendingGrammarClass && pendingGrammarClass.pendingGrammarAttempts.length > 0 && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setPendingGrammarClassId(null);
+            }}
+          >
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="pending-grammar-title"
+              className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
+            >
+              <div className="flex items-start justify-between gap-3 border-b p-4 sm:p-5">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <ClipboardList className="h-4 w-4 shrink-0 text-amber-600" />
+                    <h2 id="pending-grammar-title" className="font-semibold">Bài ngữ pháp chờ chấm</h2>
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {pendingGrammarClass.pendingGrammarAttempts.length} bài · {pendingGrammarClass.name}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Đóng danh sách bài chờ chấm"
+                  onClick={() => setPendingGrammarClassId(null)}
+                  className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-muted"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <ul className="divide-y overflow-y-auto p-4 sm:p-5">
+                {pendingGrammarClass.pendingGrammarAttempts.map((attempt) => (
+                  <li key={attempt.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPendingGrammarClassId(null);
+                        openGradingAttempt(pendingGrammarClass.courseId, attempt.lessonId, attempt.userId, attempt.id);
+                      }}
+                      className="group flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <span className="min-w-0 flex-1 break-words font-medium">{attempt.studentName} · {attempt.lessonTitle} · {attempt.sectionTitle}</span>
+                      <span className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-md border border-primary px-3 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                        Chấm bài <ArrowUpRight className="h-3.5 w-3.5" />
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
         )}
 
         {selectedStudent && selectedClass && (
