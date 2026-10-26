@@ -593,9 +593,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
     let endpoint: URL;
     try {
       endpoint = new URL("/transcribe", localAsrUrl);
-      if (endpoint.protocol !== "https:") {
-        console.error("[local-asr] LOCAL_ASR_URL must use HTTPS");
-        return { intent, error: "Địa chỉ dịch vụ nhận dạng chưa an toàn (cần HTTPS)." };
+      const isLocalLoopback =
+        endpoint.protocol === "http:" && endpoint.hostname === "127.0.0.1";
+      if (endpoint.protocol !== "https:" && !isLocalLoopback) {
+        console.error("[local-asr] LOCAL_ASR_URL must use HTTPS unless using 127.0.0.1");
+        return { intent, error: "Địa chỉ dịch vụ nhận dạng cần HTTPS, trừ kết nối nội bộ máy chủ." };
       }
     } catch (error) {
       console.error("[local-asr] Invalid LOCAL_ASR_URL", error);

@@ -6,7 +6,7 @@ The lesson pronunciation screen can send an existing recording to this API as an
 
 - Python 3.10-3.12.
 - FFmpeg, including `ffprobe`, available on `PATH`.
-- An HTTPS tunnel from Vercel to local port `8765` (for example, ngrok).
+- For Vercel, an HTTPS tunnel from Vercel to local port `8765` (for example, ngrok). When the app and API run on the same Linux host, use the loopback address instead.
 - FunASR downloads `iic/SenseVoiceSmall` on first startup and runs it with CPU-only PyTorch. No CUDA runtime or GPU is used.
 
 Install FFmpeg on Windows if needed:
@@ -76,6 +76,17 @@ Use the HTTPS forwarding origin printed by ngrok. Keep both the service and tunn
 - `LOCAL_ASR_TOKEN`: the exact token stored in `.asr-token`.
 
 Redeploy after changing environment variables. The lesson action sends audio only from the authenticated server-side route, with the bearer token kept off the browser.
+
+## Connect a Linux-hosted app
+
+When the app and SenseVoice API run on the same Linux machine, no tunnel is needed. Run the API with a system service and configure the app's server-side environment:
+
+```dotenv
+LOCAL_ASR_URL=http://127.0.0.1:8765
+LOCAL_ASR_TOKEN=<the contents of local-asr/.asr-token>
+```
+
+HTTP is accepted only for `127.0.0.1`; remote service URLs must use HTTPS. Keep the API bound to loopback.
 
 ## API
 
