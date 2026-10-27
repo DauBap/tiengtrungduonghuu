@@ -32,7 +32,7 @@ import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
-import { ArrowLeft, BookOpen, PartyPopper, X, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2, MessageSquareText } from "lucide-react";
+import { ArrowLeft, BookOpen, PartyPopper, X, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2, MessageSquareText, Loader2 } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
 import { createVocabularyTest, gradeVocabularyTest } from "~/lib/vocabulary-test";
 import { answerVariants, bestAnswerMatchPercent, isAnswerCorrectForAny } from "~/lib/listening-answer";
@@ -1516,6 +1516,7 @@ export default function LessonDetail() {
   const [phoneticScore, setPhoneticScore] = useState(0);
   const [recordingError, setRecordingError] = useState<string | null>(null);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [completedRecordingSeconds, setCompletedRecordingSeconds] = useState(0);
   const [recognizedTranscript, setRecognizedTranscript] = useState("");
   const [pronunciationFeedback, setPronunciationFeedback] = useState<React.ReactNode | null>(null);
   const [recordingAudioUrl, setRecordingAudioUrl] = useState<string | null>(null);
@@ -1523,6 +1524,7 @@ export default function LessonDetail() {
   const recordingBlobRef = useRef<Blob | null>(null);
   const recordingTimerRef = useRef<number | null>(null);
   const recordingStartedAtRef = useRef<number | null>(null);
+  const audioRecordingStartedAtRef = useRef<number | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const recordingChunksRef = useRef<Blob[]>([]);
@@ -1635,7 +1637,7 @@ export default function LessonDetail() {
 
   useEffect(() => {
     const result = transcriptionFetcher.data;
-    if (result?.intent !== "transcribe-pronunciation-audio") return;
+    if (transcriptionFetcher.state !== "idle" || result?.intent !== "transcribe-pronunciation-audio") return;
     if (result.error) {
       setRecordingError(result.error);
       return;
@@ -1646,7 +1648,7 @@ export default function LessonDetail() {
     setRecognizedTranscript(result.transcript);
     setPhoneticScore(result.score ?? 0);
     setPronunciationFeedback(buildPronunciationFeedback(result.score ?? 0));
-  }, [recordingAudioScriptId, transcriptionFetcher.data]);
+  }, [recordingAudioScriptId, transcriptionFetcher.data, transcriptionFetcher.state]);
 
   useEffect(() => {
     const selected = lessonAudioScripts.find((script) => script.id === selectedScriptId) ?? lessonAudioScripts[0];
@@ -1999,6 +2001,8 @@ export default function LessonDetail() {
 
         mediaStreamRef.current = stream;
         mediaRecorderRef.current = mediaRecorder;
+        audioRecordingStartedAtRef.current = Date.now();
+        setCompletedRecordingSeconds(0);
         mediaRecorder.ondataavailable = (event) => {
           if (event.data.size > 0) recordingChunksRef.current.push(event.data);
         };
@@ -2013,6 +2017,12 @@ export default function LessonDetail() {
         mediaRecorder.onstop = () => {
           const audioBlob = new Blob(recordingChunksRef.current, { type: mediaRecorder.mimeType });
           recordingChunksRef.current = [];
+          if (audioRecordingStartedAtRef.current !== null) {
+            setCompletedRecordingSeconds(
+              Math.max(0, Math.floor((Date.now() - audioRecordingStartedAtRef.current) / 1000)),
+            );
+            audioRecordingStartedAtRef.current = null;
+          }
           stream.getTracks().forEach((track) => track.stop());
           if (mediaStreamRef.current === stream) mediaStreamRef.current = null;
           if (mediaRecorderRef.current === mediaRecorder) mediaRecorderRef.current = null;
@@ -2024,6 +2034,7 @@ export default function LessonDetail() {
           recordingBlobRef.current = audioBlob;
           setRecordingAudioUrl(audioUrl);
           setRecordingAudioScriptId(selectedAudioScript.id);
+          transcribeRecording(audioBlob, selectedAudioScript.id);
         };
         try {
           mediaRecorder.start();
@@ -2047,7 +2058,6 @@ export default function LessonDetail() {
         }
 
         if (!SpeechRecognitionCtor) {
-          setRecordingError("Đã ghi âm. Hãy bấm “Nhận dạng bằng SenseVoice” để chuyển lời nói thành văn bản.");
           setRecordingSeconds(0);
           setIsRecording(true);
           recordingStartedAtRef.current = Date.now();
@@ -2304,7 +2314,7 @@ export default function LessonDetail() {
           }
           recordingStartedAtRef.current = null;
           if (!finalTranscriptRef.current.trim()) {
-            setRecordingError("Đã lưu bản ghi. Hãy chọn “Nhận dạng bằng SenseVoice” để chuyển giọng nói thành văn bản.");
+            setRecordingError(null);
           }
           return;
         }
@@ -2400,7 +2410,7 @@ export default function LessonDetail() {
                     key={script.id}
                     type="button"
                     onClick={() => setSelectedScriptId(script.id)}
-                    disabled={isRecording || isPreparingRecording}
+                    disabled={isRecording || isPreparingRecording || isTranscribingPronunciation || isSubmittingPronunciation}
                     className={cn(
                       "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
                       script.id === selectedAudioScript.id
@@ -2499,20 +2509,44 @@ export default function LessonDetail() {
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Đọc theo script</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button type="button" variant={isRecording ? "destructive" : "default"} disabled={isPreparingRecording} onClick={async () => {
-                    if (isRecording) {
-                      stopRecording();
-                    } else {
-                      await startRecording();
-                    }
-                  }}>
-                    {isRecording ? "Dừng đọc" : isPreparingRecording ? "Đang kết nối micro..." : "Bắt đầu đọc"}
-                  </Button>
+                <div className="flex items-start gap-2">
+                  <div className="flex flex-col items-start gap-2">
+                    <Button type="button" variant={isRecording ? "destructive" : "default"} disabled={isPreparingRecording || isTranscribingPronunciation || isSubmittingPronunciation} onClick={async () => {
+                      if (isRecording) {
+                        stopRecording();
+                      } else {
+                        await startRecording();
+                      }
+                    }}>
+                      {isRecording ? "Dừng đọc" : isPreparingRecording ? "Đang kết nối micro..." : "Bắt đầu đọc"}
+                    </Button>
+                    {isRecording && (
+                      <div
+                        className="flex items-center gap-2 text-sm text-success"
+                        role="status"
+                        aria-live="polite"
+                      >
+                        <span className="font-medium">Đang lắng nghe</span>
+                        <span className="text-success/80">· {recordingSeconds}s</span>
+                      </div>
+                    )}
+                    {isTranscribingPronunciation && (
+                      <div
+                        className="flex items-center gap-2 text-sm text-primary"
+                        role="status"
+                        aria-live="polite"
+                      >
+                        <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden="true" />
+                        <span>
+                          Đã nghe {completedRecordingSeconds}s · Đang nhận diện giọng nói...
+                        </span>
+                      </div>
+                    )}
+                  </div>
                   <Button
                     type="button"
                     onClick={submitPronunciation}
-                    disabled={!recognizedTranscript.trim() || isRecording || isPreparingRecording || isSubmittingPronunciation}
+                    disabled={!recognizedTranscript.trim() || isRecording || isPreparingRecording || isTranscribingPronunciation || isSubmittingPronunciation}
                   >
                     {isSubmittingPronunciation ? "Đang nộp..." : "Nộp bài"}
                   </Button>
@@ -2582,50 +2616,44 @@ export default function LessonDetail() {
                 </div>
               )}
 
-              {showScript && (recognizedTranscript || isRecording) && (
+              {showScript && recognizedTranscript && visiblePinyinComparison.length > 0 && (
                 <div
                   className="mt-4 space-y-3 rounded-lg border p-4"
                   aria-live="polite"
                   aria-label="Đối chiếu pinyin chuẩn và pinyin nhận diện"
                 >
-                  {visiblePinyinComparison.length > 0 ? (
-                      <>
-                        <div>
-                          <p className="font-medium text-foreground">Pinyin chuẩn</p>
-                          <div className="mt-1 whitespace-pre-wrap break-words text-base leading-relaxed text-foreground">
-                            {visiblePinyinComparison.map((item, index) => item.scriptPinyin && (
-                              <span
-                                key={`script-pinyin-${index}`}
-                                className={item.status === "incorrect" || item.status === "missing"
-                                  ? "rounded-sm bg-destructive/10 px-0.5 font-semibold text-destructive"
-                                  : undefined}
-                              >
-                                {toPinyinText(item.scriptPinyin)}{" "}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="mt-3">
-                          <p className="font-medium text-foreground">Bạn đọc (Pinyin)</p>
-                          <div className="mt-1 whitespace-pre-wrap break-words text-base leading-relaxed text-foreground">
-                            {visiblePinyinComparison.map((item, index) => item.spokenPinyin && (
-                              <span
-                                key={`spoken-pinyin-${index}`}
-                                className={item.status === "incorrect" || item.status === "extra"
-                                  ? "rounded-sm bg-destructive/10 px-0.5 font-semibold text-destructive"
-                                  : undefined}
-                              >
-                                {toPinyinText(item.spokenPinyin)}{" "}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <p className="text-base text-muted-foreground">
-                        {isRecording ? "Đang chờ nhận diện lời đọc..." : "Chưa có nội dung để đối chiếu."}
-                      </p>
-                    )}
+                  <>
+                    <div>
+                      <p className="font-medium text-foreground">Pinyin chuẩn</p>
+                      <div className="mt-1 whitespace-pre-wrap break-words text-base leading-relaxed text-foreground">
+                        {visiblePinyinComparison.map((item, index) => item.scriptPinyin && (
+                          <span
+                            key={`script-pinyin-${index}`}
+                            className={item.status === "incorrect" || item.status === "missing"
+                              ? "rounded-sm bg-destructive/10 px-0.5 font-semibold text-destructive"
+                              : undefined}
+                          >
+                            {toPinyinText(item.scriptPinyin)}{" "}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <p className="font-medium text-foreground">Bạn đọc (Pinyin)</p>
+                      <div className="mt-1 whitespace-pre-wrap break-words text-base leading-relaxed text-foreground">
+                        {visiblePinyinComparison.map((item, index) => item.spokenPinyin && (
+                          <span
+                            key={`spoken-pinyin-${index}`}
+                            className={item.status === "incorrect" || item.status === "extra"
+                              ? "rounded-sm bg-destructive/10 px-0.5 font-semibold text-destructive"
+                              : undefined}
+                          >
+                            {toPinyinText(item.spokenPinyin)}{" "}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </>
                   <p className="text-xs text-muted-foreground">
                     Phần đỏ là âm tiết khác, thiếu hoặc đọc thừa. Điểm hiện tại so khớp âm tiết, chưa chấm thanh điệu hay chất lượng phát âm.
                   </p>
@@ -2645,31 +2673,23 @@ export default function LessonDetail() {
                   >
                     Trình duyệt không hỗ trợ phát lại bản ghi âm.
                   </audio>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="min-h-11"
-                    disabled={isTranscribingPronunciation}
-                    onClick={() => {
-                      const audioBlob = recordingBlobRef.current;
-                      if (!audioBlob) {
-                        setRecordingError("Không tìm thấy bản ghi âm. Hãy ghi âm lại rồi thử.");
-                        return;
-                      }
-                      transcribeRecording(audioBlob, selectedAudioScript.id);
-                    }}
-                  >
-                    {isTranscribingPronunciation ? "Đang nhận dạng bằng SenseVoice..." : "Nhận dạng bằng SenseVoice"}
-                  </Button>
+                  {recordingError && recordingBlobRef.current && recordingBlobRef.current.size <= 3_000_000 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="min-h-11"
+                      disabled={isTranscribingPronunciation}
+                      onClick={() => {
+                        const audioBlob = recordingBlobRef.current;
+                        if (audioBlob) transcribeRecording(audioBlob, selectedAudioScript.id);
+                      }}
+                    >
+                      Thử nhận dạng lại
+                    </Button>
+                  )}
                 </div>
               )}
 
-              {isRecording && (
-                <div className="mt-4 rounded-lg border border-success/30 bg-success/5 p-3 text-sm text-success">
-                  <span className="font-bold">Đang lắng nghe...</span>
-                  <span className="ml-2 text-success/80">Đã nghe {recordingSeconds}s · đang nhận dạng giọng nói.</span>
-                </div>
-              )}
             </section>
             )}
             </div>
