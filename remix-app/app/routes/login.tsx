@@ -24,14 +24,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
-  const email = String(formData.get("email") ?? "").toLowerCase().trim();
+  const identifier = String(formData.get("email") ?? "").toLowerCase().trim();
   const password = String(formData.get("password") ?? "");
 
-  if (!email) {
-    return { error: "Vui lòng nhập email", field: "email" as const };
+  if (!identifier) {
+    return { error: "Vui lòng nhập email hoặc tài khoản", field: "email" as const };
   }
 
-  if (!EMAIL_RE.test(email)) {
+  if (identifier.includes("@") && !EMAIL_RE.test(identifier)) {
     return { error: "Email không đúng định dạng, ví dụ: ban@example.com", field: "email" as const };
   }
 
@@ -39,15 +39,23 @@ export async function action({ request }: ActionFunctionArgs) {
     return { error: "Vui lòng nhập mật khẩu", field: "password" as const };
   }
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const matchingUsers = identifier.includes("@")
+    ? [await prisma.user.findUnique({ where: { email: identifier } })].filter((user) => user !== null)
+    : await prisma.user.findMany({
+        where: { email: { startsWith: `${identifier}@`, mode: "insensitive" } },
+        take: 2,
+      });
 
-  if (!user || user.deletedAt) {
-    return { error: "Email hoặc mật khẩu không đúng" };
+  if (matchingUsers.length !== 1) {
+    return { error: "Email/tài khoản hoặc mật khẩu không đúng" };
   }
+
+  const user = matchingUsers[0];
+  if (user.deletedAt) return { error: "Email/tài khoản hoặc mật khẩu không đúng" };
 
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) {
-    return { error: "Email hoặc mật khẩu không đúng" };
+    return { error: "Email/tài khoản hoặc mật khẩu không đúng" };
   }
 
   if (!user.isActive) {
@@ -125,16 +133,15 @@ export default function LoginPage() {
                   </div>
                 )}
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">Email hoặc tài khoản</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
                       name="email"
                       type="text"
-                      inputMode="email"
-                      autoComplete="email"
-                      placeholder="ban@example.com"
+                      autoComplete="username"
+                      placeholder="Email hoặc tên tài khoản"
                       className="pl-10"
                       aria-invalid={actionData?.field === "email" || undefined}
                     />

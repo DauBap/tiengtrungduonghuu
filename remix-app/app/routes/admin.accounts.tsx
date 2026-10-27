@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Plus, Pencil, Trash2, X, Users, GraduationCap, ShieldCheck, LockKeyhole, LockKeyholeOpen, Search, Loader2 } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { toast } from "sonner";
 
 // createdAt là Date: React Router 7 serialize loader bằng turbo-stream nên Date
 // đi qua nguyên vẹn, không bị đổi thành string như JSON.stringify.
@@ -27,6 +28,7 @@ type ModalMode = "create" | "edit" | "delete" | "toggle" | null;
 
 const ROLE_LABEL: Record<string, string> = { teacher: "Giáo viên", student: "Học viên" };
 const ROLE_BADGE: Record<string, string> = { teacher: "bg-accent/15 text-accent border-accent/30", student: "bg-primary/10 text-primary border-primary/30" };
+const DEFAULT_ACCOUNT_PASSWORD = "123456";
 
 function formatDate(value: Date | string) {
   return new Date(value).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -59,7 +61,6 @@ export async function action({ request }: ActionFunctionArgs) {
   if (intent === "create") {
     const email = String(formData.get("email")).toLowerCase().trim();
     const name = String(formData.get("name")).trim();
-    const password = String(formData.get("password"));
     const role = String(formData.get("role")) as "teacher" | "student";
     const { phone, error } = parsePhone(formData.get("phone"));
     if (error) return { error };
@@ -70,7 +71,7 @@ export async function action({ request }: ActionFunctionArgs) {
         email,
         name,
         phone,
-        password: await bcrypt.hash(password, 10),
+        password: await bcrypt.hash(DEFAULT_ACCOUNT_PASSWORD, 10),
         role,
         mustChangePassword: true,
       },
@@ -115,8 +116,11 @@ function Modal({ mode, user, onClose }: { mode: ModalMode; user: UserRecord | nu
   const isLoading = fetcher.state !== "idle";
 
   useEffect(() => {
-    if (fetcher.state === "idle" && fetcher.data?.success) onClose();
-  }, [fetcher.state, fetcher.data, onClose]);
+    if (fetcher.state === "idle" && fetcher.data?.success) {
+      if (mode === "edit") toast.success("Đã lưu thay đổi tài khoản.");
+      onClose();
+    }
+  }, [fetcher.state, fetcher.data, mode, onClose]);
 
   if (!mode) return null;
 
@@ -176,51 +180,88 @@ function Modal({ mode, user, onClose }: { mode: ModalMode; user: UserRecord | nu
 
   const isEdit = mode === "edit";
   return (
-    <Overlay onClose={onClose}>
-      <fetcher.Form method="post" className="space-y-4">
-        <div className="flex items-start justify-between">
-          <h2 className="text-lg font-bold">{isEdit ? "Chỉnh sửa tài khoản" : "Tạo tài khoản mới"}</h2>
-          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+    <Overlay onClose={onClose} className="max-w-xl">
+      <fetcher.Form method="post" className="space-y-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <h2 className="text-xl font-semibold tracking-tight">
+              {isEdit ? "Chỉnh sửa tài khoản" : "Tạo tài khoản mới"}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {isEdit
+                ? "Cập nhật thông tin đăng nhập và vai trò của tài khoản."
+                : "Tạo thông tin đăng nhập cho giáo viên hoặc học viên."}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isLoading}
+            aria-label="Đóng"
+            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
-        {fetcher.data?.error && <p className="text-sm text-destructive">{fetcher.data.error}</p>}
-        <input type="hidden" name="intent" value={isEdit ? "edit" : "create"} />
-        {isEdit && <input type="hidden" name="userId" value={user?.id} />}
-        <div className="space-y-2">
-          <Label htmlFor="name">Họ tên <span className="text-destructive">*</span></Label>
-          <Input id="name" name="name" defaultValue={user?.name} placeholder="Nguyễn Văn A" required />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
-          <Input id="email" name="email" type="email" defaultValue={user?.email} placeholder="nguyen@example.com" required />
-        </div>
-        {role === "student" && (
-          <div className="space-y-2">
-            <Label htmlFor="phone">Số điện thoại Zalo</Label>
-            <Input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" defaultValue={user?.phone ?? ""} placeholder="0912 345 678" />
-            <p className="text-xs text-muted-foreground">Dùng để mở cuộc trò chuyện Zalo từ bảng điều khiển giáo viên.</p>
+        {fetcher.data?.error && (
+          <div role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm text-destructive">
+            {fetcher.data.error}
           </div>
         )}
-        <div className="space-y-2">
-          <Label htmlFor="password">
-            Mật khẩu {isEdit ? <span className="text-muted-foreground font-normal text-xs">(để trống nếu không đổi)</span> : <span className="text-destructive">*</span>}
-          </Label>
-          <Input id="password" name="password" type="password" placeholder={isEdit ? "••••••••" : "Nhập mật khẩu"} required={!isEdit} />
-          {!isEdit && <p className="text-xs text-muted-foreground">Tài khoản sẽ được yêu cầu đổi mật khẩu sau lần đăng nhập đầu tiên.</p>}
+        <input type="hidden" name="intent" value={isEdit ? "edit" : "create"} />
+        {isEdit && <input type="hidden" name="userId" value={user?.id} />}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="name">Họ tên <span className="text-destructive">*</span></Label>
+            <Input id="name" name="name" defaultValue={user?.name} placeholder="Nguyễn Văn A" required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
+            <Input id="email" name="email" type="email" defaultValue={user?.email} placeholder="nguyen@example.com" required />
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label>Vai trò <span className="text-destructive">*</span></Label>
-          <Select value={role} onValueChange={(v) => setRole(v as "teacher" | "student")} name="role">
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="teacher">Giáo viên</SelectItem>
-              <SelectItem value="student">Học viên</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {role === "student" && (
+            <div className="space-y-2">
+              <Label htmlFor="phone">Số điện thoại Zalo</Label>
+              <Input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" defaultValue={user?.phone ?? ""} placeholder="0912 345 678" />
+              <p className="text-xs text-muted-foreground">Dùng để mở cuộc trò chuyện Zalo từ bảng điều khiển giáo viên.</p>
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="role">Vai trò <span className="text-destructive">*</span></Label>
+            <Select value={role} onValueChange={(v) => setRole(v as "teacher" | "student")} name="role">
+              <SelectTrigger id="role"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="teacher">Giáo viên</SelectItem>
+                <SelectItem value="student">Học viên</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Hủy</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading && <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />}
+        {isEdit ? (
+          <div className="space-y-2">
+            <Label htmlFor="password">
+              Mật khẩu <span className="text-muted-foreground font-normal text-xs">(để trống nếu không đổi)</span>
+            </Label>
+            <Input id="password" name="password" type="password" autoComplete="new-password" placeholder="Nhập mật khẩu mới" />
+          </div>
+        ) : (
+          <div className="rounded-md border bg-muted/40 px-3.5 py-3">
+            <p className="text-sm font-medium text-foreground">
+              Mật khẩu mặc định: <span className="font-semibold tabular-nums">123456</span>
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              Người dùng cần đổi mật khẩu sau lần đăng nhập đầu tiên.
+            </p>
+          </div>
+        )}
+        <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+          <Button type="button" variant="outline" onClick={onClose} disabled={isLoading} className="w-full sm:w-auto">
+            Hủy
+          </Button>
+          <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+            {isLoading && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
             {isEdit ? "Lưu thay đổi" : "Tạo tài khoản"}
           </Button>
         </div>

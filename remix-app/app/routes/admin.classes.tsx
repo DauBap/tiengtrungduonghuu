@@ -12,7 +12,7 @@ import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Overlay } from "~/components/common/overlay";
 import {
-  School, Plus, Pencil, Trash2, X, Loader2, Users, UserCheck,
+  School, Plus, Pencil, Trash2, X, Search, Loader2, Users, UserCheck,
   UserPlus, UserMinus, Clock,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -510,6 +510,13 @@ export default function AdminClasses() {
   const { user, classes, courses, teachers, students } = useLoaderData<typeof loader>();
   const [modal, setModal] = useState<ModalMode>(null);
   const [selectedClass, setSelectedClass] = useState<ClassRow | null>(null);
+  const [search, setSearch] = useState("");
+
+  const normalizedSearch = search.trim().toLocaleLowerCase("vi");
+  const filteredClasses = classes.filter((cls: ClassRow) =>
+    [cls.name, cls.course.title, cls.course.code, cls.teacher?.name]
+      .some((value) => value?.toLocaleLowerCase("vi").includes(normalizedSearch))
+  );
 
   const openModal = (mode: ModalMode, cls: ClassRow | null = null) => {
     setSelectedClass(cls);
@@ -550,7 +557,39 @@ export default function AdminClasses() {
             </div>
           ) : (
             <div className="space-y-3">
-              {classes.map((cls: ClassRow) => {
+              <div className="relative max-w-md">
+                <Search
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                  aria-label="Tìm lớp học"
+                  placeholder="Tìm theo tên lớp, khóa học hoặc giáo viên..."
+                  className="pl-10 pr-10"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+                {search && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Xóa tìm kiếm"
+                    className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2"
+                    onClick={() => setSearch("")}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              {filteredClasses.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-8 text-center">
+                  <p className="font-medium">Không tìm thấy lớp học phù hợp</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Thử tên lớp, khóa học hoặc tên giáo viên khác.
+                  </p>
+                </div>
+              ) : filteredClasses.map((cls: ClassRow) => {
                 const schedule = parseSchedule(cls.schedule);
                 return (
                   <Card key={cls.id}>
