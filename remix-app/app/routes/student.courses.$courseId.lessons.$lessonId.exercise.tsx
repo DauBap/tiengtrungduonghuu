@@ -1,7 +1,8 @@
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, Link, Form, redirect } from "react-router";
 import { requireRole } from "~/lib/session.server";
-import { getLessonById, getLessonProgress, upsertLessonProgress, computeLessonStatus } from "~/lib/db.server";
+import { requireEnrolledLesson } from "~/lib/student-course-access.server";
+import { getLessonProgress, upsertLessonProgress, computeLessonStatus } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { LockedContent } from "~/components/lessons/locked-content";
 import { Button } from "~/components/ui/button";
@@ -10,8 +11,7 @@ import { ArrowLeft, CheckCircle2 } from "lucide-react";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
-  const lesson = await getLessonById(params.lessonId!);
-  if (!lesson) throw new Response("Không tìm thấy", { status: 404 });
+  const lesson = await requireEnrolledLesson(user.id, params.courseId!, params.lessonId!);
   const progress = await getLessonProgress(user.id, lesson.id);
   const lessonStatus = computeLessonStatus(progress);
   return { user, lesson, lessonStatus };
@@ -19,7 +19,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const user = await requireRole(request, ["student"]);
-  await upsertLessonProgress(user.id, params.lessonId!, { learningCompleted: true, exerciseCompleted: true });
+  const lesson = await requireEnrolledLesson(user.id, params.courseId!, params.lessonId!);
+  await upsertLessonProgress(user.id, lesson.id, { learningCompleted: true, exerciseCompleted: true });
   return redirect(`/student/courses/${params.courseId}/lessons/${params.lessonId}/test`);
 }
 

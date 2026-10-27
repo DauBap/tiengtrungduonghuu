@@ -1,8 +1,9 @@
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useActionData, Link, Form } from "react-router";
 import { requireRole } from "~/lib/session.server";
+import { requireEnrolledLesson } from "~/lib/student-course-access.server";
 import { prisma } from "~/lib/prisma.server";
-import { getLessonById, getLessonProgress, upsertLessonProgress, computeLessonStatus } from "~/lib/db.server";
+import { getLessonProgress, upsertLessonProgress, computeLessonStatus } from "~/lib/db.server";
 import { gradeLessonTest, parseTestResponses } from "~/lib/lesson-test";
 import { GRAMMAR_QUESTION_META, grammarAnswerText, shuffledTokens } from "~/lib/grammar";
 import { AppShell } from "~/components/layout/app-shell";
@@ -32,8 +33,7 @@ interface QuestionResult {
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
-  const lesson = await getLessonById(params.lessonId!);
-  if (!lesson) throw new Response("Không tìm thấy", { status: 404 });
+  const lesson = await requireEnrolledLesson(user.id, params.courseId!, params.lessonId!);
   const progress = await getLessonProgress(user.id, lesson.id);
   const lessonStatus = computeLessonStatus(progress);
 
@@ -60,6 +60,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 export async function action({ request, params }: ActionFunctionArgs) {
   const user = await requireRole(request, ["student"]);
   const lessonId = params.lessonId!;
+  await requireEnrolledLesson(user.id, params.courseId!, lessonId);
 
   const test = await prisma.test.findUnique({
     where: { lessonId },

@@ -2,8 +2,8 @@ import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useFetcher, Link, redirect } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import { requireRole } from "~/lib/session.server";
+import { requireEnrolledLesson } from "~/lib/student-course-access.server";
 import {
-  getLessonById,
   getLessonProgress,
   upsertLessonProgress,
   computeLessonStatus,
@@ -215,8 +215,7 @@ declare global {
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
-  const lesson = await getLessonById(params.lessonId!);
-  if (!lesson) throw new Response("Không tìm thấy", { status: 404 });
+  const lesson = await requireEnrolledLesson(user.id, params.courseId!, params.lessonId!);
 
   const [
     lessonNumber,
@@ -543,6 +542,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 export async function action({ request, params }: ActionFunctionArgs) {
   const user = await requireRole(request, ["student"]);
+  await requireEnrolledLesson(user.id, params.courseId!, params.lessonId!);
   const form = await request.formData();
   const intent = String(form.get("intent") ?? "complete-learning");
 
