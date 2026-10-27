@@ -1,5 +1,5 @@
 import { cn } from "~/lib/utils";
-import { ClipboardCheck, BookOpen, AudioLines } from "lucide-react";
+import { ClipboardCheck, BookOpen, AudioLines, MoveRight } from "lucide-react";
 import { BLOCK_TYPES, BLOCK_META, type LearningBlockType } from "~/lib/learning-blocks";
 
 /** Tab ôn từ vựng là tab inline, không phải route riêng nữa. */
@@ -119,6 +119,10 @@ export function LessonTabs({ activeTab, onTabChange, availableTypes, hasQuiz }: 
             );
         })}
       </div>
+      <p className="flex items-center justify-end gap-1 px-2 pt-1.5 text-xs text-muted-foreground sm:hidden">
+        Vuốt ngang để xem thêm hoạt động
+        <MoveRight className="h-3.5 w-3.5" aria-hidden="true" />
+      </p>
     </div>
   );
 }

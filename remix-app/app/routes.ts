@@ -8,6 +8,8 @@ export default [
   route("api/tts", "routes/api.tts.ts"),
   route("api/pronunciation-recordings/:assessmentId", "routes/api.pronunciation-recordings.$assessmentId.ts"),
   route("uploads/*", "routes/uploads.$.ts"),
+  route("courses/:courseId/lesson/:lessonOrder", "routes/legacy-course-lesson-redirect.ts"),
+  route("courses/:courseId", "routes/legacy-course-redirect.ts"),
 
   // Admin
   route("admin", "routes/admin.tsx", [
