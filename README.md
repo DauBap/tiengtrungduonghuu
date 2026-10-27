@@ -49,6 +49,29 @@ GitHub Actions kiểm tra `https://tiengtrungduonghuu.edu.vn/` mỗi 5 phút và
 
 Workflow lưu trạng thái lần kiểm tra trước trong GitHub Actions cache để chỉ gửi tin khi trạng thái thay đổi; không cần token GitHub bổ sung hay quyền ghi repository. Cảnh báo được phát hiện trong tối đa khoảng 5 phút cộng thời gian GitHub Actions khởi chạy; lịch chạy GitHub có thể trễ khi hệ thống bận. Nếu app không có URL công khai thì cần một thiết bị giám sát khác bên ngoài server.
 
+### Tra cứu số học viên online bằng `/status`
+
+Bot hiện có thể trả lời lệnh `/status` trong chat Telegram đã cấu hình ở `TELEGRAM_CHAT_ID`. Số online là số học viên đang hoạt động, chưa bị xóa, có phiên học khóa học chưa kết thúc và heartbeat trong 2 phút gần nhất. Webhook chỉ xử lý đúng chat đã cho phép và yêu cầu header bí mật của Telegram.
+
+1. Tạo `TELEGRAM_WEBHOOK_SECRET` trên Ubuntu bằng `openssl rand -hex 32`; thêm biến này vào `~/.config/tiengtrungduonghuu/telegram.env` cùng `TELEGRAM_BOT_TOKEN` và `TELEGRAM_CHAT_ID`, đồng thời bảo đảm service app nạp file môi trường đó. Không commit hoặc gửi các giá trị này qua chat.
+2. Deploy ứng dụng có route `/telegram/status` và khởi động lại service để nạp biến môi trường.
+3. Trong shell Ubuntu đã đăng nhập, nạp cấu hình bot hiện có rồi đăng ký webhook. Thay URL nếu app production dùng domain khác:
+
+   ```bash
+   set -a
+   . ~/.config/tiengtrungduonghuu/telegram.env
+   set +a
+   curl --fail-with-body --silent --show-error \
+     --request POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook" \
+     --data-urlencode "url=https://tiengtrungduonghuu.edu.vn/telegram/status" \
+     --data-urlencode "secret_token=${TELEGRAM_WEBHOOK_SECRET}" \
+     --data-urlencode 'allowed_updates=["message"]'
+   ```
+
+4. Gửi `/status` trong chat được cấu hình. Telegram sẽ trả số học viên đang online.
+
+Webhook của bot chỉ có thể trỏ tới một endpoint tại một thời điểm. Nếu bot này đã nhận update qua webhook/polling khác, hãy chuyển handler đó sang cùng endpoint trước khi chạy `setWebhook`.
+
 ## Cấu trúc
 
 ```
