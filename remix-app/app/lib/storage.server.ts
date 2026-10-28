@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { link, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { link, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { createReadStream } from "node:fs";
@@ -28,7 +28,28 @@ export async function readCachedSpeechAudio(cacheKey: string) {
   return readFile(getSpeechCacheFilePath(cacheKey));
 }
 
+export async function getCachedSpeechAudioFileInfo(cacheKey: string) {
+  try {
+    const file = await stat(getSpeechCacheFilePath(cacheKey));
+    if (!file.isFile()) return null;
+    return { size: file.size };
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
 export async function writeCachedSpeechAudio(cacheKey: string, audio: Uint8Array) {
+  return storeCachedSpeechAudio(cacheKey, audio, false);
+}
+
+export async function replaceCachedSpeechAudio(cacheKey: string, audio: Uint8Array) {
+  return storeCachedSpeechAudio(cacheKey, audio, true);
+}
+
+async function storeCachedSpeechAudio(cacheKey: string, audio: Uint8Array, replace: boolean) {
   const destination = getSpeechCacheFilePath(cacheKey);
   const directory = path.dirname(destination);
   await mkdir(directory, { recursive: true, mode: 0o750 });
@@ -36,10 +57,16 @@ export async function writeCachedSpeechAudio(cacheKey: string, audio: Uint8Array
   const temporaryPath = path.join(directory, `.${cacheKey}.${randomUUID()}.tmp`);
   await writeFile(temporaryPath, audio, { mode: 0o640, flag: "wx" });
   try {
-    await link(temporaryPath, destination);
-  } catch (error) {
-    if (!(error && typeof error === "object" && "code" in error && error.code === "EEXIST")) {
-      throw error;
+    if (replace) {
+      await rename(temporaryPath, destination);
+    } else {
+      try {
+        await link(temporaryPath, destination);
+      } catch (error) {
+        if (!(error && typeof error === "object" && "code" in error && error.code === "EEXIST")) {
+          throw error;
+        }
+      }
     }
   } finally {
     await rm(temporaryPath, { force: true });

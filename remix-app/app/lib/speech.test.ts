@@ -78,7 +78,7 @@ test("MeloTTS failure falls back to the browser Chinese voice", async () => {
   }
 });
 
-test("MeloTTS selection overrides vocabulary audio but listening can prefer its recording", async () => {
+test("MeloTTS uses recorded vocabulary audio when available and generates it when missing", async () => {
   const restoreAnimationFrame = mockAnimationFrame();
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
   const originalAudio = Object.getOwnPropertyDescriptor(globalThis, "Audio");
@@ -122,7 +122,11 @@ test("MeloTTS selection overrides vocabulary audio but listening can prefer its 
     const { updateAppSetting } = await import("~/lib/app-settings");
     updateAppSetting("speechEngine", "melo");
 
-    speakChinese("你好", "/audio/vocabulary.mp3");
+    speakChinese("你好", "/audio/vocabulary.mp3", { preferAudio: true });
+    assert.equal(requests.length, 0);
+    assert.equal(audioInstances.at(-1)?.src, "/audio/vocabulary.mp3");
+
+    speakChinese("你好", null, { preferAudio: true });
     await new Promise((resolve) => setTimeout(resolve, 0));
     assert.equal(requests.length, 2);
     assert.deepEqual(JSON.parse(String(requests[0].body)), {

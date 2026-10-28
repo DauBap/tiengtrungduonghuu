@@ -28,6 +28,7 @@ export default [
     route("lessons/:lessonId/blocks/new", "routes/admin.lessons.$lessonId.blocks.new.tsx"),
     route("lessons/:lessonId/blocks/:blockId/edit", "routes/admin.lessons.$lessonId.blocks.$blockId.edit.tsx"),
     route("accounts", "routes/admin.accounts.tsx"),
+    route("speech-audio", "routes/admin.speech-audio.tsx"),
 
     // Bài thi
     route("question-bank", "routes/admin.question-bank._index.tsx"),

@@ -101,7 +101,7 @@ export function VocabularyTable({ items, searchable = false }: VocabularyTablePr
                         variant="ghost"
                         size="sm"
                         className="h-6 w-6 shrink-0 p-0 text-primary hover:bg-primary/10 hover:text-primary"
-                        onClick={() => speakChinese(item.chinese, item.audioUrl)}
+                        onClick={() => speakChinese(item.chinese, item.audioUrl, { preferAudio: true })}
                         title="Nghe phát âm"
                       >
                         <Volume2 className="h-4 w-4" />

@@ -30,7 +30,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   return serveStoredAsset(
     request,
     requestedPath,
-    isSpeechCacheAsset ? { cacheControl: "private, max-age=31536000, immutable" } : undefined,
+    isSpeechCacheAsset ? { cacheControl: "private, no-store" } : undefined,
   );
 }
 

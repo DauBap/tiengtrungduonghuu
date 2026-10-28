@@ -8,7 +8,9 @@ import {
   isWavAudio,
 } from "./speech-audio.server";
 import {
+  getCachedSpeechAudioFileInfo,
   readCachedSpeechAudio,
+  replaceCachedSpeechAudio,
   writeCachedSpeechAudio,
 } from "./storage.server";
 
@@ -39,5 +41,9 @@ test("speech audio is stored under a deterministic uploads path", async (t) => {
 
   assert.equal(filePath, `/uploads/audio/tts/${cacheKey}.wav`);
   assert.deepEqual(await readCachedSpeechAudio(cacheKey), audio);
+  assert.deepEqual(await getCachedSpeechAudioFileInfo(cacheKey), { size: audio.length });
+  const replacementAudio = Buffer.from("RIFFyyyyWAVE");
+  await replaceCachedSpeechAudio(cacheKey, replacementAudio);
+  assert.deepEqual(await readCachedSpeechAudio(cacheKey), replacementAudio);
   await assert.rejects(writeCachedSpeechAudio("../invalid", audio), /không hợp lệ/i);
 });
