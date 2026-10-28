@@ -96,9 +96,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
   try {
     rawGrades = JSON.parse(String(form.get("grades") ?? ""));
   } catch {
-    return { error: "Không đọc được điểm từng câu." };
+    return { error: "Không đọc được điểm từng câu.", attemptId: attempt.id };
   }
-  if (!Array.isArray(rawGrades)) return { error: "Danh sách điểm không hợp lệ." };
+  if (!Array.isArray(rawGrades)) return { error: "Danh sách điểm không hợp lệ.", attemptId: attempt.id };
 
   const grades: TeacherGrammarGrade[] = [];
   for (const rawGrade of rawGrades) {
@@ -107,7 +107,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       || typeof rawGrade.correct !== "boolean"
       || typeof rawGrade.teacherFeedback !== "string"
       || rawGrade.teacherFeedback.length > 5000) {
-      return { error: "Thông tin chấm điểm từng câu không hợp lệ." };
+      return { error: "Thông tin chấm điểm từng câu không hợp lệ.", attemptId: attempt.id };
     }
     grades.push({
       questionId: rawGrade.questionId,
@@ -118,7 +118,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   const results = readGrammarResults(attempt.details);
   const grading = applyTeacherGrammarGrades(results, grades);
-  if (!grading) return { error: "Điểm phải có đúng một lựa chọn cho từng câu trong lượt làm." };
+  if (!grading) return { error: "Điểm phải có đúng một lựa chọn cho từng câu trong lượt làm.", attemptId: attempt.id };
 
   const gradedAt = new Date();
   const updatedDetails = {
@@ -186,7 +186,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     });
   });
 
-  if (intent === "grade-grammar-fill-dashboard") return { success: true };
+  if (intent === "grade-grammar-fill-dashboard") return { success: true, attemptId: attempt.id };
   return redirect(`/teacher/courses/${course.id}/lessons/${lesson.id}/students/${enrollment.userId}/grammar-history/attempts/${attempt.id}`);
 }
 

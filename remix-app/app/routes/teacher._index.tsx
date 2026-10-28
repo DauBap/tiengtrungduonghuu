@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { Link, useFetcher, useLoaderData, useLocation, useNavigate, useRevalidator } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import { getTeacherCourses } from "~/lib/db.server";
 import { formatSchedule, formatNextClass, getNextClassTime } from "~/lib/schedule-utils";
@@ -39,6 +39,8 @@ const DASHBOARD_ACTIVITIES = [
 ] as const;
 
 type DashboardActivityTab = (typeof DASHBOARD_ACTIVITIES)[number]["tab"];
+
+type PendingGrammarAttempt = Awaited<ReturnType<typeof loader>>["classSummaries"][number]["pendingGrammarAttempts"][number];
 
 interface GrammarAttemptData {
   course: { id: string; title: string };
@@ -469,7 +471,7 @@ export default function TeacherIndex() {
   const location = useLocation();
   const navigate = useNavigate();
   const gradingFetcher = useFetcher<GrammarAttemptData & { success?: boolean }>();
-  const gradeSubmitFetcher = useFetcher<{ success?: boolean; error?: string }>();
+  const gradeSubmitFetcher = useFetcher<{ success?: boolean; attemptId?: string; error?: string }>();
   const revalidator = useRevalidator();
   const [selectedClassId, setSelectedClassId] = useState(classSummaries[0]?.id ?? "");
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
@@ -477,8 +479,12 @@ export default function TeacherIndex() {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [pendingGrammarClassId, setPendingGrammarClassId] = useState<string | null>(null);
   const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
+  const [gradingQueue, setGradingQueue] = useState<{ courseId: string; attempt: PendingGrammarAttempt }[]>([]);
+  const [gradingQueueIndex, setGradingQueueIndex] = useState<number | null>(null);
+  const [gradingComplete, setGradingComplete] = useState(false);
   const [grades, setGrades] = useState<TeacherGrammarGrade[]>([]);
   const [initializedGradeAttemptId, setInitializedGradeAttemptId] = useState<string | null>(null);
+  const handledGradeAttemptId = useRef<string | null>(null);
   const selectedClass = classSummaries.find((cls) => cls.id === selectedClassId) ?? classSummaries[0];
   const pendingGrammarClass = classSummaries.find((cls) => cls.id === pendingGrammarClassId);
   const selectedLesson = selectedClass?.lessons.find((lesson) => lesson.id === selectedLessonId)
@@ -529,6 +535,8 @@ export default function TeacherIndex() {
         setSelectedStudentId(null);
         setPendingGrammarClassId(null);
         setGradingAttemptId(null);
+        setGradingQueueIndex(null);
+        setGradingComplete(false);
       }
     };
     window.addEventListener("keydown", closeOnEscape);
@@ -547,11 +555,32 @@ export default function TeacherIndex() {
   }, [gradingData, gradingAttemptId, initializedGradeAttemptId]);
 
   useEffect(() => {
-    if (gradeSubmitFetcher.state !== "idle" || !gradeSubmitFetcher.data?.success) return;
-    setGradingAttemptId(null);
+    const submission = gradeSubmitFetcher.data;
+    if (
+      gradeSubmitFetcher.state !== "idle"
+      || !submission?.success
+      || !submission.attemptId
+      || submission.attemptId !== gradingAttemptId
+      || handledGradeAttemptId.current === submission.attemptId
+    ) return;
+
+    handledGradeAttemptId.current = submission.attemptId;
     setInitializedGradeAttemptId(null);
     revalidator.revalidate();
-  }, [gradeSubmitFetcher.state, gradeSubmitFetcher.data, revalidator]);
+    const nextIndex = (gradingQueueIndex ?? -1) + 1;
+    const nextItem = gradingQueue[nextIndex];
+    if (!nextItem) {
+      setGradingAttemptId(null);
+      setGradingQueueIndex(null);
+      setGradingComplete(true);
+      return;
+    }
+
+    setGradingQueueIndex(nextIndex);
+    setGrades([]);
+    setGradingAttemptId(nextItem.attempt.id);
+    gradingFetcher.load(`/teacher/courses/${nextItem.courseId}/lessons/${nextItem.attempt.lessonId}/students/${nextItem.attempt.userId}/grammar-history/attempts/${nextItem.attempt.id}`);
+  }, [gradeSubmitFetcher.state, gradeSubmitFetcher.data, gradingAttemptId, gradingQueue, gradingQueueIndex, revalidator, gradingFetcher]);
 
   const reminderRows = selectedClass && selectedLesson
     ? selectedClass.activityData.flatMap((student) => {
@@ -572,11 +601,27 @@ export default function TeacherIndex() {
   const updateGrade = (questionId: string, patch: Partial<TeacherGrammarGrade>) => {
     setGrades((current) => current.map((grade) => grade.questionId === questionId ? { ...grade, ...patch } : grade));
   };
-  const openGradingAttempt = (courseId: string, lessonId: string, studentId: string, attemptId: string) => {
-    setGradingAttemptId(attemptId);
+  const openGradingAttempt = (courseId: string, attempt: PendingGrammarAttempt, queueIndex: number) => {
+    setGradingQueueIndex(queueIndex);
+    setGradingAttemptId(attempt.id);
     setInitializedGradeAttemptId(null);
     setGrades([]);
-    gradingFetcher.load(`/teacher/courses/${courseId}/lessons/${lessonId}/students/${studentId}/grammar-history/attempts/${attemptId}`);
+    gradingFetcher.load(`/teacher/courses/${courseId}/lessons/${attempt.lessonId}/students/${attempt.userId}/grammar-history/attempts/${attempt.id}`);
+  };
+  const startGradingQueue = (
+    classId: string,
+    courseId: string,
+    attempts: PendingGrammarAttempt[],
+    selectedAttempt: PendingGrammarAttempt,
+  ) => {
+    const selectedIndex = attempts.findIndex((attempt) => attempt.id === selectedAttempt.id);
+    const orderedAttempts = selectedIndex < 0
+      ? attempts
+      : [...attempts.slice(selectedIndex), ...attempts.slice(0, selectedIndex)];
+    setPendingGrammarClassId(classId);
+    setGradingQueue(orderedAttempts.map((attempt) => ({ courseId, attempt })));
+    setGradingComplete(false);
+    openGradingAttempt(courseId, selectedAttempt, 0);
   };
 
   return (
@@ -665,7 +710,12 @@ export default function TeacherIndex() {
                         {cls.pendingGrammarAttempts.length > 0 && (
                           <button
                             type="button"
-                            onClick={() => setPendingGrammarClassId(cls.id)}
+                            onClick={() => {
+                              setPendingGrammarClassId(cls.id);
+                              setGradingQueue(cls.pendingGrammarAttempts.map((attempt) => ({ courseId: cls.courseId, attempt })));
+                              setGradingQueueIndex(null);
+                              setGradingComplete(false);
+                            }}
                             className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-primary bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                           >
                             <ClipboardList className="h-3.5 w-3.5" aria-hidden="true" />
@@ -978,7 +1028,14 @@ export default function TeacherIndex() {
                                               ) : result.status === "waiting" && pending ? (
                                                 <button
                                                   type="button"
-                                                  onClick={() => openGradingAttempt(selectedClass.courseId, selectedLesson.id, student.student.id, pending.id)}
+                                                  onClick={() => {
+                                                    startGradingQueue(
+                                                      selectedClass.id,
+                                                      selectedClass.courseId,
+                                                      selectedClass.pendingGrammarAttempts,
+                                                      pending,
+                                                    );
+                                                  }}
                                                   className="inline-flex rounded-md bg-blue-100 px-2.5 py-2 text-xs font-medium text-blue-800 hover:bg-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:hover:bg-blue-950"
                                                 >
                                                   Chờ chấm <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
@@ -1119,12 +1176,15 @@ export default function TeacherIndex() {
           </Card>
         )}
 
-        {pendingGrammarClass && pendingGrammarClass.pendingGrammarAttempts.length > 0 && (
+        {pendingGrammarClass && pendingGrammarClass.pendingGrammarAttempts.length > 0 && !gradingAttemptId && !gradingComplete && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
             role="presentation"
             onMouseDown={(event) => {
-              if (event.target === event.currentTarget) setPendingGrammarClassId(null);
+              if (event.target === event.currentTarget) {
+                setPendingGrammarClassId(null);
+                setGradingQueueIndex(null);
+              }
             }}
           >
             <section
@@ -1146,7 +1206,10 @@ export default function TeacherIndex() {
                 <button
                   type="button"
                   aria-label="Đóng danh sách bài chờ chấm"
-                  onClick={() => setPendingGrammarClassId(null)}
+                  onClick={() => {
+                    setPendingGrammarClassId(null);
+                    setGradingQueueIndex(null);
+                  }}
                   className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-muted"
                 >
                   <X className="h-4 w-4" />
@@ -1158,8 +1221,12 @@ export default function TeacherIndex() {
                     <button
                       type="button"
                       onClick={() => {
-                        setPendingGrammarClassId(null);
-                        openGradingAttempt(pendingGrammarClass.courseId, attempt.lessonId, attempt.userId, attempt.id);
+                        startGradingQueue(
+                          pendingGrammarClass.id,
+                          pendingGrammarClass.courseId,
+                          pendingGrammarClass.pendingGrammarAttempts,
+                          attempt,
+                        );
                       }}
                       className="group flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
@@ -1231,13 +1298,10 @@ export default function TeacherIndex() {
           </div>
         )}
 
-        {gradingAttemptId && (
+        {pendingGrammarClass && gradingAttemptId && (
           <div
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-3 sm:p-6"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
             role="presentation"
-            onMouseDown={(event) => {
-              if (event.target === event.currentTarget) setGradingAttemptId(null);
-            }}
           >
             <section
               role="dialog"
@@ -1248,6 +1312,11 @@ export default function TeacherIndex() {
               <div className="flex items-start justify-between gap-3 border-b p-4 sm:p-5">
                 <div className="min-w-0">
                   <h2 id="grammar-grading-title" className="text-lg font-semibold">Chấm bài ngữ pháp</h2>
+                  {gradingQueueIndex != null && (
+                    <p className="mt-1 text-sm font-medium text-primary">
+                      Bài {gradingQueueIndex + 1}/{gradingQueue.length} · {pendingGrammarClass.name}
+                    </p>
+                  )}
                   {gradingData && (
                     <p className="mt-1 text-sm text-muted-foreground">
                       {gradingData.student.name ?? gradingData.student.email} · {gradingData.lesson.title} · {gradingData.attempt.sectionTitle}
@@ -1257,7 +1326,12 @@ export default function TeacherIndex() {
                 <button
                   type="button"
                   aria-label="Đóng cửa sổ chấm bài"
-                  onClick={() => setGradingAttemptId(null)}
+                  onClick={() => {
+                    setPendingGrammarClassId(null);
+                    setGradingAttemptId(null);
+                    setGradingQueueIndex(null);
+                    setGradingComplete(false);
+                  }}
                   className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-muted"
                 >
                   <X className="h-4 w-4" />
@@ -1278,7 +1352,7 @@ export default function TeacherIndex() {
                   <input type="hidden" name="intent" value="grade-grammar-fill-dashboard" />
                   <input type="hidden" name="grades" value={JSON.stringify(grades)} />
                   <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
-                    {gradeSubmitFetcher.data?.error && (
+                    {gradeSubmitFetcher.data?.error && gradeSubmitFetcher.data.attemptId === gradingAttemptId && (
                       <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
                         {gradeSubmitFetcher.data.error}
                       </p>
@@ -1336,14 +1410,51 @@ export default function TeacherIndex() {
                       Điểm dự kiến: {grades.length ? `${Math.round((grades.filter((grade) => grade.correct).length / grades.length) * 100)}%` : "—"}
                     </p>
                     <div className="flex gap-2">
-                      <Button type="button" variant="outline" onClick={() => setGradingAttemptId(null)}>Hủy</Button>
+                      <Button type="button" variant="outline" onClick={() => {
+                        setPendingGrammarClassId(null);
+                        setGradingAttemptId(null);
+                        setGradingQueueIndex(null);
+                        setGradingComplete(false);
+                      }}>Đóng</Button>
                       <Button type="submit" disabled={gradeSubmitFetcher.state === "submitting" || grades.length !== gradingData.attempt.results.length || grades.length === 0}>
-                        {gradeSubmitFetcher.state === "submitting" ? "Đang lưu..." : "Lưu điểm"}
+                        {gradeSubmitFetcher.state === "submitting"
+                          ? "Đang lưu..."
+                          : gradingQueueIndex != null && gradingQueueIndex < gradingQueue.length - 1
+                            ? "Lưu & chấm bài tiếp"
+                            : "Lưu điểm"}
                       </Button>
                     </div>
                   </div>
                 </gradeSubmitFetcher.Form>
               )}
+            </section>
+          </div>
+        )}
+        {pendingGrammarClass && gradingComplete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6">
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="grammar-grading-complete-title"
+              className="w-full max-w-md rounded-xl border bg-background p-6 text-center shadow-xl"
+            >
+              <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-600" aria-hidden="true" />
+              <h2 id="grammar-grading-complete-title" className="mt-3 text-lg font-semibold">Đã chấm xong</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Bạn đã chấm {gradingQueue.length} bài của lớp {pendingGrammarClass.name}.
+              </p>
+              <Button
+                type="button"
+                className="mt-5"
+                onClick={() => {
+                  setPendingGrammarClassId(null);
+                  setGradingQueue([]);
+                  setGradingQueueIndex(null);
+                  setGradingComplete(false);
+                }}
+              >
+                Đóng
+              </Button>
             </section>
           </div>
         )}
