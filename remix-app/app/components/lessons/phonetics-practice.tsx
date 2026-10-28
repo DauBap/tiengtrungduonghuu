@@ -1,7 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { Check, Eye, RotateCcw, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
 import { cn } from "~/lib/utils";
 import type { PhoneticsConfig, PhoneticsItem, PhoneticsSection } from "~/lib/learning-blocks";
 import { TONES, isPhoneticsAnswerCorrect, type PhoneticsAnswer } from "~/lib/phonetics";
@@ -194,9 +193,20 @@ function PhoneticsSectionCard({
         {(savedScore || reviewGroup) && (
           <div className="flex flex-wrap items-center gap-2">
             {savedScore?.correctCount != null && savedScore.totalCount != null && (
-              <Badge variant="outline" className="shrink-0">
-                Điểm cao nhất {savedScore.correctCount}/{savedScore.totalCount}
-              </Badge>
+              <div
+                className="flex shrink-0 items-center gap-3 rounded-lg border border-primary/25 bg-primary/5 px-3 py-2"
+                aria-label={`Điểm cao nhất: ${savedScore.correctCount} trên ${savedScore.totalCount} câu`}
+              >
+                <span className="text-xs font-medium text-muted-foreground">Điểm cao nhất</span>
+                <span className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-bold leading-none tabular-nums text-primary">
+                    {savedScore.score ?? Math.round((savedScore.correctCount / savedScore.totalCount) * 100)}%
+                  </span>
+                  <span className="text-xs font-medium tabular-nums text-muted-foreground">
+                    {savedScore.correctCount}/{savedScore.totalCount}
+                  </span>
+                </span>
+              </div>
             )}
             {reviewGroup && (
               <Button
@@ -363,11 +373,30 @@ function PhoneticsSectionCard({
         </Button>
       </div>
 
-      <p className="mt-3 text-sm font-semibold" aria-live="polite">
-        {checked
-          ? `Số câu đúng: ${correctCount} / ${section.items.length}`
-          : `Đã làm: ${answeredCount} / ${section.items.length}`}
-      </p>
+      {checked ? (
+        <div
+          className="mt-4 flex items-center justify-between gap-4 rounded-lg border border-primary/25 bg-primary/5 px-4 py-3"
+          aria-live="polite"
+          aria-label={`Kết quả: ${correctCount} trên ${section.items.length} câu đúng, ${Math.round((correctCount / section.items.length) * 100)} phần trăm`}
+        >
+          <div>
+            <p className="text-sm font-semibold">Kết quả lần này</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">Số câu trả lời đúng</p>
+          </div>
+          <div className="flex shrink-0 items-baseline gap-2 text-right">
+            <span className="text-2xl font-bold leading-none tabular-nums text-primary">
+              {correctCount}<span className="text-base text-muted-foreground">/{section.items.length}</span>
+            </span>
+            <span className="text-sm font-semibold tabular-nums text-muted-foreground">
+              {Math.round((correctCount / section.items.length) * 100)}%
+            </span>
+          </div>
+        </div>
+      ) : (
+        <p className="mt-3 text-sm text-muted-foreground" aria-live="polite">
+          Đã làm: <span className="font-semibold tabular-nums text-foreground">{answeredCount} / {section.items.length}</span>
+        </p>
+      )}
     </article>
   );
 }
