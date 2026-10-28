@@ -2441,13 +2441,21 @@ export default function LessonDetail() {
               <section className="self-start rounded-xl border bg-muted/20 p-4 lg:sticky lg:top-20">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="text-sm font-bold uppercase tracking-wide text-primary">File nghe</span>
-                  <span className="rounded-full bg-success/10 px-2 py-1 text-[11px] font-bold text-success">Audio</span>
+                  {selectedAudioScript.audioUrl && (
+                    <span className="rounded-full bg-success/10 px-2 py-1 text-[11px] font-bold text-success">Audio</span>
+                  )}
                 </div>
                 <div className="rounded-xl border bg-background p-4">
                   <div className="flex items-center justify-center">
-                    <audio controls className="w-full" src={selectedAudioScript.audioUrl ?? ""}>
-                      <source src={selectedAudioScript.audioUrl ?? ""} />
-                    </audio>
+                    {selectedAudioScript.audioUrl ? (
+                      <audio controls className="w-full" src={selectedAudioScript.audioUrl}>
+                        <source src={selectedAudioScript.audioUrl} />
+                      </audio>
+                    ) : (
+                      <div className="flex min-h-20 w-full items-center justify-center rounded-lg border border-dashed text-center text-sm text-muted-foreground">
+                        Chưa có file nghe cho bài khóa này.
+                      </div>
+                    )}
                   </div>
                   <div className="mt-4 border-t pt-4">
                     <Button
@@ -2461,7 +2469,9 @@ export default function LessonDetail() {
                       Đọc bằng giọng máy
                     </Button>
                     <p className="mt-2 text-center text-xs text-muted-foreground">
-                      Dùng khi file nghe không phát được.
+                      {selectedAudioScript.audioUrl
+                        ? "Dùng khi file nghe không phát được."
+                        : "Nghe nội dung bài khóa bằng giọng máy."}
                     </p>
                   </div>
                 </div>
@@ -2471,15 +2481,17 @@ export default function LessonDetail() {
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm font-bold uppercase tracking-wide text-primary">Script</span>
                   <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      aria-pressed={showLessonPinyin}
-                      onClick={() => setShowLessonPinyin((visible) => !visible)}
-                    >
-                      {showLessonPinyin ? "Ẩn pinyin" : "Hiện pinyin"}
-                    </Button>
+                    {scriptSpeakers.some((speaker) => speaker.pinyin.trim()) && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        aria-pressed={showLessonPinyin}
+                        onClick={() => setShowLessonPinyin((visible) => !visible)}
+                      >
+                        {showLessonPinyin ? "Ẩn pinyin" : "Hiện pinyin"}
+                      </Button>
+                    )}
                     <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary">
                       {showScript ? "Hiển thị" : "Đã ẩn"}
                     </span>
@@ -2496,10 +2508,12 @@ export default function LessonDetail() {
                         </div>
                         <div className="mt-2 space-y-2 text-base">
                           <p className="content-text hanzi-display !text-[26px] font-medium leading-relaxed text-foreground">{speaker.chinese}</p>
-                          {showLessonPinyin && (
+                          {showLessonPinyin && speaker.pinyin.trim() && (
                             <p className="content-text pinyin-text !text-[24px] leading-relaxed text-muted-foreground">{speaker.pinyin}</p>
                           )}
-                          <p className="content-text !text-[24px] leading-relaxed text-muted-foreground">{speaker.translation}</p>
+                          {speaker.translation.trim() && (
+                            <p className="content-text !text-[24px] leading-relaxed text-muted-foreground">{speaker.translation}</p>
+                          )}
                         </div>
                       </div>
                     ))}
