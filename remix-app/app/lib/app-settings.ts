@@ -1,14 +1,12 @@
 import { useSyncExternalStore } from "react";
 
-export type SpeechEngine = "edge" | "local";
-export type SpeechVoice = "xiaoxiao" | "xiaoyi" | "liaoning";
-export type SpeechStatus = "idle" | "edge" | "local" | "fallback";
+export type SpeechEngine = "melo" | "local";
+export type SpeechStatus = "idle" | "melo" | "local" | "fallback";
 export type ThemePreference = "light" | "dark" | "system";
 
 export interface AppSettings {
   showPinyin: boolean;
   speechEngine: SpeechEngine;
-  speechVoice: SpeechVoice;
   themePreference: ThemePreference;
 }
 
@@ -16,8 +14,7 @@ const STORAGE_KEY = "chinese-study-settings";
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   showPinyin: true,
-  speechEngine: "edge",
-  speechVoice: "xiaoxiao",
+  speechEngine: "melo",
   themePreference: "system",
 };
 
@@ -35,10 +32,7 @@ function parseSettings(raw: string | null): AppSettings {
     const saved = value as Partial<AppSettings>;
     return {
       showPinyin: typeof saved.showPinyin === "boolean" ? saved.showPinyin : true,
-      speechEngine: saved.speechEngine === "local" ? "local" : "edge",
-      speechVoice: saved.speechVoice === "xiaoyi" || saved.speechVoice === "liaoning"
-        ? saved.speechVoice
-        : "xiaoxiao",
+      speechEngine: saved.speechEngine === "local" ? "local" : "melo",
       themePreference: saved.themePreference === "light" || saved.themePreference === "dark"
         ? saved.themePreference
         : "system",

@@ -1,0 +1,20 @@
+[Unit]
+Description=Local MeloTTS Chinese speech API
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/apps/tiengtrungduonghuu/remix-app/local-tts
+Environment=PYTHONUNBUFFERED=1
+Environment=OMP_NUM_THREADS=4
+Environment=MKL_NUM_THREADS=4
+Environment=MELO_TORCH_THREADS=4
+Environment=HF_HOME=%h/.cache/huggingface
+ExecStart=%h/apps/tiengtrungduonghuu/remix-app/local-tts/.venv/bin/python server.py
+Restart=on-failure
+RestartSec=10s
+TimeoutStartSec=0
+UMask=0077
+
+[Install]
+WantedBy=default.target

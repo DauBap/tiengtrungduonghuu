@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-test("Edge TTS failure falls back to the browser Chinese voice", async () => {
+test("MeloTTS failure falls back to the browser Chinese voice", async () => {
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
   const originalUtterance = Object.getOwnPropertyDescriptor(globalThis, "SpeechSynthesisUtterance");
   const originalFetch = Object.getOwnPropertyDescriptor(globalThis, "fetch");
@@ -32,7 +32,7 @@ test("Edge TTS failure falls back to the browser Chinese voice", async () => {
   });
   Object.defineProperty(globalThis, "fetch", {
     configurable: true,
-    value: async () => { throw new Error("Edge TTS unavailable"); },
+    value: async () => { throw new Error("MeloTTS unavailable"); },
   });
 
   try {
@@ -53,7 +53,7 @@ test("Edge TTS failure falls back to the browser Chinese voice", async () => {
   }
 });
 
-test("Edge selection overrides vocabulary audio but listening can prefer its recording", async () => {
+test("MeloTTS selection overrides vocabulary audio but listening can prefer its recording", async () => {
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
   const originalAudio = Object.getOwnPropertyDescriptor(globalThis, "Audio");
   const originalFetch = Object.getOwnPropertyDescriptor(globalThis, "fetch");
@@ -91,16 +91,13 @@ test("Edge selection overrides vocabulary audio but listening can prefer its rec
   try {
     const { speakChinese, stopSpeaking } = await import("~/lib/speech");
     const { updateAppSetting } = await import("~/lib/app-settings");
-    updateAppSetting("speechEngine", "edge");
-    updateAppSetting("speechVoice", "xiaoyi");
+    updateAppSetting("speechEngine", "melo");
 
     speakChinese("你好", "/audio/vocabulary.mp3");
     await new Promise((resolve) => setTimeout(resolve, 0));
     assert.equal(requests.length, 1);
     assert.deepEqual(JSON.parse(String(requests[0].body)), {
       text: "你好",
-      engine: "edge",
-      voice: "xiaoyi",
     });
 
     speakChinese("你好", "/audio/listening-question.mp3", { preferAudio: true });
@@ -117,7 +114,7 @@ test("Edge selection overrides vocabulary audio but listening can prefer its rec
   }
 });
 
-test("Edge temporary failures fall back locally and pause further Edge requests", async () => {
+test("MeloTTS failures fall back locally on each request", async () => {
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
   const originalUtterance = Object.getOwnPropertyDescriptor(globalThis, "SpeechSynthesisUtterance");
   const originalFetch = Object.getOwnPropertyDescriptor(globalThis, "fetch");
@@ -150,9 +147,8 @@ test("Edge temporary failures fall back locally and pause further Edge requests"
     configurable: true,
     value: async () => {
       requestCount += 1;
-      return Response.json({ error: "Edge TTS is temporarily unavailable" }, {
+      return Response.json({ error: "MeloTTS is temporarily unavailable" }, {
         status: 503,
-        headers: { "Retry-After": "30" },
       });
     },
   });
@@ -160,14 +156,14 @@ test("Edge temporary failures fall back locally and pause further Edge requests"
   try {
     const { speakChinese, stopSpeaking } = await import("~/lib/speech");
     const { updateAppSetting } = await import("~/lib/app-settings");
-    updateAppSetting("speechEngine", "edge");
+    updateAppSetting("speechEngine", "melo");
 
     speakChinese("你好");
     await new Promise((resolve) => setTimeout(resolve, 0));
     speakChinese("再见");
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    assert.equal(requestCount, 1);
+    assert.equal(requestCount, 2);
     assert.equal(localSpeechCount, 2);
     stopSpeaking();
   } finally {

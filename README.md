@@ -49,6 +49,13 @@ GitHub Actions kiểm tra `https://tiengtrungduonghuu.edu.vn/` mỗi 5 phút và
 
 Workflow lưu trạng thái lần kiểm tra trước trong GitHub Actions cache để chỉ gửi tin khi trạng thái thay đổi; không cần token GitHub bổ sung hay quyền ghi repository. Cảnh báo được phát hiện trong tối đa khoảng 5 phút cộng thời gian GitHub Actions khởi chạy; lịch chạy GitHub có thể trễ khi hệ thống bận. Nếu app không có URL công khai thì cần một thiết bị giám sát khác bên ngoài server.
 
+## MeloTTS trên server
+
+Ứng dụng có thể dùng MeloTTS chạy CPU trên Ubuntu qua service nội bộ tại
+`127.0.0.1:8766`; nếu service lỗi, trình duyệt tự dùng giọng tiếng Trung có
+sẵn. Hướng dẫn cài Python 3.9 trong virtual environment riêng, tải model và
+chạy systemd user service nằm trong [remix-app/local-tts/README.md](remix-app/local-tts/README.md).
+
 ### Tra cứu số học viên online bằng `/status`
 
 Bot hiện có thể trả lời lệnh `/status` trong chat Telegram đã cấu hình ở `TELEGRAM_CHAT_ID`. Số online là số học viên đang hoạt động, chưa bị xóa, có phiên học khóa học chưa kết thúc và heartbeat trong 2 phút gần nhất. Webhook chỉ xử lý đúng chat đã cho phép và yêu cầu header bí mật của Telegram.

@@ -1,7 +1,7 @@
 /**
  * Phát âm tiếng Trung.
  *
- * Dùng file audio có sẵn trước; nếu không có thì chọn Edge TTS hoặc giọng máy.
+ * Dùng file audio có sẵn trước; nếu không có thì chọn MeloTTS hoặc giọng máy.
  */
 import { getAppSettings, setSpeechStatus } from "~/lib/app-settings";
 
@@ -28,16 +28,6 @@ let activeAudio: HTMLAudioElement | null = null;
 let activeObjectUrl: string | null = null;
 let activeController: AbortController | null = null;
 let speechRequestId = 0;
-let edgeTtsCooldownUntil = 0;
-
-function retryDelayMs(retryAfter: string | null): number {
-  if (!retryAfter) return 30_000;
-  const seconds = Number(retryAfter);
-  const delay = Number.isFinite(seconds)
-    ? seconds * 1_000
-    : Date.parse(retryAfter) - Date.now();
-  return Number.isFinite(delay) ? Math.max(1_000, Math.min(delay, 5 * 60_000)) : 30_000;
-}
 
 export function speakChinese(
   text: string,
@@ -70,22 +60,16 @@ export function speakChinese(
 }
 
 function speakSelectedTts(text: string): boolean {
-  if (getAppSettings().speechEngine === "edge") {
+  if (getAppSettings().speechEngine === "melo") {
     const requestId = speechRequestId;
-    void speakWithSelectedTts(text, requestId);
+    void speakWithMeloTts(text, requestId);
     return true;
   }
   setSpeechStatus("local");
   return speakWithTts(text);
 }
 
-async function speakWithSelectedTts(text: string, requestId: number) {
-  if (Date.now() < edgeTtsCooldownUntil) {
-    setSpeechStatus("fallback");
-    speakWithTts(text);
-    return;
-  }
-
+async function speakWithMeloTts(text: string, requestId: number) {
   const controller = new AbortController();
   let fallbackStarted = false;
   activeController = controller;
@@ -93,29 +77,21 @@ async function speakWithSelectedTts(text: string, requestId: number) {
     const response = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text,
-        engine: "edge",
-        voice: getAppSettings().speechVoice,
-      }),
+      body: JSON.stringify({ text }),
       signal: controller.signal,
     });
     if (!response.ok) {
-      const retryAfter = response.headers.get("Retry-After");
-      if (response.status === 429 || retryAfter) {
-        edgeTtsCooldownUntil = Date.now() + retryDelayMs(retryAfter);
-      }
-      throw new Error(response.status === 429 ? "Edge TTS rate limit reached" : "Edge TTS request failed");
+      throw new Error("MeloTTS request failed");
     }
     const audioBlob = await response.blob();
-    if (audioBlob.size === 0) throw new Error("Edge TTS returned empty audio");
+    if (audioBlob.size === 0) throw new Error("MeloTTS returned empty audio");
     const objectUrl = URL.createObjectURL(audioBlob);
     if (requestId !== speechRequestId) {
       URL.revokeObjectURL(objectUrl);
       return;
     }
     activeObjectUrl = objectUrl;
-    setSpeechStatus("edge");
+    setSpeechStatus("melo");
     const audio = new Audio(objectUrl);
     activeAudio = audio;
     audio.onended = releaseActiveAudio;
