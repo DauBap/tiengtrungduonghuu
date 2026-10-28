@@ -187,7 +187,7 @@ function getPronunciationEvaluation(score: number) {
   return "CHƯA ĐẠT, VUI LÒNG ĐỌC LẠI";
 }
 
-function versionLessonAudioUrl(audioUrl: string | null) {
+function versionAudioUrl(audioUrl: string | null) {
   if (!audioUrl?.startsWith("/uploads/audio/")) return audioUrl;
   const version =
     process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12)
@@ -385,7 +385,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   // Ngữ âm: config đọc từ block riêng, không qua `blocks`. Mỗi section có điểm
   // riêng nên `mode` của attempt mang id section (xem action submit-phonetics-attempt).
   const phonetics = phoneticsConfig
-    ? { title: "Ngữ âm", config: phoneticsConfig }
+    ? {
+        title: "Ngữ âm",
+        config: {
+          ...phoneticsConfig,
+          sections: phoneticsConfig.sections.map((section) => ({
+            ...section,
+            audio: versionAudioUrl(section.audio),
+          })),
+        },
+      }
     : null;
   const phoneticsSectionScores: Record<number, PhoneticsSectionScore> = {};
   for (const attempt of phoneticsAttempts) {
@@ -482,7 +491,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     ...lesson,
     audioScripts: lesson.audioScripts?.map((script) => ({
       ...script,
-      audioUrl: versionLessonAudioUrl(script.audioUrl),
+      audioUrl: versionAudioUrl(script.audioUrl),
     })),
     grammarSections: lesson.grammarSections.map((section) => ({
       ...section,

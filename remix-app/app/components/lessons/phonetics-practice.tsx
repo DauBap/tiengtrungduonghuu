@@ -1,6 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Check, Eye, Headphones, Pause, RotateCcw, X } from "lucide-react";
-import { AudioSeekBar } from "~/components/audio/audio-seek-bar";
+import { Check, Eye, RotateCcw, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { cn } from "~/lib/utils";
@@ -151,9 +150,6 @@ function PhoneticsSectionCard({
   const [checked, setChecked] = useState(false);
   const [showReview, setShowReview] = useState(false);
   const [playbackRate, setPlaybackRate] = useState<(typeof playbackRates)[number]>(1);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -165,18 +161,6 @@ function PhoneticsSectionCard({
     const value = answers[item.id];
     return item.type === "tone" ? value != null && value !== "" : typeof value === "string" && value.trim() !== "";
   }).length;
-
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    setPlaybackError(null);
-    if (isPlaying) {
-      audio.pause();
-      return;
-    }
-    audio.playbackRate = playbackRate;
-    audio.play().catch(() => setPlaybackError("Không phát được audio. Vui lòng thử lại."));
-  };
 
   const changeRate = (rate: (typeof playbackRates)[number]) => {
     setPlaybackRate(rate);
@@ -304,56 +288,44 @@ function PhoneticsSectionCard({
       )}
 
       {section.audio ? (
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="mt-4 space-y-3">
           <audio
+            key={section.audio}
             ref={audioRef}
+            controls
             src={section.audio}
-            preload="none"
-            onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
-            onDurationChange={(event) => setDuration(event.currentTarget.duration)}
-            onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-            onEnded={() => {
-              setIsPlaying(false);
-              setCurrentTime(0);
+            preload="metadata"
+            className="w-full"
+            onLoadStart={() => setPlaybackError(null)}
+            onLoadedMetadata={(event) => {
+              event.currentTarget.playbackRate = playbackRate;
             }}
             onError={() => {
-              setIsPlaying(false);
               setPlaybackError("Không tải được file audio của phần này.");
             }}
           />
-          <Button type="button" variant="ghost" size="sm" onClick={togglePlay}>
-            {isPlaying ? <Pause className="mr-1.5 h-4 w-4" /> : <Headphones className="mr-1.5 h-4 w-4" />}
-            {isPlaying ? "Tạm dừng" : "Nghe"}
-          </Button>
-          <div className="inline-flex overflow-hidden rounded-md border" role="group" aria-label="Tốc độ phát">
-            {playbackRates.map((rate) => (
-              <button
-                key={rate}
-                type="button"
-                aria-pressed={playbackRate === rate}
-                onClick={() => changeRate(rate)}
-                className={cn(
-                  "px-2.5 py-1.5 text-xs transition-colors",
-                  playbackRate === rate
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted",
-                )}
-              >
-                {rate}×
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs text-muted-foreground">Tốc độ phát</span>
+            <div className="inline-flex overflow-hidden rounded-md border" role="group" aria-label="Tốc độ phát">
+              {playbackRates.map((rate) => (
+                <button
+                  key={rate}
+                  type="button"
+                  aria-pressed={playbackRate === rate}
+                  onClick={() => changeRate(rate)}
+                  className={cn(
+                    "px-2.5 py-1.5 text-xs transition-colors",
+                    playbackRate === rate
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted",
+                  )}
+                >
+                  {rate}×
+                </button>
+              ))}
+            </div>
+            <span className="text-xs text-muted-foreground">Nghe được không giới hạn số lần</span>
           </div>
-          <span className="text-xs text-muted-foreground">Nghe được không giới hạn số lần</span>
-          <AudioSeekBar
-            className="basis-full"
-            currentTime={currentTime}
-            duration={duration}
-            onSeek={(time) => {
-              if (audioRef.current) audioRef.current.currentTime = time;
-            }}
-          />
         </div>
       ) : (
         <p className="mt-4 text-xs text-muted-foreground">Phần này chưa có file ghi âm.</p>
