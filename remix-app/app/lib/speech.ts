@@ -6,9 +6,6 @@
 import { getAppSettings, setSpeechStatus } from "~/lib/app-settings";
 import { toast } from "sonner";
 
-const FIRST_GENERATION_MESSAGE =
-  "Đang tạo giọng đọc AI lần đầu cho nội dung này. Bạn chờ một chút nhé — những lần sau sẽ phát nhanh hơn.";
-
 export function isSpeechSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
@@ -104,9 +101,12 @@ async function speakWithMeloTts(text: string, requestId: number) {
     if (!isCached) {
       loadingToastShown = true;
       activeLoadingToastId = loadingToastId;
-      toast.loading(FIRST_GENERATION_MESSAGE, {
+      toast.loading("Đang tạo giọng đọc AI", {
         id: loadingToastId,
+        description: "Lần đầu có thể cần chờ thêm một chút; những lần sau sẽ phát nhanh hơn.",
         duration: Infinity,
+        position: "top-center",
+        style: { width: "min(26rem, calc(100vw - 2rem))" },
       });
     }
 
