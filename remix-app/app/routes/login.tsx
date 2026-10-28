@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Form, Link, redirect, useActionData, useNavigation } from "react-router";
+import { Form, Link, redirect, useActionData, useLoaderData, useNavigation } from "react-router";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
+import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { prisma } from "~/lib/prisma.server";
 import { createUserSession, getUserFromSession } from "~/lib/session.server";
@@ -12,68 +13,121 @@ import { Languages, Loader2, Mail, Lock, ArrowRight } from "lucide-react";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+type LoginFailureStage = "session-check" | "read-form" | "find-account" | "verify-password" | "create-session" | "session-cookie";
+type LoginDiagnostic = { reference: string; stage: LoginFailureStage };
+
+function createLoginDiagnostic(stage: LoginFailureStage): LoginDiagnostic {
+  return { reference: `LGN-${randomUUID().slice(0, 8).toUpperCase()}`, stage };
+}
+
+function logLoginFailure(diagnostic: LoginDiagnostic, error: unknown) {
+  console.error("[login] Unexpected login failure", {
+    reference: diagnostic.reference,
+    stage: diagnostic.stage,
+    error,
+  });
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
-  const user = await getUserFromSession(request);
-  if (user) {
-    if (user.mustChangePassword) return redirect("/change-password");
-    const dest = { admin: "/admin", teacher: "/teacher", student: "/student" };
-    return redirect(dest[user.role]);
+  const sessionCheck = new URL(request.url).searchParams.get("sessionCheck");
+  try {
+    const user = await getUserFromSession(request);
+    if (user) {
+      if (user.mustChangePassword) return redirect("/change-password");
+      const dest = { admin: "/admin", teacher: "/teacher", student: "/student" };
+      return redirect(dest[user.role]);
+    }
+    if (sessionCheck && /^LGN-[A-F0-9]{8}$/.test(sessionCheck)) {
+      return {
+        diagnostic: { reference: sessionCheck, stage: "session-cookie" as const },
+      };
+    }
+    return null;
+  } catch (error) {
+    if (error instanceof Response && error.status >= 300 && error.status < 400) throw error;
+    const diagnostic = createLoginDiagnostic("session-check");
+    logLoginFailure(diagnostic, error);
+    return { diagnostic };
   }
-  return null;
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const identifier = String(formData.get("email") ?? "").toLowerCase().trim();
-  const password = String(formData.get("password") ?? "");
+  let stage: LoginFailureStage = "read-form";
+  try {
+    const formData = await request.formData();
+    const identifier = String(formData.get("email") ?? "").toLowerCase().trim();
+    const password = String(formData.get("password") ?? "");
 
-  if (!identifier) {
-    return { error: "Vui lòng nhập email hoặc tài khoản", field: "email" as const };
-  }
+    if (!identifier) {
+      return { error: "Vui lòng nhập email hoặc tài khoản", field: "email" as const };
+    }
 
-  if (identifier.includes("@") && !EMAIL_RE.test(identifier)) {
-    return { error: "Email không đúng định dạng, ví dụ: ban@example.com", field: "email" as const };
-  }
+    if (identifier.includes("@") && !EMAIL_RE.test(identifier)) {
+      return { error: "Email không đúng định dạng, ví dụ: ban@example.com", field: "email" as const };
+    }
 
-  if (!password) {
-    return { error: "Vui lòng nhập mật khẩu", field: "password" as const };
-  }
+    if (!password) {
+      return { error: "Vui lòng nhập mật khẩu", field: "password" as const };
+    }
 
-  const matchingUsers = identifier.includes("@")
-    ? [await prisma.user.findUnique({ where: { email: identifier } })].filter((user) => user !== null)
-    : await prisma.user.findMany({
+    stage = "find-account";
+    const matchingUsers = identifier.includes("@")
+      ? [await prisma.user.findUnique({ where: { email: identifier } })].filter((user) => user !== null)
+      : await prisma.user.findMany({
         where: { email: { startsWith: `${identifier}@`, mode: "insensitive" } },
         take: 2,
       });
 
-  if (matchingUsers.length !== 1) {
-    return { error: "Email/tài khoản hoặc mật khẩu không đúng" };
+    if (matchingUsers.length !== 1) {
+      return { error: "Email/tài khoản hoặc mật khẩu không đúng" };
+    }
+
+    const user = matchingUsers[0];
+    if (user.deletedAt) return { error: "Email/tài khoản hoặc mật khẩu không đúng" };
+
+    stage = "verify-password";
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return { error: "Email/tài khoản hoặc mật khẩu không đúng" };
+    }
+
+    if (!user.isActive) {
+      return { error: "Tài khoản của bạn hiện bị khóa, vui lòng liên hệ với Trung Tâm để được hỗ trợ" };
+    }
+
+    const dest = { admin: "/admin", teacher: "/teacher", student: "/student" };
+    const diagnostic = createLoginDiagnostic("session-cookie");
+    const redirectTo = `/login?sessionCheck=${encodeURIComponent(diagnostic.reference)}`;
+    stage = "create-session";
+    console.info("[login] Session created; checking browser cookie round-trip", {
+      reference: diagnostic.reference,
+    });
+    return await createUserSession(
+      { id: user.id, email: user.email, name: user.name, role: user.role, mustChangePassword: user.mustChangePassword },
+      redirectTo
+    );
+  } catch (error) {
+    if (error instanceof Response && error.status >= 300 && error.status < 400) throw error;
+    const diagnostic = createLoginDiagnostic(stage);
+    logLoginFailure(diagnostic, error);
+    return {
+      error: "Hệ thống chưa thể hoàn tất đăng nhập. Vui lòng thử lại; nếu vẫn gặp lỗi, gửi mã hỗ trợ bên dưới cho trung tâm.",
+      diagnostic,
+    };
   }
-
-  const user = matchingUsers[0];
-  if (user.deletedAt) return { error: "Email/tài khoản hoặc mật khẩu không đúng" };
-
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) {
-    return { error: "Email/tài khoản hoặc mật khẩu không đúng" };
-  }
-
-  if (!user.isActive) {
-    return { error: "Tài khoản của bạn hiện bị khóa, vui lòng liên hệ với Trung Tâm để được hỗ trợ" };
-  }
-
-  const dest = { admin: "/admin", teacher: "/teacher", student: "/student" };
-  const redirectTo = user.mustChangePassword ? "/change-password" : dest[user.role];
-  return createUserSession(
-    { id: user.id, email: user.email, name: user.name, role: user.role, mustChangePassword: user.mustChangePassword },
-    redirectTo
-  );
 }
 
 export default function LoginPage() {
+  const loaderData = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
+  const diagnostic = actionData?.diagnostic ?? (actionData?.error ? undefined : loaderData?.diagnostic);
+  const error = actionData?.error ?? (loaderData?.diagnostic
+    ? loaderData.diagnostic.stage === "session-cookie"
+      ? "Tài khoản và mật khẩu đã được xác nhận nhưng trình duyệt chưa giữ được phiên đăng nhập. Hãy mở trang bằng HTTPS, cho phép cookie và thử lại. Nếu vẫn gặp lỗi, gửi mã hỗ trợ bên dưới cho trung tâm."
+      : "Tạm thời chưa kiểm tra được phiên đăng nhập. Bạn vẫn có thể thử đăng nhập lại."
+    : null);
 
   const fillDemo = (email: string, password: string) => {
     const f = document.getElementById("login-form") as HTMLFormElement;
@@ -127,9 +181,24 @@ export default function LoginPage() {
             </CardHeader>
             <CardContent>
               <Form id="login-form" method="post" noValidate className="space-y-4">
-                {actionData?.error && (
-                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-                    {actionData.error}
+                {error && (
+                  <div role="alert" className="space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                    <p>{error}</p>
+                    {diagnostic && (
+                      <div className="rounded-md border border-destructive/20 bg-background/70 p-3 text-foreground">
+                        <p className="font-medium">Mã hỗ trợ: <span className="select-all font-mono tabular-nums">{diagnostic.reference}</span></p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Bước gặp lỗi: {{
+                            "session-check": "kiểm tra phiên đăng nhập",
+                            "read-form": "nhận thông tin đăng nhập",
+                            "find-account": "tìm tài khoản",
+                            "verify-password": "xác thực mật khẩu",
+                            "create-session": "tạo phiên đăng nhập",
+                            "session-cookie": "xác nhận trình duyệt đã lưu phiên",
+                          }[diagnostic.stage]}. Chụp lại thông báo này và gửi cho trung tâm để kiểm tra log.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
                 <div className="space-y-2">
