@@ -53,6 +53,15 @@ async function readValidCachedFile(cacheKey: string) {
   }
 }
 
+export async function hasCachedSpeechAudio(text: string) {
+  const cacheKey = getSpeechAudioCacheKey(text);
+  const cachedRecord = await prisma.speechAudioCache.findUnique({ where: { cacheKey } });
+  if (cachedRecord && cachedRecord.filePath !== `/uploads/audio/tts/${cacheKey}.wav`) {
+    throw new Error(`TTS cache path does not match cache key ${cacheKey}`);
+  }
+  return Boolean(await readValidCachedFile(cacheKey));
+}
+
 async function getOrCreateSpeechAudioUncached(text: string, cacheKey: string) {
   const cachedRecord = await prisma.speechAudioCache.findUnique({ where: { cacheKey } });
   if (cachedRecord) {

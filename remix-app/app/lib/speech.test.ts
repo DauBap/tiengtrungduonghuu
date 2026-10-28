@@ -1,6 +1,31 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+function mockAnimationFrame() {
+  const originalRequestAnimationFrame = Object.getOwnPropertyDescriptor(globalThis, "requestAnimationFrame");
+  const originalCancelAnimationFrame = Object.getOwnPropertyDescriptor(globalThis, "cancelAnimationFrame");
+  Object.defineProperty(globalThis, "requestAnimationFrame", {
+    configurable: true,
+    value: () => 0,
+  });
+  Object.defineProperty(globalThis, "cancelAnimationFrame", {
+    configurable: true,
+    value() {},
+  });
+  return () => {
+    if (originalRequestAnimationFrame) {
+      Object.defineProperty(globalThis, "requestAnimationFrame", originalRequestAnimationFrame);
+    } else {
+      Reflect.deleteProperty(globalThis, "requestAnimationFrame");
+    }
+    if (originalCancelAnimationFrame) {
+      Object.defineProperty(globalThis, "cancelAnimationFrame", originalCancelAnimationFrame);
+    } else {
+      Reflect.deleteProperty(globalThis, "cancelAnimationFrame");
+    }
+  };
+}
+
 test("MeloTTS failure falls back to the browser Chinese voice", async () => {
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
   const originalUtterance = Object.getOwnPropertyDescriptor(globalThis, "SpeechSynthesisUtterance");
@@ -54,6 +79,7 @@ test("MeloTTS failure falls back to the browser Chinese voice", async () => {
 });
 
 test("MeloTTS selection overrides vocabulary audio but listening can prefer its recording", async () => {
+  const restoreAnimationFrame = mockAnimationFrame();
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
   const originalAudio = Object.getOwnPropertyDescriptor(globalThis, "Audio");
   const originalFetch = Object.getOwnPropertyDescriptor(globalThis, "fetch");
@@ -84,6 +110,9 @@ test("MeloTTS selection overrides vocabulary audio but listening can prefer its 
     configurable: true,
     value: async (_input: RequestInfo | URL, init?: RequestInit) => {
       requests.push(init ?? {});
+      if (JSON.parse(String(init?.body)).intent === "cache-status") {
+        return Response.json({ cached: false });
+      }
       return new Response(new Uint8Array([1, 2, 3]), { headers: { "Content-Type": "audio/mpeg" } });
     },
   });
@@ -95,16 +124,22 @@ test("MeloTTS selection overrides vocabulary audio but listening can prefer its 
 
     speakChinese("你好", "/audio/vocabulary.mp3");
     await new Promise((resolve) => setTimeout(resolve, 0));
-    assert.equal(requests.length, 1);
+    assert.equal(requests.length, 2);
     assert.deepEqual(JSON.parse(String(requests[0].body)), {
+      text: "你好",
+      intent: "cache-status",
+    });
+    assert.deepEqual(JSON.parse(String(requests[1].body)), {
       text: "你好",
     });
 
+    const requestCountBeforePreferredAudio = requests.length;
     speakChinese("你好", "/audio/listening-question.mp3", { preferAudio: true });
-    assert.equal(requests.length, 1);
+    assert.equal(requests.length, requestCountBeforePreferredAudio);
     assert.equal(audioInstances.at(-1)?.src, "/audio/listening-question.mp3");
     stopSpeaking();
   } finally {
+    restoreAnimationFrame();
     if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
     else Reflect.deleteProperty(globalThis, "window");
     if (originalAudio) Object.defineProperty(globalThis, "Audio", originalAudio);
@@ -115,6 +150,7 @@ test("MeloTTS selection overrides vocabulary audio but listening can prefer its 
 });
 
 test("MeloTTS failures fall back locally on each request", async () => {
+  const restoreAnimationFrame = mockAnimationFrame();
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
   const originalUtterance = Object.getOwnPropertyDescriptor(globalThis, "SpeechSynthesisUtterance");
   const originalFetch = Object.getOwnPropertyDescriptor(globalThis, "fetch");
@@ -147,6 +183,7 @@ test("MeloTTS failures fall back locally on each request", async () => {
     configurable: true,
     value: async () => {
       requestCount += 1;
+      if (requestCount % 2 === 1) return Response.json({ cached: false });
       return Response.json({ error: "MeloTTS is temporarily unavailable" }, {
         status: 503,
       });
@@ -163,10 +200,11 @@ test("MeloTTS failures fall back locally on each request", async () => {
     speakChinese("再见");
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    assert.equal(requestCount, 2);
+    assert.equal(requestCount, 4);
     assert.equal(localSpeechCount, 2);
     stopSpeaking();
   } finally {
+    restoreAnimationFrame();
     if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
     else Reflect.deleteProperty(globalThis, "window");
     if (originalUtterance) Object.defineProperty(globalThis, "SpeechSynthesisUtterance", originalUtterance);

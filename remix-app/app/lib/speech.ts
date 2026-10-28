@@ -4,6 +4,10 @@
  * Dùng file audio có sẵn trước; nếu không có thì chọn MeloTTS hoặc giọng máy.
  */
 import { getAppSettings, setSpeechStatus } from "~/lib/app-settings";
+import { toast } from "sonner";
+
+const FIRST_GENERATION_MESSAGE =
+  "Đang tạo giọng đọc AI lần đầu cho nội dung này. Bạn chờ một chút nhé — những lần sau sẽ phát nhanh hơn.";
 
 export function isSpeechSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
@@ -27,6 +31,7 @@ function pickChineseVoice(): SpeechSynthesisVoice | null {
 let activeAudio: HTMLAudioElement | null = null;
 let activeObjectUrl: string | null = null;
 let activeController: AbortController | null = null;
+let activeLoadingToastId: string | null = null;
 let speechRequestId = 0;
 
 export function speakChinese(
@@ -71,9 +76,40 @@ function speakSelectedTts(text: string): boolean {
 
 async function speakWithMeloTts(text: string, requestId: number) {
   const controller = new AbortController();
+  const loadingToastId = `speech-generation-${requestId}`;
   let fallbackStarted = false;
+  let loadingToastShown = false;
   activeController = controller;
   try {
+    const cacheResponse = await fetch("/api/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, intent: "cache-status" }),
+      signal: controller.signal,
+    });
+    if (!cacheResponse.ok) {
+      throw new Error("Could not check MeloTTS cache");
+    }
+    const cacheStatus: unknown = await cacheResponse.json();
+    if (
+      typeof cacheStatus !== "object"
+      || cacheStatus === null
+      || !("cached" in cacheStatus)
+      || typeof cacheStatus.cached !== "boolean"
+    ) {
+      throw new Error("MeloTTS returned an invalid cache status");
+    }
+    if (requestId !== speechRequestId) return;
+    const isCached = cacheStatus.cached;
+    if (!isCached) {
+      loadingToastShown = true;
+      activeLoadingToastId = loadingToastId;
+      toast.loading(FIRST_GENERATION_MESSAGE, {
+        id: loadingToastId,
+        duration: Infinity,
+      });
+    }
+
     const response = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -114,6 +150,10 @@ async function speakWithMeloTts(text: string, requestId: number) {
       speakWithTts(text);
     }
   } finally {
+    if (loadingToastShown) {
+      toast.dismiss(loadingToastId);
+      if (activeLoadingToastId === loadingToastId) activeLoadingToastId = null;
+    }
     if (activeController === controller) activeController = null;
   }
 }
@@ -141,6 +181,10 @@ export function stopSpeaking() {
   speechRequestId += 1;
   activeController?.abort();
   activeController = null;
+  if (activeLoadingToastId) {
+    toast.dismiss(activeLoadingToastId);
+    activeLoadingToastId = null;
+  }
   if (activeAudio) {
     activeAudio.pause();
     activeAudio.currentTime = 0;

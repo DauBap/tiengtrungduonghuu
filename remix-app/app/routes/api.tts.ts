@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs } from "react-router";
 import { requireRole } from "~/lib/session.server";
-import { getOrCreateSpeechAudio } from "~/lib/speech-audio.server";
+import { getOrCreateSpeechAudio, hasCachedSpeechAudio } from "~/lib/speech-audio.server";
 
 const MAX_TEXT_LENGTH = 2_000;
 
@@ -20,8 +20,24 @@ export async function action({ request }: ActionFunctionArgs) {
   const text = body && typeof body === "object" && "text" in body && typeof body.text === "string"
     ? body.text.trim()
     : "";
+  const intent = body && typeof body === "object" && "intent" in body ? body.intent : null;
   if (!text || text.length > MAX_TEXT_LENGTH) {
     return Response.json({ error: "Text must be between 1 and 2000 characters" }, { status: 400 });
+  }
+
+  if (intent === "cache-status") {
+    try {
+      return Response.json(
+        { cached: await hasCachedSpeechAudio(text) },
+        { headers: { "Cache-Control": "no-store" } },
+      );
+    } catch (error) {
+      console.error("Could not check MeloTTS audio cache:", error);
+      return Response.json(
+        { error: "MeloTTS is temporarily unavailable" },
+        { status: 502 },
+      );
+    }
   }
 
   try {
