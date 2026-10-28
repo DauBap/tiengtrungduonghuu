@@ -103,10 +103,10 @@ async function speakWithMeloTts(text: string, requestId: number) {
       activeLoadingToastId = loadingToastId;
       toast.loading("Đang tạo giọng đọc AI", {
         id: loadingToastId,
+        className: "speech-generation-toast",
         description: "Lần đầu có thể cần chờ thêm một chút; những lần sau sẽ phát nhanh hơn.",
         duration: Infinity,
         position: "top-center",
-        style: { width: "min(26rem, calc(100vw - 2rem))" },
       });
     }
 

@@ -314,3 +314,13 @@
     animation: loading-bar 1.2s ease-in-out infinite;
   }
 }
+
+@media (max-width: 600px) {
+  .toaster[data-sonner-toaster]:has(.speech-generation-toast) {
+    top: 50dvh;
+  }
+
+  .toaster[data-sonner-toaster] .speech-generation-toast[data-sonner-toast] {
+    transform: translateY(-50%);
+  }
+}
