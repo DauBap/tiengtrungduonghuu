@@ -37,6 +37,15 @@ Chạy trong `remix-app/`:
 | `npm run typecheck` | `tsc` — phải sạch trước khi commit |
 | `npm run seed` | Nạp dữ liệu mẫu (idempotent) |
 
+## Database production
+
+Production dùng PostgreSQL chạy trực tiếp trên Ubuntu, trong database
+`tiengtrungduonghuu`. Ứng dụng trên server đọc `DATABASE_URL` và `DIRECT_URL`
+từ file môi trường riêng tại
+`/home/baotn/apps/tiengtrungduonghuu/remix-app/.env`; cả hai URL trỏ tới
+PostgreSQL trên `127.0.0.1:5432`. Không đưa thông tin xác thực production vào Git.
+`.env.example` chỉ là cấu hình mẫu cho PostgreSQL dùng khi phát triển local.
+
 ## Cảnh báo server mất kết nối qua Telegram
 
 GitHub Actions kiểm tra `https://tiengtrungduonghuu.edu.vn/` mỗi 5 phút và chỉ gửi Telegram khi server chuyển trạng thái online/offline. Lần kiểm tra đầu tiên gửi trạng thái ban đầu. Workflow cần hai repository secrets, không lưu token trong Git:

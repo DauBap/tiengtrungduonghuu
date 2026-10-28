@@ -4,8 +4,6 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-    "vercel-build": "node scripts/sync-db.mjs && react-router build",
-    "db:push:test": "node scripts/push-test.mjs",
     "blob:export": "tsx prisma/export-vercel-blob.ts",
     "blob:migrate-urls": "tsx prisma/migrate-vercel-blob-urls.ts",
     "db:migrate:mock-exams": "tsx prisma/migrate-mock-exams.ts",

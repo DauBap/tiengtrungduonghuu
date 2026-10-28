@@ -222,7 +222,7 @@ export async function getAllProgressForCourse(userId: string, courseId: string) 
 
 /**
  * Tiến độ của nhiều khóa cùng lúc — 2 query cho cả danh sách, thay vì 2 query
- * mỗi khóa. Mỗi round-trip tới Neon là một lần đi mạng, nên vòng lặp `await`
+ * mỗi khóa. Mỗi round-trip tới DB là một lần đi mạng, nên vòng lặp `await`
  * theo từng khóa là thứ đắt nhất trên trang danh sách khóa học.
  */
 export async function getCourseProgressMap(userId: string, courseIds: string[]) {

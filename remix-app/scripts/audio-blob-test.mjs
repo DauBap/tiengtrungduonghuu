@@ -1,7 +1,7 @@
 // Upload MP3 trong public/audio lên Vercel Blob và trỏ DB test sang URL mới.
 //
 // `vercel env run` chỉ inject biến gắn với git branch nên BLOB_READ_WRITE_TOKEN
-// bị bỏ qua. Vì vậy pull env Preview ra file tạm giống push-test.mjs.
+// bị bỏ qua. Vì vậy pull env Preview ra file tạm để lấy cấu hình Blob.
 //
 //   npm run audio:blob:test         # dry run
 //   npm run audio:blob:test -- --apply
