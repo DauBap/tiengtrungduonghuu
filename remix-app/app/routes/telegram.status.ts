@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import type { ActionFunctionArgs } from "react-router";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { prisma } from "~/lib/prisma.server";
 
 const TELEGRAM_API_URL = "https://api.telegram.org";
@@ -44,6 +44,10 @@ async function sendTelegramMessage(botToken: string, chatId: string, text: strin
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+export function loader(_args: LoaderFunctionArgs) {
+  return new Response("Method not allowed", { status: 405, headers: { Allow: "POST" } });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
