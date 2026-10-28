@@ -181,6 +181,40 @@ const phoneticsItemSchema = z.union([
   }),
 ]);
 
+const phoneticsAudioSchema = z.string().nullable().default(null).refine((value) => {
+  if (value === null) return true;
+  if (!value.startsWith("/")) {
+    try {
+      new URL(value);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  try {
+    const url = new URL(value, "http://localhost");
+    if (
+      url.origin !== "http://localhost"
+      || url.pathname !== value
+      || url.search
+      || url.hash
+    ) return false;
+
+    const segments = url.pathname.split("/").filter(Boolean);
+    if (segments[0] !== "uploads" || segments[1] !== "audio" || segments.length < 3) {
+      return false;
+    }
+
+    return segments.every((segment) => {
+      const decoded = decodeURIComponent(segment);
+      return decoded !== "." && decoded !== ".." && !decoded.includes("/") && !decoded.includes("\\");
+    });
+  } catch {
+    return false;
+  }
+}, "Audio phải là URL hợp lệ hoặc đường dẫn /uploads/audio/... an toàn");
+
 export const phoneticsConfigSchema = z.object({
   sections: z
     .array(
@@ -188,7 +222,7 @@ export const phoneticsConfigSchema = z.object({
         id: z.number().int(),
         title: z.string().min(1),
         description: z.string().default(""),
-        audio: z.string().url().nullable().default(null),
+        audio: phoneticsAudioSchema,
         items: z.array(phoneticsItemSchema).min(1, "Section ngữ âm cần ít nhất 1 câu"),
       })
     )
