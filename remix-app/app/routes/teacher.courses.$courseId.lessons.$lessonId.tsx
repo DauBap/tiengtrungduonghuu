@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowLeft, BookOpen, Check, Download, MessageSquareText, UserRound, X } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { EmptyState } from "~/components/common/empty-state";
+import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { getCourseById, getLessonsByCourse, isTeacherOfCourse } from "~/lib/db.server";
@@ -63,6 +64,7 @@ function TeacherTabComment({
   feedback?: { comment: string; createdAt: Date; teacher: { name: string | null } };
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  useModalScrollLock(isOpen);
 
   return (
     <>
@@ -78,11 +80,8 @@ function TeacherTabComment({
       </Button>
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+          className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/45 p-4"
           role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setIsOpen(false);
-          }}
           onKeyDown={(event) => {
             if (event.key === "Escape") setIsOpen(false);
           }}

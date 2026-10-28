@@ -34,6 +34,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Overlay } from "~/components/common/overlay";
+import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import {
   ArrowLeft,
   Plus,
@@ -1233,6 +1234,7 @@ function ExpandableTextField({
   const [expanded, setExpanded] = useState(false);
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  useModalScrollLock(expanded);
 
   useEffect(() => {
     if (expanded) textareaRef.current?.focus();
@@ -1241,11 +1243,9 @@ function ExpandableTextField({
   return (
     <>
       {expanded && (
-        <button
-          type="button"
-          className="fixed inset-0 z-[60] cursor-default bg-black/50"
-          onClick={() => setExpanded(false)}
-          aria-label="Đóng chế độ phóng to"
+        <div
+          className="fixed inset-0 !mt-0 z-[60] cursor-default bg-black/50"
+          aria-hidden="true"
         />
       )}
       <div

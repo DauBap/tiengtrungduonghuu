@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { Check, Eye, RotateCcw, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { cn } from "~/lib/utils";
 import type { PhoneticsConfig, PhoneticsItem, PhoneticsSection } from "~/lib/learning-blocks";
 import { TONES, isPhoneticsAnswerCorrect, type PhoneticsAnswer } from "~/lib/phonetics";
@@ -151,6 +152,7 @@ function PhoneticsSectionCard({
   const [playbackRate, setPlaybackRate] = useState<(typeof playbackRates)[number]>(1);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  useModalScrollLock(showReview);
 
   const correctCount = useMemo(
     () => section.items.filter((item) => isPhoneticsAnswerCorrect(item, answers[item.id])).length,
@@ -225,11 +227,8 @@ function PhoneticsSectionCard({
 
       {showReview && reviewGroup && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-4"
           role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setShowReview(false);
-          }}
           onKeyDown={(event) => {
             if (event.key === "Escape") setShowReview(false);
           }}

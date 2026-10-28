@@ -3,6 +3,7 @@ import { Link, useLoaderData } from "react-router";
 import { useState } from "react";
 import { ArrowLeft, BookOpen, ClipboardList, UserRound, X } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
+import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { EmptyState } from "~/components/common/empty-state";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -103,6 +104,7 @@ export default function TeacherPhoneticsHistory() {
   const { user, course, lesson, student, sections } = useLoaderData<typeof loader>();
   const [selectedSectionId, setSelectedSectionId] = useState<number | null>(null);
   const [selectedAttemptId, setSelectedAttemptId] = useState<string | null>(null);
+  useModalScrollLock(selectedAttemptId !== null);
   const activeSection = sections.find((section) => section.id === selectedSectionId) ?? sections[0] ?? null;
   const activeAttempt = activeSection?.attempts.find((attempt) => attempt.id === selectedAttemptId) ?? null;
   const activeAttemptIndex = activeSection?.attempts.findIndex((attempt) => attempt.id === activeAttempt?.id) ?? -1;
@@ -234,11 +236,8 @@ export default function TeacherPhoneticsHistory() {
       </div>
       {activeAttempt && activeSection && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+          className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/45 p-4"
           role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setSelectedAttemptId(null);
-          }}
           onKeyDown={(event) => {
             if (event.key === "Escape") setSelectedAttemptId(null);
           }}

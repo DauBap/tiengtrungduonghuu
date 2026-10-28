@@ -3,6 +3,7 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Link, useFetcher, useLoaderData } from "react-router";
 import { ArrowLeft, Check, Clock3, Send } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
+import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { ProgressBar } from "~/components/progress/progress-bar";
@@ -236,6 +237,7 @@ export default function StudentMockExamAttempt() {
     : 0);
   const [didAutoSubmit, setDidAutoSubmit] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+  useModalScrollLock(showSubmitConfirm);
   const stickyBarRef = useRef<HTMLDivElement | null>(null);
   const listeningEndRef = useRef<HTMLDivElement | null>(null);
   const [listeningInView, setListeningInView] = useState(true);
@@ -515,11 +517,8 @@ export default function StudentMockExamAttempt() {
 
         {showSubmitConfirm && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-4"
             role="presentation"
-            onMouseDown={(event) => {
-              if (event.target === event.currentTarget) setShowSubmitConfirm(false);
-            }}
             onKeyDown={(event) => {
               if (event.key === "Escape") setShowSubmitConfirm(false);
             }}

@@ -11,6 +11,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
+import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { ArrowLeft, BookOpen, Layers, FileCheck2, Search, X } from "lucide-react";
 import type { ProgressStatus } from "~/types/progress";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
@@ -111,6 +112,7 @@ export default function StudentCourseDetail() {
   const [showCombinedStudy, setShowCombinedStudy] = useState(false);
   const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([]);
   const [lessonSearchQuery, setLessonSearchQuery] = useState("");
+  useModalScrollLock(showCombinedStudy);
 
   const orderedCourseItems = [
     ...lessonsWithStatus.map((lesson) => ({
@@ -253,10 +255,8 @@ export default function StudentCourseDetail() {
 
         {showCombinedStudy && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-            onClick={(event) => {
-              if (event.target === event.currentTarget) setShowCombinedStudy(false);
-            }}
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            role="presentation"
           >
             <section role="dialog" aria-modal="true" aria-labelledby="combined-study-title"
               className="w-full max-w-lg rounded-lg border bg-background shadow-xl">

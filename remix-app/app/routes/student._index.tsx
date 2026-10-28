@@ -5,6 +5,7 @@ import { requireRole } from "~/lib/session.server";
 import { getEnrolledCoursesWithClass, getStudentDashboardStats } from "~/lib/db.server";
 import { formatSchedule, formatNextClass, getNextClassTime } from "~/lib/schedule-utils";
 import { AppShell } from "~/components/layout/app-shell";
+import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { Card, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { ArrowRight, BookOpen, TrendingUp, CheckCircle2, PlayCircle, Clock, Calendar, Trophy, X } from "lucide-react";
@@ -96,6 +97,7 @@ export default function StudentIndex() {
   const { user, myCourses, enrollments, overallProgress, totalCompleted, currentLesson, courseProgress, classLeaderboards } =
     useLoaderData<typeof loader>();
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
+  useModalScrollLock(isLeaderboardOpen);
   const [selectedLeaderboardClassId, setSelectedLeaderboardClassId] = useState<string | null>(null);
   const leaderboardDialogRef = useRef<HTMLElement>(null);
   const leaderboardCloseButtonRef = useRef<HTMLButtonElement>(null);
@@ -118,8 +120,6 @@ export default function StudentIndex() {
     const previouslyFocusedElement = document.activeElement instanceof HTMLElement
       ? document.activeElement
       : null;
-    const previousBodyOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     leaderboardCloseButtonRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -152,7 +152,6 @@ export default function StudentIndex() {
     dialog.addEventListener("keydown", handleKeyDown);
     return () => {
       dialog.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousBodyOverflow;
       if (previouslyFocusedElement?.isConnected) previouslyFocusedElement.focus();
     };
   }, [isLeaderboardOpen]);
@@ -315,10 +314,8 @@ export default function StudentIndex() {
 
             {isLeaderboardOpen && (
               <div
-                className="fixed inset-0 z-50 flex items-end justify-end bg-black/40 p-3 sm:p-6"
-                onMouseDown={(event) => {
-                  if (event.target === event.currentTarget) setIsLeaderboardOpen(false);
-                }}
+                className="fixed inset-0 !mt-0 z-50 flex items-end justify-end bg-black/40 p-3 sm:p-6"
+                role="presentation"
               >
                 <section
                   role="dialog"

@@ -5,6 +5,7 @@ import { requireRole } from "~/lib/session.server";
 import { getTeacherCourses } from "~/lib/db.server";
 import { formatSchedule, formatNextClass, getNextClassTime } from "~/lib/schedule-utils";
 import { AppShell } from "~/components/layout/app-shell";
+import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { StatCard } from "~/components/common/stat-card";
 import { Card, CardContent } from "~/components/ui/card";
 import {
@@ -516,6 +517,13 @@ export default function TeacherIndex() {
     ? DASHBOARD_ACTIVITIES.filter(({ tab }) => selectedLesson.availableActivities[tab])
     : [];
   const selectedStudent = selectedClass?.activityData.find((item) => item.student.id === selectedStudentId);
+  const isModalOpen = Boolean(
+    selectedStudentId
+    || pendingGrammarClass
+    || gradingAttemptId
+    || (pendingGrammarClass && gradingComplete),
+  );
+  useModalScrollLock(isModalOpen);
   const upcomingClasses = myClasses
     .flatMap((cls) => {
       const nextClassTime = getNextClassTime(cls.schedule);
@@ -529,9 +537,9 @@ export default function TeacherIndex() {
   }, [location.key]);
 
   useEffect(() => {
-    if (!selectedStudentId && !pendingGrammarClassId && !gradingAttemptId) return;
+    if (!selectedStudentId && !pendingGrammarClassId && !gradingAttemptId && !gradingComplete) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && gradeSubmitFetcher.state !== "submitting") {
         setSelectedStudentId(null);
         setPendingGrammarClassId(null);
         setGradingAttemptId(null);
@@ -541,7 +549,7 @@ export default function TeacherIndex() {
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [selectedStudentId, pendingGrammarClassId, gradingAttemptId]);
+  }, [selectedStudentId, pendingGrammarClassId, gradingAttemptId, gradingComplete, gradeSubmitFetcher.state]);
 
   const gradingData = gradingFetcher.data?.attempt ? gradingFetcher.data : null;
   useEffect(() => {
@@ -1178,14 +1186,8 @@ export default function TeacherIndex() {
 
         {pendingGrammarClass && pendingGrammarClass.pendingGrammarAttempts.length > 0 && !gradingAttemptId && !gradingComplete && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
             role="presentation"
-            onMouseDown={(event) => {
-              if (event.target === event.currentTarget) {
-                setPendingGrammarClassId(null);
-                setGradingQueueIndex(null);
-              }
-            }}
           >
             <section
               role="dialog"
@@ -1244,11 +1246,8 @@ export default function TeacherIndex() {
 
         {selectedStudent && selectedClass && (
           <div
-            className="fixed inset-0 z-50 flex justify-end bg-black/45"
+            className="fixed inset-0 !mt-0 z-50 flex justify-end bg-black/45"
             role="presentation"
-            onMouseDown={(event) => {
-              if (event.target === event.currentTarget) setSelectedStudentId(null);
-            }}
           >
             <section
               role="dialog"
@@ -1300,7 +1299,7 @@ export default function TeacherIndex() {
 
         {pendingGrammarClass && gradingAttemptId && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
             role="presentation"
           >
             <section
@@ -1431,7 +1430,10 @@ export default function TeacherIndex() {
           </div>
         )}
         {pendingGrammarClass && gradingComplete && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6">
+          <div
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
+            role="presentation"
+          >
             <section
               role="dialog"
               aria-modal="true"

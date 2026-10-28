@@ -15,6 +15,7 @@ import {
 } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { EmptyState } from "~/components/common/empty-state";
+import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { OpenInBrowserNotice, useInAppBrowser } from "~/components/common/open-in-browser-notice";
 import { BlockRenderer, isBlockLearnable, type ResolvedBlock } from "~/components/lessons/blocks/block-renderer";
 import {
@@ -1517,6 +1518,7 @@ export default function LessonDetail() {
       && activeTab !== "PHONETICS";
     const activeReviewGroups = activeReviewTab ? answerReviewGroups[activeReviewTab] ?? [] : [];
     const [showAnswerReview, setShowAnswerReview] = useState(false);
+    useModalScrollLock(showAnswerReview);
   const [showScript, setShowScript] = useState(true);
   const [showLessonPinyin, setShowLessonPinyin] = useState(false);
     const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
@@ -2849,11 +2851,8 @@ export default function LessonDetail() {
               )}
               {showAnswerReview && showAnswerReviewControls && (
                 <div
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+                  className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/60 p-4"
                   role="presentation"
-                  onMouseDown={(event) => {
-                    if (event.target === event.currentTarget) setShowAnswerReview(false);
-                  }}
                   onKeyDown={(event) => {
                     if (event.key === "Escape") setShowAnswerReview(false);
                   }}
