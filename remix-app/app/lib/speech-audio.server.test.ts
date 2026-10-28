@@ -1,0 +1,43 @@
+import assert from "node:assert/strict";
+import { mkdtemp, rm } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import test from "node:test";
+import {
+  getSpeechAudioCacheKey,
+  isWavAudio,
+} from "./speech-audio.server";
+import {
+  readCachedSpeechAudio,
+  writeCachedSpeechAudio,
+} from "./storage.server";
+
+test("speech audio cache keys are stable per text", () => {
+  assert.equal(getSpeechAudioCacheKey("你好"), getSpeechAudioCacheKey("你好"));
+  assert.notEqual(getSpeechAudioCacheKey("你好"), getSpeechAudioCacheKey("你好。"));
+});
+
+test("WAV validation checks RIFF and WAVE signatures", () => {
+  assert.equal(isWavAudio(Buffer.from("RIFFxxxxWAVE")), true);
+  assert.equal(isWavAudio(Buffer.from("not-a-wave")), false);
+  assert.equal(isWavAudio(Buffer.from("RIFF")), false);
+});
+
+test("speech audio is stored under a deterministic uploads path", async (t) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "speech-audio-cache-"));
+  const previousDirectory = process.env.UPLOADS_DIR;
+  process.env.UPLOADS_DIR = directory;
+  t.after(async () => {
+    if (previousDirectory === undefined) delete process.env.UPLOADS_DIR;
+    else process.env.UPLOADS_DIR = previousDirectory;
+    await rm(directory, { recursive: true, force: true });
+  });
+
+  const cacheKey = getSpeechAudioCacheKey("你好");
+  const audio = Buffer.from("RIFFxxxxWAVE");
+  const filePath = await writeCachedSpeechAudio(cacheKey, audio);
+
+  assert.equal(filePath, `/uploads/audio/tts/${cacheKey}.wav`);
+  assert.deepEqual(await readCachedSpeechAudio(cacheKey), audio);
+  await assert.rejects(writeCachedSpeechAudio("../invalid", audio), /không hợp lệ/i);
+});

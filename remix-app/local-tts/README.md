@@ -4,9 +4,12 @@ The production app calls this CPU-only Chinese MeloTTS service through
 `http://127.0.0.1:8766`. The service binds only to loopback and loads one model
 at startup. It does not expose a public endpoint or log submitted text.
 
-The app's `/api/tts` route requires an authenticated user and proxies the
-generated WAV. If MeloTTS is unavailable, the browser uses its built-in Chinese
-speech voice.
+The app's `/api/tts` route requires an authenticated user. On first use, it
+generates a WAV and caches it under `UPLOADS_DIR/audio/tts/`; PostgreSQL stores
+the text, engine/model/voice settings, and file path. Later requests reuse that
+file instead of running inference again. Requests for the same uncached text
+within one app process share a single generation. If MeloTTS is unavailable,
+the browser uses its built-in Chinese speech voice.
 
 ## Install on Ubuntu
 
@@ -42,6 +45,8 @@ uv venv --python 3.9 local-tts/.venv
 uv pip install --python local-tts/.venv/bin/python \
   --index-url https://download.pytorch.org/whl/cpu \
   torch==2.5.1+cpu torchaudio==2.5.1+cpu
+uv pip install --python local-tts/.venv/bin/python \
+  --constraint local-tts/constraints.txt 'setuptools<81'
 grep -v -E '^(torch|torchaudio)$' ~/apps/MeloTTS/requirements.txt \
   > /tmp/melotts-requirements.txt
 uv pip install --python local-tts/.venv/bin/python \
@@ -50,6 +55,10 @@ uv pip install --python local-tts/.venv/bin/python \
   --no-deps -e ~/apps/MeloTTS
 local-tts/.venv/bin/python -m unidic download
 ```
+
+The constraints pin a mutually compatible AWS SDK set. The MeloTTS dependency
+resolver may otherwise select an old `botocore` version that prevents
+`cached_path` from importing.
 
 Warm the Chinese model cache once before enabling the service. This downloads
 the model from the official MeloTTS model source:
@@ -82,6 +91,11 @@ After deploying the app changes, test through the authenticated app and confirm
 that a temporary MeloTTS outage falls back to the browser voice. Do not expose
 port `8766` through the firewall or reverse proxy.
 
+The application deployment must persist the configured `UPLOADS_DIR`, since
+the database stores cache metadata while the WAV data lives on disk. After
+pulling the application change to Ubuntu, run `npx prisma db push` from the
+application directory before building and restarting the app.
+
 Run the API unit tests without loading the model:
 
 ```bash
@@ -94,3 +108,5 @@ cd ~/apps/tiengtrungduonghuu/remix-app/local-tts
 - `GET /healthz` returns `{"status":"ok"}` after the model has loaded.
 - `POST /synthesize` accepts `{"text":"..."}` and returns WAV audio.
 - Requests are limited to 2,000 text characters and 64 KiB.
+- Generated speech is cached by text and MeloTTS configuration in the
+  app's persistent uploads directory.

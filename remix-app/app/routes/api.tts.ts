@@ -1,8 +1,8 @@
 import type { ActionFunctionArgs } from "react-router";
 import { requireRole } from "~/lib/session.server";
+import { getOrCreateSpeechAudio } from "~/lib/speech-audio.server";
 
 const MAX_TEXT_LENGTH = 2_000;
-const MELO_TTS_URL = process.env.MELO_TTS_URL ?? "http://127.0.0.1:8766/synthesize";
 
 export async function action({ request }: ActionFunctionArgs) {
   await requireRole(request, ["student", "teacher", "admin"]);
@@ -25,19 +25,8 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   try {
-    const response = await fetch(MELO_TTS_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-      signal: AbortSignal.timeout(60_000),
-    });
-    if (!response.ok) {
-      throw new Error(`MeloTTS returned HTTP ${response.status}`);
-    }
-    if (!response.headers.get("Content-Type")?.toLowerCase().startsWith("audio/wav")) {
-      throw new Error("MeloTTS returned an unsupported audio type");
-    }
-    return new Response(response.body, {
+    const audio = await getOrCreateSpeechAudio(text);
+    return new Response(new Uint8Array(audio), {
       headers: {
         "Content-Type": "audio/wav",
         "Cache-Control": "no-store",

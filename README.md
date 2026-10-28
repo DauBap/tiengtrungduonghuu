@@ -52,9 +52,11 @@ Workflow lưu trạng thái lần kiểm tra trước trong GitHub Actions cache
 ## MeloTTS trên server
 
 Ứng dụng có thể dùng MeloTTS chạy CPU trên Ubuntu qua service nội bộ tại
-`127.0.0.1:8766`; nếu service lỗi, trình duyệt tự dùng giọng tiếng Trung có
-sẵn. Hướng dẫn cài Python 3.9 trong virtual environment riêng, tải model và
-chạy systemd user service nằm trong [remix-app/local-tts/README.md](remix-app/local-tts/README.md).
+`127.0.0.1:8766`; WAV được tạo lần đầu rồi cache trên ổ đĩa server để dùng lại,
+còn PostgreSQL lưu metadata và đường dẫn. Nếu service lỗi, trình duyệt tự dùng
+giọng tiếng Trung có sẵn. Hướng dẫn cài Python 3.9 trong virtual environment
+riêng, tải model và chạy systemd user service nằm trong
+[remix-app/local-tts/README.md](remix-app/local-tts/README.md).
 
 ### Tra cứu số học viên online bằng `/status`
 

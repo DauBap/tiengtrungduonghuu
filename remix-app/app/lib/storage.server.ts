@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, stat, writeFile } from "node:fs/promises";
+import { link, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { createReadStream } from "node:fs";
@@ -15,6 +15,42 @@ export interface SaveAssetOptions {
 }
 
 const uploadsPrefix = "/uploads";
+const speechCacheDirectory = path.join("audio", "tts");
+
+function getSpeechCacheFilePath(cacheKey: string) {
+  if (!/^[a-f0-9]{64}$/.test(cacheKey)) {
+    throw new Error("Khóa cache TTS không hợp lệ");
+  }
+  return path.join(getUploadsDirectory(), speechCacheDirectory, `${cacheKey}.wav`);
+}
+
+export async function readCachedSpeechAudio(cacheKey: string) {
+  return readFile(getSpeechCacheFilePath(cacheKey));
+}
+
+export async function writeCachedSpeechAudio(cacheKey: string, audio: Uint8Array) {
+  const destination = getSpeechCacheFilePath(cacheKey);
+  const directory = path.dirname(destination);
+  await mkdir(directory, { recursive: true, mode: 0o750 });
+
+  const temporaryPath = path.join(directory, `.${cacheKey}.${randomUUID()}.tmp`);
+  await writeFile(temporaryPath, audio, { mode: 0o640, flag: "wx" });
+  try {
+    await link(temporaryPath, destination);
+  } catch (error) {
+    if (!(error && typeof error === "object" && "code" in error && error.code === "EEXIST")) {
+      throw error;
+    }
+  } finally {
+    await rm(temporaryPath, { force: true });
+  }
+
+  return `${uploadsPrefix}/${speechCacheDirectory.split(path.sep).join("/")}/${cacheKey}.wav`;
+}
+
+export async function removeCachedSpeechAudio(cacheKey: string) {
+  await rm(getSpeechCacheFilePath(cacheKey), { force: true });
+}
 
 export function getUploadsDirectory() {
   return path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), "uploads"));
@@ -111,7 +147,11 @@ export async function saveUploadedAsset(
     .join("/")}`;
 }
 
-export async function serveStoredAsset(request: Request, storedUrl: string) {
+export async function serveStoredAsset(
+  request: Request,
+  storedUrl: string,
+  options: { cacheControl?: string } = {},
+) {
   let filePath = safeStoredPath(storedUrl);
   let fileStat;
   try {
@@ -143,7 +183,7 @@ export async function serveStoredAsset(request: Request, storedUrl: string) {
 
   const headers = new Headers({
     "Accept-Ranges": "bytes",
-    "Cache-Control": "public, max-age=31536000, immutable",
+    "Cache-Control": options.cacheControl ?? "public, max-age=31536000, immutable",
     "Content-Type": mimeType(filePath),
     "Content-Security-Policy": "default-src 'none'; sandbox",
     "X-Content-Type-Options": "nosniff",

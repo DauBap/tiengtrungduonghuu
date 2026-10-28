@@ -215,6 +215,20 @@ model PronunciationAssessment {
   @@index([lessonAudioScriptId])
 }
 
+model SpeechAudioCache {
+  cacheKey     String   @id @db.VarChar(64)
+  text         String   @db.Text
+  engine       String   @db.VarChar(32)
+  modelVersion String   @db.VarChar(128)
+  speaker      String   @db.VarChar(32)
+  speed        Float
+  filePath     String   @unique @db.VarChar(255)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([createdAt])
+}
+
 model VocabItem {
   id                      String     @id @default(cuid())
   lessonId                String
