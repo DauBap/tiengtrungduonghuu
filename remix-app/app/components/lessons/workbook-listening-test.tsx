@@ -81,6 +81,7 @@ export function WorkbookListeningTest({
   const [speed, setSpeed] = useState<0.8 | 1 | 1.5>(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [audioError, setAudioError] = useState<string | null>(null);
   const isAwaitingTeacherReview = (savedResult?.pendingReviewCount ?? 0) > 0;
   const [answers, setAnswers] = useState<Record<string, string>>(() =>
     isAwaitingTeacherReview
@@ -188,9 +189,19 @@ export function WorkbookListeningTest({
               src={config.audioUrl}
               preload="metadata"
               className="hidden"
+              onLoadStart={() => setAudioError(null)}
               onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
               onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
               onPlay={() => setIsPlaying(true)}
+              onError={(event) => {
+                const audio = event.currentTarget;
+                console.error("[workbook-audio] Failed to load audio", {
+                  src: audio.currentSrc || audio.src,
+                  errorCode: audio.error?.code,
+                });
+                setIsPlaying(false);
+                setAudioError("Không tải hoặc phát được file nghe. Hãy tải lại trang hoặc báo giáo viên kiểm tra đường dẫn audio.");
+              }}
               onPause={() => setIsPlaying(false)}
               onEnded={(event) => {
                 event.currentTarget.currentTime = 0;
@@ -207,7 +218,15 @@ export function WorkbookListeningTest({
                 if (audio.paused) {
                   if (config.maxReplays > 0 && audio.currentTime === 0 && audioPlayCount >= config.maxReplays) return;
                   if (audio.currentTime === 0) setAudioPlayCount((prev) => prev + 1);
-                  void audio.play().catch(() => setIsPlaying(false));
+                  setAudioError(null);
+                  void audio.play().catch((error: unknown) => {
+                    console.error("[workbook-audio] Playback was rejected", {
+                      src: audio.currentSrc || audio.src,
+                      error,
+                    });
+                    setIsPlaying(false);
+                    setAudioError("Trình duyệt không phát được file nghe. Vui lòng thử lại.");
+                  });
                 } else {
                   audio.pause();
                 }
@@ -260,6 +279,7 @@ export function WorkbookListeningTest({
               }}
             />
           )}
+          {audioError && <p role="alert" className="text-sm text-destructive">{audioError}</p>}
         </div>
       </Card>
 

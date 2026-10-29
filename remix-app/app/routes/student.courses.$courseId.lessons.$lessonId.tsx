@@ -172,6 +172,9 @@ function makeStudentWorkbookConfig(config: unknown): WorkbookConfig | null {
   if (!parsed.ok) return null;
   return {
     ...parsed.data,
+    audioUrl: parsed.data.audioUrl
+      ? versionAudioUrl(parsed.data.audioUrl) ?? undefined
+      : parsed.data.audioUrl,
     showResultsImmediately: false,
     sections: parsed.data.sections.map((section) => ({
       ...section,
