@@ -30,48 +30,71 @@ let activeObjectUrl: string | null = null;
 let activeController: AbortController | null = null;
 let activeLoadingToastId: string | null = null;
 let speechRequestId = 0;
+let activePlaybackStateChange: ((state: SpeechPlaybackState) => void) | null = null;
+
+export type SpeechPlaybackState = "loading" | "playing" | "idle";
+
+function updatePlaybackState(state: SpeechPlaybackState, requestId: number) {
+  if (requestId !== speechRequestId) return;
+  activePlaybackStateChange?.(state);
+  if (state === "idle") activePlaybackStateChange = null;
+}
 
 export function speakChinese(
   text: string,
   audioUrl?: string | null,
-  options: { preferAudio?: boolean } = {}
+  options: {
+    preferAudio?: boolean;
+    rate?: 0.8 | 0.85 | 1 | 1.5;
+    onPlaybackStateChange?: (state: SpeechPlaybackState) => void;
+  } = {}
 ): boolean {
   if (typeof window === "undefined") return false;
 
   stopSpeaking();
+  const rate = options.rate ?? 0.85;
+  const requestId = speechRequestId;
+  activePlaybackStateChange = options.onPlaybackStateChange ?? null;
+  updatePlaybackState("loading", requestId);
+
   if (audioUrl && options.preferAudio) {
-    const requestId = speechRequestId;
     const audio = new Audio(audioUrl);
+    let fallbackStarted = false;
+    audio.playbackRate = rate;
     activeAudio = audio;
     audio.currentTime = 0;
-    audio.onerror = () => {
-      if (requestId !== speechRequestId) return;
-      activeAudio = null;
-      speakSelectedTts(text);
+    audio.onplay = () => updatePlaybackState("playing", requestId);
+    audio.onended = () => {
+      releaseActiveAudio();
+      updatePlaybackState("idle", requestId);
     };
-    void audio.play().catch(() => {
-      // File lỗi hoặc bị chặn autoplay → fallback sang TTS
-      if (requestId !== speechRequestId) return;
+    const fallback = () => {
+      if (requestId !== speechRequestId || fallbackStarted) return;
+      fallbackStarted = true;
+      audio.onplay = null;
+      audio.onended = null;
+      audio.onerror = null;
       activeAudio = null;
-      speakSelectedTts(text);
-    });
+      speakSelectedTts(text, rate, requestId);
+    };
+    audio.onerror = fallback;
+    void audio.play().catch(fallback);
     return true;
   }
 
-  return speakSelectedTts(text);
+  return speakSelectedTts(text, rate, requestId);
 }
 
-function speakSelectedTts(text: string): boolean {
+function speakSelectedTts(text: string, rate: number, requestId: number): boolean {
   if (getAppSettings().speechEngine === "melo") {
-    const requestId = speechRequestId;
-    void speakWithMeloTts(text, requestId);
+    void speakWithMeloTts(text, requestId, rate);
     return true;
   }
   setSpeechStatus("local");
-  return speakWithTts(text);
+  return speakWithTts(text, rate, requestId);
 }
 
-async function speakWithMeloTts(text: string, requestId: number) {
+async function speakWithMeloTts(text: string, requestId: number, rate: number) {
   const controller = new AbortController();
   const loadingToastId = `speech-generation-${requestId}`;
   let fallbackStarted = false;
@@ -129,15 +152,23 @@ async function speakWithMeloTts(text: string, requestId: number) {
     activeObjectUrl = objectUrl;
     setSpeechStatus("melo");
     const audio = new Audio(objectUrl);
+    audio.playbackRate = rate;
     activeAudio = audio;
-    audio.onended = releaseActiveAudio;
+    audio.onplay = () => updatePlaybackState("playing", requestId);
+    audio.onended = () => {
+      releaseActiveAudio();
+      updatePlaybackState("idle", requestId);
+    };
     const fallback = () => {
       if (requestId !== speechRequestId) return;
       if (fallbackStarted) return;
       fallbackStarted = true;
+      audio.onplay = null;
+      audio.onended = null;
+      audio.onerror = null;
       releaseActiveAudio();
       setSpeechStatus("fallback");
-      speakWithTts(text);
+      speakWithTts(text, rate, requestId);
     };
     audio.onerror = fallback;
     await audio.play();
@@ -147,7 +178,7 @@ async function speakWithMeloTts(text: string, requestId: number) {
       fallbackStarted = true;
       releaseActiveAudio();
       setSpeechStatus("fallback");
-      speakWithTts(text);
+      speakWithTts(text, rate, requestId);
     }
   } finally {
     if (loadingToastShown) {
@@ -164,21 +195,27 @@ function releaseActiveAudio() {
   activeObjectUrl = null;
 }
 
-function speakWithTts(text: string): boolean {
+function speakWithTts(text: string, rate: number, requestId: number): boolean {
   if (!isSpeechSupported()) return false;
   // Hủy câu đang đọc để không xếp hàng chồng nhau khi bấm liên tục
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = "zh-CN";
-  utterance.rate = 0.85;
+  utterance.rate = rate;
   const voice = pickChineseVoice();
   if (voice) utterance.voice = voice;
+  utterance.onstart = () => updatePlaybackState("playing", requestId);
+  utterance.onend = () => updatePlaybackState("idle", requestId);
+  utterance.onerror = () => updatePlaybackState("idle", requestId);
   window.speechSynthesis.speak(utterance);
   return true;
 }
 
 export function stopSpeaking() {
+  const onPlaybackStateChange = activePlaybackStateChange;
+  activePlaybackStateChange = null;
   speechRequestId += 1;
+  onPlaybackStateChange?.("idle");
   activeController?.abort();
   activeController = null;
   if (activeLoadingToastId) {

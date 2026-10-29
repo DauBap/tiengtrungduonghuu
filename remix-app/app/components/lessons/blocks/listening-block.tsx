@@ -5,9 +5,13 @@ import { Input } from "~/components/ui/input";
 import { Progress } from "~/components/ui/progress";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Volume2, CheckCircle2, ArrowLeft, ArrowRight, RefreshCw, Loader2, Send } from "lucide-react";
-import { speakChinese, isSpeechSupported } from "~/lib/speech";
+import { speakChinese, stopSpeaking, isSpeechSupported } from "~/lib/speech";
+import type { SpeechPlaybackState } from "~/lib/speech";
 import type { ListeningConfig } from "~/lib/learning-blocks";
 import { getListeningGrade } from "~/lib/listening-score";
+
+const playbackRates = [0.8, 1, 1.5] as const;
+type PlaybackRate = (typeof playbackRates)[number];
 
 /** Một câu hỏi nghe — đã được loader phẳng hoá từ VocabItem hoặc SentenceItem. */
 export interface ListeningQuestion {
@@ -80,7 +84,10 @@ export function ListeningBlock({
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [replaysByQuestion, setReplaysByQuestion] = useState<Record<string, number>>({});
   const [speechReady, setSpeechReady] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState<PlaybackRate>(1);
+  const [playbackState, setPlaybackState] = useState<SpeechPlaybackState>("idle");
   const inputRef = useRef<HTMLInputElement>(null);
+  const isComposingRef = useRef(false);
 
   useEffect(() => setSpeechReady(isSpeechSupported()), []);
 
@@ -94,41 +101,95 @@ export function ListeningBlock({
 
   const play = useCallback(() => {
     if (!question) return;
-    speakChinese(question.chinese, question.audioUrl);
+    speakChinese(question.chinese, question.audioUrl, {
+      preferAudio: true,
+      rate: playbackRate,
+      onPlaybackStateChange: setPlaybackState,
+    });
     setReplaysByQuestion((previous) => ({
       ...previous,
       [question.id]: (previous[question.id] ?? 0) + 1,
     }));
-  }, [question]);
+  }, [question, playbackRate]);
 
-  // Tự focus ô nhập khi chuyển câu để học viên gõ được ngay
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, [index]);
+  const togglePlayback = useCallback(() => {
+    if (playbackState !== "idle") {
+      stopSpeaking();
+      return;
+    }
+    if (!outOfReplays) play();
+  }, [outOfReplays, play, playbackState]);
 
-  const next = () => {
-    if (isLast) return;
+  const next = useCallback(() => {
+    if (isLast || isSubmitting) return;
+    stopSpeaking();
     setIndex((current) => current + 1);
-  };
+  }, [isLast, isSubmitting]);
 
-  const previous = () => {
-    if (index === 0) return;
+  const previous = useCallback(() => {
+    if (index === 0 || isSubmitting) return;
+    stopSpeaking();
     setIndex((current) => current - 1);
-  };
+  }, [index, isSubmitting]);
 
-  const submitAttempt = () => {
+  const submitAttempt = useCallback(() => {
     if (hasSubmitted || isSubmitting) return;
+    stopSpeaking();
     setHasSubmitted(true);
     onComplete(items.map((item) => ({ questionId: item.id, answer: (answersByQuestion[item.id] ?? "").trim() })));
-  };
+  }, [answersByQuestion, hasSubmitted, isSubmitting, items, onComplete]);
 
   const restart = () => {
+    stopSpeaking();
     setIndex(0);
     setAnswersByQuestion({});
     setHasSubmitted(false);
     setReplaysByQuestion({});
     setRound((r) => r + 1);
   };
+
+  useEffect(() => {
+    inputRef.current?.focus();
+    return () => stopSpeaking();
+  }, [index]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.defaultPrevented
+        || event.isComposing
+        || event.keyCode === 229
+        || event.altKey
+        || event.ctrlKey
+        || event.metaKey
+        || hasSubmitted
+      ) {
+        return;
+      }
+
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (
+        target.isContentEditable
+        || target.closest("input, textarea, select, [contenteditable='true'], [role='textbox']")
+        || target.closest("button, a, [role='button']")
+      ) {
+        return;
+      }
+
+      if (event.key === " " || event.key === "Spacebar") {
+        event.preventDefault();
+        togglePlayback();
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        if (isLast) submitAttempt();
+        else next();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [hasSubmitted, isLast, next, submitAttempt, togglePlayback]);
 
   if (!question) {
     return (
@@ -244,31 +305,78 @@ export function ListeningBlock({
           <Button
             type="button"
             size="lg"
-            onClick={play}
-            disabled={!speechReady || outOfReplays}
+            onClick={togglePlayback}
+            disabled={!speechReady || (outOfReplays && playbackState === "idle")}
             className="h-20 w-20 rounded-full"
-            title={outOfReplays ? "Đã hết số lần nghe lại" : "Nghe câu"}
+            title={
+              playbackState !== "idle"
+                ? "Dừng phát âm thanh"
+                : outOfReplays
+                  ? "Đã hết số lần nghe lại"
+                  : "Nghe câu"
+            }
+            aria-label={
+              playbackState !== "idle"
+                ? "Dừng phát âm thanh"
+                : outOfReplays
+                  ? "Đã hết số lần nghe lại"
+                  : "Nghe câu"
+            }
           >
-            <Volume2 className="h-8 w-8" />
+            {playbackState === "loading"
+              ? <Loader2 className="h-8 w-8 animate-spin" />
+              : <Volume2 className={cn("h-8 w-8", playbackState === "playing" && "animate-pulse")} />}
           </Button>
 
-          <div className="text-center">
+          <div className="text-center" aria-live="polite">
             <p className="text-sm font-medium">
-              {replays === 0 ? "Bấm để nghe" : outOfReplays ? "Đã hết số lần nghe" : "Nghe lại"}
+              {playbackState === "loading"
+                ? "Đang chuẩn bị âm thanh…"
+                : playbackState === "playing"
+                  ? "Đang phát — bấm để dừng"
+                  : replays === 0
+                    ? "Bấm để nghe"
+                    : outOfReplays
+                      ? "Đã hết số lần nghe"
+                      : "Nghe lại"}
             </p>
             {config.maxReplays > 0 && (
-              <p className="text-xs text-muted-foreground mt-0.5 tabular-nums">
+              <p className="text-xs font-medium text-foreground/70 mt-0.5 tabular-nums">
                 Còn {Math.max(0, config.maxReplays - replays)}/{config.maxReplays} lần
               </p>
             )}
           </div>
 
           {!speechReady && (
-            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <p className="text-xs text-foreground/70 flex items-center gap-1.5">
               <Loader2 className="h-3 w-3 animate-spin" />
               Đang chuẩn bị bộ đọc…
             </p>
           )}
+
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="text-xs font-medium text-foreground/70">Tốc độ phát</span>
+            <div className="inline-flex overflow-hidden rounded-md border" role="group" aria-label="Tốc độ phát">
+              {playbackRates.map((rate) => (
+                <Button
+                  key={rate}
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  aria-pressed={playbackRate === rate}
+                  onClick={() => setPlaybackRate(rate)}
+                  className={cn(
+                    "h-8 rounded-none px-3 text-xs",
+                    playbackRate === rate
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {rate}×
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -276,14 +384,17 @@ export function ListeningBlock({
       <form
         onSubmit={(event) => {
           event.preventDefault();
+          if (isComposingRef.current) return;
           if (isLast) submitAttempt();
           else next();
         }}
         className="space-y-3"
       >
-        <div className="rounded-lg border bg-background">
+        <div className="rounded-lg border bg-background transition-[border-color,box-shadow] focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/30 focus-within:ring-offset-2">
           <Input
             ref={inputRef}
+            onCompositionStart={() => { isComposingRef.current = true; }}
+            onCompositionEnd={() => { isComposingRef.current = false; }}
             value={answer}
             onChange={(event) => {
               if (!question) return;
@@ -291,23 +402,35 @@ export function ListeningBlock({
             }}
             placeholder={config.answerMode === "pinyin" ? "Nhập pinyin vừa nghe…" : "Nhập câu tiếng Trung vừa nghe…"}
             aria-label={config.answerMode === "pinyin" ? "Đáp án pinyin" : "Đáp án tiếng Trung"}
-            className="h-12 border-0 bg-transparent text-center text-lg shadow-none focus-visible:ring-0"
+            className="h-14 border-0 bg-transparent px-4 text-center text-lg shadow-none focus-visible:ring-0"
           />
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t pt-3">
-          <Button type="button" variant="outline" onClick={previous} disabled={index === 0 || isSubmitting}>
-            <ArrowLeft className="mr-1.5 h-4 w-4" />Câu trước
-          </Button>
-          {isLast ? (
-            <Button type="submit" size="lg" disabled={isSubmitting}>
-              <Send className="mr-1.5 h-4 w-4" />Nộp bài
+        <p className="hidden -mt-2 text-center text-xs text-muted-foreground md:block">
+          Mẹo: Khi không gõ, nhấn Space để nghe · Enter để {isLast ? "nộp bài" : "sang câu tiếp theo"}
+        </p>
+
+        <div className="flex justify-center border-t pt-3">
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={previous}
+              disabled={index === 0 || isSubmitting}
+              className="min-h-11 border-primary/40 px-4 text-foreground transition-colors duration-150 hover:border-primary hover:bg-primary/10"
+            >
+              <ArrowLeft className="mr-1.5 h-4 w-4" />Câu trước
             </Button>
-          ) : (
-            <Button type="submit" size="lg" disabled={isSubmitting}>
-              Câu tiếp theo<ArrowRight className="ml-1.5 h-4 w-4" />
-            </Button>
-          )}
+            {isLast ? (
+              <Button type="submit" size="lg" disabled={isSubmitting} className="min-h-11 px-5 transition-colors duration-150">
+                <Send className="mr-1.5 h-4 w-4" />Nộp bài
+              </Button>
+            ) : (
+              <Button type="submit" size="lg" disabled={isSubmitting} className="min-h-11 px-5 transition-colors duration-150">
+                Câu tiếp theo<ArrowRight className="ml-1.5 h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </form>
 

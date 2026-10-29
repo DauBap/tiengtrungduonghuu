@@ -62,11 +62,12 @@ test("MeloTTS failure falls back to the browser Chinese voice", async () => {
 
   try {
     const { speakChinese, stopSpeaking } = await import("~/lib/speech");
-    assert.equal(speakChinese("你好"), true);
+    assert.equal(speakChinese("你好", null, { rate: 1.5 }), true);
     await new Promise((resolve) => setTimeout(resolve, 0));
     assert.equal(spoken.length, 1);
     assert.equal(spoken[0].text, "你好");
     assert.equal(spoken[0].lang, "zh-CN");
+    assert.equal(spoken[0].rate, 1.5);
     stopSpeaking();
   } finally {
     if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
@@ -84,15 +85,20 @@ test("MeloTTS uses recorded vocabulary audio when available and generates it whe
   const originalAudio = Object.getOwnPropertyDescriptor(globalThis, "Audio");
   const originalFetch = Object.getOwnPropertyDescriptor(globalThis, "fetch");
   const requests: RequestInit[] = [];
-  const audioInstances: Array<{ src: string }> = [];
+  const audioInstances: Array<{ src: string; playbackRate: number }> = [];
   const speechSynthesis = { cancel() {}, getVoices: () => [], speak() {} };
 
   class MockAudio {
     currentTime = 0;
+    playbackRate = 1;
+    onplay: (() => void) | null = null;
     onended: (() => void) | null = null;
     onerror: (() => void) | null = null;
     constructor(public src: string) { audioInstances.push(this); }
-    play() { return Promise.resolve(); }
+    play() {
+      this.onplay?.();
+      return Promise.resolve();
+    }
     pause() {}
   }
 
@@ -122,13 +128,15 @@ test("MeloTTS uses recorded vocabulary audio when available and generates it whe
     const { updateAppSetting } = await import("~/lib/app-settings");
     updateAppSetting("speechEngine", "melo");
 
-    speakChinese("你好", "/audio/vocabulary.mp3", { preferAudio: true });
+    speakChinese("你好", "/audio/vocabulary.mp3", { preferAudio: true, rate: 1.5 });
     assert.equal(requests.length, 0);
     assert.equal(audioInstances.at(-1)?.src, "/audio/vocabulary.mp3");
+    assert.equal(audioInstances.at(-1)?.playbackRate, 1.5);
 
-    speakChinese("你好", null, { preferAudio: true });
+    speakChinese("你好", null, { preferAudio: true, rate: 0.8 });
     await new Promise((resolve) => setTimeout(resolve, 0));
     assert.equal(requests.length, 2);
+    assert.equal(audioInstances.at(-1)?.playbackRate, 0.8);
     assert.deepEqual(JSON.parse(String(requests[0].body)), {
       text: "你好",
       intent: "cache-status",
@@ -138,10 +146,18 @@ test("MeloTTS uses recorded vocabulary audio when available and generates it whe
     });
 
     const requestCountBeforePreferredAudio = requests.length;
-    speakChinese("你好", "/audio/listening-question.mp3", { preferAudio: true });
+    const playbackStates: string[] = [];
+    speakChinese("你好", "/audio/listening-question.mp3", {
+      preferAudio: true,
+      rate: 0.8,
+      onPlaybackStateChange: (state) => playbackStates.push(state),
+    });
     assert.equal(requests.length, requestCountBeforePreferredAudio);
     assert.equal(audioInstances.at(-1)?.src, "/audio/listening-question.mp3");
+    assert.equal(audioInstances.at(-1)?.playbackRate, 0.8);
+    assert.deepEqual(playbackStates, ["loading", "playing"]);
     stopSpeaking();
+    assert.deepEqual(playbackStates, ["loading", "playing", "idle"]);
   } finally {
     restoreAnimationFrame();
     if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
