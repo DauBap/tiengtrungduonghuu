@@ -94,6 +94,58 @@ export interface PhoneticsSectionGrade {
   results: PhoneticsItemResult[];
 }
 
+export interface PhoneticsSectionQuestionCount {
+  sectionId: number;
+  totalCount: number;
+}
+
+export interface PhoneticsSectionAttemptSummary {
+  sectionId: number;
+  score: number;
+  correctCount: number;
+  completedAt: Date;
+}
+
+export interface PhoneticsAggregateGrade {
+  score: number;
+  correctCount: number;
+  totalCount: number;
+}
+
+/** Aggregate all section questions, using the best attempt from each submitted section. */
+export function aggregatePhoneticsSections(
+  sections: PhoneticsSectionQuestionCount[],
+  attempts: PhoneticsSectionAttemptSummary[],
+): PhoneticsAggregateGrade {
+  const sectionCounts = new Map(
+    sections.map((section) => [section.sectionId, Math.max(0, section.totalCount)]),
+  );
+  const bestAttempts = new Map<number, PhoneticsSectionAttemptSummary>();
+
+  for (const attempt of attempts) {
+    if (!sectionCounts.has(attempt.sectionId)) continue;
+    const currentBest = bestAttempts.get(attempt.sectionId);
+    if (
+      !currentBest
+      || attempt.score > currentBest.score
+      || (attempt.score === currentBest.score && attempt.completedAt > currentBest.completedAt)
+    ) {
+      bestAttempts.set(attempt.sectionId, attempt);
+    }
+  }
+
+  const totalCount = [...sectionCounts.values()].reduce((total, count) => total + count, 0);
+  const correctCount = [...bestAttempts.entries()].reduce((total, [sectionId, attempt]) => (
+    total + Math.min(sectionCounts.get(sectionId) ?? 0, Math.max(0, attempt.correctCount))
+  ), 0);
+
+  return {
+    score: totalCount > 0 ? Math.round((correctCount / totalCount) * 10000) / 100 : 0,
+    correctCount,
+    totalCount,
+  };
+}
+
 /**
  * Chấm một section. `answers` map theo `item.id`.
  *

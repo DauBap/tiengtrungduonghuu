@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import type { PhoneticsItem, PhoneticsSection } from "./learning-blocks";
 import {
+  aggregatePhoneticsSections,
   gradePhoneticsSection,
   isPhoneticsAnswerCorrect,
   normalizeFinal,
@@ -117,4 +118,35 @@ test("gradePhoneticsSection reports the expected answer for review", () => {
     ],
   );
   assert.equal(grade.score, 0);
+});
+
+test("aggregatePhoneticsSections uses each section's best result and all section questions", () => {
+  const grade = aggregatePhoneticsSections(
+    [
+      { sectionId: 1, totalCount: 9 },
+      { sectionId: 2, totalCount: 9 },
+      { sectionId: 3, totalCount: 9 },
+    ],
+    [
+      { sectionId: 1, score: 88.89, correctCount: 8, completedAt: new Date("2026-10-01T10:00:00Z") },
+      { sectionId: 1, score: 55.56, correctCount: 5, completedAt: new Date("2026-10-02T10:00:00Z") },
+      { sectionId: 2, score: 44.44, correctCount: 4, completedAt: new Date("2026-10-03T10:00:00Z") },
+    ],
+  );
+
+  assert.deepEqual(grade, { score: 44.44, correctCount: 12, totalCount: 27 });
+});
+
+test("aggregatePhoneticsSections counts unsubmitted sections in the total", () => {
+  assert.deepEqual(
+    aggregatePhoneticsSections(
+      [
+        { sectionId: 1, totalCount: 9 },
+        { sectionId: 2, totalCount: 9 },
+        { sectionId: 3, totalCount: 9 },
+      ],
+      [],
+    ),
+    { score: 0, correctCount: 0, totalCount: 27 },
+  );
 });

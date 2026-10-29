@@ -26,6 +26,7 @@ import {
 import { prisma } from "~/lib/prisma.server";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
 import { GRAMMAR_QUESTION_META, type GrammarQuestionType, type TeacherGrammarGrade } from "~/lib/grammar";
+import { aggregatePhoneticsSections } from "~/lib/phonetics";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 
@@ -146,7 +147,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const reviewSetIds = courseReviewSets.map((reviewSet) => reviewSet.id);
     const mockExamIds = courseMockExams.map((mockExam) => mockExam.id);
     const userIds = cls.enrollments.map((enrollment) => enrollment.userId);
-    const [progressRows, grammarAttempts, reviewAttempts, mockExamAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0 || mockExamIds.length > 0) && userIds.length > 0
+    const [progressRows, phoneticsSections, phoneticsAttempts, grammarAttempts, reviewAttempts, mockExamAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0 || mockExamIds.length > 0) && userIds.length > 0
       ? await Promise.all([
           lessonIds.length > 0 ? prisma.lessonTabProgress.findMany({
             where: {
@@ -172,6 +173,32 @@ export async function loader({ request }: LoaderFunctionArgs) {
                 select: { score: true, passed: true, completedAt: true, correctCount: true, totalCount: true },
               },
             },
+          }) : Promise.resolve([]),
+          lessonIds.length > 0 ? prisma.phoneticsSection.findMany({
+            where: { lessonId: { in: lessonIds }, questions: { some: {} } },
+            select: {
+              lessonId: true,
+              sectionKey: true,
+              _count: { select: { questions: true } },
+            },
+          }) : Promise.resolve([]),
+          lessonIds.length > 0 ? prisma.lessonTabAttempt.findMany({
+            where: {
+              lessonId: { in: lessonIds },
+              userId: { in: userIds },
+              tab: "PHONETICS",
+              score: { not: null },
+            },
+            select: {
+              userId: true,
+              lessonId: true,
+              mode: true,
+              score: true,
+              correctCount: true,
+              completedAt: true,
+              details: true,
+            },
+            orderBy: { completedAt: "desc" },
           }) : Promise.resolve([]),
           lessonIds.length > 0 ? prisma.lessonTabAttempt.findMany({
             where: {
@@ -220,10 +247,36 @@ export async function loader({ request }: LoaderFunctionArgs) {
             orderBy: { startedAt: "desc" },
           }) : Promise.resolve([]),
         ])
-      : [[], [], [], []];
+      : [[], [], [], [], [], []];
 
     const enrollmentsByUserId = new Map(cls.enrollments.map((enrollment) => [enrollment.userId, enrollment]));
     const lessonsById = new Map(courseLessons.map((lesson) => [lesson.id, lesson]));
+    const phoneticsSectionsByLesson = new Map<string, { sectionId: number; totalCount: number }[]>();
+    for (const section of phoneticsSections) {
+      const sections = phoneticsSectionsByLesson.get(section.lessonId) ?? [];
+      sections.push({ sectionId: section.sectionKey, totalCount: section._count.questions });
+      phoneticsSectionsByLesson.set(section.lessonId, sections);
+    }
+    const phoneticsAttemptsByUserLesson = new Map<string, {
+      sectionId: number;
+      score: number;
+      correctCount: number;
+      completedAt: Date;
+    }[]>();
+    for (const attempt of phoneticsAttempts) {
+      const details = isRecord(attempt.details) ? attempt.details : {};
+      const sectionId = typeof details.sectionId === "number" ? details.sectionId : Number(attempt.mode);
+      if (!Number.isInteger(sectionId) || attempt.score == null || attempt.correctCount == null) continue;
+      const key = `${attempt.userId}:${attempt.lessonId}`;
+      const attempts = phoneticsAttemptsByUserLesson.get(key) ?? [];
+      attempts.push({
+        sectionId,
+        score: attempt.score,
+        correctCount: attempt.correctCount,
+        completedAt: attempt.completedAt,
+      });
+      phoneticsAttemptsByUserLesson.set(key, attempts);
+    }
     const pendingGrammarAttempts = grammarAttempts.flatMap((attempt) => {
       const details = isRecord(attempt.details) ? attempt.details : {};
       if (
@@ -269,7 +322,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       availableActivities: {
         FLASHCARD: lesson.learningBlocks.some((block) => block.type === "FLASHCARD" && block.required),
         LESSON: lesson._count.audioScripts > 0,
-        PHONETICS: lesson._count.phoneticsSections > 0,
+        PHONETICS: (phoneticsSectionsByLesson.get(lesson.id)?.length ?? 0) > 0,
         VOCABULARY_TEST: lesson._count.content > 0,
         LISTENING: lesson.learningBlocks.some((block) => block.type === "LISTENING" && block.required),
         GRAMMAR: lesson._count.grammarSections > 0,
@@ -321,12 +374,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
       const latestActivityAt = activityDates.length > 0
         ? activityDates.reduce((latest, date) => date > latest ? date : latest)
         : null;
-      const studentLessons = lessons.map((lesson) => ({
-        id: lesson.id,
-        order: lesson.order,
-        displayOrder: lesson.displayOrder,
-        title: lesson.title,
-        activities: DASHBOARD_ACTIVITIES.map(({ tab }) => {
+      const studentLessons = lessons.map((lesson) => {
+        const phoneticsSummary = aggregatePhoneticsSections(
+          phoneticsSectionsByLesson.get(lesson.id) ?? [],
+          phoneticsAttemptsByUserLesson.get(`${enrollment.userId}:${lesson.id}`) ?? [],
+        );
+        return {
+          id: lesson.id,
+          order: lesson.order,
+          displayOrder: lesson.displayOrder,
+          title: lesson.title,
+          activities: DASHBOARD_ACTIVITIES.map(({ tab }) => {
           const progress = progressByKey.get(`${enrollment.userId}:${lesson.id}:${tab}`);
           const attempt = progress?.attempts[0];
           const available = lesson.availableActivities[tab];
@@ -351,13 +409,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
           return {
             tab,
             status,
-            score: Math.round(attempt?.score ?? progress?.currentScore ?? progress?.bestScore ?? progress?.percent ?? 0),
+            score: Math.round(tab === "PHONETICS"
+              ? phoneticsSummary.score
+              : attempt?.score ?? progress?.currentScore ?? progress?.bestScore ?? progress?.percent ?? 0),
             percent: Math.max(0, Math.min(100, Math.round(progress?.percent ?? 0))),
-            correctCount: attempt?.correctCount,
-            totalCount: attempt?.totalCount,
+            correctCount: tab === "PHONETICS" ? phoneticsSummary.correctCount : attempt?.correctCount,
+            totalCount: tab === "PHONETICS" ? phoneticsSummary.totalCount : attempt?.totalCount,
           };
-        }),
-      }));
+          }),
+        };
+      });
 
       return {
         student: {
@@ -1029,6 +1090,14 @@ export default function TeacherIndex() {
                                           const pending = activity.tab === "GRAMMAR" && result?.status === "waiting"
                                             ? selectedClass.pendingGrammarAttempts.find((attempt) => attempt.userId === student.student.id && attempt.lessonId === selectedLesson.id)
                                             : undefined;
+                                          const displayedPercent = result?.status === "completed"
+                                            ? result.score
+                                            : result?.status === "partial"
+                                              ? activity.tab === "PHONETICS" ? result.score : result.percent
+                                              : null;
+                                          const progressStatus = displayedPercent == null
+                                            ? result?.status
+                                            : displayedPercent > 80 ? "completed" : "partial";
                                           return (
                                             <td key={activity.tab} className="px-2 py-2 text-center">
                                               {!result || result.status === "unavailable" ? (
@@ -1049,15 +1118,30 @@ export default function TeacherIndex() {
                                                   Chờ chấm <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                                                 </button>
                                               ) : (
-                                                <span className={`inline-flex min-w-20 flex-col items-center rounded-md px-2 py-1.5 ${activityTone(result.status, selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0))}`}>
+                                                <span className={`inline-flex min-w-20 flex-col items-center rounded-md px-2 py-1.5 ${activityTone(progressStatus ?? result.status, selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0))}`}>
                                                   <span className="font-semibold">
-                                                    {result.status === "completed" ? `${result.score}%` : result.status === "partial" ? `${result.percent}%` : selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0) ? "Bỏ sót" : "Chưa làm"}
+                                                    {displayedPercent != null
+                                                        ? `${displayedPercent}%`
+                                                        : selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0)
+                                                            ? "Bỏ sót"
+                                                            : "Chưa làm"}
                                                   </span>
-                                                  {result.correctCount != null && result.totalCount != null && result.totalCount > 0 && (
+                                                  {result.correctCount != null
+                                                    && result.totalCount != null
+                                                    && result.totalCount > 0
+                                                    && (activity.tab !== "PHONETICS" || result.status === "partial" || result.status === "completed") && (
                                                     <span className="text-[10px]">{result.correctCount}/{result.totalCount}</span>
                                                   )}
                                                   <span className="text-[10px]">
-                                                    {result.status === "completed" ? "Đã xong" : result.status === "partial" ? "Đang làm" : selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0) ? "Cần hoàn thành" : "Chưa bắt đầu"}
+                                                    {displayedPercent != null
+                                                      ? displayedPercent > 80 ? "Đã làm" : "Đang làm"
+                                                      : result.status === "completed"
+                                                        ? "Đã xong"
+                                                        : result.status === "partial"
+                                                          ? "Đang làm"
+                                                          : selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0)
+                                                            ? "Cần hoàn thành"
+                                                            : "Chưa bắt đầu"}
                                                   </span>
                                                 </span>
                                               )}
