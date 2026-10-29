@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Form, useFetcher, useLoaderData } from "react-router";
-import { AudioLines, Loader2, RefreshCw, Search, Trash2, Volume2 } from "lucide-react";
+import { AudioLines, Headphones, Loader2, RefreshCw, Save, Search, Settings2, Trash2, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
@@ -9,6 +9,16 @@ import { Input } from "~/components/ui/input";
 import { prisma } from "~/lib/prisma.server";
 import { deleteSpeechAudioCache, regenerateSpeechAudioCache } from "~/lib/speech-audio.server";
 import { getCachedSpeechAudioFileInfo } from "~/lib/storage.server";
+import {
+  getSpeechProviderSettings,
+  saveSpeechProviderSettings,
+} from "~/lib/speech-settings.server";
+import {
+  isConfigurableSpeechProvider,
+  SPEECH_PROVIDER_VOICES,
+  type ConfigurableSpeechProvider,
+  type SpeechProviderSettings,
+} from "~/lib/speech-settings";
 import { requireRole } from "~/lib/session.server";
 
 const PAGE_SIZE = 100;
@@ -19,7 +29,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const query = (url.searchParams.get("q") ?? "").trim().slice(0, 100);
   const where = query ? { text: { contains: query, mode: "insensitive" as const } } : {};
 
-  const [total, cacheEntries] = await Promise.all([
+  const [total, cacheEntries, meloSettings, kokoroSettings] = await Promise.all([
     prisma.speechAudioCache.count({ where }),
     prisma.speechAudioCache.findMany({
       where,
@@ -35,19 +45,38 @@ export async function loader({ request }: LoaderFunctionArgs) {
         updatedAt: true,
       },
     }),
+    getSpeechProviderSettings("melo"),
+    getSpeechProviderSettings("kokoro"),
   ]);
   const entries = await Promise.all(cacheEntries.map(async (entry) => ({
     ...entry,
     fileInfo: await getCachedSpeechAudioFileInfo(entry.cacheKey),
   })));
 
-  return { user, query, total, entries };
+  return { user, query, total, entries, settings: { melo: meloSettings, kokoro: kokoroSettings } };
 }
 
 export async function action({ request }: ActionFunctionArgs) {
   await requireRole(request, ["admin"]);
   const formData = await request.formData();
   const intent = String(formData.get("intent") ?? "");
+  if (intent === "save-settings") {
+    const provider = String(formData.get("provider") ?? "");
+    if (!isConfigurableSpeechProvider(provider)) {
+      return { error: "Model TTS không hợp lệ." };
+    }
+    try {
+      await saveSpeechProviderSettings(provider, {
+        speaker: formData.get("speaker"),
+        speed: formData.get("speed"),
+      });
+      return { success: true, intent };
+    } catch (error) {
+      console.error("Could not save TTS voice settings:", error);
+      return { error: "Không thể lưu cấu hình giọng đọc. Vui lòng thử lại." };
+    }
+  }
+
   const cacheKey = String(formData.get("cacheKey") ?? "");
 
   if (!/^[a-f0-9]{64}$/.test(cacheKey)) {
@@ -96,6 +125,175 @@ function formatDate(value: Date) {
 
 function formatFileSize(bytes: number) {
   return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(bytes / 1024) + " KB";
+}
+
+function SpeechSettingsPanel({
+  settings,
+}: {
+  settings: Record<ConfigurableSpeechProvider, SpeechProviderSettings>;
+}) {
+  const fetcher = useFetcher<typeof action>();
+  const [provider, setProvider] = useState<ConfigurableSpeechProvider>("kokoro");
+  const [speaker, setSpeaker] = useState(settings.kokoro.speaker);
+  const [speed, setSpeed] = useState(settings.kokoro.speed);
+  const [sample, setSample] = useState("你好，我是你的中文老师。我们一起学习新词语吧。");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewing, setPreviewing] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const currentSettings = settings[provider];
+  const isDirty = speaker !== currentSettings.speaker || speed !== currentSettings.speed;
+
+  useEffect(() => {
+    setSpeaker(currentSettings.speaker);
+    setSpeed(currentSettings.speed);
+  }, [currentSettings.speaker, currentSettings.speed]);
+
+  useEffect(() => {
+    if (fetcher.state !== "idle" || !fetcher.data) return;
+    if (fetcher.data.error) {
+      toast.error(fetcher.data.error);
+    } else if (fetcher.data.success && fetcher.data.intent === "save-settings") {
+      toast.success("Đã lưu cấu hình. Audio tạo mới sẽ dùng giọng này.");
+    }
+  }, [fetcher.data, fetcher.state]);
+
+  useEffect(() => () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
+
+  async function handlePreview() {
+    setPreviewing(true);
+    setPreviewError(null);
+    try {
+      const response = await fetch("/admin/speech-audio/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider, speaker, speed, text: sample }),
+      });
+      if (!response.ok) {
+        const result = await response.json().catch(() => null) as { error?: unknown } | null;
+        throw new Error(typeof result?.error === "string" ? result.error : "Không thể tạo audio nghe thử.");
+      }
+      if (!response.headers.get("Content-Type")?.toLowerCase().startsWith("audio/wav")) {
+        throw new Error("Phiên đăng nhập đã hết hạn hoặc máy chủ trả dữ liệu không hợp lệ.");
+      }
+      const nextUrl = URL.createObjectURL(await response.blob());
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(nextUrl);
+    } catch (error) {
+      setPreviewError(error instanceof Error ? error.message : "Không thể tạo audio nghe thử.");
+    } finally {
+      setPreviewing(false);
+    }
+  }
+
+  return (
+    <section className="space-y-6 rounded-lg border p-4 sm:p-6" aria-labelledby="speech-settings-title">
+      <div>
+        <h2 id="speech-settings-title" className="text-lg font-semibold">Tinh chỉnh giọng đọc</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Nghe thử cấu hình trước khi lưu. Thiết lập chỉ áp dụng cho audio được tạo mới; audio đã có trong cache không bị thay đổi.
+        </p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2" role="group" aria-label="Chọn model TTS">
+        {(["kokoro", "melo"] as const).map((model) => (
+          <button
+            key={model}
+            type="button"
+            aria-pressed={provider === model}
+            onClick={() => setProvider(model)}
+            className={`rounded-lg border p-4 text-left transition-colors ${provider === model ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}
+          >
+            <span className="block font-medium">{model === "kokoro" ? "Kokoro · Từ vựng" : "MeloTTS · Nghe câu"}</span>
+            <span className="mt-1 block text-sm text-muted-foreground">
+              {model === "kokoro" ? "Model hexgrad/Kokoro-82M" : "Model tiếng Trung, speaker ZH"}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <fetcher.Form method="post" className="space-y-6">
+        <input type="hidden" name="intent" value="save-settings" />
+        <input type="hidden" name="provider" value={provider} />
+        <input type="hidden" name="speaker" value={speaker} />
+        <input type="hidden" name="speed" value={speed} />
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label htmlFor="speech-voice" className="text-sm font-medium">Giọng</label>
+            <select
+              id="speech-voice"
+              value={speaker}
+              onChange={(event) => setSpeaker(event.target.value)}
+              disabled={provider === "melo"}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {SPEECH_PROVIDER_VOICES[provider].map((voice) => (
+                <option key={voice} value={voice}>{voice}</option>
+              ))}
+            </select>
+            {provider === "melo" && (
+              <p className="text-xs text-muted-foreground">MeloTTS tiếng Trung hiện chỉ cung cấp speaker ZH.</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <label htmlFor="speech-speed" className="text-sm font-medium">Tốc độ</label>
+              <output htmlFor="speech-speed" className="text-sm tabular-nums text-muted-foreground">{speed.toFixed(2)}×</output>
+            </div>
+            <input
+              id="speech-speed"
+              type="range"
+              min="0.5"
+              max="1.5"
+              step="0.05"
+              value={speed}
+              onChange={(event) => setSpeed(Number(event.target.value))}
+              className="w-full accent-primary"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground"><span>Chậm</span><span>Nhanh</span></div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="speech-sample" className="text-sm font-medium">Câu mẫu nghe thử</label>
+          <textarea
+            id="speech-sample"
+            value={sample}
+            onChange={(event) => setSample(event.target.value)}
+            maxLength={500}
+            rows={3}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          />
+          <p className="text-xs text-muted-foreground">Có thể thay câu mẫu để kiểm tra từ hoặc câu cụ thể (tối đa 500 ký tự).</p>
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Button type="button" variant="outline" onClick={handlePreview} disabled={previewing || !sample.trim()}>
+            {previewing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Headphones className="mr-2 h-4 w-4" />}
+            Nghe thử cấu hình
+          </Button>
+          <Button type="submit" disabled={!isDirty || fetcher.state !== "idle"}>
+            {fetcher.state !== "idle" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            Lưu cấu hình
+          </Button>
+        </div>
+        {previewError && <p role="alert" className="text-sm text-destructive">{previewError}</p>}
+        {previewUrl && (
+          <audio
+            key={previewUrl}
+            controls
+            autoPlay
+            src={previewUrl}
+            className="h-10 w-full sm:max-w-md"
+            aria-label="Audio mẫu được tạo bằng cấu hình giọng hiện tại"
+          />
+        )}
+      </fetcher.Form>
+    </section>
+  );
 }
 
 function SpeechAudioEntry({ entry }: { entry: Awaited<ReturnType<typeof loader>>["entries"][number] }) {
@@ -189,7 +387,8 @@ function SpeechAudioEntry({ entry }: { entry: Awaited<ReturnType<typeof loader>>
 }
 
 export default function AdminSpeechAudio() {
-  const { user, query, total, entries } = useLoaderData<typeof loader>();
+  const { user, query, total, entries, settings } = useLoaderData<typeof loader>();
+  const [activePanel, setActivePanel] = useState<"settings" | "cache">("settings");
 
   return (
     <AppShell user={user}>
@@ -197,10 +396,33 @@ export default function AdminSpeechAudio() {
         <header className="space-y-2">
           <h1 className="text-2xl font-bold tracking-tight">Quản lý audio AI</h1>
           <p className="max-w-3xl text-sm text-muted-foreground">
-            Tìm và nghe thử audio AI. Nếu phát âm chưa đúng, bạn có thể tạo lại bằng đúng model đã tạo audio đó; audio mới sẽ được dùng cho tất cả học viên.
+            Tùy chỉnh giọng cho từng model hoặc quản lý các audio đã được tạo.
           </p>
         </header>
 
+        <div className="flex gap-2 border-b" role="group" aria-label="Quản lý audio AI">
+          <button
+            type="button"
+            aria-pressed={activePanel === "settings"}
+            onClick={() => setActivePanel("settings")}
+            className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium ${activePanel === "settings" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            <Settings2 className="h-4 w-4" /> Cấu hình giọng
+          </button>
+          <button
+            type="button"
+            aria-pressed={activePanel === "cache"}
+            onClick={() => setActivePanel("cache")}
+            className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium ${activePanel === "cache" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            <AudioLines className="h-4 w-4" /> Audio cache
+          </button>
+        </div>
+
+        {activePanel === "settings" ? (
+          <SpeechSettingsPanel settings={settings} />
+        ) : (
+          <>
         <section className="rounded-lg border bg-muted/30 p-4 sm:p-5" aria-label="Tìm audio">
           <Form method="get" className="flex flex-col gap-3 sm:flex-row">
             <label className="sr-only" htmlFor="speech-audio-search">Tìm theo chữ Hán hoặc nội dung câu</label>
@@ -249,6 +471,8 @@ export default function AdminSpeechAudio() {
           <Volume2 className="mt-0.5 h-4 w-4 shrink-0" />
           <span>Xóa cache không xóa nội dung bài học. Khi audio bị xóa, lần nghe tiếp theo sẽ tự tạo lại.</span>
         </p>
+          </>
+        )}
       </div>
     </AppShell>
   );

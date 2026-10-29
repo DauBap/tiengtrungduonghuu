@@ -91,10 +91,21 @@ After deploying the app changes, test through the authenticated app and confirm
 that a temporary MeloTTS outage falls back to the browser voice. Do not expose
 port `8766` through the firewall or reverse proxy.
 
+The admin **Audio AI → Cấu hình giọng** page can preview and save a voice and
+speed for each model. MeloTTS's Chinese model currently exposes only the `ZH`
+speaker; Kokoro offers the Mandarin voices listed in the admin selector. The
+supported speed range is `0.5`–`1.5`. Saved settings are written to
+`$UPLOADS_DIR/.config/tts/` (or `uploads/.config/tts/` when `UPLOADS_DIR` is
+unset), so keep that directory persistent and shared by the app process. The
+preview endpoint generates a temporary response and does not add it to the
+audio cache. Saving settings affects future synthesis only; existing cached
+audio remains unchanged. No database migration is needed for these settings.
+
 The application deployment must persist the configured `UPLOADS_DIR`, since
-the database stores cache metadata while the WAV data lives on disk. After
-pulling the application change to Ubuntu, run `npx prisma db push` from the
-application directory before building and restarting the app.
+the database stores cache metadata while the WAV data lives on disk. When an
+application revision changes the Prisma schema, run `npx prisma db push` from
+the application directory before building and restarting the app. The admin
+voice-settings feature itself does not change the database schema.
 
 Run the API unit tests without loading the model:
 
@@ -194,8 +205,17 @@ systemctl --user disable --now tiengtrung-kokoro.service
 ## API
 
 - `GET /healthz` returns `{"status":"ok"}` after the model has loaded.
-- `POST /synthesize` accepts `{"text":"..."}` and returns WAV audio.
+- `POST /synthesize` accepts `{"text":"...","voice":"ZH","speed":0.85}` and
+  returns WAV audio. `voice` and `speed` are optional for backward compatibility.
 - Requests are limited to 2,000 text characters and 64 KiB.
 - Generated speech is cached by text and provider/model/voice configuration in the
   app's persistent uploads directory.
 - The Kokoro service uses the same health and synthesis paths on port `8767`.
+
+After pulling updates to the Python service scripts, restart each enabled
+user service so it loads the updated request validation and voice/speed support:
+
+```bash
+systemctl --user restart tiengtrung-melotts.service
+systemctl --user restart tiengtrung-kokoro.service
+```

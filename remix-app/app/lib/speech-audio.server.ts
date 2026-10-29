@@ -6,16 +6,16 @@ import {
   replaceCachedSpeechAudio,
   writeCachedSpeechAudio,
 } from "~/lib/storage.server";
+import {
+  getSpeechProviderSettings,
+} from "~/lib/speech-settings.server";
+import type { SpeechProviderSettings } from "~/lib/speech-settings";
 
 const ENGINE = "melotts";
 const MODEL_VERSION = "myshell-ai/MeloTTS@209145371cff8fc3bd60d7be902ea69cbdb7965a";
-const SPEAKER = "ZH";
-const SPEED = 0.85;
 const MELO_TTS_URL = process.env.MELO_TTS_URL ?? "http://127.0.0.1:8766/synthesize";
 const KOKORO_ENGINE = "kokoro";
 const KOKORO_MODEL_VERSION = "hexgrad/Kokoro-82M@v1.0";
-const KOKORO_SPEAKER = "zf_xiaobei";
-const KOKORO_SPEED = 0.85;
 const KOKORO_TTS_URL = process.env.KOKORO_TTS_URL ?? "http://127.0.0.1:8767/synthesize";
 
 export type SpeechAudioProvider = "melo" | "kokoro";
@@ -26,15 +26,14 @@ type CacheOperation =
 
 const activeOperations = new Map<string, CacheOperation>();
 
-function getProviderSettings(provider: SpeechAudioProvider) {
+function getProviderSettings(provider: SpeechAudioProvider, settings: SpeechProviderSettings) {
   return provider === "kokoro"
     ? {
       engine: KOKORO_ENGINE,
       modelVersion: KOKORO_MODEL_VERSION,
-      speaker: KOKORO_SPEAKER,
-      speed: KOKORO_SPEED,
+      ...settings,
     }
-    : { engine: ENGINE, modelVersion: MODEL_VERSION, speaker: SPEAKER, speed: SPEED };
+    : { engine: ENGINE, modelVersion: MODEL_VERSION, ...settings };
 }
 
 function getProviderFromEngine(engine: string): SpeechAudioProvider {
@@ -43,10 +42,21 @@ function getProviderFromEngine(engine: string): SpeechAudioProvider {
   throw new Error(`Unsupported speech audio engine: ${engine}`);
 }
 
-export function getSpeechAudioCacheKey(text: string, provider: SpeechAudioProvider = "melo") {
-  const settings = getProviderSettings(provider);
+export function getSpeechAudioCacheKey(
+  text: string,
+  provider: SpeechAudioProvider = "melo",
+  settings: SpeechProviderSettings = provider === "kokoro"
+    ? { speaker: "zf_xiaobei", speed: 0.85 }
+    : { speaker: "ZH", speed: 0.85 },
+) {
   return createHash("sha256")
-    .update(JSON.stringify({ ...settings, text }))
+    .update(JSON.stringify({
+      ...(provider === "kokoro"
+        ? { engine: KOKORO_ENGINE, modelVersion: KOKORO_MODEL_VERSION }
+        : { engine: ENGINE, modelVersion: MODEL_VERSION }),
+      ...settings,
+      text,
+    }))
     .digest("hex");
 }
 
@@ -83,12 +93,16 @@ async function readValidCachedFile(cacheKey: string) {
   }
 }
 
-async function synthesizeSpeechAudio(text: string, provider: SpeechAudioProvider) {
+async function synthesizeSpeechAudio(
+  text: string,
+  provider: SpeechAudioProvider,
+  settings: SpeechProviderSettings,
+) {
   const endpoint = provider === "kokoro" ? KOKORO_TTS_URL : MELO_TTS_URL;
   const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ text, voice: settings.speaker, speed: settings.speed }),
     signal: AbortSignal.timeout(60_000),
   });
   if (!response.ok) {
@@ -105,14 +119,23 @@ async function synthesizeSpeechAudio(text: string, provider: SpeechAudioProvider
   return audio;
 }
 
+export async function generateSpeechAudioPreview(
+  text: string,
+  provider: SpeechAudioProvider,
+  settings: SpeechProviderSettings,
+) {
+  return synthesizeSpeechAudio(text, provider, settings);
+}
+
 async function generateAndStoreSpeechAudio(
   text: string,
   cacheKey: string,
   replace: boolean,
   provider: SpeechAudioProvider,
+  settings: SpeechProviderSettings,
 ) {
-  const audio = await synthesizeSpeechAudio(text, provider);
-  const providerSettings = getProviderSettings(provider);
+  const audio = await synthesizeSpeechAudio(text, provider, settings);
+  const providerSettings = getProviderSettings(provider, settings);
   const filePath = replace
     ? await replaceCachedSpeechAudio(cacheKey, audio)
     : await writeCachedSpeechAudio(cacheKey, audio);
@@ -139,7 +162,8 @@ async function generateAndStoreSpeechAudio(
 }
 
 export async function hasCachedSpeechAudio(text: string, provider: SpeechAudioProvider = "melo") {
-  const cacheKey = getSpeechAudioCacheKey(text, provider);
+  const settings = await getSpeechProviderSettings(provider);
+  const cacheKey = getSpeechAudioCacheKey(text, provider, settings);
   const cachedRecord = await prisma.speechAudioCache.findUnique({ where: { cacheKey } });
   if (cachedRecord && cachedRecord.filePath !== `/uploads/audio/tts/${cacheKey}.wav`) {
     throw new Error(`TTS cache path does not match cache key ${cacheKey}`);
@@ -151,6 +175,7 @@ async function getOrCreateSpeechAudioUncached(
   text: string,
   cacheKey: string,
   provider: SpeechAudioProvider,
+  settings: SpeechProviderSettings,
 ) {
   const cachedRecord = await prisma.speechAudioCache.findUnique({ where: { cacheKey } });
   if (cachedRecord) {
@@ -164,7 +189,7 @@ async function getOrCreateSpeechAudioUncached(
 
   const orphanedAudio = await readValidCachedFile(cacheKey);
   if (orphanedAudio) {
-    const providerSettings = getProviderSettings(provider);
+    const providerSettings = getProviderSettings(provider, settings);
     await prisma.speechAudioCache.upsert({
       where: { cacheKey },
       create: {
@@ -178,21 +203,22 @@ async function getOrCreateSpeechAudioUncached(
     return orphanedAudio;
   }
 
-  return generateAndStoreSpeechAudio(text, cacheKey, false, provider);
+  return generateAndStoreSpeechAudio(text, cacheKey, false, provider, settings);
 }
 
-export function getOrCreateSpeechAudio(
+export async function getOrCreateSpeechAudio(
   text: string,
   provider: SpeechAudioProvider = "melo",
 ): Promise<Buffer> {
-  const cacheKey = getSpeechAudioCacheKey(text, provider);
+  const settings = await getSpeechProviderSettings(provider);
+  const cacheKey = getSpeechAudioCacheKey(text, provider, settings);
   const activeOperation = activeOperations.get(cacheKey);
   if (activeOperation) {
     if (activeOperation.kind === "synthesis") return activeOperation.promise;
     return activeOperation.promise.then(() => getOrCreateSpeechAudio(text, provider));
   }
 
-  const request = getOrCreateSpeechAudioUncached(text, cacheKey, provider).finally(() => {
+  const request = getOrCreateSpeechAudioUncached(text, cacheKey, provider, settings).finally(() => {
     if (activeOperations.get(cacheKey)?.promise === request) {
       activeOperations.delete(cacheKey);
     }
@@ -258,11 +284,13 @@ export async function regenerateSpeechAudioCache(cacheKey: string) {
     return regenerateSpeechAudioCache(cacheKey);
   }
 
+  const provider = getProviderFromEngine(record.engine);
   const request = generateAndStoreSpeechAudio(
     record.text,
     cacheKey,
     true,
-    getProviderFromEngine(record.engine),
+    provider,
+    { speaker: record.speaker, speed: record.speed },
   ).finally(() => {
     if (activeOperations.get(cacheKey)?.promise === request) {
       activeOperations.delete(cacheKey);

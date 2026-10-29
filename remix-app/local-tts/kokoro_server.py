@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from io import BytesIO
@@ -13,6 +14,16 @@ MAX_REQUEST_BYTES = 64 * 1024
 SAMPLE_RATE = 24_000
 VOICE = os.environ.get("KOKORO_VOICE", "zf_xiaobei")
 SPEECH_SPEED = float(os.environ.get("KOKORO_SPEED", "0.85"))
+VOICES = {
+    "zf_xiaobei",
+    "zf_xiaoni",
+    "zf_xiaoxiao",
+    "zf_xiaoyi",
+    "zm_yunjian",
+    "zm_yunxi",
+    "zm_yunxia",
+    "zm_yunyang",
+}
 LOGGER = logging.getLogger("kokoro")
 
 
@@ -58,8 +69,23 @@ class KokoroTTSHandler(BaseHTTPRequestHandler):
             self._send_json(400, {"error": "Text must be between 1 and 2000 characters"})
             return
 
+        voice = payload.get("voice", VOICE) if isinstance(payload, dict) else VOICE
+        speed = payload.get("speed", SPEECH_SPEED) if isinstance(payload, dict) else SPEECH_SPEED
+        if not isinstance(voice, str) or voice not in VOICES:
+            self._send_json(400, {"error": "Unsupported Kokoro Mandarin voice"})
+            return
+        if (
+            isinstance(speed, bool)
+            or not isinstance(speed, (int, float))
+            or not math.isfinite(speed)
+            or speed < 0.5
+            or speed > 1.5
+        ):
+            self._send_json(400, {"error": "Speed must be between 0.5 and 1.5"})
+            return
+
         try:
-            audio = self._synthesize(text)
+            audio = self._synthesize(text, voice, float(speed))
         except Exception:
             LOGGER.exception("Speech synthesis failed")
             self._send_json(503, {"error": "Speech synthesis is temporarily unavailable"})
@@ -75,15 +101,15 @@ class KokoroTTSHandler(BaseHTTPRequestHandler):
         except Exception:
             LOGGER.exception("Could not send generated audio")
 
-    def _synthesize(self, text):
+    def _synthesize(self, text, voice, speed):
         import numpy as np
         import soundfile as sf
 
         chunks = []
         for _, _, audio in self.pipeline(
             text,
-            voice=VOICE,
-            speed=SPEECH_SPEED,
+            voice=voice,
+            speed=speed,
             split_pattern=r"\n+",
         ):
             if audio is None:

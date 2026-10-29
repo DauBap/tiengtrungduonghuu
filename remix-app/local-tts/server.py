@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 import os
 import tempfile
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -11,7 +12,7 @@ HOST = "127.0.0.1"
 PORT = 8766
 MAX_TEXT_LENGTH = 2_000
 MAX_REQUEST_BYTES = 64 * 1024
-SPEECH_SPEED = 0.85
+SPEECH_SPEED = float(os.environ.get("MELO_SPEED", "0.85"))
 LOGGER = logging.getLogger("melotts")
 
 
@@ -58,6 +59,21 @@ class MeloTTSHandler(BaseHTTPRequestHandler):
             self._send_json(400, {"error": "Text must be between 1 and 2000 characters"})
             return
 
+        voice = payload.get("voice", "ZH") if isinstance(payload, dict) else "ZH"
+        speed = payload.get("speed", SPEECH_SPEED) if isinstance(payload, dict) else SPEECH_SPEED
+        if voice != "ZH":
+            self._send_json(400, {"error": "Unsupported MeloTTS Chinese voice"})
+            return
+        if (
+            isinstance(speed, bool)
+            or not isinstance(speed, (int, float))
+            or not math.isfinite(speed)
+            or speed < 0.5
+            or speed > 1.5
+        ):
+            self._send_json(400, {"error": "Speed must be between 0.5 and 1.5"})
+            return
+
         audio_path = None
         try:
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as audio_file:
@@ -67,7 +83,7 @@ class MeloTTSHandler(BaseHTTPRequestHandler):
                 text,
                 self.speaker_id,
                 str(audio_path),
-                speed=SPEECH_SPEED,
+                speed=float(speed),
                 quiet=True,
             )
             audio = audio_path.read_bytes()

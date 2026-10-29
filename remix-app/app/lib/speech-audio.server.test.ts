@@ -21,6 +21,14 @@ test("speech audio cache keys are stable per text", () => {
     getSpeechAudioCacheKey("你好", "melo"),
     getSpeechAudioCacheKey("你好", "kokoro"),
   );
+  assert.notEqual(
+    getSpeechAudioCacheKey("你好", "kokoro", { speaker: "zf_xiaobei", speed: 0.85 }),
+    getSpeechAudioCacheKey("你好", "kokoro", { speaker: "zm_yunxi", speed: 0.85 }),
+  );
+  assert.notEqual(
+    getSpeechAudioCacheKey("你好", "melo", { speaker: "ZH", speed: 0.85 }),
+    getSpeechAudioCacheKey("你好", "melo", { speaker: "ZH", speed: 1 }),
+  );
 });
 
 test("WAV validation checks RIFF and WAVE signatures", () => {

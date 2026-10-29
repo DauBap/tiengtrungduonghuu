@@ -91,6 +91,40 @@ class KokoroTTSHandlerTests(unittest.TestCase):
             ("你好", "zf_xiaobei", 0.85, r"\n+"),
         )
 
+    def test_synthesis_uses_requested_voice_and_speed(self):
+        request = urllib.request.Request(
+            self.base_url + "/synthesize",
+            data=json.dumps({
+                "text": "你好",
+                "voice": "zm_yunxi",
+                "speed": 1.1,
+            }).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        fake_modules = {
+            "numpy": FakeNumpy,
+            "soundfile": FakeSoundFile,
+        }
+        with patch.dict(sys.modules, fake_modules):
+            with urllib.request.urlopen(request) as response:
+                self.assertEqual(response.status, 200)
+        self.assertEqual(
+            self.pipeline.request,
+            ("你好", "zm_yunxi", 1.1, r"\n+"),
+        )
+
+    def test_rejects_unsupported_voice(self):
+        request = urllib.request.Request(
+            self.base_url + "/synthesize",
+            data=json.dumps({"text": "你好", "voice": "unknown"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with self.assertRaises(urllib.error.HTTPError) as error:
+            urllib.request.urlopen(request)
+        self.assertEqual(error.exception.code, 400)
+
     def test_rejects_empty_text(self):
         request = urllib.request.Request(
             self.base_url + "/synthesize",

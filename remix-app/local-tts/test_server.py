@@ -53,6 +53,28 @@ class MeloTTSHandlerTests(unittest.TestCase):
             self.assertEqual(response.read(), b"RIFF-test-wave")
         self.assertEqual(self.model.request, ("你好", 7, 0.85, True))
 
+    def test_synthesis_uses_requested_speed(self):
+        request = urllib.request.Request(
+            self.base_url + "/synthesize",
+            data=json.dumps({"text": "你好", "voice": "ZH", "speed": 1.1}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(request) as response:
+            self.assertEqual(response.status, 200)
+        self.assertEqual(self.model.request, ("你好", 7, 1.1, True))
+
+    def test_rejects_unsupported_voice(self):
+        request = urllib.request.Request(
+            self.base_url + "/synthesize",
+            data=json.dumps({"text": "你好", "voice": "EN"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with self.assertRaises(urllib.error.HTTPError) as error:
+            urllib.request.urlopen(request)
+        self.assertEqual(error.exception.code, 400)
+
     def test_rejects_empty_text(self):
         request = urllib.request.Request(
             self.base_url + "/synthesize",
