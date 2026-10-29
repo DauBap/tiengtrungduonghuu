@@ -50,6 +50,7 @@ export function speakChinese(
     rate?: 0.8 | 0.85 | 1 | 1.5;
     audioElement?: HTMLAudioElement;
     serverProvider?: ServerSpeechProvider;
+    useBrowserTts?: boolean;
     onPlaybackStateChange?: (state: SpeechPlaybackState) => void;
   } = {}
 ): boolean {
@@ -60,6 +61,11 @@ export function speakChinese(
   const requestId = speechRequestId;
   activePlaybackStateChange = options.onPlaybackStateChange ?? null;
   updatePlaybackState("loading", requestId);
+
+  if (options.useBrowserTts) {
+    setSpeechStatus("local");
+    return speakWithTts(text, rate, requestId);
+  }
 
   if (audioUrl && options.preferAudio) {
     const audio = options.audioElement ?? new Audio(audioUrl);

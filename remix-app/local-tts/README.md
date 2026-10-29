@@ -91,6 +91,12 @@ After deploying the app changes, test through the authenticated app and confirm
 that a temporary MeloTTS outage falls back to the browser voice. Do not expose
 port `8766` through the firewall or reverse proxy.
 
+MeloTTS output is peak-normalized to approximately `-1 dBFS` before it is sent
+to the app and cached, which raises quiet generations without clipping. This
+only applies to newly generated audio. To replace a quiet cached sentence, open
+**Admin → Audio AI → Audio cache**, search for the sentence, delete its cache,
+then play it again so the normalized version is generated.
+
 The admin **Audio AI → Cấu hình giọng** page can preview and save a voice and
 speed for each model. MeloTTS's Chinese model currently exposes only the `ZH`
 speaker; Kokoro offers the Mandarin voices listed in the admin selector. The

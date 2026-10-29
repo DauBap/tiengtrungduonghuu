@@ -2,7 +2,9 @@ import json
 import logging
 import math
 import os
+import struct
 import tempfile
+import wave
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -14,6 +16,60 @@ MAX_TEXT_LENGTH = 2_000
 MAX_REQUEST_BYTES = 64 * 1024
 SPEECH_SPEED = float(os.environ.get("MELO_SPEED", "0.85"))
 LOGGER = logging.getLogger("melotts")
+TARGET_PEAK = 10 ** (-1 / 20)
+
+
+def normalize_wav_peak(audio_path):
+    with wave.open(str(audio_path), "rb") as wav_file:
+        params = wav_file.getparams()
+        if params.comptype != "NONE":
+            raise RuntimeError("MeloTTS generated a compressed WAV file")
+        sample_width = params.sampwidth
+        frames = wav_file.readframes(params.nframes)
+
+    if sample_width not in (1, 2, 3, 4):
+        raise RuntimeError("MeloTTS generated an unsupported PCM sample width")
+    if not frames or len(frames) % sample_width:
+        raise RuntimeError("MeloTTS generated an invalid PCM WAV file")
+
+    if sample_width == 1:
+        samples = [sample - 128 for sample in frames]
+    elif sample_width == 3:
+        samples = [
+            int.from_bytes(frames[offset:offset + 3], "little", signed=True)
+            for offset in range(0, len(frames), 3)
+        ]
+    else:
+        code = "<h" if sample_width == 2 else "<i"
+        samples = [
+            sample[0]
+            for sample in struct.iter_unpack(code, frames)
+        ]
+
+    peak = max(abs(sample) for sample in samples)
+    if peak == 0:
+        raise RuntimeError("MeloTTS generated silent audio")
+
+    positive_peak = (1 << (sample_width * 8 - 1)) - 1
+    negative_peak = -(1 << (sample_width * 8 - 1))
+    gain = TARGET_PEAK * positive_peak / peak
+    if gain == 1.0:
+        return
+
+    adjusted = bytearray()
+    for sample in samples:
+        scaled = round(sample * gain)
+        scaled = max(negative_peak, min(positive_peak, scaled))
+        if sample_width == 1:
+            adjusted.append(scaled + 128)
+        elif sample_width == 3:
+            adjusted.extend(scaled.to_bytes(3, "little", signed=True))
+        else:
+            adjusted.extend(struct.pack("<h" if sample_width == 2 else "<i", scaled))
+
+    with wave.open(str(audio_path), "wb") as wav_file:
+        wav_file.setparams(params)
+        wav_file.writeframes(adjusted)
 
 
 class MeloTTSHandler(BaseHTTPRequestHandler):
@@ -86,6 +142,7 @@ class MeloTTSHandler(BaseHTTPRequestHandler):
                 speed=float(speed),
                 quiet=True,
             )
+            normalize_wav_peak(audio_path)
             audio = audio_path.read_bytes()
             if not audio:
                 raise RuntimeError("MeloTTS generated an empty audio file")

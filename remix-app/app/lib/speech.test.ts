@@ -68,6 +68,18 @@ test("MeloTTS failure falls back to the browser Chinese voice", async () => {
     assert.equal(spoken[0].text, "你好");
     assert.equal(spoken[0].lang, "zh-CN");
     assert.equal(spoken[0].rate, 1.5);
+
+    assert.equal(
+      speakChinese("词语", "/audio/vocabulary.mp3", {
+        preferAudio: true,
+        serverProvider: "kokoro",
+        useBrowserTts: true,
+      }),
+      true,
+    );
+    assert.equal(spoken.length, 2);
+    assert.equal(spoken[1].text, "词语");
+    assert.equal(spoken[1].lang, "zh-CN");
     stopSpeaking();
   } finally {
     if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);

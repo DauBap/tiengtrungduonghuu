@@ -1,12 +1,16 @@
 import json
+import io
+import struct
+import tempfile
 import threading
 import unittest
 import urllib.error
 import urllib.request
+import wave
 from http.server import HTTPServer
 from pathlib import Path
 
-from server import MeloTTSHandler
+from server import MeloTTSHandler, normalize_wav_peak
 
 
 class FakeModel:
@@ -15,7 +19,11 @@ class FakeModel:
 
     def tts_to_file(self, text, speaker_id, output_path, speed, quiet):
         self.request = (text, speaker_id, speed, quiet)
-        Path(output_path).write_bytes(b"RIFF-test-wave")
+        with wave.open(output_path, "wb") as wav_file:
+            wav_file.setnchannels(1)
+            wav_file.setsampwidth(2)
+            wav_file.setframerate(24_000)
+            wav_file.writeframes(struct.pack("<hhhh", 1000, -1000, 500, -500))
 
 
 class MeloTTSHandlerTests(unittest.TestCase):
@@ -50,7 +58,10 @@ class MeloTTSHandlerTests(unittest.TestCase):
         with urllib.request.urlopen(request) as response:
             self.assertEqual(response.status, 200)
             self.assertEqual(response.headers.get_content_type(), "audio/wav")
-            self.assertEqual(response.read(), b"RIFF-test-wave")
+            audio = response.read()
+        with wave.open(io.BytesIO(audio), "rb") as wav_file:
+            samples = struct.unpack("<hhhh", wav_file.readframes(4))
+        self.assertGreater(max(abs(sample) for sample in samples), 28_000)
         self.assertEqual(self.model.request, ("你好", 7, 0.85, True))
 
     def test_synthesis_uses_requested_speed(self):
@@ -63,6 +74,22 @@ class MeloTTSHandlerTests(unittest.TestCase):
         with urllib.request.urlopen(request) as response:
             self.assertEqual(response.status, 200)
         self.assertEqual(self.model.request, ("你好", 7, 1.1, True))
+
+    def test_normalizes_quiet_pcm_wav_without_clipping(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "quiet.wav"
+            with wave.open(str(path), "wb") as wav_file:
+                wav_file.setnchannels(1)
+                wav_file.setsampwidth(2)
+                wav_file.setframerate(24_000)
+                wav_file.writeframes(struct.pack("<hhhh", 100, -100, 50, -50))
+
+            normalize_wav_peak(path)
+
+            with wave.open(str(path), "rb") as wav_file:
+                samples = struct.unpack("<hhhh", wav_file.readframes(4))
+            self.assertGreater(max(abs(sample) for sample in samples), 28_000)
+            self.assertLess(max(abs(sample) for sample in samples), 30_000)
 
     def test_rejects_unsupported_voice(self):
         request = urllib.request.Request(
