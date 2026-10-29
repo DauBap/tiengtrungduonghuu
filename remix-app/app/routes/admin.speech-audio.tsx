@@ -80,7 +80,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return { success: true, intent };
     } catch (error) {
       console.error("Could not regenerate cached speech audio:", error);
-      return { error: "AI chưa thể tạo lại audio. Hãy kiểm tra dịch vụ MeloTTS rồi thử lại." };
+      return { error: "AI chưa thể tạo lại audio. Hãy kiểm tra dịch vụ TTS rồi thử lại." };
     }
   }
 
@@ -197,7 +197,7 @@ export default function AdminSpeechAudio() {
         <header className="space-y-2">
           <h1 className="text-2xl font-bold tracking-tight">Quản lý audio AI</h1>
           <p className="max-w-3xl text-sm text-muted-foreground">
-            Tìm và nghe thử audio MeloTTS. Nếu phát âm chưa đúng, bạn có thể tạo lại ngay; audio mới sẽ được dùng cho tất cả học viên.
+            Tìm và nghe thử audio AI. Nếu phát âm chưa đúng, bạn có thể tạo lại bằng đúng model đã tạo audio đó; audio mới sẽ được dùng cho tất cả học viên.
           </p>
         </header>
 
@@ -239,7 +239,7 @@ export default function AdminSpeechAudio() {
               <p className="mt-1 max-w-md text-sm text-muted-foreground">
                 {query
                   ? "Thử tìm bằng chữ Hán khác hoặc một phần nội dung câu."
-                  : "Audio MeloTTS sẽ xuất hiện tại đây sau khi được tạo lần đầu."}
+                  : "Audio AI sẽ xuất hiện tại đây sau khi được tạo lần đầu."}
               </p>
             </div>
           )}

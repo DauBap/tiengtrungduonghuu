@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 
 export type SpeechEngine = "melo" | "local";
-export type SpeechStatus = "idle" | "melo" | "local" | "fallback";
+export type SpeechStatus = "idle" | "melo" | "kokoro" | "local" | "melo-fallback" | "kokoro-fallback";
 export type ThemePreference = "light" | "dark" | "system";
 
 export interface AppSettings {

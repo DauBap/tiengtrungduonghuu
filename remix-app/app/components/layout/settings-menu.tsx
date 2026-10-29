@@ -99,9 +99,11 @@ export function SettingsMenu({
               </label>
             ))}
           </fieldset>
-          {settings.speechEngine === "melo" && speechStatus === "fallback" && (
+          {settings.speechEngine === "melo"
+            && (speechStatus === "melo-fallback" || speechStatus === "kokoro-fallback") && (
             <p role="status" className="mt-2 rounded-md border border-warning/30 bg-warning/10 px-2.5 py-2 text-xs leading-5 text-foreground">
-              MeloTTS tạm thời không khả dụng. Đang dùng giọng đọc của trình duyệt.
+              {speechStatus === "kokoro-fallback" ? "Kokoro" : "MeloTTS"} tạm thời không khả dụng.
+              {" "}Đang dùng giọng đọc của trình duyệt.
             </p>
           )}
         </section>

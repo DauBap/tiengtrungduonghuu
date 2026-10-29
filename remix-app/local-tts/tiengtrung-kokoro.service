@@ -1,0 +1,22 @@
+[Unit]
+Description=Local Kokoro Mandarin speech API
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/apps/tiengtrungduonghuu/remix-app/local-tts
+Environment=PYTHONUNBUFFERED=1
+Environment=OMP_NUM_THREADS=4
+Environment=MKL_NUM_THREADS=4
+Environment=KOKORO_TORCH_THREADS=4
+Environment=KOKORO_VOICE=zf_xiaobei
+Environment=KOKORO_SPEED=0.85
+Environment=HF_HOME=%h/.cache/huggingface
+ExecStart=%h/apps/tiengtrungduonghuu/remix-app/local-tts/kokoro-venv/bin/python kokoro_server.py
+Restart=on-failure
+RestartSec=10s
+TimeoutStartSec=0
+UMask=0077
+
+[Install]
+WantedBy=default.target

@@ -142,7 +142,10 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
   );
 
   const speak = useCallback(
-    (item: FlashcardVocab) => speakChinese(item.chinese, item.audioUrl, { preferAudio: true }),
+    (item: FlashcardVocab) => speakChinese(item.chinese, item.audioUrl, {
+      preferAudio: true,
+      serverProvider: "kokoro",
+    }),
     [],
   );
   const interacted = useRef(false);

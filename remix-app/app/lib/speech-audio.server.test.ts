@@ -17,6 +17,10 @@ import {
 test("speech audio cache keys are stable per text", () => {
   assert.equal(getSpeechAudioCacheKey("你好"), getSpeechAudioCacheKey("你好"));
   assert.notEqual(getSpeechAudioCacheKey("你好"), getSpeechAudioCacheKey("你好。"));
+  assert.notEqual(
+    getSpeechAudioCacheKey("你好", "melo"),
+    getSpeechAudioCacheKey("你好", "kokoro"),
+  );
 });
 
 test("WAV validation checks RIFF and WAVE signatures", () => {

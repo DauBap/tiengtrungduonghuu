@@ -103,10 +103,99 @@ cd ~/apps/tiengtrungduonghuu/remix-app/local-tts
 .venv/bin/python -m unittest test_server.py
 ```
 
+## Optional Kokoro service for vocabulary audio
+
+The vocabulary flashcards and vocabulary table can use a separate Kokoro
+service. Listening questions continue using MeloTTS at port `8766`. Kokoro
+runs in its own CPU-only virtual environment on loopback port `8767`, so it
+does not replace or stop the existing MeloTTS service.
+
+Kokoro's Mandarin voice data can be weaker for very short utterances. Test
+single-character words, multi-character words, and short phrases before
+switching student traffic. The default voice is `zf_xiaobei`; change
+`KOKORO_VOICE` in the user service if another Mandarin voice sounds better.
+
+The Kokoro model is Apache-licensed. Keep its license and attribution notices
+when redistributing the model or derived materials.
+
+### Install on Ubuntu
+
+Run these commands on the Ubuntu production host after deploying the app
+revision that contains `kokoro_server.py`. This leaves the MeloTTS virtual
+environment and systemd service untouched.
+
+Install the runtime libraries and create an isolated Python 3.11 environment:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y espeak-ng libsndfile1
+
+cd ~/apps/tiengtrungduonghuu/remix-app/local-tts
+uv python install 3.11
+uv venv --python 3.11 kokoro-venv
+uv pip install --python kokoro-venv/bin/python \
+  --index-url https://download.pytorch.org/whl/cpu \
+  torch
+uv pip install --python kokoro-venv/bin/python \
+  -r requirements-kokoro.txt
+```
+
+Download and warm the Mandarin model and voice once. This generates a short
+sample WAV in `/tmp` so it can be listened to before enabling the service:
+
+```bash
+HF_HOME="$HOME/.cache/huggingface" kokoro-venv/bin/python - <<'PY'
+import numpy as np
+import soundfile as sf
+import torch
+from kokoro import KPipeline
+
+torch.set_num_threads(4)
+pipeline = KPipeline(lang_code="z", device="cpu")
+chunks = [
+    audio
+    for _, _, audio in pipeline("你好。谢谢。", voice="zf_xiaobei", speed=0.85)
+    if audio is not None
+]
+if not chunks:
+    raise RuntimeError("Kokoro did not generate any audio")
+sf.write("/tmp/kokoro-zh-test.wav", np.concatenate(chunks), 24_000)
+print("Wrote /tmp/kokoro-zh-test.wav")
+PY
+```
+
+Install and start the separate user service:
+
+```bash
+mkdir -p ~/.config/systemd/user
+cp ~/apps/tiengtrungduonghuu/remix-app/local-tts/tiengtrung-kokoro.service \
+  ~/.config/systemd/user/tiengtrung-kokoro.service
+systemctl --user daemon-reload
+systemctl --user enable --now tiengtrung-kokoro.service
+```
+
+Check startup and the local health endpoint:
+
+```bash
+systemctl --user status tiengtrung-kokoro.service --no-pager -l
+journalctl --user -u tiengtrung-kokoro.service -n 50 --no-pager
+curl --fail --silent --show-error http://127.0.0.1:8767/healthz
+```
+
+Do not expose port `8767` through the firewall or reverse proxy. After
+deploying the app code, the `/api/tts` route sends vocabulary requests to
+Kokoro and listening requests to MeloTTS. If Kokoro is unavailable, the client
+falls back to the browser's Chinese voice. Stop Kokoro without affecting Melo:
+
+```bash
+systemctl --user disable --now tiengtrung-kokoro.service
+```
+
 ## API
 
 - `GET /healthz` returns `{"status":"ok"}` after the model has loaded.
 - `POST /synthesize` accepts `{"text":"..."}` and returns WAV audio.
 - Requests are limited to 2,000 text characters and 64 KiB.
-- Generated speech is cached by text and MeloTTS configuration in the
+- Generated speech is cached by text and provider/model/voice configuration in the
   app's persistent uploads directory.
+- The Kokoro service uses the same health and synthesis paths on port `8767`.

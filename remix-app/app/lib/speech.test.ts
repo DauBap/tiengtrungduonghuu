@@ -158,6 +158,20 @@ test("MeloTTS uses recorded vocabulary audio when available and generates it whe
     assert.deepEqual(playbackStates, ["loading", "playing"]);
     stopSpeaking();
     assert.deepEqual(playbackStates, ["loading", "playing", "idle"]);
+
+    const requestCountBeforeKokoro = requests.length;
+    speakChinese("词语", null, { serverProvider: "kokoro" });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    assert.equal(requests.length, requestCountBeforeKokoro + 2);
+    assert.deepEqual(JSON.parse(String(requests[requestCountBeforeKokoro].body)), {
+      text: "词语",
+      provider: "kokoro",
+      intent: "cache-status",
+    });
+    assert.deepEqual(JSON.parse(String(requests[requestCountBeforeKokoro + 1].body)), {
+      text: "词语",
+      provider: "kokoro",
+    });
   } finally {
     restoreAnimationFrame();
     if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);

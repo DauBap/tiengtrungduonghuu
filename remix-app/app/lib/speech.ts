@@ -1,10 +1,12 @@
 /**
  * Phát âm tiếng Trung.
  *
- * Dùng file audio có sẵn trước; nếu không có thì chọn MeloTTS hoặc giọng máy.
+ * Dùng file audio có sẵn trước; khi cần TTS, chọn model theo ngữ cảnh hoặc cài đặt.
  */
 import { getAppSettings, setSpeechStatus } from "~/lib/app-settings";
 import { toast } from "sonner";
+
+export type ServerSpeechProvider = "melo" | "kokoro";
 
 export function isSpeechSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
@@ -47,6 +49,7 @@ export function speakChinese(
     preferAudio?: boolean;
     rate?: 0.8 | 0.85 | 1 | 1.5;
     audioElement?: HTMLAudioElement;
+    serverProvider?: ServerSpeechProvider;
     onPlaybackStateChange?: (state: SpeechPlaybackState) => void;
   } = {}
 ): boolean {
@@ -83,19 +86,29 @@ export function speakChinese(
     return true;
   }
 
-  return speakSelectedTts(text, rate, requestId);
+  return speakSelectedTts(text, rate, requestId, options.serverProvider);
 }
 
-function speakSelectedTts(text: string, rate: number, requestId: number): boolean {
+function speakSelectedTts(
+  text: string,
+  rate: number,
+  requestId: number,
+  serverProvider: ServerSpeechProvider = "melo",
+): boolean {
   if (getAppSettings().speechEngine === "melo") {
-    void speakWithMeloTts(text, requestId, rate);
+    void speakWithServerTts(text, requestId, rate, serverProvider);
     return true;
   }
   setSpeechStatus("local");
   return speakWithTts(text, rate, requestId);
 }
 
-async function speakWithMeloTts(text: string, requestId: number, rate: number) {
+async function speakWithServerTts(
+  text: string,
+  requestId: number,
+  rate: number,
+  provider: ServerSpeechProvider,
+) {
   const controller = new AbortController();
   const loadingToastId = `speech-generation-${requestId}`;
   let fallbackStarted = false;
@@ -105,11 +118,15 @@ async function speakWithMeloTts(text: string, requestId: number, rate: number) {
     const cacheResponse = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, intent: "cache-status" }),
+      body: JSON.stringify({
+        text,
+        ...(provider === "melo" ? {} : { provider }),
+        intent: "cache-status",
+      }),
       signal: controller.signal,
     });
     if (!cacheResponse.ok) {
-      throw new Error("Could not check MeloTTS cache");
+      throw new Error(`Could not check ${provider} audio cache`);
     }
     const cacheStatus: unknown = await cacheResponse.json();
     if (
@@ -118,7 +135,7 @@ async function speakWithMeloTts(text: string, requestId: number, rate: number) {
       || !("cached" in cacheStatus)
       || typeof cacheStatus.cached !== "boolean"
     ) {
-      throw new Error("MeloTTS returned an invalid cache status");
+      throw new Error(`${provider} returned an invalid cache status`);
     }
     if (requestId !== speechRequestId) return;
     const isCached = cacheStatus.cached;
@@ -137,21 +154,24 @@ async function speakWithMeloTts(text: string, requestId: number, rate: number) {
     const response = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({
+        text,
+        ...(provider === "melo" ? {} : { provider }),
+      }),
       signal: controller.signal,
     });
     if (!response.ok) {
-      throw new Error("MeloTTS request failed");
+      throw new Error(`${provider} speech request failed`);
     }
     const audioBlob = await response.blob();
-    if (audioBlob.size === 0) throw new Error("MeloTTS returned empty audio");
+    if (audioBlob.size === 0) throw new Error(`${provider} returned empty audio`);
     const objectUrl = URL.createObjectURL(audioBlob);
     if (requestId !== speechRequestId) {
       URL.revokeObjectURL(objectUrl);
       return;
     }
     activeObjectUrl = objectUrl;
-    setSpeechStatus("melo");
+    setSpeechStatus(provider);
     const audio = new Audio(objectUrl);
     audio.playbackRate = rate;
     activeAudio = audio;
@@ -168,7 +188,7 @@ async function speakWithMeloTts(text: string, requestId: number, rate: number) {
       audio.onended = null;
       audio.onerror = null;
       releaseActiveAudio();
-      setSpeechStatus("fallback");
+      setSpeechStatus(`${provider}-fallback`);
       speakWithTts(text, rate, requestId);
     };
     audio.onerror = fallback;
@@ -178,7 +198,7 @@ async function speakWithMeloTts(text: string, requestId: number, rate: number) {
       if (fallbackStarted) return;
       fallbackStarted = true;
       releaseActiveAudio();
-      setSpeechStatus("fallback");
+      setSpeechStatus(`${provider}-fallback`);
       speakWithTts(text, rate, requestId);
     }
   } finally {
