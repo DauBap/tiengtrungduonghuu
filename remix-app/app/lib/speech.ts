@@ -46,6 +46,7 @@ export function speakChinese(
   options: {
     preferAudio?: boolean;
     rate?: 0.8 | 0.85 | 1 | 1.5;
+    audioElement?: HTMLAudioElement;
     onPlaybackStateChange?: (state: SpeechPlaybackState) => void;
   } = {}
 ): boolean {
@@ -58,7 +59,7 @@ export function speakChinese(
   updatePlaybackState("loading", requestId);
 
   if (audioUrl && options.preferAudio) {
-    const audio = new Audio(audioUrl);
+    const audio = options.audioElement ?? new Audio(audioUrl);
     let fallbackStarted = false;
     audio.playbackRate = rate;
     activeAudio = audio;

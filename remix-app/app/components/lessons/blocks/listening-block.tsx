@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Volume2, CheckCircle2, ArrowLeft, ArrowRight, RefreshCw, Loader2, Send } from "lucide-react";
 import { speakChinese, stopSpeaking, isSpeechSupported } from "~/lib/speech";
 import type { SpeechPlaybackState } from "~/lib/speech";
+import { preloadAudioUrls } from "~/lib/audio-preload";
+import type { AudioPreloadSession } from "~/lib/audio-preload";
 import type { ListeningConfig } from "~/lib/learning-blocks";
 import { getListeningGrade } from "~/lib/listening-score";
 
@@ -88,8 +90,21 @@ export function ListeningBlock({
   const [playbackState, setPlaybackState] = useState<SpeechPlaybackState>("idle");
   const inputRef = useRef<HTMLInputElement>(null);
   const isComposingRef = useRef(false);
+  const audioPreloadRef = useRef<AudioPreloadSession | null>(null);
 
   useEffect(() => setSpeechReady(isSpeechSupported()), []);
+
+  useEffect(() => {
+    if (hasSubmitted) return;
+
+    const session = preloadAudioUrls(items.map((item) => item.audioUrl));
+    audioPreloadRef.current = session;
+    return () => {
+      stopSpeaking();
+      if (audioPreloadRef.current === session) audioPreloadRef.current = null;
+      session.dispose();
+    };
+  }, [hasSubmitted, items]);
 
   const question = items[index];
   const isLast = index === items.length - 1;
@@ -104,6 +119,9 @@ export function ListeningBlock({
     speakChinese(question.chinese, question.audioUrl, {
       preferAudio: true,
       rate: playbackRate,
+      audioElement: question.audioUrl
+        ? audioPreloadRef.current?.getAudioElement(question.audioUrl)
+        : undefined,
       onPlaybackStateChange: setPlaybackState,
     });
     setReplaysByQuestion((previous) => ({
