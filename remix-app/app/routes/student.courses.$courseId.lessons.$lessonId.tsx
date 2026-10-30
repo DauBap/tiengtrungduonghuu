@@ -57,6 +57,7 @@ import {
 import { gradePhoneticsSection, type PhoneticsAnswer } from "~/lib/phonetics";
 import { getListeningGrade } from "~/lib/listening-score";
 import { getVocabularyAudioUrl } from "~/lib/vocabulary-audio";
+import { notifyAssignedTeacherOfPendingWork } from "~/lib/grading-notifications.server";
 
 const FEEDBACK_TAB_LABELS: Record<string, string> = {
   FLASHCARD: "Flashcard",
@@ -221,6 +222,7 @@ declare global {
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
   const lesson = await requireEnrolledLesson(user.id, params.courseId!, params.lessonId!);
+  const requestedReviewAttemptId = new URL(request.url).searchParams.get("reviewAttemptId");
 
   const [
     lessonNumber,
@@ -317,8 +319,29 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const answerReviewAttempts = await prisma.lessonTabAttempt.findMany({
     where: { userId: user.id, lessonId: lesson.id, tab: { in: [...reviewableTabs] } },
     orderBy: [{ score: "desc" }, { completedAt: "desc" }],
-    select: { tab: true, mode: true, score: true, correctCount: true, totalCount: true, details: true },
+    select: { id: true, tab: true, mode: true, score: true, correctCount: true, totalCount: true, details: true },
   });
+  const requestedReviewAttempt = requestedReviewAttemptId
+    ? answerReviewAttempts.find((attempt) => attempt.id === requestedReviewAttemptId)
+    : undefined;
+  const requestedReviewDetails = isRecord(requestedReviewAttempt?.details) ? requestedReviewAttempt.details : {};
+  const requestedReviewHasTeacherGrade = hasTeacherGrade(requestedReviewDetails);
+  const reviewFocus = requestedReviewAttempt && requestedReviewHasTeacherGrade
+    && (requestedReviewAttempt.tab === "GRAMMAR" || requestedReviewAttempt.tab === "WORKBOOK")
+    ? {
+        attemptId: requestedReviewAttempt.id,
+        tab: requestedReviewAttempt.tab,
+        targetKey: requestedReviewAttempt.tab === "GRAMMAR"
+          ? `${String(requestedReviewDetails.sectionId ?? "")}:${String(requestedReviewDetails.questionType ?? requestedReviewAttempt.mode ?? "")}`
+          : typeof requestedReviewDetails.blockId === "string" ? requestedReviewDetails.blockId : "",
+        questionType: requestedReviewAttempt.tab === "GRAMMAR"
+          ? String(requestedReviewDetails.questionType ?? requestedReviewAttempt.mode ?? "")
+          : null,
+      }
+    : null;
+  if (reviewFocus) {
+    answerReviewAttempts.sort((a, b) => Number(b.id === reviewFocus.attemptId) - Number(a.id === reviewFocus.attemptId));
+  }
   const answerReviewGroups: Partial<Record<ProgressTab, AnswerReviewGroup[]>> = {};
   for (const attempt of answerReviewAttempts) {
     const details = isRecord(attempt.details) ? attempt.details : {};
@@ -544,6 +567,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     teacherTabComments,
     grammarAttemptsBySection,
     answerReviewGroups,
+    reviewFocus,
     phonetics,
     phoneticsSectionScores,
     latestTabScores: {
@@ -927,7 +951,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const totalCount = results.length;
     const score = Math.round((correctCount / totalCount) * 10000) / 100;
     const completedAt = new Date();
-    await recordLessonTabAttempt(prisma, {
+    const savedAttempt = await recordLessonTabAttempt(prisma, {
       userId: user.id,
       lessonId: params.lessonId!,
       tab: "GRAMMAR",
@@ -946,6 +970,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
         results,
       },
     });
+    if (reviewPending) {
+      await notifyAssignedTeacherOfPendingWork({
+        studentId: user.id,
+        courseId: params.courseId!,
+        attemptId: savedAttempt.attempt.id,
+        lessonId: params.lessonId!,
+        kind: "GRAMMAR_GRADING_REQUEST",
+        studentName: user.name,
+        sectionTitle: section.title,
+        targetUrl: `/teacher?gradeAttemptId=${encodeURIComponent(savedAttempt.attempt.id)}`,
+      });
+    }
 
     return {
       success: true as const,
@@ -1288,7 +1324,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }));
     const completedAt = new Date();
 
-    await recordLessonTabAttempt(prisma, {
+    const savedAttempt = await recordLessonTabAttempt(prisma, {
       userId: user.id,
       lessonId: params.lessonId!,
       tab: "WORKBOOK",
@@ -1311,6 +1347,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
         results: savedResults,
       },
     });
+    if (pendingReviewCount > 0) {
+      await notifyAssignedTeacherOfPendingWork({
+        studentId: user.id,
+        courseId: params.courseId!,
+        attemptId: savedAttempt.attempt.id,
+        lessonId: params.lessonId!,
+        kind: "WORKBOOK_GRADING_REQUEST",
+        studentName: user.name,
+        sectionTitle: block.title,
+        targetUrl: `/teacher?gradeWorkbookAttemptId=${encodeURIComponent(savedAttempt.attempt.id)}`,
+      });
+    }
     if (pendingReviewCount === 0) {
       await markBlockCompleted(user.id, block.id);
       await syncLearningCompleted(user.id, params.lessonId!);
@@ -1447,7 +1495,7 @@ function AnswerReviewDetails({ groups }: { groups: AnswerReviewGroup[] }) {
 }
 
 export default function LessonDetail() {
-  const { user, lesson, lessonNumber, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewGroups, phonetics, phoneticsSectionScores, workbookSubmissions } = useLoaderData<typeof loader>();
+  const { user, lesson, lessonNumber, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewGroups, reviewFocus, phonetics, phoneticsSectionScores, workbookSubmissions } = useLoaderData<typeof loader>();
   const settings = useAppSettings();
   const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; lessonPinyin: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string; error?: string }>();
   const workbookFetcher = useFetcher<{
@@ -1486,7 +1534,7 @@ export default function LessonDetail() {
     phoneticsError?: string;
   }>();
   const progressFetcher = useFetcher();
-  const [activeTab, setActiveTab] = useState<LessonTab>("FLASHCARD");
+  const [activeTab, setActiveTab] = useState<LessonTab>(() => reviewFocus?.tab ?? "FLASHCARD");
   const hasGrammar = lesson.grammarSections.length > 0;
   const hasWorkbook = blocks.some((block) => block.type === "WORKBOOK");
   const hasPhonetics = phonetics !== null;
@@ -1525,7 +1573,7 @@ export default function LessonDetail() {
       && activeTab !== "GRAMMAR"
       && activeTab !== "PHONETICS";
     const activeReviewGroups = activeReviewTab ? answerReviewGroups[activeReviewTab] ?? [] : [];
-    const [showAnswerReview, setShowAnswerReview] = useState(false);
+    const [showAnswerReview, setShowAnswerReview] = useState(() => reviewFocus?.tab === "WORKBOOK");
     useModalScrollLock(showAnswerReview);
   const [showScript, setShowScript] = useState(true);
   const [showLessonPinyin, setShowLessonPinyin] = useState(false);
@@ -1768,6 +1816,11 @@ export default function LessonDetail() {
               answerReviewGroups={(answerReviewGroups.GRAMMAR ?? []).filter((group) =>
                 group.targetKey.startsWith(`${section.id}:`)
               )}
+              initialReviewQuestionType={reviewFocus?.tab === "GRAMMAR"
+                && reviewFocus.targetKey.startsWith(`${section.id}:`)
+                && reviewFocus.questionType === "FILL"
+                ? "FILL"
+                : undefined}
             />
           ))}
         </div>

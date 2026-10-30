@@ -117,6 +117,8 @@ remix-app/
   và validate bằng zod. Hiện chỉ **Flashcard** hoạt động; Nghe câu / Từ vựng / Ngữ pháp đang là mục
   disable "Sắp có" ở trang admin.
 - **Migration**: dự án không có migration history, dùng `prisma db push`. `migrate dev` sẽ yêu cầu reset DB.
+  Khi cập nhật phiên bản có thay đổi `prisma/schema.prisma`, hãy chạy `npx prisma db push` trong `remix-app/`
+  để tạo/cập nhật bảng trước khi khởi động ứng dụng.
   Trên Windows, nếu `db push` báo `EPERM` khi ghi `query_engine-windows.dll.node` thì tắt dev server trước,
   hoặc chạy `npx prisma db push --skip-generate` rồi `npx prisma generate` sau.
 - **Loader data**: React Router 7 serialize bằng turbo-stream, nên `Date` đi qua loader nguyên vẹn —

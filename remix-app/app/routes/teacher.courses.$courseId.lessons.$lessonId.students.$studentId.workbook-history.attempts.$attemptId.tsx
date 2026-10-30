@@ -87,7 +87,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
   if (pendingIds.length === 0) return { error: "Không tìm thấy câu cần chấm." };
 
   const form = await request.formData();
-  if (form.get("intent") !== "grade-workbook") return null;
+  const intent = form.get("intent");
+  if (intent !== "grade-workbook" && intent !== "grade-workbook-dashboard") return null;
   const grades = new Map<string, boolean>();
   for (const questionId of pendingIds) {
     const value = form.get(`grade-${questionId}`);
@@ -157,6 +158,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
         completedAt: stillPending ? null : gradedAt,
       },
     });
+    await tx.userNotification.create({
+      data: {
+        recipientId: enrollment.userId,
+        actorId: user.id,
+        kind: "WORKBOOK_GRADED",
+        entityId: attempt.id,
+        title: "Bài làm đã được chấm",
+        message: `Phần “${typeof details.blockTitle === "string" ? details.blockTitle : "Sách bài tập"}” của “${lesson.title}” đã được chấm. Bạn hãy kiểm tra nhé.`,
+        targetUrl: `/student/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(lesson.id)}?reviewAttemptId=${encodeURIComponent(attempt.id)}`,
+      },
+    });
   });
 
   if (typeof details.blockId === "string") {
@@ -180,6 +192,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
   }
 
+  if (intent === "grade-workbook-dashboard") return { success: true, attemptId: attempt.id };
   return redirect(new URL(request.url).pathname);
 }
 

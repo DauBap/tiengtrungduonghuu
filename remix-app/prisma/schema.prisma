@@ -38,6 +38,8 @@ model User {
   lessonTabProgresses      LessonTabProgress[]
   lessonTabAttempts        LessonTabAttempt[]
   lessonTabFeedback        LessonTabFeedback[]       @relation("TeacherTabFeedback")
+  receivedNotifications   UserNotification[]        @relation("NotificationRecipient")
+  sentNotifications       UserNotification[]        @relation("NotificationActor")
 }
 
 enum Role {
@@ -620,6 +622,25 @@ model LessonTabAttempt {
 
   @@index([userId, lessonId, tab, completedAt])
   @@index([lessonId, tab])
+}
+
+model UserNotification {
+  id          String    @id @default(cuid())
+  recipientId String
+  actorId     String?
+  kind        String
+  title       String
+  message     String
+  targetUrl   String
+  entityId    String?
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  recipient User  @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  actor     User? @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([recipientId, readAt, createdAt])
+  @@index([recipientId, kind, entityId])
 }
 
 model LessonTabItemProgress {

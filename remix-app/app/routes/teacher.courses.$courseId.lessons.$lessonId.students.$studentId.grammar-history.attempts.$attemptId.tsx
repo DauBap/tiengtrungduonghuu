@@ -184,6 +184,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
         completedAt: stillPending ? null : gradedAt,
       },
     });
+    await tx.userNotification.create({
+      data: {
+        recipientId: enrollment.userId,
+        actorId: user.id,
+        kind: "GRAMMAR_GRADED",
+        entityId: attempt.id,
+        title: "Bài làm đã được chấm",
+        message: `Phần “${typeof details.sectionTitle === "string" ? details.sectionTitle : "Dịch câu"}” của “${lesson.title}” đã được chấm. Bạn hãy kiểm tra nhé.`,
+        targetUrl: `/student/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(lesson.id)}?reviewAttemptId=${encodeURIComponent(attempt.id)}`,
+      },
+    });
   });
 
   if (intent === "grade-grammar-fill-dashboard") return { success: true, attemptId: attempt.id };

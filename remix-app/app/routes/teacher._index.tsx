@@ -17,6 +17,7 @@ import {
   ClipboardList,
   Clock,
   Layers,
+  Loader2,
   MessageCircle,
   TrendingUp,
   Users,
@@ -87,12 +88,34 @@ interface ActivityReviewDialogState {
   wrongAnswers: DashboardWrongAnswer[];
 }
 
+interface WorkbookGradingData {
+  course: { id: string; title: string };
+  lesson: { id: string; title: string };
+  student: { id: string; name: string | null; email: string };
+  attempt: {
+    blockTitle: string;
+    results: {
+      id: string;
+      number: number;
+      sectionTitle: string;
+      prompt: string;
+      passage: string;
+      givenLabel: string;
+      correctAnswer: string;
+      teacherReviewPending: boolean;
+    }[];
+  };
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
+  const searchParams = new URL(request.url).searchParams;
+  const initialGradeAttemptId = searchParams.get("gradeAttemptId");
+  const initialWorkbookAttemptId = searchParams.get("gradeWorkbookAttemptId");
   const myCourses = await getTeacherCourses(user.id);
   const myClasses = await prisma.class.findMany({
     where: { teacherId: user.id },
@@ -106,6 +129,28 @@ export async function loader({ request }: LoaderFunctionArgs) {
     },
     orderBy: [{ course: { order: "asc" } }, { name: "asc" }],
   });
+  let initialWorkbookTargetUrl: string | null = null;
+  if (initialWorkbookAttemptId) {
+    const candidate = await prisma.lessonTabAttempt.findFirst({
+      where: { id: initialWorkbookAttemptId, tab: "WORKBOOK" },
+      select: {
+        id: true,
+        userId: true,
+        details: true,
+        lesson: { select: { id: true, courseId: true } },
+      },
+    });
+    const isAssignedStudent = candidate && myClasses.some((cls) =>
+      cls.courseId === candidate.lesson.courseId
+      && cls.enrollments.some((enrollment) => enrollment.userId === candidate.userId)
+    );
+    const details = isRecord(candidate?.details) ? candidate.details : {};
+    const hasPendingQuestions = Array.isArray(details.results)
+      && details.results.some((item) => isRecord(item) && item.teacherReviewPending === true);
+    if (candidate && isAssignedStudent && details.reviewPending === true && hasPendingQuestions) {
+      initialWorkbookTargetUrl = `/teacher/courses/${encodeURIComponent(candidate.lesson.courseId)}/lessons/${encodeURIComponent(candidate.lesson.id)}/students/${encodeURIComponent(candidate.userId)}/workbook-history/attempts/${encodeURIComponent(candidate.id)}`;
+    }
+  }
 
   const courseIds = [...new Set(myClasses.map((cls) => cls.courseId))];
   const [lessonCounts, lessonsByCourse, reviewSetsByCourse, mockExamsByCourse] = await Promise.all([
@@ -678,7 +723,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
     };
   }));
 
-  return { user, myCourses, myClasses, classSummaries, totalLessons, totalStudents };
+  return {
+    user,
+    myCourses,
+    myClasses,
+    classSummaries,
+    totalLessons,
+    totalStudents,
+    initialGradeAttemptId,
+    initialWorkbookAttemptId,
+    initialWorkbookTargetUrl,
+  };
 }
 
 function getLessonProgress(activities: { status: string; percent: number }[]) {
@@ -708,11 +763,13 @@ function lessonProgressTone(percent: number) {
 }
 
 export default function TeacherIndex() {
-  const { user, myCourses, myClasses, classSummaries, totalLessons, totalStudents } = useLoaderData<typeof loader>();
+  const { user, myCourses, myClasses, classSummaries, totalLessons, totalStudents, initialGradeAttemptId, initialWorkbookAttemptId, initialWorkbookTargetUrl } = useLoaderData<typeof loader>();
   const location = useLocation();
   const navigate = useNavigate();
   const gradingFetcher = useFetcher<GrammarAttemptData & { success?: boolean }>();
   const gradeSubmitFetcher = useFetcher<{ success?: boolean; attemptId?: string; error?: string }>();
+  const workbookGradingFetcher = useFetcher<WorkbookGradingData>();
+  const workbookGradeSubmitFetcher = useFetcher<{ success?: boolean; attemptId?: string; error?: string }>();
   const revalidator = useRevalidator();
   const [selectedClassId, setSelectedClassId] = useState(classSummaries[0]?.id ?? "");
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
@@ -721,12 +778,16 @@ export default function TeacherIndex() {
   const [selectedActivityReview, setSelectedActivityReview] = useState<ActivityReviewDialogState | null>(null);
   const [pendingGrammarClassId, setPendingGrammarClassId] = useState<string | null>(null);
   const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
+  const [workbookGradingAttemptId, setWorkbookGradingAttemptId] = useState<string | null>(null);
   const [gradingQueue, setGradingQueue] = useState<{ courseId: string; attempt: PendingGrammarAttempt }[]>([]);
   const [gradingQueueIndex, setGradingQueueIndex] = useState<number | null>(null);
   const [gradingComplete, setGradingComplete] = useState(false);
   const [grades, setGrades] = useState<TeacherGrammarGrade[]>([]);
   const [initializedGradeAttemptId, setInitializedGradeAttemptId] = useState<string | null>(null);
   const handledGradeAttemptId = useRef<string | null>(null);
+  const handledInitialGradeAttemptId = useRef<string | null>(null);
+  const handledInitialWorkbookAttemptId = useRef<string | null>(null);
+  const handledWorkbookGradeAttemptId = useRef<string | null>(null);
   const selectedClass = classSummaries.find((cls) => cls.id === selectedClassId) ?? classSummaries[0];
   const pendingGrammarClass = classSummaries.find((cls) => cls.id === pendingGrammarClassId);
   const selectedLesson = selectedClass?.lessons.find((lesson) => lesson.id === selectedLessonId)
@@ -763,6 +824,7 @@ export default function TeacherIndex() {
     || selectedActivityReview
     || pendingGrammarClass
     || gradingAttemptId
+    || workbookGradingAttemptId
     || (pendingGrammarClass && gradingComplete),
   );
   useModalScrollLock(isModalOpen);
@@ -779,20 +841,25 @@ export default function TeacherIndex() {
   }, [location.key]);
 
   useEffect(() => {
-    if (!selectedStudentId && !selectedActivityReview && !pendingGrammarClassId && !gradingAttemptId && !gradingComplete) return;
+    if (!selectedStudentId && !selectedActivityReview && !pendingGrammarClassId && !gradingAttemptId && !workbookGradingAttemptId && !gradingComplete) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && gradeSubmitFetcher.state !== "submitting") {
+      if (
+        event.key === "Escape"
+        && gradeSubmitFetcher.state !== "submitting"
+        && workbookGradeSubmitFetcher.state !== "submitting"
+      ) {
         setSelectedStudentId(null);
         setSelectedActivityReview(null);
         setPendingGrammarClassId(null);
         setGradingAttemptId(null);
+        setWorkbookGradingAttemptId(null);
         setGradingQueueIndex(null);
         setGradingComplete(false);
       }
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [selectedStudentId, selectedActivityReview, pendingGrammarClassId, gradingAttemptId, gradingComplete, gradeSubmitFetcher.state]);
+  }, [selectedStudentId, selectedActivityReview, pendingGrammarClassId, gradingAttemptId, workbookGradingAttemptId, gradingComplete, gradeSubmitFetcher.state, workbookGradeSubmitFetcher.state]);
 
   const gradingData = gradingFetcher.data?.attempt ? gradingFetcher.data : null;
   useEffect(() => {
@@ -832,6 +899,20 @@ export default function TeacherIndex() {
     setGradingAttemptId(nextItem.attempt.id);
     gradingFetcher.load(`/teacher/courses/${nextItem.courseId}/lessons/${nextItem.attempt.lessonId}/students/${nextItem.attempt.userId}/grammar-history/attempts/${nextItem.attempt.id}`);
   }, [gradeSubmitFetcher.state, gradeSubmitFetcher.data, gradingAttemptId, gradingQueue, gradingQueueIndex, revalidator, gradingFetcher]);
+
+  useEffect(() => {
+    const submission = workbookGradeSubmitFetcher.data;
+    if (
+      workbookGradeSubmitFetcher.state !== "idle"
+      || !submission?.success
+      || !submission.attemptId
+      || submission.attemptId !== workbookGradingAttemptId
+      || handledWorkbookGradeAttemptId.current === submission.attemptId
+    ) return;
+    handledWorkbookGradeAttemptId.current = submission.attemptId;
+    setWorkbookGradingAttemptId(null);
+    revalidator.revalidate();
+  }, [workbookGradeSubmitFetcher.data, workbookGradeSubmitFetcher.state, workbookGradingAttemptId, revalidator]);
 
   const reminderRows = selectedClass && selectedLesson
     ? selectedClass.activityData.flatMap((student) => {
@@ -874,6 +955,52 @@ export default function TeacherIndex() {
     setGradingComplete(false);
     openGradingAttempt(courseId, selectedAttempt, 0);
   };
+
+  useEffect(() => {
+    if (!initialGradeAttemptId || handledInitialGradeAttemptId.current === initialGradeAttemptId) return;
+    const ownerClass = classSummaries.find((cls) =>
+      cls.pendingGrammarAttempts.some((attempt) => attempt.id === initialGradeAttemptId)
+    );
+    if (!ownerClass) {
+      handledInitialGradeAttemptId.current = initialGradeAttemptId;
+      const searchParams = new URLSearchParams(location.search);
+      searchParams.delete("gradeAttemptId");
+      navigate(
+        { pathname: location.pathname, search: searchParams.toString() ? `?${searchParams}` : "" },
+        { replace: true },
+      );
+      return;
+    }
+
+    const selectedAttempt = ownerClass.pendingGrammarAttempts.find((attempt) => attempt.id === initialGradeAttemptId);
+    if (!selectedAttempt) return;
+    handledInitialGradeAttemptId.current = initialGradeAttemptId;
+    setSelectedClassId(ownerClass.id);
+    startGradingQueue(ownerClass.id, ownerClass.courseId, ownerClass.pendingGrammarAttempts, selectedAttempt);
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete("gradeAttemptId");
+    navigate(
+      { pathname: location.pathname, search: searchParams.toString() ? `?${searchParams}` : "" },
+      { replace: true },
+    );
+  }, [classSummaries, initialGradeAttemptId, location.pathname, location.search, navigate]);
+
+  useEffect(() => {
+    if (!initialWorkbookAttemptId || handledInitialWorkbookAttemptId.current === initialWorkbookAttemptId) return;
+    handledInitialWorkbookAttemptId.current = initialWorkbookAttemptId;
+    if (initialWorkbookTargetUrl) {
+      handledWorkbookGradeAttemptId.current = null;
+      setWorkbookGradingAttemptId(initialWorkbookAttemptId);
+      workbookGradingFetcher.load(initialWorkbookTargetUrl);
+    }
+
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete("gradeWorkbookAttemptId");
+    navigate(
+      { pathname: location.pathname, search: searchParams.toString() ? `?${searchParams}` : "" },
+      { replace: true },
+    );
+  }, [initialWorkbookAttemptId, initialWorkbookTargetUrl, location.pathname, location.search, navigate, workbookGradingFetcher]);
 
   return (
     <AppShell user={user}>
@@ -1709,6 +1836,124 @@ export default function TeacherIndex() {
                 <p className="mt-3 text-xs text-muted-foreground">
                   Có câu chưa làm hoặc không lưu chi tiết đáp án trong dữ liệu lượt nộp.
                 </p>
+              )}
+            </section>
+          </div>
+        )}
+
+        {workbookGradingAttemptId && (
+          <div
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
+            role="presentation"
+            onClick={(event) => {
+              if (event.target === event.currentTarget && workbookGradeSubmitFetcher.state === "idle") {
+                setWorkbookGradingAttemptId(null);
+              }
+            }}
+          >
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="workbook-grading-title"
+              className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
+            >
+              <div className="flex items-start justify-between gap-3 border-b p-4 sm:p-5">
+                <div className="min-w-0">
+                  <h2 id="workbook-grading-title" className="text-lg font-semibold">Chấm Sách bài tập</h2>
+                  {workbookGradingFetcher.data && (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {workbookGradingFetcher.data.student.name ?? workbookGradingFetcher.data.student.email}
+                      {" · "}{workbookGradingFetcher.data.lesson.title}
+                      {" · "}{workbookGradingFetcher.data.attempt.blockTitle}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  aria-label="Đóng cửa sổ chấm Sách bài tập"
+                  disabled={workbookGradeSubmitFetcher.state !== "idle"}
+                  onClick={() => setWorkbookGradingAttemptId(null)}
+                  className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {workbookGradingFetcher.state === "loading" ? (
+                <div className="flex items-center justify-center gap-2 p-8 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />Đang tải bài làm...
+                </div>
+              ) : !workbookGradingFetcher.data ? (
+                <p role="alert" className="p-8 text-center text-sm text-destructive">
+                  Không tải được bài làm. Hãy đóng cửa sổ và mở lại thông báo.
+                </p>
+              ) : (
+                <workbookGradeSubmitFetcher.Form
+                  method="post"
+                  action={`/teacher/courses/${workbookGradingFetcher.data.course.id}/lessons/${workbookGradingFetcher.data.lesson.id}/students/${workbookGradingFetcher.data.student.id}/workbook-history/attempts/${workbookGradingAttemptId}`}
+                  className="flex min-h-0 flex-1 flex-col"
+                >
+                  <input type="hidden" name="intent" value="grade-workbook-dashboard" />
+                  <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
+                    <p className="text-sm text-muted-foreground">
+                      Đối chiếu từng câu đang chờ chấm với đáp án chuẩn.
+                    </p>
+                    {workbookGradeSubmitFetcher.data?.error && (
+                      <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                        {workbookGradeSubmitFetcher.data.error}
+                      </p>
+                    )}
+                    {workbookGradingFetcher.data.attempt.results
+                      .filter((result) => result.teacherReviewPending)
+                      .map((result) => (
+                        <article key={result.id} className="space-y-2 rounded-lg border p-3 sm:p-4">
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div className="min-w-0 space-y-1">
+                              <p className="text-xs font-medium text-muted-foreground">
+                                {result.sectionTitle} · Câu {result.number}
+                              </p>
+                              {result.prompt && <p className="text-sm font-medium">{result.prompt}</p>}
+                              {result.passage && <p className="whitespace-pre-wrap text-sm text-muted-foreground">{result.passage}</p>}
+                              <p className="text-sm">
+                                <span className="text-muted-foreground">Học viên trả lời: </span>
+                                {result.givenLabel || "Bỏ trống"}
+                              </p>
+                              <p className="text-sm">
+                                <span className="text-muted-foreground">Đáp án chuẩn: </span>
+                                <span className="font-medium">{result.correctAnswer || "Chưa cấu hình"}</span>
+                              </p>
+                            </div>
+                            <label className="flex shrink-0 items-center gap-2 text-sm font-medium">
+                              Kết quả
+                              <select
+                                name={`grade-${result.id}`}
+                                required
+                                defaultValue=""
+                                className="rounded-md border bg-background px-2 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <option value="" disabled>Chọn</option>
+                                <option value="correct">Đúng</option>
+                                <option value="incorrect">Sai</option>
+                              </select>
+                            </label>
+                          </div>
+                        </article>
+                      ))}
+                  </div>
+                  <footer className="flex justify-end gap-2 border-t p-4 sm:px-5">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={workbookGradeSubmitFetcher.state !== "idle"}
+                      onClick={() => setWorkbookGradingAttemptId(null)}
+                    >
+                      Để sau
+                    </Button>
+                    <Button type="submit" disabled={workbookGradeSubmitFetcher.state !== "idle"}>
+                      {workbookGradeSubmitFetcher.state !== "idle" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Lưu điểm
+                    </Button>
+                  </footer>
+                </workbookGradeSubmitFetcher.Form>
               )}
             </section>
           </div>

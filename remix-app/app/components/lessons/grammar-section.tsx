@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { GrammarPractice, type GrammarPracticeQuestion } from "./grammar-practice";
 import { GRAMMAR_FIELDS, type GrammarFieldKey, type GrammarQuestionType } from "~/lib/grammar";
@@ -58,11 +58,13 @@ export function GrammarSection({
   number,
   latestAttempts,
   answerReviewGroups = [],
+  initialReviewQuestionType,
 }: {
   section: GrammarSectionData;
   number: number;
   latestAttempts: Partial<Record<GrammarQuestionType, GrammarPracticeSummary>>;
   answerReviewGroups?: GrammarAnswerReviewGroup[];
+  initialReviewQuestionType?: GrammarQuestionType;
 }) {
   const [practicing, setPracticing] = useState(false);
   const [activeType, setActiveType] = useState<GrammarQuestionType>("SINGLE_CHOICE");
@@ -89,6 +91,15 @@ export function GrammarSection({
     ? answerReviewGroups.find((group) => group.targetKey === `${section.id}:${showAnswersFor}`)
     : null;
   const activeReviewLabel = PRACTICE_TABS.find((tab) => tab.type === showAnswersFor)?.label;
+
+  useEffect(() => {
+    if (
+      initialReviewQuestionType
+      && answerReviewGroups.some((group) => group.targetKey === `${section.id}:${initialReviewQuestionType}`)
+    ) {
+      setShowAnswersFor(initialReviewQuestionType);
+    }
+  }, [answerReviewGroups, initialReviewQuestionType, section.id]);
 
   return (
     <article className="overflow-hidden rounded-lg border bg-card">
