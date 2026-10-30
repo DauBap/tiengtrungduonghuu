@@ -1,0 +1,1 @@
+export const DEFAULT_ACCOUNT_PASSWORD = "123456";

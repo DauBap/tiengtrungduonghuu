@@ -104,6 +104,15 @@ export interface PhoneticsSectionAttemptSummary {
   score: number;
   correctCount: number;
   completedAt: Date;
+  results?: PhoneticsReviewResult[];
+}
+
+export interface PhoneticsReviewResult {
+  prompt: string;
+  full: string;
+  given: string;
+  correctAnswer: string;
+  correct: boolean;
 }
 
 export interface PhoneticsAggregateGrade {
@@ -112,11 +121,10 @@ export interface PhoneticsAggregateGrade {
   totalCount: number;
 }
 
-/** Aggregate all section questions, using the best attempt from each submitted section. */
-export function aggregatePhoneticsSections(
+export function getBestPhoneticsSectionAttempts(
   sections: PhoneticsSectionQuestionCount[],
   attempts: PhoneticsSectionAttemptSummary[],
-): PhoneticsAggregateGrade {
+): PhoneticsSectionAttemptSummary[] {
   const sectionCounts = new Map(
     sections.map((section) => [section.sectionId, Math.max(0, section.totalCount)]),
   );
@@ -134,9 +142,24 @@ export function aggregatePhoneticsSections(
     }
   }
 
+  return sections.flatMap((section) => {
+    const attempt = bestAttempts.get(section.sectionId);
+    return attempt ? [attempt] : [];
+  });
+}
+
+/** Aggregate all section questions, using the best attempt from each submitted section. */
+export function aggregatePhoneticsSections(
+  sections: PhoneticsSectionQuestionCount[],
+  attempts: PhoneticsSectionAttemptSummary[],
+): PhoneticsAggregateGrade {
+  const sectionCounts = new Map(
+    sections.map((section) => [section.sectionId, Math.max(0, section.totalCount)]),
+  );
+  const bestAttempts = getBestPhoneticsSectionAttempts(sections, attempts);
   const totalCount = [...sectionCounts.values()].reduce((total, count) => total + count, 0);
-  const correctCount = [...bestAttempts.entries()].reduce((total, [sectionId, attempt]) => (
-    total + Math.min(sectionCounts.get(sectionId) ?? 0, Math.max(0, attempt.correctCount))
+  const correctCount = bestAttempts.reduce((total, attempt) => (
+    total + Math.min(sectionCounts.get(attempt.sectionId) ?? 0, Math.max(0, attempt.correctCount))
   ), 0);
 
   return {

@@ -21,6 +21,7 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
   ],
   teacher: [
     { label: "Bảng điều khiển", href: "/teacher", icon: LayoutDashboard },
+    { label: "Lớp học", href: "/teacher/classes", icon: School },
     { label: "Lịch dạy", href: "/teacher/schedule", icon: CalendarDays },
     { label: "Khóa học của tôi", href: "/teacher/courses", icon: BookOpen },
     { label: "Hồ sơ", href: "/teacher/profile", icon: User },
@@ -143,7 +144,7 @@ export function AppSidebar({ user }: { user: SessionUser }) {
         </div>
       )}
 
-      <aside className="hidden lg:block w-64 shrink-0 h-screen sticky top-0">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden h-dvh w-64 lg:block">
         <SidebarContent />
       </aside>
     </>

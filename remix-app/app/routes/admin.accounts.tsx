@@ -4,6 +4,7 @@ import type { Role } from "@prisma/client";
 import { useLoaderData, useFetcher, Form, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { prisma } from "~/lib/prisma.server";
+import { DEFAULT_ACCOUNT_PASSWORD } from "~/lib/account-credentials";
 import bcrypt from "bcryptjs";
 import { AppShell } from "~/components/layout/app-shell";
 import { StatCard } from "~/components/common/stat-card";
@@ -28,8 +29,6 @@ type ModalMode = "create" | "edit" | "delete" | "toggle" | null;
 
 const ROLE_LABEL: Record<string, string> = { teacher: "Giáo viên", student: "Học viên" };
 const ROLE_BADGE: Record<string, string> = { teacher: "bg-accent/15 text-accent border-accent/30", student: "bg-primary/10 text-primary border-primary/30" };
-const DEFAULT_ACCOUNT_PASSWORD = "123456";
-
 function formatDate(value: Date | string) {
   return new Date(value).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 }

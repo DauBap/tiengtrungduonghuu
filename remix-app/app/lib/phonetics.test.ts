@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import type { PhoneticsItem, PhoneticsSection } from "./learning-blocks";
 import {
   aggregatePhoneticsSections,
+  getBestPhoneticsSectionAttempts,
   gradePhoneticsSection,
   isPhoneticsAnswerCorrect,
   normalizeFinal,
@@ -148,5 +149,77 @@ test("aggregatePhoneticsSections counts unsubmitted sections in the total", () =
       [],
     ),
     { score: 0, correctCount: 0, totalCount: 27 },
+  );
+});
+
+test("getBestPhoneticsSectionAttempts keeps answer details from the attempts used for the aggregate", () => {
+  const bestAttempts = getBestPhoneticsSectionAttempts(
+    [
+      { sectionId: 1, totalCount: 2 },
+      { sectionId: 2, totalCount: 1 },
+    ],
+    [
+      {
+        sectionId: 1,
+        score: 50,
+        correctCount: 1,
+        completedAt: new Date("2026-10-01T10:00:00Z"),
+        results: [{
+          prompt: "Câu 1",
+          full: "你好",
+          given: "nǐ hǎo",
+          correctAnswer: "nǐ hǎo",
+          correct: true,
+        }],
+      },
+      {
+        sectionId: 1,
+        score: 50,
+        correctCount: 1,
+        completedAt: new Date("2026-10-02T10:00:00Z"),
+        results: [{
+          prompt: "Câu 2",
+          full: "再见",
+          given: "zài jiàn",
+          correctAnswer: "zài jiàn",
+          correct: false,
+        }],
+      },
+      {
+        sectionId: 2,
+        score: 0,
+        correctCount: 0,
+        completedAt: new Date("2026-10-03T10:00:00Z"),
+        results: [{
+          prompt: "Câu 1",
+          full: "老师",
+          given: "lǎo shí",
+          correctAnswer: "lǎo shī",
+          correct: false,
+        }],
+      },
+    ],
+  );
+
+  assert.deepEqual(bestAttempts.map((attempt) => attempt.sectionId), [1, 2]);
+  assert.equal(bestAttempts[0].completedAt.toISOString(), "2026-10-02T10:00:00.000Z");
+  assert.deepEqual(
+    bestAttempts.flatMap((attempt) => attempt.results?.filter((result) => !result.correct) ?? []),
+    [
+      {
+        prompt: "Câu 2",
+        full: "再见",
+        given: "zài jiàn",
+        correctAnswer: "zài jiàn",
+        correct: false,
+      },
+      {
+        prompt: "Câu 1",
+        full: "老师",
+        given: "lǎo shí",
+        correctAnswer: "lǎo shī",
+        correct: false,
+      },
+    ],
   );
 });

@@ -60,6 +60,8 @@ export default [
 
   // Teacher
   route("teacher", "routes/teacher._index.tsx"),
+  route("teacher/classes/search", "routes/teacher.classes.search.ts"),
+  route("teacher/classes", "routes/teacher.classes.tsx"),
   route("teacher/schedule", "routes/teacher.schedule.tsx"),
   route("teacher/courses", "routes/teacher.courses._index.tsx"),
   route("teacher/courses/:courseId", "routes/teacher.courses.$courseId.tsx"),

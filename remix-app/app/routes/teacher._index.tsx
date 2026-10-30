@@ -26,7 +26,7 @@ import {
 import { prisma } from "~/lib/prisma.server";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
 import { GRAMMAR_QUESTION_META, type GrammarQuestionType, type TeacherGrammarGrade } from "~/lib/grammar";
-import { aggregatePhoneticsSections } from "~/lib/phonetics";
+import { aggregatePhoneticsSections, getBestPhoneticsSectionAttempts, type PhoneticsReviewResult } from "~/lib/phonetics";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 
@@ -66,6 +66,25 @@ interface GrammarAttemptData {
       hint: string | null;
     }[];
   };
+}
+
+interface DashboardWrongAnswer {
+  prompt: string;
+  full: string;
+  given: string;
+  correctAnswer: string;
+  answerMode: "chinese" | "pinyin" | "plain";
+  translation: string;
+  groupLabel: string;
+}
+
+interface ActivityReviewDialogState {
+  activityLabel: string;
+  studentName: string;
+  lessonTitle: string;
+  correctCount: number;
+  totalCount: number;
+  wrongAnswers: DashboardWrongAnswer[];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -147,7 +166,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const reviewSetIds = courseReviewSets.map((reviewSet) => reviewSet.id);
     const mockExamIds = courseMockExams.map((mockExam) => mockExam.id);
     const userIds = cls.enrollments.map((enrollment) => enrollment.userId);
-    const [progressRows, phoneticsSections, phoneticsAttempts, grammarAttempts, reviewAttempts, mockExamAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0 || mockExamIds.length > 0) && userIds.length > 0
+    const [progressRows, phoneticsSections, phoneticsAttempts, grammarAttempts, grammarAutoAttempts, grammarQuestionRows, reviewAttempts, mockExamAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0 || mockExamIds.length > 0) && userIds.length > 0
       ? await Promise.all([
           lessonIds.length > 0 ? prisma.lessonTabProgress.findMany({
             where: {
@@ -170,7 +189,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
                 where: { tab: { in: DASHBOARD_ACTIVITIES.map((activity) => activity.tab) } },
                 orderBy: { completedAt: "desc" },
                 take: 1,
-                select: { score: true, passed: true, completedAt: true, correctCount: true, totalCount: true },
+                select: {
+                  score: true,
+                  passed: true,
+                  completedAt: true,
+                  correctCount: true,
+                  totalCount: true,
+                  details: true,
+                },
               },
             },
           }) : Promise.resolve([]),
@@ -179,6 +205,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             select: {
               lessonId: true,
               sectionKey: true,
+              title: true,
               _count: { select: { questions: true } },
             },
           }) : Promise.resolve([]),
@@ -216,6 +243,34 @@ export async function loader({ request }: LoaderFunctionArgs) {
             },
             orderBy: { completedAt: "desc" },
           }) : Promise.resolve([]),
+          lessonIds.length > 0 ? prisma.lessonTabAttempt.findMany({
+            where: {
+              lessonId: { in: lessonIds },
+              userId: { in: userIds },
+              tab: "GRAMMAR",
+              mode: { in: ["SINGLE_CHOICE", "ARRANGE"] },
+            },
+            select: {
+              userId: true,
+              lessonId: true,
+              mode: true,
+              correctCount: true,
+              totalCount: true,
+              completedAt: true,
+              details: true,
+            },
+            orderBy: { completedAt: "desc" },
+          }) : Promise.resolve([]),
+          lessonIds.length > 0 ? prisma.grammarQuestion.findMany({
+            where: {
+              section: { lessonId: { in: lessonIds } },
+              type: { in: ["SINGLE_CHOICE", "ARRANGE"] },
+            },
+            select: {
+              type: true,
+              section: { select: { lessonId: true } },
+            },
+          }) : Promise.resolve([]),
           reviewSetIds.length > 0 ? prisma.courseReviewAttempt.findMany({
             where: {
               reviewSetId: { in: reviewSetIds },
@@ -247,26 +302,83 @@ export async function loader({ request }: LoaderFunctionArgs) {
             orderBy: { startedAt: "desc" },
           }) : Promise.resolve([]),
         ])
-      : [[], [], [], [], [], []];
+      : [[], [], [], [], [], [], [], []];
 
     const enrollmentsByUserId = new Map(cls.enrollments.map((enrollment) => [enrollment.userId, enrollment]));
     const lessonsById = new Map(courseLessons.map((lesson) => [lesson.id, lesson]));
-    const phoneticsSectionsByLesson = new Map<string, { sectionId: number; totalCount: number }[]>();
+    const phoneticsSectionsByLesson = new Map<string, { sectionId: number; totalCount: number; title: string }[]>();
     for (const section of phoneticsSections) {
       const sections = phoneticsSectionsByLesson.get(section.lessonId) ?? [];
-      sections.push({ sectionId: section.sectionKey, totalCount: section._count.questions });
+      sections.push({
+        sectionId: section.sectionKey,
+        totalCount: section._count.questions,
+        title: section.title,
+      });
       phoneticsSectionsByLesson.set(section.lessonId, sections);
+    }
+    const grammarQuestionTotalsByLesson = new Map<string, number>();
+    for (const question of grammarQuestionRows) {
+      grammarQuestionTotalsByLesson.set(
+        question.section.lessonId,
+        (grammarQuestionTotalsByLesson.get(question.section.lessonId) ?? 0) + 1,
+      );
+    }
+    const latestGrammarAttemptsBySectionType = new Map<string, (typeof grammarAutoAttempts)[number]>();
+    for (const attempt of grammarAutoAttempts) {
+      const details = isRecord(attempt.details) ? attempt.details : {};
+      const questionType = details.questionType === "SINGLE_CHOICE" || details.questionType === "ARRANGE"
+        ? details.questionType
+        : attempt.mode;
+      if (questionType !== "SINGLE_CHOICE" && questionType !== "ARRANGE") continue;
+      const sectionId = typeof details.sectionId === "string" ? details.sectionId : "unknown-section";
+      const key = `${attempt.userId}:${attempt.lessonId}:${sectionId}:${questionType}`;
+      if (!latestGrammarAttemptsBySectionType.has(key)) {
+        latestGrammarAttemptsBySectionType.set(key, attempt);
+      }
+    }
+    const grammarSummaryByUserLesson = new Map<string, {
+      lessonId: string;
+      correctCount: number;
+      totalCount: number;
+    }>();
+    for (const attempt of latestGrammarAttemptsBySectionType.values()) {
+      const summaryKey = `${attempt.userId}:${attempt.lessonId}`;
+      const summary = grammarSummaryByUserLesson.get(summaryKey) ?? {
+        lessonId: attempt.lessonId,
+        correctCount: 0,
+        totalCount: 0,
+      };
+      summary.correctCount += attempt.correctCount ?? 0;
+      summary.totalCount += attempt.totalCount ?? 0;
+      grammarSummaryByUserLesson.set(summaryKey, summary);
+    }
+    for (const summary of grammarSummaryByUserLesson.values()) {
+      summary.totalCount = grammarQuestionTotalsByLesson.get(summary.lessonId) ?? summary.totalCount;
+      summary.correctCount = Math.min(summary.correctCount, summary.totalCount);
     }
     const phoneticsAttemptsByUserLesson = new Map<string, {
       sectionId: number;
       score: number;
       correctCount: number;
       completedAt: Date;
+      results: PhoneticsReviewResult[];
     }[]>();
     for (const attempt of phoneticsAttempts) {
       const details = isRecord(attempt.details) ? attempt.details : {};
       const sectionId = typeof details.sectionId === "number" ? details.sectionId : Number(attempt.mode);
       if (!Number.isInteger(sectionId) || attempt.score == null || attempt.correctCount == null) continue;
+      const results = Array.isArray(details.results)
+        ? details.results.flatMap((result): PhoneticsReviewResult[] => {
+            if (!isRecord(result)) return [];
+            return [{
+              prompt: typeof result.prompt === "string" ? result.prompt : "Câu hỏi",
+              full: typeof result.full === "string" ? result.full : "",
+              given: typeof result.given === "string" ? result.given : "",
+              correctAnswer: typeof result.correctAnswer === "string" ? result.correctAnswer : "",
+              correct: result.correct === true,
+            }];
+          })
+        : [];
       const key = `${attempt.userId}:${attempt.lessonId}`;
       const attempts = phoneticsAttemptsByUserLesson.get(key) ?? [];
       attempts.push({
@@ -274,6 +386,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         score: attempt.score,
         correctCount: attempt.correctCount,
         completedAt: attempt.completedAt,
+        results,
       });
       phoneticsAttemptsByUserLesson.set(key, attempts);
     }
@@ -375,10 +488,27 @@ export async function loader({ request }: LoaderFunctionArgs) {
         ? activityDates.reduce((latest, date) => date > latest ? date : latest)
         : null;
       const studentLessons = lessons.map((lesson) => {
+        const lessonPhoneticsSections = phoneticsSectionsByLesson.get(lesson.id) ?? [];
+        const lessonPhoneticsAttempts = phoneticsAttemptsByUserLesson.get(`${enrollment.userId}:${lesson.id}`) ?? [];
         const phoneticsSummary = aggregatePhoneticsSections(
-          phoneticsSectionsByLesson.get(lesson.id) ?? [],
-          phoneticsAttemptsByUserLesson.get(`${enrollment.userId}:${lesson.id}`) ?? [],
+          lessonPhoneticsSections,
+          lessonPhoneticsAttempts,
         );
+        const sectionTitles = new Map(lessonPhoneticsSections.map((section) => [section.sectionId, section.title]));
+        const phoneticsWrongAnswers = getBestPhoneticsSectionAttempts(
+          lessonPhoneticsSections,
+          lessonPhoneticsAttempts,
+        ).flatMap((attempt) => (attempt.results ?? [])
+          .filter((result) => !result.correct)
+          .map((result) => ({
+            prompt: result.prompt,
+            full: result.full,
+            given: result.given,
+            correctAnswer: result.correctAnswer,
+            answerMode: "pinyin" as const,
+            translation: "",
+            groupLabel: sectionTitles.get(attempt.sectionId) ?? "Ngữ âm",
+          })));
         return {
           id: lesson.id,
           order: lesson.order,
@@ -387,6 +517,48 @@ export async function loader({ request }: LoaderFunctionArgs) {
           activities: DASHBOARD_ACTIVITIES.map(({ tab }) => {
           const progress = progressByKey.get(`${enrollment.userId}:${lesson.id}:${tab}`);
           const attempt = progress?.attempts[0];
+          const grammarSummary = tab === "GRAMMAR"
+            ? grammarSummaryByUserLesson.get(`${enrollment.userId}:${lesson.id}`)
+            : undefined;
+          const attemptDetails = isRecord(attempt?.details) ? attempt.details : {};
+          const reviewableAttemptResults = (
+            tab === "LISTENING" || tab === "VOCABULARY_TEST" || tab === "WORKBOOK"
+          ) && Array.isArray(attemptDetails.results)
+            ? attemptDetails.results.flatMap((result): DashboardWrongAnswer[] => {
+                if (!isRecord(result) || result.correct !== false) return [];
+                const isVocabularyTest = tab === "VOCABULARY_TEST";
+                const isWorkbook = tab === "WORKBOOK";
+                const questionNumber = typeof result.number === "number" ? `Câu ${result.number}` : "";
+                const questionPrompt = typeof result.prompt === "string" ? result.prompt : "";
+                return [{
+                  prompt: [questionNumber, questionPrompt].filter(Boolean).join(": ") || "Câu hỏi",
+                  full: typeof result.chinese === "string"
+                    ? result.chinese
+                    : isVocabularyTest && typeof result.prompt === "string"
+                      ? result.prompt
+                      : isWorkbook && typeof result.passage === "string"
+                        ? result.passage
+                      : "",
+                  given: typeof result.givenLabel === "string"
+                    ? result.givenLabel
+                    : typeof result.given === "string"
+                      ? result.given
+                      : "",
+                  correctAnswer: typeof result.correctAnswer === "string" ? result.correctAnswer : "",
+                  answerMode: result.answerMode === "pinyin"
+                    ? "pinyin"
+                    : isVocabularyTest || isWorkbook
+                      ? "plain"
+                      : "chinese",
+                  translation: typeof result.translation === "string" ? result.translation : "",
+                  groupLabel: isWorkbook
+                    ? typeof result.sectionTitle === "string" ? result.sectionTitle : "Sách bài tập"
+                    : isVocabularyTest
+                      ? typeof result.typeLabel === "string" ? result.typeLabel : "Ôn từ vựng"
+                      : typeof attemptDetails.blockTitle === "string" ? attemptDetails.blockTitle : "Nghe câu",
+                }];
+              })
+            : [];
           const available = lesson.availableActivities[tab];
           const completed = tab === "VOCABULARY_TEST"
             ? attempt?.passed === true
@@ -411,10 +583,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
             status,
             score: Math.round(tab === "PHONETICS"
               ? phoneticsSummary.score
-              : attempt?.score ?? progress?.currentScore ?? progress?.bestScore ?? progress?.percent ?? 0),
+              : grammarSummary && grammarSummary.totalCount > 0
+                ? (grammarSummary.correctCount / grammarSummary.totalCount) * 100
+                : attempt?.score ?? progress?.currentScore ?? progress?.bestScore ?? progress?.percent ?? 0),
             percent: Math.max(0, Math.min(100, Math.round(progress?.percent ?? 0))),
-            correctCount: tab === "PHONETICS" ? phoneticsSummary.correctCount : attempt?.correctCount,
-            totalCount: tab === "PHONETICS" ? phoneticsSummary.totalCount : attempt?.totalCount,
+            correctCount: tab === "PHONETICS"
+              ? phoneticsSummary.correctCount
+              : grammarSummary?.correctCount ?? attempt?.correctCount,
+            totalCount: tab === "PHONETICS"
+              ? phoneticsSummary.totalCount
+              : grammarSummary?.totalCount ?? attempt?.totalCount,
+            wrongAnswers: tab === "PHONETICS" ? phoneticsWrongAnswers : reviewableAttemptResults,
           };
           }),
         };
@@ -539,6 +718,7 @@ export default function TeacherIndex() {
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [progressView, setProgressView] = useState<"overview" | "lesson">("overview");
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedActivityReview, setSelectedActivityReview] = useState<ActivityReviewDialogState | null>(null);
   const [pendingGrammarClassId, setPendingGrammarClassId] = useState<string | null>(null);
   const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
   const [gradingQueue, setGradingQueue] = useState<{ courseId: string; attempt: PendingGrammarAttempt }[]>([]);
@@ -580,6 +760,7 @@ export default function TeacherIndex() {
   const selectedStudent = selectedClass?.activityData.find((item) => item.student.id === selectedStudentId);
   const isModalOpen = Boolean(
     selectedStudentId
+    || selectedActivityReview
     || pendingGrammarClass
     || gradingAttemptId
     || (pendingGrammarClass && gradingComplete),
@@ -598,10 +779,11 @@ export default function TeacherIndex() {
   }, [location.key]);
 
   useEffect(() => {
-    if (!selectedStudentId && !pendingGrammarClassId && !gradingAttemptId && !gradingComplete) return;
+    if (!selectedStudentId && !selectedActivityReview && !pendingGrammarClassId && !gradingAttemptId && !gradingComplete) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape" && gradeSubmitFetcher.state !== "submitting") {
         setSelectedStudentId(null);
+        setSelectedActivityReview(null);
         setPendingGrammarClassId(null);
         setGradingAttemptId(null);
         setGradingQueueIndex(null);
@@ -610,7 +792,7 @@ export default function TeacherIndex() {
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [selectedStudentId, pendingGrammarClassId, gradingAttemptId, gradingComplete, gradeSubmitFetcher.state]);
+  }, [selectedStudentId, selectedActivityReview, pendingGrammarClassId, gradingAttemptId, gradingComplete, gradeSubmitFetcher.state]);
 
   const gradingData = gradingFetcher.data?.attempt ? gradingFetcher.data : null;
   useEffect(() => {
@@ -760,6 +942,7 @@ export default function TeacherIndex() {
                           setSelectedClassId(cls.id);
                           setSelectedLessonId(null);
                           setSelectedStudentId(null);
+                          setSelectedActivityReview(null);
                         }}
                         className="mb-3 w-full rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
@@ -1098,6 +1281,58 @@ export default function TeacherIndex() {
                                           const progressStatus = displayedPercent == null
                                             ? result?.status
                                             : displayedPercent > 80 ? "completed" : "partial";
+                                          const activityReviewData = (
+                                            activity.tab === "PHONETICS"
+                                            || activity.tab === "LISTENING"
+                                            || activity.tab === "VOCABULARY_TEST"
+                                            || activity.tab === "WORKBOOK"
+                                          )
+                                            && result != null
+                                            && (result.status === "partial" || result.status === "completed")
+                                            && result.correctCount != null
+                                            && result.totalCount != null
+                                            && result.totalCount > 0
+                                            && result.wrongAnswers.length > 0
+                                            ? {
+                                                activityLabel: activity.label,
+                                                studentName: student.student.name ?? student.student.email,
+                                                lessonTitle: selectedLesson.title,
+                                                correctCount: result.correctCount,
+                                                totalCount: result.totalCount,
+                                                wrongAnswers: result.wrongAnswers,
+                                              }
+                                            : null;
+                                          const tileClassName = `inline-flex min-w-20 flex-col items-center rounded-md px-2 py-1.5 ${activityTone(progressStatus ?? result?.status ?? "missing", selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0))}`;
+                                          const tileContent = (
+                                            <>
+                                              <span className="font-semibold">
+                                                {displayedPercent != null
+                                                    ? `${displayedPercent}%`
+                                                    : selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0)
+                                                        ? "Bỏ sót"
+                                                        : "Chưa làm"}
+                                              </span>
+                                              {result?.correctCount != null
+                                                && result.totalCount != null
+                                                && result.totalCount > 0
+                                                && ((activity.tab !== "PHONETICS" && activity.tab !== "LISTENING") || result.status === "partial" || result.status === "completed") && (
+                                                <span className={`text-[10px] ${activityReviewData ? "underline decoration-dotted underline-offset-2" : ""}`}>
+                                                  {result.correctCount}/{result.totalCount}
+                                                </span>
+                                              )}
+                                              <span className="text-[10px]">
+                                                {displayedPercent != null
+                                                  ? displayedPercent > 80 ? "Đã làm" : "Đang làm"
+                                                  : result?.status === "completed"
+                                                    ? "Đã xong"
+                                                    : result?.status === "partial"
+                                                      ? "Đang làm"
+                                                      : selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0)
+                                                        ? "Cần hoàn thành"
+                                                        : "Chưa bắt đầu"}
+                                              </span>
+                                            </>
+                                          );
                                           return (
                                             <td key={activity.tab} className="px-2 py-2 text-center">
                                               {!result || result.status === "unavailable" ? (
@@ -1118,32 +1353,24 @@ export default function TeacherIndex() {
                                                   Chờ chấm <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                                                 </button>
                                               ) : (
-                                                <span className={`inline-flex min-w-20 flex-col items-center rounded-md px-2 py-1.5 ${activityTone(progressStatus ?? result.status, selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0))}`}>
-                                                  <span className="font-semibold">
-                                                    {displayedPercent != null
-                                                        ? `${displayedPercent}%`
-                                                        : selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0)
-                                                            ? "Bỏ sót"
-                                                            : "Chưa làm"}
+                                                activityReviewData ? (
+                                                  <button
+                                                    type="button"
+                                                    title={activityReviewData.wrongAnswers.length > 0
+                                                      ? `Xem ${activityReviewData.wrongAnswers.length} câu chưa đúng`
+                                                      : `Xem kết quả ${activityReviewData.activityLabel}`}
+                                                    aria-haspopup="dialog"
+                                                    aria-label={`Xem kết quả ${activityReviewData.activityLabel} của ${activityReviewData.studentName}: đúng ${activityReviewData.correctCount}/${activityReviewData.totalCount} câu`}
+                                                    onClick={() => setSelectedActivityReview(activityReviewData)}
+                                                    className={`${tileClassName} cursor-pointer transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+                                                  >
+                                                    {tileContent}
+                                                  </button>
+                                                ) : (
+                                                  <span className={tileClassName}>
+                                                    {tileContent}
                                                   </span>
-                                                  {result.correctCount != null
-                                                    && result.totalCount != null
-                                                    && result.totalCount > 0
-                                                    && (activity.tab !== "PHONETICS" || result.status === "partial" || result.status === "completed") && (
-                                                    <span className="text-[10px]">{result.correctCount}/{result.totalCount}</span>
-                                                  )}
-                                                  <span className="text-[10px]">
-                                                    {displayedPercent != null
-                                                      ? displayedPercent > 80 ? "Đã làm" : "Đang làm"
-                                                      : result.status === "completed"
-                                                        ? "Đã xong"
-                                                        : result.status === "partial"
-                                                          ? "Đang làm"
-                                                          : selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0)
-                                                            ? "Cần hoàn thành"
-                                                            : "Chưa bắt đầu"}
-                                                  </span>
-                                                </span>
+                                                )
                                               )}
                                             </td>
                                           );
@@ -1377,6 +1604,112 @@ export default function TeacherIndex() {
               >
                 Mở hồ sơ tiến độ đầy đủ <ArrowUpRight className="h-4 w-4" />
               </Link>
+            </section>
+          </div>
+        )}
+
+        {selectedActivityReview && (
+          <div
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/45 p-3 sm:p-6"
+            role="presentation"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) setSelectedActivityReview(null);
+            }}
+          >
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="activity-review-title"
+              className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border bg-background p-5 shadow-xl"
+            >
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                  <h2 id="activity-review-title" className="text-base font-semibold">
+                    {selectedActivityReview.activityLabel}
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {selectedActivityReview.studentName} · {selectedActivityReview.lessonTitle}
+                  </p>
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-muted px-2.5 py-1 text-sm font-medium tabular-nums">
+                    <span className="text-foreground">{selectedActivityReview.correctCount}/{selectedActivityReview.totalCount} câu đúng</span>
+                    <span className="text-muted-foreground">· {selectedActivityReview.wrongAnswers.length} câu cần xem lại</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  aria-label={`Đóng câu sai ${selectedActivityReview.activityLabel}`}
+                  onClick={() => setSelectedActivityReview(null)}
+                  className="rounded-md p-2 text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {selectedActivityReview.wrongAnswers.length > 0 ? (
+                <ol className="divide-y rounded-md border">
+                  {selectedActivityReview.wrongAnswers.map((answer, index) => (
+                    <li key={`${answer.groupLabel}-${answer.prompt}-${index}`} className="space-y-3 px-3 py-4 text-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="font-semibold">{answer.prompt}</p>
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                          answer.given
+                            ? "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-200"
+                            : "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
+                        }`}>
+                          {answer.given ? "Trả lời chưa đúng" : "Chưa trả lời"}
+                        </span>
+                      </div>
+                      {answer.groupLabel !== selectedActivityReview.activityLabel && (
+                        <p className="text-xs text-muted-foreground">{answer.groupLabel}</p>
+                      )}
+                      {answer.full && (
+                        <div>
+                          <p className="mb-1 text-xs font-medium text-muted-foreground">
+                            {selectedActivityReview.activityLabel === "Nghe câu"
+                              ? "Câu nghe"
+                              : selectedActivityReview.activityLabel === "Ôn từ vựng"
+                                ? "Từ vựng"
+                                : "Nội dung"}
+                          </p>
+                          <p className={`content-text text-base font-medium ${answer.answerMode === "pinyin" ? "pinyin-text" : answer.answerMode === "chinese" ? "hanzi-display" : ""}`}>
+                            {answer.full}
+                          </p>
+                        </div>
+                      )}
+                      {answer.translation && (
+                        <p className="text-xs text-muted-foreground">Nghĩa: {answer.translation}</p>
+                      )}
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="min-w-0 rounded-md border border-rose-200 bg-rose-50/70 px-3 py-2.5 dark:border-rose-900 dark:bg-rose-950/25">
+                          <p className="text-xs font-medium text-rose-800 dark:text-rose-200">Học viên trả lời</p>
+                          <p className={`mt-1 break-words font-medium text-rose-950 dark:text-rose-100 ${answer.answerMode === "pinyin" ? "pinyin-text" : answer.answerMode === "chinese" ? "hanzi-display" : ""}`}>
+                            {answer.given || "Chưa trả lời"}
+                          </p>
+                        </div>
+                        <div className="min-w-0 rounded-md border border-emerald-200 bg-emerald-50/70 px-3 py-2.5 dark:border-emerald-900 dark:bg-emerald-950/25">
+                          <p className="text-xs font-medium text-emerald-800 dark:text-emerald-200">Đáp án đúng</p>
+                          <p className={`mt-1 break-words font-medium text-emerald-950 dark:text-emerald-100 ${answer.answerMode === "pinyin" ? "pinyin-text" : answer.answerMode === "chinese" ? "hanzi-display" : ""}`}>
+                            {answer.correctAnswer || "—"}
+                          </p>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              ) : selectedActivityReview.correctCount === selectedActivityReview.totalCount ? (
+                <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+                  Học viên làm đúng tất cả câu trong phần này.
+                </p>
+              ) : (
+                <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+                  Lượt làm này chưa lưu dữ liệu chi tiết từng câu.
+                </p>
+              )}
+              {selectedActivityReview.wrongAnswers.length
+                < selectedActivityReview.totalCount - selectedActivityReview.correctCount && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Có câu chưa làm hoặc không lưu chi tiết đáp án trong dữ liệu lượt nộp.
+                </p>
+              )}
             </section>
           </div>
         )}
