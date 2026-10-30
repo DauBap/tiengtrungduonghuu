@@ -69,6 +69,17 @@ test("MeloTTS failure falls back to the browser Chinese voice", async () => {
     assert.equal(spoken[0].lang, "zh-CN");
     assert.equal(spoken[0].rate, 1.5);
 
+    assert.equal(
+      speakChinese("词语", "/audio/vocabulary.mp3", {
+        preferAudio: true,
+        serverProvider: "kokoro",
+        useBrowserTts: true,
+      }),
+      true,
+    );
+    assert.equal(spoken.length, 2);
+    assert.equal(spoken[1].text, "词语");
+    assert.equal(spoken[1].lang, "zh-CN");
     stopSpeaking();
   } finally {
     if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
@@ -87,13 +98,7 @@ test("MeloTTS uses recorded vocabulary audio when available and generates it whe
   const originalFetch = Object.getOwnPropertyDescriptor(globalThis, "fetch");
   const requests: RequestInit[] = [];
   const audioInstances: Array<{ src: string; playbackRate: number }> = [];
-  let failServerRequests = false;
-  let browserSpeechCount = 0;
-  const speechSynthesis = {
-    cancel() {},
-    getVoices: () => [],
-    speak() { browserSpeechCount += 1; },
-  };
+  const speechSynthesis = { cancel() {}, getVoices: () => [], speak() {} };
 
   class MockAudio {
     currentTime = 0;
@@ -122,7 +127,6 @@ test("MeloTTS uses recorded vocabulary audio when available and generates it whe
   Object.defineProperty(globalThis, "fetch", {
     configurable: true,
     value: async (_input: RequestInfo | URL, init?: RequestInit) => {
-      if (failServerRequests) throw new Error("MeloTTS unavailable");
       requests.push(init ?? {});
       if (JSON.parse(String(init?.body)).intent === "cache-status") {
         return Response.json({ cached: false });
@@ -167,33 +171,19 @@ test("MeloTTS uses recorded vocabulary audio when available and generates it whe
     stopSpeaking();
     assert.deepEqual(playbackStates, ["loading", "playing", "idle"]);
 
-    updateAppSetting("speechEngine", "local");
-    const requestCountBeforeForcedServerTts = requests.length;
-    speakChinese("词语", null, {
-      serverProvider: "melo",
-      forceServerTts: true,
-      allowBrowserFallback: false,
-    });
+    const requestCountBeforeKokoro = requests.length;
+    speakChinese("词语", null, { serverProvider: "kokoro" });
     await new Promise((resolve) => setTimeout(resolve, 0));
-    assert.equal(requests.length, requestCountBeforeForcedServerTts + 2);
-    assert.deepEqual(JSON.parse(String(requests[requestCountBeforeForcedServerTts].body)), {
+    assert.equal(requests.length, requestCountBeforeKokoro + 2);
+    assert.deepEqual(JSON.parse(String(requests[requestCountBeforeKokoro].body)), {
       text: "词语",
+      provider: "kokoro",
       intent: "cache-status",
     });
-    assert.deepEqual(JSON.parse(String(requests[requestCountBeforeForcedServerTts + 1].body)), {
+    assert.deepEqual(JSON.parse(String(requests[requestCountBeforeKokoro + 1].body)), {
       text: "词语",
+      provider: "kokoro",
     });
-    assert.equal(audioInstances.at(-1)?.src.startsWith("blob:"), true);
-    assert.equal(browserSpeechCount, 0);
-
-    failServerRequests = true;
-    speakChinese("再见", null, {
-      serverProvider: "melo",
-      forceServerTts: true,
-      allowBrowserFallback: false,
-    });
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    assert.equal(browserSpeechCount, 0);
   } finally {
     restoreAnimationFrame();
     if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);

@@ -144,9 +144,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
   const speak = useCallback(
     (item: FlashcardVocab) => speakChinese(item.chinese, item.audioUrl, {
       preferAudio: true,
-      serverProvider: "melo",
-      forceServerTts: true,
-      allowBrowserFallback: false,
+      useBrowserTts: true,
     }),
     [],
   );
