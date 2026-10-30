@@ -8,6 +8,7 @@ import { getCourseById, isEnrolled } from "~/lib/db.server";
 import type { FlashcardConfig } from "~/lib/learning-blocks";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
+import { getVocabularyAudioUrl } from "~/lib/vocabulary-audio";
 import { ArrowLeft } from "lucide-react";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -61,7 +62,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     pinyin: item.pinyin,
     translation: item.translation,
     wordTypes: item.wordTypes ?? [],
-    audioUrl: item.audioUrl,
+    audioUrl: getVocabularyAudioUrl(course.code, lesson.order, item.chinese) ?? item.audioUrl,
     note: item.note,
   })));
 

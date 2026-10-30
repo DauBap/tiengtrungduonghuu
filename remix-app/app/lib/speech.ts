@@ -50,7 +50,8 @@ export function speakChinese(
     rate?: 0.8 | 0.85 | 1 | 1.5;
     audioElement?: HTMLAudioElement;
     serverProvider?: ServerSpeechProvider;
-    useBrowserTts?: boolean;
+    forceServerTts?: boolean;
+    allowBrowserFallback?: boolean;
     onPlaybackStateChange?: (state: SpeechPlaybackState) => void;
   } = {}
 ): boolean {
@@ -61,11 +62,6 @@ export function speakChinese(
   const requestId = speechRequestId;
   activePlaybackStateChange = options.onPlaybackStateChange ?? null;
   updatePlaybackState("loading", requestId);
-
-  if (options.useBrowserTts) {
-    setSpeechStatus("local");
-    return speakWithTts(text, rate, requestId);
-  }
 
   if (audioUrl && options.preferAudio) {
     const audio = options.audioElement ?? new Audio(audioUrl);
@@ -85,10 +81,31 @@ export function speakChinese(
       audio.onended = null;
       audio.onerror = null;
       activeAudio = null;
-      speakSelectedTts(text, rate, requestId);
+      if (options.forceServerTts) {
+        void speakWithServerTts(
+          text,
+          requestId,
+          rate,
+          options.serverProvider ?? "melo",
+          options.allowBrowserFallback ?? false,
+        );
+      } else {
+        speakSelectedTts(text, rate, requestId, options.serverProvider);
+      }
     };
     audio.onerror = fallback;
     void audio.play().catch(fallback);
+    return true;
+  }
+
+  if (options.forceServerTts) {
+    void speakWithServerTts(
+      text,
+      requestId,
+      rate,
+      options.serverProvider ?? "melo",
+      options.allowBrowserFallback ?? false,
+    );
     return true;
   }
 
@@ -114,6 +131,7 @@ async function speakWithServerTts(
   requestId: number,
   rate: number,
   provider: ServerSpeechProvider,
+  allowBrowserFallback = true,
 ) {
   const controller = new AbortController();
   const loadingToastId = `speech-generation-${requestId}`;
@@ -195,7 +213,8 @@ async function speakWithServerTts(
       audio.onerror = null;
       releaseActiveAudio();
       setSpeechStatus(`${provider}-fallback`);
-      speakWithTts(text, rate, requestId);
+      if (allowBrowserFallback) speakWithTts(text, rate, requestId);
+      else updatePlaybackState("idle", requestId);
     };
     audio.onerror = fallback;
     await audio.play();
@@ -205,7 +224,8 @@ async function speakWithServerTts(
       fallbackStarted = true;
       releaseActiveAudio();
       setSpeechStatus(`${provider}-fallback`);
-      speakWithTts(text, rate, requestId);
+      if (allowBrowserFallback) speakWithTts(text, rate, requestId);
+      else updatePlaybackState("idle", requestId);
     }
   } finally {
     if (loadingToastShown) {

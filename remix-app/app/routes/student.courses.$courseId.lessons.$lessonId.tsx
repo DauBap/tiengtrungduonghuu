@@ -56,6 +56,7 @@ import {
 } from "~/lib/pronunciation";
 import { gradePhoneticsSection, type PhoneticsAnswer } from "~/lib/phonetics";
 import { getListeningGrade } from "~/lib/listening-score";
+import { getVocabularyAudioUrl } from "~/lib/vocabulary-audio";
 
 const FEEDBACK_TAB_LABELS: Record<string, string> = {
   FLASHCARD: "Flashcard",
@@ -440,7 +441,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
             pinyin: v.pinyin,
             translation: v.translation,
             wordTypes: v.wordTypes ?? [],
-            audioUrl: v.audioUrl,
+            audioUrl: getVocabularyAudioUrl(lesson.course.code, lesson.order, v.chinese) ?? v.audioUrl,
             note: v.note,
           })),
         sentenceItems: sentenceIds
@@ -493,6 +494,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   }
   const studentLesson = {
     ...lesson,
+    content: lesson.content.map((item) => ({
+      ...item,
+      audioUrl: getVocabularyAudioUrl(lesson.course.code, lesson.order, item.chinese) ?? item.audioUrl,
+    })),
     audioScripts: lesson.audioScripts?.map((script) => ({
       ...script,
       audioUrl: versionAudioUrl(script.audioUrl),
