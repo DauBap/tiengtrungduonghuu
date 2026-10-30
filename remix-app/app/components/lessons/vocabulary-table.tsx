@@ -103,7 +103,9 @@ export function VocabularyTable({ items, searchable = false }: VocabularyTablePr
                         className="h-6 w-6 shrink-0 p-0 text-primary hover:bg-primary/10 hover:text-primary"
                         onClick={() => speakChinese(item.chinese, item.audioUrl, {
                           preferAudio: true,
-                          useBrowserTts: true,
+                          serverProvider: "melo",
+                          forceServerTts: true,
+                          allowBrowserFallback: false,
                         })}
                         title="Nghe phát âm"
                       >

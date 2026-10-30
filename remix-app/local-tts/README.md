@@ -91,6 +91,44 @@ After deploying the app changes, test through the authenticated app and confirm
 that a temporary MeloTTS outage falls back to the browser voice. Do not expose
 port `8766` through the firewall or reverse proxy.
 
+## Import vocabulary audio for HSK1-3.0 lesson 1
+
+The 13 supplied MP3 recordings and an idempotent importer are included in
+`prisma/assets/hsk1-3-0-lesson-01-vocabulary/` and
+`prisma/import-hsk1-3-lesson-01-vocab-audio.ts`. The importer maps each filename
+to the exactly matching Chinese `VocabItem` in lesson 1 of course `HSK1-3.0`,
+stores the files under the app's persistent `UPLOADS_DIR`, then updates only
+those vocabulary rows. Other courses and lessons are not changed.
+
+After deploying the app revision to Ubuntu, run from the `remix-app` directory.
+The first command loads the app's `.env` without printing its database URL and
+selects the direct production connection:
+
+```bash
+cd ~/apps/tiengtrungduonghuu/remix-app
+export TARGET_DATABASE_URL="$(node -r dotenv/config -e 'process.stdout.write(process.env.DIRECT_URL || process.env.DATABASE_URL || "")')"
+test -n "$TARGET_DATABASE_URL" || { echo "Production database URL is missing"; exit 1; }
+```
+
+Set `UPLOADS_DIR` to the same persistent path used by the running app service,
+if that setting is configured outside `.env`. Preview the matching course,
+lesson, and all 13 audio URLs first:
+
+```bash
+npx tsx prisma/import-hsk1-3-lesson-01-vocab-audio.ts
+```
+
+Only after confirming the dry-run targets `HSK1-3.0`, lesson 1, and all 13
+expected words, apply the import:
+
+```bash
+npx tsx prisma/import-hsk1-3-lesson-01-vocab-audio.ts --apply
+```
+
+The importer refuses to apply if the course/lesson is missing, any word does
+not match exactly once, or `TARGET_DATABASE_URL` is unset. It is safe to rerun:
+files are content-addressed and matching database rows receive the same URLs.
+
 MeloTTS output is peak-normalized to approximately `-1 dBFS` before it is sent
 to the app and cached, which raises quiet generations without clipping. This
 only applies to newly generated audio. To replace a quiet cached sentence, open
