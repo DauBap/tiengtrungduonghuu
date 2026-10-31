@@ -375,49 +375,51 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
         <span className="shrink-0 text-xs font-medium text-muted-foreground tabular-nums">{position}/{queue.length}</span>
       </div>
 
-      <button
-        key={card.id}
-        type="button"
-        onClick={handleCardClick}
-        onPointerDown={handleCardPointerDown}
-        onPointerMove={handleCardPointerMove}
-        onPointerUp={finishCardPointer}
-        onPointerCancel={cancelCardPointer}
-        disabled={isTransitioning}
-        ref={cardElementRef}
-        className="group relative block w-full touch-none select-none [perspective:1200px]"
-        style={{
-          transform: `translate3d(${dragX}px, 0, 0) rotate(${dragX / 24}deg)`,
-          opacity: Math.max(
-            0,
-            1 -
-              Math.abs(dragX) /
-                Math.max(
-                  typeof window === "undefined" ? 500 : window.innerWidth,
-                  500,
-                ),
-          ),
-          transition: isDragging.current
-            ? "none"
-            : "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease-out",
-          willChange: "transform, opacity",
-        }}
-        aria-label={flipped ? "Xem mặt trước; vuốt trái để đánh dấu đã thuộc, vuốt phải để đánh dấu chưa thuộc" : "Xem mặt sau; vuốt trái để đánh dấu đã thuộc, vuốt phải để đánh dấu chưa thuộc"}
-      >
-        <div className={cn("relative h-72 w-full transition-transform duration-500 [transform-style:preserve-3d]", flipped && "[transform:rotateY(180deg)]")}>
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/20 bg-primary/5 p-6 transition-colors [backface-visibility:hidden] group-hover:border-primary/40">
-            <p className={cn("content-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center font-semibold [overflow-wrap:anywhere]", frontIsChinese ? "hanzi-display text-5xl" : "text-2xl")}>{frontMain}</p>
-            {frontIsChinese && config.showPinyinOnFront && settings.showPinyin && <p className="content-text pinyin-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center text-lg text-primary [overflow-wrap:anywhere]">{card.pinyin}</p>}
-            <p className="absolute bottom-4 text-xs text-muted-foreground">Bấm để lật thẻ</p>
+      <div className="overflow-hidden">
+        <button
+          key={card.id}
+          type="button"
+          onClick={handleCardClick}
+          onPointerDown={handleCardPointerDown}
+          onPointerMove={handleCardPointerMove}
+          onPointerUp={finishCardPointer}
+          onPointerCancel={cancelCardPointer}
+          disabled={isTransitioning}
+          ref={cardElementRef}
+          className="group relative block w-full touch-pan-y select-none [perspective:1200px]"
+          style={{
+            transform: `translate3d(${dragX}px, 0, 0) rotate(${dragX / 24}deg)`,
+            opacity: Math.max(
+              0,
+              1 -
+                Math.abs(dragX) /
+                  Math.max(
+                    typeof window === "undefined" ? 500 : window.innerWidth,
+                    500,
+                  ),
+            ),
+            transition: isDragging.current
+              ? "none"
+              : "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease-out",
+            willChange: "transform, opacity",
+          }}
+          aria-label={flipped ? "Xem mặt trước; vuốt trái để đánh dấu đã thuộc, vuốt phải để đánh dấu chưa thuộc" : "Xem mặt sau; vuốt trái để đánh dấu đã thuộc, vuốt phải để đánh dấu chưa thuộc"}
+        >
+          <div className={cn("relative h-72 w-full transition-transform duration-500 [transform-style:preserve-3d]", flipped && "[transform:rotateY(180deg)]")}>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/20 bg-primary/5 p-6 transition-colors [backface-visibility:hidden] group-hover:border-primary/40">
+              <p className={cn("content-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center font-semibold [overflow-wrap:anywhere]", frontIsChinese ? "hanzi-display text-5xl" : "text-2xl")}>{frontMain}</p>
+              {frontIsChinese && config.showPinyinOnFront && settings.showPinyin && <p className="content-text pinyin-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center text-lg text-primary [overflow-wrap:anywhere]">{card.pinyin}</p>}
+              <p className="absolute bottom-4 text-xs text-muted-foreground">Bấm để lật thẻ</p>
+            </div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/30 bg-primary/10 p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+              <p className={cn("content-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center font-semibold [overflow-wrap:anywhere]", frontIsChinese ? "text-2xl" : "hanzi-display text-5xl")}>{backMain}</p>
+              {settings.showPinyin && <p className="content-text pinyin-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center text-base text-primary [overflow-wrap:anywhere]">{card.pinyin}</p>}
+              {!!card.wordTypes?.length && <div className="flex flex-wrap justify-center gap-1">{card.wordTypes.map((type) => <span key={type} className="rounded-full border border-border bg-background/60 px-2.5 py-0.5 text-xs text-muted-foreground">{WORD_TYPE_META[type].label}</span>)}</div>}
+              {card.note && <p className="content-text mt-1 w-full min-w-0 max-w-xs break-words whitespace-normal text-center text-sm text-muted-foreground [overflow-wrap:anywhere]">{card.note}</p>}
+            </div>
           </div>
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/30 bg-primary/10 p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-            <p className={cn("content-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center font-semibold [overflow-wrap:anywhere]", frontIsChinese ? "text-2xl" : "hanzi-display text-5xl")}>{backMain}</p>
-            {settings.showPinyin && <p className="content-text pinyin-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center text-base text-primary [overflow-wrap:anywhere]">{card.pinyin}</p>}
-            {!!card.wordTypes?.length && <div className="flex flex-wrap justify-center gap-1">{card.wordTypes.map((type) => <span key={type} className="rounded-full border border-border bg-background/60 px-2.5 py-0.5 text-xs text-muted-foreground">{WORD_TYPE_META[type].label}</span>)}</div>}
-            {card.note && <p className="content-text mt-1 w-full min-w-0 max-w-xs break-words whitespace-normal text-center text-sm text-muted-foreground [overflow-wrap:anywhere]">{card.note}</p>}
-          </div>
-        </div>
-      </button>
+        </button>
+      </div>
       <p className="-mt-2 text-center text-xs text-muted-foreground">Vuốt trái: đã thuộc · Vuốt phải: chưa thuộc</p>
 
       <div className="flex items-center justify-between gap-2">
