@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useFetcher } from "react-router";
 import { requireRole } from "~/lib/session.server";
@@ -12,10 +12,11 @@ import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Overlay } from "~/components/common/overlay";
 import {
-  School, Plus, Pencil, Trash2, X, Search, Loader2, Users, UserCheck,
+  School, Plus, Pencil, Trash2, X, Search, Loader2, Users, UserCheck, Check, ChevronDown, Save,
   UserPlus, UserMinus, Clock,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { toast } from "sonner";
 
 // ─── Schedule types ───────────────────────────────────────────────────────────
 
@@ -104,28 +105,63 @@ export async function action({ request }: ActionFunctionArgs) {
     return { success: true };
   }
 
-  if (intent === "add-student") {
-    const classId = String(form.get("classId"));
-    const studentId = String(form.get("studentId"));
-    const cls = await prisma.class.findUnique({ where: { id: classId }, select: { courseId: true } });
-    if (!cls) return { error: "Không tìm thấy lớp" };
-    await prisma.enrollment.upsert({
-      where: { userId_courseId: { userId: studentId, courseId: cls.courseId } },
-      update: { classId },
-      create: { userId: studentId, courseId: cls.courseId, classId },
-    });
-    return { success: true };
-  }
+  if (intent === "sync-students") {
+    const classId = String(form.get("classId") ?? "").trim();
+    const studentIds = [...new Set(
+      form.getAll("studentIds")
+        .map((value) => String(value).trim())
+        .filter(Boolean),
+    )];
+    if (!classId) return { error: "Không tìm thấy lớp cần cập nhật." };
 
-  if (intent === "remove-student") {
-    const classId = String(form.get("classId"));
-    const studentId = String(form.get("studentId"));
-    const cls = await prisma.class.findUnique({ where: { id: classId }, select: { courseId: true } });
-    if (!cls) return { error: "Không tìm thấy lớp" };
-    await prisma.enrollment.deleteMany({
-      where: { userId: studentId, courseId: cls.courseId, classId },
+    return prisma.$transaction(async (tx) => {
+      const cls = await tx.class.findUnique({
+        where: { id: classId },
+        select: { id: true, courseId: true, maxStudents: true },
+      });
+      if (!cls) return { error: "Không tìm thấy lớp cần cập nhật." };
+      if (studentIds.length > cls.maxStudents) {
+        return { error: `Lớp chỉ nhận tối đa ${cls.maxStudents} học sinh.` };
+      }
+
+      const currentEnrollments = await tx.enrollment.findMany({
+        where: { classId: cls.id, courseId: cls.courseId },
+        select: { userId: true },
+      });
+      const currentStudentIds = new Set(currentEnrollments.map(({ userId }) => userId));
+      const activeStudents = await tx.user.findMany({
+        where: { id: { in: studentIds }, role: "student", isActive: true, deletedAt: null },
+        select: { id: true },
+      });
+      const eligibleStudentIds = new Set([
+        ...activeStudents.map(({ id }) => id),
+        ...currentStudentIds,
+      ]);
+      if (studentIds.some((studentId) => !eligibleStudentIds.has(studentId))) {
+        return { error: "Một số tài khoản học sinh không còn khả dụng. Hãy tải lại danh sách." };
+      }
+
+      const desiredStudentIds = new Set(studentIds);
+      const removedStudentIds = currentEnrollments
+        .map(({ userId }) => userId)
+        .filter((userId) => !desiredStudentIds.has(userId));
+
+      if (removedStudentIds.length > 0) {
+        await tx.enrollment.deleteMany({
+          where: { userId: { in: removedStudentIds }, courseId: cls.courseId, classId: cls.id },
+        });
+      }
+
+      await Promise.all(studentIds.map((studentId) =>
+        tx.enrollment.upsert({
+          where: { userId_courseId: { userId: studentId, courseId: cls.courseId } },
+          update: { classId: cls.id },
+          create: { userId: studentId, courseId: cls.courseId, classId: cls.id },
+        })
+      ));
+
+      return { success: true };
     });
-    return { success: true };
   }
 
   return null;
@@ -135,6 +171,150 @@ export async function action({ request }: ActionFunctionArgs) {
 
 type ClassRow = Awaited<ReturnType<typeof getAllClasses>>[number];
 type ModalMode = "create" | "edit" | "delete" | "members" | null;
+
+interface SearchableOption {
+  value: string;
+  label: string;
+  searchText?: string;
+}
+
+function normalizeSearchText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/gi, "d")
+    .toLocaleLowerCase("vi")
+    .trim();
+}
+
+function SearchableSelect({
+  id,
+  name,
+  options,
+  defaultValue,
+  placeholder,
+  searchPlaceholder,
+  emptyMessage,
+}: {
+  id: string;
+  name: string;
+  options: SearchableOption[];
+  defaultValue: string;
+  placeholder: string;
+  searchPlaceholder: string;
+  emptyMessage: string;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const initialOption = options.find((option) => option.value === defaultValue);
+  const [selectedValue, setSelectedValue] = useState(defaultValue);
+  const [inputValue, setInputValue] = useState(initialOption?.label ?? "");
+  const [query, setQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const listboxId = `${id}-options`;
+  const filteredOptions = options.filter((option) =>
+    normalizeSearchText(`${option.label} ${option.searchText ?? ""}`).includes(normalizeSearchText(query))
+  );
+
+  const selectOption = (option: SearchableOption) => {
+    setSelectedValue(option.value);
+    setInputValue(option.label);
+    setQuery("");
+    setIsOpen(false);
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative"
+      onBlur={(event) => {
+        if (!containerRef.current?.contains(event.relatedTarget as Node | null)) {
+          setIsOpen(false);
+          setQuery("");
+          setInputValue(options.find((option) => option.value === selectedValue)?.label ?? "");
+        }
+      }}
+    >
+      <input type="hidden" name={name} value={selectedValue} />
+      <Input
+        id={id}
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded={isOpen}
+        aria-controls={listboxId}
+        aria-activedescendant={isOpen && filteredOptions[activeIndex] ? `${listboxId}-${activeIndex}` : undefined}
+        autoComplete="off"
+        placeholder={placeholder}
+        className="pr-10"
+        value={inputValue}
+        onFocus={() => {
+          setQuery("");
+          const selectedIndex = options.findIndex((option) => option.value === selectedValue);
+          setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
+          setIsOpen(true);
+        }}
+        onChange={(event) => {
+          setInputValue(event.target.value);
+          setQuery(event.target.value);
+          setSelectedValue("");
+          setActiveIndex(0);
+          setIsOpen(true);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            setIsOpen(true);
+            setActiveIndex((index) => Math.min(index + 1, filteredOptions.length - 1));
+          } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            setActiveIndex((index) => Math.max(index - 1, 0));
+          } else if (event.key === "Enter" && isOpen && filteredOptions[activeIndex]) {
+            event.preventDefault();
+            selectOption(filteredOptions[activeIndex]);
+          } else if (event.key === "Escape") {
+            setIsOpen(false);
+            setQuery("");
+            setInputValue(options.find((option) => option.value === selectedValue)?.label ?? "");
+          }
+        }}
+      />
+      <ChevronDown
+        aria-hidden="true"
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+      />
+      {isOpen && (
+        <div
+          id={listboxId}
+          role="listbox"
+          aria-label={searchPlaceholder}
+          className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+        >
+          {filteredOptions.length === 0 ? (
+            <p className="px-3 py-2 text-sm text-muted-foreground">{emptyMessage}</p>
+          ) : filteredOptions.map((option, index) => (
+            <button
+              key={option.value || "unassigned"}
+              id={`${listboxId}-${index}`}
+              type="button"
+              role="option"
+              aria-selected={option.value === selectedValue}
+              onMouseDown={(event) => event.preventDefault()}
+              onMouseEnter={() => setActiveIndex(index)}
+              onClick={() => selectOption(option)}
+              className={cn(
+                "flex min-h-9 w-full items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                index === activeIndex ? "bg-accent text-accent-foreground" : "hover:bg-muted",
+              )}
+            >
+              <span className="min-w-0 truncate">{option.label}</span>
+              {option.value === selectedValue && <Check aria-hidden="true" className="h-4 w-4 shrink-0" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── Schedule Picker ──────────────────────────────────────────────────────────
 
@@ -253,6 +433,22 @@ function ClassFormModal({
   const isLoading = fetcher.state !== "idle";
   const isEdit = mode === "edit";
   const defaultSchedule = parseSchedule(cls?.schedule);
+  const courseOptions: SearchableOption[] = [
+    { value: "", label: "— Chọn khóa học —", searchText: "chọn khóa học" },
+    ...courses.map((course) => ({
+      value: course.id,
+      label: `HSK${course.hskLevel} · ${course.code} · ${course.title}`,
+      searchText: `${course.hskLevel} ${course.code} ${course.title}`,
+    })),
+  ];
+  const teacherOptions: SearchableOption[] = [
+    { value: "", label: "— Chưa phân công —", searchText: "chưa phân công" },
+    ...teachers.map((teacher) => ({
+      value: teacher.id,
+      label: `${teacher.name} (${teacher.email})`,
+      searchText: `${teacher.name} ${teacher.email}`,
+    })),
+  ];
 
   useEffect(() => {
     if (fetcher.state === "idle" && fetcher.data?.success) onClose();
@@ -287,36 +483,30 @@ function ClassFormModal({
         {!isEdit && (
           <div className="space-y-2">
             <Label htmlFor="courseId">Khóa học <span className="text-destructive">*</span></Label>
-            <select
+            <SearchableSelect
               id="courseId"
               name="courseId"
+              options={courseOptions}
               defaultValue=""
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <option value="">— Chọn khóa học —</option>
-              {courses.map((c) => (
-                <option key={c.id} value={c.id}>
-                  HSK{c.hskLevel} · {c.code} · {c.title}
-                </option>
-              ))}
-            </select>
+              placeholder="Tìm theo tên hoặc mã khóa học..."
+              searchPlaceholder="Tìm khóa học"
+              emptyMessage="Không tìm thấy khóa học phù hợp."
+            />
           </div>
         )}
 
         {/* Giáo viên */}
         <div className="space-y-2">
           <Label htmlFor="teacherId">Giáo viên phụ trách <span className="text-muted-foreground font-normal text-xs">(tùy chọn)</span></Label>
-          <select
+          <SearchableSelect
             id="teacherId"
             name="teacherId"
+            options={teacherOptions}
             defaultValue={cls?.teacher?.id ?? ""}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <option value="">— Chưa phân công —</option>
-            {teachers.map((t) => (
-              <option key={t.id} value={t.id}>{t.name} ({t.email})</option>
-            ))}
-          </select>
+            placeholder="Tìm theo tên giáo viên..."
+            searchPlaceholder="Tìm giáo viên"
+            emptyMessage="Không tìm thấy giáo viên phù hợp."
+          />
         </div>
 
         {/* Số lượng học viên tối đa */}
@@ -401,30 +591,70 @@ function MembersModal({
   const isLoading = fetcher.state !== "idle";
   const [search, setSearch] = useState("");
 
-  const enrolledIds = new Set(cls.enrollments.map((e: { user: { id: string } }) => e.user.id));
-  const enrolledStudents = cls.enrollments.map((e: { user: { id: string; name: string; email: string } }) => e.user);
-  const isFull = enrolledStudents.length >= cls.maxStudents;
+  const [selectedStudentIds, setSelectedStudentIds] = useState(
+    () => cls.enrollments.map((enrollment: { user: { id: string } }) => enrollment.user.id),
+  );
+  const initialStudentIds = cls.enrollments.map((enrollment: { user: { id: string } }) => enrollment.user.id);
+  const initialStudentIdSet = new Set(initialStudentIds);
+  const selectedStudentIdSet = new Set(selectedStudentIds);
+  const hasChanges = selectedStudentIds.length !== initialStudentIds.length
+    || selectedStudentIds.some((studentId) => !initialStudentIdSet.has(studentId));
+  const enrolledStudents = selectedStudentIds
+    .map((studentId) =>
+      allStudents.find((student) => student.id === studentId)
+      ?? cls.enrollments.find((enrollment: { user: { id: string } }) => enrollment.user.id === studentId)?.user
+    )
+    .filter((student): student is { id: string; name: string; email: string } => Boolean(student));
+  const isFull = selectedStudentIds.length >= cls.maxStudents;
+  const normalizedSearch = normalizeSearchText(search);
   const availableStudents = allStudents.filter(
     (s: { id: string; name: string; email: string }) =>
-      !enrolledIds.has(s.id) &&
-      (search === "" ||
-        s.name.toLowerCase().includes(search.toLowerCase()) ||
-        s.email.toLowerCase().includes(search.toLowerCase()))
+      !selectedStudentIdSet.has(s.id) &&
+      (!normalizedSearch || normalizeSearchText(`${s.name} ${s.email}`).includes(normalizedSearch))
   );
+
+  useEffect(() => {
+    if (fetcher.state !== "idle" || !fetcher.data?.success) return;
+    toast.success("Đã lưu danh sách học sinh trong lớp.");
+    onClose();
+  }, [fetcher.state, fetcher.data, onClose]);
+
+  const toggleStudent = (studentId: string) => {
+    setSelectedStudentIds((current) =>
+      current.includes(studentId)
+        ? current.filter((id) => id !== studentId)
+        : current.length < cls.maxStudents
+          ? [...current, studentId]
+          : current
+    );
+  };
 
   return (
     <Overlay onClose={onClose}>
-      <div className="space-y-4">
+      <fetcher.Form method="post" className="space-y-4">
+        <input type="hidden" name="intent" value="sync-students" />
+        <input type="hidden" name="classId" value={cls.id} />
+        {selectedStudentIds.map((studentId) => (
+          <input key={studentId} type="hidden" name="studentIds" value={studentId} />
+        ))}
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-lg font-bold">Thành viên lớp {cls.name}</h2>
             <p className="text-sm text-muted-foreground">
-              {cls.course.title} · {enrolledStudents.length}/{cls.maxStudents} học sinh
+              {cls.course.title} · {selectedStudentIds.length}/{cls.maxStudents} học sinh
               {isFull && <span className="ml-1.5 text-warning font-medium">· Đã đầy</span>}
             </p>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+          <button type="button" onClick={onClose} disabled={isLoading} className="text-muted-foreground hover:text-foreground disabled:opacity-50">
+            <X className="h-5 w-5" />
+          </button>
         </div>
+
+        {fetcher.data?.error && (
+          <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+            {fetcher.data.error}
+          </p>
+        )}
 
         {/* Danh sách học sinh trong lớp */}
         <div>
@@ -439,15 +669,18 @@ function MembersModal({
                     <p className="text-sm font-medium truncate">{s.name}</p>
                     <p className="text-xs text-muted-foreground truncate">{s.email}</p>
                   </div>
-                  <fetcher.Form method="post">
-                    <input type="hidden" name="intent" value="remove-student" />
-                    <input type="hidden" name="classId" value={cls.id} />
-                    <input type="hidden" name="studentId" value={s.id} />
-                    <Button type="submit" variant="ghost" size="icon" disabled={isLoading} title="Xóa khỏi lớp"
-                      className="hover:text-destructive hover:bg-destructive/10 h-7 w-7">
-                      <UserMinus className="h-3.5 w-3.5" />
-                    </Button>
-                  </fetcher.Form>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    disabled={isLoading}
+                    title="Xóa khỏi lớp (chưa lưu)"
+                    aria-label={`Xóa ${s.name} khỏi lớp (chưa lưu)`}
+                    onClick={() => toggleStudent(s.id)}
+                    className="hover:text-destructive hover:bg-destructive/10 h-7 w-7"
+                  >
+                    <UserMinus className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               ))}
             </div>
@@ -479,15 +712,16 @@ function MembersModal({
                         <p className="text-sm font-medium truncate">{s.name}</p>
                         <p className="text-xs text-muted-foreground truncate">{s.email}</p>
                       </div>
-                      <fetcher.Form method="post">
-                        <input type="hidden" name="intent" value="add-student" />
-                        <input type="hidden" name="classId" value={cls.id} />
-                        <input type="hidden" name="studentId" value={s.id} />
-                        <Button type="submit" size="sm" variant="outline" disabled={isLoading}>
-                          {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserPlus className="h-3.5 w-3.5 mr-1" />}
-                          Thêm
-                        </Button>
-                      </fetcher.Form>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={isLoading || isFull}
+                        onClick={() => toggleStudent(s.id)}
+                      >
+                        <UserPlus className="h-3.5 w-3.5 mr-1" />
+                        Thêm
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -496,10 +730,19 @@ function MembersModal({
           )}
         </div>
 
-        <div className="flex justify-end pt-2">
-          <Button variant="outline" onClick={onClose}>Đóng</Button>
+        <div className="flex items-center justify-between gap-3 border-t pt-4">
+          <p className="min-h-5 text-xs text-muted-foreground" aria-live="polite">
+            {hasChanges ? "Có thay đổi chưa lưu." : "Danh sách đã được lưu."}
+          </p>
+          <div className="flex shrink-0 justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Đóng</Button>
+            <Button type="submit" disabled={isLoading || !hasChanges}>
+              {isLoading ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Save className="h-4 w-4 mr-1.5" />}
+              Lưu thay đổi
+            </Button>
+          </div>
         </div>
-      </div>
+      </fetcher.Form>
     </Overlay>
   );
 }
