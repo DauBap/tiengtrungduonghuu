@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import { Plus, Pencil, Trash2, X, Users, GraduationCap, ShieldCheck, LockKeyhole, LockKeyholeOpen, Search, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Users, GraduationCap, ShieldCheck, LockKeyhole, LockKeyholeOpen, Search, Loader2, CheckCircle2, Clock3 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { toast } from "sonner";
 
@@ -24,8 +24,8 @@ import { toast } from "sonner";
 // đi qua nguyên vẹn, không bị đổi thành string như JSON.stringify.
 // role dùng nguyên enum Role của Prisma; loader đã lọc `in: ["teacher","student"]`
 // nhưng TS không suy ra được điều đó từ kiểu trả về.
-type UserRecord = { id: string; email: string; name: string; phone: string | null; role: Role; isActive: boolean; createdAt: Date };
-type ModalMode = "create" | "edit" | "delete" | "toggle" | null;
+type UserRecord = { id: string; email: string; name: string; phone: string | null; role: Role; isActive: boolean; isActivated: boolean; createdAt: Date };
+type ModalMode = "create" | "edit" | "delete" | "toggle" | "activate" | null;
 
 const ROLE_LABEL: Record<string, string> = { teacher: "Giáo viên", student: "Học viên" };
 const ROLE_BADGE: Record<string, string> = { teacher: "bg-accent/15 text-accent border-accent/30", student: "bg-primary/10 text-primary border-primary/30" };
@@ -46,7 +46,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
   const users = await prisma.user.findMany({
     where: { role: { in: ["teacher", "student"] }, deletedAt: null },
-    select: { id: true, email: true, name: true, phone: true, role: true, isActive: true, createdAt: true },
+    select: { id: true, email: true, name: true, phone: true, role: true, isActive: true, isActivated: true, createdAt: true },
     orderBy: { createdAt: "desc" },
   });
   return { user, users };
@@ -99,6 +99,17 @@ export async function action({ request }: ActionFunctionArgs) {
     return { success: true };
   }
 
+  if (intent === "activate") {
+    const userId = String(formData.get("userId") ?? "").trim();
+    if (!userId) return { error: "Không tìm thấy tài khoản cần kích hoạt." };
+    const result = await prisma.user.updateMany({
+      where: { id: userId, isActivated: false, deletedAt: null },
+      data: { isActivated: true },
+    });
+    if (result.count === 0) return { error: "Tài khoản không còn ở trạng thái chờ kích hoạt." };
+    return { success: true };
+  }
+
   if (intent === "delete") {
     const userId = String(formData.get("userId"));
     await prisma.user.update({ where: { id: userId }, data: { deletedAt: new Date() } });
@@ -117,11 +128,45 @@ function Modal({ mode, user, onClose }: { mode: ModalMode; user: UserRecord | nu
   useEffect(() => {
     if (fetcher.state === "idle" && fetcher.data?.success) {
       if (mode === "edit") toast.success("Đã lưu thay đổi tài khoản.");
+      if (mode === "activate") toast.success("Đã kích hoạt tài khoản.");
       onClose();
     }
   }, [fetcher.state, fetcher.data, mode, onClose]);
 
   if (!mode) return null;
+
+  if (mode === "activate") {
+    return (
+      <Overlay onClose={onClose}>
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-bold">Xác nhận kích hoạt</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{user?.name} · {user?.email}</p>
+            </div>
+            <button type="button" onClick={onClose} aria-label="Đóng" className="text-muted-foreground hover:text-foreground">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm">
+            Sau khi kích hoạt, học viên có thể đăng nhập bằng mật khẩu ban đầu và sẽ được yêu cầu đổi mật khẩu ở lần đăng nhập đầu tiên.
+          </div>
+          {fetcher.data?.error && <p role="alert" className="text-sm text-destructive">{fetcher.data.error}</p>}
+          <fetcher.Form method="post">
+            <input type="hidden" name="intent" value="activate" />
+            <input type="hidden" name="userId" value={user?.id} />
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Hủy</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-1.5 h-4 w-4" />}
+                Xác nhận kích hoạt
+              </Button>
+            </div>
+          </fetcher.Form>
+        </div>
+      </Overlay>
+    );
+  }
 
   if (mode === "toggle") {
     return (
@@ -273,7 +318,7 @@ export default function AccountsPage() {
   const { user, users } = useLoaderData<typeof loader>();
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [statusTab, setStatusTab] = useState<"ACTIVE" | "LOCKED" | "PENDING">("ACTIVE");
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null);
 
@@ -282,15 +327,18 @@ export default function AccountsPage() {
 
   const filtered = users.filter((u) => {
     if (roleFilter !== "ALL" && u.role !== roleFilter) return false;
-    if (statusFilter === "ACTIVE" && !u.isActive) return false;
-    if (statusFilter === "LOCKED" && u.isActive) return false;
+    if (statusTab === "ACTIVE" && (!u.isActivated || !u.isActive)) return false;
+    if (statusTab === "LOCKED" && (!u.isActivated || u.isActive)) return false;
+    if (statusTab === "PENDING" && u.isActivated) return false;
     if (search) { const q = search.toLowerCase(); return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q); }
     return true;
   });
 
   const teacherCount = users.filter((u) => u.role === "teacher").length;
   const studentCount = users.filter((u) => u.role === "student").length;
-  const lockedCount = users.filter((u) => !u.isActive).length;
+  const lockedCount = users.filter((u) => u.isActivated && !u.isActive).length;
+  const pendingCount = users.filter((u) => !u.isActivated).length;
+  const activeCount = users.filter((u) => u.isActivated && u.isActive).length;
 
   return (
     <>
@@ -324,21 +372,43 @@ export default function AccountsPage() {
                 <SelectItem value="student">Học viên</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-44"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
-                <SelectItem value="ACTIVE">Đang hoạt động</SelectItem>
-                <SelectItem value="LOCKED">Đang bị khóa</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="space-y-3 pb-3">
               <CardTitle className="text-base">Danh sách tài khoản <span className="text-sm font-normal text-muted-foreground">({filtered.length})</span></CardTitle>
+              <div role="tablist" aria-label="Trạng thái tài khoản" className="flex flex-wrap gap-2 border-b">
+                {([
+                  ["ACTIVE", "Đang hoạt động", activeCount],
+                  ["LOCKED", "Đang bị khóa", lockedCount],
+                  ["PENDING", "Chưa được kích hoạt", pendingCount],
+                ] as const).map(([tab, label, count]) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    id={`accounts-tab-${tab.toLowerCase()}`}
+                    role="tab"
+                    aria-selected={statusTab === tab}
+                    aria-controls="accounts-status-panel"
+                    onClick={() => setStatusTab(tab)}
+                    className={cn(
+                      "min-h-10 rounded-t-md border-b-2 px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      statusTab === tab
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {label} <span className="ml-1 tabular-nums text-xs">{count}</span>
+                  </button>
+                ))}
+              </div>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent
+              id="accounts-status-panel"
+              role="tabpanel"
+              aria-labelledby={`accounts-tab-${statusTab.toLowerCase()}`}
+              className="p-0"
+            >
               {filtered.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                   <Users className="h-10 w-10 text-muted-foreground mb-3" />
@@ -358,23 +428,38 @@ export default function AccountsPage() {
                   </TableHeader>
                   <TableBody>
                     {filtered.map((u) => (
-                      <TableRow key={u.id} className={cn(!u.isActive && "opacity-60 bg-muted/20")}>
+                      <TableRow key={u.id} className={cn((!u.isActive || !u.isActivated) && "opacity-60 bg-muted/20")}>
                         <TableCell className="font-medium">{u.name}</TableCell>
                         <TableCell className="text-sm text-muted-foreground font-mono">{u.email}</TableCell>
                         <TableCell><Badge variant="outline" className={ROLE_BADGE[u.role]}>{ROLE_LABEL[u.role]}</Badge></TableCell>
                         <TableCell>
-                          {u.isActive
-                            ? <Badge variant="outline" className="bg-success/15 text-success border-success/30 gap-1"><LockKeyholeOpen className="h-3 w-3" />Hoạt động</Badge>
-                            : <Badge variant="outline" className="bg-warning/15 text-warning border-warning/30 gap-1"><LockKeyhole className="h-3 w-3" />Bị khóa</Badge>}
+                          {!u.isActivated
+                            ? <Badge variant="outline" className="bg-warning/15 text-warning border-warning/30 gap-1"><Clock3 className="h-3 w-3" />Chưa kích hoạt</Badge>
+                            : u.isActive
+                              ? <Badge variant="outline" className="bg-success/15 text-success border-success/30 gap-1"><LockKeyholeOpen className="h-3 w-3" />Hoạt động</Badge>
+                              : <Badge variant="outline" className="bg-muted text-muted-foreground border-border gap-1"><LockKeyhole className="h-3 w-3" />Bị khóa</Badge>}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">{formatDate(u.createdAt)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
-                            <Button variant="ghost" size="icon" title={u.isActive ? "Khóa" : "Mở khóa"}
-                              onClick={() => open("toggle", u)}
-                              className={cn(u.isActive ? "hover:text-warning hover:bg-warning/10" : "hover:text-success hover:bg-success/10")}>
-                              {u.isActive ? <LockKeyhole className="h-4 w-4" /> : <LockKeyholeOpen className="h-4 w-4" />}
-                            </Button>
+                            {!u.isActivated ? (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title="Xác nhận kích hoạt"
+                                aria-label={`Xác nhận kích hoạt ${u.name}`}
+                                onClick={() => open("activate", u)}
+                                className="hover:bg-success/10 hover:text-success"
+                              >
+                                <CheckCircle2 className="h-4 w-4" />
+                              </Button>
+                            ) : (
+                              <Button variant="ghost" size="icon" title={u.isActive ? "Khóa" : "Mở khóa"}
+                                onClick={() => open("toggle", u)}
+                                className={cn(u.isActive ? "hover:text-warning hover:bg-warning/10" : "hover:text-success hover:bg-success/10")}>
+                                {u.isActive ? <LockKeyhole className="h-4 w-4" /> : <LockKeyholeOpen className="h-4 w-4" />}
+                              </Button>
+                            )}
                             <Button variant="ghost" size="icon" title="Chỉnh sửa" onClick={() => open("edit", u)}>
                               <Pencil className="h-4 w-4" />
                             </Button>

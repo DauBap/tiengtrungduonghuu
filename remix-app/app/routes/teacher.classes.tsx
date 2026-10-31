@@ -63,7 +63,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         where: { user: { is: { role: "student", deletedAt: null } } },
         orderBy: { createdAt: "asc" },
         select: {
-          user: { select: { id: true, name: true, email: true, phone: true, isActive: true } },
+          user: { select: { id: true, name: true, email: true, phone: true, isActive: true, isActivated: true } },
         },
       },
     },
@@ -123,6 +123,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
             phone: studentDetails.phone,
             password: await bcrypt.hash(DEFAULT_ACCOUNT_PASSWORD, 10),
             role: "student",
+            isActivated: false,
             mustChangePassword: true,
           },
           select: { id: true, name: true, email: true },
@@ -359,7 +360,7 @@ export default function TeacherClassesPage() {
                         <p><span className="font-medium">Học viên:</span> {createdAccount.studentName}</p>
                         <p><span className="font-medium">Email:</span> {createdAccount.email}</p>
                         <p><span className="font-medium">Mật khẩu ban đầu:</span> <strong className="tabular-nums">{createdAccount.initialPassword}</strong></p>
-                        <p className="pt-1 text-xs">Hãy gửi thông tin đăng nhập riêng cho học viên. Học viên cần đổi mật khẩu ở lần đăng nhập đầu tiên.</p>
+                        <p className="pt-1 text-xs">Tài khoản đang chờ quản trị viên xác nhận kích hoạt. Học viên chưa thể đăng nhập; sau khi được kích hoạt, học viên cần đổi mật khẩu ở lần đăng nhập đầu tiên.</p>
                       </div>
                       <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
                         <Button type="button" onClick={closeModal} className="w-full sm:w-auto">Đóng</Button>
@@ -386,7 +387,7 @@ export default function TeacherClassesPage() {
                     </div>
                     <div className="rounded-md border bg-muted/40 px-3.5 py-3 text-sm">
                       Mật khẩu ban đầu: <strong className="tabular-nums">{DEFAULT_ACCOUNT_PASSWORD}</strong>
-                      <p className="mt-1 text-xs text-muted-foreground">Học viên sẽ phải đổi mật khẩu ở lần đăng nhập đầu tiên.</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Tài khoản cần quản trị viên xác nhận kích hoạt trước khi học viên có thể đăng nhập.</p>
                     </div>
                     <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
                       <Button type="button" variant="outline" onClick={closeModal} disabled={createBusy} className="w-full sm:w-auto">
@@ -542,8 +543,8 @@ export default function TeacherClassesPage() {
                             <p className="truncate text-sm font-medium">{student.name}</p>
                             <p className="break-all text-xs text-muted-foreground">{student.email}</p>
                           </div>
-                          <span className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${student.isActive ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" : "bg-muted text-muted-foreground"}`}>
-                            {student.isActive ? "Đang hoạt động" : "Đã khóa"}
+                          <span className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${!student.isActivated ? "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200" : student.isActive ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" : "bg-muted text-muted-foreground"}`}>
+                            {!student.isActivated ? "Chưa kích hoạt" : student.isActive ? "Đang hoạt động" : "Đã khóa"}
                           </span>
                         </li>
                       ))}

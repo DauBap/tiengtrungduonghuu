@@ -18,6 +18,7 @@ model User {
   password  String
   role      Role      @default(student)
   isActive  Boolean   @default(true)
+  isActivated Boolean @default(true)
   mustChangePassword Boolean @default(false)
   deletedAt DateTime?
   createdAt DateTime  @default(now())

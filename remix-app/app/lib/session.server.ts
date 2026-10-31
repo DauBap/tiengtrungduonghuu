@@ -46,7 +46,7 @@ async function getValidatedSessionUser(session: Awaited<ReturnType<typeof getSes
   if (!isSessionUser(sessionUser) || typeof authVersion !== "number" || !Number.isSafeInteger(authVersion)) return null;
 
   const user = await prisma.user.findFirst({
-    where: { id: sessionUser.id, isActive: true, deletedAt: null },
+    where: { id: sessionUser.id, isActive: true, isActivated: true, deletedAt: null },
     select: {
       id: true,
       email: true,
@@ -102,7 +102,7 @@ export async function requireRole(request: Request, roles: UserRole[]): Promise<
 export async function createUserSession(user: SessionUser, redirectTo: string) {
   const session = await sessionStorage.getSession();
   const currentUser = await prisma.user.findFirst({
-    where: { id: user.id, isActive: true, deletedAt: null },
+    where: { id: user.id, isActive: true, isActivated: true, deletedAt: null },
     select: {
       id: true,
       email: true,

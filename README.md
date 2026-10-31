@@ -119,6 +119,8 @@ remix-app/
 - **Migration**: dự án không có migration history, dùng `prisma db push`. `migrate dev` sẽ yêu cầu reset DB.
   Khi cập nhật phiên bản có thay đổi `prisma/schema.prisma`, hãy chạy `npx prisma db push` trong `remix-app/`
   để tạo/cập nhật bảng trước khi khởi động ứng dụng.
+  Tài khoản học viên do giáo viên tạo cần đồng bộ field `User.isActivated`; admin phải xác nhận kích hoạt
+  trong tab **Chưa được kích hoạt** trước khi học viên có thể đăng nhập.
   Trên Windows, nếu `db push` báo `EPERM` khi ghi `query_engine-windows.dll.node` thì tắt dev server trước,
   hoặc chạy `npx prisma db push --skip-generate` rồi `npx prisma generate` sau.
 - **Loader data**: React Router 7 serialize bằng turbo-stream, nên `Date` đi qua loader nguyên vẹn —

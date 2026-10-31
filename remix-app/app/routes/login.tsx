@@ -91,6 +91,10 @@ export async function action({ request }: ActionFunctionArgs) {
       return { error: "Email/tài khoản hoặc mật khẩu không đúng" };
     }
 
+    if (!user.isActivated) {
+      return { error: "Tài khoản chưa được kích hoạt. Vui lòng liên hệ giáo viên hoặc quản trị viên để được hỗ trợ." };
+    }
+
     if (!user.isActive) {
       return { error: "Tài khoản của bạn hiện bị khóa, vui lòng liên hệ với Trung Tâm để được hỗ trợ" };
     }

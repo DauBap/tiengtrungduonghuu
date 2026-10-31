@@ -20,7 +20,7 @@ async function getActiveSessionUser(request: Request) {
   if (!sessionUser) return null;
 
   return prisma.user.findFirst({
-    where: { id: sessionUser.id, deletedAt: null, isActive: true },
+    where: { id: sessionUser.id, deletedAt: null, isActive: true, isActivated: true },
     select: { id: true, email: true, name: true, role: true, password: true, mustChangePassword: true },
   });
 }
@@ -52,7 +52,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   const result = await prisma.user.updateMany({
-    where: { id: user.id, mustChangePassword: true, isActive: true, deletedAt: null },
+    where: { id: user.id, mustChangePassword: true, isActive: true, isActivated: true, deletedAt: null },
     data: { password: await bcrypt.hash(password, 10), mustChangePassword: false },
   });
   if (result.count !== 1) {
