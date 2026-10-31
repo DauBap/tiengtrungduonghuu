@@ -118,7 +118,9 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
 
         const student = await tx.user.create({
           data: {
-            ...studentDetails,
+            name: studentDetails.name,
+            email: studentDetails.email,
+            phone: studentDetails.phone,
             password: await bcrypt.hash(DEFAULT_ACCOUNT_PASSWORD, 10),
             role: "student",
             mustChangePassword: true,
