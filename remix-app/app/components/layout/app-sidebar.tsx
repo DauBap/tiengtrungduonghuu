@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useFetcher } from "react-router";
 import { cn } from "~/lib/utils";
-import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, Languages, School, ListChecks, FileCheck2, CalendarDays, Volume2 } from "lucide-react";
+import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, School, ListChecks, FileCheck2, CalendarDays, Volume2 } from "lucide-react";
 import type { UserRole, SessionUser } from "~/lib/session.server";
 import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -56,9 +56,12 @@ export function AppSidebar({ user }: { user: SessionUser }) {
   const SidebarContent = () => (
     <div className="flex h-full flex-col bg-sidebar-gradient text-sidebar-foreground">
       <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-foreground/15 text-sidebar-foreground backdrop-blur-sm">
-          <Languages className="h-5 w-5" />
-        </div>
+        <img
+          src="/logo-duong-huu.webp"
+          alt=""
+          aria-hidden="true"
+          className="h-10 w-10 shrink-0 rounded-full object-contain"
+        />
         <div>
           <p className="text-sm font-bold tracking-tight">TIẾNG TRUNG DƯƠNG HỮU</p>
           <p className="text-xs text-sidebar-muted-foreground">{ROLE_LABEL[user.role]}</p>

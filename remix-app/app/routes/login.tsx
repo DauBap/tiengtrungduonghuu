@@ -9,7 +9,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { Languages, Loader2, Mail, Lock, ArrowRight } from "lucide-react";
+import { Loader2, Mail, Lock, ArrowRight } from "lucide-react";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -144,9 +144,12 @@ export default function LoginPage() {
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
         <div className="relative flex flex-col justify-between p-12 text-white">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-foreground/20 backdrop-blur-sm">
-              <Languages className="h-6 w-6" />
-            </div>
+            <img
+              src="/logo-duong-huu.webp"
+              alt=""
+              aria-hidden="true"
+              className="h-12 w-12 shrink-0 rounded-full object-contain"
+            />
             <span className="header-name text-xl font-bold">TIẾNG TRUNG DƯƠNG HỮU</span>
           </div>
           <div className="space-y-6">
@@ -168,9 +171,12 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center p-6 bg-background">
         <div className="w-full max-w-sm space-y-6">
           <div className="text-center lg:hidden">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground mb-3">
-              <Languages className="h-6 w-6" />
-            </div>
+            <img
+              src="/logo-duong-huu.webp"
+              alt=""
+              aria-hidden="true"
+              className="mx-auto mb-3 h-12 w-12 rounded-full object-contain"
+            />
             <h1 className="header-name text-xl font-bold">TIẾNG TRUNG DƯƠNG HỮU</h1>
           </div>
 
