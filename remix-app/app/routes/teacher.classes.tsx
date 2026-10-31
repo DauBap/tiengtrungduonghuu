@@ -86,7 +86,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
     return await prisma.$transaction(async (tx): Promise<ActionResult> => {
       const cls = await tx.class.findFirst({
         where: { id: classId, teacherId: user.id },
-        select: { id: true, courseId: true, maxStudents: true },
+        select: { id: true, courseId: true, name: true, maxStudents: true },
       });
       if (!cls) return { error: "Không tìm thấy lớp hoặc bạn không được phân công lớp này.", classId };
 
@@ -142,7 +142,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
               actorId: user.id,
               kind: "ACCOUNT_ACTIVATION_REQUEST",
               title: "Tài khoản mới chờ kích hoạt",
-              message: `${student.name} (${student.email}) vừa được giáo viên ${user.name} tạo và đang chờ bạn xác nhận.`,
+              message: `${student.name} (${student.email}) vừa được giáo viên ${user.name} thêm vào lớp ${cls.name}. Đang chờ bạn kích hoạt.`,
               targetUrl: `/admin/accounts?status=PENDING&userId=${encodeURIComponent(student.id)}`,
               entityId: student.id,
             })),
@@ -376,7 +376,7 @@ export default function TeacherClassesPage() {
                       <div role="status" className="space-y-1 rounded-md border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-950 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100">
                         <p><span className="font-medium">Học viên:</span> {createdAccount.studentName}</p>
                         <p><span className="font-medium">Email:</span> {createdAccount.email}</p>
-                        <p><span className="font-medium">Mật khẩu ban đầu:</span> <strong className="tabular-nums">{createdAccount.initialPassword}</strong></p>
+                        <p><span className="font-medium">Mật khẩu mặc định:</span> <strong className="tabular-nums">{createdAccount.initialPassword}</strong></p>
                         <p className="pt-1 text-xs">Tài khoản đang chờ quản trị viên xác nhận kích hoạt. Học viên chưa thể đăng nhập; sau khi được kích hoạt, học viên cần đổi mật khẩu ở lần đăng nhập đầu tiên.</p>
                       </div>
                       <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
@@ -403,7 +403,7 @@ export default function TeacherClassesPage() {
                       </div>
                     </div>
                     <div className="rounded-md border bg-muted/40 px-3.5 py-3 text-sm">
-                      Mật khẩu ban đầu: <strong className="tabular-nums">{DEFAULT_ACCOUNT_PASSWORD}</strong>
+                      Mật khẩu mặc định: <strong className="tabular-nums">{DEFAULT_ACCOUNT_PASSWORD}</strong>
                       <p className="mt-1 text-xs text-muted-foreground">Tài khoản cần quản trị viên xác nhận kích hoạt trước khi học viên có thể đăng nhập.</p>
                     </div>
                     <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
