@@ -131,6 +131,23 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
         await tx.enrollment.create({
           data: { userId: student.id, courseId: cls.courseId, classId: cls.id },
         });
+        const admins = await tx.user.findMany({
+          where: { role: "admin", isActive: true, isActivated: true, deletedAt: null },
+          select: { id: true },
+        });
+        if (admins.length > 0) {
+          await tx.userNotification.createMany({
+            data: admins.map((admin) => ({
+              recipientId: admin.id,
+              actorId: user.id,
+              kind: "ACCOUNT_ACTIVATION_REQUEST",
+              title: "Tài khoản mới chờ kích hoạt",
+              message: `${student.name} (${student.email}) vừa được giáo viên ${user.name} tạo và đang chờ bạn xác nhận.`,
+              targetUrl: `/admin/accounts?status=PENDING&userId=${encodeURIComponent(student.id)}`,
+              entityId: student.id,
+            })),
+          });
+        }
         return {
           success: true,
           kind: "created",

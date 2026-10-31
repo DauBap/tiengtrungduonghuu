@@ -38,6 +38,7 @@ export function GradingNotifications() {
   const [openingId, setOpeningId] = useState<string | null>(null);
   const handledNotificationId = useRef<string | null>(null);
   const hasHandledInitialNotifications = useRef(false);
+  const knownNotificationIds = useRef(new Set<string>());
   const openNotification = (notificationId: string) => {
     if (markFetcher.state !== "idle") return;
     handledNotificationId.current = null;
@@ -74,30 +75,41 @@ export function GradingNotifications() {
 
   useEffect(() => {
     if (
-      hasHandledInitialNotifications.current
-      || listFetcher.state !== "idle"
+      listFetcher.state !== "idle"
       || !listFetcher.data
       || listFetcher.data.error
     ) return;
 
-    hasHandledInitialNotifications.current = true;
     const unreadNotifications = listFetcher.data.notifications.filter(({ readAt }) => !readAt);
-    unreadNotifications.slice(0, 3).forEach((notification) => {
+    const notificationsToToast = hasHandledInitialNotifications.current
+      ? unreadNotifications.filter(({ id }) => !knownNotificationIds.current.has(id))
+      : unreadNotifications;
+    for (const notification of listFetcher.data.notifications) {
+      knownNotificationIds.current.add(notification.id);
+    }
+    hasHandledInitialNotifications.current = true;
+    notificationsToToast.slice(0, 3).forEach((notification) => {
       toast(notification.title, {
         className: "grading-notification-toast",
         description: notification.message,
         duration: 8_000,
         action: {
-          label: notification.kind.endsWith("_GRADING_REQUEST") ? "Chấm bài" : "Xem kết quả",
+          label: notification.kind === "ACCOUNT_ACTIVATION_REQUEST"
+            ? "Xem tài khoản"
+            : notification.kind === "ACCOUNT_ACTIVATED"
+              ? "Xem lớp học"
+              : notification.kind.endsWith("_GRADING_REQUEST")
+                ? "Chấm bài"
+                : "Xem kết quả",
           onClick: () => openNotificationRef.current(notification.id),
         },
       });
     });
 
-    if (unreadNotifications.length > 3) {
+    if (notificationsToToast.length > 3) {
       toast("Có thêm thông báo mới", {
         className: "grading-notification-toast",
-        description: `Bạn còn ${unreadNotifications.length - 3} thông báo chưa đọc.`,
+        description: `Bạn có thêm ${notificationsToToast.length - 3} thông báo mới chưa đọc.`,
         duration: 8_000,
         action: {
           label: "Mở hộp thư",

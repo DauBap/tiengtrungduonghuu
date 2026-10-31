@@ -8,7 +8,7 @@ function isMissingNotificationTable(error: unknown) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const user = await requireRole(request, ["teacher", "student"]);
+  const user = await requireRole(request, ["admin", "teacher", "student"]);
   try {
     const [notifications, unreadCount] = await Promise.all([
       prisma.userNotification.findMany({
@@ -43,7 +43,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const user = await requireRole(request, ["teacher", "student"]);
+  const user = await requireRole(request, ["admin", "teacher", "student"]);
   const form = await request.formData();
   const notificationId = String(form.get("notificationId") ?? "").trim();
   if (!notificationId) return { error: "Không tìm thấy thông báo cần mở." };

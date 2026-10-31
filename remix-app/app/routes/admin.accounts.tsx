@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import type { Role } from "@prisma/client";
-import { useLoaderData, useFetcher, Form, Link } from "react-router";
+import { useLoaderData, useFetcher, Form, Link, useSearchParams } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { prisma } from "~/lib/prisma.server";
 import { DEFAULT_ACCOUNT_PASSWORD } from "~/lib/account-credentials";
@@ -53,7 +53,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  await requireRole(request, ["admin"]);
+  const admin = await requireRole(request, ["admin"]);
   const formData = await request.formData();
   const intent = String(formData.get("intent"));
 
@@ -102,12 +102,59 @@ export async function action({ request }: ActionFunctionArgs) {
   if (intent === "activate") {
     const userId = String(formData.get("userId") ?? "").trim();
     if (!userId) return { error: "Không tìm thấy tài khoản cần kích hoạt." };
-    const result = await prisma.user.updateMany({
-      where: { id: userId, isActivated: false, deletedAt: null },
-      data: { isActivated: true },
+    return prisma.$transaction(async (tx) => {
+      const student = await tx.user.findFirst({
+        where: { id: userId, role: "student", isActivated: false, deletedAt: null },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          enrollments: {
+            orderBy: { createdAt: "asc" },
+            select: { class: { select: { teacherId: true } } },
+          },
+        },
+      });
+      if (!student) return { error: "Tài khoản không còn ở trạng thái chờ kích hoạt." };
+
+      const activationRequests = await tx.userNotification.findMany({
+        where: { kind: "ACCOUNT_ACTIVATION_REQUEST", entityId: student.id },
+        select: { actorId: true },
+      });
+      const result = await tx.user.updateMany({
+        where: { id: student.id, isActivated: false, deletedAt: null },
+        data: { isActivated: true },
+      });
+      if (result.count === 0) return { error: "Tài khoản không còn ở trạng thái chờ kích hoạt." };
+
+      await tx.userNotification.updateMany({
+        where: { kind: "ACCOUNT_ACTIVATION_REQUEST", entityId: student.id, readAt: null },
+        data: { readAt: new Date() },
+      });
+      const requestTeacherIds = activationRequests
+        .map(({ actorId }) => actorId)
+        .filter((teacherId): teacherId is string => teacherId !== null);
+      const teacherIds = [...new Set([
+        ...requestTeacherIds,
+        ...student.enrollments
+          .map(({ class: studentClass }) => studentClass?.teacherId)
+          .filter((teacherId): teacherId is string => teacherId !== null),
+      ])];
+      if (teacherIds.length > 0) {
+        await tx.userNotification.createMany({
+          data: teacherIds.map((teacherId) => ({
+            recipientId: teacherId,
+            actorId: admin.id,
+            kind: "ACCOUNT_ACTIVATED",
+            title: "Tài khoản học viên đã được kích hoạt",
+            message: `${student.name} (${student.email}) đã được quản trị viên kích hoạt và hiện có thể đăng nhập.`,
+            targetUrl: "/teacher/classes",
+            entityId: student.id,
+          })),
+        });
+      }
+      return { success: true };
     });
-    if (result.count === 0) return { error: "Tài khoản không còn ở trạng thái chờ kích hoạt." };
-    return { success: true };
   }
 
   if (intent === "delete") {
@@ -316,11 +363,18 @@ function Modal({ mode, user, onClose }: { mode: ModalMode; user: UserRecord | nu
 
 export default function AccountsPage() {
   const { user, users } = useLoaderData<typeof loader>();
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
-  const [statusTab, setStatusTab] = useState<"ACTIVE" | "LOCKED" | "PENDING">("ACTIVE");
+  const [statusTab, setStatusTab] = useState<"ACTIVE" | "LOCKED" | "PENDING">(
+    () => searchParams.get("status") === "PENDING" ? "PENDING" : "ACTIVE",
+  );
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("status") === "PENDING") setStatusTab("PENDING");
+  }, [searchParams]);
 
   const open = (mode: ModalMode, u: UserRecord | null = null) => { setSelectedUser(u); setModalMode(mode); };
   const closeModal = useCallback(() => { setModalMode(null); setSelectedUser(null); }, []);
