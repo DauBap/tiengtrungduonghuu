@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useFetcher } from "react-router";
 import { cn } from "~/lib/utils";
-import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, School, ListChecks, FileCheck2, CalendarDays, Volume2 } from "lucide-react";
+import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, School, ListChecks, FileCheck2, CalendarDays, Volume2, ClipboardCheck } from "lucide-react";
 import type { UserRole, SessionUser } from "~/lib/session.server";
 import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -28,6 +28,7 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
   ],
   student: [
     { label: "Bảng điều khiển", href: "/student", icon: LayoutDashboard },
+    { label: "Bài cần chấm", href: "/student/assignments", icon: ClipboardCheck },
     { label: "Lịch học", href: "/student/schedule", icon: CalendarDays },
     { label: "Khóa học của tôi", href: "/student/courses", icon: BookOpen },
   ],
@@ -40,9 +41,23 @@ const ROLE_LABEL: Record<UserRole, string> = {
 export function AppSidebar({ user }: { user: SessionUser }) {
   const location = useLocation();
   const fetcher = useFetcher();
+  const reviewCountFetcher = useFetcher<{ count: number }>();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navItems = ROLE_NAV[user.role];
   const initials = user.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) ?? "U";
+  const pendingReviewCount = reviewCountFetcher.data?.count ?? 0;
+
+  useEffect(() => {
+    if (user.role !== "student") return;
+    const refresh = () => reviewCountFetcher.load("/api/student/review-count");
+    refresh();
+    const intervalId = window.setInterval(refresh, 30_000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [location.pathname, user.role]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -83,7 +98,22 @@ export function AppSidebar({ user }: { user: SessionUser }) {
                 isActive ? "bg-sidebar-foreground text-sidebar shadow-sm" : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground"
               )}>
               <Icon className="h-4 w-4 shrink-0" />
-              {item.label}
+              <span className="min-w-0 flex-1 truncate">{item.label}</span>
+              {user.role === "student"
+                && item.href === "/student/assignments"
+                && pendingReviewCount > 0 && (
+                  <span
+                    aria-label={`${pendingReviewCount} bài đang chờ chấm`}
+                    className={cn(
+                      "inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums",
+                      isActive
+                        ? "bg-sidebar text-sidebar-foreground"
+                        : "bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-100",
+                    )}
+                  >
+                    {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
+                  </span>
+                )}
             </Link>
           );
         })}
