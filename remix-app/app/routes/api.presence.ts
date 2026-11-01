@@ -8,17 +8,15 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   const user = await requireRole(request, ["teacher", "student"]);
-  const result = await prisma.user.updateMany({
-    where: {
-      id: user.id,
-      role: user.role,
-      isActive: true,
-      isActivated: true,
-      deletedAt: null,
-    },
-    data: { lastSeenAt: new Date() },
-  });
-  if (result.count !== 1) throw new Response("Không thể cập nhật trạng thái online", { status: 409 });
+  const updatedCount = await prisma.$executeRaw`
+    UPDATE "User"
+    SET "lastSeenAt" = CURRENT_TIMESTAMP
+    WHERE "id" = ${user.id}
+      AND "isActive" = TRUE
+      AND "isActivated" = TRUE
+      AND "deletedAt" IS NULL
+  `;
+  if (updatedCount !== 1) throw new Response("Không thể cập nhật trạng thái online", { status: 409 });
 
   return Response.json({ ok: true });
 }
