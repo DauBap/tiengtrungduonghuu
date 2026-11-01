@@ -7,6 +7,7 @@ export default [
   route("logout", "routes/logout.tsx"),
   route("api/tts", "routes/api.tts.ts"),
   route("api/notifications", "routes/api.notifications.ts"),
+  route("api/presence", "routes/api.presence.ts"),
   route("api/pronunciation-recordings/:assessmentId", "routes/api.pronunciation-recordings.$assessmentId.ts"),
   route("telegram/status", "routes/telegram.status.ts"),
   route("uploads/*", "routes/uploads.$.ts"),

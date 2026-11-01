@@ -121,6 +121,8 @@ remix-app/
   để tạo/cập nhật bảng trước khi khởi động ứng dụng.
   Tài khoản học viên do giáo viên tạo cần đồng bộ field `User.isActivated`; admin phải xác nhận kích hoạt
   trong tab **Chưa được kích hoạt** trước khi học viên có thể đăng nhập.
+  Trạng thái online của giáo viên/học viên dùng `User.lastSeenAt`, được cập nhật khi người dùng tương tác
+  với ứng dụng và hết hạn sau 2 phút không hoạt động; không lưu lịch sử online.
   Trên Windows, nếu `db push` báo `EPERM` khi ghi `query_engine-windows.dll.node` thì tắt dev server trước,
   hoặc chạy `npx prisma db push --skip-generate` rồi `npx prisma generate` sau.
 - **Loader data**: React Router 7 serialize bằng turbo-stream, nên `Date` đi qua loader nguyên vẹn —

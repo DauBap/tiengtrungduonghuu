@@ -20,6 +20,7 @@ model User {
   isActive  Boolean   @default(true)
   isActivated Boolean @default(true)
   mustChangePassword Boolean @default(false)
+  lastSeenAt DateTime?
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -41,6 +42,8 @@ model User {
   lessonTabFeedback        LessonTabFeedback[]       @relation("TeacherTabFeedback")
   receivedNotifications   UserNotification[]        @relation("NotificationRecipient")
   sentNotifications       UserNotification[]        @relation("NotificationActor")
+
+  @@index([role, lastSeenAt])
 }
 
 enum Role {

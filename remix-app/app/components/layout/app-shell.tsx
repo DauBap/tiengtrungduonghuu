@@ -1,5 +1,6 @@
 import { AppSidebar } from "~/components/layout/app-sidebar";
 import { GradingNotifications } from "~/components/layout/grading-notifications";
+import { PresenceTracker } from "~/components/layout/presence-tracker";
 import type { SessionUser } from "~/lib/session.server";
 
 interface AppShellProps {
@@ -10,6 +11,7 @@ interface AppShellProps {
 export function AppShell({ user, children }: AppShellProps) {
   return (
     <div className="flex min-h-screen bg-background">
+      {user.role !== "admin" && <PresenceTracker />}
       <AppSidebar user={user} />
       <GradingNotifications />
       <div className="flex min-w-0 flex-1 flex-col lg:pl-64">

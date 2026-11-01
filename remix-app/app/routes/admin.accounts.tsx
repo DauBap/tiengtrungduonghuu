@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import type { Role } from "@prisma/client";
-import { useLoaderData, useFetcher, Form, Link, useSearchParams } from "react-router";
+import { useLoaderData, useFetcher, Form, Link, useRevalidator, useSearchParams } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { prisma } from "~/lib/prisma.server";
 import { DEFAULT_ACCOUNT_PASSWORD } from "~/lib/account-credentials";
@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
+import { Switch } from "~/components/ui/switch";
 import { Plus, Pencil, Trash2, X, Users, GraduationCap, ShieldCheck, LockKeyhole, LockKeyholeOpen, Search, Loader2, CheckCircle2, Clock3 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { toast } from "sonner";
@@ -24,7 +25,8 @@ import { toast } from "sonner";
 // đi qua nguyên vẹn, không bị đổi thành string như JSON.stringify.
 // role dùng nguyên enum Role của Prisma; loader đã lọc `in: ["teacher","student"]`
 // nhưng TS không suy ra được điều đó từ kiểu trả về.
-type UserRecord = { id: string; email: string; name: string; phone: string | null; role: Role; isActive: boolean; isActivated: boolean; createdAt: Date };
+type PresenceStatus = "online" | "offline";
+type UserRecord = { id: string; email: string; name: string; phone: string | null; role: Role; isActive: boolean; isActivated: boolean; createdAt: Date; presence: PresenceStatus };
 type ModalMode = "create" | "edit" | "delete" | "toggle" | "activate" | null;
 
 const ROLE_LABEL: Record<string, string> = { teacher: "Giáo viên", student: "Học viên" };
@@ -46,10 +48,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
   const users = await prisma.user.findMany({
     where: { role: { in: ["teacher", "student"] }, deletedAt: null },
-    select: { id: true, email: true, name: true, phone: true, role: true, isActive: true, isActivated: true, createdAt: true },
+    select: { id: true, email: true, name: true, phone: true, role: true, isActive: true, isActivated: true, createdAt: true, lastSeenAt: true },
     orderBy: { createdAt: "desc" },
   });
-  return { user, users };
+  const onlineSince = Date.now() - 2 * 60 * 1000;
+  return {
+    user,
+    users: users.map((account) => ({
+      ...account,
+      presence: account.isActive && account.isActivated && account.lastSeenAt && account.lastSeenAt.getTime() >= onlineSince
+        ? "online" as const
+        : "offline" as const,
+    })),
+  };
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -364,8 +375,10 @@ function Modal({ mode, user, onClose }: { mode: ModalMode; user: UserRecord | nu
 export default function AccountsPage() {
   const { user, users } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
+  const revalidator = useRevalidator();
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
+  const [onlineOnly, setOnlineOnly] = useState(false);
   const [statusTab, setStatusTab] = useState<"ACTIVE" | "LOCKED" | "PENDING">(
     () => searchParams.get("status") === "PENDING" ? "PENDING" : "ACTIVE",
   );
@@ -376,11 +389,19 @@ export default function AccountsPage() {
     if (searchParams.get("status") === "PENDING") setStatusTab("PENDING");
   }, [searchParams]);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (revalidator.state === "idle") revalidator.revalidate();
+    }, 30_000);
+    return () => window.clearInterval(timer);
+  }, [revalidator]);
+
   const open = (mode: ModalMode, u: UserRecord | null = null) => { setSelectedUser(u); setModalMode(mode); };
   const closeModal = useCallback(() => { setModalMode(null); setSelectedUser(null); }, []);
 
   const filtered = users.filter((u) => {
     if (roleFilter !== "ALL" && u.role !== roleFilter) return false;
+    if (onlineOnly && u.presence !== "online") return false;
     if (statusTab === "ACTIVE" && (!u.isActivated || !u.isActive)) return false;
     if (statusTab === "LOCKED" && (!u.isActivated || u.isActive)) return false;
     if (statusTab === "PENDING" && u.isActivated) return false;
@@ -426,6 +447,19 @@ export default function AccountsPage() {
                 <SelectItem value="student">Học viên</SelectItem>
               </SelectContent>
             </Select>
+            <div className={cn(
+              "flex min-h-10 items-center justify-between gap-3 rounded-md border px-3 py-2 transition-colors sm:w-auto",
+              onlineOnly && "border-success/30 bg-success/10",
+            )}>
+              <Label htmlFor="accounts-online-only" className={cn("cursor-pointer text-sm font-medium", onlineOnly && "text-success")}>Đang online</Label>
+              <Switch
+                id="accounts-online-only"
+                checked={onlineOnly}
+                onCheckedChange={setOnlineOnly}
+                aria-label="Chỉ hiện tài khoản đang online"
+                className="data-[state=checked]:bg-success"
+              />
+            </div>
           </div>
 
           <Card>
@@ -461,12 +495,14 @@ export default function AccountsPage() {
               id="accounts-status-panel"
               role="tabpanel"
               aria-labelledby={`accounts-tab-${statusTab.toLowerCase()}`}
-              className="p-0"
+              className="min-h-[65vh] p-0 [&>div]:max-h-[65vh]"
             >
               {filtered.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="flex min-h-[65vh] flex-col items-center justify-center py-16 text-center">
                   <Users className="h-10 w-10 text-muted-foreground mb-3" />
-                  <p className="text-sm font-medium">Không tìm thấy tài khoản</p>
+                  <p className="text-sm font-medium">
+                    {onlineOnly ? "Không có tài khoản đang online" : "Không tìm thấy tài khoản"}
+                  </p>
                 </div>
               ) : (
                 <Table>
@@ -483,7 +519,19 @@ export default function AccountsPage() {
                   <TableBody>
                     {filtered.map((u) => (
                       <TableRow key={u.id} className={cn((!u.isActive || !u.isActivated) && "opacity-60 bg-muted/20")}>
-                        <TableCell className="font-medium">{u.name}</TableCell>
+                        <TableCell className="font-medium">
+                          <span className="inline-flex items-center gap-2">
+                            <span
+                              aria-label={u.presence === "online" ? "Đang online" : u.presence === "offline" ? "Offline" : "Chưa có dữ liệu online"}
+                              title={u.presence === "online" ? "Đang online" : u.presence === "offline" ? "Offline" : "Chưa có dữ liệu online"}
+                              className={cn(
+                                "h-2.5 w-2.5 shrink-0 rounded-full",
+                                u.presence === "online" ? "bg-success" : u.presence === "offline" ? "bg-muted-foreground/40" : "border border-muted-foreground/40",
+                              )}
+                            />
+                            {u.name}
+                          </span>
+                        </TableCell>
                         <TableCell className="text-sm text-muted-foreground font-mono">{u.email}</TableCell>
                         <TableCell><Badge variant="outline" className={ROLE_BADGE[u.role]}>{ROLE_LABEL[u.role]}</Badge></TableCell>
                         <TableCell>
