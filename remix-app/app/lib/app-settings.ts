@@ -1,7 +1,15 @@
 import { useSyncExternalStore } from "react";
 
-export type SpeechEngine = "melo" | "local";
-export type SpeechStatus = "idle" | "melo" | "kokoro" | "local" | "melo-fallback" | "kokoro-fallback";
+export type SpeechEngine = "edge" | "local";
+export type SpeechStatus =
+  | "idle"
+  | "edge"
+  | "melo"
+  | "kokoro"
+  | "local"
+  | "edge-error"
+  | "melo-fallback"
+  | "kokoro-fallback";
 export type ThemePreference = "light" | "dark" | "system";
 
 export interface AppSettings {
@@ -14,7 +22,7 @@ const STORAGE_KEY = "chinese-study-settings";
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   showPinyin: true,
-  speechEngine: "melo",
+  speechEngine: "edge",
   themePreference: "system",
 };
 
@@ -32,7 +40,7 @@ function parseSettings(raw: string | null): AppSettings {
     const saved = value as Partial<AppSettings>;
     return {
       showPinyin: typeof saved.showPinyin === "boolean" ? saved.showPinyin : true,
-      speechEngine: saved.speechEngine === "local" ? "local" : "melo",
+      speechEngine: saved.speechEngine === "local" ? "local" : "edge",
       themePreference: saved.themePreference === "light" || saved.themePreference === "dark"
         ? saved.themePreference
         : "system",

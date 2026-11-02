@@ -16,10 +16,19 @@ import {
 
 test("speech audio cache keys are stable per text", () => {
   assert.equal(getSpeechAudioCacheKey("你好"), getSpeechAudioCacheKey("你好"));
+  assert.equal(getSpeechAudioCacheKey("你好"), getSpeechAudioCacheKey("你好", "edge"));
   assert.notEqual(getSpeechAudioCacheKey("你好"), getSpeechAudioCacheKey("你好。"));
   assert.notEqual(
+    getSpeechAudioCacheKey("你好", "edge"),
     getSpeechAudioCacheKey("你好", "melo"),
+  );
+  assert.notEqual(
+    getSpeechAudioCacheKey("你好", "edge"),
     getSpeechAudioCacheKey("你好", "kokoro"),
+  );
+  assert.notEqual(
+    getSpeechAudioCacheKey("你好", "edge", { speaker: "zh-CN-XiaoxiaoNeural", speed: 0.85 }),
+    getSpeechAudioCacheKey("你好", "edge", { speaker: "zh-CN-YunxiNeural", speed: 0.85 }),
   );
   assert.notEqual(
     getSpeechAudioCacheKey("你好", "kokoro", { speaker: "zf_xiaobei", speed: 0.85 }),

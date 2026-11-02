@@ -6,10 +6,11 @@ import {
   replaceCachedSpeechAudio,
   writeCachedSpeechAudio,
 } from "~/lib/storage.server";
+import { getSpeechProviderSettings } from "~/lib/speech-settings.server";
 import {
-  getSpeechProviderSettings,
-} from "~/lib/speech-settings.server";
-import type { SpeechProviderSettings } from "~/lib/speech-settings";
+  SPEECH_PROVIDER_DEFAULTS,
+  type SpeechProviderSettings,
+} from "~/lib/speech-settings";
 
 const ENGINE = "melotts";
 const MODEL_VERSION = "myshell-ai/MeloTTS@209145371cff8fc3bd60d7be902ea69cbdb7965a";
@@ -17,8 +18,11 @@ const MELO_TTS_URL = process.env.MELO_TTS_URL ?? "http://127.0.0.1:8766/synthesi
 const KOKORO_ENGINE = "kokoro";
 const KOKORO_MODEL_VERSION = "hexgrad/Kokoro-82M@v1.0";
 const KOKORO_TTS_URL = process.env.KOKORO_TTS_URL ?? "http://127.0.0.1:8767/synthesize";
+const EDGE_ENGINE = "edge-tts";
+const EDGE_MODEL_VERSION = "edge-tts-service-v1";
+const EDGE_TTS_URL = process.env.EDGE_TTS_URL ?? "http://127.0.0.1:8768/synthesize";
 
-export type SpeechAudioProvider = "melo" | "kokoro";
+export type SpeechAudioProvider = "edge" | "melo" | "kokoro";
 
 type CacheOperation =
   | { kind: "synthesis"; promise: Promise<Buffer> }
@@ -27,16 +31,26 @@ type CacheOperation =
 const activeOperations = new Map<string, CacheOperation>();
 
 function getProviderSettings(provider: SpeechAudioProvider, settings: SpeechProviderSettings) {
-  return provider === "kokoro"
-    ? {
-      engine: KOKORO_ENGINE,
-      modelVersion: KOKORO_MODEL_VERSION,
-      ...settings,
-    }
-    : { engine: ENGINE, modelVersion: MODEL_VERSION, ...settings };
+  switch (provider) {
+    case "edge":
+      return {
+        engine: EDGE_ENGINE,
+        modelVersion: EDGE_MODEL_VERSION,
+        ...settings,
+      };
+    case "kokoro":
+      return {
+        engine: KOKORO_ENGINE,
+        modelVersion: KOKORO_MODEL_VERSION,
+        ...settings,
+      };
+    case "melo":
+      return { engine: ENGINE, modelVersion: MODEL_VERSION, ...settings };
+  }
 }
 
 function getProviderFromEngine(engine: string): SpeechAudioProvider {
+  if (engine === EDGE_ENGINE) return "edge";
   if (engine === KOKORO_ENGINE) return "kokoro";
   if (engine === ENGINE) return "melo";
   throw new Error(`Unsupported speech audio engine: ${engine}`);
@@ -44,17 +58,12 @@ function getProviderFromEngine(engine: string): SpeechAudioProvider {
 
 export function getSpeechAudioCacheKey(
   text: string,
-  provider: SpeechAudioProvider = "melo",
-  settings: SpeechProviderSettings = provider === "kokoro"
-    ? { speaker: "zf_xiaobei", speed: 0.85 }
-    : { speaker: "ZH", speed: 0.85 },
+  provider: SpeechAudioProvider = "edge",
+  settings: SpeechProviderSettings = SPEECH_PROVIDER_DEFAULTS[provider],
 ) {
   return createHash("sha256")
     .update(JSON.stringify({
-      ...(provider === "kokoro"
-        ? { engine: KOKORO_ENGINE, modelVersion: KOKORO_MODEL_VERSION }
-        : { engine: ENGINE, modelVersion: MODEL_VERSION }),
-      ...settings,
+      ...getProviderSettings(provider, settings),
       text,
     }))
     .digest("hex");
@@ -98,12 +107,16 @@ async function synthesizeSpeechAudio(
   provider: SpeechAudioProvider,
   settings: SpeechProviderSettings,
 ) {
-  const endpoint = provider === "kokoro" ? KOKORO_TTS_URL : MELO_TTS_URL;
+  const endpoint = provider === "edge"
+    ? EDGE_TTS_URL
+    : provider === "kokoro"
+      ? KOKORO_TTS_URL
+      : MELO_TTS_URL;
   const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text, voice: settings.speaker, speed: settings.speed }),
-    signal: AbortSignal.timeout(60_000),
+    signal: AbortSignal.timeout(provider === "edge" ? 90_000 : 60_000),
   });
   if (!response.ok) {
     throw new Error(`${provider} returned HTTP ${response.status}`);
@@ -161,7 +174,7 @@ async function generateAndStoreSpeechAudio(
   return audio;
 }
 
-export async function hasCachedSpeechAudio(text: string, provider: SpeechAudioProvider = "melo") {
+export async function hasCachedSpeechAudio(text: string, provider: SpeechAudioProvider = "edge") {
   const settings = await getSpeechProviderSettings(provider);
   const cacheKey = getSpeechAudioCacheKey(text, provider, settings);
   const cachedRecord = await prisma.speechAudioCache.findUnique({ where: { cacheKey } });
@@ -208,7 +221,7 @@ async function getOrCreateSpeechAudioUncached(
 
 export async function getOrCreateSpeechAudio(
   text: string,
-  provider: SpeechAudioProvider = "melo",
+  provider: SpeechAudioProvider = "edge",
 ): Promise<Buffer> {
   const settings = await getSpeechProviderSettings(provider);
   const cacheKey = getSpeechAudioCacheKey(text, provider, settings);

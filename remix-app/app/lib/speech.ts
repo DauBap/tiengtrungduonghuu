@@ -6,7 +6,7 @@
 import { getAppSettings, setSpeechStatus } from "~/lib/app-settings";
 import { toast } from "sonner";
 
-export type ServerSpeechProvider = "melo" | "kokoro";
+export type ServerSpeechProvider = "edge" | "melo" | "kokoro";
 
 export function isSpeechSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
@@ -86,7 +86,7 @@ export function speakChinese(
           text,
           requestId,
           rate,
-          options.serverProvider ?? "melo",
+          options.serverProvider ?? "edge",
           options.allowBrowserFallback ?? false,
         );
       } else {
@@ -103,7 +103,7 @@ export function speakChinese(
       text,
       requestId,
       rate,
-      options.serverProvider ?? "melo",
+      options.serverProvider ?? "edge",
       options.allowBrowserFallback ?? false,
     );
     return true;
@@ -116,9 +116,9 @@ function speakSelectedTts(
   text: string,
   rate: number,
   requestId: number,
-  serverProvider: ServerSpeechProvider = "melo",
+  serverProvider: ServerSpeechProvider = "edge",
 ): boolean {
-  if (getAppSettings().speechEngine === "melo") {
+  if (getAppSettings().speechEngine === "edge") {
     void speakWithServerTts(text, requestId, rate, serverProvider);
     return true;
   }
@@ -131,20 +131,39 @@ async function speakWithServerTts(
   requestId: number,
   rate: number,
   provider: ServerSpeechProvider,
-  allowBrowserFallback = true,
+  allowBrowserFallback = provider !== "edge",
 ) {
   const controller = new AbortController();
   const loadingToastId = `speech-generation-${requestId}`;
   let fallbackStarted = false;
   let loadingToastShown = false;
   activeController = controller;
+  const handleFailure = () => {
+    if (requestId !== speechRequestId || fallbackStarted) return;
+    fallbackStarted = true;
+    if (activeAudio) {
+      activeAudio.onplay = null;
+      activeAudio.onended = null;
+      activeAudio.onerror = null;
+    }
+    releaseActiveAudio();
+    if (provider === "edge") {
+      setSpeechStatus("edge-error");
+      toast.error("Edge TTS hiện không khả dụng. Vui lòng kiểm tra kết nối rồi thử lại.");
+      updatePlaybackState("idle", requestId);
+    } else {
+      setSpeechStatus(provider === "kokoro" ? "kokoro-fallback" : "melo-fallback");
+      if (allowBrowserFallback) speakWithTts(text, rate, requestId);
+      else updatePlaybackState("idle", requestId);
+    }
+  };
   try {
     const cacheResponse = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         text,
-        ...(provider === "melo" ? {} : { provider }),
+        ...(provider === "edge" ? {} : { provider }),
         intent: "cache-status",
       }),
       signal: controller.signal,
@@ -166,7 +185,7 @@ async function speakWithServerTts(
     if (!isCached) {
       loadingToastShown = true;
       activeLoadingToastId = loadingToastId;
-      toast.loading("Đang tạo giọng đọc AI", {
+      toast.loading(provider === "edge" ? "Đang tạo giọng đọc Edge TTS" : "Đang tạo giọng đọc AI", {
         id: loadingToastId,
         className: "speech-generation-toast",
         description: "Lần đầu có thể cần chờ thêm một chút; những lần sau sẽ phát nhanh hơn.",
@@ -180,7 +199,7 @@ async function speakWithServerTts(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         text,
-        ...(provider === "melo" ? {} : { provider }),
+        ...(provider === "edge" ? {} : { provider }),
       }),
       signal: controller.signal,
     });
@@ -204,29 +223,10 @@ async function speakWithServerTts(
       releaseActiveAudio();
       updatePlaybackState("idle", requestId);
     };
-    const fallback = () => {
-      if (requestId !== speechRequestId) return;
-      if (fallbackStarted) return;
-      fallbackStarted = true;
-      audio.onplay = null;
-      audio.onended = null;
-      audio.onerror = null;
-      releaseActiveAudio();
-      setSpeechStatus(`${provider}-fallback`);
-      if (allowBrowserFallback) speakWithTts(text, rate, requestId);
-      else updatePlaybackState("idle", requestId);
-    };
-    audio.onerror = fallback;
+    audio.onerror = handleFailure;
     await audio.play();
   } catch {
-    if (requestId === speechRequestId) {
-      if (fallbackStarted) return;
-      fallbackStarted = true;
-      releaseActiveAudio();
-      setSpeechStatus(`${provider}-fallback`);
-      if (allowBrowserFallback) speakWithTts(text, rate, requestId);
-      else updatePlaybackState("idle", requestId);
-    }
+    if (requestId === speechRequestId) handleFailure();
   } finally {
     if (loadingToastShown) {
       toast.dismiss(loadingToastId);

@@ -29,7 +29,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const query = (url.searchParams.get("q") ?? "").trim().slice(0, 100);
   const where = query ? { text: { contains: query, mode: "insensitive" as const } } : {};
 
-  const [total, cacheEntries, meloSettings, kokoroSettings] = await Promise.all([
+  const [total, cacheEntries, edgeSettings, meloSettings, kokoroSettings] = await Promise.all([
     prisma.speechAudioCache.count({ where }),
     prisma.speechAudioCache.findMany({
       where,
@@ -45,6 +45,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         updatedAt: true,
       },
     }),
+    getSpeechProviderSettings("edge"),
     getSpeechProviderSettings("melo"),
     getSpeechProviderSettings("kokoro"),
   ]);
@@ -53,7 +54,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
     fileInfo: await getCachedSpeechAudioFileInfo(entry.cacheKey),
   })));
 
-  return { user, query, total, entries, settings: { melo: meloSettings, kokoro: kokoroSettings } };
+  return {
+    user,
+    query,
+    total,
+    entries,
+    settings: { edge: edgeSettings, melo: meloSettings, kokoro: kokoroSettings },
+  };
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -109,7 +116,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return { success: true, intent };
     } catch (error) {
       console.error("Could not regenerate cached speech audio:", error);
-      return { error: "AI chưa thể tạo lại audio. Hãy kiểm tra dịch vụ TTS rồi thử lại." };
+      return { error: "Không thể tạo lại audio. Hãy kiểm tra dịch vụ TTS hoặc kết nối Internet rồi thử lại." };
     }
   }
 
@@ -133,9 +140,9 @@ function SpeechSettingsPanel({
   settings: Record<ConfigurableSpeechProvider, SpeechProviderSettings>;
 }) {
   const fetcher = useFetcher<typeof action>();
-  const [provider, setProvider] = useState<ConfigurableSpeechProvider>("kokoro");
-  const [speaker, setSpeaker] = useState(settings.kokoro.speaker);
-  const [speed, setSpeed] = useState(settings.kokoro.speed);
+  const [provider, setProvider] = useState<ConfigurableSpeechProvider>("edge");
+  const [speaker, setSpeaker] = useState(settings.edge.speaker);
+  const [speed, setSpeed] = useState(settings.edge.speed);
   const [sample, setSample] = useState("你好，我是你的中文老师。我们一起学习新词语吧。");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewing, setPreviewing] = useState(false);
@@ -196,8 +203,8 @@ function SpeechSettingsPanel({
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2" role="group" aria-label="Chọn model TTS">
-        {(["kokoro", "melo"] as const).map((model) => (
+      <div className="grid gap-3 sm:grid-cols-3" role="group" aria-label="Chọn model TTS">
+        {(["edge", "kokoro", "melo"] as const).map((model) => (
           <button
             key={model}
             type="button"
@@ -205,9 +212,15 @@ function SpeechSettingsPanel({
             onClick={() => setProvider(model)}
             className={`rounded-lg border p-4 text-left transition-colors ${provider === model ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}
           >
-            <span className="block font-medium">{model === "kokoro" ? "Kokoro · Từ vựng" : "MeloTTS · Nghe câu"}</span>
+            <span className="block font-medium">
+              {model === "edge" ? "Edge TTS · Mặc định" : model === "kokoro" ? "Kokoro · Từ vựng" : "MeloTTS"}
+            </span>
             <span className="mt-1 block text-sm text-muted-foreground">
-              {model === "kokoro" ? "Model hexgrad/Kokoro-82M" : "Model tiếng Trung, speaker ZH"}
+              {model === "edge"
+                ? "Giọng neural tiếng Trung online; audio lưu cache sau lần tạo đầu."
+                : model === "kokoro"
+                  ? "Model hexgrad/Kokoro-82M"
+                  : "Model tiếng Trung cục bộ, speaker ZH"}
             </span>
           </button>
         ))}
@@ -226,7 +239,7 @@ function SpeechSettingsPanel({
               id="speech-voice"
               value={speaker}
               onChange={(event) => setSpeaker(event.target.value)}
-              disabled={provider === "melo"}
+              disabled={SPEECH_PROVIDER_VOICES[provider].length < 2}
               className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm disabled:cursor-not-allowed disabled:opacity-70"
             >
               {SPEECH_PROVIDER_VOICES[provider].map((voice) => (
@@ -340,7 +353,7 @@ function SpeechAudioEntry({ entry }: { entry: Awaited<ReturnType<typeof loader>>
               {isBusy && fetcher.formData?.get("intent") === "regenerate"
                 ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 : <RefreshCw className="mr-2 h-4 w-4" />}
-              Tạo lại bằng AI
+              Tạo lại audio
             </Button>
           </fetcher.Form>
           <fetcher.Form
@@ -394,13 +407,13 @@ export default function AdminSpeechAudio() {
     <AppShell user={user}>
       <div className="mx-auto max-w-5xl space-y-6">
         <header className="space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight">Quản lý audio AI</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Quản lý audio TTS</h1>
           <p className="max-w-3xl text-sm text-muted-foreground">
-            Tùy chỉnh giọng cho từng model hoặc quản lý các audio đã được tạo.
+            Tùy chỉnh giọng đọc hoặc quản lý các audio đã được tạo và lưu trong cache.
           </p>
         </header>
 
-        <div className="flex gap-2 border-b" role="group" aria-label="Quản lý audio AI">
+        <div className="flex gap-2 border-b" role="group" aria-label="Quản lý audio TTS">
           <button
             type="button"
             aria-pressed={activePanel === "settings"}
@@ -461,7 +474,7 @@ export default function AdminSpeechAudio() {
               <p className="mt-1 max-w-md text-sm text-muted-foreground">
                 {query
                   ? "Thử tìm bằng chữ Hán khác hoặc một phần nội dung câu."
-                  : "Audio AI sẽ xuất hiện tại đây sau khi được tạo lần đầu."}
+                  : "Audio TTS sẽ xuất hiện tại đây sau khi được tạo lần đầu."}
               </p>
             </div>
           )}

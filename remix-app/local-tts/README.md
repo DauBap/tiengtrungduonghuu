@@ -1,15 +1,72 @@
-# Local MeloTTS service
+# Speech synthesis services
 
-The production app calls this CPU-only Chinese MeloTTS service through
-`http://127.0.0.1:8766`. The service binds only to loopback and loads one model
-at startup. It does not expose a public endpoint or log submitted text.
+The default `/api/tts` provider is Microsoft Edge online TTS, served through a
+local adapter at `http://127.0.0.1:8768`. Edge TTS returns MP3; the adapter
+converts it to WAV with `ffmpeg`, then the app stores the WAV and its provider,
+voice, speed, and cache key. Repeated requests use the cached file without
+calling the online service again. The adapter binds only to loopback and does
+not log submitted text. A first-generation error is reported to the learner;
+the app does not silently substitute a browser voice.
+
+The production app can also call this CPU-only Chinese MeloTTS service through
+`http://127.0.0.1:8766`. MeloTTS remains available as a legacy provider and
+continues to use its existing WAV cache entries.
 
 The app's `/api/tts` route requires an authenticated user. On first use, it
 generates a WAV and caches it under `UPLOADS_DIR/audio/tts/`; PostgreSQL stores
-the text, engine/model/voice settings, and file path. Later requests reuse that
-file instead of running inference again. Requests for the same uncached text
-within one app process share a single generation. If MeloTTS is unavailable,
-the browser uses its built-in Chinese speech voice.
+the text, engine/model/voice settings, and file path. Requests for the same
+uncached text within one app process share a single generation. Existing Melo
+and Kokoro service deployments are not replaced by the Edge adapter.
+
+## Edge TTS service on Ubuntu
+
+Edge TTS uses the third-party `edge-tts` Python client to reach Microsoft's
+online speech service. It is not a self-hosted model: initial generation needs
+outbound Internet access and depends on that service being available. Cached
+audio remains playable if the online service later becomes unavailable.
+
+Install `ffmpeg` and create an isolated Python 3.11 environment:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y ffmpeg
+
+cd ~/apps/tiengtrungduonghuu/remix-app/local-tts
+uv python install 3.11
+uv venv --python 3.11 edge-venv
+uv pip install --python edge-venv/bin/python -r requirements-edge.txt
+```
+
+Install and start the user service:
+
+```bash
+mkdir -p ~/.config/systemd/user
+cp ~/apps/tiengtrungduonghuu/remix-app/local-tts/tiengtrung-edge-tts.service \
+  ~/.config/systemd/user/tiengtrung-edge-tts.service
+systemctl --user daemon-reload
+systemctl --user enable --now tiengtrung-edge-tts.service
+```
+
+Confirm the service is running and bound locally:
+
+```bash
+systemctl --user status tiengtrung-edge-tts.service --no-pager -l
+journalctl --user -u tiengtrung-edge-tts.service -n 50 --no-pager
+curl --fail --silent --show-error http://127.0.0.1:8768/healthz
+```
+
+Do not expose port `8768` through the firewall or reverse proxy. The default
+application endpoint is `http://127.0.0.1:8768/synthesize`; set `EDGE_TTS_URL`
+only if the adapter runs at a different private address. Admins can choose the
+Edge voice and speed under **Admin → Audio AI → Cấu hình giọng**. A setting
+change affects future cache entries only and does not replace existing audio.
+
+Run the adapter unit tests without making an online TTS request:
+
+```bash
+cd ~/apps/tiengtrungduonghuu/remix-app/local-tts
+edge-venv/bin/python -m unittest test_edge_tts_server.py
+```
 
 ## Install on Ubuntu
 
@@ -87,9 +144,11 @@ journalctl --user -u tiengtrung-melotts.service -n 50 --no-pager
 curl --fail --silent --show-error http://127.0.0.1:8766/healthz
 ```
 
-After deploying the app changes, test through the authenticated app and confirm
-that a temporary MeloTTS outage falls back to the browser voice. Do not expose
-port `8766` through the firewall or reverse proxy.
+After deploying the app changes, test through the authenticated app. A
+temporary Edge TTS outage must show an error without switching to the browser
+voice; existing cached files should still play. MeloTTS legacy requests may
+continue to fall back to the browser voice. Do not expose port `8766` through
+the firewall or reverse proxy.
 
 MeloTTS output is peak-normalized to approximately `-1 dBFS` before it is sent
 to the app and cached, which raises quiet generations without clipping. This

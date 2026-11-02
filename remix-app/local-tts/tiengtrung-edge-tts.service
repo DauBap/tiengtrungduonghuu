@@ -1,0 +1,17 @@
+[Unit]
+Description=Microsoft Edge online Chinese speech API
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/apps/tiengtrungduonghuu/remix-app/local-tts
+Environment=PYTHONUNBUFFERED=1
+Environment=EDGE_TTS_PORT=8768
+ExecStart=%h/apps/tiengtrungduonghuu/remix-app/local-tts/edge-venv/bin/python edge_tts_server.py
+Restart=on-failure
+RestartSec=10s
+TimeoutStopSec=15s
+UMask=0077
+
+[Install]
+WantedBy=default.target

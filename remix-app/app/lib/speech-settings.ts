@@ -1,4 +1,4 @@
-export type ConfigurableSpeechProvider = "melo" | "kokoro";
+export type ConfigurableSpeechProvider = "edge" | "melo" | "kokoro";
 
 export interface SpeechProviderSettings {
   speaker: string;
@@ -6,11 +6,20 @@ export interface SpeechProviderSettings {
 }
 
 export const SPEECH_PROVIDER_DEFAULTS: Record<ConfigurableSpeechProvider, SpeechProviderSettings> = {
+  edge: { speaker: "zh-CN-XiaoxiaoNeural", speed: 0.85 },
   melo: { speaker: "ZH", speed: 0.85 },
   kokoro: { speaker: "zf_xiaobei", speed: 0.85 },
 };
 
 export const SPEECH_PROVIDER_VOICES: Record<ConfigurableSpeechProvider, readonly string[]> = {
+  edge: [
+    "zh-CN-XiaoxiaoNeural",
+    "zh-CN-XiaoyiNeural",
+    "zh-CN-XiaoxuanNeural",
+    "zh-CN-YunjianNeural",
+    "zh-CN-YunxiNeural",
+    "zh-CN-YunyangNeural",
+  ],
   melo: ["ZH"],
   kokoro: [
     "zf_xiaobei",
@@ -25,7 +34,7 @@ export const SPEECH_PROVIDER_VOICES: Record<ConfigurableSpeechProvider, readonly
 };
 
 export function isConfigurableSpeechProvider(value: string): value is ConfigurableSpeechProvider {
-  return value === "melo" || value === "kokoro";
+  return value === "edge" || value === "melo" || value === "kokoro";
 }
 
 export function parseSpeechProviderSettings(

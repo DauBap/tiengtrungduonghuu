@@ -62,7 +62,7 @@ test("MeloTTS failure falls back to the browser Chinese voice", async () => {
 
   try {
     const { speakChinese, stopSpeaking } = await import("~/lib/speech");
-    assert.equal(speakChinese("你好", null, { rate: 1.5 }), true);
+    assert.equal(speakChinese("你好", null, { rate: 1.5, serverProvider: "melo" }), true);
     await new Promise((resolve) => setTimeout(resolve, 0));
     assert.equal(spoken.length, 1);
     assert.equal(spoken[0].text, "你好");
@@ -134,7 +134,7 @@ test("MeloTTS uses recorded vocabulary audio when available and generates it whe
   try {
     const { speakChinese, stopSpeaking } = await import("~/lib/speech");
     const { updateAppSetting } = await import("~/lib/app-settings");
-    updateAppSetting("speechEngine", "melo");
+    updateAppSetting("speechEngine", "edge");
 
     speakChinese("你好", "/audio/vocabulary.mp3", { preferAudio: true, rate: 1.5 });
     assert.equal(requests.length, 0);
@@ -193,7 +193,12 @@ test("MeloTTS uses recorded vocabulary audio when available and generates it whe
     assert.equal(requests.length, requestCountBeforeForcedMelo + 2);
     assert.deepEqual(JSON.parse(String(requests[requestCountBeforeForcedMelo].body)), {
       text: "你好",
+      provider: "melo",
       intent: "cache-status",
+    });
+    assert.deepEqual(JSON.parse(String(requests[requestCountBeforeForcedMelo + 1].body)), {
+      text: "你好",
+      provider: "melo",
     });
     assert.equal(browserSpeechCount, 0);
 
@@ -260,15 +265,77 @@ test("MeloTTS failures fall back locally on each request", async () => {
   try {
     const { speakChinese, stopSpeaking } = await import("~/lib/speech");
     const { updateAppSetting } = await import("~/lib/app-settings");
-    updateAppSetting("speechEngine", "melo");
+    updateAppSetting("speechEngine", "edge");
 
-    speakChinese("你好");
+    speakChinese("你好", null, { serverProvider: "melo" });
     await new Promise((resolve) => setTimeout(resolve, 0));
-    speakChinese("再见");
+    speakChinese("再见", null, { serverProvider: "melo" });
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     assert.equal(requestCount, 4);
     assert.equal(localSpeechCount, 2);
+    stopSpeaking();
+  } finally {
+    restoreAnimationFrame();
+    if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
+    else Reflect.deleteProperty(globalThis, "window");
+    if (originalUtterance) Object.defineProperty(globalThis, "SpeechSynthesisUtterance", originalUtterance);
+    else Reflect.deleteProperty(globalThis, "SpeechSynthesisUtterance");
+    if (originalFetch) Object.defineProperty(globalThis, "fetch", originalFetch);
+    else Reflect.deleteProperty(globalThis, "fetch");
+  }
+});
+
+test("Edge TTS failures do not fall back to the browser voice", async () => {
+  const restoreAnimationFrame = mockAnimationFrame();
+  const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+  const originalUtterance = Object.getOwnPropertyDescriptor(globalThis, "SpeechSynthesisUtterance");
+  const originalFetch = Object.getOwnPropertyDescriptor(globalThis, "fetch");
+  let requestCount = 0;
+  let browserSpeechCount = 0;
+
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: {
+      speechSynthesis: {
+        cancel() {},
+        getVoices: () => [{ lang: "zh-CN" }],
+        speak() { browserSpeechCount += 1; },
+      },
+      localStorage: { getItem: () => null, setItem() {} },
+      addEventListener() {},
+      matchMedia: () => ({ addEventListener() {} }),
+    },
+  });
+  Object.defineProperty(globalThis, "SpeechSynthesisUtterance", {
+    configurable: true,
+    value: class {
+      lang = "";
+      rate = 1;
+      voice: unknown;
+      constructor(public text: string) {}
+    },
+  });
+  Object.defineProperty(globalThis, "fetch", {
+    configurable: true,
+    value: async () => {
+      requestCount += 1;
+      if (requestCount === 1) return Response.json({ cached: false });
+      return Response.json({ error: "Edge TTS is temporarily unavailable" }, { status: 502 });
+    },
+  });
+
+  try {
+    const { speakChinese, stopSpeaking } = await import("~/lib/speech");
+    const { getSpeechStatus, updateAppSetting } = await import("~/lib/app-settings");
+    updateAppSetting("speechEngine", "edge");
+
+    speakChinese("你好");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    assert.equal(requestCount, 2);
+    assert.equal(browserSpeechCount, 0);
+    assert.equal(getSpeechStatus(), "edge-error");
     stopSpeaking();
   } finally {
     restoreAnimationFrame();

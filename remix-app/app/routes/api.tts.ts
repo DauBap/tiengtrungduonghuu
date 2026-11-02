@@ -25,8 +25,8 @@ export async function action({ request }: ActionFunctionArgs) {
     ? body.text.trim()
     : "";
   const intent = body && typeof body === "object" && "intent" in body ? body.intent : null;
-  const requestedProvider = body && typeof body === "object" && "provider" in body ? body.provider : "melo";
-  if (requestedProvider !== "melo" && requestedProvider !== "kokoro") {
+  const requestedProvider = body && typeof body === "object" && "provider" in body ? body.provider : "edge";
+  if (requestedProvider !== "edge" && requestedProvider !== "melo" && requestedProvider !== "kokoro") {
     return Response.json({ error: "Unsupported speech provider" }, { status: 400 });
   }
   const provider: SpeechAudioProvider = requestedProvider;

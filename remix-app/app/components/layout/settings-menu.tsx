@@ -77,7 +77,7 @@ export function SettingsMenu({
           <fieldset className="mt-2 border-t pt-2">
             <legend className="px-2 text-xs font-semibold text-muted-foreground">Giọng đọc</legend>
             {([
-              ["melo", "MeloTTS", "Giọng tiếng Trung AI trên máy chủ"],
+              ["edge", "Edge TTS", "Giọng neural tiếng Trung; audio tạo mới được lưu cache"],
               ["local", "Local TTS", "Giọng có sẵn trên thiết bị"],
             ] as const).map(([value, label, description]) => (
               <label
@@ -99,8 +99,12 @@ export function SettingsMenu({
               </label>
             ))}
           </fieldset>
-          {settings.speechEngine === "melo"
-            && (speechStatus === "melo-fallback" || speechStatus === "kokoro-fallback") && (
+          {settings.speechEngine === "edge" && speechStatus === "edge-error" && (
+            <p role="status" className="mt-2 rounded-md border border-warning/30 bg-warning/10 px-2.5 py-2 text-xs leading-5 text-foreground">
+              Edge TTS tạm thời không khả dụng. Hệ thống không tự chuyển sang giọng trình duyệt; vui lòng thử lại sau.
+            </p>
+          )}
+          {(speechStatus === "melo-fallback" || speechStatus === "kokoro-fallback") && (
             <p role="status" className="mt-2 rounded-md border border-warning/30 bg-warning/10 px-2.5 py-2 text-xs leading-5 text-foreground">
               {speechStatus === "kokoro-fallback" ? "Kokoro" : "MeloTTS"} tạm thời không khả dụng.
               {" "}Đang dùng giọng đọc của trình duyệt.

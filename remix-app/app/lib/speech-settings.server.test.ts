@@ -23,7 +23,19 @@ test("speech provider settings default safely and persist validated values", asy
     speaker: "zf_xiaobei",
     speed: 0.85,
   });
+  assert.deepEqual(await getSpeechProviderSettings("edge"), {
+    speaker: "zh-CN-XiaoxiaoNeural",
+    speed: 0.85,
+  });
 
+  await saveSpeechProviderSettings("edge", {
+    speaker: "zh-CN-YunxiNeural",
+    speed: "1.1",
+  });
+  assert.deepEqual(await getSpeechProviderSettings("edge"), {
+    speaker: "zh-CN-YunxiNeural",
+    speed: 1.1,
+  });
   await saveSpeechProviderSettings("kokoro", { speaker: "zm_yunxi", speed: "1.1" });
   assert.deepEqual(await getSpeechProviderSettings("kokoro"), {
     speaker: "zm_yunxi",
@@ -48,6 +60,11 @@ test("speech provider settings default safely and persist validated values", asy
 });
 
 test("speech provider settings reject unsupported voices and out-of-range speeds", () => {
+  assert.equal(parseSpeechProviderSettings("edge", "en-US-AriaNeural", 0.85), null);
+  assert.deepEqual(parseSpeechProviderSettings("edge", "zh-CN-XiaoxiaoNeural", "1.25"), {
+    speaker: "zh-CN-XiaoxiaoNeural",
+    speed: 1.25,
+  });
   assert.equal(parseSpeechProviderSettings("melo", "EN", 0.85), null);
   assert.equal(parseSpeechProviderSettings("kokoro", "zf_xiaobei", 2), null);
   assert.deepEqual(parseSpeechProviderSettings("melo", "ZH", "1.25"), {
