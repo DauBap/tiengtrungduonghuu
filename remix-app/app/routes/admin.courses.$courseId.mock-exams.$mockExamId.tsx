@@ -262,20 +262,32 @@ function QuestionEditor({
         </div>
       </div>
       <fieldset className="space-y-3">
-        <legend className="text-sm font-medium">Lựa chọn · đánh dấu đáp án đúng</legend>
-        {[0, 1, 2, 3].map((index) => (
-          <div key={index} className="grid items-center gap-2 sm:grid-cols-[auto_1fr_1fr]">
-            <input
-              aria-label={`Lựa chọn ${index + 1} là đáp án đúng`}
-              name="optionCorrect"
-              type="checkbox"
-              value={index}
-              defaultChecked={options[index]?.isCorrect ?? false}
-            />
-            <Input name="optionContent" placeholder={`Nội dung lựa chọn ${index + 1}`} defaultValue={options[index]?.content ?? ""} />
-            <Input name="optionImageUrl" type="url" placeholder="URL ảnh lựa chọn (nếu có)" defaultValue={options[index]?.imageUrl ?? ""} />
-          </div>
-        ))}
+        <legend className="text-sm font-medium">Lựa chọn A–F · đánh dấu đáp án đúng</legend>
+        <div className="space-y-3">
+          {Array.from({ length: 6 }, (_, index) => {
+            const label = String.fromCharCode(65 + index);
+            return (
+              <div key={index} className="grid items-center gap-2 sm:grid-cols-[2rem_auto_1fr_1fr]">
+                <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-md bg-muted text-sm font-semibold">
+                  {label}
+                </span>
+                <input
+                  aria-label={`Lựa chọn ${label} là đáp án đúng`}
+                  name="optionCorrect"
+                  type="checkbox"
+                  value={index}
+                  defaultChecked={options[index]?.isCorrect ?? false}
+                  className="h-4 w-4 justify-self-start"
+                />
+                <Input name="optionContent" placeholder={`Nội dung lựa chọn ${label}`} defaultValue={options[index]?.content ?? ""} />
+                <Input name="optionImageUrl" type="url" placeholder={`URL ảnh lựa chọn ${label} (nếu có)`} defaultValue={options[index]?.imageUrl ?? ""} />
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Có thể để trống lựa chọn không sử dụng. Tối đa 6 lựa chọn cho mỗi câu.
+        </p>
       </fieldset>
       <div className="flex justify-end">
         <Button type="submit" size="sm"><Plus className="mr-1.5 h-4 w-4" />{question ? "Lưu câu hỏi" : "Thêm câu hỏi"}</Button>
