@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Form, useFetcher, useLoaderData } from "react-router";
-import { AudioLines, Headphones, Loader2, RefreshCw, Save, Search, Settings2, Trash2, Volume2 } from "lucide-react";
+import { AudioLines, BookOpenCheck, Headphones, Loader2, Pause, Play, RefreshCw, RotateCw, Save, Search, Settings2, Trash2, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
@@ -309,6 +309,277 @@ function SpeechSettingsPanel({
   );
 }
 
+function VocabularyCachePanel({ edgeSettings }: { edgeSettings: SpeechProviderSettings }) {
+  const [vocabulary, setVocabulary] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [status, setStatus] = useState("");
+  const [processed, setProcessed] = useState(0);
+  const [created, setCreated] = useState(0);
+  const [alreadyCached, setAlreadyCached] = useState(0);
+  const [failures, setFailures] = useState<Array<{ text: string; message: string }>>([]);
+  const queueRef = useRef<string[]>([]);
+  const cursorRef = useRef(0);
+  const pauseRequestedRef = useRef(false);
+  const failureCountRef = useRef(0);
+  const controllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => controllerRef.current?.abort(), []);
+
+  async function loadVocabulary() {
+    setIsLoading(true);
+    setStatus("");
+    const controller = new AbortController();
+    controllerRef.current?.abort();
+    controllerRef.current = controller;
+    try {
+      const response = await fetch("/admin/speech-audio/vocabulary", {
+        method: "GET",
+        signal: controller.signal,
+      });
+      if (!response.headers.get("Content-Type")?.toLowerCase().includes("application/json")) {
+        throw new Error("Không nhận được danh sách từ vựng từ máy chủ. Hãy tải lại trang rồi thử lại.");
+      }
+      const result: unknown = await response.json();
+      if (
+        typeof result === "object"
+        && result !== null
+        && "vocabulary" in result
+        && Array.isArray(result.vocabulary)
+        && result.vocabulary.every((item) => typeof item === "string")
+      ) {
+        queueRef.current = result.vocabulary;
+        cursorRef.current = 0;
+        setVocabulary(result.vocabulary);
+        setProcessed(0);
+        setCreated(0);
+        setAlreadyCached(0);
+        setFailures([]);
+        failureCountRef.current = 0;
+        setIsPaused(false);
+        setStatus(result.vocabulary.length
+          ? `Đã tải ${result.vocabulary.length.toLocaleString("vi-VN")} từ duy nhất.`
+          : "Chưa có từ vựng nào để tạo cache.");
+      } else {
+        const message = typeof result === "object" && result !== null && "error" in result
+          && typeof result.error === "string"
+          ? result.error
+          : "Máy chủ trả về danh sách từ vựng không hợp lệ.";
+        throw new Error(message);
+      }
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setStatus(error instanceof Error ? error.message : "Không thể tải danh sách từ vựng.");
+      }
+    } finally {
+      if (!controller.signal.aborted) setIsLoading(false);
+    }
+  }
+
+  async function runFrom(startIndex: number) {
+    const controller = controllerRef.current;
+    const queue = queueRef.current;
+    if (!controller || controller.signal.aborted) return;
+
+    setIsRunning(true);
+    setIsPaused(false);
+    pauseRequestedRef.current = false;
+    setStatus("Đang tạo cache Edge TTS tuần tự…");
+
+    for (let index = startIndex; index < queue.length; index += 1) {
+      if (controller.signal.aborted) return;
+      if (pauseRequestedRef.current) {
+        setIsRunning(false);
+        setIsPaused(true);
+        setStatus(`Đã tạm dừng tại ${cursorRef.current.toLocaleString("vi-VN")}/${queue.length.toLocaleString("vi-VN")}.`);
+        return;
+      }
+
+      const text = queue[index];
+      try {
+        const response = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, provider: "edge", intent: "cache-only" }),
+          signal: controller.signal,
+        });
+        const isJson = response.headers.get("Content-Type")?.toLowerCase().includes("application/json");
+        const result: unknown = isJson ? await response.json().catch(() => null) : null;
+        if (!response.ok) {
+          const message = typeof result === "object" && result !== null && "error" in result
+            && typeof result.error === "string"
+            ? result.error
+            : `Máy chủ trả về lỗi HTTP ${response.status}.`;
+          throw new Error(message);
+        }
+        if (!isJson) {
+          throw new Error("Phiên đăng nhập có thể đã hết hạn. Hãy tải lại trang rồi thử lại.");
+        }
+        if (
+          typeof result !== "object"
+          || result === null
+          || !("cached" in result)
+          || typeof result.cached !== "boolean"
+        ) {
+          throw new Error("Máy chủ trả về trạng thái cache không hợp lệ.");
+        }
+
+        if (result.cached) setAlreadyCached((count) => count + 1);
+        else setCreated((count) => count + 1);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        const message = error instanceof Error ? error.message : "Không tạo được audio.";
+        setFailures((current) => [...current, { text, message }]);
+        failureCountRef.current += 1;
+      }
+
+      cursorRef.current = index + 1;
+      setProcessed(index + 1);
+      if (pauseRequestedRef.current && cursorRef.current < queue.length) {
+        setIsRunning(false);
+        setIsPaused(true);
+        setStatus(`Đã tạm dừng tại ${cursorRef.current.toLocaleString("vi-VN")}/${queue.length.toLocaleString("vi-VN")}.`);
+        return;
+      }
+    }
+
+    if (controller.signal.aborted) return;
+    setIsRunning(false);
+    setIsPaused(false);
+    setStatus(failureCountRef.current > 0
+      ? "Đã chạy xong; một số từ cần thử lại."
+      : "Đã tạo xong cache cho danh sách từ vựng.");
+  }
+
+  function startBatch() {
+    if (!queueRef.current.length || isRunning) return;
+    const controller = new AbortController();
+    controllerRef.current?.abort();
+    controllerRef.current = controller;
+    cursorRef.current = 0;
+    setProcessed(0);
+    setCreated(0);
+    setAlreadyCached(0);
+    setFailures([]);
+    failureCountRef.current = 0;
+    void runFrom(0);
+  }
+
+  function resumeBatch() {
+    if (!isPaused || isRunning) return;
+    void runFrom(cursorRef.current);
+  }
+
+  function retryFailures() {
+    const retryQueue = failures.map(({ text }) => text);
+    if (!retryQueue.length || isRunning) return;
+    queueRef.current = retryQueue;
+    cursorRef.current = 0;
+    setVocabulary(retryQueue);
+    setProcessed(0);
+    setCreated(0);
+    setAlreadyCached(0);
+    setFailures([]);
+    failureCountRef.current = 0;
+    const controller = new AbortController();
+    controllerRef.current?.abort();
+    controllerRef.current = controller;
+    void runFrom(0);
+  }
+
+  const progress = vocabulary.length ? Math.round((processed / vocabulary.length) * 100) : 0;
+
+  return (
+    <section className="space-y-5 rounded-lg border p-4 sm:p-6" aria-labelledby="vocabulary-cache-title">
+      <header className="space-y-2">
+        <h2 id="vocabulary-cache-title" className="text-lg font-semibold">Tạo trước cache từ vựng</h2>
+        <p className="text-sm text-muted-foreground">
+          Quét toàn bộ từ vựng trong các khóa học, gộp chữ Hán trùng nhau và chỉ tạo audio Edge còn thiếu.
+          Dùng giọng {edgeSettings.speaker} · tốc độ {edgeSettings.speed.toFixed(2)}×.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Job chạy tuần tự trên trang này. Nếu đóng hoặc rời trang, lượt chạy sẽ dừng; mở lại và chạy lại sẽ tự bỏ qua cache đã có.
+        </p>
+      </header>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <Button type="button" variant="outline" onClick={loadVocabulary} disabled={isLoading || isRunning}>
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BookOpenCheck className="mr-2 h-4 w-4" />}
+          Tải danh sách từ vựng
+        </Button>
+        {vocabulary.length > 0 && !isRunning && !isPaused && processed === 0 && (
+          <Button type="button" onClick={startBatch}>
+            <Play className="mr-2 h-4 w-4" />
+            Tạo cache cho {vocabulary.length.toLocaleString("vi-VN")} từ
+          </Button>
+        )}
+        {isRunning && (
+          <Button type="button" variant="outline" onClick={() => { pauseRequestedRef.current = true; }}>
+            <Pause className="mr-2 h-4 w-4" /> Tạm dừng sau từ hiện tại
+          </Button>
+        )}
+        {isPaused && (
+          <Button type="button" onClick={resumeBatch}>
+            <Play className="mr-2 h-4 w-4" /> Tiếp tục
+          </Button>
+        )}
+        {!isRunning && failures.length > 0 && (
+          <Button type="button" variant="outline" onClick={retryFailures}>
+            <RotateCw className="mr-2 h-4 w-4" /> Thử lại {failures.length} từ lỗi
+          </Button>
+        )}
+      </div>
+
+      {vocabulary.length > 0 && (
+        <div className="space-y-2">
+          <div
+            className="h-2 overflow-hidden rounded-full bg-muted"
+            role="progressbar"
+            aria-label="Tiến độ tạo cache từ vựng"
+            aria-valuemin={0}
+            aria-valuemax={vocabulary.length}
+            aria-valuenow={processed}
+          >
+            <div className="h-full bg-primary transition-[width] duration-300" style={{ width: `${progress}%` }} />
+          </div>
+          <p className="text-sm tabular-nums text-muted-foreground" aria-live="polite">
+            {processed.toLocaleString("vi-VN")}/{vocabulary.length.toLocaleString("vi-VN")} ·
+            {" "}Mới tạo {created.toLocaleString("vi-VN")} ·
+            {" "}Đã có cache {alreadyCached.toLocaleString("vi-VN")} ·
+            {" "}Lỗi {failures.length.toLocaleString("vi-VN")}
+          </p>
+        </div>
+      )}
+
+      {status && <p className="text-sm" role="status">{status}</p>}
+
+      {isRunning && cursorRef.current < vocabulary.length && (
+        <p className="break-all text-sm text-muted-foreground">
+          Đang xử lý: <span className="content-text hanzi-display text-foreground">{queueRef.current[cursorRef.current]}</span>
+        </p>
+      )}
+
+      {failures.length > 0 && (
+        <div className="space-y-2" aria-label="Các từ tạo audio thất bại">
+          <h3 className="text-sm font-medium">Từ cần thử lại</h3>
+          <ul className="max-h-52 space-y-2 overflow-y-auto rounded-md border p-3 text-sm">
+            {failures.slice(0, 20).map(({ text, message }, index) => (
+              <li key={`${text}-${index}`} className="break-words">
+                <span className="content-text hanzi-display font-medium">{text}</span>
+                <span className="text-muted-foreground"> — {message}</span>
+              </li>
+            ))}
+          </ul>
+          {failures.length > 20 && (
+            <p className="text-xs text-muted-foreground">Còn {failures.length - 20} từ lỗi khác.</p>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function SpeechAudioEntry({ entry }: { entry: Awaited<ReturnType<typeof loader>>["entries"][number] }) {
   const fetcher = useFetcher<typeof action>();
   const isBusy = fetcher.state !== "idle";
@@ -401,7 +672,7 @@ function SpeechAudioEntry({ entry }: { entry: Awaited<ReturnType<typeof loader>>
 
 export default function AdminSpeechAudio() {
   const { user, query, total, entries, settings } = useLoaderData<typeof loader>();
-  const [activePanel, setActivePanel] = useState<"settings" | "cache">("settings");
+  const [activePanel, setActivePanel] = useState<"settings" | "batch" | "cache">("batch");
 
   return (
     <AppShell user={user}>
@@ -413,10 +684,12 @@ export default function AdminSpeechAudio() {
           </p>
         </header>
 
-        <div className="flex gap-2 border-b" role="group" aria-label="Quản lý audio TTS">
+        <div className="flex gap-2 overflow-x-auto border-b" role="tablist" aria-label="Quản lý audio TTS">
           <button
             type="button"
-            aria-pressed={activePanel === "settings"}
+            role="tab"
+            aria-controls="speech-settings-panel"
+            aria-selected={activePanel === "settings"}
             onClick={() => setActivePanel("settings")}
             className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium ${activePanel === "settings" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
@@ -424,7 +697,19 @@ export default function AdminSpeechAudio() {
           </button>
           <button
             type="button"
-            aria-pressed={activePanel === "cache"}
+            role="tab"
+            aria-controls="speech-batch-panel"
+            aria-selected={activePanel === "batch"}
+            onClick={() => setActivePanel("batch")}
+            className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium ${activePanel === "batch" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            <BookOpenCheck className="h-4 w-4" /> Tạo cache từ vựng
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-controls="speech-cache-panel"
+            aria-selected={activePanel === "cache"}
             onClick={() => setActivePanel("cache")}
             className={`inline-flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-medium ${activePanel === "cache" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
@@ -432,10 +717,13 @@ export default function AdminSpeechAudio() {
           </button>
         </div>
 
-        {activePanel === "settings" ? (
+        <div id="speech-settings-panel" role="tabpanel" hidden={activePanel !== "settings"}>
           <SpeechSettingsPanel settings={settings} />
-        ) : (
-          <>
+        </div>
+        <div id="speech-batch-panel" role="tabpanel" hidden={activePanel !== "batch"}>
+          <VocabularyCachePanel edgeSettings={settings.edge} />
+        </div>
+        <div id="speech-cache-panel" role="tabpanel" hidden={activePanel !== "cache"}>
         <section className="rounded-lg border bg-muted/30 p-4 sm:p-5" aria-label="Tìm audio">
           <Form method="get" className="flex flex-col gap-3 sm:flex-row">
             <label className="sr-only" htmlFor="speech-audio-search">Tìm theo chữ Hán hoặc nội dung câu</label>
@@ -484,8 +772,7 @@ export default function AdminSpeechAudio() {
           <Volume2 className="mt-0.5 h-4 w-4 shrink-0" />
           <span>Xóa cache không xóa nội dung bài học. Khi audio bị xóa, lần nghe tiếp theo sẽ tự tạo lại.</span>
         </p>
-          </>
-        )}
+        </div>
       </div>
     </AppShell>
   );

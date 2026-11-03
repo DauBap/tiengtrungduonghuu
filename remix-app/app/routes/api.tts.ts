@@ -49,6 +49,23 @@ export async function action({ request }: ActionFunctionArgs) {
     }
   }
 
+  if (intent === "cache-only") {
+    try {
+      const cached = await hasCachedSpeechAudio(text, provider);
+      if (!cached) await getOrCreateSpeechAudio(text, provider);
+      return Response.json(
+        { cached },
+        { headers: { "Cache-Control": "no-store" } },
+      );
+    } catch (error) {
+      console.error(`${provider} cache generation failed:`, error);
+      return Response.json(
+        { error: "Không thể tạo audio cache. Hãy kiểm tra dịch vụ TTS hoặc kết nối Internet rồi thử lại." },
+        { status: 502 },
+      );
+    }
+  }
+
   try {
     const audio = await getOrCreateSpeechAudio(text, provider);
     return new Response(new Uint8Array(audio), {

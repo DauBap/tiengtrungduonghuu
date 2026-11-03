@@ -48,7 +48,8 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
   const storageKey = progressStorageKey ?? `flashcard-progress:${courseId}:${lessonId}`;
   const [round, setRound] = useState(0);
   const cards = useMemo(() => (config.shuffle ? shuffled(items) : items), [items, config.shuffle, round]);
-  const [index, setIndex] = useState(0);
+  const [sequenceIndex, setSequenceIndex] = useState(0);
+  const [randomCardId, setRandomCardId] = useState<string | null>(null);
   const [mode, setMode] = useState<StudyMode>("all");
   const [queue, setQueue] = useState<string[]>(() => items.map((item) => item.id));
   const [flipped, setFlipped] = useState(false);
@@ -123,7 +124,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
     onComplete();
   }, [allKnown, hydrated, isCompleted, onComplete]);
 
-  const card = cards.find((item) => item.id === queue[index]);
+  const card = cards.find((item) => item.id === (randomCardId ?? queue[sequenceIndex]));
   const counts = useMemo(() => {
     const knownCount = items.filter((item) => statuses[item.id] === "known").length;
     const unknownCount = items.filter((item) => statuses[item.id] === "unknown").length;
@@ -143,10 +144,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
 
   const speak = useCallback(
     (item: FlashcardVocab) => speakChinese(item.chinese, item.audioUrl, {
-      preferAudio: true,
-      serverProvider: "edge",
-      forceServerTts: true,
-      allowBrowserFallback: false,
+      preferCachedServerTts: true,
     }),
     [],
   );
@@ -179,7 +177,8 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
       : nextCards.map((item) => item.id);
     setMode(nextMode);
     setQueue(nextQueue);
-    setIndex(0);
+    setSequenceIndex(0);
+    setRandomCardId(null);
     setFlipped(false);
     setFinished(nextQueue.length === 0);
     setRound((value) => value + 1);
@@ -189,9 +188,20 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
   const goTo = useCallback((next: number) => {
     if (isTransitioning || next < 0 || next >= queue.length) return;
     interacted.current = true;
-    setIndex(next);
+    setSequenceIndex(next);
+    setRandomCardId(null);
     setFlipped(false);
   }, [isTransitioning, queue.length]);
+
+  const goToRandom = useCallback(() => {
+    if (isTransitioning || queue.length === 0) return;
+    const availableIds = queue.filter((id) => id !== card?.id);
+    const candidates = availableIds.length > 0 ? availableIds : queue;
+    // Randomly change the visible card without changing the sequential progress.
+    setRandomCardId(candidates[Math.floor(Math.random() * candidates.length)]);
+    setFlipped(false);
+    interacted.current = true;
+  }, [card?.id, isTransitioning, queue]);
 
   const flip = useCallback(() => {
     if (!card || isTransitioning) return;
@@ -214,16 +224,17 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
     transitionTimerRef.current = window.setTimeout(() => {
       transitionTimerRef.current = null;
       setFlipped(false);
-      if (index >= queue.length - 1) {
+      setRandomCardId(null);
+      if (sequenceIndex >= queue.length - 1) {
         setDragX(0);
         setFinished(true);
       } else {
-        setIndex((value) => value + 1);
+        setSequenceIndex((value) => value + 1);
         setDragX(0);
       }
       setIsTransitioning(false);
     }, 280);
-  }, [card, index, isTransitioning, items, onIncomplete, queue.length, statuses]);
+  }, [card, isTransitioning, items, onIncomplete, queue.length, sequenceIndex, statuses]);
 
   const handleCardPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (!event.isPrimary || isTransitioning) return;
@@ -305,13 +316,13 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
-      if (event.key === "ArrowLeft") { event.preventDefault(); goTo(index - 1); }
-      else if (event.key === "ArrowRight") { event.preventDefault(); goTo(index + 1); }
+      if (event.key === "ArrowLeft") { event.preventDefault(); goTo(sequenceIndex - 1); }
+      else if (event.key === "ArrowRight") { event.preventDefault(); goTo(sequenceIndex + 1); }
       else if (event.key === " " || event.key === "Enter") { event.preventDefault(); flip(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [flip, goTo, index]);
+  }, [flip, goTo, sequenceIndex]);
 
   if (!card && !finished) {
     return <p className="py-8 text-center text-sm text-muted-foreground">Block này chưa có thẻ nào. Vui lòng liên hệ giáo viên.</p>;
@@ -359,7 +370,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
   const frontIsChinese = config.frontSide === "chinese";
   const frontMain = frontIsChinese ? card.chinese : card.translation;
   const backMain = frontIsChinese ? card.translation : card.chinese;
-  const position = index + 1;
+  const position = sequenceIndex + 1;
 
   return (
     <div className="space-y-4">
@@ -423,13 +434,13 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
       <p className="-mt-2 text-center text-xs text-muted-foreground">Vuốt trái: đã thuộc · Vuốt phải: chưa thuộc</p>
 
       <div className="flex items-center justify-between gap-2">
-        <Button variant="outline" size="sm" onClick={() => goTo(index - 1)} disabled={index === 0 || isTransitioning}><ChevronLeft className="mr-1 h-4 w-4" />Trước</Button>
+        <Button variant="outline" size="sm" onClick={() => goTo(sequenceIndex - 1)} disabled={sequenceIndex === 0 || isTransitioning}><ChevronLeft className="mr-1 h-4 w-4" />Trước</Button>
         <div className="flex gap-2">
           {speechReady && <Button variant="ghost" size="sm" title="Nghe phát âm" onClick={() => { interacted.current = true; speak(card); }} disabled={isTransitioning}><Volume2 className="h-4 w-4" /></Button>}
-          <Button variant="ghost" size="sm" onClick={() => goTo(Math.floor(Math.random() * queue.length))} title="Nhảy tới thẻ ngẫu nhiên" disabled={isTransitioning}><Shuffle className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="sm" onClick={goToRandom} title="Nhảy tới thẻ ngẫu nhiên" disabled={isTransitioning}><Shuffle className="h-4 w-4" /></Button>
           <Button variant="ghost" size="sm" onClick={flip} title="Lật thẻ" disabled={isTransitioning}><RotateCcw className="h-4 w-4" /></Button>
         </div>
-        <Button variant="outline" size="sm" onClick={() => goTo(index + 1)} disabled={index === queue.length - 1 || isTransitioning}>Sau<ChevronRight className="ml-1 h-4 w-4" /></Button>
+        <Button variant="outline" size="sm" onClick={() => goTo(sequenceIndex + 1)} disabled={sequenceIndex === queue.length - 1 || isTransitioning}>Sau<ChevronRight className="ml-1 h-4 w-4" /></Button>
       </div>
 
       <div className="grid grid-cols-2 gap-2 border-t pt-3">

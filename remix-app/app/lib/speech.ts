@@ -33,6 +33,7 @@ let activeController: AbortController | null = null;
 let activeLoadingToastId: string | null = null;
 let speechRequestId = 0;
 let activePlaybackStateChange: ((state: SpeechPlaybackState) => void) | null = null;
+const activeSpeechCacheWarmups = new Map<string, Promise<void>>();
 
 export type SpeechPlaybackState = "loading" | "playing" | "idle";
 
@@ -51,6 +52,7 @@ export function speakChinese(
     audioElement?: HTMLAudioElement;
     serverProvider?: ServerSpeechProvider;
     forceServerTts?: boolean;
+    preferCachedServerTts?: boolean;
     allowBrowserFallback?: boolean;
     onPlaybackStateChange?: (state: SpeechPlaybackState) => void;
   } = {}
@@ -62,6 +64,11 @@ export function speakChinese(
   const requestId = speechRequestId;
   activePlaybackStateChange = options.onPlaybackStateChange ?? null;
   updatePlaybackState("loading", requestId);
+
+  if (options.preferCachedServerTts) {
+    void speakVocabularyWithCache(text, audioUrl, rate, requestId);
+    return true;
+  }
 
   if (audioUrl && options.preferAudio) {
     const audio = options.audioElement ?? new Audio(audioUrl);
@@ -110,6 +117,117 @@ export function speakChinese(
   }
 
   return speakSelectedTts(text, rate, requestId, options.serverProvider);
+}
+
+async function speakVocabularyWithCache(
+  text: string,
+  audioUrl: string | null | undefined,
+  rate: number,
+  requestId: number,
+) {
+  try {
+    const response = await fetch("/api/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, intent: "cache-status" }),
+    });
+    if (!response.ok) throw new Error("Could not check Edge TTS cache");
+    const cacheStatus: unknown = await response.json();
+    if (
+      typeof cacheStatus !== "object"
+      || cacheStatus === null
+      || !("cached" in cacheStatus)
+      || typeof cacheStatus.cached !== "boolean"
+    ) {
+      throw new Error("Edge TTS returned an invalid cache status");
+    }
+
+    if (requestId !== speechRequestId) return;
+    if (cacheStatus.cached) {
+      await speakWithServerTts(text, requestId, rate, "edge", false);
+      return;
+    }
+  } catch {
+    if (requestId !== speechRequestId) return;
+  }
+
+  if (audioUrl) {
+    void warmSpeechAudioCache(text);
+    playStoredAudio(audioUrl, rate, requestId, () => {
+      void speakWithServerTts(text, requestId, rate, "edge", false);
+    });
+    return;
+  }
+
+  await speakWithServerTts(text, requestId, rate, "edge", false);
+}
+
+function playStoredAudio(
+  audioUrl: string,
+  rate: number,
+  requestId: number,
+  onError: () => void,
+) {
+  const audio = new Audio(audioUrl);
+  let handledError = false;
+  const handleError = () => {
+    if (handledError || requestId !== speechRequestId) return;
+    handledError = true;
+    audio.onplay = null;
+    audio.onended = null;
+    audio.onerror = null;
+    if (activeAudio === audio) activeAudio = null;
+    onError();
+  };
+  audio.playbackRate = rate;
+  audio.currentTime = 0;
+  activeAudio = audio;
+  audio.onplay = () => updatePlaybackState("playing", requestId);
+  audio.onended = () => {
+    releaseActiveAudio();
+    updatePlaybackState("idle", requestId);
+  };
+  audio.onerror = handleError;
+  void audio.play().catch(handleError);
+}
+
+function warmSpeechAudioCache(text: string) {
+  const key = `edge:${text}`;
+  const activeWarmup = activeSpeechCacheWarmups.get(key);
+  if (activeWarmup) return activeWarmup;
+
+  const request = (async () => {
+    const response = await fetch("/api/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, intent: "cache-only" }),
+    });
+    if (!response.ok) {
+      let message = "Không thể tạo cache Edge TTS.";
+      try {
+        const result: unknown = await response.json();
+        if (
+          typeof result === "object"
+          && result !== null
+          && "error" in result
+          && typeof result.error === "string"
+        ) {
+          message = result.error;
+        }
+      } catch {
+        // Keep the actionable default when the server does not return JSON.
+      }
+      throw new Error(message);
+    }
+  })().catch((error: unknown) => {
+    toast.error(error instanceof Error ? error.message : "Không thể tạo cache Edge TTS.");
+  }).finally(() => {
+    if (activeSpeechCacheWarmups.get(key) === request) {
+      activeSpeechCacheWarmups.delete(key);
+    }
+  });
+  activeSpeechCacheWarmups.set(key, request);
+  return request;
 }
 
 function speakSelectedTts(

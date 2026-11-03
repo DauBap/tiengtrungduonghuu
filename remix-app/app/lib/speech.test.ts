@@ -347,3 +347,84 @@ test("Edge TTS failures do not fall back to the browser voice", async () => {
     else Reflect.deleteProperty(globalThis, "fetch");
   }
 });
+
+test("vocabulary playback prefers cached Edge audio and warms the cache behind recorded audio", async () => {
+  const restoreAnimationFrame = mockAnimationFrame();
+  const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+  const originalAudio = Object.getOwnPropertyDescriptor(globalThis, "Audio");
+  const originalFetch = Object.getOwnPropertyDescriptor(globalThis, "fetch");
+  const requests: Array<{ intent?: string; text?: string }> = [];
+  const audioInstances: Array<{ src: string }> = [];
+
+  class MockAudio {
+    currentTime = 0;
+    playbackRate = 1;
+    onplay: (() => void) | null = null;
+    onended: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    constructor(public src: string) { audioInstances.push(this); }
+    play() {
+      this.onplay?.();
+      return Promise.resolve();
+    }
+    pause() {}
+  }
+
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: {
+      speechSynthesis: { cancel() {}, getVoices: () => [], speak() {} },
+      localStorage: { getItem: () => null, setItem() {} },
+      addEventListener() {},
+      matchMedia: () => ({ addEventListener() {} }),
+    },
+  });
+  Object.defineProperty(globalThis, "Audio", { configurable: true, value: MockAudio });
+  Object.defineProperty(globalThis, "fetch", {
+    configurable: true,
+    value: async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const request = JSON.parse(String(init?.body)) as { intent?: string; text?: string };
+      requests.push(request);
+      if (request.intent === "cache-status") return Response.json({ cached: true });
+      return new Response(new Uint8Array([0x52, 0x49, 0x46, 0x46]), {
+        headers: { "Content-Type": "audio/wav" },
+      });
+    },
+  });
+
+  try {
+    const { speakChinese, stopSpeaking } = await import("~/lib/speech");
+
+    speakChinese("你好", "/audio/vocabulary.mp3", { preferCachedServerTts: true });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    assert.deepEqual(requests.map(({ intent }) => intent), ["cache-status", "cache-status", undefined]);
+    assert.notEqual(audioInstances.at(-1)?.src, "/audio/vocabulary.mp3");
+
+    stopSpeaking();
+    requests.length = 0;
+    audioInstances.length = 0;
+    Object.defineProperty(globalThis, "fetch", {
+      configurable: true,
+      value: async (_input: RequestInfo | URL, init?: RequestInit) => {
+        const request = JSON.parse(String(init?.body)) as { intent?: string; text?: string };
+        requests.push(request);
+        if (request.intent === "cache-status") return Response.json({ cached: false });
+        return Response.json({ cached: false });
+      },
+    });
+
+    speakChinese("再见", "/audio/vocabulary.mp3", { preferCachedServerTts: true });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    assert.deepEqual(requests.map(({ intent }) => intent), ["cache-status", "cache-only"]);
+    assert.equal(audioInstances.at(-1)?.src, "/audio/vocabulary.mp3");
+    stopSpeaking();
+  } finally {
+    restoreAnimationFrame();
+    if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
+    else Reflect.deleteProperty(globalThis, "window");
+    if (originalAudio) Object.defineProperty(globalThis, "Audio", originalAudio);
+    else Reflect.deleteProperty(globalThis, "Audio");
+    if (originalFetch) Object.defineProperty(globalThis, "fetch", originalFetch);
+    else Reflect.deleteProperty(globalThis, "fetch");
+  }
+});

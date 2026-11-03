@@ -113,6 +113,22 @@ remix-app/
 
 ## Ghi chú
 
+- **Thần Bút**: trò chơi học viên ở `/student/shen-bi`, báo cáo/giao bài cho giáo viên ở
+  `/teacher/shen-bi`, và nhập dữ liệu dành cho admin ở `/admin/shen-bi-data`. Bộ từ của khóa học
+  chỉ lấy các khóa có mã HSK 3.0; HSK 2.0 không được dùng thay thế. Dữ liệu HSK 4–9 cần được
+  bổ sung từ nguồn đã xác minh trước khi có thể chơi cấp đó; không có danh sách giả lập.
+  Admin có thể nhập tệp CSV/XLS/XLSX bằng liên kết tải mẫu trống trên trang quản lý; các cột bắt buộc
+  là `HSK`, `Bài`, `Hán tự`, `Pinyin`, `Nghĩa tiếng Việt`, `Nguồn HSK 3.0`. Nguồn trong tệp do
+  người nhập khai báo và cần được trung tâm tự xác minh. Các cột đáp án thay thế (nếu có) phải
+  chứa số mục bằng nhau, cùng thứ tự giữa Hán tự, pinyin và nghĩa. Audio URL chỉ nhận đường dẫn
+  `/uploads/` hoặc HTTPS. Nhận diện viết dùng HanziWriter kiểm tra nét và cần tải dữ liệu nét chữ
+  qua mạng; giọng đọc ưu tiên Edge cache, nếu chưa có thì phát audio từ vựng sẵn có và tạo cache
+  Edge cho lần nghe sau. Admin có thể tạo trước cache cho toàn bộ từ vựng tại `/admin/speech-audio`;
+  tiến trình chạy tuần tự khi trang còn mở.
+  Kết quả, tiến độ chặng và bài giao cần các model Thần Bút trong Prisma schema.
+- **Đồng bộ schema Thần Bút**: các model lượt chơi, từ vựng bổ sung và bài giao mới cần được tạo
+  trên cơ sở dữ liệu trước khi triển khai. Dự án hiện dùng `prisma db push`, không chạy lệnh này
+  trực tiếp trên production nếu chưa có phê duyệt và quy trình sao lưu/triển khai phù hợp.
 - **Dạng bài học lý thuyết**: mỗi bài gồm nhiều `LearningBlock`, cấu hình riêng lưu ở cột `config Json`
   và validate bằng zod. Hiện chỉ **Flashcard** hoạt động; Nghe câu / Từ vựng / Ngữ pháp đang là mục
   disable "Sắp có" ở trang admin.

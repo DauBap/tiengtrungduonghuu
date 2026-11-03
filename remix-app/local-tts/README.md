@@ -8,6 +8,13 @@ calling the online service again. The adapter binds only to loopback and does
 not log submitted text. A first-generation error is reported to the learner;
 the app does not silently substitute a browser voice.
 
+Admins can pre-generate vocabulary audio from **Admin → Audio TTS → Tạo cache từ vựng**.
+The batch deduplicates Chinese terms, processes one term at a time, skips existing
+Edge cache entries, and can be paused or retried. Keep the page open while it runs;
+if it is closed, starting again skips audio already cached. Vocabulary playback uses
+Edge cache when available; while an uncached term is being generated, its existing
+recording is played when available.
+
 The production app can also call this CPU-only Chinese MeloTTS service through
 `http://127.0.0.1:8766`. MeloTTS remains available as a legacy provider and
 continues to use its existing WAV cache entries.

@@ -60,3 +60,6 @@ smoke.mjs
 .cursor/
 .devin/
 .env*.local
+
+# Generated speech cache is runtime data, not application source
+/remix-app/uploads/audio/tts/

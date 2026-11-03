@@ -42,6 +42,8 @@ model User {
   lessonTabFeedback        LessonTabFeedback[]       @relation("TeacherTabFeedback")
   receivedNotifications   UserNotification[]        @relation("NotificationRecipient")
   sentNotifications       UserNotification[]        @relation("NotificationActor")
+  shenbiAttempts          ShenbiAttempt[]
+  shenbiAssignments       ShenbiAssignment[]
 
   @@index([role, lastSeenAt])
 }
@@ -487,6 +489,7 @@ model Class {
   course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   teacher     User?        @relation("ClassTeacher", fields: [teacherId], references: [id], onDelete: SetNull)
   enrollments Enrollment[]
+  shenbiAssignments ShenbiAssignment[]
 
   @@index([courseId])
   @@index([teacherId])
@@ -526,6 +529,75 @@ model CourseStudySession {
 
   @@index([courseId, userId])
   @@index([courseId, totalSeconds])
+}
+
+model ShenbiAttempt {
+  id              String   @id @default(cuid())
+  userId          String
+  assignmentId    String?
+  hskLevel        Int
+  mode            String   @db.VarChar(16)
+  scopeKey        String   @db.VarChar(32)
+  lessonFrom      Int?
+  lessonTo        Int?
+  stageNumber     Int      @default(0)
+  stageCompleted  Boolean  @default(false)
+  score           Int      @default(0)
+  correctCount    Int      @default(0)
+  missedCount     Int      @default(0)
+  elapsedSeconds  Int      @default(0)
+  accuracy        Float    @default(0)
+  reviewWords     Json     @default("[]")
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignment ShenbiAssignment? @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+
+  @@index([hskLevel, mode, score, createdAt])
+  @@index([userId, hskLevel, mode, scopeKey, stageCompleted, stageNumber])
+  @@index([userId, createdAt])
+  @@index([assignmentId, createdAt])
+}
+
+model ShenbiAssignment {
+  id            String   @id @default(cuid())
+  classId       String
+  teacherId     String
+  title         String
+  hskLevel      Int
+  lessonFrom    Int?
+  lessonTo      Int?
+  mode          String   @db.VarChar(16)
+  dueAt         DateTime?
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  class    Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher  User           @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  attempts ShenbiAttempt[]
+
+  @@index([classId, active, dueAt])
+  @@index([teacherId, createdAt])
+}
+
+model ShenbiVocabulary {
+  id                      String   @id @default(cuid())
+  hskLevel                Int
+  lesson                  Int
+  chinese                 String
+  chineseAlternatives     String[] @default([])
+  pinyin                  String
+  pinyinAlternatives      String[] @default([])
+  translation             String
+  translationAlternatives String[] @default([])
+  audioUrl                String?
+  source                  String   @db.VarChar(240)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@unique([hskLevel, lesson, chinese, pinyin])
+  @@index([hskLevel, lesson])
 }
 
 model LessonProgress {

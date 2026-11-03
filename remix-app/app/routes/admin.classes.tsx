@@ -175,6 +175,7 @@ type ModalMode = "create" | "edit" | "delete" | "members" | null;
 interface SearchableOption {
   value: string;
   label: string;
+  displayLabel?: string;
   searchText?: string;
 }
 
@@ -207,7 +208,7 @@ function SearchableSelect({
   const containerRef = useRef<HTMLDivElement>(null);
   const initialOption = options.find((option) => option.value === defaultValue);
   const [selectedValue, setSelectedValue] = useState(defaultValue);
-  const [inputValue, setInputValue] = useState(initialOption?.label ?? "");
+  const [inputValue, setInputValue] = useState(initialOption?.displayLabel ?? initialOption?.label ?? "");
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -218,7 +219,7 @@ function SearchableSelect({
 
   const selectOption = (option: SearchableOption) => {
     setSelectedValue(option.value);
-    setInputValue(option.label);
+    setInputValue(option.displayLabel ?? option.label);
     setQuery("");
     setIsOpen(false);
   };
@@ -231,7 +232,8 @@ function SearchableSelect({
         if (!containerRef.current?.contains(event.relatedTarget as Node | null)) {
           setIsOpen(false);
           setQuery("");
-          setInputValue(options.find((option) => option.value === selectedValue)?.label ?? "");
+          const selectedOption = options.find((option) => option.value === selectedValue);
+          setInputValue(selectedOption?.displayLabel ?? selectedOption?.label ?? "");
         }
       }}
     >
@@ -274,7 +276,8 @@ function SearchableSelect({
           } else if (event.key === "Escape") {
             setIsOpen(false);
             setQuery("");
-            setInputValue(options.find((option) => option.value === selectedValue)?.label ?? "");
+            const selectedOption = options.find((option) => option.value === selectedValue);
+            setInputValue(selectedOption?.displayLabel ?? selectedOption?.label ?? "");
           }
         }}
       />
@@ -442,7 +445,7 @@ function ClassFormModal({
     })),
   ];
   const teacherOptions: SearchableOption[] = [
-    { value: "", label: "— Chưa phân công —", searchText: "chưa phân công" },
+    { value: "", label: "Không phân công", displayLabel: "", searchText: "chưa phân công" },
     ...teachers.map((teacher) => ({
       value: teacher.id,
       label: `${teacher.name} (${teacher.email})`,

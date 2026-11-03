@@ -9,6 +9,7 @@ export default [
   route("api/notifications", "routes/api.notifications.ts"),
   route("api/presence", "routes/api.presence.ts"),
   route("api/student/review-count", "routes/api.student.review-count.ts"),
+  route("api/student/shenbi-attempts", "routes/api.student.shenbi-attempts.ts"),
   route("api/pronunciation-recordings/:assessmentId", "routes/api.pronunciation-recordings.$assessmentId.ts"),
   route("telegram/status", "routes/telegram.status.ts"),
   route("uploads/*", "routes/uploads.$.ts"),
@@ -32,6 +33,8 @@ export default [
     route("lessons/:lessonId/blocks/:blockId/edit", "routes/admin.lessons.$lessonId.blocks.$blockId.edit.tsx"),
     route("accounts", "routes/admin.accounts.tsx"),
     route("speech-audio", "routes/admin.speech-audio.tsx"),
+    route("speech-audio/vocabulary", "routes/admin.speech-audio.vocabulary.ts"),
+    route("shen-bi-data", "routes/admin.shen-bi-data.tsx"),
     route("speech-audio/preview", "routes/admin.speech-audio.preview.ts"),
 
     // Bài thi
@@ -65,6 +68,7 @@ export default [
   route("teacher", "routes/teacher._index.tsx"),
   route("teacher/classes/search", "routes/teacher.classes.search.ts"),
   route("teacher/classes", "routes/teacher.classes.tsx"),
+  route("teacher/shen-bi", "routes/teacher.shen-bi.tsx"),
   route("teacher/schedule", "routes/teacher.schedule.tsx"),
   route("teacher/courses", "routes/teacher.courses._index.tsx"),
   route("teacher/courses/:courseId", "routes/teacher.courses.$courseId.tsx"),
@@ -86,6 +90,7 @@ export default [
 
   // Student
   route("student", "routes/student._index.tsx"),
+  route("student/shen-bi", "routes/student.shen-bi.tsx"),
   route("student/schedule", "routes/student.schedule.tsx"),
   route("student/courses", "routes/student.courses._index.tsx"),
   route("student/assignments", "routes/student.assignments.tsx"),

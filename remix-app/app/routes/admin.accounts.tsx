@@ -207,7 +207,7 @@ function Modal({ mode, user, onClose }: { mode: ModalMode; user: UserRecord | nu
             </button>
           </div>
           <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm">
-            Sau khi kích hoạt, học viên có thể đăng nhập bằng mật khẩu ban đầu và sẽ được yêu cầu đổi mật khẩu ở lần đăng nhập đầu tiên.
+            Sau khi kích hoạt, học viên có thể đăng nhập bằng Mật khẩu mặc định và sẽ được yêu cầu đổi mật khẩu ở lần đăng nhập đầu tiên.
           </div>
           {fetcher.data?.error && <p role="alert" className="text-sm text-destructive">{fetcher.data.error}</p>}
           <fetcher.Form method="post">
