@@ -189,7 +189,9 @@ export async function recordLessonTabAttempt(prisma: PrismaClient, input: Attemp
       ? input.progress.completed
       : input.tab === "VOCABULARY_TEST"
         ? input.passed === true
-        : true;
+        : input.tab === "GRAMMAR"
+          ? false
+          : true;
     const needsReview = input.needsReview === true || previous?.state === "NEEDS_REVIEW";
     // Điểm hiện tại của tab: `progress.score` nếu tab tự tính, nếu không thì
     // điểm của lượt vừa nộp.

@@ -209,8 +209,8 @@ export default function StudentIndex() {
 
         {/* Class Schedule Info */}
         {nextScheduledEnrollment && (
-          <Card>
-            <CardContent className="p-4">
+          <Card className="flex min-h-[68px] items-center">
+            <CardContent className="w-full p-4">
               <div className="mb-2.5 flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <h3 className="text-sm font-semibold">Lịch học</h3>

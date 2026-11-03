@@ -2,7 +2,7 @@ import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link, useNavigate } from "react-router";
 import { useMemo, useState } from "react";
 import { requireRole } from "~/lib/session.server";
-import { getCourseById, getLessonSummariesByCourse, getCourseReviewSetSummaries, getAllProgressForCourse, computeLessonStatus, computeTrackedCourseProgress, isEnrolled } from "~/lib/db.server";
+import { getCourseById, getLessonSummariesByCourse, getCourseReviewSetSummaries, computeTrackedCourseProgress, isEnrolled } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { LessonCard } from "~/components/lessons/lesson-card";
 import { ProgressBar } from "~/components/progress/progress-bar";
@@ -15,6 +15,14 @@ import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { ArrowLeft, BookOpen, Layers, FileCheck2, Search, X } from "lucide-react";
 import type { ProgressStatus } from "~/types/progress";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
+import {
+  areAllAvailableActivitiesGreen,
+  getGrammarActivityProgress,
+  type GrammarAttemptProgress,
+  type GrammarQuestionGroup,
+  type LessonActivityProgress,
+} from "~/lib/lesson-progress-summary";
+import { parseGrammarQuestionType } from "~/lib/grammar";
 import { prisma } from "~/lib/prisma.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -28,10 +36,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   if (!course) throw new Response("Không tìm thấy", { status: 404 });
   if (!enrolled) throw new Response("Không có quyền truy cập", { status: 403 });
 
-  const [lessons, reviewSets, progressList, tabProgressRows] = await Promise.all([
+  const [lessons, reviewSets, tabProgressRows, grammarAttempts, grammarQuestionRows] = await Promise.all([
     getLessonSummariesByCourse(course.id),
     getCourseReviewSetSummaries(course.id),
-    getAllProgressForCourse(user.id, course.id),
     prisma.lessonTabProgress.findMany({
       where: { userId: user.id, lesson: { courseId: course.id } },
       include: {
@@ -39,8 +46,22 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
           where: { tab: "VOCABULARY_TEST" },
           orderBy: { completedAt: "desc" },
           take: 1,
+          select: { passed: true },
         },
       },
+    }),
+    prisma.lessonTabAttempt.findMany({
+      where: {
+        userId: user.id,
+        lesson: { courseId: course.id },
+        tab: "GRAMMAR",
+      },
+      select: { lessonId: true, mode: true, details: true, completedAt: true },
+      orderBy: { completedAt: "desc" },
+    }),
+    prisma.grammarQuestion.findMany({
+      where: { section: { lesson: { courseId: course.id } } },
+      select: { type: true, sectionId: true, section: { select: { lessonId: true } } },
     }),
   ]);
   const mockExams = await prisma.mockExam.findMany({
@@ -67,7 +88,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       labels,
     };
   });
-  const progressMap = new Map(progressList.map((p) => [p.lessonId, p]));
   const courseProgress = computeTrackedCourseProgress(lessons.map((lesson) => lesson.id), tabProgressRows);
   const tabProgressByLesson = new Map<string, typeof tabProgressRows>();
   for (const row of tabProgressRows) {
@@ -75,23 +95,87 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     rows.push(row);
     tabProgressByLesson.set(row.lessonId, rows);
   }
+  const grammarGroupsByLesson = new Map<string, GrammarQuestionGroup[]>();
+  for (const question of grammarQuestionRows) {
+    const groups = grammarGroupsByLesson.get(question.section.lessonId) ?? [];
+    groups.push({ sectionId: question.sectionId, questionType: question.type });
+    grammarGroupsByLesson.set(question.section.lessonId, groups);
+  }
+  const grammarAttemptsByLesson = new Map<string, GrammarAttemptProgress[]>();
+  for (const attempt of grammarAttempts) {
+    const details = typeof attempt.details === "object" && attempt.details !== null && !Array.isArray(attempt.details)
+      ? attempt.details
+      : {};
+    const questionType = parseGrammarQuestionType(details.questionType ?? attempt.mode);
+    if (typeof details.sectionId !== "string" || !questionType) continue;
 
-  // Mọi bài học đều mở — không còn khóa theo tiến độ bài trước.
-  // Status chỉ còn phản ánh học viên đã học tới đâu, không dùng để chặn truy cập.
+    const attempts = grammarAttemptsByLesson.get(attempt.lessonId) ?? [];
+    const teacherGrading = details.teacherGrading;
+    attempts.push({
+      sectionId: details.sectionId,
+      questionType,
+      completedAt: attempt.completedAt,
+      reviewPending: details.reviewPending === true
+        && (typeof teacherGrading !== "object" || teacherGrading === null || Array.isArray(teacherGrading)),
+    });
+    grammarAttemptsByLesson.set(attempt.lessonId, attempts);
+  }
+
+  // Match a lesson's tick to every available activity being green in the teacher table.
   const lessonsWithStatus = lessons.map((lesson) => {
-    const p = progressMap.get(lesson.id) ?? null;
-    const s = computeLessonStatus(p);
     const tabRows = tabProgressByLesson.get(lesson.id) ?? [];
-    const completedTabCount = tabRows.filter((row) => row.tab === "VOCABULARY_TEST"
-      ? row.attempts[0]?.passed === true
-      : row.completed).length;
-    const hasStartedTab = tabRows.some((row) => row.opened || row.completed);
+    const progressByTab = new Map(tabRows.map((row) => [row.tab, row]));
+    const grammarProgress = getGrammarActivityProgress(
+      grammarGroupsByLesson.get(lesson.id) ?? [],
+      grammarAttemptsByLesson.get(lesson.id) ?? [],
+    );
+    const availableActivities: Record<(typeof LESSON_TAB_KEYS)[number], boolean> = {
+      FLASHCARD: lesson.learningBlocks.some((block) => block.type === "FLASHCARD"),
+      VOCABULARY_TEST: lesson._count.content > 0,
+      LISTENING: lesson.learningBlocks.some((block) => block.type === "LISTENING"),
+      VOCABULARY: false,
+      LESSON: lesson._count.audioScripts > 0,
+      PHONETICS: lesson.phoneticsSections.length > 0,
+      GRAMMAR: lesson._count.grammarSections > 0,
+      WORKBOOK: lesson.learningBlocks.some((block) => block.type === "WORKBOOK"),
+    };
+    const activities: LessonActivityProgress[] = LESSON_TAB_KEYS.map((tab) => {
+      const progress = progressByTab.get(tab);
+      const latestAttempt = progress?.attempts[0];
+      const completed = tab === "VOCABULARY_TEST"
+        ? latestAttempt?.passed === true
+        : tab === "GRAMMAR"
+          ? grammarProgress.completed
+          : progress?.completed === true;
+      const waiting = tab === "GRAMMAR" && grammarProgress.waiting;
+      const hasStarted = Boolean(
+        latestAttempt
+        || (tab === "GRAMMAR" && grammarProgress.hasStarted)
+        || progress?.opened
+        || progress?.state === "IN_PROGRESS"
+        || (progress?.percent ?? 0) > 0,
+      );
 
-    let status: ProgressStatus;
-    if (completedTabCount === LESSON_TAB_KEYS.length) status = "COMPLETED";
-    else if (hasStartedTab) status = "IN_PROGRESS";
-    else if (s.learningStatus === "COMPLETED" || s.exerciseStatus !== "LOCKED") status = "IN_PROGRESS";
-    else status = "AVAILABLE";
+      return {
+        status: !availableActivities[tab]
+          ? "unavailable"
+          : waiting
+            ? "waiting"
+            : completed
+              ? "completed"
+              : hasStarted
+                ? "partial"
+                : "missing",
+        percent: tab === "GRAMMAR"
+          ? grammarProgress.percent
+          : Math.max(0, Math.min(100, Math.round(progress?.percent ?? 0))),
+      };
+    });
+    const status: ProgressStatus = areAllAvailableActivitiesGreen(activities)
+      ? "COMPLETED"
+      : activities.some((activity) => activity.status !== "unavailable" && activity.status !== "missing")
+        ? "IN_PROGRESS"
+        : "AVAILABLE";
 
     return { ...lesson, status };
   });

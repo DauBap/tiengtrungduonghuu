@@ -26,7 +26,20 @@ import {
 } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
-import { GRAMMAR_QUESTION_META, type GrammarQuestionType, type TeacherGrammarGrade } from "~/lib/grammar";
+import {
+  getGrammarActivityProgress,
+  getLessonProgress,
+  getLessonScriptProgress,
+  isLessonProgressGreen,
+  type GrammarAttemptProgress,
+  type GrammarQuestionGroup,
+} from "~/lib/lesson-progress-summary";
+import {
+  GRAMMAR_QUESTION_META,
+  parseGrammarQuestionType,
+  type GrammarQuestionType,
+  type TeacherGrammarGrade,
+} from "~/lib/grammar";
 import { aggregatePhoneticsSections, getBestPhoneticsSectionAttempts, type PhoneticsReviewResult } from "~/lib/phonetics";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
@@ -211,7 +224,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const reviewSetIds = courseReviewSets.map((reviewSet) => reviewSet.id);
     const mockExamIds = courseMockExams.map((mockExam) => mockExam.id);
     const userIds = cls.enrollments.map((enrollment) => enrollment.userId);
-    const [progressRows, phoneticsSections, phoneticsAttempts, grammarAttempts, grammarAutoAttempts, grammarQuestionRows, reviewAttempts, mockExamAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0 || mockExamIds.length > 0) && userIds.length > 0
+    const [progressRows, lessonAudioScripts, pronunciationAssessments, phoneticsSections, phoneticsAttempts, grammarAttempts, grammarAutoAttempts, grammarQuestionRows, reviewAttempts, mockExamAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0 || mockExamIds.length > 0) && userIds.length > 0
       ? await Promise.all([
           lessonIds.length > 0 ? prisma.lessonTabProgress.findMany({
             where: {
@@ -243,6 +256,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
                   details: true,
                 },
               },
+            },
+          }) : Promise.resolve([]),
+          lessonIds.length > 0 ? prisma.lessonAudioScript.findMany({
+            where: { lessonId: { in: lessonIds } },
+            select: { id: true, lessonId: true },
+          }) : Promise.resolve([]),
+          lessonIds.length > 0 ? prisma.pronunciationAssessment.findMany({
+            where: {
+              userId: { in: userIds },
+              lessonAudioScript: { lessonId: { in: lessonIds } },
+            },
+            select: {
+              userId: true,
+              lessonAudioScriptId: true,
+              score: true,
             },
           }) : Promise.resolve([]),
           lessonIds.length > 0 ? prisma.phoneticsSection.findMany({
@@ -309,9 +337,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
           lessonIds.length > 0 ? prisma.grammarQuestion.findMany({
             where: {
               section: { lessonId: { in: lessonIds } },
-              type: { in: ["SINGLE_CHOICE", "ARRANGE"] },
             },
             select: {
+              sectionId: true,
               type: true,
               section: { select: { lessonId: true } },
             },
@@ -347,10 +375,27 @@ export async function loader({ request }: LoaderFunctionArgs) {
             orderBy: { startedAt: "desc" },
           }) : Promise.resolve([]),
         ])
-      : [[], [], [], [], [], [], [], []];
+      : [[], [], [], [], [], [], [], [], [], []];
 
     const enrollmentsByUserId = new Map(cls.enrollments.map((enrollment) => [enrollment.userId, enrollment]));
     const lessonsById = new Map(courseLessons.map((lesson) => [lesson.id, lesson]));
+    const audioScriptIdsByLesson = new Map<string, string[]>();
+    const audioScriptLessonById = new Map<string, string>();
+    for (const script of lessonAudioScripts) {
+      const scriptIds = audioScriptIdsByLesson.get(script.lessonId) ?? [];
+      scriptIds.push(script.id);
+      audioScriptIdsByLesson.set(script.lessonId, scriptIds);
+      audioScriptLessonById.set(script.id, script.lessonId);
+    }
+    const pronunciationScoresByUserLesson = new Map<string, { scriptId: string; score: number }[]>();
+    for (const assessment of pronunciationAssessments) {
+      const lessonId = audioScriptLessonById.get(assessment.lessonAudioScriptId);
+      if (!lessonId) continue;
+      const key = `${assessment.userId}:${lessonId}`;
+      const attempts = pronunciationScoresByUserLesson.get(key) ?? [];
+      attempts.push({ scriptId: assessment.lessonAudioScriptId, score: assessment.score });
+      pronunciationScoresByUserLesson.set(key, attempts);
+    }
     const phoneticsSectionsByLesson = new Map<string, { sectionId: number; totalCount: number; title: string }[]>();
     for (const section of phoneticsSections) {
       const sections = phoneticsSectionsByLesson.get(section.lessonId) ?? [];
@@ -362,11 +407,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
       phoneticsSectionsByLesson.set(section.lessonId, sections);
     }
     const grammarQuestionTotalsByLesson = new Map<string, number>();
+    const grammarGroupsByLesson = new Map<string, GrammarQuestionGroup[]>();
     for (const question of grammarQuestionRows) {
-      grammarQuestionTotalsByLesson.set(
-        question.section.lessonId,
-        (grammarQuestionTotalsByLesson.get(question.section.lessonId) ?? 0) + 1,
-      );
+      const groups = grammarGroupsByLesson.get(question.section.lessonId) ?? [];
+      groups.push({ sectionId: question.sectionId, questionType: question.type });
+      grammarGroupsByLesson.set(question.section.lessonId, groups);
+      if (question.type === "SINGLE_CHOICE" || question.type === "ARRANGE") {
+        grammarQuestionTotalsByLesson.set(
+          question.section.lessonId,
+          (grammarQuestionTotalsByLesson.get(question.section.lessonId) ?? 0) + 1,
+        );
+      }
     }
     const latestGrammarAttemptsBySectionType = new Map<string, (typeof grammarAutoAttempts)[number]>();
     for (const attempt of grammarAutoAttempts) {
@@ -400,6 +451,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
     for (const summary of grammarSummaryByUserLesson.values()) {
       summary.totalCount = grammarQuestionTotalsByLesson.get(summary.lessonId) ?? summary.totalCount;
       summary.correctCount = Math.min(summary.correctCount, summary.totalCount);
+    }
+    const grammarAttemptsByUserLesson = new Map<string, GrammarAttemptProgress[]>();
+    for (const attempt of [...grammarAttempts, ...grammarAutoAttempts]) {
+      const details = isRecord(attempt.details) ? attempt.details : {};
+      const questionType = parseGrammarQuestionType(
+        details.questionType ?? ("mode" in attempt ? attempt.mode : null),
+      );
+      if (typeof details.sectionId !== "string" || !questionType) continue;
+
+      const key = `${attempt.userId}:${attempt.lessonId}`;
+      const attempts = grammarAttemptsByUserLesson.get(key) ?? [];
+      const teacherGrading = details.teacherGrading;
+      attempts.push({
+        sectionId: details.sectionId,
+        questionType,
+        completedAt: attempt.completedAt,
+        reviewPending: details.reviewPending === true
+          && !isRecord(teacherGrading),
+      });
+      grammarAttemptsByUserLesson.set(key, attempts);
     }
     const phoneticsAttemptsByUserLesson = new Map<string, {
       sectionId: number;
@@ -471,7 +542,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
       const key = `${attempt.userId}:${attempt.mockExamId}`;
       if (!mockExamProgressByKey.has(key)) mockExamProgressByKey.set(key, attempt);
     }
-    const pendingGrammarKeys = new Set(pendingGrammarAttempts.map((attempt) => `${attempt.userId}:${attempt.lessonId}`));
     const lessons = courseLessons.map((lesson, index) => ({
       id: lesson.id,
       order: lesson.order,
@@ -509,6 +579,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         questionCount: mockExam.sections.reduce((total, section) => total + section._count.questions, 0),
       })),
     ];
+    const grammarProgressByUserLesson = new Map<string, ReturnType<typeof getGrammarActivityProgress>>();
     const activityData = cls.enrollments.map((enrollment) => {
       const lastActivityAt = progressRows
         .filter((row) => row.userId === enrollment.userId)
@@ -533,6 +604,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
         ? activityDates.reduce((latest, date) => date > latest ? date : latest)
         : null;
       const studentLessons = lessons.map((lesson) => {
+        const lessonKey = `${enrollment.userId}:${lesson.id}`;
+        const lessonScriptProgress = getLessonScriptProgress(
+          audioScriptIdsByLesson.get(lesson.id) ?? [],
+          pronunciationScoresByUserLesson.get(lessonKey) ?? [],
+        );
+        const grammarProgress = getGrammarActivityProgress(
+          grammarGroupsByLesson.get(lesson.id) ?? [],
+          grammarAttemptsByUserLesson.get(lessonKey) ?? [],
+        );
+        grammarProgressByUserLesson.set(lessonKey, grammarProgress);
         const lessonPhoneticsSections = phoneticsSectionsByLesson.get(lesson.id) ?? [];
         const lessonPhoneticsAttempts = phoneticsAttemptsByUserLesson.get(`${enrollment.userId}:${lesson.id}`) ?? [];
         const phoneticsSummary = aggregatePhoneticsSections(
@@ -607,16 +688,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
           const available = lesson.availableActivities[tab];
           const completed = tab === "VOCABULARY_TEST"
             ? attempt?.passed === true
-            : progress?.completed === true;
+            : tab === "LESSON"
+              ? lessonScriptProgress.completed
+            : tab === "GRAMMAR"
+              ? grammarProgress.completed
+              : progress?.completed === true;
           const hasStarted = Boolean(
             attempt
+            || (tab === "LESSON" && lessonScriptProgress.started)
+            || (tab === "GRAMMAR" && grammarProgress.hasStarted)
             || progress?.opened
             || progress?.state === "IN_PROGRESS"
             || (progress?.percent ?? 0) > 0,
           );
           const status = !available
             ? "unavailable"
-            : tab === "GRAMMAR" && pendingGrammarKeys.has(`${enrollment.userId}:${lesson.id}`)
+            : tab === "GRAMMAR" && grammarProgress.waiting
               ? "waiting"
               : completed
                 ? "completed"
@@ -628,10 +715,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
             status,
             score: Math.round(tab === "PHONETICS"
               ? phoneticsSummary.score
-              : grammarSummary && grammarSummary.totalCount > 0
-                ? (grammarSummary.correctCount / grammarSummary.totalCount) * 100
-                : attempt?.score ?? progress?.currentScore ?? progress?.bestScore ?? progress?.percent ?? 0),
-            percent: Math.max(0, Math.min(100, Math.round(progress?.percent ?? 0))),
+              : tab === "LESSON"
+                ? lessonScriptProgress.score
+                : grammarSummary && grammarSummary.totalCount > 0
+                  ? (grammarSummary.correctCount / grammarSummary.totalCount) * 100
+                  : attempt?.score ?? progress?.currentScore ?? progress?.bestScore ?? progress?.percent ?? 0),
+            useScoreWhenPartial: tab === "PHONETICS" || tab === "LESSON",
+            percent: tab === "GRAMMAR"
+              ? grammarProgress.percent
+              : tab === "LESSON"
+                ? lessonScriptProgress.score
+                : Math.max(0, Math.min(100, Math.round(progress?.percent ?? 0))),
             correctCount: tab === "PHONETICS"
               ? phoneticsSummary.correctCount
               : grammarSummary?.correctCount ?? attempt?.correctCount,
@@ -685,7 +779,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
     for (const row of progressRows) {
       const completed = row.tab === "VOCABULARY_TEST"
         ? row.attempts[0]?.passed === true
-        : row.completed;
+        : row.tab === "GRAMMAR"
+          ? grammarProgressByUserLesson.get(`${row.userId}:${row.lessonId}`)?.completed === true
+          : row.completed;
       if (!completed) continue;
       const current = perStudent.get(row.userId) ?? new Set<string>();
       current.add(`${row.lessonId}:${row.tab}`);
@@ -736,17 +832,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
 }
 
-function getLessonProgress(activities: { status: string; percent: number }[]) {
-  const available = activities.filter((activity) => activity.status !== "unavailable");
-  if (available.length === 0) return { percent: 0, completed: 0, total: 0 };
-  const completed = available.filter((activity) => activity.status === "completed" || activity.status === "waiting").length;
-  const percent = Math.round(available.reduce((sum, activity) => {
-    if (activity.status === "completed" || activity.status === "waiting") return sum + 100;
-    return sum + (activity.status === "partial" ? activity.percent : 0);
-  }, 0) / available.length);
-  return { percent, completed, total: available.length };
-}
-
 function activityTone(status: string, isPastLesson: boolean) {
   if (status === "completed") return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300";
   if (status === "waiting") return "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300";
@@ -758,7 +843,7 @@ function activityTone(status: string, isPastLesson: boolean) {
 
 function lessonProgressTone(percent: number) {
   if (percent === 0) return "bg-muted text-muted-foreground";
-  if (percent <= 80) return "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300";
+  if (!isLessonProgressGreen(percent)) return "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300";
   return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300";
 }
 
@@ -1449,7 +1534,7 @@ export default function TeacherIndex() {
                                               )}
                                               <span className="text-[10px]">
                                                 {displayedPercent != null
-                                                  ? displayedPercent > 80 ? "Đã làm" : "Đang làm"
+                                                  ? result?.status === "completed" || displayedPercent > 80 ? "Đã làm" : "Đang làm"
                                                   : result?.status === "completed"
                                                     ? "Đã xong"
                                                     : result?.status === "partial"

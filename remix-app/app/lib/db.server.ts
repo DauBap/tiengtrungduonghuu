@@ -153,7 +153,23 @@ export async function getLessonsByCourse(courseId: string) {
 export async function getLessonSummariesByCourse(courseId: string) {
   return prisma.lesson.findMany({
     where: { courseId },
-    select: { id: true, courseId: true, order: true, title: true, subtitle: true },
+    select: {
+      id: true,
+      courseId: true,
+      order: true,
+      title: true,
+      subtitle: true,
+      _count: { select: { content: true, grammarSections: true, audioScripts: true } },
+      phoneticsSections: {
+        where: { questions: { some: {} } },
+        select: { id: true },
+        take: 1,
+      },
+      learningBlocks: {
+        where: { required: true, type: { in: ["FLASHCARD", "LISTENING", "WORKBOOK"] } },
+        select: { type: true },
+      },
+    },
     orderBy: { order: "asc" },
   });
 }

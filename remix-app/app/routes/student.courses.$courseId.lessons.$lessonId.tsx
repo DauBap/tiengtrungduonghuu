@@ -47,6 +47,7 @@ import { useAppSettings } from "~/lib/app-settings";
 import { SettingsMenu } from "~/components/layout/settings-menu";
 import { isLessonTabKey, openLessonTab, recordLessonTabAttempt } from "~/lib/lesson-tab-progress.server";
 import type { LessonTab as ProgressTab } from "~/lib/lesson-tab-progress";
+import { getGrammarActivityProgress, type GrammarAttemptProgress, type GrammarQuestionGroup } from "~/lib/lesson-progress-summary";
 import {
   comparePronunciationPinyin,
   chooseClosestRecognitionCandidate,
@@ -951,6 +952,42 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const totalCount = results.length;
     const score = Math.round((correctCount / totalCount) * 10000) / 100;
     const completedAt = new Date();
+    const [grammarQuestionRows, previousGrammarAttempts] = await Promise.all([
+      prisma.grammarQuestion.findMany({
+        where: { section: { lessonId: params.lessonId! } },
+        select: { sectionId: true, type: true },
+      }),
+      prisma.lessonTabAttempt.findMany({
+        where: { userId: user.id, lessonId: params.lessonId!, tab: "GRAMMAR" },
+        select: { mode: true, details: true, completedAt: true },
+      }),
+    ]);
+    const grammarGroups: GrammarQuestionGroup[] = grammarQuestionRows.map((question) => ({
+      sectionId: question.sectionId,
+      questionType: question.type,
+    }));
+    const grammarAttempts: GrammarAttemptProgress[] = previousGrammarAttempts.flatMap((attempt) => {
+      const details = typeof attempt.details === "object" && attempt.details !== null && !Array.isArray(attempt.details)
+        ? attempt.details
+        : {};
+      const attemptQuestionType = parseGrammarQuestionType(details.questionType ?? attempt.mode);
+      if (typeof details.sectionId !== "string" || !attemptQuestionType) return [];
+      const teacherGrading = details.teacherGrading;
+      return [{
+        sectionId: details.sectionId,
+        questionType: attemptQuestionType,
+        completedAt: attempt.completedAt,
+        reviewPending: details.reviewPending === true
+          && (typeof teacherGrading !== "object" || teacherGrading === null || Array.isArray(teacherGrading)),
+      }];
+    });
+    grammarAttempts.push({
+      sectionId: section.id,
+      questionType,
+      completedAt,
+      reviewPending,
+    });
+    const grammarProgress = getGrammarActivityProgress(grammarGroups, grammarAttempts);
     const savedAttempt = await recordLessonTabAttempt(prisma, {
       userId: user.id,
       lessonId: params.lessonId!,
@@ -961,6 +998,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
       totalCount: reviewPending ? null : totalCount,
       passed: reviewPending ? null : correctCount === totalCount,
       needsReview: reviewPending,
+      progress: {
+        percent: grammarProgress.percent,
+        completed: grammarProgress.completed,
+      },
       completedAt,
       details: {
         sectionId: section.id,

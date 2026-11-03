@@ -9,7 +9,15 @@ import { Textarea } from "~/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
 import { getCourseById, getLessonsByCourse, isTeacherOfCourse } from "~/lib/db.server";
-import { applyTeacherGrammarGrades, GRAMMAR_QUESTION_META, isGrammarQuestionType, type GrammarQuestionType, type TeacherGrammarGrade } from "~/lib/grammar";
+import {
+  applyTeacherGrammarGrades,
+  GRAMMAR_QUESTION_META,
+  isGrammarQuestionType,
+  parseGrammarQuestionType,
+  type GrammarQuestionType,
+  type TeacherGrammarGrade,
+} from "~/lib/grammar";
+import { getGrammarActivityProgress, type GrammarAttemptProgress, type GrammarQuestionGroup } from "~/lib/lesson-progress-summary";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 import { cn } from "~/lib/utils";
@@ -129,20 +137,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
   };
 
   await prisma.$transaction(async (tx) => {
-    const otherAttempts = await tx.lessonTabAttempt.findMany({
-      where: {
-        userId: enrollment.userId,
-        lessonId: lesson.id,
-        tab: "GRAMMAR",
-        mode: "FILL",
-        id: { not: attempt.id },
-      },
-      select: { details: true },
-    });
-    const stillPending = otherAttempts.some((other) => {
-      const otherDetails = isRecord(other.details) ? other.details : {};
-      return otherDetails.reviewPending === true && !isRecord(otherDetails.teacherGrading);
-    });
     const progress = await tx.lessonTabProgress.findUnique({
       where: { userId_lessonId_tab: { userId: enrollment.userId, lessonId: lesson.id, tab: "GRAMMAR" } },
     });
@@ -158,30 +152,59 @@ export async function action({ request, params }: ActionFunctionArgs) {
         details: updatedDetails,
       },
     });
+    const [grammarQuestionRows, grammarAttempts] = await Promise.all([
+      tx.grammarQuestion.findMany({
+        where: { section: { lessonId: lesson.id } },
+        select: { sectionId: true, type: true },
+      }),
+      tx.lessonTabAttempt.findMany({
+        where: { userId: enrollment.userId, lessonId: lesson.id, tab: "GRAMMAR" },
+        select: { mode: true, details: true, completedAt: true },
+      }),
+    ]);
+    const grammarGroups: GrammarQuestionGroup[] = grammarQuestionRows.map((question) => ({
+      sectionId: question.sectionId,
+      questionType: question.type,
+    }));
+    const grammarProgressAttempts: GrammarAttemptProgress[] = grammarAttempts.flatMap((grammarAttempt) => {
+      const attemptDetails = isRecord(grammarAttempt.details) ? grammarAttempt.details : {};
+      const questionType = parseGrammarQuestionType(attemptDetails.questionType ?? grammarAttempt.mode);
+      if (typeof attemptDetails.sectionId !== "string" || !questionType) return [];
+      return [{
+        sectionId: attemptDetails.sectionId,
+        questionType,
+        completedAt: grammarAttempt.completedAt,
+        reviewPending: attemptDetails.reviewPending === true && !isRecord(attemptDetails.teacherGrading),
+      }];
+    });
+    const grammarActivity = getGrammarActivityProgress(grammarGroups, grammarProgressAttempts);
+    const stillPending = grammarActivity.waiting;
+    const completed = grammarActivity.completed;
+    const state = stillPending ? "NEEDS_REVIEW" : completed ? "COMPLETED" : "IN_PROGRESS";
     await tx.lessonTabProgress.upsert({
       where: { userId_lessonId_tab: { userId: enrollment.userId, lessonId: lesson.id, tab: "GRAMMAR" } },
       update: {
         opened: true,
-        state: stillPending ? "NEEDS_REVIEW" : "COMPLETED",
-        completed: !stillPending,
-        percent: stillPending ? 0 : 100,
+        state,
+        completed,
+        percent: grammarActivity.percent,
         currentScore: grading.score,
         bestScore,
         lastAttemptAt: attempt.completedAt,
-        completedAt: stillPending ? null : progress?.completedAt ?? gradedAt,
+        completedAt: completed ? progress?.completedAt ?? gradedAt : null,
       },
       create: {
         userId: enrollment.userId,
         lessonId: lesson.id,
         tab: "GRAMMAR",
         opened: true,
-        state: stillPending ? "NEEDS_REVIEW" : "COMPLETED",
-        completed: !stillPending,
-        percent: stillPending ? 0 : 100,
+        state,
+        completed,
+        percent: grammarActivity.percent,
         currentScore: grading.score,
         bestScore,
         lastAttemptAt: attempt.completedAt,
-        completedAt: stillPending ? null : gradedAt,
+        completedAt: completed ? gradedAt : null,
       },
     });
     await tx.userNotification.create({

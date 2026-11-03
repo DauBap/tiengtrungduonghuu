@@ -1,0 +1,3 @@
+$env:Path = "C:\Program Files\nodejs;$env:Path"
+cd D:\tiengtrungduonghuu\remix-app
+npm.cmd run dev -- --host 127.0.0.1
