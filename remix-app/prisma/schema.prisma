@@ -44,6 +44,7 @@ model User {
   sentNotifications       UserNotification[]        @relation("NotificationActor")
   shenbiAttempts          ShenbiAttempt[]
   shenbiAssignments       ShenbiAssignment[]
+  attendanceRecords       AttendanceRecord[]
 
   @@index([role, lastSeenAt])
 }
@@ -490,6 +491,7 @@ model Class {
   teacher     User?        @relation("ClassTeacher", fields: [teacherId], references: [id], onDelete: SetNull)
   enrollments Enrollment[]
   shenbiAssignments ShenbiAssignment[]
+  attendanceSessions AttendanceSession[]
 
   @@index([courseId])
   @@index([teacherId])
@@ -513,6 +515,52 @@ model Enrollment {
   // còn đếm/liệt kê học viên theo khóa và theo lớp, nên cần index riêng.
   @@index([courseId])
   @@index([classId])
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+}
+
+enum AttendanceAbsenceReason {
+  EXCUSED
+  UNEXCUSED
+}
+
+model AttendanceSession {
+  id        String   @id @default(cuid())
+  classId   String
+  title     String
+  lesson    String   @default("")
+  date      DateTime @db.Date
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  class   Class              @relation(fields: [classId], references: [id], onDelete: Cascade)
+  records AttendanceRecord[]
+
+  @@index([classId, date])
+}
+
+model AttendanceRecord {
+  id            String                    @id @default(cuid())
+  sessionId     String
+  studentId     String
+  status        AttendanceStatus?
+  absenceReason AttendanceAbsenceReason?
+  recording     Boolean                   @default(false)
+  hanzi         Boolean                   @default(false)
+  duet          Boolean                   @default(false)
+  lessonLink    Boolean                   @default(false)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+
+  session AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student User              @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId])
+  @@index([studentId, sessionId])
 }
 
 model CourseStudySession {

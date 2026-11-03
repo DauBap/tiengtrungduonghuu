@@ -3,6 +3,14 @@
  */
 import { prisma } from "~/lib/prisma.server";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
+import {
+  areAllAvailableActivitiesGreen,
+  getGrammarActivityProgress,
+  type GrammarAttemptProgress,
+  type GrammarQuestionGroup,
+  type LessonActivityProgress,
+} from "~/lib/lesson-progress-summary";
+import { parseGrammarQuestionType } from "~/lib/grammar";
 import { parsePhoneticsConfig, type PhoneticsConfig } from "~/lib/learning-blocks";
 
 type TrackedTabProgressRow = {
@@ -276,20 +284,35 @@ export async function getCourseProgressMap(userId: string, courseIds: string[]) 
 }
 
 /**
- * Số liệu cho dashboard học viên trong 2 query, chỉ `select` các field bảng
- * thật sự dùng. Trước đây trang này gọi `getLessonsByCourse` cho từng khóa,
- * kéo theo cả vocab/exercise/test chỉ để đếm bài và tìm bài đang học.
+ * Số liệu dashboard chỉ tải các trường tiến độ và mức độ sẵn có của hoạt động,
+ * không kéo toàn bộ nội dung vocab/exercise/test của từng bài.
  */
 export async function getStudentDashboardStats(userId: string, courseIds: string[]) {
   if (courseIds.length === 0) {
     return { totalLessons: 0, totalCompleted: 0, currentLesson: null, courseProgress: {}, overallProgress: 0 };
   }
 
-  const [lessons, progressList] = await Promise.all([
+  const [lessons, progressList, grammarQuestionRows, grammarAttempts] = await Promise.all([
     prisma.lesson.findMany({
       where: { courseId: { in: courseIds } },
-      select: { id: true, courseId: true, order: true, title: true, subtitle: true },
-      orderBy: { order: "asc" },
+      select: {
+        id: true,
+        courseId: true,
+        order: true,
+        title: true,
+        subtitle: true,
+        _count: { select: { content: true, grammarSections: true, audioScripts: true } },
+        phoneticsSections: {
+          where: { questions: { some: {} } },
+          select: { id: true },
+          take: 1,
+        },
+        learningBlocks: {
+          where: { required: true, type: { in: ["FLASHCARD", "LISTENING", "WORKBOOK"] } },
+          select: { type: true },
+        },
+      },
+      orderBy: [{ courseId: "asc" }, { order: "asc" }],
     }),
     prisma.lessonTabProgress.findMany({
       where: { userId, lesson: { courseId: { in: courseIds } } },
@@ -301,6 +324,15 @@ export async function getStudentDashboardStats(userId: string, courseIds: string
         },
       },
     }),
+    prisma.grammarQuestion.findMany({
+      where: { section: { lesson: { courseId: { in: courseIds } } } },
+      select: { type: true, sectionId: true, section: { select: { lessonId: true } } },
+    }),
+    prisma.lessonTabAttempt.findMany({
+      where: { userId, lesson: { courseId: { in: courseIds } }, tab: "GRAMMAR" },
+      select: { lessonId: true, mode: true, details: true, completedAt: true },
+      orderBy: { completedAt: "desc" },
+    }),
   ]);
 
   const progressByLesson = new Map<string, typeof progressList>();
@@ -309,11 +341,68 @@ export async function getStudentDashboardStats(userId: string, courseIds: string
     rows.push(row);
     progressByLesson.set(row.lessonId, rows);
   }
-  const isDone = (lessonId: string) => LESSON_TAB_KEYS.every((tab) => {
-    const row = progressByLesson.get(lessonId)?.find((item) => item.tab === tab);
-    return row ? isTrackedTabCompleted(row) : false;
-  });
+  const grammarGroupsByLesson = new Map<string, GrammarQuestionGroup[]>();
+  for (const question of grammarQuestionRows) {
+    const groups = grammarGroupsByLesson.get(question.section.lessonId) ?? [];
+    groups.push({ sectionId: question.sectionId, questionType: question.type });
+    grammarGroupsByLesson.set(question.section.lessonId, groups);
+  }
+  const grammarAttemptsByLesson = new Map<string, GrammarAttemptProgress[]>();
+  for (const attempt of grammarAttempts) {
+    const details = typeof attempt.details === "object" && attempt.details !== null && !Array.isArray(attempt.details)
+      ? attempt.details
+      : {};
+    const questionType = parseGrammarQuestionType(details.questionType ?? attempt.mode);
+    if (typeof details.sectionId !== "string" || !questionType) continue;
 
+    const attempts = grammarAttemptsByLesson.get(attempt.lessonId) ?? [];
+    const teacherGrading = details.teacherGrading;
+    attempts.push({
+      sectionId: details.sectionId,
+      questionType,
+      completedAt: attempt.completedAt,
+      reviewPending: details.reviewPending === true
+        && (typeof teacherGrading !== "object" || teacherGrading === null || Array.isArray(teacherGrading)),
+    });
+    grammarAttemptsByLesson.set(attempt.lessonId, attempts);
+  }
+  const isDone = (lessonId: string) => {
+    const lesson = lessons.find((item) => item.id === lessonId);
+    if (!lesson) return false;
+
+    const availableActivities: Record<(typeof LESSON_TAB_KEYS)[number], boolean> = {
+      FLASHCARD: lesson.learningBlocks.some((block) => block.type === "FLASHCARD"),
+      VOCABULARY_TEST: lesson._count.content > 0,
+      LISTENING: lesson.learningBlocks.some((block) => block.type === "LISTENING"),
+      VOCABULARY: false,
+      LESSON: lesson._count.audioScripts > 0,
+      PHONETICS: lesson.phoneticsSections.length > 0,
+      GRAMMAR: lesson._count.grammarSections > 0,
+      WORKBOOK: lesson.learningBlocks.some((block) => block.type === "WORKBOOK"),
+    };
+    const progressByTab = new Map(
+      (progressByLesson.get(lessonId) ?? []).map((row) => [row.tab, row]),
+    );
+    const grammarProgress = getGrammarActivityProgress(
+      grammarGroupsByLesson.get(lessonId) ?? [],
+      grammarAttemptsByLesson.get(lessonId) ?? [],
+    );
+    const activities: LessonActivityProgress[] = LESSON_TAB_KEYS.map((tab) => {
+      if (!availableActivities[tab]) return { status: "unavailable", percent: 0 };
+
+      const progress = progressByTab.get(tab);
+      const completed = tab === "VOCABULARY_TEST"
+        ? progress?.attempts[0]?.passed === true
+        : tab === "GRAMMAR"
+          ? grammarProgress.completed
+          : progress?.completed === true;
+      return { status: completed ? "completed" : "missing", percent: 0 };
+    });
+
+    return areAllAvailableActivitiesGreen(activities);
+  };
+
+  const completedByLesson = new Map(lessons.map((lesson) => [lesson.id, isDone(lesson.id)]));
   const courseProgress: Record<string, number> = {};
   for (const courseId of courseIds) {
     const courseLessons = lessons.filter((l) => l.courseId === courseId);
@@ -329,7 +418,9 @@ export async function getStudentDashboardStats(userId: string, courseIds: string
   // Bài đang học = bài chưa xong đầu tiên, theo đúng thứ tự khóa học hiển thị.
   let currentLesson: (typeof lessons)[number] | null = null;
   for (const courseId of courseIds) {
-    const next = lessons.find((l) => l.courseId === courseId && !isDone(l.id));
+    const next = lessons.find((lesson) => (
+      lesson.courseId === courseId && !completedByLesson.get(lesson.id)
+    ));
     if (next) {
       currentLesson = next;
       break;
@@ -338,7 +429,7 @@ export async function getStudentDashboardStats(userId: string, courseIds: string
 
   return {
     totalLessons: lessons.length,
-    totalCompleted: lessons.filter((l) => isDone(l.id)).length,
+    totalCompleted: lessons.filter((lesson) => completedByLesson.get(lesson.id)).length,
     currentLesson,
     courseProgress,
     overallProgress: totalTrackedTabs > 0 ? Math.round((totalCompletedTabs / totalTrackedTabs) * 100) : 0,

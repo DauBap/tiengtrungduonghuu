@@ -8,7 +8,7 @@ import { AppShell } from "~/components/layout/app-shell";
 import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { Card, CardContent } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
-import { ArrowRight, BookOpen, TrendingUp, CheckCircle2, PlayCircle, Clock, Calendar, Trophy, X } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, PlayCircle, Clock, Calendar, Trophy, X } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
 
 function formatStudyTime(totalSeconds: number) {
@@ -164,12 +164,10 @@ export default function StudentIndex() {
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Chào mừng bạn trở lại</h1>
           <p className="mt-2 text-sm text-muted-foreground">Mỗi bài học hôm nay là một bước tiến mới.</p>
         </div>
-        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
           {[
             { label: "Khóa học", value: myCourses.length, icon: BookOpen, tone: "text-primary bg-primary/10" },
-            { label: "Tiến độ", value: `${overallProgress}%`, icon: TrendingUp, tone: "text-success bg-success/10" },
             { label: "Bài hoàn thành", value: totalCompleted, icon: CheckCircle2, tone: "text-accent bg-accent/10" },
-            { label: "Bài hiện tại", value: currentLesson ? `Bài ${currentLesson.order}` : "Hoàn thành", icon: PlayCircle, tone: "text-warning bg-warning/10" },
           ].map(({ label, value, icon: Icon, tone }) => (
             <Card key={label} className="shadow-none">
               <CardContent className="flex min-w-0 items-center gap-3 p-3 sm:p-4">
@@ -210,7 +208,7 @@ export default function StudentIndex() {
         {/* Class Schedule Info */}
         {nextScheduledEnrollment && (
           <Card className="flex min-h-[68px] items-center">
-            <CardContent className="w-full p-4">
+            <CardContent className="w-full p-4 sm:pt-6">
               <div className="mb-2.5 flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <h3 className="text-sm font-semibold">Lịch học</h3>
