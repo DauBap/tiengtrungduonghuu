@@ -29,6 +29,18 @@ interface ScheduleSlot {
   endTime: string;
 }
 
+const DEFAULT_SLOT_DURATION_MINUTES = 90;
+
+function addMinutesToTime(time: string, minutes: number): string | null {
+  const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(time);
+  if (!match) return null;
+
+  const totalMinutes = (Number(match[1]) * 60 + Number(match[2]) + minutes) % (24 * 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const remainingMinutes = totalMinutes % 60;
+  return `${String(hours).padStart(2, "0")}:${String(remainingMinutes).padStart(2, "0")}`;
+}
+
 function parseSchedule(raw: unknown): ScheduleSlot[] {
   if (!Array.isArray(raw)) return [];
   return raw.filter(
@@ -325,7 +337,7 @@ function SchedulePicker({ defaultValue }: { defaultValue: ScheduleSlot[] }) {
   const [slots, setSlots] = useState<ScheduleSlot[]>(defaultValue);
 
   const addSlot = () =>
-    setSlots((prev) => [...prev, { days: [1, 3, 5], startTime: "20:00", endTime: "22:00" }]);
+    setSlots((prev) => [...prev, { days: [1, 3, 5], startTime: "20:00", endTime: "21:30" }]);
 
   const removeSlot = (i: number) =>
     setSlots((prev) => prev.filter((_, idx) => idx !== i));
@@ -341,7 +353,12 @@ function SchedulePicker({ defaultValue }: { defaultValue: ScheduleSlot[] }) {
 
   const updateTime = (slotIdx: number, field: "startTime" | "endTime", value: string) =>
     setSlots((prev) =>
-      prev.map((s, i) => (i === slotIdx ? { ...s, [field]: value } : s))
+      prev.map((s, i) => {
+        if (i !== slotIdx) return s;
+        if (field === "endTime") return { ...s, endTime: value };
+        const endTime = addMinutesToTime(value, DEFAULT_SLOT_DURATION_MINUTES);
+        return { ...s, startTime: value, ...(endTime ? { endTime } : {}) };
+      })
     );
 
   return (

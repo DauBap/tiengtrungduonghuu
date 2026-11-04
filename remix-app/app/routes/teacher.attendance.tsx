@@ -112,7 +112,7 @@ function isAttendanceTasks(value: unknown): value is Record<AttendanceTask, bool
 
 function createEmptyAttendanceRecord(): AttendanceRecord {
   return {
-    status: null,
+    status: "present",
     absenceReason: null,
     tasks: { recording: false, hanzi: false, duet: false, lessonLink: false },
   };
@@ -201,15 +201,50 @@ export async function action({ request }: ActionFunctionArgs) {
       const number = Number(session.title.match(/\d+$/)?.[0] ?? 0);
       return Math.max(highest, number);
     }, 0) + 1;
-    const session = await prisma.attendanceSession.create({
-      data: { classId, title: `Buổi ${nextNumber}`, lesson: "", date: new Date(`${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`) },
-      select: { id: true, title: true, lesson: true, date: true },
+    const enrolledStudents = await prisma.enrollment.findMany({
+      where: {
+        classId,
+        user: { is: { role: "student", isActive: true, deletedAt: null } },
+      },
+      select: { userId: true },
+    });
+    const session = await prisma.$transaction(async (tx) => {
+      const createdSession = await tx.attendanceSession.create({
+        data: {
+          classId,
+          title: `Buổi ${nextNumber}`,
+          lesson: "",
+          date: new Date(`${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`),
+        },
+        select: { id: true, title: true, lesson: true, date: true },
+      });
+      if (enrolledStudents.length > 0) {
+        await tx.attendanceRecord.createMany({
+          data: enrolledStudents.map(({ userId }) => ({
+            sessionId: createdSession.id,
+            studentId: userId,
+            status: "PRESENT",
+          })),
+        });
+      }
+      return createdSession;
     });
     return {
       success: true as const,
       intent,
       classId,
-      session: { ...session, date: session.date.toISOString().slice(0, 10), records: {} },
+      session: {
+        ...session,
+        date: session.date.toISOString().slice(0, 10),
+        records: Object.fromEntries(enrolledStudents.map(({ userId }) => [
+          userId,
+          {
+            status: "present" as const,
+            absenceReason: null,
+            tasks: { recording: false, hanzi: false, duet: false, lessonLink: false },
+          },
+        ])),
+      },
     };
   }
 
