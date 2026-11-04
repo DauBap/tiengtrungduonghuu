@@ -65,11 +65,13 @@ export function BlockRenderer({
   status,
   courseId,
   lessonId,
+  previewOnly = false,
 }: {
   block: ResolvedBlock;
   status: ProgressStatus;
   courseId: string;
   lessonId: string;
+  previewOnly?: boolean;
 }) {
   const fetcher = useFetcher<{
     success?: boolean;
@@ -84,10 +86,12 @@ export function BlockRenderer({
   const isCompleted = effectiveStatus === "COMPLETED";
 
   const markComplete = () => {
+    if (previewOnly) return;
     fetcher.submit({ intent: "complete-block", blockId: block.id }, { method: "post" });
   };
 
   const markFlashcardIncomplete = (knownCount: number, totalCount: number) => {
+    if (previewOnly) return;
     if (!isCompleted) return;
     fetcher.submit({
       intent: "mark-flashcard-incomplete",
@@ -98,6 +102,7 @@ export function BlockRenderer({
   };
 
   const submitListeningAttempt = (answers: { questionId: string; answer: string }[]) => {
+    if (previewOnly) return;
     fetcher.submit(
       {
         intent: "submit-listening-attempt",
@@ -140,6 +145,7 @@ export function BlockRenderer({
           isCompleted={isCompleted}
           onComplete={markComplete}
           onIncomplete={markFlashcardIncomplete}
+          previewOnly={previewOnly}
         />
       </BlockShell>
     );
@@ -175,6 +181,7 @@ export function BlockRenderer({
             : null}
           submissionError={fetcher.data?.listeningError ?? null}
           onComplete={submitListeningAttempt}
+          previewOnly={previewOnly}
         />
       </BlockShell>
     );

@@ -49,6 +49,7 @@ interface ListeningBlockProps {
     results: ListeningAnswerResult[];
   } | null;
   submissionError?: string | null;
+  previewOnly?: boolean;
 }
 
 /** Trộn mảng, không đụng vào mảng gốc */
@@ -73,6 +74,7 @@ export function ListeningBlock({
   isSubmitting = false,
   savedResult = null,
   submissionError = null,
+  previewOnly = false,
 }: ListeningBlockProps) {
   const [round, setRound] = useState(0);
   const items = useMemo(
@@ -200,14 +202,14 @@ export function ListeningBlock({
         togglePlayback();
       } else if (event.key === "Enter") {
         event.preventDefault();
-        if (isLast) submitAttempt();
+        if (isLast && !previewOnly) submitAttempt();
         else next();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [hasSubmitted, isLast, next, submitAttempt, togglePlayback]);
+  }, [hasSubmitted, isLast, next, previewOnly, submitAttempt, togglePlayback]);
 
   if (!question) {
     return (
@@ -402,6 +404,10 @@ export function ListeningBlock({
       <form
         onSubmit={(event) => {
           event.preventDefault();
+          if (previewOnly) {
+            if (!isLast) next();
+            return;
+          }
           if (isComposingRef.current) return;
           if (isLast) submitAttempt();
           else next();
@@ -418,15 +424,16 @@ export function ListeningBlock({
               if (!question) return;
               setAnswersByQuestion((previousAnswers) => ({ ...previousAnswers, [question.id]: event.target.value }));
             }}
+            disabled={previewOnly}
             placeholder={config.answerMode === "pinyin" ? "Nhập pinyin vừa nghe…" : "Nhập câu tiếng Trung vừa nghe…"}
             aria-label={config.answerMode === "pinyin" ? "Đáp án pinyin" : "Đáp án tiếng Trung"}
             className="h-14 border-0 bg-transparent px-4 text-center text-lg shadow-none focus-visible:ring-0"
           />
         </div>
 
-        <p className="hidden -mt-2 text-center text-xs text-muted-foreground md:block">
+        {!previewOnly && <p className="hidden -mt-2 text-center text-xs text-muted-foreground md:block">
           Mẹo: Khi không gõ, nhấn Space để nghe · Enter để {isLast ? "nộp bài" : "sang câu tiếp theo"}
-        </p>
+        </p>}
 
         <div className="flex justify-center border-t pt-3">
           <div className="flex items-center justify-center gap-2">
@@ -439,12 +446,14 @@ export function ListeningBlock({
             >
               <ArrowLeft className="mr-1.5 h-4 w-4" />Câu trước
             </Button>
-            {isLast ? (
+            {isLast ? previewOnly ? (
+              <span className="px-3 text-sm text-muted-foreground">Câu cuối</span>
+            ) : (
               <Button type="submit" size="lg" disabled={isSubmitting} className="min-h-11 px-5 transition-colors duration-150">
                 <Send className="mr-1.5 h-4 w-4" />Nộp bài
               </Button>
             ) : (
-              <Button type="submit" size="lg" disabled={isSubmitting} className="min-h-11 px-5 transition-colors duration-150">
+              <Button type={previewOnly ? "button" : "submit"} onClick={previewOnly ? next : undefined} disabled={isSubmitting} className="min-h-11 px-5 transition-colors duration-150">
                 Câu tiếp theo<ArrowRight className="ml-1.5 h-4 w-4" />
               </Button>
             )}

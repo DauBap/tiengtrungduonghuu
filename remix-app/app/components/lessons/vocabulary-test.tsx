@@ -31,10 +31,12 @@ export function VocabularyTest({
   questionSets,
   timeLimitMinutes,
   isSubmitting = false,
+  previewOnly = false,
 }: {
   questionSets: { sameWordType: VocabularyTestQuestion[]; random: VocabularyTestQuestion[] };
   timeLimitMinutes: number | null;
   isSubmitting?: boolean;
+  previewOnly?: boolean;
 }) {
   const settings = useAppSettings();
   const questions = questionSets.sameWordType;
@@ -99,6 +101,38 @@ export function VocabularyTest({
     `${Math.floor(value / 60).toString().padStart(2, "0")}:${(value % 60).toString().padStart(2, "0")}`;
 
   if (questions.length === 0) return null;
+
+  if (previewOnly) {
+    return (
+      <div className="space-y-4">
+        <p className="rounded-md border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+          Bản xem trước · câu hỏi và lựa chọn được khóa, không thể nộp bài.
+        </p>
+        {questions.map((question, index) => (
+          <section key={question.id} className="space-y-3 rounded-lg border p-4">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="font-mono tabular-nums">{index + 1}.</span>
+              <span>Trung → Việt</span>
+            </div>
+            <div className="flex min-h-36 flex-col items-center justify-center gap-2 rounded-lg border bg-card px-5 py-6 text-center">
+              <p className="content-text hanzi-display text-5xl font-semibold">{question.chinese}</p>
+              {settings.showPinyin && <p className="content-text pinyin-text text-sm text-muted-foreground">{question.pinyin}</p>}
+              {question.wordTypeLabels.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  {question.wordTypeLabels.map((label) => <span key={label} className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-900">{label}</span>)}
+                </div>
+              )}
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {question.translationOptions.map((option) => (
+                <button key={option} type="button" disabled className="min-h-14 rounded-md border px-4 py-3 text-center text-muted-foreground disabled:cursor-not-allowed disabled:opacity-70">{option}</button>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    );
+  }
 
   if (!started) {
     return (

@@ -39,6 +39,7 @@ interface PhoneticsPracticeProps {
   isSaving: boolean;
   submissionError: string | null;
   onSubmitSection: (sectionId: number, answers: { itemId: number; answer: string }[]) => void;
+  previewOnly?: boolean;
 }
 
 /** Ô nhập của một câu, khác nhau theo dạng: initial / final / tone. */
@@ -138,6 +139,7 @@ function PhoneticsSectionCard({
   reviewGroup,
   isSaving,
   onSubmit,
+  previewOnly,
 }: {
   section: PhoneticsSection;
   number: number;
@@ -145,6 +147,7 @@ function PhoneticsSectionCard({
   reviewGroup: PhoneticsSectionReview | null;
   isSaving: boolean;
   onSubmit: (answers: { itemId: number; answer: string }[]) => void;
+  previewOnly: boolean;
 }) {
   const [answers, setAnswers] = useState<Record<number, PhoneticsAnswer>>({});
   const [checked, setChecked] = useState(false);
@@ -351,8 +354,8 @@ function PhoneticsSectionCard({
             item={item}
             number={index + 1}
             value={answers[item.id]}
-            checked={checked}
-            disabled={isSaving}
+            checked={!previewOnly && checked}
+            disabled={previewOnly || isSaving}
             onChange={(value) => {
               setAnswers((previous) => ({ ...previous, [item.id]: value }));
               setChecked(false);
@@ -361,7 +364,7 @@ function PhoneticsSectionCard({
         ))}
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      {!previewOnly && <div className="mt-4 flex flex-wrap gap-2">
         <Button type="button" size="sm" onClick={submit} disabled={isSaving || answeredCount === 0}>
           <Check className="mr-1.5 h-4 w-4" />
           {isSaving ? "Đang lưu…" : "Kiểm tra và lưu điểm"}
@@ -370,9 +373,9 @@ function PhoneticsSectionCard({
           <RotateCcw className="mr-1.5 h-4 w-4" />
           Làm lại
         </Button>
-      </div>
+      </div>}
 
-      {checked ? (
+      {!previewOnly && checked ? (
         <div
           className="mt-4 flex items-center justify-between gap-4 rounded-lg border border-primary/25 bg-primary/5 px-4 py-3"
           aria-live="polite"
@@ -408,6 +411,7 @@ export function PhoneticsPractice({
   isSaving,
   submissionError,
   onSubmitSection,
+  previewOnly = false,
 }: PhoneticsPracticeProps) {
   return (
     <section className="mx-auto max-w-6xl space-y-4" aria-labelledby="phonetics-title">
@@ -434,6 +438,7 @@ export function PhoneticsPractice({
               : reviewGroups.find((group) => group.targetKey === String(section.id)) ?? null
           }
           isSaving={isSaving}
+          previewOnly={previewOnly}
           onSubmit={(answers) => onSubmitSection(section.id, answers)}
         />
       ))}

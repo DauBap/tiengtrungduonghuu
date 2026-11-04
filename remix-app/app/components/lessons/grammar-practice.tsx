@@ -31,7 +31,7 @@ interface QuestionState {
 
 const EMPTY: QuestionState = { text: "", picked: [] };
 
-export function GrammarPractice({ questions, sectionId }: { questions: GrammarPracticeQuestion[]; sectionId: string }) {
+export function GrammarPractice({ questions, sectionId, previewOnly = false }: { questions: GrammarPracticeQuestion[]; sectionId: string; previewOnly?: boolean }) {
   const fetcher = useFetcher<{
     intent?: string;
     success?: boolean;
@@ -66,7 +66,7 @@ export function GrammarPractice({ questions, sectionId }: { questions: GrammarPr
   const savedResult = submitted && fetcher.data?.intent === "submit-grammar-attempt" && fetcher.data.success
     ? fetcher.data
     : null;
-  const locked = Boolean(savedResult) || fetcher.state !== "idle";
+  const locked = previewOnly || Boolean(savedResult) || fetcher.state !== "idle";
   const isLast = index === questions.length - 1;
   const doneCount = questions.filter((item) => {
     const itemState = states[item.id] ?? EMPTY;
@@ -221,7 +221,9 @@ export function GrammarPractice({ questions, sectionId }: { questions: GrammarPr
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-muted/20 p-3">
-        {savedResult ? (
+        {previewOnly ? (
+          <p className="text-sm text-muted-foreground">Chế độ xem trước · câu trả lời đã được khóa.</p>
+        ) : savedResult ? (
           <div>
             {savedResult.reviewPending ? (
               <p className="text-sm font-medium text-muted-foreground">Đã nộp. Đang chờ giáo viên chấm.</p>
@@ -241,17 +243,17 @@ export function GrammarPractice({ questions, sectionId }: { questions: GrammarPr
         ) : (
           <p className="text-sm text-muted-foreground">Trả lời hết câu hỏi để nộp kết quả.</p>
         )}
-        <Button
+        {!previewOnly && <Button
           type="button"
           size="sm"
           onClick={submitAttempt}
           disabled={doneCount !== questions.length || fetcher.state !== "idle" || Boolean(savedResult)}
         >
           {fetcher.state !== "idle" ? "Đang nộp..." : savedResult ? "Đã nộp kết quả" : submitted && fetcher.data?.grammarError ? "Thử nộp lại" : "Nộp kết quả"}
-        </Button>
+        </Button>}
       </div>
 
-      {savedResult && !savedResult.reviewPending && savedResult.results && (
+      {!previewOnly && savedResult && !savedResult.reviewPending && savedResult.results && (
         <section className="space-y-2" aria-label="Kết quả chi tiết">
           {savedResult.results.map((result, resultIndex) => (
             <div

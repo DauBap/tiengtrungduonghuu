@@ -59,12 +59,14 @@ export function GrammarSection({
   latestAttempts,
   answerReviewGroups = [],
   initialReviewQuestionType,
+  previewOnly = false,
 }: {
   section: GrammarSectionData;
   number: number;
   latestAttempts: Partial<Record<GrammarQuestionType, GrammarPracticeSummary>>;
   answerReviewGroups?: GrammarAnswerReviewGroup[];
   initialReviewQuestionType?: GrammarQuestionType;
+  previewOnly?: boolean;
 }) {
   const [practicing, setPracticing] = useState(false);
   const [activeType, setActiveType] = useState<GrammarQuestionType>("SINGLE_CHOICE");
@@ -212,7 +214,7 @@ export function GrammarSection({
                         </Button>
                       )}
                       <Button type="button" size="sm" variant="outline" onClick={() => openPractice(tab.type)}>
-                        {result ? "Làm lại" : "Luyện tập"}
+                        {previewOnly ? "Xem câu hỏi" : result ? "Làm lại" : "Luyện tập"}
                       </Button>
                     </div>
                   )}
@@ -223,7 +225,7 @@ export function GrammarSection({
           {unattemptedPracticeTabs.length > 0 && (
             <Button type="button" variant="destructive" size="sm" onClick={() => openPractice(unattemptedPracticeTabs[0].type)}>
               <ListChecks className="mr-1.5 h-4 w-4" />
-              {latestPracticeTabs.length > 0 ? "Luyện dạng khác" : "Bắt đầu luyện tập"}
+              {previewOnly ? "Xem câu hỏi" : latestPracticeTabs.length > 0 ? "Luyện dạng khác" : "Bắt đầu luyện tập"}
             </Button>
           )}
         </div>
@@ -346,7 +348,7 @@ export function GrammarSection({
                     aria-labelledby={tabId}
                     hidden={activeType !== tab.type}
                   >
-                      <GrammarPractice questions={questions} sectionId={section.id} />
+                      <GrammarPractice questions={questions} sectionId={section.id} previewOnly={previewOnly} />
                   </section>
                 );
               })}

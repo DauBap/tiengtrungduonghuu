@@ -32,6 +32,7 @@ interface FlashcardBlockProps {
   onComplete: () => void;
   onIncomplete?: (knownCount: number, totalCount: number) => void;
   progressStorageKey?: string;
+  previewOnly?: boolean;
 }
 
 function shuffled<T>(arr: T[]): T[] {
@@ -43,7 +44,7 @@ function shuffled<T>(arr: T[]): T[] {
   return copy;
 }
 
-export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted, onComplete, onIncomplete, progressStorageKey }: FlashcardBlockProps) {
+export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted, onComplete, onIncomplete, progressStorageKey, previewOnly = false }: FlashcardBlockProps) {
   const settings = useAppSettings();
   const storageKey = progressStorageKey ?? `flashcard-progress:${courseId}:${lessonId}`;
   const [round, setRound] = useState(0);
@@ -70,6 +71,10 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
 
   useEffect(() => {
     setSpeechReady(isSpeechSupported());
+    if (previewOnly) {
+      setHydrated(true);
+      return;
+    }
     try {
       const saved = window.localStorage.getItem(storageKey);
       if (saved) {
@@ -86,17 +91,17 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
     } finally {
       setHydrated(true);
     }
-  }, [storageKey]);
+  }, [previewOnly, storageKey]);
 
   useEffect(() => {
-    if (hydrated) {
+    if (!previewOnly && hydrated) {
       try {
         window.localStorage.setItem(storageKey, JSON.stringify(statuses));
       } catch {
         // Bỏ qua khi trình duyệt không cho phép ghi localStorage.
       }
     }
-  }, [hydrated, statuses, storageKey]);
+  }, [hydrated, previewOnly, statuses, storageKey]);
 
   useEffect(() => () => {
     if (transitionTimerRef.current !== null) {
@@ -113,7 +118,8 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
       return;
     }
     if (
-      !hydrated
+      previewOnly
+      || !hydrated
       || completionSubmitted.current
       || !allKnown
     ) {
@@ -122,7 +128,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
 
     completionSubmitted.current = true;
     onComplete();
-  }, [allKnown, hydrated, isCompleted, onComplete]);
+  }, [allKnown, hydrated, isCompleted, onComplete, previewOnly]);
 
   const card = cards.find((item) => item.id === (randomCardId ?? queue[sequenceIndex]));
   const counts = useMemo(() => {
@@ -234,10 +240,10 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
       }
       setIsTransitioning(false);
     }, 280);
-  }, [card, isTransitioning, items, onIncomplete, queue.length, sequenceIndex, statuses]);
+  }, [card, isTransitioning, items, onIncomplete, previewOnly, queue.length, sequenceIndex, statuses]);
 
   const handleCardPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (!event.isPrimary || isTransitioning) return;
+    if (previewOnly || !event.isPrimary || isTransitioning) return;
     pointerStart.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
     isDragging.current = false;
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -306,6 +312,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
   };
 
   const resetProgress = () => {
+    if (previewOnly) return;
     if (!window.confirm("Bạn có chắc muốn xóa toàn bộ trạng thái từ vựng của bài này không?")) return;
     window.localStorage.removeItem(storageKey);
     setStatuses({});
@@ -318,11 +325,11 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
       if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
       if (event.key === "ArrowLeft") { event.preventDefault(); goTo(sequenceIndex - 1); }
       else if (event.key === "ArrowRight") { event.preventDefault(); goTo(sequenceIndex + 1); }
-      else if (event.key === " " || event.key === "Enter") { event.preventDefault(); flip(); }
+      else if (!previewOnly && (event.key === " " || event.key === "Enter")) { event.preventDefault(); flip(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [flip, goTo, sequenceIndex]);
+  }, [flip, goTo, previewOnly, sequenceIndex]);
 
   if (!card && !finished) {
     return <p className="py-8 text-center text-sm text-muted-foreground">Block này chưa có thẻ nào. Vui lòng liên hệ giáo viên.</p>;
@@ -343,6 +350,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
                 : "Vẫn còn từ chưa thuộc hoặc chưa đánh giá. Lượt học này chưa được tính là hoàn thành."}
             </p>
           </div>
+          {previewOnly && <p className="text-sm text-muted-foreground">Bản xem trước · tiến độ học không được lưu.</p>}
           <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
             <div className="rounded-lg border bg-success/5 p-3"><strong className="block text-lg text-success">{counts.known}</strong>Đã thuộc</div>
             <div className="rounded-lg border bg-destructive/5 p-3"><strong className="block text-lg text-destructive">{counts.unknown}</strong>Chưa thuộc</div>
@@ -374,13 +382,13 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
+      {!previewOnly && <div className="flex flex-wrap items-center gap-2">
         <div className="flex gap-1 rounded-md border p-1">
           <Button size="sm" variant={mode === "all" ? "destructive" : "ghost"} onClick={() => startSession("all")} disabled={isTransitioning}>TẤT CẢ TỪ</Button>
           <Button size="sm" variant={mode === "unknown" ? "destructive" : "ghost"} onClick={() => startSession("unknown")} disabled={isTransitioning || counts.toReview === 0}>TỪ CHƯA THUỘC</Button>
         </div>
         <span className="ml-auto text-xs text-muted-foreground tabular-nums">Đã thuộc {counts.known} · Chưa thuộc {counts.unknown} · Chưa đánh giá {counts.unreviewed} · Tổng {counts.total}</span>
-      </div>
+      </div>}
       <div className="flex items-center gap-3">
         <Progress value={(position / queue.length) * 100} className="h-1.5 flex-1" />
         <span className="shrink-0 text-xs font-medium text-muted-foreground tabular-nums">{position}/{queue.length}</span>
@@ -391,10 +399,10 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
           key={card.id}
           type="button"
           onClick={handleCardClick}
-          onPointerDown={handleCardPointerDown}
-          onPointerMove={handleCardPointerMove}
-          onPointerUp={finishCardPointer}
-          onPointerCancel={cancelCardPointer}
+          onPointerDown={previewOnly ? undefined : handleCardPointerDown}
+          onPointerMove={previewOnly ? undefined : handleCardPointerMove}
+          onPointerUp={previewOnly ? undefined : finishCardPointer}
+          onPointerCancel={previewOnly ? undefined : cancelCardPointer}
           disabled={isTransitioning}
           ref={cardElementRef}
           className="group relative block w-full touch-pan-y select-none [perspective:1200px]"
@@ -414,7 +422,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
               : "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease-out",
             willChange: "transform, opacity",
           }}
-          aria-label={flipped ? "Xem mặt trước; vuốt trái để đánh dấu đã thuộc, vuốt phải để đánh dấu chưa thuộc" : "Xem mặt sau; vuốt trái để đánh dấu đã thuộc, vuốt phải để đánh dấu chưa thuộc"}
+          aria-label={previewOnly ? (flipped ? "Xem mặt trước" : "Xem mặt sau") : (flipped ? "Xem mặt trước; vuốt trái để đánh dấu đã thuộc, vuốt phải để đánh dấu chưa thuộc" : "Xem mặt sau; vuốt trái để đánh dấu đã thuộc, vuốt phải để đánh dấu chưa thuộc")}
         >
           <div className={cn("relative h-72 w-full transition-transform duration-500 [transform-style:preserve-3d]", flipped && "[transform:rotateY(180deg)]")}>
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/20 bg-primary/5 p-6 transition-colors [backface-visibility:hidden] group-hover:border-primary/40">
@@ -431,7 +439,7 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
           </div>
         </button>
       </div>
-      <p className="-mt-2 text-center text-xs text-muted-foreground">Vuốt trái: đã thuộc · Vuốt phải: chưa thuộc</p>
+      {!previewOnly && <p className="-mt-2 text-center text-xs text-muted-foreground">Vuốt trái: đã thuộc · Vuốt phải: chưa thuộc</p>}
 
       <div className="flex items-center justify-between gap-2">
         <Button variant="outline" size="sm" onClick={() => goTo(sequenceIndex - 1)} disabled={sequenceIndex === 0 || isTransitioning}><ChevronLeft className="mr-1 h-4 w-4" />Trước</Button>
@@ -443,14 +451,14 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
         <Button variant="outline" size="sm" onClick={() => goTo(sequenceIndex + 1)} disabled={sequenceIndex === queue.length - 1 || isTransitioning}>Sau<ChevronRight className="ml-1 h-4 w-4" /></Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 border-t pt-3">
+      {!previewOnly && <div className="grid grid-cols-2 gap-2 border-t pt-3">
         <Button variant={statuses[card.id] === "known" ? "secondary" : "outline"} onClick={() => mark("known")} disabled={isTransitioning} className="border-success/40 text-success hover:bg-success/10"><Check className="mr-1.5 h-4 w-4" />ĐÃ THUỘC</Button>
         <Button variant={statuses[card.id] === "unknown" ? "secondary" : "outline"} onClick={() => mark("unknown")} disabled={isTransitioning} className="border-destructive/40 text-destructive hover:bg-destructive/10"><X className="mr-1.5 h-4 w-4" />CHƯA THUỘC</Button>
-      </div>
-      <div className="flex items-center justify-between border-t pt-2">
+      </div>}
+      {!previewOnly && <div className="flex items-center justify-between border-t pt-2">
         <Button variant="ghost" size="sm" onClick={() => startSession(mode)} disabled={isTransitioning}><RefreshCw className="mr-1.5 h-4 w-4" />Học lại lượt này</Button>
         <Button variant="ghost" size="sm" onClick={resetProgress} disabled={isTransitioning}><Trash2 className="mr-1.5 h-4 w-4" />Đặt lại tiến độ</Button>
-      </div>
+      </div>}
       {mode === "unknown" && unknownItems.length > 0 && (
         <section className="space-y-3 border-t pt-4">
           <h3 className="text-lg font-semibold">Từ chưa thuộc ({unknownItems.length})</h3>

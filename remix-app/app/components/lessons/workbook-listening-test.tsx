@@ -60,6 +60,7 @@ export function WorkbookListeningTest({
   isSaving = false,
   savedResult = null,
   submissionError = null,
+  previewOnly = false,
 }: {
   config: WorkbookConfig;
   blockTitle: string;
@@ -74,6 +75,7 @@ export function WorkbookListeningTest({
     answers: { id: string; given: string }[];
   } | null;
   submissionError?: string | null;
+  previewOnly?: boolean;
 }) {
   const appSettings = useAppSettings();
   const showPinyin = config.showPinyin && appSettings.showPinyin;
@@ -107,7 +109,7 @@ export function WorkbookListeningTest({
 
   // Timer countdown
   useEffect(() => {
-    if (!config.timeLimit || timeRemaining <= 0 || isSubmitted) return;
+    if (previewOnly || !config.timeLimit || timeRemaining <= 0 || isSubmitted) return;
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
@@ -117,13 +119,13 @@ export function WorkbookListeningTest({
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [config.timeLimit, timeRemaining, isSubmitted]);
+  }, [config.timeLimit, timeRemaining, isSubmitted, previewOnly]);
 
   useEffect(() => {
-    if (config.timeLimit > 0 && timeRemaining === 0 && !isSubmitted) {
+    if (!previewOnly && config.timeLimit > 0 && timeRemaining === 0 && !isSubmitted) {
       submitAttemptRef.current();
     }
-  }, [config.timeLimit, timeRemaining, isSubmitted]);
+  }, [config.timeLimit, timeRemaining, isSubmitted, previewOnly]);
 
   useEffect(() => {
     if (submissionError && !isSaving) setIsSubmitted(false);
@@ -283,7 +285,7 @@ export function WorkbookListeningTest({
         </div>
       </Card>
 
-      {isAwaitingTeacherReview && isSubmitted && (
+      {!previewOnly && isAwaitingTeacherReview && isSubmitted && (
         <Card className="border-amber-500/40 bg-amber-500/5 p-4">
           <p className="text-sm font-medium">
             Lượt làm trước có {savedResult?.pendingReviewCount} câu đang chờ giáo viên chấm.
@@ -374,6 +376,7 @@ export function WorkbookListeningTest({
                 showTranslation={config.showTranslation}
                 showPinyin={showPinyin}
                 isSubmitted={isSubmitted}
+                previewOnly={previewOnly}
                 reviewResult={reviewResults.get(question.id)}
               />
             ))}
@@ -381,7 +384,11 @@ export function WorkbookListeningTest({
         </Card>
       ))}
       <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
-        {isSubmitted ? (
+        {previewOnly ? (
+          <div className="space-y-2 border-t pt-4">
+            <p className="text-sm text-muted-foreground">Bản xem trước · không thể nhập đáp án hoặc nộp bài.</p>
+          </div>
+        ) : isSubmitted ? (
           <div>
             <p className="text-sm font-medium">
               {savedResult && !isSaving
@@ -408,7 +415,7 @@ export function WorkbookListeningTest({
         ) : (
           <p className="text-sm text-muted-foreground">Đã trả lời {Object.values(answers).filter(Boolean).length}/{questions.length} câu</p>
         )}
-        {!isSubmitted
+        {!previewOnly && !isSubmitted
           ? <Button type="button" onClick={submitAttempt} disabled={isSaving}>Nộp bài</Button>
           : savedResult && savedResult.pendingReviewCount === 0 && !isSaving
             ? <Button type="button" variant="outline" onClick={() => {
@@ -429,6 +436,7 @@ function QuestionCard({
   showTranslation = true,
   showPinyin = true,
   isSubmitted = false,
+  previewOnly = false,
   reviewResult,
 }: {
   question: Question;
@@ -438,6 +446,7 @@ function QuestionCard({
   showTranslation?: boolean;
   showPinyin?: boolean;
   isSubmitted?: boolean;
+  previewOnly?: boolean;
   reviewResult?: { correct: boolean | null; correctAnswer: string } | undefined;
 }) {
   const isAnswered = !!selectedAnswer;
@@ -508,7 +517,7 @@ function QuestionCard({
             value={selectedAnswer ?? ""}
             onChange={(event) => onAnswer(event.target.value)}
             placeholder="Nhập đáp án"
-            disabled={isSubmitted}
+            disabled={previewOnly || isSubmitted}
             aria-label={`Đáp án câu ${question.number}`}
           />
           {showResults && reviewResult?.correctAnswer && (
@@ -541,7 +550,7 @@ function QuestionCard({
                 !showResults && !isSubmitted && !isSelected && "hover:border-primary hover:bg-primary/5",
                 !showResults && !isSubmitted && isSelected && "border-primary bg-primary/5"
               )}
-              disabled={showResults || isSubmitted}
+              disabled={previewOnly || showResults || isSubmitted}
             >
               <div className={cn(
                 "option-label flex shrink-0 items-center justify-center rounded-full border-2 font-medium transition-colors",

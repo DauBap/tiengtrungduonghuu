@@ -1,7 +1,7 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Link, redirect, useLoaderData, useSearchParams } from "react-router";
 import { useState } from "react";
-import { ArrowLeft, BookOpen, Check, Download, MessageSquareText, UserRound, X } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, Download, Eye, MessageSquareText, UserRound, X } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { EmptyState } from "~/components/common/empty-state";
 import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
@@ -335,6 +335,13 @@ export default function TeacherLessonProgress() {
               <h1 className="mt-1 text-2xl font-bold tracking-tight">{lesson.title}</h1>
               <p className="mt-1 text-sm text-muted-foreground">{lesson.subtitle}</p>
             </div>
+            <Button asChild variant="outline" className="ml-auto shrink-0">
+              <Link to={`/teacher/courses/${course.id}/lessons/${lesson.id}/preview`}>
+                <Eye className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Xem bài như học viên</span>
+                <span className="sm:hidden">Xem bài</span>
+              </Link>
+            </Button>
           </div>
         </div>
 
