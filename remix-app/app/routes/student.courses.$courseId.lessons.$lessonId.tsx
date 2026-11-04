@@ -2549,13 +2549,13 @@ export default function LessonDetail() {
                   )}
                 </div>
                 <div className="rounded-xl border bg-background p-4">
-                  <div className="flex items-center justify-center">
+                  <div className="flex min-w-0 items-center gap-1">
                     {selectedAudioScript.audioUrl ? (
                       <audio
                         key={selectedAudioScript.id}
                         controls
                         loop={autoReplayLessonAudio}
-                        className="w-full"
+                        className="min-w-0 flex-1"
                         src={selectedAudioScript.audioUrl}
                       >
                         <source src={selectedAudioScript.audioUrl} />
@@ -2565,24 +2565,26 @@ export default function LessonDetail() {
                         Chưa có file nghe cho bài khóa này.
                       </div>
                     )}
-                  </div>
-                  {selectedAudioScript.audioUrl && (
-                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
+                    {selectedAudioScript.audioUrl && (
                       <Button
                         type="button"
-                        variant={autoReplayLessonAudio ? "secondary" : "outline"}
-                        size="sm"
+                        variant="outline"
+                        size="icon"
+                        className={cn(
+                          "h-9 w-9 shrink-0 rounded-full",
+                          autoReplayLessonAudio
+                            ? "border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:text-destructive-foreground"
+                            : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:text-slate-900",
+                        )}
                         aria-pressed={autoReplayLessonAudio}
+                        aria-label={autoReplayLessonAudio ? "Tắt phát lại tự động" : "Bật phát lại tự động"}
+                        title={autoReplayLessonAudio ? "Tắt phát lại tự động" : "Bật phát lại tự động"}
                         onClick={() => setAutoReplayLessonAudio((enabled) => !enabled)}
                       >
-                        <Repeat2 className="mr-2 h-4 w-4" />
-                        Phát lại tự động
+                        <Repeat2 className="h-4 w-4" />
                       </Button>
-                      <span className="text-xs text-muted-foreground">
-                        {autoReplayLessonAudio ? "Lặp liên tục đang bật" : "Lặp liên tục đang tắt"}
-                      </span>
-                    </div>
-                  )}
+                    )}
+                  </div>
                   <div className="mt-4 border-t pt-4">
                     <Button
                       type="button"
