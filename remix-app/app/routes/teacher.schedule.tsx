@@ -52,7 +52,7 @@ function getScheduleSlots(value: unknown): ScheduleSlot[] {
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
   const classes = await prisma.class.findMany({
-    where: { teacherId: user.id },
+    where: { teacherId: user.id, completedAt: null },
     select: {
       id: true,
       name: true,

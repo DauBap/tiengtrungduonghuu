@@ -71,7 +71,7 @@ export async function getEnrolledCoursesWithClass(userId: string) {
 /** Lấy danh sách course mà teacher phụ trách (qua Class). */
 export async function getTeacherCourses(teacherId: string) {
   const classes = await prisma.class.findMany({
-    where: { teacherId },
+    where: { teacherId, completedAt: null },
     include: { course: true },
     orderBy: { course: { order: "asc" } },
   });

@@ -56,6 +56,20 @@ GitHub Actions kiểm tra `https://tiengtrungduonghuu.edu.vn/` mỗi 5 phút và
 4. Trong **Settings → Actions → General → Workflow permissions**, cho phép workflow có quyền đọc và ghi repository actions/variables nếu cài đặt repository yêu cầu.
 5. Sau khi push workflow lên nhánh mặc định, mở **Actions → Server uptime monitor → Run workflow** để chạy thử.
 
+## Tự động deploy production
+
+Workflow `.github/workflows/deploy-production.yml` chạy khi push lên `main` hoặc khi được chạy thủ công trong **Actions**. Workflow kết nối Tailscale, SSH vào Ubuntu, cập nhật code theo kiểu fast-forward, cài dependencies, generate Prisma Client, build rồi restart `tiengtrungduonghuu.service`; kết quả deploy được gửi qua Telegram.
+
+Trước khi bật workflow:
+
+1. Tạo Tailscale OAuth client với scope `auth_keys`, cho phép tag `tag:github-actions`, và cấu hình Tailnet policy để tag đó được SSH tới máy Ubuntu `100.98.11.60:22`.
+2. Tạo SSH key riêng cho deploy, thêm public key vào `/home/baotn/.ssh/authorized_keys`; lưu private key thành GitHub Actions secret `PRODUCTION_SSH_KEY`.
+3. Xác minh SSH host key của Ubuntu qua Tailscale rồi lưu dòng `known_hosts` tương ứng thành secret `PRODUCTION_SSH_KNOWN_HOSTS`.
+4. Tạo các repository secrets `TS_OAUTH_CLIENT_ID` và `TS_OAUTH_SECRET` từ OAuth client. Hai secrets `TELEGRAM_BOT_TOKEN` và `TELEGRAM_CHAT_ID` được dùng chung với workflow uptime.
+5. Cho phép user `baotn` restart và kiểm tra riêng service ứng dụng không cần nhập mật khẩu sudo; workflow dùng `sudo -n` và sẽ báo lỗi nếu chưa được cấp quyền.
+
+Workflow chỉ deploy code, **không chạy `prisma db push`**. Thay đổi schema cần được backup, xem xét cảnh báo và đồng bộ production theo quy trình riêng trước khi restart app.
+
 Workflow lưu trạng thái lần kiểm tra trước trong GitHub Actions cache để chỉ gửi tin khi trạng thái thay đổi; không cần token GitHub bổ sung hay quyền ghi repository. Cảnh báo được phát hiện trong tối đa khoảng 5 phút cộng thời gian GitHub Actions khởi chạy; lịch chạy GitHub có thể trễ khi hệ thống bận. Nếu app không có URL công khai thì cần một thiết bị giám sát khác bên ngoài server.
 
 ## MeloTTS trên server
@@ -135,6 +149,8 @@ remix-app/
 - **Migration**: dự án không có migration history, dùng `prisma db push`. `migrate dev` sẽ yêu cầu reset DB.
   Khi cập nhật phiên bản có thay đổi `prisma/schema.prisma`, hãy chạy `npx prisma db push` trong `remix-app/`
   để tạo/cập nhật bảng trước khi khởi động ứng dụng.
+  Trạng thái lớp đã kết thúc được lưu ở `Class.completedAt`; đồng bộ schema trước khi triển khai thay đổi này.
+  Trạng thái này chỉ ẩn lớp khỏi các danh sách giảng dạy của giáo viên, không xóa đăng ký hay quyền học của học sinh.
   Tài khoản học viên do giáo viên tạo cần đồng bộ field `User.isActivated`; admin phải xác nhận kích hoạt
   trong tab **Chưa được kích hoạt** trước khi học viên có thể đăng nhập.
   Trạng thái online của giáo viên/học viên dùng `User.lastSeenAt`, được cập nhật khi người dùng tương tác

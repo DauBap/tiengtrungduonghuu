@@ -12,7 +12,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (query.length > 100) return { query, students: [] };
 
   const cls = await prisma.class.findFirst({
-    where: { id: classId, teacherId: user.id },
+    where: { id: classId, teacherId: user.id, completedAt: null },
     select: { courseId: true },
   });
   if (!cls) throw new Response("Không tìm thấy lớp hoặc bạn không được phân công lớp này.", { status: 404 });

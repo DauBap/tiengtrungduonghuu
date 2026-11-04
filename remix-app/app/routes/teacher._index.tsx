@@ -131,7 +131,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const initialWorkbookAttemptId = searchParams.get("gradeWorkbookAttemptId");
   const myCourses = await getTeacherCourses(user.id);
   const myClasses = await prisma.class.findMany({
-    where: { teacherId: user.id },
+    where: { teacherId: user.id, completedAt: null },
     include: {
       course: { select: { id: true, title: true, code: true, hskLevel: true, description: true, order: true } },
       enrollments: {

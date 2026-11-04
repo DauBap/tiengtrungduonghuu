@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { requireRole } from "~/lib/session.server";
 import { prisma } from "~/lib/prisma.server";
 import { DEFAULT_ACCOUNT_PASSWORD } from "~/lib/account-credentials";
-import { Loader2, Plus, UserPlus, Users, X } from "lucide-react";
+import { Archive, CheckCircle2, Loader2, Plus, UserPlus, Users, X } from "lucide-react";
 import { toast } from "sonner";
 
 type ActionResult =
@@ -24,7 +24,8 @@ type ActionResult =
       studentName: string;
       email: string;
       initialPassword?: string;
-    };
+    }
+  | { success: true; kind: "completed"; classId: string };
 
 function parseStudentDetails(form: FormData) {
   const name = String(form.get("name") ?? "").trim();
@@ -58,6 +59,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       id: true,
       name: true,
       maxStudents: true,
+      completedAt: true,
       course: { select: { id: true, code: true, title: true, hskLevel: true } },
       enrollments: {
         where: { user: { is: { role: "student", deletedAt: null } } },
@@ -78,6 +80,16 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
   const intent = String(form.get("intent") ?? "");
   const classId = String(form.get("classId") ?? "").trim();
   if (!classId) return { error: "Vui lòng chọn lớp học." };
+  if (intent === "complete-class") {
+    const result = await prisma.class.updateMany({
+      where: { id: classId, teacherId: user.id, completedAt: null },
+      data: { completedAt: new Date() },
+    });
+    if (result.count === 0) {
+      return { error: "Không tìm thấy lớp đang dạy hoặc lớp đã được kết thúc.", classId };
+    }
+    return { success: true, kind: "completed", classId };
+  }
   if (intent !== "create-student" && intent !== "add-existing-student") {
     return { error: "Thao tác không hợp lệ.", classId };
   }
@@ -86,9 +98,10 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
     return await prisma.$transaction(async (tx): Promise<ActionResult> => {
       const cls = await tx.class.findFirst({
         where: { id: classId, teacherId: user.id },
-        select: { id: true, courseId: true, name: true, maxStudents: true },
+        select: { id: true, courseId: true, name: true, maxStudents: true, completedAt: true },
       });
       if (!cls) return { error: "Không tìm thấy lớp hoặc bạn không được phân công lớp này.", classId };
+      if (cls.completedAt) return { error: "Lớp đã kết thúc nên không thể thêm học viên.", classId };
 
       const occupiedSeats = await tx.enrollment.count({
         where: {
@@ -204,16 +217,29 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
 export default function TeacherClassesPage() {
   const { user, classes } = useLoaderData<typeof loader>();
   const [selectedClassId, setSelectedClassId] = useState(classes[0]?.id ?? "");
+  const [classView, setClassView] = useState<"active" | "completed">("active");
+  const [optimisticallyCompletedClassIds, setOptimisticallyCompletedClassIds] = useState<string[]>([]);
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "existing" | null>(null);
   const [studentQuery, setStudentQuery] = useState("");
   const [searchedQuery, setSearchedQuery] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<{ id: string; name: string; email: string } | null>(null);
   const createFetcher = useFetcher<typeof action>();
   const existingFetcher = useFetcher<typeof action>();
+  const completeFetcher = useFetcher<typeof action>();
   const searchFetcher = useFetcher<{ query: string; students: { id: string; name: string; email: string }[] }>();
-  const selectedClass = classes.find((item) => item.id === selectedClassId);
+  const optimisticallyCompletedClassIdSet = new Set(optimisticallyCompletedClassIds);
+  const activeClasses = classes.filter((item) =>
+    !item.completedAt && !optimisticallyCompletedClassIdSet.has(item.id)
+  );
+  const completedClasses = classes.filter((item) =>
+    Boolean(item.completedAt) || optimisticallyCompletedClassIdSet.has(item.id)
+  );
+  const visibleClasses = classView === "active" ? activeClasses : completedClasses;
+  const selectedClass = visibleClasses.find((item) => item.id === selectedClassId) ?? visibleClasses[0];
   const createBusy = createFetcher.state !== "idle";
   const existingBusy = existingFetcher.state !== "idle";
+  const isCompleting = completeFetcher.state !== "idle";
   const normalizedStudentQuery = studentQuery.trim();
   const searchResults = searchFetcher.data?.query === normalizedStudentQuery
     ? searchFetcher.data.students
@@ -230,18 +256,45 @@ export default function TeacherClassesPage() {
     && "success" in createFetcher.data
     && createFetcher.data.success
     && createFetcher.data.kind === "created"
+    && "studentName" in createFetcher.data
     && createFetcher.data.classId === selectedClass?.id
     ? createFetcher.data
     : null;
 
   useEffect(() => {
     if (modalMode === "existing" && existingFetcher.state === "idle"
-      && existingFetcher.data && "success" in existingFetcher.data && existingFetcher.data.success) {
+      && existingFetcher.data && "success" in existingFetcher.data && existingFetcher.data.success
+      && "studentName" in existingFetcher.data) {
       toast.success(`Đã thêm ${existingFetcher.data.studentName} vào lớp.`);
       existingFetcher.reset();
       setModalMode(null);
     }
   }, [modalMode, existingFetcher.state, existingFetcher.data]);
+
+  useEffect(() => {
+    const result = completeFetcher.data;
+    if (!result || !("kind" in result) || result.kind !== "completed") {
+      if (result && "error" in result) toast.error(result.error);
+      return;
+    }
+    toast.success("Đã chuyển lớp sang danh sách lớp học đã kết thúc.");
+    setOptimisticallyCompletedClassIds((current) =>
+      current.includes(result.classId) ? current : [...current, result.classId]
+    );
+    setShowCompleteDialog(false);
+    setClassView("completed");
+    setSelectedClassId(result.classId);
+    completeFetcher.reset();
+  }, [completeFetcher.data]);
+
+  useEffect(() => {
+    if (!showCompleteDialog || isCompleting) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowCompleteDialog(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [showCompleteDialog, isCompleting]);
 
   useEffect(() => {
     const query = normalizedStudentQuery;
@@ -276,6 +329,23 @@ export default function TeacherClassesPage() {
     setSelectedStudent(null);
     setModalMode(null);
   };
+  const changeClassView = (view: "active" | "completed") => {
+    const nextClasses = view === "active" ? activeClasses : completedClasses;
+    setClassView(view);
+    setSelectedClassId(nextClasses[0]?.id ?? "");
+    closeModal();
+  };
+  const completeSelectedClass = () => {
+    if (!selectedClass) return;
+    setShowCompleteDialog(true);
+  };
+  const confirmCompleteClass = () => {
+    if (!selectedClass) return;
+    completeFetcher.submit(
+      { intent: "complete-class", classId: selectedClass.id },
+      { method: "post" },
+    );
+  };
 
   return (
     <AppShell user={user}>
@@ -284,6 +354,51 @@ export default function TeacherClassesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Lớp học</h1>
           <p className="text-sm text-muted-foreground">Tạo tài khoản học viên mới hoặc thêm tài khoản đã có vào lớp bạn phụ trách.</p>
         </header>
+
+        {showCompleteDialog && selectedClass && (
+          <Overlay onClose={() => setShowCompleteDialog(false)} className="max-w-md">
+            <section
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="complete-class-title"
+              aria-describedby="complete-class-description"
+              className="space-y-5"
+            >
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <CheckCircle2 aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 space-y-1">
+                  <h2 id="complete-class-title" className="text-lg font-semibold">Hoàn thành lớp học?</h2>
+                  <p className="break-words text-sm font-medium text-foreground">{selectedClass.name}</p>
+                  <p id="complete-class-description" className="text-sm leading-relaxed text-muted-foreground">
+                    Lớp sẽ được chuyển sang tab “Lớp học đã kết thúc” và không còn xuất hiện trong lịch dạy. Học sinh vẫn xem bài và tiếp tục làm bài như bình thường.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowCompleteDialog(false)}
+                  disabled={isCompleting}
+                  className="w-full sm:w-auto"
+                >
+                  Để sau
+                </Button>
+                <Button
+                  type="button"
+                  onClick={confirmCompleteClass}
+                  disabled={isCompleting}
+                  className="w-full sm:w-auto"
+                >
+                  {isCompleting && <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />}
+                  {isCompleting ? "Đang hoàn thành..." : "Hoàn thành lớp"}
+                </Button>
+              </div>
+            </section>
+          </Overlay>
+        )}
 
         {classes.length === 0 ? (
           <Card>
@@ -297,6 +412,39 @@ export default function TeacherClassesPage() {
           </Card>
         ) : (
           <>
+            <div className="flex flex-wrap gap-2 border-b" role="tablist" aria-label="Trạng thái lớp học">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={classView === "active"}
+                onClick={() => changeClassView("active")}
+                className={`-mb-px inline-flex min-h-11 items-center gap-2 border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${classView === "active" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+              >
+                Lớp đang dạy <span className="tabular-nums">{activeClasses.length}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={classView === "completed"}
+                onClick={() => changeClassView("completed")}
+                className={`-mb-px inline-flex min-h-11 items-center gap-2 border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${classView === "completed" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+              >
+                Lớp học đã kết thúc <span className="tabular-nums">{completedClasses.length}</span>
+              </button>
+            </div>
+            {visibleClasses.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+                  {classView === "completed" ? <Archive className="h-8 w-8 text-muted-foreground" /> : <Users className="h-8 w-8 text-muted-foreground" />}
+                  <div>
+                    <h2 className="font-semibold">{classView === "completed" ? "Chưa có lớp học đã kết thúc" : "Bạn chưa được phân công lớp đang dạy"}</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {classView === "completed" ? "Các lớp bạn hoàn thành sẽ được lưu tại đây." : "Liên hệ quản trị viên để được thêm vào lớp học."}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
             <div className="grid gap-5 lg:grid-cols-[minmax(15rem,0.8fr)_minmax(0,1.5fr)]">
               <section className="space-y-2">
                 <Label htmlFor="class-select">Chọn lớp</Label>
@@ -309,7 +457,7 @@ export default function TeacherClassesPage() {
                   }}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  {classes.map((cls) => (
+                  {visibleClasses.map((cls) => (
                     <option key={cls.id} value={cls.id}>{cls.name} · {cls.course.code}</option>
                   ))}
                 </select>
@@ -320,34 +468,28 @@ export default function TeacherClassesPage() {
                 )}
               </section>
 
-              {selectedClass && (
+              {selectedClass && classView === "active" && (
                 <section className="flex flex-col justify-end gap-3 sm:flex-row">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => openModal("existing")}
-                    disabled={selectedClass.enrollments.length >= selectedClass.maxStudents}
-                  >
-                    <UserPlus className="mr-2 h-4 w-4" />Thêm tài khoản có sẵn
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => openModal("create")}
-                    disabled={selectedClass.enrollments.length >= selectedClass.maxStudents}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />Tạo tài khoản học viên
+                  <Button type="button" variant="outline" onClick={completeSelectedClass} disabled={isCompleting} className="w-full sm:w-auto">
+                    <CheckCircle2 className="mr-2 h-4 w-4" />{isCompleting ? "Đang hoàn thành..." : "Hoàn thành lớp học"}
                   </Button>
                 </section>
               )}
+              {selectedClass && classView === "completed" && (
+                <p className="text-sm text-muted-foreground sm:self-end">
+                  Học sinh vẫn có thể truy cập khóa học và tiếp tục làm bài.
+                </p>
+              )}
             </div>
+            )}
 
-            {selectedClass && selectedClass.enrollments.length >= selectedClass.maxStudents && (
+            {classView === "active" && selectedClass && selectedClass.enrollments.length >= selectedClass.maxStudents && (
               <p role="status" className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2.5 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
                 Lớp đã đủ {selectedClass.maxStudents} học viên. Liên hệ quản trị viên nếu cần tăng sĩ số.
               </p>
             )}
 
-            {modalMode === "create" && selectedClass && (
+            {classView === "active" && modalMode === "create" && selectedClass && (
               <Overlay onClose={closeModal} className="max-w-xl">
                 <div className="space-y-5">
                   <div className="flex items-start justify-between gap-4">
@@ -421,7 +563,7 @@ export default function TeacherClassesPage() {
               </Overlay>
             )}
 
-            {modalMode === "existing" && selectedClass && (
+            {classView === "active" && modalMode === "existing" && selectedClass && (
               <Overlay onClose={closeModal} className="max-w-xl">
                 <div className="space-y-5">
                   <div className="flex items-start justify-between gap-4">
@@ -537,7 +679,7 @@ export default function TeacherClassesPage() {
 
             {selectedClass && (
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between gap-3">
+                <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2 text-base">
                       <Users className="h-4 w-4" />Học viên trong lớp
@@ -546,6 +688,27 @@ export default function TeacherClassesPage() {
                       {selectedClass.enrollments.length}/{selectedClass.maxStudents} chỗ · {selectedClass.course.title}
                     </p>
                   </div>
+                  {classView === "active" && (
+                    <div className="flex flex-wrap gap-2 sm:justify-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => openModal("existing")}
+                        disabled={selectedClass.enrollments.length >= selectedClass.maxStudents}
+                        className="flex-1 sm:flex-none"
+                      >
+                        <UserPlus className="mr-2 h-4 w-4" />Thêm tài khoản có sẵn
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => openModal("create")}
+                        disabled={selectedClass.enrollments.length >= selectedClass.maxStudents}
+                        className="flex-1 sm:flex-none"
+                      >
+                        <Plus className="mr-2 h-4 w-4" />Tạo tài khoản học viên
+                      </Button>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent>
                   {selectedClass.enrollments.length === 0 ? (
