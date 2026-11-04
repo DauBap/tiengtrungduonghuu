@@ -24,6 +24,7 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
     { label: "Bảng điều khiển", href: "/teacher", icon: LayoutDashboard },
     { label: "Lớp học", href: "/teacher/classes", icon: School },
     { label: "Lịch dạy", href: "/teacher/schedule", icon: CalendarDays },
+    { label: "Điểm danh", href: "/teacher/attendance", icon: ClipboardCheck },
     { label: "Khóa học của tôi", href: "/teacher/courses", icon: BookOpen },
     { label: "Hồ sơ", href: "/teacher/profile", icon: User },
   ],

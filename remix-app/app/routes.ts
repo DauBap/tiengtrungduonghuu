@@ -87,6 +87,7 @@ export default [
   route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/workbook-history", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.workbook-history.tsx"),
   route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/workbook-history/attempts/:attemptId", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.workbook-history.attempts.$attemptId.tsx"),
   route("teacher/courses/:courseId/students/:studentId", "routes/teacher.courses.$courseId.students.$studentId.tsx"),
+  route("teacher/attendance", "routes/teacher.attendance.tsx"),
 
   // Student
   route("student", "routes/student._index.tsx"),
