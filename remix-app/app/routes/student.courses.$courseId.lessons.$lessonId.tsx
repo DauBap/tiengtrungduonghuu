@@ -33,7 +33,7 @@ import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
-import { ArrowLeft, BookOpen, PartyPopper, X, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2, MessageSquareText, Loader2 } from "lucide-react";
+import { ArrowLeft, BookOpen, PartyPopper, X, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2, MessageSquareText, Loader2, Repeat2 } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
 import { createVocabularyTest, gradeVocabularyTest } from "~/lib/vocabulary-test";
 import { answerVariants, bestAnswerMatchPercent, isAnswerCorrectForAny } from "~/lib/listening-answer";
@@ -1619,6 +1619,7 @@ export default function LessonDetail() {
   const [showScript, setShowScript] = useState(true);
   const [showLessonPinyin, setShowLessonPinyin] = useState(false);
     const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
+  const [autoReplayLessonAudio, setAutoReplayLessonAudio] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isPreparingRecording, setIsPreparingRecording] = useState(false);
   const [phoneticScore, setPhoneticScore] = useState(0);
@@ -2550,7 +2551,13 @@ export default function LessonDetail() {
                 <div className="rounded-xl border bg-background p-4">
                   <div className="flex items-center justify-center">
                     {selectedAudioScript.audioUrl ? (
-                      <audio controls className="w-full" src={selectedAudioScript.audioUrl}>
+                      <audio
+                        key={selectedAudioScript.id}
+                        controls
+                        loop={autoReplayLessonAudio}
+                        className="w-full"
+                        src={selectedAudioScript.audioUrl}
+                      >
                         <source src={selectedAudioScript.audioUrl} />
                       </audio>
                     ) : (
@@ -2559,6 +2566,23 @@ export default function LessonDetail() {
                       </div>
                     )}
                   </div>
+                  {selectedAudioScript.audioUrl && (
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
+                      <Button
+                        type="button"
+                        variant={autoReplayLessonAudio ? "secondary" : "outline"}
+                        size="sm"
+                        aria-pressed={autoReplayLessonAudio}
+                        onClick={() => setAutoReplayLessonAudio((enabled) => !enabled)}
+                      >
+                        <Repeat2 className="mr-2 h-4 w-4" />
+                        Phát lại tự động
+                      </Button>
+                      <span className="text-xs text-muted-foreground">
+                        {autoReplayLessonAudio ? "Lặp liên tục đang bật" : "Lặp liên tục đang tắt"}
+                      </span>
+                    </div>
+                  )}
                   <div className="mt-4 border-t pt-4">
                     <Button
                       type="button"
