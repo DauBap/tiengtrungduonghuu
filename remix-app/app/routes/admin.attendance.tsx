@@ -957,10 +957,10 @@ export default function AdminAttendance() {
 
         {!selectedClass ? (
           <Card>
-            <CardContent className="flex flex-col items-center px-6 py-12 text-center">
+            <CardContent className="flex flex-col items-center px-6 pt-12 pb-12 text-center sm:pt-12 sm:pb-12">
               <Users className="h-10 w-10 text-muted-foreground" aria-hidden="true" />
               <h2 className="mt-4 font-semibold">Chọn lớp để xem danh sách buổi học</h2>
-              <p className="mt-1 max-w-md text-sm text-muted-foreground">
+              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
                 Sau khi chọn lớp, các buổi điểm danh sẽ hiện ở đây. Chọn một buổi để mở bảng điểm danh.
               </p>
             </CardContent>
