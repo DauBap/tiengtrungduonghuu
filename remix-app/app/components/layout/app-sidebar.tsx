@@ -14,6 +14,7 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
     { label: "Bảng điều khiển", href: "/admin", icon: LayoutDashboard },
     { label: "Dữ liệu Thần Bút", href: "/admin/shen-bi-data", icon: Brush },
     { label: "Lớp học", href: "/admin/classes", icon: School },
+    { label: "Điểm danh", href: "/admin/attendance", icon: ClipboardCheck },
     { label: "Lịch giáo viên", href: "/admin/teachers", icon: GraduationCap },
     { label: "Khóa học", href: "/admin/courses", icon: BookOpen },
     { label: "Bài thi", href: "/admin/exams", icon: FileCheck2 },
