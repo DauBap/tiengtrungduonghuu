@@ -6,6 +6,11 @@ import { AppShell } from "~/components/layout/app-shell";
 import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
 import { Button } from "~/components/ui/button";
 import { getStudentsAbsentForThreeConsecutiveSessions } from "~/lib/attendance-streak";
+import {
+  excludeHandledAbsenceAlerts,
+  handleConsecutiveAbsenceAlert,
+  type ConsecutiveAbsenceAlert,
+} from "~/lib/attendance-streak.server";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 
@@ -31,6 +36,7 @@ interface AttendanceClass {
   course: string;
   sessions: AttendanceSession[];
   students: AttendanceStudent[];
+  consecutiveAbsenceAlerts: ConsecutiveAbsenceAlert[];
 }
 
 interface AttendanceSession {
@@ -140,6 +146,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           title: true,
           lesson: true,
           date: true,
+          createdAt: true,
           records: {
             select: {
               studentId: true,
@@ -156,6 +163,45 @@ export async function loader({ request }: LoaderFunctionArgs) {
     },
     orderBy: { name: "asc" },
   });
+  const alerts = classes.flatMap((classroom) => {
+    const sessions = classroom.attendanceSessions;
+    return sessions.flatMap((session, sessionIndex) => {
+      if (sessionIndex < 2) return [];
+      const recentSessions = sessions.slice(sessionIndex - 2, sessionIndex + 1);
+      const absentStudentIds = getStudentsAbsentForThreeConsecutiveSessions(
+        recentSessions.map((item) => ({
+          id: item.id,
+          records: item.records.map(({ studentId, status }) => ({ studentId, status })),
+        })),
+        session.id,
+      );
+      return [...absentStudentIds].flatMap((studentId) => {
+        const student = classroom.enrollments.find(({ user: enrolled }) => enrolled.id === studentId)?.user;
+        if (!student) return [];
+        return [{
+          classId: classroom.id,
+          className: classroom.name,
+          studentId,
+          studentName: student.name,
+          sessionId: session.id,
+          sessionDate: session.date,
+          sessionCreatedAt: session.createdAt,
+          sessions: recentSessions.map((item) => ({
+            id: item.id,
+            title: item.title,
+            date: item.date.toISOString().slice(0, 10),
+          })),
+        }];
+      });
+    });
+  });
+  const visibleAlerts = await excludeHandledAbsenceAlerts(alerts);
+  const alertsByClass = new Map<string, ConsecutiveAbsenceAlert[]>();
+  for (const alert of visibleAlerts) {
+    const classAlerts = alertsByClass.get(alert.classId) ?? [];
+    classAlerts.push(alert);
+    alertsByClass.set(alert.classId, classAlerts);
+  }
   return {
     user,
     classes: classes.map((classroom): AttendanceClass => ({
@@ -179,6 +225,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           },
         }])),
       })),
+      consecutiveAbsenceAlerts: alertsByClass.get(classroom.id) ?? [],
     })),
   };
 }
@@ -187,6 +234,25 @@ export async function action({ request }: ActionFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
   const form = await request.formData();
   const intent = String(form.get("intent") ?? "");
+
+  if (intent === "dismiss-absence-alert") {
+    const classId = String(form.get("classId") ?? "");
+    const studentId = String(form.get("studentId") ?? "");
+    const sessionId = String(form.get("sessionId") ?? "");
+    const classroom = await prisma.class.findFirst({
+      where: { id: classId, teacherId: user.id, completedAt: null },
+      select: { id: true },
+    });
+    if (!classroom || !studentId || !sessionId) {
+      return { success: false as const, intent, studentId, error: "Không tìm thấy cảnh báo hoặc bạn không có quyền xử lý cảnh báo này." };
+    }
+
+    const handled = await handleConsecutiveAbsenceAlert({ classId, studentId, sessionId, handledById: user.id });
+    if (!handled) {
+      return { success: false as const, intent, studentId, error: "Cảnh báo này không còn hợp lệ. Hãy tải lại trang." };
+    }
+    return { success: true as const, intent, studentId };
+  }
 
   if (intent === "create-session") {
     const classId = String(form.get("classId") ?? "");
@@ -412,22 +478,12 @@ export default function TeacherAttendance() {
     left.date.localeCompare(right.date)
     || attendanceSessions.indexOf(left) - attendanceSessions.indexOf(right),
   );
-  const absenceSessions = chronologicalSessions.map((session) => ({
-    id: session.id,
-    records: (selectedClass?.students ?? []).map((student) => ({
-      studentId: student.id,
-      status: (attendanceBySession[`${classId}:${session.id}`] ?? session.records)[student.id]?.status ?? null,
-    })),
-  }));
   const absenceTargetSession = isTotalView
     ? chronologicalSessions[chronologicalSessions.length - 1]
     : selectedAttendanceSession;
-  const consecutiveAbsenceStudentIds = absenceTargetSession
-    ? getStudentsAbsentForThreeConsecutiveSessions(absenceSessions, absenceTargetSession.id)
-    : new Set<string>();
-  const consecutiveAbsenceNames = (selectedClass?.students ?? [])
-    .filter((student) => consecutiveAbsenceStudentIds.has(student.id))
-    .map((student) => student.name);
+  const consecutiveAbsenceAlerts = (selectedClass?.consecutiveAbsenceAlerts ?? [])
+    .filter((alert) => alert.sessionId === absenceTargetSession?.id);
+  const consecutiveAbsenceStudentIds = new Set(consecutiveAbsenceAlerts.map(({ studentId }) => studentId));
   const aggregateWithAbsence = aggregate.map((item) => ({
     ...item,
     hasConsecutiveAbsence: consecutiveAbsenceStudentIds.has(item.student.id),
@@ -473,8 +529,9 @@ export default function TeacherAttendance() {
 
   useEffect(() => {
     if (deleteSessionFetcher.data?.success && deleteSessionFetcher.data.intent === "delete-session" && "sessionId" in deleteSessionFetcher.data && "classId" in deleteSessionFetcher.data) {
-      const deletedId = deleteSessionFetcher.data.sessionId;
-      const deletedClassId = deleteSessionFetcher.data.classId;
+      const deletedId = typeof deleteSessionFetcher.data.sessionId === "string" ? deleteSessionFetcher.data.sessionId : "";
+      const deletedClassId = typeof deleteSessionFetcher.data.classId === "string" ? deleteSessionFetcher.data.classId : "";
+      if (!deletedId || !deletedClassId) return;
       setSessionsByClass((current) => ({
         ...current,
         [deletedClassId]: (current[deletedClassId] ?? []).filter((session) => session.id !== deletedId),
@@ -868,9 +925,9 @@ export default function TeacherAttendance() {
             )}
           </div>
 
-          {consecutiveAbsenceNames.length > 0 && (
+          {consecutiveAbsenceAlerts.length > 0 && (
             <div className="px-4 pb-4 sm:px-5">
-              <ConsecutiveAbsenceNotice studentNames={consecutiveAbsenceNames} />
+              <ConsecutiveAbsenceNotice alerts={consecutiveAbsenceAlerts} />
             </div>
           )}
 

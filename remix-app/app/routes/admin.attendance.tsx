@@ -25,6 +25,11 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { getStudentsAbsentForThreeConsecutiveSessions } from "~/lib/attendance-streak";
+import {
+  excludeHandledAbsenceAlerts,
+  handleConsecutiveAbsenceAlert,
+  type ConsecutiveAbsenceAlert,
+} from "~/lib/attendance-streak.server";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 import { toast } from "sonner";
@@ -299,6 +304,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
           take: 3,
           select: {
             id: true,
+            title: true,
+            date: true,
+            createdAt: true,
             records: {
               where: { status: "ABSENT" },
               select: { studentId: true, student: { select: { name: true } } },
@@ -455,17 +463,41 @@ export async function loader({ request }: LoaderFunctionArgs) {
         take: 3,
         select: {
           id: true,
+          title: true,
+          date: true,
+          createdAt: true,
           records: { select: { studentId: true, status: true, student: { select: { name: true } } } },
         },
       })
     : [];
   const selectedAbsenceSessions = [...selectedAbsenceSessionsDescending].reverse();
-  const selectedAbsenceStudentIds = selectedSession
+  const selectedCandidateStudentIds = selectedSession
     ? getStudentsAbsentForThreeConsecutiveSessions(selectedAbsenceSessions, selectedSession.id)
     : new Set<string>();
-  const selectedAbsenceNames = selectedAbsenceSessions[selectedAbsenceSessions.length - 1]?.records
-    .filter(({ studentId }) => selectedAbsenceStudentIds.has(studentId))
-    .map(({ student }) => student.name) ?? [];
+  const selectedAbsenceAlerts = await excludeHandledAbsenceAlerts(
+    selectedSession
+      ? [...selectedCandidateStudentIds].flatMap((studentId): ConsecutiveAbsenceAlert[] => {
+          const student = selectedAbsenceSessions.at(-1)?.records.find((record) => record.studentId === studentId)?.student;
+          if (!student) return [];
+          return [{
+            classId: selectedSession.classId,
+            className: selectedSession.class.name,
+            studentId,
+            studentName: student.name,
+            sessionId: selectedSession.id,
+            sessionDate: selectedSession.date,
+            sessionCreatedAt: selectedSession.createdAt,
+            sessions: selectedAbsenceSessions.map((session) => ({
+              id: session.id,
+              title: session.title,
+              date: session.date.toISOString().slice(0, 10),
+            })),
+          }];
+        })
+      : [],
+  );
+  const selectedAbsenceStudentIds = new Set(selectedAbsenceAlerts.map(({ studentId }) => studentId));
+  const selectedAbsenceNames = selectedAbsenceAlerts.map(({ studentName }) => studentName);
   const matchingRecords = selectedSession?.records
     .map(({ student, ...record }) => ({
       ...record,
@@ -489,14 +521,43 @@ export async function loader({ request }: LoaderFunctionArgs) {
             where: { classId: selectedClass.id },
             orderBy: [{ date: "desc" }, { createdAt: "desc" }],
             take: 3,
-            select: { id: true, records: { select: { studentId: true, status: true } } },
+            select: {
+              id: true,
+              title: true,
+              date: true,
+              createdAt: true,
+              records: { select: { studentId: true, status: true, student: { select: { name: true } } } },
+            },
           }),
         ]);
         const recentSessions = [...recentSessionsDescending].reverse();
         const latestSession = recentSessions[recentSessions.length - 1];
-        const consecutiveAbsenceStudentIds = latestSession
+        const candidateAbsenceStudentIds = latestSession
           ? getStudentsAbsentForThreeConsecutiveSessions(recentSessions, latestSession.id)
           : new Set<string>();
+        const summaryAbsenceAlerts = await excludeHandledAbsenceAlerts(
+          latestSession
+            ? [...candidateAbsenceStudentIds].flatMap((studentId): ConsecutiveAbsenceAlert[] => {
+                const student = latestSession.records.find((record) => record.studentId === studentId)?.student;
+                if (!student) return [];
+                return [{
+                  classId: selectedClass.id,
+                  className: selectedClass.name,
+                  studentId,
+                  studentName: student.name,
+                  sessionId: latestSession.id,
+                  sessionDate: latestSession.date,
+                  sessionCreatedAt: latestSession.createdAt,
+                  sessions: recentSessions.map((session) => ({
+                    id: session.id,
+                    title: session.title,
+                    date: session.date.toISOString().slice(0, 10),
+                  })),
+                }];
+              })
+            : [],
+        );
+        const consecutiveAbsenceStudentIds = new Set(summaryAbsenceAlerts.map(({ studentId }) => studentId));
         const recordStudentIds = Array.from(new Set(groupedRecords.map(({ studentId }) => studentId)));
         const recordStudents = recordStudentIds.length > 0
           ? await prisma.user.findMany({
@@ -572,6 +633,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           consecutiveAbsenceNames: students
             .filter((student) => student.hasConsecutiveAbsence)
             .map((student) => student.name),
+          consecutiveAbsenceAlerts: summaryAbsenceAlerts,
           students,
         };
       })()
@@ -611,7 +673,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     ? Math.round((attendanceSummary.present / markedRecordCount) * 100)
     : 0;
   const classById = new Map(classes.map((classroom) => [classroom.id, classroom]));
-  const getConsecutiveAbsenceClasses = (includedClasses: typeof classes) => includedClasses.flatMap((classroom) => {
+  const consecutiveAbsenceAlerts = classes.flatMap((classroom) => {
     const recentSessions = [...classroom.attendanceSessions].reverse();
     const latestSession = recentSessions[recentSessions.length - 1];
     if (!latestSession) return [];
@@ -623,15 +685,47 @@ export async function loader({ request }: LoaderFunctionArgs) {
       })),
       latestSession.id,
     );
-    const studentNames = latestSession.records
+    const students = latestSession.records
       .filter(({ studentId }) => studentIds.has(studentId))
-      .map(({ student }) => student.name);
-    return studentNames.length > 0
-      ? [{ classId: classroom.id, className: classroom.name, studentNames }]
+      .map(({ studentId, student }) => ({ studentId, studentName: student.name }));
+    return students.map(({ studentId, studentName }): ConsecutiveAbsenceAlert => ({
+      classId: classroom.id,
+      className: classroom.name,
+      studentId,
+      studentName,
+      sessionId: latestSession.id,
+      sessionDate: latestSession.date,
+      sessionCreatedAt: latestSession.createdAt,
+      sessions: recentSessions.map((session) => ({
+        id: session.id,
+        title: session.title,
+        date: session.date.toISOString().slice(0, 10),
+      })),
+    }));
+  });
+  const visibleConsecutiveAbsenceAlerts = await excludeHandledAbsenceAlerts(consecutiveAbsenceAlerts);
+  const alertsByClassId = new Map<string, ConsecutiveAbsenceAlert[]>();
+  for (const alert of visibleConsecutiveAbsenceAlerts) {
+    const classAlerts = alertsByClassId.get(alert.classId) ?? [];
+    classAlerts.push(alert);
+    alertsByClassId.set(alert.classId, classAlerts);
+  }
+  const getConsecutiveAbsenceClasses = (includedClasses: typeof classes) => includedClasses.flatMap((classroom) => {
+    const alerts = alertsByClassId.get(classroom.id) ?? [];
+    return alerts.length > 0
+      ? [{
+          classId: classroom.id,
+          className: classroom.name,
+          studentNames: alerts.map(({ studentName }) => studentName),
+          alerts,
+        }]
       : [];
   });
   const unassignedConsecutiveAbsenceClasses = getConsecutiveAbsenceClasses(
     classes.filter((classroom) => classroom.teacherId === null),
+  );
+  const consecutiveAbsenceByClassId = new Map(
+    getConsecutiveAbsenceClasses(classes).map((classroom) => [classroom.classId, classroom]),
   );
   const unassignedAttendance = summarizeSessions(
     sessions.filter((session) => classById.get(session.classId)?.teacherId === null),
@@ -710,6 +804,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
       teacher: classroom.teacher?.name ?? "Chưa phân công",
       isCompleted: Boolean(classroom.completedAt),
       sessionCount: classroom._count.attendanceSessions,
+      consecutiveAbsentStudentNames: consecutiveAbsenceByClassId.get(classroom.id)?.studentNames ?? [],
+      consecutiveAbsenceAlerts: consecutiveAbsenceByClassId.get(classroom.id)?.alerts ?? [],
     })),
     activeClasses: classes
       .filter((classroom) => !classroom.completedAt)
@@ -745,6 +841,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           recordCount: selectedSession._count.records,
           records: matchingRecords ?? [],
           consecutiveAbsenceNames: selectedAbsenceNames,
+          consecutiveAbsenceAlerts: selectedAbsenceAlerts,
         }
       : null,
     classAttendanceSummary,
@@ -765,9 +862,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  await requireRole(request, ["admin"]);
+  const user = await requireRole(request, ["admin"]);
   const form = await request.formData();
   const intent = String(form.get("intent") ?? "");
+
+  if (intent === "dismiss-absence-alert") {
+    const classId = String(form.get("classId") ?? "");
+    const studentId = String(form.get("studentId") ?? "");
+    const sessionId = String(form.get("sessionId") ?? "");
+    if (!classId || !studentId || !sessionId) {
+      return { success: false as const, intent, studentId, error: "Thông tin cảnh báo không đầy đủ. Hãy tải lại trang." };
+    }
+
+    const handled = await handleConsecutiveAbsenceAlert({ classId, studentId, sessionId, handledById: user.id });
+    if (!handled) {
+      return { success: false as const, intent, studentId, error: "Cảnh báo này không còn hợp lệ. Hãy tải lại trang." };
+    }
+    return { success: true as const, intent, studentId };
+  }
 
   if (intent === "create-session") {
     const classId = String(form.get("classId") ?? "");
@@ -1084,7 +1196,7 @@ function AttendanceClassTotalSummary({
         ))}
       </div>
 
-      <ConsecutiveAbsenceNotice studentNames={summary.consecutiveAbsenceNames} />
+      <ConsecutiveAbsenceNotice alerts={summary.consecutiveAbsenceAlerts} />
 
       <div className="overflow-hidden rounded-lg border bg-card">
         <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -1613,9 +1725,9 @@ function AttendanceSessionDetails({
       </div>
 
       <CardContent className="p-0">
-        {session.consecutiveAbsenceNames.length > 0 && (
+        {session.consecutiveAbsenceAlerts.length > 0 && (
           <div className="p-4 sm:px-5">
-            <ConsecutiveAbsenceNotice studentNames={session.consecutiveAbsenceNames} />
+            <ConsecutiveAbsenceNotice alerts={session.consecutiveAbsenceAlerts} />
           </div>
         )}
         <div className="border-b p-4 sm:p-5">
@@ -2099,10 +2211,10 @@ export default function AdminAttendance() {
             {visibleTeachers.length > 0 || showUnassignedClasses ? (
               <div className="overflow-hidden rounded-xl border bg-card">
                 {visibleTeachers.map((teacher) => (
+                  <div key={teacher.id} className="border-b last:border-b-0">
                   <Link
-                    key={teacher.id}
                     to={getAttendanceHref({ teacherId: teacher.id })}
-                    className="flex flex-col gap-3 border-b px-4 py-4 transition-colors last:border-b-0 hover:bg-muted/40 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                    className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:px-5"
                   >
                     <span className="min-w-0 flex-1">
                       <span className="flex flex-wrap items-center gap-2 font-medium">
@@ -2134,30 +2246,23 @@ export default function AdminAttendance() {
                           </span>
                         </span>
                       )}
-                      {teacher.consecutiveAbsenceClasses.length > 0 && (
-                        <span className="mt-2 flex flex-wrap items-center gap-1.5">
-                          <span className="text-xs font-medium text-destructive">Có học sinh vắng 3 buổi liên tiếp;</span>
-                          {teacher.consecutiveAbsenceClasses.flatMap((classroom) =>
-                            classroom.studentNames.map((studentName) => (
-                              <Badge
-                                key={`${classroom.classId}:${studentName}`}
-                                variant="outline"
-                                className="border-destructive/30 bg-destructive/5 text-destructive"
-                              >
-                                {classroom.className} - {studentName}
-                              </Badge>
-                            )),
-                          )}
-                        </span>
-                      )}
                     </span>
                     <span className="flex items-center justify-between gap-3 text-sm text-muted-foreground sm:justify-end">
                       <span>{teacher.sessionCount} buổi tổng cộng</span>
                       <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
                     </span>
                   </Link>
+                  {teacher.consecutiveAbsenceClasses.length > 0 && (
+                    <div className="px-4 pb-4 sm:px-5">
+                      <ConsecutiveAbsenceNotice
+                        alerts={teacher.consecutiveAbsenceClasses.flatMap(({ alerts }) => alerts)}
+                      />
+                    </div>
+                  )}
+                  </div>
                 ))}
                 {showUnassignedClasses && (
+                  <div>
                   <Link
                     to={getAttendanceHref({ teacherId: "unassigned" })}
                     className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:px-5"
@@ -2178,28 +2283,20 @@ export default function AdminAttendance() {
                             : ""}
                         </span>
                       )}
-                      {unassignedAttendanceSummary.consecutiveAbsenceClasses.length > 0 && (
-                        <span className="mt-2 flex flex-wrap items-center gap-1.5">
-                          <span className="text-xs font-medium text-destructive">Có học sinh vắng 3 buổi liên tiếp;</span>
-                          {unassignedAttendanceSummary.consecutiveAbsenceClasses.flatMap((classroom) =>
-                            classroom.studentNames.map((studentName) => (
-                              <Badge
-                                key={`${classroom.classId}:${studentName}`}
-                                variant="outline"
-                                className="border-destructive/30 bg-destructive/5 text-destructive"
-                              >
-                                {classroom.className} - {studentName}
-                              </Badge>
-                            )),
-                          )}
-                        </span>
-                      )}
                     </span>
                     <span className="flex items-center justify-between gap-4 text-sm text-muted-foreground sm:justify-end">
                       <span>{unassignedClasses.reduce((total, classroom) => total + classroom.sessionCount, 0)} buổi điểm danh</span>
                       <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
                     </span>
                   </Link>
+                  {unassignedAttendanceSummary.consecutiveAbsenceClasses.length > 0 && (
+                    <div className="px-4 pb-4 sm:px-5">
+                      <ConsecutiveAbsenceNotice
+                        alerts={unassignedAttendanceSummary.consecutiveAbsenceClasses.flatMap(({ alerts }) => alerts)}
+                      />
+                    </div>
+                  )}
+                  </div>
                 )}
               </div>
             ) : (
@@ -2306,7 +2403,6 @@ export default function AdminAttendance() {
               <div className="space-y-3">
                 {filteredVisibleClasses.map((classroom) => {
                   const classSessions = sessions.filter((session) => session.classId === classroom.id);
-                  const absentCount = classSessions.reduce((total, session) => total + session.absent, 0);
                   return (
                     <Card key={classroom.id} className="overflow-hidden">
                       <div className="flex flex-col gap-2 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -2319,16 +2415,13 @@ export default function AdminAttendance() {
                         </div>
                         <span className="shrink-0 text-sm text-muted-foreground">
                           {classSessions.length} buổi trong ngày
-                          {absentCount > 0 && (
-                            <Badge
-                              variant="outline"
-                              className="ml-2 border-destructive/30 bg-destructive/5 text-destructive"
-                            >
-                              {absentCount} lượt vắng
-                            </Badge>
-                          )}
                         </span>
                       </div>
+                      {classroom.consecutiveAbsentStudentNames.length > 0 && (
+                        <div className="border-b px-4 py-3 sm:px-5">
+                          <ConsecutiveAbsenceNotice alerts={classroom.consecutiveAbsenceAlerts} />
+                        </div>
+                      )}
                       <div
                         role="tablist"
                         aria-label={`Nội dung điểm danh lớp ${classroom.name}`}

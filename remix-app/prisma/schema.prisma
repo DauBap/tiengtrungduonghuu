@@ -45,6 +45,8 @@ model User {
   shenbiAttempts          ShenbiAttempt[]
   shenbiAssignments       ShenbiAssignment[]
   attendanceRecords       AttendanceRecord[]
+  handledAttendanceAbsenceDismissals AttendanceAbsenceDismissal[] @relation("AttendanceAbsenceHandler")
+  attendanceAbsenceDismissals        AttendanceAbsenceDismissal[] @relation("AttendanceAbsenceStudent")
 
   @@index([role, lastSeenAt])
 }
@@ -493,6 +495,7 @@ model Class {
   enrollments Enrollment[]
   shenbiAssignments ShenbiAssignment[]
   attendanceSessions AttendanceSession[]
+  attendanceAbsenceDismissals AttendanceAbsenceDismissal[]
 
   @@index([courseId])
   @@index([teacherId])
@@ -540,6 +543,7 @@ model AttendanceSession {
 
   class   Class              @relation(fields: [classId], references: [id], onDelete: Cascade)
   records AttendanceRecord[]
+  absenceDismissals AttendanceAbsenceDismissal[]
 
   @@index([classId, date])
 }
@@ -562,6 +566,23 @@ model AttendanceRecord {
 
   @@unique([sessionId, studentId])
   @@index([studentId, sessionId])
+}
+
+model AttendanceAbsenceDismissal {
+  id               String   @id @default(cuid())
+  classId          String
+  studentId        String
+  handledSessionId String
+  handledById      String?
+  handledAt        DateTime @default(now())
+
+  class          Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student        User              @relation("AttendanceAbsenceStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  handledSession AttendanceSession @relation(fields: [handledSessionId], references: [id], onDelete: Cascade)
+  handledBy      User?             @relation("AttendanceAbsenceHandler", fields: [handledById], references: [id], onDelete: SetNull)
+
+  @@unique([classId, studentId])
+  @@index([handledSessionId])
 }
 
 model CourseStudySession {
