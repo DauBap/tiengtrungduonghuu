@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Form, Link, useFetcher, useLoaderData, useNavigate } from "react-router";
 import type { Prisma } from "@prisma/client";
@@ -16,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
+import { Overlay } from "~/components/common/overlay";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -23,12 +25,17 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
+import { toast } from "sonner";
 
 type AttendanceStatus = "PRESENT" | "LATE" | "ABSENT";
 type AbsenceReason = "EXCUSED" | "UNEXCUSED";
 type StatusFilter = "ALL" | "UNMARKED" | AttendanceStatus;
+type AttendanceTask = "recording" | "hanzi" | "duet" | "lessonLink";
+type AttendanceStatusDraft = { status: string; absenceReason: string };
+type AttendanceTaskDraft = { recordId: string; task: AttendanceTask; completed: boolean };
 
 const PAGE_SIZE = 25;
+const MAX_BULK_UPDATES = 5000;
 
 const STATUS_OPTIONS: { value: AttendanceStatus; label: string }[] = [
   { value: "PRESENT", label: "Có mặt" },
@@ -45,6 +52,10 @@ function isAttendanceStatus(value: string): value is AttendanceStatus {
 
 function isAbsenceReason(value: string): value is AbsenceReason {
   return value === "EXCUSED" || value === "UNEXCUSED";
+}
+
+function isAttendanceTask(value: string): value is AttendanceTask {
+  return value === "recording" || value === "hanzi" || value === "duet" || value === "lessonLink";
 }
 
 function isStatusFilter(value: string): value is StatusFilter {
@@ -245,14 +256,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const recordWhere: Prisma.AttendanceRecordWhereInput = {};
   if (status === "UNMARKED") recordWhere.status = null;
   else if (isAttendanceStatus(status)) recordWhere.status = status;
-  if (query) {
-    recordWhere.student = {
-      OR: [
-        { name: { contains: query, mode: "insensitive" } },
-        { email: { contains: query, mode: "insensitive" } },
-      ],
-    };
-  }
 
   const totalSessions = !classId || invalidFilter
     ? 0
@@ -313,12 +316,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
               hanzi: true,
               duet: true,
               lessonLink: true,
-              student: { select: { name: true } },
+              student: { select: { name: true, email: true } },
             },
           },
         },
       })
     : null;
+
+  const matchingRecords = selectedSession?.records
+    .map(({ student, ...record }) => ({ ...record, student: { name: student.name, email: student.email } }));
 
   return {
     user,
@@ -357,7 +363,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             isCompleted: Boolean(selectedSession.class.completedAt),
           },
           recordCount: selectedSession._count.records,
-          records: selectedSession.records,
+          records: matchingRecords ?? [],
         }
       : null,
     filters: { classId, sessionId: selectedSession?.id ?? "", status, query },
@@ -450,9 +456,113 @@ export async function action({ request }: ActionFunctionArgs) {
     }
     if (!date) return { success: false as const, intent, error: "Vui lòng chọn ngày học hợp lệ." };
 
-    await prisma.attendanceSession.update({
-      where: { id: session.id },
-      data: { title, lesson, date },
+    const rawRecords = String(form.get("records") ?? "[]");
+    let parsedRecords: unknown;
+    try {
+      parsedRecords = JSON.parse(rawRecords);
+    } catch {
+      return { success: false as const, intent, error: "Danh sách điểm danh cần lưu không hợp lệ." };
+    }
+    if (!Array.isArray(parsedRecords) || parsedRecords.length > MAX_BULK_UPDATES) {
+      return { success: false as const, intent, error: "Danh sách điểm danh cần lưu không hợp lệ." };
+    }
+
+    const recordUpdates: { recordId: string; status: AttendanceStatus | null; absenceReason: AbsenceReason | null }[] = [];
+    const seenRecordIds = new Set<string>();
+    for (const value of parsedRecords) {
+      if (!value || typeof value !== "object") {
+        return { success: false as const, intent, error: "Thông tin điểm danh không hợp lệ." };
+      }
+      const update = value as Record<string, unknown>;
+      const recordId = typeof update.recordId === "string" ? update.recordId : "";
+      const rawStatus = typeof update.status === "string" ? update.status : "";
+      const rawReason = typeof update.absenceReason === "string" ? update.absenceReason : "";
+      const status = rawStatus === "" ? null : isAttendanceStatus(rawStatus) ? rawStatus : undefined;
+      const absenceReason = rawReason === "" ? null : isAbsenceReason(rawReason) ? rawReason : undefined;
+      if (
+        !recordId
+        || seenRecordIds.has(recordId)
+        || status === undefined
+        || absenceReason === undefined
+        || (status === "ABSENT" && absenceReason === null)
+      ) {
+        return { success: false as const, intent, error: "Thông tin điểm danh không hợp lệ hoặc thiếu lý do vắng." };
+      }
+      seenRecordIds.add(recordId);
+      recordUpdates.push({
+        recordId,
+        status,
+        absenceReason: status === "ABSENT" ? absenceReason : null,
+      });
+    }
+
+    const rawTasks = String(form.get("tasks") ?? "[]");
+    let parsedTasks: unknown;
+    try {
+      parsedTasks = JSON.parse(rawTasks);
+    } catch {
+      return { success: false as const, intent, error: "Danh sách nhiệm vụ cần lưu không hợp lệ." };
+    }
+    if (!Array.isArray(parsedTasks) || parsedTasks.length > MAX_BULK_UPDATES) {
+      return { success: false as const, intent, error: "Danh sách nhiệm vụ cần lưu không hợp lệ." };
+    }
+
+    const taskUpdates: AttendanceTaskDraft[] = [];
+    const seenTaskKeys = new Set<string>();
+    for (const value of parsedTasks) {
+      if (!value || typeof value !== "object") {
+        return { success: false as const, intent, error: "Thông tin nhiệm vụ không hợp lệ." };
+      }
+      const update = value as Record<string, unknown>;
+      const recordId = typeof update.recordId === "string" ? update.recordId : "";
+      const task = typeof update.task === "string" ? update.task : "";
+      if (!recordId || !isAttendanceTask(task) || typeof update.completed !== "boolean") {
+        return { success: false as const, intent, error: "Thông tin nhiệm vụ không hợp lệ." };
+      }
+      const taskKey = `${recordId}:${task}`;
+      if (seenTaskKeys.has(taskKey)) {
+        return { success: false as const, intent, error: "Danh sách nhiệm vụ bị trùng." };
+      }
+      seenTaskKeys.add(taskKey);
+      taskUpdates.push({ recordId, task, completed: update.completed });
+    }
+
+    const updatedRecordIds = new Set([
+      ...recordUpdates.map(({ recordId }) => recordId),
+      ...taskUpdates.map(({ recordId }) => recordId),
+    ]);
+    if (updatedRecordIds.size > 0) {
+      const matchingRecords = await prisma.attendanceRecord.findMany({
+        where: { id: { in: [...updatedRecordIds] }, sessionId: session.id },
+        select: { id: true },
+      });
+      if (matchingRecords.length !== updatedRecordIds.size) {
+        return { success: false as const, intent, error: "Không tìm thấy một số dòng điểm danh. Hãy tải lại trang." };
+      }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.attendanceSession.update({
+        where: { id: session.id },
+        data: { title, lesson, date },
+      });
+      for (const update of recordUpdates) {
+        await tx.attendanceRecord.update({
+          where: { id: update.recordId },
+          data: { status: update.status, absenceReason: update.absenceReason },
+        });
+      }
+      for (const update of taskUpdates) {
+        await tx.attendanceRecord.update({
+          where: { id: update.recordId },
+          data: {
+            recording: update.task === "recording" ? update.completed : undefined,
+            hanzi: update.task === "hanzi" ? update.completed : undefined,
+            duet: update.task === "duet" ? update.completed : undefined,
+            lessonLink: update.task === "lessonLink" ? update.completed : undefined,
+          },
+        });
+      }
     });
     return { success: true as const, intent, sessionId };
   }
@@ -488,6 +598,35 @@ export async function action({ request }: ActionFunctionArgs) {
     return { success: true as const, intent, recordId };
   }
 
+  if (intent === "update-task") {
+    const recordId = String(form.get("recordId") ?? "");
+    const record = await prisma.attendanceRecord.findUnique({
+      where: { id: recordId },
+      select: { id: true },
+    });
+    if (!record) {
+      return { success: false as const, intent, error: "Không tìm thấy dòng điểm danh. Hãy tải lại trang." };
+    }
+
+    const task = String(form.get("task") ?? "");
+    const completedValue = String(form.get("completed") ?? "");
+    if (!isAttendanceTask(task) || (completedValue !== "true" && completedValue !== "false")) {
+      return { success: false as const, intent, error: "Thông tin nhiệm vụ không hợp lệ." };
+    }
+
+    const completed = completedValue === "true";
+    await prisma.attendanceRecord.update({
+      where: { id: record.id },
+      data: {
+        recording: task === "recording" ? completed : undefined,
+        hanzi: task === "hanzi" ? completed : undefined,
+        duet: task === "duet" ? completed : undefined,
+        lessonLink: task === "lessonLink" ? completed : undefined,
+      },
+    });
+    return { success: true as const, intent, recordId, task, completed };
+  }
+
   return { success: false as const, intent, error: "Thao tác điểm danh không hợp lệ." };
 }
 
@@ -510,33 +649,42 @@ function AttendanceStatusBadge({ status }: { status: AttendanceStatus | null }) 
 }
 
 function AttendanceRecordEditor({
-  sessionId,
   record,
+  isEditing,
+  onDraftChange,
 }: {
-  sessionId: string;
   record: AttendanceRow;
+  isEditing: boolean;
+  onDraftChange: (recordId: string, draft: AttendanceStatusDraft) => void;
 }) {
-  const fetcher = useFetcher<typeof action>();
   const [status, setStatus] = useState<string>(record.status ?? "");
   const [absenceReason, setAbsenceReason] = useState<string>(record.absenceReason ?? "");
-  const savedStatus = record.status ?? "";
-  const savedReason = record.absenceReason ?? "";
-  const isDirty = status !== savedStatus || (status === "ABSENT" && absenceReason !== savedReason);
-  const isSaving = fetcher.state !== "idle";
+
+  if (!isEditing) {
+    return (
+      <div>
+        <AttendanceStatusBadge status={record.status} />
+        {record.status === "ABSENT" && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            {record.absenceReason === "EXCUSED" ? "Có phép" : record.absenceReason === "UNEXCUSED" ? "Không phép" : "Chưa ghi nhận lý do"}
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
-    <fetcher.Form method="post" className="flex min-w-[19rem] flex-wrap items-center gap-2">
-      <input type="hidden" name="intent" value="update-record" />
-      <input type="hidden" name="sessionId" value={sessionId} />
-      <input type="hidden" name="recordId" value={record.id} />
+    <div className="flex min-w-[19rem] flex-wrap items-center gap-2">
       <label className="sr-only" htmlFor={`attendance-status-${record.id}`}>Trạng thái điểm danh</label>
       <select
         id={`attendance-status-${record.id}`}
-        name="status"
         value={status}
         onChange={(event) => {
-          setStatus(event.currentTarget.value);
-          if (event.currentTarget.value !== "ABSENT") setAbsenceReason("");
+          const nextStatus = event.currentTarget.value;
+          const nextReason = nextStatus === "ABSENT" ? absenceReason : "";
+          setStatus(nextStatus);
+          setAbsenceReason(nextReason);
+          onDraftChange(record.id, { status: nextStatus, absenceReason: nextReason });
         }}
         className="h-9 min-w-36 rounded-md border border-input bg-background px-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
@@ -550,9 +698,12 @@ function AttendanceRecordEditor({
           <label className="sr-only" htmlFor={`absence-reason-${record.id}`}>Lý do vắng</label>
           <select
             id={`absence-reason-${record.id}`}
-            name="absenceReason"
             value={absenceReason}
-            onChange={(event) => setAbsenceReason(event.currentTarget.value)}
+            onChange={(event) => {
+              const nextReason = event.currentTarget.value;
+              setAbsenceReason(nextReason);
+              onDraftChange(record.id, { status, absenceReason: nextReason });
+            }}
             required
             className="h-9 min-w-36 rounded-md border border-input bg-background px-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
@@ -562,55 +713,48 @@ function AttendanceRecordEditor({
           </select>
         </>
       )}
-      <Button type="submit" size="sm" variant="outline" disabled={!isDirty || isSaving}>
-        <Check className="mr-1.5 h-4 w-4" />
-        {isSaving ? "Đang lưu" : "Lưu"}
-      </Button>
-      {fetcher.data?.success === false && (
-        <span role="alert" className="w-full text-xs text-destructive">{fetcher.data.error}</span>
-      )}
-    </fetcher.Form>
+    </div>
+  );
+}
+
+function AttendanceTaskCheckbox({
+  recordId,
+  studentName,
+  task,
+  label,
+  checked,
+  isEditing,
+  onDraftChange,
+}: {
+  recordId: string;
+  studentName: string;
+  task: AttendanceTask;
+  label: string;
+  checked: boolean;
+  isEditing: boolean;
+  onDraftChange: (recordId: string, task: AttendanceTask, completed: boolean) => void;
+}) {
+  return (
+    <div className="flex justify-center">
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={!isEditing}
+        aria-label={`${label} của ${studentName}`}
+        onChange={(event) => {
+          onDraftChange(recordId, task, event.currentTarget.checked);
+        }}
+        className="h-4 w-4 cursor-pointer rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+      />
+    </div>
   );
 }
 
 function SessionActions({ session }: { session: AttendanceSession }) {
-  const editFetcher = useFetcher<typeof action>();
   const deleteFetcher = useFetcher<typeof action>();
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <details className="group">
-        <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-          Chỉnh sửa buổi
-        </summary>
-        <div className="mt-3 rounded-lg border bg-muted/30 p-4">
-          <editFetcher.Form method="post" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <input type="hidden" name="intent" value="update-session" />
-            <input type="hidden" name="sessionId" value={session.id} />
-            <div className="space-y-1.5">
-              <Label htmlFor={`session-title-${session.id}`}>Tên buổi</Label>
-              <Input id={`session-title-${session.id}`} name="title" defaultValue={session.title} maxLength={80} required />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor={`session-lesson-${session.id}`}>Bài học</Label>
-              <Input id={`session-lesson-${session.id}`} name="lesson" defaultValue={session.lesson} maxLength={120} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor={`session-date-${session.id}`}>Ngày học</Label>
-              <Input id={`session-date-${session.id}`} name="date" type="date" defaultValue={session.date} required />
-            </div>
-            <div className="flex items-end">
-              <Button type="submit" variant="outline" className="w-full" disabled={editFetcher.state !== "idle"}>
-                {editFetcher.state !== "idle" ? "Đang lưu..." : "Lưu thông tin buổi"}
-              </Button>
-            </div>
-            {editFetcher.data?.success === false && (
-              <p role="alert" className="text-sm text-destructive sm:col-span-2 lg:col-span-4">{editFetcher.data.error}</p>
-            )}
-          </editFetcher.Form>
-        </div>
-      </details>
-
+    <div>
       <deleteFetcher.Form
         method="post"
         onSubmit={(event) => {
@@ -630,6 +774,126 @@ function SessionActions({ session }: { session: AttendanceSession }) {
           <p role="alert" className="mt-2 text-sm text-destructive">{deleteFetcher.data.error}</p>
         )}
       </deleteFetcher.Form>
+    </div>
+  );
+}
+
+function SessionMetadataEditor({
+  session,
+  records,
+  tasks,
+  onDirtyChange,
+  onSavingChange,
+  onSaved,
+}: {
+  session: AttendanceSession;
+  records: string;
+  tasks: string;
+  onDirtyChange: (isDirty: boolean) => void;
+  onSavingChange: (isSaving: boolean) => void;
+  onSaved: () => void;
+}) {
+  const editFetcher = useFetcher<typeof action>();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [title, setTitle] = useState(session.title);
+  const [lesson, setLesson] = useState(session.lesson);
+  const [date, setDate] = useState(session.date);
+  const isDirty = title !== session.title || lesson !== session.lesson || date !== session.date;
+  const isSaving = editFetcher.state !== "idle";
+
+  useEffect(() => {
+    onDirtyChange(isDirty);
+  }, [isDirty, onDirtyChange]);
+
+  useEffect(() => {
+    onSavingChange(isSaving);
+  }, [isSaving, onSavingChange]);
+
+  useEffect(() => {
+    if (editFetcher.data?.intent === "update-session" && editFetcher.data.success) {
+      toast.success("Đã lưu thay đổi điểm danh thành công.");
+      onSaved();
+    }
+  }, [editFetcher.data, onSaved]);
+
+  return (
+    <div className="rounded-lg border bg-muted/30 p-4">
+      <editFetcher.Form
+        ref={formRef}
+        id={`session-metadata-${session.id}`}
+        method="post"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setIsConfirmOpen(true);
+        }}
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        <input type="hidden" name="intent" value="update-session" />
+        <input type="hidden" name="sessionId" value={session.id} />
+        <input type="hidden" name="records" value={records} />
+        <input type="hidden" name="tasks" value={tasks} />
+        <div className="space-y-1.5">
+          <Label htmlFor={`session-title-${session.id}`}>Tên buổi</Label>
+          <Input id={`session-title-${session.id}`} name="title" value={title} onChange={(event) => setTitle(event.currentTarget.value)} maxLength={80} required />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor={`session-lesson-${session.id}`}>Bài học</Label>
+          <Input id={`session-lesson-${session.id}`} name="lesson" value={lesson} onChange={(event) => setLesson(event.currentTarget.value)} maxLength={120} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor={`session-date-${session.id}`}>Ngày học</Label>
+          <Input id={`session-date-${session.id}`} name="date" type="date" value={date} onChange={(event) => setDate(event.currentTarget.value)} required />
+        </div>
+        {editFetcher.data?.success === false && (
+          <p role="alert" className="text-sm text-destructive sm:col-span-2 lg:col-span-3">{editFetcher.data.error}</p>
+        )}
+      </editFetcher.Form>
+      {isConfirmOpen && createPortal(
+        <Overlay onClose={() => setIsConfirmOpen(false)} className="max-w-md">
+          <section
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby={`confirm-attendance-save-title-${session.id}`}
+            aria-describedby={`confirm-attendance-save-description-${session.id}`}
+            className="space-y-5"
+          >
+            <div className="space-y-2">
+              <h2 id={`confirm-attendance-save-title-${session.id}`} className="text-lg font-semibold">
+                Lưu thay đổi?
+              </h2>
+              <p id={`confirm-attendance-save-description-${session.id}`} className="text-sm leading-relaxed text-muted-foreground">
+                Các cập nhật điểm danh và thông tin buổi học sẽ được áp dụng.
+              </p>
+            </div>
+            <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsConfirmOpen(false)}
+                disabled={isSaving}
+                className="w-full sm:w-auto"
+              >
+                Để sau
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  const form = formRef.current;
+                  if (!form) return;
+                  setIsConfirmOpen(false);
+                  editFetcher.submit(new FormData(form), { method: "post" });
+                }}
+                disabled={isSaving}
+                className="w-full sm:w-auto"
+              >
+                Xác nhận lưu
+              </Button>
+            </div>
+          </section>
+        </Overlay>,
+        document.body,
+      )}
     </div>
   );
 }
@@ -672,7 +936,41 @@ function AttendanceSessionDetails({
   status: StatusFilter;
   query: string;
 }) {
-  const counts = session.records.reduce(
+  const [isEditing, setIsEditing] = useState(false);
+  const [isMetadataDirty, setIsMetadataDirty] = useState(false);
+  const [isMetadataSaving, setIsMetadataSaving] = useState(false);
+  const [recordDrafts, setRecordDrafts] = useState<Record<string, AttendanceStatusDraft>>({});
+  const [taskDrafts, setTaskDrafts] = useState<Record<string, Partial<Record<AttendanceTask, boolean>>>>({});
+  const [searchQuery, setSearchQuery] = useState(query);
+  useEffect(() => {
+    setSearchQuery(query);
+  }, [query]);
+  const filteredRecords = session.records.filter(({ student }) =>
+    !searchQuery
+    || normalizeSearchText(`${student.name} ${student.email}`).includes(normalizeSearchText(searchQuery)),
+  );
+  const recordUpdates = Object.entries(recordDrafts).map(([recordId, draft]) => ({
+    recordId,
+    ...draft,
+  }));
+  const serializedRecordUpdates = JSON.stringify(recordUpdates);
+  const taskUpdates = Object.entries(taskDrafts).flatMap(([recordId, drafts]) =>
+    Object.entries(drafts).flatMap(([task, completed]) =>
+      isAttendanceTask(task) && typeof completed === "boolean"
+        ? [{ recordId, task, completed }]
+        : [],
+    ),
+  );
+  const serializedTaskUpdates = JSON.stringify(taskUpdates);
+  const isDirty = isMetadataDirty || recordUpdates.length > 0 || taskUpdates.length > 0;
+  const handleSaved = useCallback(() => {
+    setIsEditing(false);
+    setIsMetadataDirty(false);
+    setIsMetadataSaving(false);
+    setRecordDrafts({});
+    setTaskDrafts({});
+  }, []);
+  const counts = filteredRecords.reduce(
     (result, record) => {
       if (record.status === "PRESENT") result.present += 1;
       else if (record.status === "LATE") result.late += 1;
@@ -685,45 +983,88 @@ function AttendanceSessionDetails({
 
   return (
     <Card>
-      <div className="flex flex-col gap-4 border-b p-4 sm:p-5 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-lg font-semibold leading-tight">{session.classroom.name}</h2>
-            {session.classroom.isCompleted && (
-              <Badge variant="outline" className="text-muted-foreground">Đã kết thúc</Badge>
-            )}
-            <span className="text-sm text-muted-foreground">{session.classroom.course}</span>
+      <div className="space-y-4 border-b p-4 sm:p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-lg font-semibold leading-tight">{session.classroom.name}</h2>
+              {session.classroom.isCompleted && (
+                <Badge variant="outline" className="text-muted-foreground">Đã kết thúc</Badge>
+              )}
+              <span className="text-sm text-muted-foreground">{session.classroom.course}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">{session.title}</span>
+              <span className="inline-flex items-center gap-1.5">
+                <CalendarDays className="h-4 w-4" />
+                {formatAttendanceDate(session.date)}
+              </span>
+              {session.lesson && <span>Bài: {session.lesson}</span>}
+              <span>GV: {session.classroom.teacher}</span>
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs">
+              <Badge variant="outline">{filteredRecords.length} học viên trong kết quả</Badge>
+              <Badge variant="outline" className="border-success/30 text-success">{counts.present} có mặt</Badge>
+              <Badge variant="outline" className="border-warning/30 text-warning">{counts.late} đi muộn</Badge>
+              <Badge variant="outline" className="border-destructive/30 text-destructive">{counts.absent} vắng</Badge>
+              {counts.unmarked > 0 && (
+                <Badge variant="outline" className="text-muted-foreground">{counts.unmarked} chưa điểm danh</Badge>
+              )}
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">{session.title}</span>
-            <span className="inline-flex items-center gap-1.5">
-              <CalendarDays className="h-4 w-4" />
-              {formatAttendanceDate(session.date)}
-            </span>
-            {session.lesson && <span>Bài: {session.lesson}</span>}
-            <span>GV: {session.classroom.teacher}</span>
-          </div>
-          <div className="flex flex-wrap gap-2 text-xs">
-            <Badge variant="outline">{session.records.length} học viên trong kết quả</Badge>
-            <Badge variant="outline" className="border-success/30 text-success">{counts.present} có mặt</Badge>
-            <Badge variant="outline" className="border-warning/30 text-warning">{counts.late} đi muộn</Badge>
-            <Badge variant="outline" className="border-destructive/30 text-destructive">{counts.absent} vắng</Badge>
-            {counts.unmarked > 0 && (
-              <Badge variant="outline" className="text-muted-foreground">{counts.unmarked} chưa điểm danh</Badge>
-            )}
+          <div className="flex flex-wrap items-start gap-2">
+            <Button
+              type={isDirty ? "submit" : "button"}
+              form={isDirty ? `session-metadata-${session.id}` : undefined}
+              variant={isEditing && !isDirty ? "default" : "outline"}
+              aria-pressed={isEditing}
+              disabled={isMetadataSaving}
+              onClick={() => {
+                if (!isDirty) {
+                  setIsEditing((current) => !current);
+                  setIsMetadataDirty(false);
+                }
+              }}
+            >
+              {isMetadataSaving
+                ? "Đang lưu..."
+                : isDirty
+                  ? "Lưu"
+                  : isEditing
+                    ? "Xong chỉnh sửa"
+                    : "Chỉnh sửa buổi"}
+            </Button>
+            <SessionActions session={session} />
           </div>
         </div>
-        <SessionActions session={session} />
+        {isEditing && (
+          <SessionMetadataEditor
+            key={session.id}
+            session={session}
+            records={serializedRecordUpdates}
+            tasks={serializedTaskUpdates}
+            onDirtyChange={setIsMetadataDirty}
+            onSavingChange={setIsMetadataSaving}
+            onSaved={handleSaved}
+          />
+        )}
       </div>
 
       <CardContent className="p-0">
         <div className="border-b p-4 sm:p-5">
-          <Form method="get" className="grid gap-3 sm:grid-cols-[1fr_1.5fr_auto_auto] sm:items-end">
+          <Form method="get" className="grid gap-3 sm:grid-cols-[1fr_1.5fr] sm:items-end">
             <input type="hidden" name="classId" value={session.classId} />
             <input type="hidden" name="sessionId" value={session.id} />
+            <input type="hidden" name="q" value={searchQuery} />
             <div className="space-y-1.5">
               <Label htmlFor={`record-status-${session.id}`}>Trạng thái</Label>
-              <select id={`record-status-${session.id}`} name="status" defaultValue={status} className={SELECT_CLASS}>
+              <select
+                id={`record-status-${session.id}`}
+                name="status"
+                value={status}
+                onChange={(event) => event.currentTarget.form?.requestSubmit()}
+                className={SELECT_CLASS}
+              >
                 <option value="ALL">Tất cả</option>
                 <option value="UNMARKED">Chưa điểm danh</option>
                 {STATUS_OPTIONS.map((option) => (
@@ -737,68 +1078,91 @@ function AttendanceSessionDetails({
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id={`record-search-${session.id}`}
-                  name="q"
-                  defaultValue={query}
+                  value={searchQuery}
+                  maxLength={100}
+                  onChange={(event) => setSearchQuery(event.currentTarget.value)}
                   placeholder="Tên hoặc email"
                   className="pl-9"
                 />
               </div>
             </div>
-            <Button type="submit" variant="outline">
-              <Search className="mr-2 h-4 w-4" />
-              Lọc học viên
-            </Button>
-            <Button asChild type="button" variant="ghost">
-              <Link to={`/admin/attendance?classId=${encodeURIComponent(session.classId)}&sessionId=${encodeURIComponent(session.id)}`}>
-                Đặt lại
-              </Link>
-            </Button>
           </Form>
         </div>
-        {session.records.length === 0 ? (
+        {filteredRecords.length === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">Buổi này chưa có học viên khớp với bộ lọc.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
+            <table className="w-full min-w-[1000px] text-left text-sm">
               <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th scope="col" className="px-4 py-3 font-medium sm:px-5">Học viên</th>
-                  <th scope="col" className="px-4 py-3 font-medium">Trạng thái điểm danh</th>
-                  <th scope="col" className="px-4 py-3 font-medium sm:px-5">Nhiệm vụ</th>
+                  <th scope="col" className="w-[240px] px-4 py-3 font-medium">Trạng thái điểm danh</th>
+                  <th scope="col" className="w-[100px] px-3 py-3 text-center font-medium">Ghi âm</th>
+                  <th scope="col" className="w-[100px] px-3 py-3 text-center font-medium">Chữ Hán</th>
+                  <th scope="col" className="w-[100px] px-3 py-3 text-center font-medium">Duet</th>
+                  <th scope="col" className="w-[100px] px-3 py-3 text-center font-medium">Bài link</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {session.records.map((record) => (
+                {filteredRecords.map((record) => (
                   <tr key={record.id} className="align-top">
                     <th scope="row" className="px-4 py-4 font-medium sm:px-5">
                       <span className="block">{record.student.name}</span>
-                      <span className="mt-1 block">
-                        <AttendanceStatusBadge status={record.status} />
-                      </span>
                     </th>
                     <td className="px-4 py-3">
                       <AttendanceRecordEditor
                         key={`${record.id}:${record.status ?? ""}:${record.absenceReason ?? ""}`}
-                        sessionId={session.id}
                         record={record}
+                        isEditing={isEditing}
+                        onDraftChange={(recordId, draft) => {
+                          const existingRecord = session.records.find(({ id }) => id === recordId);
+                          if (!existingRecord) return;
+                          const savedStatus = existingRecord.status ?? "";
+                          const savedReason = existingRecord.absenceReason ?? "";
+                          const isReverted = draft.status === savedStatus
+                            && (draft.status !== "ABSENT" || draft.absenceReason === savedReason);
+                          setRecordDrafts((current) => {
+                            if (isReverted) {
+                              const { [recordId]: _discarded, ...remaining } = current;
+                              return remaining;
+                            }
+                            return { ...current, [recordId]: draft };
+                          });
+                        }}
                       />
-                      {record.status === "ABSENT" && (
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Lý do hiện tại: {record.absenceReason === "EXCUSED" ? "Có phép" : record.absenceReason === "UNEXCUSED" ? "Không phép" : "Chưa ghi nhận"}
-                        </p>
-                      )}
                     </td>
-                    <td className="px-4 py-4 text-muted-foreground sm:px-5">
-                      {[
-                        ["Ghi âm", record.recording],
-                        ["Chữ Hán", record.hanzi],
-                        ["Duet", record.duet],
-                        ["Bài link", record.lessonLink],
-                      ]
-                        .filter(([, completed]) => completed)
-                        .map(([label]) => label)
-                        .join(" · ") || "Chưa hoàn thành"}
-                    </td>
+                    {[
+                      ["Ghi âm", record.recording, "recording"] as const,
+                      ["Chữ Hán", record.hanzi, "hanzi"] as const,
+                      ["Duet", record.duet, "duet"] as const,
+                      ["Bài link", record.lessonLink, "lessonLink"] as const,
+                    ].map(([label, completed, task]) => (
+                      <td key={label} className="px-3 py-3.5 text-center">
+                        <AttendanceTaskCheckbox
+                          recordId={record.id}
+                          studentName={record.student.name}
+                          task={task}
+                          label={label}
+                          checked={taskDrafts[record.id]?.[task] ?? completed}
+                          isEditing={isEditing}
+                          onDraftChange={(recordId, changedTask, nextValue) => {
+                            const savedRecord = session.records.find(({ id }) => id === recordId);
+                            if (!savedRecord) return;
+                            const isReverted = savedRecord[changedTask] === nextValue;
+                            setTaskDrafts((current) => {
+                              const recordTasks = { ...(current[recordId] ?? {}) };
+                              if (isReverted) delete recordTasks[changedTask];
+                              else recordTasks[changedTask] = nextValue;
+                              if (Object.keys(recordTasks).length === 0) {
+                                const { [recordId]: _discarded, ...remaining } = current;
+                                return remaining;
+                              }
+                              return { ...current, [recordId]: recordTasks };
+                            });
+                          }}
+                        />
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
