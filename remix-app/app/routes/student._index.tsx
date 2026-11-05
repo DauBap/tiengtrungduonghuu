@@ -54,6 +54,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
       ])
     : [[], []];
 
+  const attendanceByStatus = await prisma.attendanceRecord.groupBy({
+    by: ["status"],
+    where: {
+      studentId: user.id,
+      status: { in: ["PRESENT", "LATE", "ABSENT"] },
+    },
+    _count: { _all: true },
+  });
+  const attendanceStats = attendanceByStatus.reduce(
+    (stats, row) => {
+      if (row.status === "PRESENT" || row.status === "LATE") {
+        stats.attended += row._count._all;
+      } else if (row.status === "ABSENT") {
+        stats.absent += row._count._all;
+      }
+      return stats;
+    },
+    { attended: 0, absent: 0 },
+  );
+
   const studyByEnrollment = new Map<string, { totalSeconds: number; visitCount: number }>();
   for (const session of studySessions) {
     studyByEnrollment.set(`${session.courseId}:${session.userId}`, {
@@ -90,11 +110,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }));
   });
 
-  return { user, myCourses, enrollments, overallProgress, totalCompleted, currentLesson, courseProgress, classLeaderboards };
+  return {
+    user,
+    myCourses,
+    enrollments,
+    overallProgress,
+    totalCompleted,
+    currentLesson,
+    courseProgress,
+    classLeaderboards,
+    attendanceStats,
+  };
 }
 
 export default function StudentIndex() {
-  const { user, myCourses, enrollments, overallProgress, totalCompleted, currentLesson, courseProgress, classLeaderboards } =
+  const { user, myCourses, enrollments, overallProgress, totalCompleted, currentLesson, courseProgress, classLeaderboards, attendanceStats } =
     useLoaderData<typeof loader>();
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   useModalScrollLock(isLeaderboardOpen);
@@ -164,7 +194,7 @@ export default function StudentIndex() {
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Chào mừng bạn trở lại</h1>
           <p className="mt-2 text-sm text-muted-foreground">Mỗi bài học hôm nay là một bước tiến mới.</p>
         </div>
-        <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {[
             { label: "Khóa học", value: myCourses.length, icon: BookOpen, tone: "text-primary bg-primary/10" },
             { label: "Bài hoàn thành", value: totalCompleted, icon: CheckCircle2, tone: "text-accent bg-accent/10" },
@@ -181,6 +211,27 @@ export default function StudentIndex() {
               </CardContent>
             </Card>
           ))}
+          <Card className="shadow-none">
+            <CardContent className="flex min-w-0 items-center gap-3 p-3 sm:p-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Calendar className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <div className="grid min-w-0 flex-1 grid-cols-2 gap-3">
+                <div>
+                  <p className="truncate text-xs text-muted-foreground sm:text-sm">Đi học</p>
+                  <p className="text-lg font-semibold leading-tight tabular-nums text-success sm:text-xl">
+                    {attendanceStats.attended}
+                  </p>
+                </div>
+                <div className="border-l pl-3">
+                  <p className="truncate text-xs text-muted-foreground sm:text-sm">Vắng</p>
+                  <p className="text-lg font-semibold leading-tight tabular-nums text-destructive sm:text-xl">
+                    {attendanceStats.absent}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {currentLesson && (
