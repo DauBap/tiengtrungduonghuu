@@ -569,7 +569,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
       isActive: teacher.isActive,
       isActivated: teacher.isActivated,
       isDeleted: teacher.deletedAt !== null,
-      classCount: assignedClasses.length,
       activeClassCount: assignedClasses.filter((classroom) => !classroom.completedAt).length,
       sessionCount: assignedClasses.reduce((total, classroom) => total + classroom._count.attendanceSessions, 0),
       dailySessionCount: teacherAttendance.sessionCount,
@@ -1669,6 +1668,7 @@ export default function AdminAttendance() {
       ? classroom.teacherId === null
       : classroom.teacherId === selectedTeacherId
   ));
+  const activeTeacherClasses = teacherClasses.filter((classroom) => !classroom.isCompleted);
   const visibleClasses = selectedClass ? [selectedClass] : teacherClasses;
   const isTeacherOverview = !selectedTeacherId || (!selectedTeacher && selectedTeacherId !== "unassigned");
   const navigate = useNavigate();
@@ -1738,15 +1738,21 @@ export default function AdminAttendance() {
     }
     return true;
   };
-  const visibleTeachers = teachers.filter((teacher) =>
-    normalizeSearchText(teacher.name).includes(normalizeSearchText(teacherSearch))
-    && matchesOverviewStatus(
-      teacher.dailySessionCount,
-      teacher.dailyCompletedSessionCount,
-      teacher.dailyEmptySessionCount,
-    ),
-  );
+  const visibleTeachers = teachers
+    .filter((teacher) =>
+      normalizeSearchText(teacher.name).includes(normalizeSearchText(teacherSearch))
+      && matchesOverviewStatus(
+        teacher.dailySessionCount,
+        teacher.dailyCompletedSessionCount,
+        teacher.dailyEmptySessionCount,
+      ),
+    )
+    .sort((left, right) =>
+      right.activeClassCount - left.activeClassCount
+      || left.name.localeCompare(right.name, "vi"),
+    );
   const filteredVisibleClasses = visibleClasses.filter((classroom) => {
+    if (classroom.isCompleted) return false;
     const classSessions = sessions.filter((session) => session.classId === classroom.id);
     if (filters.overviewStatus === "NO_SESSION") return classSessions.length === 0;
     if (filters.overviewStatus === "NEEDS_ATTENTION") {
@@ -1763,7 +1769,8 @@ export default function AdminAttendance() {
     return true;
   });
   const unassignedClasses = classes.filter((classroom) => classroom.teacherId === null);
-  const showUnassignedClasses = unassignedClasses.length > 0
+  const activeUnassignedClasses = unassignedClasses.filter((classroom) => !classroom.isCompleted);
+  const showUnassignedClasses = activeUnassignedClasses.length > 0
     && matchesOverviewStatus(
       unassignedAttendanceSummary.sessionCount,
       unassignedAttendanceSummary.completedSessionCount,
@@ -1945,7 +1952,7 @@ export default function AdminAttendance() {
               <div>
                 <h2 id="attendance-teachers-heading" className="text-lg font-semibold">Toàn bộ giáo viên</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {visibleTeachers.length} / {teachers.length} giáo viên · {activeClassCount} lớp đang hoạt động · {classes.length} lớp tổng cộng
+                  {visibleTeachers.length} / {teachers.length} giáo viên · {activeClassCount} lớp đang hoạt động
                 </p>
               </div>
               <div className="grid w-full gap-3 sm:max-w-xl sm:grid-cols-[1fr_auto] sm:items-end">
@@ -1998,8 +2005,7 @@ export default function AdminAttendance() {
                         {teacher.isDeleted && <Badge variant="outline">Đã xóa</Badge>}
                       </span>
                       <span className="mt-1 block text-sm text-muted-foreground">
-                        {teacher.activeClassCount} lớp đang hoạt động · {teacher.classCount} lớp
-                        {" · "}{teacher.dailySessionCount} buổi ngày {formatAttendanceDate(filters.date)}
+                        {teacher.activeClassCount} lớp đang hoạt động · {teacher.dailySessionCount} buổi ngày {formatAttendanceDate(filters.date)}
                       </span>
                       {teacher.dailySessionCount > 0 && (
                         <span className="mt-2 block max-w-sm">
@@ -2036,8 +2042,7 @@ export default function AdminAttendance() {
                     <span className="min-w-0 flex-1">
                       <span className="font-medium">Chưa phân công giáo viên</span>
                       <span className="mt-1 block text-sm text-muted-foreground">
-                        {unassignedClasses.filter((classroom) => !classroom.isCompleted).length} lớp đang hoạt động · {unassignedClasses.length} lớp
-                        {" · "}{unassignedAttendanceSummary.sessionCount} buổi ngày {formatAttendanceDate(filters.date)}
+                        {activeUnassignedClasses.length} lớp đang hoạt động · {unassignedAttendanceSummary.sessionCount} buổi ngày {formatAttendanceDate(filters.date)}
                       </span>
                       {unassignedAttendanceSummary.sessionCount > 0 && (
                         <span className="mt-1 block text-xs text-muted-foreground">
@@ -2083,7 +2088,7 @@ export default function AdminAttendance() {
                     {selectedTeacher?.name ?? "Chưa phân công giáo viên"}
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {teacherClasses.length} lớp · {sessions.length} buổi ngày {formatAttendanceDate(filters.date)}
+                    {activeTeacherClasses.length} lớp đang hoạt động · {sessions.length} buổi ngày {formatAttendanceDate(filters.date)}
                   </p>
                 </div>
                 {selectedTeacher && (!selectedTeacher.isActive || !selectedTeacher.isActivated || selectedTeacher.isDeleted) && (
@@ -2097,10 +2102,10 @@ export default function AdminAttendance() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              {teacherClasses.length > 1 && (
+              {activeTeacherClasses.length > 1 && (
                 <div className="w-full sm:max-w-xs">
                   <SearchableClassSelect
-                    classes={teacherClasses}
+                    classes={activeTeacherClasses}
                     selectedClassId={filters.classId}
                     onSelect={(classId) => navigate(getAttendanceHref({ classId }))}
                   />
@@ -2139,12 +2144,22 @@ export default function AdminAttendance() {
               <Card>
                 <CardContent className="px-5 py-10 text-center">
                   <p className="font-medium">
-                    {teacherClasses.length === 0 ? "Giáo viên này chưa có lớp" : "Không có lớp khớp tình trạng"}
+                    {selectedClass?.isCompleted
+                      ? "Lớp này đã kết thúc"
+                      : activeTeacherClasses.length === 0
+                        ? teacherClasses.length === 0
+                          ? "Giáo viên này chưa có lớp"
+                          : "Không có lớp đang hoạt động"
+                        : "Không có lớp khớp tình trạng"}
                   </p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {teacherClasses.length === 0
-                      ? "Các lớp được phân công sẽ xuất hiện tại đây."
-                      : "Thử đổi bộ lọc tình trạng hoặc ngày điểm danh."}
+                    {selectedClass?.isCompleted
+                      ? "Lớp kết thúc được ẩn khỏi danh sách; lịch sử đã lưu vẫn có thể xem ở bên dưới."
+                      : activeTeacherClasses.length === 0 && teacherClasses.length === 0
+                        ? "Các lớp được phân công sẽ xuất hiện tại đây."
+                        : activeTeacherClasses.length === 0
+                          ? "Các lớp đã kết thúc được ẩn khỏi danh sách điểm danh."
+                          : "Thử đổi bộ lọc tình trạng hoặc ngày điểm danh."}
                   </p>
                 </CardContent>
               </Card>
