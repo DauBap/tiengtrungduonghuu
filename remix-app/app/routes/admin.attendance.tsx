@@ -293,6 +293,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
         course: { select: { title: true } },
         teacher: { select: { id: true, name: true } },
         _count: { select: { attendanceSessions: true } },
+        attendanceSessions: {
+          where: { date: { lte: date } },
+          orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+          take: 3,
+          select: {
+            id: true,
+            records: {
+              where: { status: "ABSENT" },
+              select: { studentId: true, student: { select: { name: true } } },
+            },
+          },
+        },
       },
       orderBy: [{ completedAt: "asc" }, { name: "asc" }],
     }),
@@ -599,6 +611,28 @@ export async function loader({ request }: LoaderFunctionArgs) {
     ? Math.round((attendanceSummary.present / markedRecordCount) * 100)
     : 0;
   const classById = new Map(classes.map((classroom) => [classroom.id, classroom]));
+  const getConsecutiveAbsenceClasses = (includedClasses: typeof classes) => includedClasses.flatMap((classroom) => {
+    const recentSessions = [...classroom.attendanceSessions].reverse();
+    const latestSession = recentSessions[recentSessions.length - 1];
+    if (!latestSession) return [];
+
+    const studentIds = getStudentsAbsentForThreeConsecutiveSessions(
+      recentSessions.map((session) => ({
+        id: session.id,
+        records: session.records.map(({ studentId }) => ({ studentId, status: "ABSENT" })),
+      })),
+      latestSession.id,
+    );
+    const studentNames = latestSession.records
+      .filter(({ studentId }) => studentIds.has(studentId))
+      .map(({ student }) => student.name);
+    return studentNames.length > 0
+      ? [{ classId: classroom.id, className: classroom.name, studentNames }]
+      : [];
+  });
+  const unassignedConsecutiveAbsenceClasses = getConsecutiveAbsenceClasses(
+    classes.filter((classroom) => classroom.teacherId === null),
+  );
   const unassignedAttendance = summarizeSessions(
     sessions.filter((session) => classById.get(session.classId)?.teacherId === null),
   );
@@ -608,9 +642,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const teacherSummaries = teachers.map((teacher) => {
     const assignedClasses = classes.filter((classroom) => classroom.teacherId === teacher.id);
-    const teacherAttendance = summarizeSessions(
-      sessions.filter((session) => classById.get(session.classId)?.teacherId === teacher.id),
-    );
+    const consecutiveAbsenceClasses = getConsecutiveAbsenceClasses(assignedClasses);
+    const teacherSessions = sessions.filter((session) => classById.get(session.classId)?.teacherId === teacher.id);
+    const teacherAttendance = summarizeSessions(teacherSessions);
     const teacherMarkedRecords = teacherAttendance.present + teacherAttendance.late + teacherAttendance.absent;
     return {
       id: teacher.id,
@@ -625,6 +659,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       dailyPresent: teacherAttendance.present,
       dailyLate: teacherAttendance.late,
       dailyAbsent: teacherAttendance.absent,
+      consecutiveAbsenceClasses,
       dailyUnmarked: teacherAttendance.unmarked,
       dailyMarkedRecordCount: teacherMarkedRecords,
       dailyIncompleteSessionCount: teacherAttendance.sessionsNeedingAttention,
@@ -660,6 +695,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       completedSessionCount: unassignedAttendance.completedSessions,
       incompleteSessionCount: unassignedAttendance.sessionsNeedingAttention,
       emptySessionCount: unassignedAttendance.sessionsWithoutStudents,
+      consecutiveAbsenceClasses: unassignedConsecutiveAbsenceClasses,
       attendanceRate: unassignedMarkedRecordCount > 0
         ? Math.round((unassignedAttendance.present / unassignedMarkedRecordCount) * 100)
         : null,
@@ -2098,6 +2134,22 @@ export default function AdminAttendance() {
                           </span>
                         </span>
                       )}
+                      {teacher.consecutiveAbsenceClasses.length > 0 && (
+                        <span className="mt-2 flex flex-wrap items-center gap-1.5">
+                          <span className="text-xs font-medium text-destructive">Có học sinh vắng 3 buổi liên tiếp;</span>
+                          {teacher.consecutiveAbsenceClasses.flatMap((classroom) =>
+                            classroom.studentNames.map((studentName) => (
+                              <Badge
+                                key={`${classroom.classId}:${studentName}`}
+                                variant="outline"
+                                className="border-destructive/30 bg-destructive/5 text-destructive"
+                              >
+                                {classroom.className} - {studentName}
+                              </Badge>
+                            )),
+                          )}
+                        </span>
+                      )}
                     </span>
                     <span className="flex items-center justify-between gap-3 text-sm text-muted-foreground sm:justify-end">
                       <span>{teacher.sessionCount} buổi tổng cộng</span>
@@ -2124,6 +2176,22 @@ export default function AdminAttendance() {
                           {unassignedAttendanceSummary.emptySessionCount > 0
                             ? ` · ${unassignedAttendanceSummary.emptySessionCount} buổi chưa có học viên`
                             : ""}
+                        </span>
+                      )}
+                      {unassignedAttendanceSummary.consecutiveAbsenceClasses.length > 0 && (
+                        <span className="mt-2 flex flex-wrap items-center gap-1.5">
+                          <span className="text-xs font-medium text-destructive">Có học sinh vắng 3 buổi liên tiếp;</span>
+                          {unassignedAttendanceSummary.consecutiveAbsenceClasses.flatMap((classroom) =>
+                            classroom.studentNames.map((studentName) => (
+                              <Badge
+                                key={`${classroom.classId}:${studentName}`}
+                                variant="outline"
+                                className="border-destructive/30 bg-destructive/5 text-destructive"
+                              >
+                                {classroom.className} - {studentName}
+                              </Badge>
+                            )),
+                          )}
                         </span>
                       )}
                     </span>
@@ -2238,6 +2306,7 @@ export default function AdminAttendance() {
               <div className="space-y-3">
                 {filteredVisibleClasses.map((classroom) => {
                   const classSessions = sessions.filter((session) => session.classId === classroom.id);
+                  const absentCount = classSessions.reduce((total, session) => total + session.absent, 0);
                   return (
                     <Card key={classroom.id} className="overflow-hidden">
                       <div className="flex flex-col gap-2 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -2250,6 +2319,14 @@ export default function AdminAttendance() {
                         </div>
                         <span className="shrink-0 text-sm text-muted-foreground">
                           {classSessions.length} buổi trong ngày
+                          {absentCount > 0 && (
+                            <Badge
+                              variant="outline"
+                              className="ml-2 border-destructive/30 bg-destructive/5 text-destructive"
+                            >
+                              {absentCount} lượt vắng
+                            </Badge>
+                          )}
                         </span>
                       </div>
                       <div
