@@ -3,7 +3,9 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { useFetcher, useLoaderData } from "react-router";
 import { ClipboardCheck, Search, Users } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
+import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
 import { Button } from "~/components/ui/button";
+import { getStudentsAbsentForThreeConsecutiveSessions } from "~/lib/attendance-streak";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 
@@ -406,6 +408,30 @@ export default function TeacherAttendance() {
       lessonLink: records.filter((record) => record.tasks.lessonLink).length,
     };
   });
+  const chronologicalSessions = [...attendanceSessions].sort((left, right) =>
+    left.date.localeCompare(right.date)
+    || attendanceSessions.indexOf(left) - attendanceSessions.indexOf(right),
+  );
+  const absenceSessions = chronologicalSessions.map((session) => ({
+    id: session.id,
+    records: (selectedClass?.students ?? []).map((student) => ({
+      studentId: student.id,
+      status: (attendanceBySession[`${classId}:${session.id}`] ?? session.records)[student.id]?.status ?? null,
+    })),
+  }));
+  const absenceTargetSession = isTotalView
+    ? chronologicalSessions[chronologicalSessions.length - 1]
+    : selectedAttendanceSession;
+  const consecutiveAbsenceStudentIds = absenceTargetSession
+    ? getStudentsAbsentForThreeConsecutiveSessions(absenceSessions, absenceTargetSession.id)
+    : new Set<string>();
+  const consecutiveAbsenceNames = (selectedClass?.students ?? [])
+    .filter((student) => consecutiveAbsenceStudentIds.has(student.id))
+    .map((student) => student.name);
+  const aggregateWithAbsence = aggregate.map((item) => ({
+    ...item,
+    hasConsecutiveAbsence: consecutiveAbsenceStudentIds.has(item.student.id),
+  }));
   const counts = isTotalView
     ? {
         total: selectedClass?.students.length ?? 0,
@@ -842,6 +868,12 @@ export default function TeacherAttendance() {
             )}
           </div>
 
+          {consecutiveAbsenceNames.length > 0 && (
+            <div className="px-4 pb-4 sm:px-5">
+              <ConsecutiveAbsenceNotice studentNames={consecutiveAbsenceNames} />
+            </div>
+          )}
+
           <div className="overflow-x-auto">
             {isTotalView ? (
               <table className="w-full min-w-[1116px] border-collapse text-left">
@@ -859,7 +891,7 @@ export default function TeacherAttendance() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {aggregate
+                  {aggregateWithAbsence
                     .filter(({ student }) => student.name.toLocaleLowerCase("vi").includes(search.trim().toLocaleLowerCase("vi")))
                     .map((item, index) => {
                       const doneByTask: Record<AttendanceTask, number> = {
@@ -870,13 +902,17 @@ export default function TeacherAttendance() {
                       };
                       const initials = item.student.name.split(" ").slice(-2).map((part) => part[0]).join("");
                       return (
-                        <tr key={item.student.id} className="transition-colors hover:bg-muted/30">
+                        <tr
+                          key={item.student.id}
+                          className={`transition-colors hover:bg-muted/30 ${item.hasConsecutiveAbsence ? "bg-destructive/5" : ""}`}
+                        >
                           <td className="px-3 py-3.5 text-center text-sm tabular-nums text-muted-foreground">{index + 1}</td>
                           <th scope="row" className="px-5 py-3.5 text-left">
                             <span className="flex items-center gap-3">
                               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground" aria-hidden="true">{initials}</span>
                               <span>
                                 <span className="block text-sm font-medium text-foreground">{item.student.name}</span>
+                                {item.hasConsecutiveAbsence && <ConsecutiveAbsenceBadge />}
                               </span>
                             </span>
                           </th>
@@ -891,7 +927,7 @@ export default function TeacherAttendance() {
                         </tr>
                       );
                     })}
-                  {aggregate.filter(({ student }) => student.name.toLocaleLowerCase("vi").includes(search.trim().toLocaleLowerCase("vi"))).length === 0 && (
+                  {aggregateWithAbsence.filter(({ student }) => student.name.toLocaleLowerCase("vi").includes(search.trim().toLocaleLowerCase("vi"))).length === 0 && (
                     <tr>
                       <td colSpan={9} className="px-4 py-10 text-center">
                         <p className="text-sm font-medium">
@@ -926,7 +962,10 @@ export default function TeacherAttendance() {
                   const initials = student.name.split(" ").slice(-2).map((part) => part[0]).join("");
 
                   return (
-                    <tr key={student.id} className="transition-colors hover:bg-muted/30">
+                    <tr
+                      key={student.id}
+                      className={`transition-colors hover:bg-muted/30 ${consecutiveAbsenceStudentIds.has(student.id) ? "bg-destructive/5" : ""}`}
+                    >
                       <td className="px-3 py-3.5 text-center text-sm tabular-nums text-muted-foreground">{index + 1}</td>
                       <th scope="row" className="px-5 py-3.5 text-left">
                         <div className="flex min-w-0 items-center gap-3">
@@ -935,6 +974,7 @@ export default function TeacherAttendance() {
                           </span>
                           <span className="min-w-0">
                             <span className="block truncate text-sm font-medium text-foreground">{student.name}</span>
+                            {consecutiveAbsenceStudentIds.has(student.id) && <ConsecutiveAbsenceBadge />}
                           </span>
                         </div>
                       </th>

@@ -18,11 +18,13 @@ import {
 } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Overlay } from "~/components/common/overlay";
+import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { getStudentsAbsentForThreeConsecutiveSessions } from "~/lib/attendance-streak";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 import { toast } from "sonner";
@@ -400,6 +402,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           title: true,
           lesson: true,
           date: true,
+          createdAt: true,
           class: {
             select: {
               name: true,
@@ -420,19 +423,47 @@ export async function loader({ request }: LoaderFunctionArgs) {
               hanzi: true,
               duet: true,
               lessonLink: true,
-              student: { select: { name: true, email: true } },
+              student: { select: { id: true, name: true, email: true } },
             },
           },
         },
       })
     : null;
 
+  const selectedAbsenceSessionsDescending = selectedSession
+    ? await prisma.attendanceSession.findMany({
+        where: {
+          classId: selectedSession.classId,
+          OR: [
+            { date: { lt: selectedSession.date } },
+            { date: selectedSession.date, createdAt: { lte: selectedSession.createdAt } },
+          ],
+        },
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+        take: 3,
+        select: {
+          id: true,
+          records: { select: { studentId: true, status: true, student: { select: { name: true } } } },
+        },
+      })
+    : [];
+  const selectedAbsenceSessions = [...selectedAbsenceSessionsDescending].reverse();
+  const selectedAbsenceStudentIds = selectedSession
+    ? getStudentsAbsentForThreeConsecutiveSessions(selectedAbsenceSessions, selectedSession.id)
+    : new Set<string>();
+  const selectedAbsenceNames = selectedAbsenceSessions[selectedAbsenceSessions.length - 1]?.records
+    .filter(({ studentId }) => selectedAbsenceStudentIds.has(studentId))
+    .map(({ student }) => student.name) ?? [];
   const matchingRecords = selectedSession?.records
-    .map(({ student, ...record }) => ({ ...record, student: { name: student.name, email: student.email } }));
+    .map(({ student, ...record }) => ({
+      ...record,
+      consecutiveAbsence: selectedAbsenceStudentIds.has(student.id),
+      student: { name: student.name, email: student.email },
+    }));
 
   const classAttendanceSummary = canLoadClassSummary && selectedClass
     ? await (async () => {
-        const [enrollments, groupedRecords] = await Promise.all([
+        const [enrollments, groupedRecords, recentSessionsDescending] = await Promise.all([
           prisma.enrollment.findMany({
             where: { classId: selectedClass.id },
             select: { user: { select: { id: true, name: true, email: true } } },
@@ -442,7 +473,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
             where: { session: { is: { classId: selectedClass.id } } },
             _count: { _all: true },
           }),
+          prisma.attendanceSession.findMany({
+            where: { classId: selectedClass.id },
+            orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+            take: 3,
+            select: { id: true, records: { select: { studentId: true, status: true } } },
+          }),
         ]);
+        const recentSessions = [...recentSessionsDescending].reverse();
+        const latestSession = recentSessions[recentSessions.length - 1];
+        const consecutiveAbsenceStudentIds = latestSession
+          ? getStudentsAbsentForThreeConsecutiveSessions(recentSessions, latestSession.id)
+          : new Set<string>();
         const recordStudentIds = Array.from(new Set(groupedRecords.map(({ studentId }) => studentId)));
         const recordStudents = recordStudentIds.length > 0
           ? await prisma.user.findMany({
@@ -503,7 +545,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
         }
 
         const students = Array.from(studentSummaries.values())
-          .sort((left, right) => left.name.localeCompare(right.name, "vi"));
+          .sort((left, right) => left.name.localeCompare(right.name, "vi"))
+          .map((student) => ({
+            ...student,
+            hasConsecutiveAbsence: consecutiveAbsenceStudentIds.has(student.id),
+          }));
         return {
           sessionCount: selectedClass._count.attendanceSessions,
           studentCount: students.length,
@@ -511,6 +557,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
           present: students.reduce((total, student) => total + student.present, 0),
           late: students.reduce((total, student) => total + student.late, 0),
           absent: students.reduce((total, student) => total + student.absent, 0),
+          consecutiveAbsenceNames: students
+            .filter((student) => student.hasConsecutiveAbsence)
+            .map((student) => student.name),
           students,
         };
       })()
@@ -659,6 +708,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           },
           recordCount: selectedSession._count.records,
           records: matchingRecords ?? [],
+          consecutiveAbsenceNames: selectedAbsenceNames,
         }
       : null,
     classAttendanceSummary,
@@ -998,6 +1048,8 @@ function AttendanceClassTotalSummary({
         ))}
       </div>
 
+      <ConsecutiveAbsenceNotice studentNames={summary.consecutiveAbsenceNames} />
+
       <div className="overflow-hidden rounded-lg border bg-card">
         <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div>
@@ -1050,9 +1102,17 @@ function AttendanceClassTotalSummary({
               </thead>
               <tbody className="divide-y">
                 {visibleStudents.map((student, index) => (
-                  <tr key={student.id}>
+                  <tr
+                    key={student.id}
+                    className={student.hasConsecutiveAbsence ? "bg-destructive/5" : undefined}
+                  >
                     <td className="px-4 py-4 text-center text-muted-foreground tabular-nums">{index + 1}</td>
-                    <th scope="row" className="px-4 py-4 font-medium">{student.name}</th>
+                    <th scope="row" className="px-4 py-4 font-medium">
+                      <span className="flex flex-wrap items-center gap-2">
+                        {student.name}
+                        {student.hasConsecutiveAbsence && <ConsecutiveAbsenceBadge />}
+                      </span>
+                    </th>
                     <td className="px-3 py-4 text-center font-medium text-success tabular-nums">{student.present}</td>
                     <td className="px-3 py-4 text-center font-medium text-warning tabular-nums">{student.late}</td>
                     <td className="px-3 py-4 text-center font-medium text-destructive tabular-nums">{student.absent}</td>
@@ -1517,6 +1577,11 @@ function AttendanceSessionDetails({
       </div>
 
       <CardContent className="p-0">
+        {session.consecutiveAbsenceNames.length > 0 && (
+          <div className="p-4 sm:px-5">
+            <ConsecutiveAbsenceNotice studentNames={session.consecutiveAbsenceNames} />
+          </div>
+        )}
         <div className="border-b p-4 sm:p-5">
           <Form method="get" className="grid gap-3 sm:grid-cols-[1fr_1.5fr] sm:items-end">
             <input type="hidden" name="date" value={session.date} />
@@ -1572,9 +1637,15 @@ function AttendanceSessionDetails({
               </thead>
               <tbody className="divide-y">
                 {filteredRecords.map((record) => (
-                  <tr key={record.id} className="align-top">
+                  <tr
+                    key={record.id}
+                    className={`align-top ${record.consecutiveAbsence ? "bg-destructive/5" : ""}`}
+                  >
                     <th scope="row" className="px-4 py-4 font-medium sm:px-5">
-                      <span className="block">{record.student.name}</span>
+                      <span className="flex flex-wrap items-center gap-2">
+                        {record.student.name}
+                        {record.consecutiveAbsence && <ConsecutiveAbsenceBadge />}
+                      </span>
                     </th>
                     <td className="px-4 py-3">
                       <AttendanceRecordEditor
