@@ -121,7 +121,7 @@ function createEmptyAttendanceRecord(): AttendanceRecord {
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
   const classes = await prisma.class.findMany({
-    where: { teacherId: user.id },
+    where: { teacherId: user.id, completedAt: null },
     select: {
       id: true,
       name: true,
@@ -189,7 +189,7 @@ export async function action({ request }: ActionFunctionArgs) {
   if (intent === "create-session") {
     const classId = String(form.get("classId") ?? "");
     const classroom = await prisma.class.findFirst({
-      where: { id: classId, teacherId: user.id },
+      where: { id: classId, teacherId: user.id, completedAt: null },
       select: { id: true },
     });
     if (!classroom) return { success: false as const, error: "Không tìm thấy lớp hoặc bạn không có quyền điểm danh lớp này." };
@@ -251,7 +251,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const sessionId = String(form.get("sessionId") ?? "");
   const session = sessionId
     ? await prisma.attendanceSession.findFirst({
-        where: { id: sessionId, class: { is: { teacherId: user.id } } },
+        where: { id: sessionId, class: { is: { teacherId: user.id, completedAt: null } } },
         select: { id: true, classId: true },
       })
     : null;
@@ -626,7 +626,7 @@ export default function TeacherAttendance() {
         <div className="mx-auto max-w-6xl space-y-3">
           <h1 className="text-2xl font-bold tracking-tight">Điểm danh</h1>
           <p className="text-sm text-muted-foreground">
-            Bạn chưa được phân công lớp học. Hãy liên hệ quản trị viên để được thêm vào lớp.
+            Bạn hiện không có lớp học nào đang hoạt động để điểm danh.
           </p>
         </div>
       </AppShell>
