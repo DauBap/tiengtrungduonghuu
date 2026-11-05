@@ -71,6 +71,8 @@ const FEEDBACK_TAB_LABELS: Record<string, string> = {
   WORKBOOK: "Sách bài tập",
 };
 
+const PRONUNCIATION_TRANSCRIPTION_TIMEOUT_MS = 300_000;
+
 interface AnswerReviewResult {
   id: string;
   prompt: string;
@@ -596,9 +598,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!(audio instanceof File) || audio.size === 0) {
       return { intent, error: "Không nhận được file ghi âm. Hãy ghi âm lại." };
     }
-    if (audio.size > 3_000_000) {
-      return { intent, error: "Bản ghi quá lớn. Hãy đọc ngắn hơn rồi thử lại." };
-    }
     const allowedAudioTypes = new Set([
       "audio/aac",
       "audio/mp4",
@@ -656,9 +655,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
           "Content-Type": audio.type.toLowerCase().split(";", 1)[0],
         },
         body: audio,
-        signal: AbortSignal.timeout(55_000),
+        signal: AbortSignal.timeout(PRONUNCIATION_TRANSCRIPTION_TIMEOUT_MS),
       });
     } catch (error) {
+      if (error instanceof Error && error.name === "TimeoutError") {
+        console.error("[local-asr] Transcription timed out", {
+          timeoutMs: PRONUNCIATION_TRANSCRIPTION_TIMEOUT_MS,
+        });
+        return {
+          intent,
+          error: "Nhận diện giọng nói mất quá nhiều thời gian. Hãy thử đọc lại đoạn ngắn hơn hoặc thử lại sau.",
+        };
+      }
       console.error("[local-asr] Could not reach local service", error);
       return {
         intent,
@@ -2037,10 +2045,6 @@ export default function LessonDetail() {
       };
 
       const transcribeRecording = (audioBlob: Blob, scriptId: string) => {
-        if (audioBlob.size > 3_000_000) {
-          setRecordingError("Bản ghi quá lớn. Hãy đọc ngắn hơn rồi thử lại.");
-          return;
-        }
         const formData = new FormData();
         formData.append("intent", "transcribe-pronunciation-audio");
         formData.append("lessonAudioScriptId", scriptId);
@@ -2826,7 +2830,7 @@ export default function LessonDetail() {
                   >
                     Trình duyệt không hỗ trợ phát lại bản ghi âm.
                   </audio>
-                  {recordingError && recordingBlobRef.current && recordingBlobRef.current.size <= 3_000_000 && (
+                  {recordingError && recordingBlobRef.current && (
                     <Button
                       type="button"
                       variant="outline"
