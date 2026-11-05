@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Link, useFetcher, useLoaderData } from "react-router";
 import {
@@ -11,6 +11,7 @@ import {
   RotateCcw,
   Search,
   Users,
+  X,
 } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
@@ -295,9 +296,11 @@ type ScheduledClass = Awaited<ReturnType<typeof loader>>["classes"][number];
 function TeacherAssignment({
   cls,
   teachers,
+  compact = false,
 }: {
   cls: ScheduledClass;
   teachers: Teacher[];
+  compact?: boolean;
 }) {
   const fetcher = useFetcher<ActionResult>();
   const [teacherId, setTeacherId] = useState(cls.teacherId ?? "");
@@ -320,7 +323,7 @@ function TeacherAssignment({
   );
 
   return (
-    <fetcher.Form method="post" className="mt-2 flex items-center gap-1.5">
+    <fetcher.Form method="post" className={cn("flex items-center gap-1.5", compact ? "mt-1" : "mt-2")}>
       <label htmlFor={`teacher-${cls.id}`} className="sr-only">
         Giáo viên phụ trách lớp {cls.name}
       </label>
@@ -357,6 +360,165 @@ function TeacherAssignment({
         {isSaving && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" aria-label="Đang lưu" />}
       </span>
     </fetcher.Form>
+  );
+}
+
+type ScheduleEntry = {
+  cls: ScheduledClass;
+  slot: ScheduleSlot;
+  slotIndex: number;
+};
+
+type ScheduleTimeGroup = {
+  key: string;
+  startTime: string;
+  endTime: string;
+  entries: ScheduleEntry[];
+};
+
+function ScheduleClassCard({
+  entry,
+  teachers,
+  compact = false,
+}: {
+  entry: ScheduleEntry;
+  teachers: Teacher[];
+  compact?: boolean;
+}) {
+  const { cls, slot, slotIndex } = entry;
+  const teacherIndex = cls.teacherId
+    ? teachers.findIndex((teacher) => teacher.id === cls.teacherId)
+    : -1;
+  const colorIndex = teacherIndex >= 0
+    ? teacherIndex % TEACHER_COLORS.length
+    : cls.teacherId
+      ? hashColorIndex(cls.teacherId)
+      : -1;
+  const color = colorIndex >= 0 ? TEACHER_COLORS[colorIndex] : null;
+
+  return (
+    <article
+      key={`${cls.id}-${slot.startTime}-${slot.endTime}-${slotIndex}`}
+      className={cn(
+        "min-w-0 rounded-lg transition-colors",
+        compact ? "p-2" : "p-2.5",
+        color ? color.chip : "bg-warning/10 text-warning-foreground dark:text-warning",
+      )}
+    >
+      {!compact && (
+        <p className="flex items-center gap-1 text-xs font-semibold tabular-nums">
+          <Clock3 className="h-3 w-3 shrink-0" aria-hidden="true" />
+          <span>{slot.startTime}–{slot.endTime}</span>
+        </p>
+      )}
+      <h3
+        title={cls.name}
+        className={cn(
+          "break-words text-sm font-semibold leading-snug",
+          compact ? "line-clamp-2" : "mt-1.5",
+        )}
+      >
+        {cls.name}
+      </h3>
+      <p className="mt-1 break-words text-xs opacity-80">
+        {cls.course.code} · HSK {cls.course.hskLevel}
+        {compact && cls._count.enrollments > 0 && ` · ${cls._count.enrollments} học viên`}
+      </p>
+      {!compact && cls._count.enrollments > 0 && (
+        <p className="mt-1 flex items-center gap-1 text-xs opacity-80">
+          <Users className="h-3 w-3" aria-hidden="true" />
+          {cls._count.enrollments} học viên
+        </p>
+      )}
+      <TeacherAssignment cls={cls} teachers={teachers} compact={compact} />
+    </article>
+  );
+}
+
+function ScheduleTimeSlot({
+  group,
+  teachers,
+  day,
+}: {
+  group: ScheduleTimeGroup;
+  teachers: Teacher[];
+  day: number;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const slotId = `schedule-slot-${day}-${group.startTime.replace(":", "")}-${group.endTime.replace(":", "")}`;
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (isExpanded && !dialog.open) {
+      dialog.showModal();
+    } else if (!isExpanded && dialog.open) {
+      dialog.close();
+    }
+  }, [isExpanded]);
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded={isExpanded}
+        aria-controls={slotId}
+        aria-label={`${group.startTime} đến ${group.endTime}, ${group.entries.length} lớp. Bấm để xem danh sách lớp.`}
+        onClick={() => setIsExpanded(true)}
+        className="flex min-h-12 w-full items-center gap-1.5 rounded-lg border bg-card px-2 text-left text-xs font-semibold shadow-sm transition-colors hover:border-primary/40 hover:bg-primary/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <Clock3 className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <span className="min-w-0 flex-1 whitespace-nowrap tabular-nums">
+          {group.startTime}–{group.endTime}
+        </span>
+        <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+          {group.entries.length} lớp
+        </span>
+        <Users className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+      </button>
+      <dialog
+        ref={dialogRef}
+        id={slotId}
+        aria-labelledby={`${slotId}-title`}
+        onClose={() => setIsExpanded(false)}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) {
+            event.currentTarget.close();
+          }
+        }}
+        className="teacher-slot-dialog fixed inset-auto left-1/2 top-1/2 m-0 max-h-[85dvh] w-[min(42rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border bg-card p-0 text-card-foreground shadow-2xl"
+      >
+        <div className="flex items-start justify-between gap-4 border-b p-4">
+          <div className="min-w-0">
+            <h2 id={`${slotId}-title`} className="font-semibold">Các lớp cùng khung giờ</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {group.startTime}–{group.endTime} · {group.entries.length} lớp
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label="Đóng danh sách lớp"
+            onClick={() => dialogRef.current?.close()}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+        <div className="grid max-h-[min(68dvh,38rem)] grid-cols-1 gap-3 overflow-y-auto p-4 sm:grid-cols-2">
+          {group.entries.map((entry) => (
+            <ScheduleClassCard
+              key={`${entry.cls.id}-${entry.slot.startTime}-${entry.slot.endTime}-${entry.slotIndex}`}
+              entry={entry}
+              teachers={teachers}
+              compact
+            />
+          ))}
+        </div>
+      </dialog>
+    </>
   );
 }
 
@@ -589,11 +751,26 @@ export default function AdminTeachers() {
             <div className="grid grid-cols-1 divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0 xl:grid-cols-7">
               {weekDates.map(({ value, short, label, date }) => {
                 const isToday = date.toDateString() === today.toDateString();
-                const dayClasses = scheduledClasses.flatMap((cls) =>
+                const dayClasses: ScheduleEntry[] = scheduledClasses.flatMap((cls) =>
                   cls.schedule
                     .filter((slot) => slot.days.includes(value))
                     .map((slot, slotIndex) => ({ cls, slot, slotIndex })),
                 ).sort((a, b) => a.slot.startTime.localeCompare(b.slot.startTime) || a.cls.name.localeCompare(b.cls.name, "vi"));
+                const timeGroups = dayClasses.reduce<ScheduleTimeGroup[]>((groups, entry) => {
+                  const key = `${entry.slot.startTime}-${entry.slot.endTime}`;
+                  const group = groups.find((candidate) => candidate.key === key);
+                  if (group) {
+                    group.entries.push(entry);
+                  } else {
+                    groups.push({
+                      key,
+                      startTime: entry.slot.startTime,
+                      endTime: entry.slot.endTime,
+                      entries: [entry],
+                    });
+                  }
+                  return groups;
+                }, []);
 
                 return (
                   <section
@@ -618,43 +795,22 @@ export default function AdminTeachers() {
                     </div>
 
                     <div className="space-y-2 p-2">
-                      {dayClasses.length > 0 ? dayClasses.map(({ cls, slot, slotIndex }) => {
-                        const teacherIndex = cls.teacherId
-                          ? teachers.findIndex((teacher) => teacher.id === cls.teacherId)
-                          : -1;
-                        const colorIndex = teacherIndex >= 0
-                          ? teacherIndex % TEACHER_COLORS.length
-                          : cls.teacherId
-                            ? hashColorIndex(cls.teacherId)
-                            : -1;
-                        const color = colorIndex >= 0 ? TEACHER_COLORS[colorIndex] : null;
-
-                        return (
-                          <article
-                            key={`${cls.id}-${slot.startTime}-${slot.endTime}-${slotIndex}`}
-                            className={cn(
-                              "min-w-0 rounded-lg p-2.5 transition-colors",
-                              color ? color.chip : "bg-warning/10 text-warning-foreground dark:text-warning",
-                            )}
-                          >
-                            <p className="flex items-center gap-1 text-xs font-semibold tabular-nums">
-                              <Clock3 className="h-3 w-3 shrink-0" aria-hidden="true" />
-                              <span>{slot.startTime}–{slot.endTime}</span>
-                            </p>
-                            <h3 className="mt-1.5 break-words text-sm font-semibold leading-snug">{cls.name}</h3>
-                            <p className="mt-1 break-words text-xs opacity-80">
-                              {cls.course.code} · HSK {cls.course.hskLevel}
-                            </p>
-                            {cls._count.enrollments > 0 && (
-                              <p className="mt-1 flex items-center gap-1 text-xs opacity-80">
-                                <Users className="h-3 w-3" aria-hidden="true" />
-                                {cls._count.enrollments} học viên
-                              </p>
-                            )}
-                            <TeacherAssignment cls={cls} teachers={teachers} />
-                          </article>
-                        );
-                      }) : (
+                      {timeGroups.length > 0 ? timeGroups.map((group) => (
+                        group.entries.length === 1 ? (
+                          <ScheduleClassCard
+                            key={`${group.key}-${group.entries[0].cls.id}-${group.entries[0].slotIndex}`}
+                            entry={group.entries[0]}
+                            teachers={teachers}
+                          />
+                        ) : (
+                          <ScheduleTimeSlot
+                            key={group.key}
+                            group={group}
+                            teachers={teachers}
+                            day={value}
+                          />
+                        )
+                      )) : (
                         <p className="px-1 py-2 text-xs text-muted-foreground">Không có lớp</p>
                       )}
                     </div>

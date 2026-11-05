@@ -349,3 +349,14 @@
     transition: opacity 180ms ease !important;
   }
 }
+
+.teacher-slot-dialog::backdrop {
+  background-color: rgb(15 23 42 / 0.32);
+  backdrop-filter: blur(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teacher-slot-dialog::backdrop {
+    backdrop-filter: none;
+  }
+}
