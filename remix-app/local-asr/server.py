@@ -13,8 +13,8 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 
-MAX_AUDIO_BYTES = 3_000_000
-MAX_AUDIO_SECONDS = 60
+UPLOAD_CHUNK_BYTES = 1024 * 1024
+ASR_BATCH_SIZE_SECONDS = 60
 MAX_CONCURRENT_REQUESTS = 1
 REQUEST_SLOTS = threading.BoundedSemaphore(MAX_CONCURRENT_REQUESTS)
 MODEL_ID = os.environ.get("SENSEVOICE_MODEL_ID", "iic/SenseVoiceSmall")
@@ -123,8 +123,8 @@ class ASRHandler(BaseHTTPRequestHandler):
         except ValueError:
             self._send_json(411, {"error": "Content-Length is required"})
             return
-        if content_length < 1 or content_length > MAX_AUDIO_BYTES:
-            self._send_json(413, {"error": "Audio must be between 1 byte and 3 MB"})
+        if content_length < 1:
+            self._send_json(400, {"error": "Audio upload is empty"})
             return
 
         content_type = self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
@@ -135,28 +135,30 @@ class ASRHandler(BaseHTTPRequestHandler):
 
         started_at = time.monotonic()
         try:
-            audio_bytes = self.rfile.read(content_length)
-            if len(audio_bytes) != content_length:
-                self._send_json(400, {"error": "Incomplete audio upload"})
-                return
-
             with tempfile.TemporaryDirectory(prefix="sensevoice-") as temp_dir:
                 input_path = Path(temp_dir) / f"recording{extension}"
                 wav_path = Path(temp_dir) / "converted.wav"
-                input_path.write_bytes(audio_bytes)
+                remaining = content_length
+                with input_path.open("wb") as audio_file:
+                    while remaining:
+                        chunk = self.rfile.read(min(UPLOAD_CHUNK_BYTES, remaining))
+                        if not chunk:
+                            self._send_json(400, {"error": "Incomplete audio upload"})
+                            return
+                        audio_file.write(chunk)
+                        remaining -= len(chunk)
 
                 converted = subprocess.run(
                     [
                         str(FFMPEG),
                         "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
                         "-i", str(input_path),
-                        "-t", str(MAX_AUDIO_SECONDS + 1),
                         "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le",
                         str(wav_path),
                     ],
                     capture_output=True,
                     text=True,
-                    timeout=20,
+                    timeout=120,
                     check=False,
                     creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
                 )
@@ -190,16 +192,12 @@ class ASRHandler(BaseHTTPRequestHandler):
                 if not math.isfinite(duration) or duration <= 0:
                     self._send_json(422, {"error": "Audio duration could not be determined"})
                     return
-                if duration > MAX_AUDIO_SECONDS:
-                    self._send_json(413, {"error": "Audio must be no longer than 60 seconds"})
-                    return
-
                 try:
                     result = ASR_MODEL.generate(
                         input=str(wav_path),
                         language="zh",
                         use_itn=True,
-                        batch_size_s=MAX_AUDIO_SECONDS,
+                        batch_size_s=ASR_BATCH_SIZE_SECONDS,
                     )
                 except Exception as error:
                     print(f"[asr] inference failed: {error}", flush=True)

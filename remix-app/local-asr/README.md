@@ -51,7 +51,7 @@ Windows PowerShell:
 ./run.ps1
 ```
 
-The Windows script creates a 48-byte random bearer token in `.asr-token` the first time it runs. Both commands start an API bound to `127.0.0.1:8765`. Keep the process open while using the feature. The service accepts audio up to 3 MB and 60 seconds, converts it to mono 16 kHz WAV, runs SenseVoice on CPU, and deletes temporary files after each request.
+The Windows script creates a 48-byte random bearer token in `.asr-token` the first time it runs. Both commands start an API bound to `127.0.0.1:8765`. Keep the process open while using the feature. The service has no configured audio size or duration limit. It streams the upload to a temporary file, converts the recording to mono 16 kHz WAV, runs SenseVoice on CPU in 60-second batches, and deletes temporary files after each request. Longer recordings take more CPU time and temporary disk space.
 
 To check the service locally, use the token stored in `.asr-token`:
 
