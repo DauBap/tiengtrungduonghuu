@@ -33,7 +33,6 @@ let activeController: AbortController | null = null;
 let activeLoadingToastId: string | null = null;
 let speechRequestId = 0;
 let activePlaybackStateChange: ((state: SpeechPlaybackState) => void) | null = null;
-const activeSpeechCacheWarmups = new Map<string, Promise<void>>();
 
 export type SpeechPlaybackState = "loading" | "playing" | "idle";
 
@@ -65,8 +64,15 @@ export function speakChinese(
   activePlaybackStateChange = options.onPlaybackStateChange ?? null;
   updatePlaybackState("loading", requestId);
 
+  if (options.preferCachedServerTts && audioUrl) {
+    playStoredAudio(audioUrl, rate, requestId, () => {
+      void speakWithServerTts(text, requestId, rate, "edge", false);
+    });
+    return true;
+  }
+
   if (options.preferCachedServerTts) {
-    void speakVocabularyWithCache(text, audioUrl, rate, requestId);
+    void speakVocabularyWithCache(text, rate, requestId);
     return true;
   }
 
@@ -121,7 +127,6 @@ export function speakChinese(
 
 async function speakVocabularyWithCache(
   text: string,
-  audioUrl: string | null | undefined,
   rate: number,
   requestId: number,
 ) {
@@ -149,14 +154,6 @@ async function speakVocabularyWithCache(
     }
   } catch {
     if (requestId !== speechRequestId) return;
-  }
-
-  if (audioUrl) {
-    void warmSpeechAudioCache(text);
-    playStoredAudio(audioUrl, rate, requestId, () => {
-      void speakWithServerTts(text, requestId, rate, "edge", false);
-    });
-    return;
   }
 
   await speakWithServerTts(text, requestId, rate, "edge", false);
@@ -189,45 +186,6 @@ function playStoredAudio(
   };
   audio.onerror = handleError;
   void audio.play().catch(handleError);
-}
-
-function warmSpeechAudioCache(text: string) {
-  const key = `edge:${text}`;
-  const activeWarmup = activeSpeechCacheWarmups.get(key);
-  if (activeWarmup) return activeWarmup;
-
-  const request = (async () => {
-    const response = await fetch("/api/tts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, intent: "cache-only" }),
-    });
-    if (!response.ok) {
-      let message = "Không thể tạo cache Edge TTS.";
-      try {
-        const result: unknown = await response.json();
-        if (
-          typeof result === "object"
-          && result !== null
-          && "error" in result
-          && typeof result.error === "string"
-        ) {
-          message = result.error;
-        }
-      } catch {
-        // Keep the actionable default when the server does not return JSON.
-      }
-      throw new Error(message);
-    }
-  })().catch((error: unknown) => {
-    toast.error(error instanceof Error ? error.message : "Không thể tạo cache Edge TTS.");
-  }).finally(() => {
-    if (activeSpeechCacheWarmups.get(key) === request) {
-      activeSpeechCacheWarmups.delete(key);
-    }
-  });
-  activeSpeechCacheWarmups.set(key, request);
-  return request;
 }
 
 function speakSelectedTts(

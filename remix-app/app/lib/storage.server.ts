@@ -4,7 +4,7 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import { createReadStream } from "node:fs";
 
-export type AssetKind = "workbook-image" | "lesson-audio";
+export type AssetKind = "workbook-image" | "lesson-audio" | "vocab-audio";
 
 export interface SaveAssetOptions {
   kind: AssetKind;
@@ -150,14 +150,27 @@ export async function saveUploadedAsset(
   if (!file || !file.name) return null;
 
   if (options.kind === "workbook-image" && !file.type.startsWith("image/")) return null;
-  if (options.kind === "lesson-audio" && !file.type.startsWith("audio/")) return null;
+  if (
+    (options.kind === "lesson-audio" || options.kind === "vocab-audio")
+    && !file.type.startsWith("audio/")
+  ) return null;
 
   const folder =
     options.kind === "lesson-audio"
       ? path.join("audio", "lessons", options.lessonId || "lesson")
-      : path.join("images", "workbooks", options.lessonId || "lesson");
-  const extension = path.extname(file.name).replace(/[^a-z0-9.]/gi, "") || ".bin";
-  const pathname = path.join(folder, `${randomUUID()}${extension}`).split(path.sep).join("/");
+      : options.kind === "vocab-audio"
+        ? path.join("audio", "vocab", options.lessonId || "lesson")
+        : path.join("images", "workbooks", options.lessonId || "lesson");
+  const sourceName = file.name.replace(/\\/g, "/").split("/").pop() || "audio";
+  const sourceExtension = path.extname(sourceName);
+  const extension = sourceExtension.replace(/[^a-z0-9.]/gi, "") || ".bin";
+  const fileName =
+    options.kind === "vocab-audio"
+      ? `${path.basename(sourceName, sourceExtension).replace(/[^\p{L}\p{N}._-]/gu, "_").slice(0, 120) || "audio"}${extension}`
+      : `${randomUUID()}${extension}`;
+  const uniqueFolder =
+    options.kind === "vocab-audio" ? path.join(folder, randomUUID()) : folder;
+  const pathname = path.join(uniqueFolder, fileName).split(path.sep).join("/");
   const uploadsDirectory = getUploadsDirectory();
   const destination = path.resolve(uploadsDirectory, pathname);
   const relative = path.relative(uploadsDirectory, destination);

@@ -107,6 +107,15 @@ function isHttpOrLocalPath(value: string) {
   return /^https?:\/\/.+/i.test(value) || (value.startsWith("/") && !value.startsWith("//"));
 }
 
+function getAudioFileName(audioUrl: string) {
+  try {
+    const fileName = new URL(audioUrl, "http://localhost").pathname.split("/").pop();
+    return fileName ? decodeURIComponent(fileName) : audioUrl;
+  } catch {
+    return audioUrl;
+  }
+}
+
 export async function action({ request, params }: ActionFunctionArgs) {
   await requireRole(request, ["admin"]);
   const lessonId = params.lessonId!;
@@ -426,6 +435,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
       translation,
     );
     const audioUrl = String(form.get("audioUrl") ?? "").trim();
+    const uploadedFile = form.get("audioFile");
+    const uploadedAudioFile =
+      uploadedFile instanceof File && uploadedFile.name ? uploadedFile : null;
     const note = String(form.get("note") ?? "").trim();
     const wordTypes = parseWordTypes(form.getAll("wordTypes"));
 
@@ -433,13 +445,26 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!pinyin) return { error: "Vui lòng nhập pinyin", field: "pinyin" };
     if (!translation)
       return { error: "Vui lòng nhập nghĩa tiếng Việt", field: "translation" };
-    if (audioUrl && !isHttpOrLocalPath(audioUrl)) {
+    if (
+      uploadedAudioFile &&
+      (!uploadedAudioFile.type.startsWith("audio/") || uploadedAudioFile.size === 0)
+    ) {
+      return {
+        error: "Vui lòng chọn file audio hợp lệ",
+        field: "audioUrl",
+      };
+    }
+    if (!uploadedAudioFile && audioUrl && !isHttpOrLocalPath(audioUrl)) {
       return {
         error: "Link audio phải là URL http(s) hoặc đường dẫn trong site",
         field: "audioUrl",
       };
     }
 
+    const uploadedAudioUrl = await saveUploadedAsset(uploadedAudioFile, {
+      kind: "vocab-audio",
+      lessonId,
+    });
     const data = {
       chinese,
       chineseAlternatives,
@@ -448,7 +473,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       translation,
       translationAlternatives,
       wordTypes,
-      audioUrl: audioUrl || null,
+      audioUrl: uploadedAudioUrl || audioUrl || null,
       note: note || null,
     };
 
@@ -668,6 +693,10 @@ function VocabModal({
     success?: boolean;
   }>();
   const isLoading = fetcher.state !== "idle";
+  const [audioUrl, setAudioUrl] = useState(vocab?.audioUrl ?? "");
+  const [uploadedAudioFile, setUploadedAudioFile] = useState<File | null>(null);
+  const [uploadedAudioPreviewUrl, setUploadedAudioPreviewUrl] = useState<string | null>(null);
+  const audioFileInputRef = useRef<HTMLInputElement>(null);
 
   // Đóng modal sau khi action thành công. Phải nằm trong effect, không gọi
   // onClose() giữa lúc render (setState của cha) — và component được mount lại
@@ -675,6 +704,17 @@ function VocabModal({
   useEffect(() => {
     if (fetcher.state === "idle" && fetcher.data?.success) onClose();
   }, [fetcher.state, fetcher.data, onClose]);
+
+  useEffect(() => {
+    if (!uploadedAudioFile) {
+      setUploadedAudioPreviewUrl(null);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(uploadedAudioFile);
+    setUploadedAudioPreviewUrl(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [uploadedAudioFile]);
 
   if (!mode) return null;
 
@@ -723,9 +763,17 @@ function VocabModal({
   }
 
   const isEdit = mode === "edit";
+  const audioPreviewSrc = uploadedAudioPreviewUrl ?? audioUrl;
+  const audioFileName =
+    uploadedAudioFile?.name ?? (audioUrl ? getAudioFileName(audioUrl) : null);
   return (
     <Overlay onClose={onClose}>
-      <fetcher.Form method="post" noValidate className="space-y-4">
+      <fetcher.Form
+        method="post"
+        encType="multipart/form-data"
+        noValidate
+        className="space-y-4"
+      >
         <div className="flex items-start justify-between">
           <h2 className="text-lg font-bold">
             {isEdit ? "Chỉnh sửa từ vựng" : "Thêm từ vựng"}
@@ -884,12 +932,74 @@ function VocabModal({
           <Input
             id="audioUrl"
             name="audioUrl"
-            defaultValue={vocab?.audioUrl ?? ""}
+            value={audioUrl}
+            onChange={(event) => setAudioUrl(event.target.value)}
             placeholder="https://..."
             aria-invalid={fetcher.data?.field === "audioUrl" || undefined}
           />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="vocab-audio-file">
+            Tải file audio{" "}
+            <span className="text-muted-foreground font-normal text-xs">
+              (tùy chọn)
+            </span>
+          </Label>
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              ref={audioFileInputRef}
+              id="vocab-audio-file"
+              name="audioFile"
+              type="file"
+              accept="audio/*"
+              className="peer sr-only"
+              aria-invalid={fetcher.data?.field === "audioUrl" || undefined}
+              onChange={(event) =>
+                setUploadedAudioFile(event.currentTarget.files?.[0] ?? null)
+              }
+            />
+            <Label
+              htmlFor="vocab-audio-file"
+              className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2"
+            >
+              <AudioLines className="h-4 w-4" />
+              Chọn file audio
+            </Label>
+            {uploadedAudioFile && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setUploadedAudioFile(null);
+                  if (audioFileInputRef.current) audioFileInputRef.current.value = "";
+                }}
+                disabled={isLoading}
+              >
+                Bỏ file mới
+              </Button>
+            )}
+          </div>
+          <div className="space-y-2 rounded-md border border-border bg-muted/30 p-3">
+            <p className="truncate text-sm font-medium" title={audioFileName ?? undefined}>
+              {audioFileName ?? "Chưa có file audio"}
+            </p>
+            {audioPreviewSrc ? (
+              <audio
+                controls
+                preload="metadata"
+                src={audioPreviewSrc}
+                className="h-10 w-full"
+              />
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Chọn file hoặc nhập link audio để nghe thử.
+              </p>
+            )}
+          </div>
           <p className="text-xs text-muted-foreground">
-            Để trống thì dùng giọng đọc tự động của trình duyệt.
+            File mới sẽ thay thế link audio khi lưu. Nếu chưa có audio, học viên
+            dùng giọng đọc tự động.
           </p>
         </div>
         <div className="flex justify-end gap-2 pt-2">

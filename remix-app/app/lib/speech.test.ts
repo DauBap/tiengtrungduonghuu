@@ -348,13 +348,13 @@ test("Edge TTS failures do not fall back to the browser voice", async () => {
   }
 });
 
-test("vocabulary playback prefers cached Edge audio and warms the cache behind recorded audio", async () => {
+test("vocabulary playback prefers recorded audio before cached Edge TTS", async () => {
   const restoreAnimationFrame = mockAnimationFrame();
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
   const originalAudio = Object.getOwnPropertyDescriptor(globalThis, "Audio");
   const originalFetch = Object.getOwnPropertyDescriptor(globalThis, "fetch");
   const requests: Array<{ intent?: string; text?: string }> = [];
-  const audioInstances: Array<{ src: string }> = [];
+  const audioInstances: Array<{ src: string; onerror: (() => void) | null }> = [];
 
   class MockAudio {
     currentTime = 0;
@@ -396,8 +396,12 @@ test("vocabulary playback prefers cached Edge audio and warms the cache behind r
     const { speakChinese, stopSpeaking } = await import("~/lib/speech");
 
     speakChinese("你好", "/audio/vocabulary.mp3", { preferCachedServerTts: true });
+    assert.equal(requests.length, 0);
+    assert.equal(audioInstances.at(-1)?.src, "/audio/vocabulary.mp3");
+
+    audioInstances.at(-1)?.onerror?.();
     await new Promise((resolve) => setTimeout(resolve, 0));
-    assert.deepEqual(requests.map(({ intent }) => intent), ["cache-status", "cache-status", undefined]);
+    assert.deepEqual(requests.map(({ intent }) => intent), ["cache-status", undefined]);
     assert.notEqual(audioInstances.at(-1)?.src, "/audio/vocabulary.mp3");
 
     stopSpeaking();
@@ -413,10 +417,10 @@ test("vocabulary playback prefers cached Edge audio and warms the cache behind r
       },
     });
 
-    speakChinese("再见", "/audio/vocabulary.mp3", { preferCachedServerTts: true });
+    speakChinese("再见", null, { preferCachedServerTts: true });
     await new Promise((resolve) => setTimeout(resolve, 0));
-    assert.deepEqual(requests.map(({ intent }) => intent), ["cache-status", "cache-only"]);
-    assert.equal(audioInstances.at(-1)?.src, "/audio/vocabulary.mp3");
+    assert.deepEqual(requests.map(({ intent }) => intent), ["cache-status", "cache-status", undefined]);
+    assert.notEqual(audioInstances.at(-1)?.src, "/audio/vocabulary.mp3");
     stopSpeaking();
   } finally {
     restoreAnimationFrame();
