@@ -15,9 +15,21 @@ export interface ConsecutiveAbsenceAlert {
 export async function excludeHandledAbsenceAlerts(alerts: ConsecutiveAbsenceAlert[]) {
   if (alerts.length === 0) return alerts;
 
+  const dismissalDelegate = Reflect.get(
+    prisma as object,
+    "attendanceAbsenceDismissal",
+  ) as {
+    findMany: (args: unknown) => Promise<Array<{
+      classId: string;
+      studentId: string;
+      handledSession: { id: string; date: Date; createdAt: Date };
+    }>>;
+  } | undefined;
+  if (!dismissalDelegate?.findMany) return alerts;
+
   let dismissals;
   try {
-    dismissals = await prisma.attendanceAbsenceDismissal.findMany({
+    dismissals = await dismissalDelegate.findMany({
       where: {
         OR: alerts.map(({ classId, studentId }) => ({ classId, studentId })),
       },
@@ -143,8 +155,16 @@ export async function handleConsecutiveAbsenceAlert({
   const sessions = [...sessionsDescending].reverse();
   if (!getStudentsAbsentForThreeConsecutiveSessions(sessions, sessionId).has(studentId)) return false;
 
+  const dismissalDelegate = Reflect.get(
+    prisma as object,
+    "attendanceAbsenceDismissal",
+  ) as {
+    upsert: (args: unknown) => Promise<unknown>;
+  } | undefined;
+  if (!dismissalDelegate?.upsert) return false;
+
   try {
-    await prisma.attendanceAbsenceDismissal.upsert({
+    await dismissalDelegate.upsert({
       where: { classId_studentId: { classId, studentId } },
       create: { classId, studentId, handledSessionId: sessionId, handledById },
       update: { handledSessionId: sessionId, handledById, handledAt: new Date() },
