@@ -239,6 +239,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const requestedTeacherId = params.get("teacherId") ?? "";
   const classId = params.get("classId") ?? "";
   const requestedSessionId = params.get("sessionId") ?? "";
+  const rawTab = params.get("tab") ?? "";
+  const isTotalTab = rawTab === "total";
   const rawDate = params.get("date") ?? getTodayDateValue();
   const selectedDate = parseAttendanceDate(rawDate);
   const date = selectedDate ?? parseAttendanceDate(getTodayDateValue())!;
@@ -253,6 +255,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let invalidFilter = false;
   if (!selectedDate) {
     filterError = "Ngày điểm danh không hợp lệ. Hãy chọn lại ngày.";
+    invalidFilter = true;
+  }
+  if (rawTab !== "" && rawTab !== "total") {
+    filterError = "Chế độ xem điểm danh không hợp lệ. Hãy chọn lại tab.";
+    invalidFilter = true;
+  }
+  if (isTotalTab && !classId) {
+    filterError = "Hãy chọn một lớp để xem tổng hợp điểm danh.";
     invalidFilter = true;
   }
   if (!isAttendanceOverviewStatus(rawOverviewStatus)) {
@@ -309,6 +319,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
     filterError = "Lớp này không thuộc giáo viên được chọn. Hãy chọn lại lớp.";
     invalidFilter = true;
   }
+  const canLoadClassSummary = Boolean(
+    isTotalTab
+    && selectedClass
+    && (!selectedTeacherId
+      || (selectedTeacherId === "unassigned"
+        ? selectedClass.teacherId === null
+        : selectedClass.teacherId === selectedTeacherId && selectedTeacher)),
+  );
 
   const status: StatusFilter = isStatusFilter(rawStatus) ? rawStatus : "ALL";
   if (!isStatusFilter(rawStatus)) {
@@ -411,6 +429,92 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const matchingRecords = selectedSession?.records
     .map(({ student, ...record }) => ({ ...record, student: { name: student.name, email: student.email } }));
+
+  const classAttendanceSummary = canLoadClassSummary && selectedClass
+    ? await (async () => {
+        const [enrollments, groupedRecords] = await Promise.all([
+          prisma.enrollment.findMany({
+            where: { classId: selectedClass.id },
+            select: { user: { select: { id: true, name: true, email: true } } },
+          }),
+          prisma.attendanceRecord.groupBy({
+            by: ["studentId", "status", "recording", "hanzi", "duet", "lessonLink"],
+            where: { session: { is: { classId: selectedClass.id } } },
+            _count: { _all: true },
+          }),
+        ]);
+        const recordStudentIds = Array.from(new Set(groupedRecords.map(({ studentId }) => studentId)));
+        const recordStudents = recordStudentIds.length > 0
+          ? await prisma.user.findMany({
+              where: { id: { in: recordStudentIds } },
+              select: { id: true, name: true, email: true },
+            })
+          : [];
+        const studentsById = new Map(
+          [...enrollments.map(({ user }) => user), ...recordStudents].map((student) => [student.id, student]),
+        );
+        const studentSummaries = new Map<string, {
+          id: string;
+          name: string;
+          email: string;
+          recordCount: number;
+          present: number;
+          late: number;
+          absent: number;
+          recording: { completed: number; total: number };
+          hanzi: { completed: number; total: number };
+          duet: { completed: number; total: number };
+          lessonLink: { completed: number; total: number };
+        }>();
+        const getStudentSummary = (studentId: string) => {
+          const student = studentsById.get(studentId);
+          if (!student) throw new Error("Không tìm thấy học viên trong dữ liệu tổng hợp điểm danh.");
+          const existingSummary = studentSummaries.get(studentId);
+          if (existingSummary) return existingSummary;
+          const summary = {
+            id: student.id,
+            name: student.name,
+            email: student.email,
+            recordCount: 0,
+            present: 0,
+            late: 0,
+            absent: 0,
+            recording: { completed: 0, total: 0 },
+            hanzi: { completed: 0, total: 0 },
+            duet: { completed: 0, total: 0 },
+            lessonLink: { completed: 0, total: 0 },
+          };
+          studentSummaries.set(studentId, summary);
+          return summary;
+        };
+
+        for (const { user } of enrollments) getStudentSummary(user.id);
+        for (const group of groupedRecords) {
+          const count = group._count._all;
+          const summary = getStudentSummary(group.studentId);
+          summary.recordCount += count;
+          if (group.status === "PRESENT") summary.present += count;
+          else if (group.status === "LATE") summary.late += count;
+          else if (group.status === "ABSENT") summary.absent += count;
+          for (const task of ["recording", "hanzi", "duet", "lessonLink"] as const) {
+            summary[task].total += count;
+            if (group[task]) summary[task].completed += count;
+          }
+        }
+
+        const students = Array.from(studentSummaries.values())
+          .sort((left, right) => left.name.localeCompare(right.name, "vi"));
+        return {
+          sessionCount: selectedClass._count.attendanceSessions,
+          studentCount: students.length,
+          recordCount: students.reduce((total, student) => total + student.recordCount, 0),
+          present: students.reduce((total, student) => total + student.present, 0),
+          late: students.reduce((total, student) => total + student.late, 0),
+          absent: students.reduce((total, student) => total + student.absent, 0),
+          students,
+        };
+      })()
+    : null;
 
   const summarizeSessions = (includedSessions: typeof sessions) => includedSessions.reduce(
     (summary, session) => {
@@ -558,10 +662,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
           records: matchingRecords ?? [],
         }
       : null,
+    classAttendanceSummary,
     filters: {
       teacherId: selectedTeacherId,
       classId,
       sessionId: requestedSessionId,
+      tab: isTotalTab ? "total" as const : "sessions" as const,
       date: date.toISOString().slice(0, 10),
       overviewStatus,
       status,
@@ -844,6 +950,128 @@ type AttendanceData = Awaited<ReturnType<typeof loader>>;
 type AttendanceSessionSummary = AttendanceData["sessions"][number];
 type AttendanceSession = NonNullable<AttendanceData["selectedSession"]>;
 type AttendanceRow = AttendanceSession["records"][number];
+type AttendanceClassSummary = NonNullable<AttendanceData["classAttendanceSummary"]>;
+
+function AttendanceClassTotalSummary({
+  classId,
+  className,
+  summary,
+}: {
+  classId: string;
+  className: string;
+  summary: AttendanceClassSummary;
+}) {
+  const [query, setQuery] = useState("");
+  const visibleStudents = summary.students.filter(({ name, email }) =>
+    normalizeSearchText(`${name} ${email}`).includes(normalizeSearchText(query)),
+  );
+  const metrics = [
+    { label: "Sĩ số", value: summary.studentCount, className: "text-foreground" },
+    { label: "Có mặt", value: summary.present, className: "text-success" },
+    { label: "Đi muộn", value: summary.late, className: "text-warning" },
+    { label: "Vắng mặt", value: summary.absent, className: "text-destructive" },
+  ];
+
+  return (
+    <section aria-labelledby={`attendance-class-total-heading-${classId}`} className="space-y-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 id={`attendance-class-total-heading-${classId}`} className="text-lg font-semibold">
+          Tổng hợp điểm danh · {className}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Toàn bộ {summary.sessionCount} buổi điểm danh của lớp
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 overflow-hidden rounded-lg border bg-card sm:grid-cols-4">
+        {metrics.map((metric, index) => (
+          <div
+            key={metric.label}
+            className={`p-4 ${index < 2 ? "border-b" : ""} ${index % 2 === 0 ? "border-r" : ""} ${
+              index === 0 ? "sm:border-b-0 sm:border-r" : index === 1 ? "sm:border-b-0 sm:border-r" : index === 2 ? "sm:border-r" : ""
+            }`}
+          >
+            <p className="text-sm text-muted-foreground">{metric.label}</p>
+            <p className={`mt-1 text-xl font-semibold tabular-nums ${metric.className}`}>
+              {metric.value.toLocaleString("vi-VN")}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div className="overflow-hidden rounded-lg border bg-card">
+        <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div>
+            <h3 className="font-semibold">Tổng hợp theo học viên</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Số lần ghi nhận trên {summary.sessionCount} buổi
+            </p>
+          </div>
+          <div className="relative w-full sm:max-w-xs">
+            <Label htmlFor={`attendance-class-total-search-${classId}`} className="sr-only">
+              Tìm học viên trong tổng hợp
+            </Label>
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              id={`attendance-class-total-search-${classId}`}
+              value={query}
+              maxLength={100}
+              onChange={(event) => setQuery(event.currentTarget.value)}
+              placeholder="Tìm học viên..."
+              className="pl-9"
+            />
+          </div>
+        </div>
+
+        {visibleStudents.length === 0 ? (
+          <p className="p-5 text-sm text-muted-foreground">
+            {summary.students.length === 0
+              ? "Chưa có học viên trong danh sách tổng hợp của lớp."
+              : "Không tìm thấy học viên phù hợp."}
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[960px] text-left text-sm">
+              <caption className="sr-only">Tổng hợp trạng thái và bài tập theo học viên của lớp {className}</caption>
+              <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th scope="col" className="w-16 px-4 py-3 text-center font-medium">STT</th>
+                  <th scope="col" className="min-w-52 px-4 py-3 font-medium">Học viên</th>
+                  <th scope="col" className="w-24 px-3 py-3 text-center font-medium">Có mặt</th>
+                  <th scope="col" className="w-24 px-3 py-3 text-center font-medium">Đi muộn</th>
+                  <th scope="col" className="w-24 px-3 py-3 text-center font-medium">Vắng mặt</th>
+                  <th scope="col" className="w-24 px-3 py-3 text-center font-medium">Ghi âm</th>
+                  <th scope="col" className="w-24 px-3 py-3 text-center font-medium">Chữ Hán</th>
+                  <th scope="col" className="w-24 px-3 py-3 text-center font-medium">Duet</th>
+                  <th scope="col" className="w-24 px-3 py-3 text-center font-medium">Bài link</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {visibleStudents.map((student, index) => (
+                  <tr key={student.id}>
+                    <td className="px-4 py-4 text-center text-muted-foreground tabular-nums">{index + 1}</td>
+                    <th scope="row" className="px-4 py-4 font-medium">{student.name}</th>
+                    <td className="px-3 py-4 text-center font-medium text-success tabular-nums">{student.present}</td>
+                    <td className="px-3 py-4 text-center font-medium text-warning tabular-nums">{student.late}</td>
+                    <td className="px-3 py-4 text-center font-medium text-destructive tabular-nums">{student.absent}</td>
+                    {(["recording", "hanzi", "duet", "lessonLink"] as const).map((task) => (
+                      <td key={task} className="px-3 py-4 text-center text-muted-foreground tabular-nums">
+                        {student[task].completed}/{student[task].total}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
 
 function AttendanceStatusBadge({ status }: { status: AttendanceStatus | null }) {
   if (status === "PRESENT") {
@@ -1425,6 +1653,7 @@ export default function AdminAttendance() {
     activeClasses,
     sessions,
     selectedSession,
+    classAttendanceSummary,
     filters,
     totalSessions,
     filterError,
@@ -1449,6 +1678,7 @@ export default function AdminAttendance() {
     sessionId: string;
     date: string;
     overviewStatus: AttendanceOverviewStatus;
+    tab: "sessions" | "total";
   }> = {}) => {
     const params = new URLSearchParams();
     const teacherId = next.teacherId ?? filters.teacherId;
@@ -1456,11 +1686,13 @@ export default function AdminAttendance() {
     const sessionId = next.sessionId ?? "";
     const date = next.date ?? filters.date;
     const overviewStatus = next.overviewStatus ?? filters.overviewStatus;
+    const tab = next.tab ?? "sessions";
     if (teacherId) params.set("teacherId", teacherId);
     if (classId) params.set("classId", classId);
     if (sessionId) params.set("sessionId", sessionId);
     params.set("date", date);
     if (overviewStatus !== "ALL") params.set("view", overviewStatus);
+    if (tab === "total") params.set("tab", tab);
     return `/admin/attendance?${params.toString()}`;
   }, [filters.date, filters.overviewStatus, filters.teacherId]);
 
@@ -1934,24 +2166,35 @@ export default function AdminAttendance() {
                           {classSessions.length} buổi trong ngày
                         </span>
                       </div>
-                      {classSessions.length > 0 ? (
-                        <div
-                          role="tablist"
-                          aria-label={`Buổi điểm danh lớp ${classroom.name}`}
-                          className="flex flex-wrap items-center gap-2 bg-muted/20 p-3 sm:p-4"
+                      <div
+                        role="tablist"
+                        aria-label={`Nội dung điểm danh lớp ${classroom.name}`}
+                        className="flex flex-wrap items-center gap-2 bg-muted/20 p-3 sm:p-4"
+                      >
+                        <Link
+                          to={getAttendanceHref({ classId: classroom.id, sessionId: "", tab: "total" })}
+                          role="tab"
+                          aria-selected={filters.classId === classroom.id && filters.tab === "total"}
+                          className={`inline-flex h-10 shrink-0 items-center rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                            filters.classId === classroom.id && filters.tab === "total"
+                              ? "border-foreground bg-foreground text-background"
+                              : "border-border bg-background text-foreground hover:bg-muted"
+                          }`}
                         >
-                          {classSessions.map((session) => (
-                            <AttendanceSessionTab
-                              key={session.id}
-                              session={session}
-                              classId={classroom.id}
-                              teacherId={selectedTeacherId}
-                              date={filters.date}
-                              isSelected={session.id === filters.sessionId}
-                            />
-                          ))}
-                        </div>
-                      ) : (
+                          Tổng
+                        </Link>
+                        {classSessions.map((session) => (
+                          <AttendanceSessionTab
+                            key={session.id}
+                            session={session}
+                            classId={classroom.id}
+                            teacherId={selectedTeacherId}
+                            date={filters.date}
+                            isSelected={session.id === filters.sessionId}
+                          />
+                        ))}
+                      </div>
+                      {classSessions.length === 0 && (
                         <p className="px-4 py-4 text-sm text-muted-foreground sm:px-5">
                           {classroom.isCompleted
                             ? `Lớp đã kết thúc và chưa có buổi điểm danh ngày ${formatAttendanceDate(filters.date)}.`
@@ -1964,7 +2207,14 @@ export default function AdminAttendance() {
               </div>
             )}
 
-            {selectedSession ? (
+            {filters.tab === "total" && selectedClass && classAttendanceSummary ? (
+              <AttendanceClassTotalSummary
+                key={selectedClass.id}
+                classId={selectedClass.id}
+                className={selectedClass.name}
+                summary={classAttendanceSummary}
+              />
+            ) : selectedSession ? (
               <section aria-labelledby="attendance-session-detail-heading" className="space-y-3">
                 <h2 id="attendance-session-detail-heading" className="text-lg font-semibold">
                   Bảng điểm danh · {selectedSession.title}

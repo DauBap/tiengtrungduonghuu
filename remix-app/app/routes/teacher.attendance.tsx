@@ -665,6 +665,27 @@ export default function TeacherAttendance() {
           <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
             <div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 p-3 sm:p-4">
               <div role="tablist" aria-label="Các buổi điểm danh" className="flex flex-wrap items-center gap-2">
+                <button
+                  id="attendance-tab-total"
+                  type="button"
+                  role="tab"
+                  aria-selected={isTotalView}
+                  aria-controls="attendance-session-panel"
+                  disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
+                  onClick={() => {
+                    setActiveTabId(TOTAL_TAB_ID);
+                    setFilter("all");
+                    setSearch("");
+                    setFeedback("");
+                  }}
+                  className={`h-10 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                    isTotalView
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border bg-background text-foreground hover:bg-muted"
+                  }`}
+                >
+                  Tổng
+                </button>
                 {attendanceSessions.map((session) => (
                   <button
                     key={session.id}
@@ -689,27 +710,6 @@ export default function TeacherAttendance() {
                     {session.lesson.trim() ? `${session.title} - ${session.lesson.trim()}` : session.title}
                   </button>
                 ))}
-                <button
-                  id="attendance-tab-total"
-                  type="button"
-                  role="tab"
-                  aria-selected={isTotalView}
-                  aria-controls="attendance-session-panel"
-                  disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
-                  onClick={() => {
-                    setActiveTabId(TOTAL_TAB_ID);
-                    setFilter("all");
-                    setSearch("");
-                    setFeedback("");
-                  }}
-                  className={`h-10 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                    isTotalView
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-border bg-background text-foreground hover:bg-muted"
-                  }`}
-                >
-                  Tổng
-                </button>
               </div>
               <button
                 type="button"
