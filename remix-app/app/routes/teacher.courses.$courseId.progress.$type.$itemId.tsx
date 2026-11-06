@@ -6,8 +6,13 @@ import { EmptyState } from "~/components/common/empty-state";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { getCourseById, isTeacherOfCourse } from "~/lib/db.server";
+import { isReviewAnswerCorrect } from "~/lib/review-answer";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
@@ -20,18 +25,41 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     throw new Response("Không tìm thấy nội dung tiến độ", { status: 404 });
   }
 
-  const students = await prisma.enrollment.findMany({
-    where: { courseId: course.id },
-    select: { user: { select: { id: true, name: true, email: true } } },
-    orderBy: { user: { name: "asc" } },
+  const classes = await prisma.class.findMany({
+    where: { courseId: course.id, teacherId: user.id },
+    select: { id: true, name: true, completedAt: true },
+    orderBy: [{ completedAt: "asc" }, { name: "asc" }],
   });
+  const requestedClassId = new URL(request.url).searchParams.get("classId");
+  const selectedClass = requestedClassId
+    ? classes.find((item) => item.id === requestedClassId) ?? null
+    : classes.find((item) => item.completedAt === null) ?? classes[0] ?? null;
+  if (requestedClassId && !selectedClass) {
+    throw new Response("Không tìm thấy lớp học", { status: 404 });
+  }
+  const students = selectedClass
+    ? await prisma.enrollment.findMany({
+        where: { courseId: course.id, classId: selectedClass.id },
+        select: { user: { select: { id: true, name: true, email: true } } },
+        orderBy: { user: { name: "asc" } },
+      })
+    : [];
   const studentIds = students.map(({ user: student }) => student.id);
   const courseData = { id: course.id, title: course.title };
 
   if (params.type === "reviews") {
     const reviewSet = await prisma.courseReviewSet.findFirst({
       where: { id: params.itemId, courseId: course.id },
-      select: { id: true, title: true, subtitle: true, _count: { select: { questions: true } } },
+      select: {
+        id: true,
+        title: true,
+        subtitle: true,
+        _count: { select: { questions: true } },
+        questions: {
+          orderBy: [{ order: "asc" }, { id: "asc" }],
+          select: { id: true, prompt: true, answer: true, acceptedAnswers: true },
+        },
+      },
     });
     if (!reviewSet) throw new Response("Không tìm thấy bộ ôn tập", { status: 404 });
 
@@ -40,7 +68,15 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       : await prisma.courseReviewAttempt.findMany({
           where: { reviewSetId: reviewSet.id, userId: { in: studentIds } },
           orderBy: { completedAt: "desc" },
-          select: { userId: true, correctCount: true, totalQuestions: true, percentage: true, completedAt: true },
+          select: {
+            id: true,
+            userId: true,
+            answers: true,
+            correctCount: true,
+            totalQuestions: true,
+            percentage: true,
+            completedAt: true,
+          },
         });
     const attemptsByStudent = new Map<string, typeof attempts>();
     for (const attempt of attempts) {
@@ -52,6 +88,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     return {
       user,
       course: courseData,
+      classes: classes.map(({ id, name }) => ({ id, name })),
+      selectedClass: selectedClass ? { id: selectedClass.id, name: selectedClass.name } : null,
       item: {
         id: reviewSet.id,
         type: "reviews" as const,
@@ -65,6 +103,26 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         return {
           ...student,
           attemptCount: studentAttempts.length,
+          reviewAttempts: studentAttempts.map((attempt) => {
+            const submittedAnswers = isRecord(attempt.answers) ? attempt.answers : {};
+            return {
+              id: attempt.id,
+              percentage: attempt.percentage,
+              correctCount: attempt.correctCount,
+              totalQuestions: attempt.totalQuestions,
+              date: attempt.completedAt.toISOString(),
+              answers: reviewSet.questions.map((question) => {
+                const submitted = submittedAnswers[question.id];
+                const answer = typeof submitted === "string" ? submitted : "";
+                return {
+                  prompt: question.prompt,
+                  answer,
+                  correctAnswer: question.answer,
+                  correct: isReviewAnswerCorrect(answer, [question.answer, ...question.acceptedAnswers]),
+                };
+              }),
+            };
+          }),
           latest: latest ? {
             status: "Hoàn thành",
             summary: `${latest.correctCount}/${latest.totalQuestions} câu`,
@@ -112,6 +170,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   return {
     user,
     course: courseData,
+    classes: classes.map(({ id, name }) => ({ id, name })),
+    selectedClass: selectedClass ? { id: selectedClass.id, name: selectedClass.name } : null,
     item: {
       id: mockExam.id,
       type: "mock-exams" as const,
@@ -149,7 +209,7 @@ function formatDate(value: string | null) {
 }
 
 export default function TeacherCourseItemProgress() {
-  const { user, course, item, students } = useLoaderData<typeof loader>();
+  const { user, course, classes, selectedClass, item, students } = useLoaderData<typeof loader>();
   const isReview = item.type === "reviews";
 
   return (
@@ -169,7 +229,9 @@ export default function TeacherCourseItemProgress() {
             </p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight">{item.title}</h1>
             {item.subtitle && <p className="mt-1 text-sm text-muted-foreground">{item.subtitle}</p>}
-            <p className="mt-1 text-sm text-muted-foreground">{item.questionCount} câu · {students.length} học viên</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {item.questionCount} câu · {selectedClass?.name ?? "Chưa chọn lớp"} · {students.length} học viên
+            </p>
             {!isReview && !item.isPublished && (
               <p className="mt-1 text-xs font-medium text-amber-700">Đề chưa phát hành; chưa thể làm trên tài khoản học viên.</p>
             )}
@@ -178,14 +240,34 @@ export default function TeacherCourseItemProgress() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Tiến độ học viên</CardTitle>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <CardTitle className="text-base">Tiến độ học viên</CardTitle>
+              {classes.length > 0 && (
+                <form method="get" className="flex flex-wrap items-end gap-2">
+                  <label htmlFor="progress-class" className="text-sm font-medium">Lớp</label>
+                  <select
+                    id="progress-class"
+                    name="classId"
+                    defaultValue={selectedClass?.id ?? ""}
+                    className="h-9 min-w-48 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {classes.map((classOption) => (
+                      <option key={classOption.id} value={classOption.id}>{classOption.name}</option>
+                    ))}
+                  </select>
+                  <Button type="submit" size="sm" variant="outline">Xem lớp</Button>
+                </form>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
-            {students.length === 0 ? (
-              <EmptyState title="Chưa có học viên" message={`Chưa có học viên nào trong khóa ${course.title}.`} />
+            {!selectedClass ? (
+              <EmptyState title="Chưa có lớp phụ trách" message={`Bạn chưa có lớp nào trong khóa ${course.title}.`} />
+            ) : students.length === 0 ? (
+              <EmptyState title="Lớp chưa có học viên" message={`Lớp ${selectedClass.name} hiện chưa có học viên.`} />
             ) : (
               <div className="overflow-x-auto rounded-md border">
-                <table className="w-full text-left text-sm">
+                <table className={`w-full text-left text-sm ${isReview ? "min-w-[900px]" : ""}`}>
                   <thead className="bg-muted/40 text-xs text-muted-foreground">
                     <tr>
                       <th scope="col" className="w-16 px-4 py-3 font-medium">STT</th>
@@ -193,6 +275,7 @@ export default function TeacherCourseItemProgress() {
                       <th scope="col" className="px-4 py-3 font-medium">Tiến độ mới nhất</th>
                       <th scope="col" className="px-4 py-3 font-medium">Số lần làm</th>
                       <th scope="col" className="px-4 py-3 font-medium">Thời gian</th>
+                      {isReview && <th scope="col" className="px-4 py-3 font-medium">Bài làm</th>}
                       {!isReview && <th scope="col" className="px-4 py-3 text-right font-medium">Lịch sử</th>}
                     </tr>
                   </thead>
@@ -218,6 +301,56 @@ export default function TeacherCourseItemProgress() {
                           </td>
                           <td className="px-4 py-3 tabular-nums">{student.attemptCount}</td>
                           <td className="px-4 py-3 text-muted-foreground">{formatDate(latest?.date ?? null)}</td>
+                          {isReview && "reviewAttempts" in student && (
+                            <td className="px-4 py-3">
+                              {student.reviewAttempts.length > 0 ? (
+                                <details className="max-w-[34rem]">
+                                  <summary className="w-fit cursor-pointer rounded-md px-2 py-1 font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                    Xem {student.reviewAttempts.length} lượt làm
+                                  </summary>
+                                  <ol className="mt-3 space-y-3">
+                                    {student.reviewAttempts.map((attempt, attemptIndex) => (
+                                      <li key={attempt.id} className="rounded-md border bg-background p-3">
+                                        <div className="flex flex-wrap items-center justify-between gap-2">
+                                          <p className="font-medium">Lượt {student.reviewAttempts.length - attemptIndex}</p>
+                                          <span className="text-xs tabular-nums text-muted-foreground">
+                                            {attempt.correctCount}/{attempt.totalQuestions} câu · {attempt.percentage}%
+                                          </span>
+                                        </div>
+                                        <time className="mt-1 block text-xs text-muted-foreground" dateTime={attempt.date}>
+                                          {formatDate(attempt.date)}
+                                        </time>
+                                        <ol className="mt-3 space-y-2">
+                                          {attempt.answers.map((answer, answerIndex) => (
+                                            <li key={`${attempt.id}-${answerIndex}`} className="rounded bg-muted/40 p-2.5">
+                                              <p className="text-xs font-medium text-muted-foreground">
+                                                Câu {answerIndex + 1}
+                                                <span className={`ml-2 ${answer.correct ? "text-emerald-700" : "text-rose-700"}`}>
+                                                  {answer.correct ? "Đúng" : "Chưa đúng"}
+                                                </span>
+                                              </p>
+                                              <p className="mt-1 whitespace-pre-wrap break-words font-medium">{answer.prompt}</p>
+                                              <p className="mt-1 whitespace-pre-wrap break-words">
+                                                <span className="text-muted-foreground">Học viên: </span>
+                                                {answer.answer || <span className="italic text-muted-foreground">Bỏ trống</span>}
+                                              </p>
+                                              {!answer.correct && (
+                                                <p className="mt-1 whitespace-pre-wrap break-words text-muted-foreground">
+                                                  <span className="font-medium text-foreground">Đáp án: </span>{answer.correctAnswer}
+                                                </p>
+                                              )}
+                                            </li>
+                                          ))}
+                                        </ol>
+                                      </li>
+                                    ))}
+                                  </ol>
+                                </details>
+                              ) : (
+                                <span className="text-muted-foreground">Chưa nộp bài</span>
+                              )}
+                            </td>
+                          )}
                           {!isReview && (
                             <td className="px-4 py-3 text-right">
                               <Button asChild size="sm" variant="outline">

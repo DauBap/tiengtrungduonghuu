@@ -1628,11 +1628,11 @@ export default function TeacherIndex() {
                                     type="button"
                                     onClick={() => {
                                       if (item.kind === "review") {
-                                        navigate(`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}`);
+                                        navigate(`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}?classId=${encodeURIComponent(selectedClass.id)}`);
                                         return;
                                       }
                                       if (item.kind === "mockExam") {
-                                        navigate(`/teacher/courses/${selectedClass.courseId}/progress/mock-exams/${item.id}`);
+                                        navigate(`/teacher/courses/${selectedClass.courseId}/progress/mock-exams/${item.id}?classId=${encodeURIComponent(selectedClass.id)}`);
                                         return;
                                       }
                                       setSelectedLessonId(item.id);
@@ -1685,7 +1685,7 @@ export default function TeacherIndex() {
                                           ) : (
                                             <button
                                               type="button"
-                                              onClick={() => navigate(`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}`)}
+                                              onClick={() => navigate(`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}?classId=${encodeURIComponent(selectedClass.id)}`)}
                                               title={`${item.label}: ${review?.percentage ?? 0}%`}
                                               className={`min-w-12 rounded-md px-1.5 py-2 text-xs font-semibold ${lessonProgressTone(review?.percentage ?? 0)}`}
                                             >
@@ -1712,7 +1712,7 @@ export default function TeacherIndex() {
                                           ) : (
                                             <button
                                               type="button"
-                                              onClick={() => navigate(`/teacher/courses/${selectedClass.courseId}/progress/mock-exams/${item.id}`)}
+                                              onClick={() => navigate(`/teacher/courses/${selectedClass.courseId}/progress/mock-exams/${item.id}?classId=${encodeURIComponent(selectedClass.id)}`)}
                                               title={`${item.title}: ${status}${exam?.attemptCount ? ` · ${exam.attemptCount} lượt làm` : ""}`}
                                               className={`min-w-16 rounded-md px-1.5 py-2 text-xs font-semibold ${lessonProgressTone(latest?.percentage ?? 0)}`}
                                             >
@@ -1791,7 +1791,7 @@ export default function TeacherIndex() {
                               return (
                                 <Link
                                   key={`review:${item.id}`}
-                                  to={`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}`}
+                                  to={`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}?classId=${encodeURIComponent(selectedClass.id)}`}
                                   className="shrink-0 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
                                   title={item.title}
                                 >
@@ -1803,7 +1803,7 @@ export default function TeacherIndex() {
                               return (
                                 <Link
                                   key={`mockExam:${item.id}`}
-                                  to={`/teacher/courses/${selectedClass.courseId}/progress/mock-exams/${item.id}`}
+                                  to={`/teacher/courses/${selectedClass.courseId}/progress/mock-exams/${item.id}?classId=${encodeURIComponent(selectedClass.id)}`}
                                   className="shrink-0 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
                                   title={item.title}
                                 >
