@@ -45,6 +45,8 @@ import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { Badge } from "~/components/ui/badge";
 import { Input } from "~/components/ui/input";
+import type { loader as courseItemProgressLoader } from "./teacher.courses.$courseId.progress.$type.$itemId";
+import type { loader as mockExamAttemptLoader } from "./teacher.courses.$courseId.progress.mock-exams.$itemId.students.$studentId.attempts.$attemptId";
 
 const DASHBOARD_ACTIVITIES = [
   { tab: "FLASHCARD", label: "Flashcard" },
@@ -60,6 +62,14 @@ const DASHBOARD_ACTIVITIES = [
 type DashboardActivityTab = (typeof DASHBOARD_ACTIVITIES)[number]["tab"];
 
 type PendingGrammarAttempt = Awaited<ReturnType<typeof loader>>["classSummaries"][number]["pendingGrammarAttempts"][number];
+type DashboardReviewItem = Extract<
+  Awaited<ReturnType<typeof loader>>["classSummaries"][number]["courseItems"][number],
+  { kind: "review" }
+>;
+type DashboardMockExamItem = Extract<
+  Awaited<ReturnType<typeof loader>>["classSummaries"][number]["courseItems"][number],
+  { kind: "mockExam" }
+>;
 
 interface GrammarAttemptData {
   course: { id: string; title: string };
@@ -85,6 +95,15 @@ interface GrammarAttemptData {
   };
 }
 
+interface MockExamProgressDialogState {
+  classId: string;
+  mockExamId: string;
+  mockExamTitle: string;
+  studentId: string;
+  studentName: string;
+  attemptId: string;
+}
+
 interface DashboardWrongAnswer {
   prompt: string;
   full: string;
@@ -102,6 +121,14 @@ interface ActivityReviewDialogState {
   correctCount: number;
   totalCount: number;
   wrongAnswers: DashboardWrongAnswer[];
+}
+
+interface ReviewProgressDialogState {
+  classId: string;
+  reviewId: string;
+  reviewTitle: string;
+  studentId: string;
+  studentName: string;
 }
 
 interface LessonReviewDialogState {
@@ -431,6 +458,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
               userId: { in: userIds },
             },
             select: {
+              id: true,
               userId: true,
               mockExamId: true,
               attemptNumber: true,
@@ -601,8 +629,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
     const progressByKey = new Map(progressRows.map((row) => [`${row.userId}:${row.lessonId}:${row.tab}`, row]));
     const reviewProgressByKey = new Map<string, (typeof reviewAttempts)[number]>();
+    const reviewAttemptsByKey = new Map<string, typeof reviewAttempts>();
     for (const attempt of reviewAttempts) {
       const key = `${attempt.userId}:${attempt.reviewSetId}`;
+      const attemptsForStudent = reviewAttemptsByKey.get(key) ?? [];
+      attemptsForStudent.push(attempt);
+      reviewAttemptsByKey.set(key, attemptsForStudent);
       if (!reviewProgressByKey.has(key)) reviewProgressByKey.set(key, attempt);
     }
     const mockExamProgressByKey = new Map<string, (typeof mockExamAttempts)[number]>();
@@ -878,11 +910,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
         lastActivityAt: latestActivityAt?.toISOString() ?? null,
         lessons: studentLessons,
         reviews: reviews.map((review) => {
-          const attempt = reviewProgressByKey.get(`${enrollment.userId}:${review.id}`);
+          const key = `${enrollment.userId}:${review.id}`;
+          const attempt = reviewProgressByKey.get(key);
+          const attempts = reviewAttemptsByKey.get(key) ?? [];
           return {
             id: review.id,
             percentage: attempt?.percentage ?? 0,
             hasAttempt: Boolean(attempt),
+            attemptCount: attempts.length,
+            lastAttemptAt: attempt?.completedAt.toISOString() ?? null,
           };
         }),
         mockExams: courseMockExams.map((mockExam, index) => {
@@ -896,11 +932,23 @@ export async function loader({ request }: LoaderFunctionArgs) {
             title: mockExam.title,
             questionCount: mockExam.sections.reduce((total, section) => total + section._count.questions, 0),
             attemptCount: attempts.length,
+            attempts: attempts.map((attempt) => ({
+              id: attempt.id,
+              attemptNumber: attempt.attemptNumber,
+              status: attempt.status,
+              percentage: attempt.percentage,
+              passed: attempt.passed,
+              startedAt: attempt.startedAt.toISOString(),
+              submittedAt: attempt.submittedAt?.toISOString() ?? null,
+            })),
             latest: latest ? {
+              id: latest.id,
               status: latest.status,
               percentage: latest.percentage,
               passed: latest.passed,
               attemptNumber: latest.attemptNumber,
+              startedAt: latest.startedAt.toISOString(),
+              submittedAt: latest.submittedAt?.toISOString() ?? null,
             } : null,
           };
         }),
@@ -1144,6 +1192,8 @@ export default function TeacherIndex() {
   const location = useLocation();
   const navigate = useNavigate();
   const gradingFetcher = useFetcher<GrammarAttemptData & { success?: boolean }>();
+  const reviewProgressFetcher = useFetcher<typeof courseItemProgressLoader>();
+  const mockExamAttemptFetcher = useFetcher<typeof mockExamAttemptLoader>();
   const gradeSubmitFetcher = useFetcher<{ success?: boolean; attemptId?: string; error?: string }>();
   const workbookGradingFetcher = useFetcher<WorkbookGradingData>();
   const workbookGradeSubmitFetcher = useFetcher<{ success?: boolean; attemptId?: string; error?: string }>();
@@ -1151,9 +1201,13 @@ export default function TeacherIndex() {
   const revalidator = useRevalidator();
   const [selectedClassId, setSelectedClassId] = useState(classSummaries[0]?.id ?? "");
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+  const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
+  const [selectedMockExamId, setSelectedMockExamId] = useState<string | null>(null);
   const [progressView, setProgressView] = useState<"overview" | "lesson">("overview");
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedActivityReview, setSelectedActivityReview] = useState<ActivityReviewDialogState | null>(null);
+  const [selectedReviewProgress, setSelectedReviewProgress] = useState<ReviewProgressDialogState | null>(null);
+  const [selectedMockExamProgress, setSelectedMockExamProgress] = useState<MockExamProgressDialogState | null>(null);
   const [selectedLessonReview, setSelectedLessonReview] = useState<LessonReviewDialogState | null>(null);
   const [selectedLessonScriptId, setSelectedLessonScriptId] = useState<string | null>(null);
   const [pendingGrammarClassId, setPendingGrammarClassId] = useState<string | null>(null);
@@ -1172,9 +1226,60 @@ export default function TeacherIndex() {
   const handledInitialTranslationNavigationKey = useRef<string | null>(null);
   const selectedClass = classSummaries.find((cls) => cls.id === selectedClassId) ?? classSummaries[0];
   const pendingGrammarClass = classSummaries.find((cls) => cls.id === pendingGrammarClassId);
+  const openReviewProgress = (
+    review: { id: string; title: string },
+    student: { id: string; name: string | null; email: string },
+  ) => {
+    if (!selectedClass) return;
+    setSelectedReviewProgress({
+      classId: selectedClass.id,
+      reviewId: review.id,
+      reviewTitle: review.title,
+      studentId: student.id,
+      studentName: student.name ?? student.email,
+    });
+    reviewProgressFetcher.load(
+      `/teacher/courses/${selectedClass.courseId}/progress/reviews/${review.id}?classId=${encodeURIComponent(selectedClass.id)}`,
+    );
+  };
+  const openMockExamProgress = (
+    mockExam: DashboardMockExamItem,
+    student: { id: string; name: string | null; email: string },
+  ) => {
+    if (!selectedClass) return;
+    const exam = selectedClass.activityData
+      .find((entry) => entry.student.id === student.id)
+      ?.mockExams.find((entry) => entry.id === mockExam.id);
+    const latestAttempt = exam?.attempts[0];
+    if (!latestAttempt) return;
+    setSelectedMockExamProgress({
+      classId: selectedClass.id,
+      mockExamId: mockExam.id,
+      mockExamTitle: mockExam.title,
+      studentId: student.id,
+      studentName: student.name ?? student.email,
+      attemptId: latestAttempt.id,
+    });
+    mockExamAttemptFetcher.load(
+      `/teacher/courses/${selectedClass.courseId}/progress/mock-exams/${mockExam.id}/students/${student.id}/attempts/${latestAttempt.id}`,
+    );
+  };
+  const openMockExamAttempt = (attemptId: string) => {
+    if (!selectedMockExamProgress || !selectedClass) return;
+    setSelectedMockExamProgress({ ...selectedMockExamProgress, attemptId });
+    mockExamAttemptFetcher.load(
+      `/teacher/courses/${selectedClass.courseId}/progress/mock-exams/${selectedMockExamProgress.mockExamId}/students/${selectedMockExamProgress.studentId}/attempts/${attemptId}`,
+    );
+  };
   const selectedLesson = selectedClass?.lessons.find((lesson) => lesson.id === selectedLessonId)
     ?? selectedClass?.lessons.find((lesson) => lesson.id === selectedClass.suggestedLessonId)
     ?? selectedClass?.lessons[0];
+  const selectedReviewItem = selectedClass?.courseItems.find(
+    (item): item is DashboardReviewItem => item.kind === "review" && item.id === selectedReviewId,
+  );
+  const selectedMockExamItem = selectedClass?.courseItems.find(
+    (item): item is DashboardMockExamItem => item.kind === "mockExam" && item.id === selectedMockExamId,
+  );
   const sortedActivityData = selectedClass
     ? selectedClass.activityData
         .map((student) => {
@@ -1201,6 +1306,32 @@ export default function TeacherIndex() {
     ? DASHBOARD_ACTIVITIES.filter(({ tab }) => selectedLesson.availableActivities[tab])
     : [];
   const selectedStudent = selectedClass?.activityData.find((item) => item.student.id === selectedStudentId);
+  const reviewProgressData = reviewProgressFetcher.data;
+  const selectedReviewProgressData = selectedReviewProgress
+    && reviewProgressData?.item.type === "reviews"
+    && reviewProgressData.item.id === selectedReviewProgress.reviewId
+    && reviewProgressData.selectedClass?.id === selectedReviewProgress.classId
+    ? reviewProgressData
+    : null;
+  const selectedReviewProgressStudent = selectedReviewProgressData?.students.find(
+    (student) => student.id === selectedReviewProgress?.studentId,
+  );
+  const selectedReviewAttempts = selectedReviewProgressStudent && "reviewAttempts" in selectedReviewProgressStudent
+    ? selectedReviewProgressStudent.reviewAttempts
+    : null;
+  const selectedMockExamStudent = selectedMockExamProgress
+    ? selectedClass?.activityData.find((entry) => entry.student.id === selectedMockExamProgress.studentId)
+    : null;
+  const selectedMockExam = selectedMockExamStudent?.mockExams.find(
+    (exam) => exam.id === selectedMockExamProgress?.mockExamId,
+  );
+  const selectedMockExamAttempts = selectedMockExam?.attempts ?? [];
+  const selectedMockExamAttemptData = mockExamAttemptFetcher.data
+    && mockExamAttemptFetcher.data.mockExam.id === selectedMockExamProgress?.mockExamId
+    && mockExamAttemptFetcher.data.student.id === selectedMockExamProgress?.studentId
+    && mockExamAttemptFetcher.data.attempt.id === selectedMockExamProgress?.attemptId
+    ? mockExamAttemptFetcher.data
+    : null;
   const selectedTranslationSubmission = selectedTranslationSubmissionId
     ? translationSubmissions.find((item) => item.id === selectedTranslationSubmissionId)
       ?? (initialTranslationSubmission?.id === selectedTranslationSubmissionId ? initialTranslationSubmission : null)
@@ -1208,6 +1339,8 @@ export default function TeacherIndex() {
   const isModalOpen = Boolean(
     selectedStudentId
     || selectedActivityReview
+    || selectedReviewProgress
+    || selectedMockExamProgress
     || selectedLessonReview
     || pendingGrammarClass
     || gradingAttemptId
@@ -1229,7 +1362,7 @@ export default function TeacherIndex() {
   }, [location.key]);
 
   useEffect(() => {
-    if (!selectedStudentId && !selectedActivityReview && !selectedLessonReview && !pendingGrammarClassId && !gradingAttemptId && !workbookGradingAttemptId && !selectedTranslationSubmissionId && !gradingComplete) return;
+    if (!selectedStudentId && !selectedActivityReview && !selectedReviewProgress && !selectedMockExamProgress && !selectedLessonReview && !pendingGrammarClassId && !gradingAttemptId && !workbookGradingAttemptId && !selectedTranslationSubmissionId && !gradingComplete) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (
         event.key === "Escape"
@@ -1239,6 +1372,8 @@ export default function TeacherIndex() {
       ) {
         setSelectedStudentId(null);
         setSelectedActivityReview(null);
+        setSelectedReviewProgress(null);
+        setSelectedMockExamProgress(null);
         setSelectedLessonReview(null);
         setPendingGrammarClassId(null);
         setGradingAttemptId(null);
@@ -1250,7 +1385,7 @@ export default function TeacherIndex() {
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [selectedStudentId, selectedActivityReview, selectedLessonReview, pendingGrammarClassId, gradingAttemptId, workbookGradingAttemptId, selectedTranslationSubmissionId, gradingComplete, gradeSubmitFetcher.state, workbookGradeSubmitFetcher.state, TranslationGradeFetcher.state]);
+  }, [selectedStudentId, selectedActivityReview, selectedReviewProgress, selectedMockExamProgress, selectedLessonReview, pendingGrammarClassId, gradingAttemptId, workbookGradingAttemptId, selectedTranslationSubmissionId, gradingComplete, gradeSubmitFetcher.state, workbookGradeSubmitFetcher.state, TranslationGradeFetcher.state]);
 
   const gradingData = gradingFetcher.data?.attempt ? gradingFetcher.data : null;
   useEffect(() => {
@@ -1538,6 +1673,7 @@ export default function TeacherIndex() {
                         onClick={() => {
                           setSelectedClassId(cls.id);
                           setSelectedLessonId(null);
+                          setSelectedReviewId(null);
                           setSelectedStudentId(null);
                           setSelectedActivityReview(null);
                         }}
@@ -1595,7 +1731,10 @@ export default function TeacherIndex() {
                           type="button"
                           role="tab"
                           aria-selected={progressView === "overview"}
-                          onClick={() => setProgressView("overview")}
+                          onClick={() => {
+                            setProgressView("overview");
+                            setSelectedReviewId(null);
+                          }}
                           className={`rounded-md px-3 py-1.5 text-sm ${progressView === "overview" ? "bg-background font-medium text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
                         >
                           Tổng quan {selectedClass.courseItems.length} mục
@@ -1628,7 +1767,8 @@ export default function TeacherIndex() {
                                     type="button"
                                     onClick={() => {
                                       if (item.kind === "review") {
-                                        navigate(`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}?classId=${encodeURIComponent(selectedClass.id)}`);
+                                        setProgressView("lesson");
+                                        setSelectedReviewId(item.id);
                                         return;
                                       }
                                       if (item.kind === "mockExam") {
@@ -1636,6 +1776,7 @@ export default function TeacherIndex() {
                                         return;
                                       }
                                       setSelectedLessonId(item.id);
+                                      setSelectedReviewId(null);
                                       setProgressView("lesson");
                                     }}
                                     className="rounded px-1.5 py-1 hover:bg-background hover:text-primary"
@@ -1685,9 +1826,11 @@ export default function TeacherIndex() {
                                           ) : (
                                             <button
                                               type="button"
-                                              onClick={() => navigate(`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}?classId=${encodeURIComponent(selectedClass.id)}`)}
+                                              aria-haspopup="dialog"
+                                              aria-label={`Xem các lượt làm ${item.label} của ${student.student.name ?? student.student.email}`}
+                                              onClick={() => openReviewProgress(item, student.student)}
                                               title={`${item.label}: ${review?.percentage ?? 0}%`}
-                                              className={`min-w-12 rounded-md px-1.5 py-2 text-xs font-semibold ${lessonProgressTone(review?.percentage ?? 0)}`}
+                                              className={`min-w-12 rounded-md px-1.5 py-2 text-xs font-semibold transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${lessonProgressTone(review?.percentage ?? 0)}`}
                                             >
                                               {review?.percentage ?? 0}%
                                             </button>
@@ -1785,30 +1928,40 @@ export default function TeacherIndex() {
                       </div>
                     ) : (
                       <>
-                        <div className="-mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-2" aria-label="Chọn bài học">
+                        <div className="-mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-2" aria-label="Chọn nội dung">
                           {selectedClass.courseItems.map((item) => {
                             if (item.kind === "review") {
                               return (
-                                <Link
+                                <button
                                   key={`review:${item.id}`}
-                                  to={`/teacher/courses/${selectedClass.courseId}/progress/reviews/${item.id}?classId=${encodeURIComponent(selectedClass.id)}`}
-                                  className="shrink-0 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+                                  type="button"
+                                  aria-pressed={selectedReviewId === item.id}
+                                  onClick={() => {
+                                    setSelectedReviewId(item.id);
+                                    setSelectedMockExamId(null);
+                                  }}
+                                  className={`shrink-0 rounded-md border px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedReviewId === item.id ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted"}`}
                                   title={item.title}
                                 >
                                   {item.label}
-                                </Link>
+                                </button>
                               );
                             }
                             if (item.kind === "mockExam") {
                               return (
-                                <Link
+                                <button
                                   key={`mockExam:${item.id}`}
-                                  to={`/teacher/courses/${selectedClass.courseId}/progress/mock-exams/${item.id}?classId=${encodeURIComponent(selectedClass.id)}`}
-                                  className="shrink-0 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+                                  type="button"
+                                  aria-pressed={selectedMockExamId === item.id}
+                                  onClick={() => {
+                                    setSelectedMockExamId(item.id);
+                                    setSelectedReviewId(null);
+                                  }}
+                                  className={`shrink-0 rounded-md border px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedMockExamId === item.id ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted"}`}
                                   title={item.title}
                                 >
                                   {item.label}
-                                </Link>
+                                </button>
                               );
                             }
                             const lesson = item;
@@ -1819,9 +1972,13 @@ export default function TeacherIndex() {
                               <button
                                 key={lesson.id}
                                 type="button"
-                                aria-pressed={selectedLesson?.id === lesson.id}
-                                onClick={() => setSelectedLessonId(lesson.id)}
-                                className={`shrink-0 rounded-md border px-3 py-1.5 text-sm ${selectedLesson?.id === lesson.id ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted"} ${hasGaps && selectedLesson?.id !== lesson.id ? "border-rose-300" : ""}`}
+                                aria-pressed={selectedReviewId === null && selectedMockExamId === null && selectedLesson?.id === lesson.id}
+                                onClick={() => {
+                                  setSelectedLessonId(lesson.id);
+                                  setSelectedReviewId(null);
+                                  setSelectedMockExamId(null);
+                                }}
+                                className={`shrink-0 rounded-md border px-3 py-1.5 text-sm ${selectedReviewId === null && selectedMockExamId === null && selectedLesson?.id === lesson.id ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted"} ${hasGaps && selectedLesson?.id !== lesson.id ? "border-rose-300" : ""}`}
                               >
                                 Bài {lesson.displayOrder}
                                 {lesson.id === selectedClass.suggestedLessonId && <span className="ml-1.5 text-emerald-500" aria-label="Bài đang học">●</span>}
@@ -1829,7 +1986,156 @@ export default function TeacherIndex() {
                             );
                           })}
                         </div>
-                        {selectedLesson && (
+                        {selectedReviewItem ? (
+                          <>
+                            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+                              <div>
+                                <h3 className="font-medium">{selectedReviewItem.title}</h3>
+                                {selectedReviewItem.subtitle && (
+                                  <p className="text-xs text-muted-foreground">{selectedReviewItem.subtitle}</p>
+                                )}
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {selectedClass.activityData.length} học viên · {selectedReviewItem.questionCount} câu
+                              </span>
+                            </div>
+                            {selectedReviewItem.questionCount === 0 ? (
+                              <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                                Bài ôn tập này chưa có câu hỏi.
+                              </p>
+                            ) : (
+                              <div className="overflow-x-auto rounded-lg border">
+                                <table className="w-full min-w-[650px] text-left text-sm">
+                                  <thead className="bg-muted/50 text-xs text-muted-foreground">
+                                    <tr>
+                                      <th scope="col" className="min-w-44 px-3 py-3 font-medium">Học viên</th>
+                                      <th scope="col" className="px-3 py-3 text-right font-medium">Tiến độ mới nhất</th>
+                                      <th scope="col" className="px-3 py-3 text-right font-medium">Số lần làm</th>
+                                      <th scope="col" className="px-3 py-3 text-right font-medium">Thời gian</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y">
+                                    {sortedActivityData.map((student) => {
+                                      const review = student.reviews.find((entry) => entry.id === selectedReviewItem.id);
+                                      const latestAttemptAt = review?.lastAttemptAt;
+                                      return (
+                                        <tr key={student.student.id}>
+                                          <th scope="row" className="px-3 py-2 text-left">
+                                            <span className="block font-medium">{student.student.name ?? student.student.email}</span>
+                                            <span className="block text-xs font-normal text-muted-foreground">
+                                              {student.lastActivityAt
+                                                ? `Hoạt động ${new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium" }).format(new Date(student.lastActivityAt))}`
+                                                : "Chưa có hoạt động"}
+                                            </span>
+                                          </th>
+                                          <td className="px-3 py-2 text-right">
+                                            {review?.hasAttempt ? (
+                                              <button
+                                                type="button"
+                                                aria-haspopup="dialog"
+                                                aria-label={`Xem ${review.percentage}% và bài làm ${selectedReviewItem.label} của ${student.student.name ?? student.student.email}`}
+                                                onClick={() => openReviewProgress(selectedReviewItem, student.student)}
+                                                className={`min-w-16 rounded-md px-2.5 py-2 font-semibold tabular-nums transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${lessonProgressTone(review.percentage)}`}
+                                              >
+                                                {review.percentage}%
+                                              </button>
+                                            ) : (
+                                              <span className="inline-flex min-w-16 justify-center rounded-md bg-muted px-2.5 py-2 text-xs text-muted-foreground">
+                                                Chưa làm
+                                              </span>
+                                            )}
+                                          </td>
+                                          <td className="px-3 py-2 text-right tabular-nums">{review?.attemptCount ?? 0}</td>
+                                          <td className="px-3 py-2 text-right text-muted-foreground">
+                                            {latestAttemptAt
+                                              ? new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(latestAttemptAt))
+                                              : "—"}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </>
+                        ) : selectedMockExamItem ? (
+                          <>
+                            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+                              <div>
+                                <h3 className="font-medium">{selectedMockExamItem.title}</h3>
+                                <p className="text-xs text-muted-foreground">Tiến độ và kết quả thi thử của học viên trong lớp.</p>
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {selectedClass.activityData.length} học viên · {selectedMockExamItem.questionCount} câu
+                              </span>
+                            </div>
+                            <div className="overflow-x-auto rounded-lg border">
+                              <table className="w-full min-w-[650px] text-left text-sm">
+                                <thead className="bg-muted/50 text-xs text-muted-foreground">
+                                  <tr>
+                                    <th scope="col" className="min-w-44 px-3 py-3 font-medium">Học viên</th>
+                                    <th scope="col" className="px-3 py-3 text-right font-medium">Kết quả mới nhất</th>
+                                    <th scope="col" className="px-3 py-3 text-right font-medium">Số lần thi</th>
+                                    <th scope="col" className="px-3 py-3 text-right font-medium">Thời gian</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y">
+                                  {sortedActivityData.map((student) => {
+                                    const exam = student.mockExams.find((entry) => entry.id === selectedMockExamItem.id);
+                                    const latest = exam?.latest;
+                                    const latestAt = latest?.submittedAt ?? latest?.startedAt ?? null;
+                                    const resultLabel = latest?.percentage != null
+                                      ? `${latest.percentage}%`
+                                      : latest?.status === "IN_PROGRESS" ? "Đang làm" : "Đã nộp";
+                                    const resultTone = latest?.status === "IN_PROGRESS"
+                                      ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300"
+                                      : latest?.passed === true
+                                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+                                        : latest?.passed === false
+                                          ? "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300"
+                                          : "bg-muted text-muted-foreground";
+                                    return (
+                                      <tr key={student.student.id}>
+                                        <th scope="row" className="px-3 py-2 text-left">
+                                          <span className="block font-medium">{student.student.name ?? student.student.email}</span>
+                                          <span className="block text-xs font-normal text-muted-foreground">
+                                            {student.lastActivityAt
+                                              ? `Hoạt động ${new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium" }).format(new Date(student.lastActivityAt))}`
+                                              : "Chưa có hoạt động"}
+                                          </span>
+                                        </th>
+                                        <td className="px-3 py-2 text-right">
+                                          {latest ? (
+                                            <button
+                                              type="button"
+                                              aria-haspopup="dialog"
+                                              aria-label={`Xem ${resultLabel} và bài làm ${selectedMockExamItem.label} của ${student.student.name ?? student.student.email}`}
+                                              onClick={() => openMockExamProgress(selectedMockExamItem, student.student)}
+                                              className={`min-w-20 rounded-md px-2.5 py-2 font-semibold tabular-nums transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${resultTone}`}
+                                            >
+                                              {resultLabel}
+                                            </button>
+                                          ) : (
+                                            <span className="inline-flex min-w-20 justify-center rounded-md bg-muted px-2.5 py-2 text-xs text-muted-foreground">
+                                              Chưa thi
+                                            </span>
+                                          )}
+                                        </td>
+                                        <td className="px-3 py-2 text-right tabular-nums">{exam?.attemptCount ?? 0}</td>
+                                        <td className="px-3 py-2 text-right text-muted-foreground">
+                                          {latestAt
+                                            ? new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(latestAt))
+                                            : "—"}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          </>
+                        ) : selectedLesson && (
                           <>
                             <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
                               <div>
@@ -2482,6 +2788,255 @@ export default function TeacherIndex() {
                   Có câu chưa làm hoặc không lưu chi tiết đáp án trong dữ liệu lượt nộp.
                 </p>
               )}
+            </section>
+          </div>
+        )}
+
+        {selectedReviewProgress && (
+          <div
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/45 p-3 sm:p-6"
+            role="presentation"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) setSelectedReviewProgress(null);
+            }}
+          >
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="review-progress-title"
+              className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
+            >
+              <div className="flex items-start justify-between gap-3 border-b p-4 sm:p-5">
+                <div className="min-w-0">
+                  <h2 id="review-progress-title" className="font-semibold">{selectedReviewProgress.reviewTitle}</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {selectedReviewProgress.studentName} · {selectedReviewProgressData?.selectedClass?.name ?? "Tiến độ ôn tập"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Đóng tiến độ ôn tập"
+                  onClick={() => setSelectedReviewProgress(null)}
+                  className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="overflow-y-auto p-4 sm:p-5">
+                {reviewProgressFetcher.state !== "idle" ? (
+                  <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground" role="status">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Đang tải bài làm…
+                  </div>
+                ) : !selectedReviewProgressData ? (
+                  <p className="py-8 text-center text-sm text-muted-foreground">
+                    Chưa tải được dữ liệu ôn tập. Hãy đóng hộp thoại và thử lại.
+                  </p>
+                ) : !selectedReviewAttempts || selectedReviewAttempts.length === 0 ? (
+                  <p className="py-8 text-center text-sm text-muted-foreground">
+                    Học viên chưa có lượt làm bài ôn tập này.
+                  </p>
+                ) : (
+                    <ol className="space-y-4">
+                      {selectedReviewAttempts.map((attempt, index) => (
+                        <li key={attempt.id} className="rounded-lg border p-3 sm:p-4">
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div>
+                              <h3 className="font-medium">Lượt làm {selectedReviewAttempts.length - index}</h3>
+                              <time className="mt-1 block text-xs text-muted-foreground" dateTime={attempt.date}>
+                                {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(attempt.date))}
+                              </time>
+                            </div>
+                            <span className="rounded-md bg-muted px-2.5 py-1 text-sm font-semibold tabular-nums">
+                              {attempt.correctCount}/{attempt.totalQuestions} câu · {attempt.percentage}%
+                            </span>
+                          </div>
+                          <ol className="mt-3 space-y-2">
+                            {attempt.answers.map((answer, answerIndex) => (
+                              <li key={`${attempt.id}-${answerIndex}`} className="rounded-md bg-muted/40 p-3">
+                                <p className="text-xs font-medium text-muted-foreground">
+                                  Câu {answerIndex + 1}
+                                  <span className={`ml-2 ${answer.correct ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"}`}>
+                                    {answer.correct ? "Đúng" : "Chưa đúng"}
+                                  </span>
+                                </p>
+                                <p className="mt-1 font-medium">{answer.prompt}</p>
+                                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                                  <div className="min-w-0 rounded-md border bg-background px-3 py-2">
+                                    <p className="text-xs text-muted-foreground">Học viên trả lời</p>
+                                    <p className="mt-1 break-words">{answer.answer || "Chưa trả lời"}</p>
+                                  </div>
+                                  <div className="min-w-0 rounded-md border bg-background px-3 py-2">
+                                    <p className="text-xs text-muted-foreground">Đáp án đúng</p>
+                                    <p className="mt-1 break-words">{answer.correctAnswer}</p>
+                                  </div>
+                                </div>
+                              </li>
+                            ))}
+                          </ol>
+                        </li>
+                      ))}
+                    </ol>
+                  )
+                }
+              </div>
+            </section>
+          </div>
+        )}
+
+        {selectedMockExamProgress && (
+          <div
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/45 p-3 sm:p-6"
+            role="presentation"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) setSelectedMockExamProgress(null);
+            }}
+          >
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="mock-exam-progress-title"
+              className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
+            >
+              <div className="flex items-start justify-between gap-3 border-b p-4 sm:p-5">
+                <div className="min-w-0">
+                  <h2 id="mock-exam-progress-title" className="font-semibold">{selectedMockExamProgress.mockExamTitle}</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {selectedMockExamProgress.studentName} · {selectedClass?.name ?? "Tiến độ thi thử"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Đóng tiến độ thi thử"
+                  onClick={() => setSelectedMockExamProgress(null)}
+                  className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="min-h-0 overflow-y-auto p-4 sm:p-5">
+                {selectedMockExamAttempts.length > 1 && (
+                  <div className="mb-5">
+                    <h3 className="mb-2 text-sm font-medium">Lịch sử các lần thi</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedMockExamAttempts.map((attempt) => (
+                        <button
+                          key={attempt.id}
+                          type="button"
+                          aria-pressed={selectedMockExamProgress.attemptId === attempt.id}
+                          onClick={() => openMockExamAttempt(attempt.id)}
+                          className={`rounded-md border px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedMockExamProgress.attemptId === attempt.id ? "border-primary bg-primary/10" : "hover:bg-muted"}`}
+                        >
+                          <span className="block font-medium">Lượt {attempt.attemptNumber}</span>
+                          <span className="mt-0.5 block text-xs text-muted-foreground">
+                            {attempt.percentage != null
+                              ? `${attempt.percentage}%`
+                              : attempt.status === "IN_PROGRESS" ? "Đang làm" : "Đã nộp"}
+                            {" · "}
+                            {new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" })
+                              .format(new Date(attempt.submittedAt ?? attempt.startedAt))}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {mockExamAttemptFetcher.state !== "idle" ? (
+                  <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground" role="status">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Đang tải bài thi…
+                  </div>
+                ) : !selectedMockExamAttemptData ? (
+                  <div className="py-8 text-center">
+                    <p className="text-sm text-muted-foreground">Chưa tải được bài thi. Hãy thử tải lại.</p>
+                    <button
+                      type="button"
+                      onClick={() => openMockExamAttempt(selectedMockExamProgress.attemptId)}
+                      className="mt-3 rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      Thử lại
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+                      <div>
+                        <h3 className="font-medium">Lượt thi {selectedMockExamAttemptData.attempt.attemptNumber}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {selectedMockExamAttemptData.attempt.answeredCount}/{selectedMockExamAttemptData.attempt.questionCount} câu đã trả lời
+                          {" · Bắt đầu "}
+                          {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" })
+                            .format(new Date(selectedMockExamAttemptData.attempt.startedAt))}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-semibold ${selectedMockExamAttemptData.attempt.status === "IN_PROGRESS" ? "text-amber-700 dark:text-amber-300" : selectedMockExamAttemptData.attempt.passed ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"}`}>
+                          {selectedMockExamAttemptData.attempt.status === "IN_PROGRESS"
+                            ? "Đang làm"
+                            : selectedMockExamAttemptData.attempt.passed ? "Đạt" : "Chưa đạt"}
+                        </p>
+                        {selectedMockExamAttemptData.attempt.percentage != null && (
+                          <p className="mt-0.5 text-2xl font-bold tabular-nums">
+                            {selectedMockExamAttemptData.attempt.percentage}%
+                          </p>
+                        )}
+                        {selectedMockExamAttemptData.attempt.earnedPoints != null
+                          && selectedMockExamAttemptData.attempt.totalPoints != null && (
+                            <p className="text-xs text-muted-foreground tabular-nums">
+                              {selectedMockExamAttemptData.attempt.earnedPoints}/{selectedMockExamAttemptData.attempt.totalPoints} điểm
+                            </p>
+                          )}
+                      </div>
+                    </div>
+                    <div className="space-y-6">
+                      {selectedMockExamAttemptData.attempt.sections.map((section, sectionIndex) => (
+                        <section key={`${section.title}-${sectionIndex}`} className="space-y-3">
+                          <h3 className="border-b pb-2 font-semibold">{section.title}</h3>
+                          {section.questions.map((question, questionIndex) => (
+                            <article key={question.id} className="space-y-3 rounded-lg border p-3 sm:p-4">
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <h4 className="font-medium">Câu {questionIndex + 1}</h4>
+                                  {question.prompt && <p className="mt-1 whitespace-pre-wrap text-sm">{question.prompt}</p>}
+                                </div>
+                                {selectedMockExamAttemptData.attempt.status === "SUBMITTED" && (
+                                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${question.correct ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300" : "bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300"}`}>
+                                    {question.correct ? "Đúng" : "Sai"}
+                                  </span>
+                                )}
+                              </div>
+                              {question.imageUrl && (
+                                <img src={question.imageUrl} alt={`Hình câu ${questionIndex + 1}`} className="max-h-60 max-w-full rounded-md border object-contain" />
+                              )}
+                              <div className="grid gap-2 sm:grid-cols-2">
+                                {question.options.map((option, optionIndex) => (
+                                  <div
+                                    key={option.id}
+                                    className={`flex items-start gap-2 rounded-md border p-3 text-sm ${option.selected ? "border-primary bg-primary/5" : ""} ${option.showCorrect ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950/25" : ""}`}
+                                  >
+                                    <span className="font-semibold text-muted-foreground">{String.fromCharCode(65 + optionIndex)}.</span>
+                                    <div className="min-w-0 flex-1">
+                                      {option.content && <p className="whitespace-pre-wrap">{option.content}</p>}
+                                      {option.imageUrl && (
+                                        <img src={option.imageUrl} alt={`Lựa chọn ${String.fromCharCode(65 + optionIndex)}`} className="mt-2 max-h-40 object-contain" />
+                                      )}
+                                      {option.selected && <p className="mt-1 text-xs font-medium text-primary">Học sinh chọn</p>}
+                                      {option.showCorrect && <p className="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">Đáp án đúng</p>}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                              {!question.options.some((option) => option.selected) && (
+                                <p className="text-xs text-muted-foreground">Học sinh chưa chọn đáp án.</p>
+                              )}
+                            </article>
+                          ))}
+                        </section>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </section>
           </div>
         )}
