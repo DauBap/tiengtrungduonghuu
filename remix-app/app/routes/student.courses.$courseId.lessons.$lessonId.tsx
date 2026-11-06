@@ -1705,11 +1705,8 @@ export default function LessonDetail() {
     useModalScrollLock(showAnswerReview);
   const [showScript, setShowScript] = useState(true);
   const [showLessonPinyin, setShowLessonPinyin] = useState(false);
-  const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
+    const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
   const [autoReplayLessonAudio, setAutoReplayLessonAudio] = useState(false);
-  const lessonPlaybackRates = [0.8, 1, 1.5] as const;
-  const [lessonPlaybackRate, setLessonPlaybackRate] = useState<(typeof lessonPlaybackRates)[number]>(1);
-  const lessonAudioRef = useRef<HTMLAudioElement | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isPreparingRecording, setIsPreparingRecording] = useState(false);
   const [phoneticScore, setPhoneticScore] = useState(0);
@@ -1780,13 +1777,6 @@ export default function LessonDetail() {
   };
 
   const lessonAudioScripts = [...(lesson.audioScripts ?? [])].sort((a, b) => a.order - b.order);
-
-  const changeLessonPlaybackRate = (rate: (typeof lessonPlaybackRates)[number]) => {
-    setLessonPlaybackRate(rate);
-    if (lessonAudioRef.current) {
-      lessonAudioRef.current.playbackRate = rate;
-    }
-  };
 
   useEffect(() => {
     return () => {
@@ -2658,14 +2648,10 @@ export default function LessonDetail() {
                     {selectedAudioScript.audioUrl ? (
                       <audio
                         key={selectedAudioScript.id}
-                        ref={lessonAudioRef}
                         controls
                         loop={autoReplayLessonAudio}
                         className="min-w-0 flex-1"
                         src={selectedAudioScript.audioUrl}
-                        onLoadedMetadata={(event) => {
-                          event.currentTarget.playbackRate = lessonPlaybackRate;
-                        }}
                       >
                         <source src={selectedAudioScript.audioUrl} />
                       </audio>
@@ -2694,35 +2680,6 @@ export default function LessonDetail() {
                       </Button>
                     )}
                   </div>
-                  {selectedAudioScript.audioUrl && (
-                    <div className="mt-3 flex flex-wrap items-center gap-3">
-                      <span id="lesson-audio-speed-label" className="text-xs text-muted-foreground">
-                        Tốc độ phát
-                      </span>
-                      <div
-                        className="inline-flex overflow-hidden rounded-md border"
-                        role="group"
-                        aria-labelledby="lesson-audio-speed-label"
-                      >
-                        {lessonPlaybackRates.map((rate) => (
-                          <button
-                            key={rate}
-                            type="button"
-                            aria-pressed={lessonPlaybackRate === rate}
-                            onClick={() => changeLessonPlaybackRate(rate)}
-                            className={cn(
-                              "min-h-11 min-w-[3.25rem] px-2.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
-                              lessonPlaybackRate === rate
-                                ? "bg-primary text-primary-foreground"
-                                : "text-muted-foreground hover:bg-muted",
-                            )}
-                          >
-                            {rate}×
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                   <div className="mt-4 border-t pt-4">
                     <Button
                       type="button"
