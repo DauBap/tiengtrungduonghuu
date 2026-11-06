@@ -2804,12 +2804,12 @@ export default function TeacherIndex() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="review-progress-title"
-              className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
+              className="max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-lg border bg-background p-5 shadow-xl"
             >
-              <div className="flex items-start justify-between gap-3 border-b p-4 sm:p-5">
+              <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 id="review-progress-title" className="font-semibold">{selectedReviewProgress.reviewTitle}</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <h2 id="review-progress-title" className="break-words text-base font-semibold leading-tight">{selectedReviewProgress.reviewTitle}</h2>
+                  <p className="mt-1 break-words text-sm text-muted-foreground">
                     {selectedReviewProgress.studentName} · {selectedReviewProgressData?.selectedClass?.name ?? "Tiến độ ôn tập"}
                   </p>
                 </div>
@@ -2822,53 +2822,79 @@ export default function TeacherIndex() {
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              <div className="overflow-y-auto p-4 sm:p-5">
+              <div>
                 {reviewProgressFetcher.state !== "idle" ? (
-                  <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground" role="status">
+                  <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground" role="status">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Đang tải bài làm…
                   </div>
                 ) : !selectedReviewProgressData ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">
+                  <p className="py-6 text-center text-sm text-muted-foreground">
                     Chưa tải được dữ liệu ôn tập. Hãy đóng hộp thoại và thử lại.
                   </p>
                 ) : !selectedReviewAttempts || selectedReviewAttempts.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">
+                  <p className="py-6 text-center text-sm text-muted-foreground">
                     Học viên chưa có lượt làm bài ôn tập này.
                   </p>
                 ) : (
                     <ol className="space-y-4">
                       {selectedReviewAttempts.map((attempt, index) => (
-                        <li key={attempt.id} className="rounded-lg border p-3 sm:p-4">
-                          <div className="flex flex-wrap items-start justify-between gap-2">
-                            <div>
+                        <li key={attempt.id}>
+                          <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                               <h3 className="font-medium">Lượt làm {selectedReviewAttempts.length - index}</h3>
-                              <time className="mt-1 block text-xs text-muted-foreground" dateTime={attempt.date}>
+                              <time className="text-xs text-muted-foreground" dateTime={attempt.date}>
                                 {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(attempt.date))}
                               </time>
                             </div>
-                            <span className="rounded-md bg-muted px-2.5 py-1 text-sm font-semibold tabular-nums">
+                            <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold tabular-nums">
                               {attempt.correctCount}/{attempt.totalQuestions} câu · {attempt.percentage}%
                             </span>
                           </div>
-                          <ol className="mt-3 space-y-2">
+                          <ol className="divide-y rounded-md border">
                             {attempt.answers.map((answer, answerIndex) => (
-                              <li key={`${attempt.id}-${answerIndex}`} className="rounded-md bg-muted/40 p-3">
-                                <p className="text-xs font-medium text-muted-foreground">
-                                  Câu {answerIndex + 1}
-                                  <span className={`ml-2 ${answer.correct ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"}`}>
-                                    {answer.correct ? "Đúng" : "Chưa đúng"}
-                                  </span>
-                                </p>
-                                <p className="mt-1 font-medium">{answer.prompt}</p>
-                                <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                                  <div className="min-w-0 rounded-md border bg-background px-3 py-2">
-                                    <p className="text-xs text-muted-foreground">Học viên trả lời</p>
-                                    <p className="mt-1 break-words">{answer.answer || "Chưa trả lời"}</p>
+                              <li key={`${attempt.id}-${answerIndex}`} className="space-y-3 px-3 py-4 text-sm">
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                  <div className="flex min-w-0 items-baseline gap-2">
+                                    <span className="shrink-0 font-semibold">Câu {answerIndex + 1}</span>
+                                    <p className="break-words font-semibold">{answer.prompt}</p>
                                   </div>
-                                  <div className="min-w-0 rounded-md border bg-background px-3 py-2">
-                                    <p className="text-xs text-muted-foreground">Đáp án đúng</p>
-                                    <p className="mt-1 break-words">{answer.correctAnswer}</p>
+                                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
+                                    answer.correct
+                                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+                                      : answer.answer
+                                        ? "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-200"
+                                        : "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
+                                  }`}>
+                                    {answer.correct ? "Đúng" : answer.answer ? "Trả lời chưa đúng" : "Chưa trả lời"}
+                                  </span>
+                                </div>
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                  <div className={`min-w-0 rounded-md border px-3 py-2.5 ${
+                                    answer.correct
+                                      ? "border-emerald-200 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/25"
+                                      : answer.answer
+                                        ? "border-rose-200 bg-rose-50/70 dark:border-rose-900 dark:bg-rose-950/25"
+                                        : "border-amber-200 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/25"
+                                  }`}>
+                                    <p className={`text-xs font-medium ${
+                                      answer.correct
+                                        ? "text-emerald-800 dark:text-emerald-200"
+                                        : answer.answer
+                                          ? "text-rose-800 dark:text-rose-200"
+                                          : "text-amber-900 dark:text-amber-200"
+                                    }`}>Học viên trả lời</p>
+                                    <p className={`mt-1 break-words font-medium ${
+                                      answer.correct
+                                        ? "text-emerald-950 dark:text-emerald-100"
+                                        : answer.answer
+                                          ? "text-rose-950 dark:text-rose-100"
+                                          : "text-amber-950 dark:text-amber-100"
+                                    }`}>{answer.answer || "Chưa trả lời"}</p>
+                                  </div>
+                                  <div className="min-w-0 rounded-md border border-emerald-200 bg-emerald-50/70 px-3 py-2.5 dark:border-emerald-900 dark:bg-emerald-950/25">
+                                    <p className="text-xs font-medium text-emerald-800 dark:text-emerald-200">Đáp án đúng</p>
+                                    <p className="mt-1 break-words font-medium text-emerald-950 dark:text-emerald-100">{answer.correctAnswer}</p>
                                   </div>
                                 </div>
                               </li>
@@ -2896,12 +2922,12 @@ export default function TeacherIndex() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="mock-exam-progress-title"
-              className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
+              className="flex max-h-[90dvh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
             >
-              <div className="flex items-start justify-between gap-3 border-b p-4 sm:p-5">
+              <div className="flex items-start justify-between gap-3 border-b px-4 py-3 sm:px-5">
                 <div className="min-w-0">
-                  <h2 id="mock-exam-progress-title" className="font-semibold">{selectedMockExamProgress.mockExamTitle}</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <h2 id="mock-exam-progress-title" className="break-words font-semibold leading-tight">{selectedMockExamProgress.mockExamTitle}</h2>
+                  <p className="mt-0.5 break-words text-sm text-muted-foreground">
                     {selectedMockExamProgress.studentName} · {selectedClass?.name ?? "Tiến độ thi thử"}
                   </p>
                 </div>
@@ -2914,9 +2940,9 @@ export default function TeacherIndex() {
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              <div className="min-h-0 overflow-y-auto p-4 sm:p-5">
+              <div className="min-h-0 overflow-y-auto p-3 sm:p-4">
                 {selectedMockExamAttempts.length > 1 && (
-                  <div className="mb-5">
+                  <div className="mb-4">
                     <h3 className="mb-2 text-sm font-medium">Lịch sử các lần thi</h3>
                     <div className="flex flex-wrap gap-2">
                       {selectedMockExamAttempts.map((attempt) => (
@@ -2925,7 +2951,7 @@ export default function TeacherIndex() {
                           type="button"
                           aria-pressed={selectedMockExamProgress.attemptId === attempt.id}
                           onClick={() => openMockExamAttempt(attempt.id)}
-                          className={`rounded-md border px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedMockExamProgress.attemptId === attempt.id ? "border-primary bg-primary/10" : "hover:bg-muted"}`}
+                          className={`rounded-md border px-2.5 py-1.5 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedMockExamProgress.attemptId === attempt.id ? "border-primary bg-primary/10" : "hover:bg-muted"}`}
                         >
                           <span className="block font-medium">Lượt {attempt.attemptNumber}</span>
                           <span className="mt-0.5 block text-xs text-muted-foreground">
@@ -2942,12 +2968,12 @@ export default function TeacherIndex() {
                   </div>
                 )}
                 {mockExamAttemptFetcher.state !== "idle" ? (
-                  <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground" role="status">
+                  <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground" role="status">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Đang tải bài thi…
                   </div>
                 ) : !selectedMockExamAttemptData ? (
-                  <div className="py-8 text-center">
+                  <div className="py-6 text-center">
                     <p className="text-sm text-muted-foreground">Chưa tải được bài thi. Hãy thử tải lại.</p>
                     <button
                       type="button"
@@ -2959,10 +2985,10 @@ export default function TeacherIndex() {
                   </div>
                 ) : (
                   <>
-                    <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b pb-3">
                       <div>
                         <h3 className="font-medium">Lượt thi {selectedMockExamAttemptData.attempt.attemptNumber}</h3>
-                        <p className="mt-1 text-xs text-muted-foreground">
+                        <p className="mt-0.5 text-xs text-muted-foreground">
                           {selectedMockExamAttemptData.attempt.answeredCount}/{selectedMockExamAttemptData.attempt.questionCount} câu đã trả lời
                           {" · Bắt đầu "}
                           {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" })
@@ -2988,12 +3014,12 @@ export default function TeacherIndex() {
                           )}
                       </div>
                     </div>
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                       {selectedMockExamAttemptData.attempt.sections.map((section, sectionIndex) => (
-                        <section key={`${section.title}-${sectionIndex}`} className="space-y-3">
+                        <section key={`${section.title}-${sectionIndex}`} className="space-y-2.5">
                           <h3 className="border-b pb-2 font-semibold">{section.title}</h3>
                           {section.questions.map((question, questionIndex) => (
-                            <article key={question.id} className="space-y-3 rounded-lg border p-3 sm:p-4">
+                            <article key={question.id} className="space-y-2 rounded-lg border p-3">
                               <div className="flex items-start justify-between gap-3">
                                 <div>
                                   <h4 className="font-medium">Câu {questionIndex + 1}</h4>
@@ -3008,11 +3034,11 @@ export default function TeacherIndex() {
                               {question.imageUrl && (
                                 <img src={question.imageUrl} alt={`Hình câu ${questionIndex + 1}`} className="max-h-60 max-w-full rounded-md border object-contain" />
                               )}
-                              <div className="grid gap-2 sm:grid-cols-2">
+                              <div className="grid gap-1.5 sm:grid-cols-2">
                                 {question.options.map((option, optionIndex) => (
                                   <div
                                     key={option.id}
-                                    className={`flex items-start gap-2 rounded-md border p-3 text-sm ${option.selected ? "border-primary bg-primary/5" : ""} ${option.showCorrect ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950/25" : ""}`}
+                                    className={`flex items-start gap-2 rounded-md bg-muted/40 p-2.5 text-sm ${option.selected ? "ring-1 ring-primary/40" : ""} ${option.showCorrect ? "bg-emerald-50 ring-1 ring-emerald-400 dark:bg-emerald-950/25" : ""}`}
                                   >
                                     <span className="font-semibold text-muted-foreground">{String.fromCharCode(65 + optionIndex)}.</span>
                                     <div className="min-w-0 flex-1">
