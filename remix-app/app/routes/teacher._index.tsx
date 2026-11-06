@@ -914,6 +914,7 @@ export default function TeacherIndex() {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedActivityReview, setSelectedActivityReview] = useState<ActivityReviewDialogState | null>(null);
   const [selectedLessonReview, setSelectedLessonReview] = useState<LessonReviewDialogState | null>(null);
+  const [selectedLessonScriptId, setSelectedLessonScriptId] = useState<string | null>(null);
   const [pendingGrammarClassId, setPendingGrammarClassId] = useState<string | null>(null);
   const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
   const [workbookGradingAttemptId, setWorkbookGradingAttemptId] = useState<string | null>(null);
@@ -1651,13 +1652,15 @@ export default function TeacherIndex() {
                                                           group.attempts.push(attempt);
                                                           scriptMap.set(attempt.scriptId, group);
                                                         }
+                                                        const scripts = [...scriptMap.values()].sort((first, second) =>
+                                                          first.title.localeCompare(second.title, "vi", { numeric: true, sensitivity: "base" })
+                                                        );
                                                         setSelectedLessonReview({
                                                           studentName: student.student.name ?? student.student.email,
                                                           lessonTitle: selectedLesson.title,
-                                                          scripts: [...scriptMap.values()].sort((first, second) =>
-                                                            first.title.localeCompare(second.title, "vi", { numeric: true, sensitivity: "base" })
-                                                          ),
+                                                          scripts,
                                                         });
+                                                        setSelectedLessonScriptId(scripts[0]?.id ?? null);
                                                         return;
                                                       }
                                                       navigate(`/teacher/courses/${selectedClass.courseId}/lessons/${selectedLesson.id}/students/${student.student.id}/grammar-history`);
@@ -1941,48 +1944,95 @@ export default function TeacherIndex() {
 
               <div className="divide-y px-4 sm:px-5">
                 {selectedLessonReview.scripts.length > 0 ? (
-                  selectedLessonReview.scripts.map((script) => (
-                    <section key={script.id} className="py-5 first:pt-4">
-                      <div className="mb-3 flex items-center justify-between gap-3">
-                        <h3 className="font-semibold">{script.title}</h3>
-                        <span className="text-xs text-muted-foreground tabular-nums">{script.attempts.length} lượt làm</span>
+                  <>
+                    <div className="sticky top-[73px] z-[9] -mx-4 overflow-x-auto border-b bg-background px-4 sm:-mx-5 sm:px-5" role="tablist" aria-label="Các bài khóa">
+                      <div className="flex min-w-max gap-1">
+                        {selectedLessonReview.scripts.map((script, scriptIndex) => {
+                          const selected = script.id === (selectedLessonScriptId ?? selectedLessonReview.scripts[0]?.id);
+                          return (
+                            <button
+                              key={script.id}
+                              type="button"
+                              role="tab"
+                              aria-selected={selected}
+                              onClick={() => setSelectedLessonScriptId(script.id)}
+                              className={`border-b-2 px-4 py-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
+                                selected
+                                  ? "border-primary font-semibold text-primary"
+                                  : "border-transparent text-muted-foreground hover:border-muted-foreground/30 hover:text-foreground"
+                              }`}
+                            >
+                              {script.title || `Bài khóa ${scriptIndex + 1}`}
+                              <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs tabular-nums">
+                                {script.attempts.length}
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
-                      <div className="divide-y border-t">
-                        {script.attempts.map((attempt, index) => (
-                          <article key={attempt.id} className="py-4 first:pt-3">
-                            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                              <div>
-                                <p className="text-sm font-medium">Lượt {script.attempts.length - index}</p>
-                                <p className="mt-0.5 text-xs text-muted-foreground">
-                                  {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(attempt.completedAt))}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {attempt.evaluation && (
-                                  <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium">
-                                    {attempt.evaluation}
-                                  </span>
-                                )}
-                                <span className="text-sm font-semibold tabular-nums">
-                                  {attempt.score != null ? `${Math.round(attempt.score)} / 100` : "— / 100"}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="grid gap-3 md:grid-cols-2">
-                              <div className="rounded-md border bg-muted/20 p-3">
-                                <p className="text-xs font-semibold text-muted-foreground">Script đúng</p>
-                                <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{attempt.scriptText || "—"}</p>
-                              </div>
-                              <div className="rounded-md border border-rose-200 bg-rose-50/40 p-3 dark:border-rose-900 dark:bg-rose-950/20">
-                                <p className="text-xs font-semibold text-rose-800 dark:text-rose-200">Học viên đã đọc</p>
-                                <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{attempt.transcript || "—"}</p>
-                              </div>
-                            </div>
-                          </article>
-                        ))}
-                      </div>
-                    </section>
-                  ))
+                    </div>
+                    {selectedLessonReview.scripts
+                      .filter((script) => script.id === (selectedLessonScriptId ?? selectedLessonReview.scripts[0]?.id))
+                      .map((script) => (
+                        <section key={script.id} className="py-5 first:pt-4" role="tabpanel">
+                          <div className="mb-3 flex items-center justify-between gap-3">
+                            <h3 className="font-semibold">{script.title}</h3>
+                            <span className="text-xs text-muted-foreground tabular-nums">{script.attempts.length} lượt làm</span>
+                          </div>
+                          <div className="divide-y border-t">
+                            {script.attempts.map((attempt, index) => (
+                              <article key={attempt.id} className="py-5 first:pt-3">
+                                <div className="mb-3 flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold tabular-nums text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                        {script.attempts.length - index}
+                                      </span>
+                                      <p className="font-semibold">Lượt {script.attempts.length - index}</p>
+                                    </div>
+                                    <p className="mt-1.5 pl-9 text-xs text-muted-foreground">
+                                      {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(attempt.completedAt))}
+                                    </p>
+                                  </div>
+                                  <div className="flex shrink-0 items-center gap-2">
+                                    {attempt.evaluation && (
+                                      <span className="hidden rounded-md border bg-background px-2 py-1 text-xs font-medium sm:inline-flex">
+                                        {attempt.evaluation}
+                                      </span>
+                                    )}
+                                    <span
+                                      className={`rounded-md px-2.5 py-1.5 text-sm font-bold tabular-nums ${
+                                        attempt.score == null
+                                          ? "bg-muted text-muted-foreground"
+                                          : attempt.score >= 80
+                                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                            : attempt.score >= 50
+                                              ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                                              : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+                                      }`}
+                                    >
+                                      {attempt.score != null ? `${Math.round(attempt.score)} / 100` : "— / 100"}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="grid overflow-hidden rounded-lg border md:grid-cols-2">
+                                  <div className="border-b p-3 md:border-b-0 md:border-r">
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Script chuẩn</p>
+                                    <p className="mt-2 whitespace-pre-wrap text-base leading-7">{attempt.scriptText || "—"}</p>
+                                  </div>
+                                  <div className="bg-rose-50/60 p-3 dark:bg-rose-950/20">
+                                    <p className="text-xs font-semibold text-rose-700 dark:text-rose-300">Học viên đã đọc</p>
+                                    <p className="mt-2 whitespace-pre-wrap text-base leading-7 text-rose-950 dark:text-rose-100">
+                                      {attempt.transcript || "—"}
+                                    </p>
+                                  </div>
+                                </div>
+                              </article>
+                            ))}
+                          </div>
+                        </section>
+                      ))}
+                  </>
                 ) : (
                   <p className="py-8 text-center text-sm text-muted-foreground">
                     Học viên chưa có dữ liệu chi tiết lượt làm Bài khóa.
