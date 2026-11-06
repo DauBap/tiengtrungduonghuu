@@ -699,9 +699,53 @@ export async function loader({ request }: LoaderFunctionArgs) {
             ? grammarSummaryByUserLesson.get(`${enrollment.userId}:${lesson.id}`)
             : undefined;
           const attemptDetails = isRecord(attempt?.details) ? attempt.details : {};
-          const reviewableAttemptResults = (
-            tab === "LISTENING" || tab === "VOCABULARY_TEST" || tab === "WORKBOOK"
-          ) && Array.isArray(attemptDetails.results)
+          const reviewableAttemptResults: DashboardWrongAnswer[] = tab === "GRAMMAR"
+            ? (() => {
+                const latestAttempts = new Map<string, { details: Record<string, unknown>; sectionTitle: string }>();
+                for (const grammarAttempt of [...grammarAttempts, ...grammarAutoAttempts]) {
+                  if (grammarAttempt.userId !== enrollment.userId || grammarAttempt.lessonId !== lesson.id) continue;
+                  const details = isRecord(grammarAttempt.details) ? grammarAttempt.details : null;
+                  if (!details) continue;
+                  const sectionId = typeof details.sectionId === "string" ? details.sectionId : "legacy";
+                  const questionType = typeof details.questionType === "string"
+                    ? details.questionType
+                    : "mode" in grammarAttempt && typeof grammarAttempt.mode === "string"
+                      ? grammarAttempt.mode
+                      : "";
+                  if (!questionType) continue;
+                  const key = `${sectionId}:${questionType}`;
+                  if (!latestAttempts.has(key)) {
+                    latestAttempts.set(key, {
+                      details,
+                      sectionTitle: typeof details.sectionTitle === "string" ? details.sectionTitle : "Ngữ pháp",
+                    });
+                  }
+                }
+                return [...latestAttempts.values()].flatMap(({ details, sectionTitle }): DashboardWrongAnswer[] => {
+                  if (!Array.isArray(details.results)) return [];
+                  return details.results.flatMap((result): DashboardWrongAnswer[] => {
+                    if (!isRecord(result) || result.correct !== false) return [];
+                    return [{
+                      prompt: typeof result.prompt === "string" && result.prompt.trim()
+                        ? result.prompt.trim()
+                        : "Câu hỏi ngữ pháp",
+                      full: "",
+                      given: typeof result.given === "string"
+                        ? result.given
+                        : Array.isArray(result.givenTokens)
+                          ? result.givenTokens.filter((token): token is string => typeof token === "string").join(" ")
+                          : "",
+                      correctAnswer: typeof result.correctAnswer === "string" ? result.correctAnswer : "",
+                      answerMode: "plain",
+                      translation: typeof result.hint === "string" ? result.hint : "",
+                      groupLabel: sectionTitle,
+                    }];
+                  });
+                });
+              })()
+            : (
+              tab === "LISTENING" || tab === "VOCABULARY_TEST" || tab === "WORKBOOK"
+            ) && Array.isArray(attemptDetails.results)
             ? attemptDetails.results.flatMap((result): DashboardWrongAnswer[] => {
                 if (!isRecord(result) || result.correct !== false) return [];
                 const isVocabularyTest = tab === "VOCABULARY_TEST";
@@ -1554,13 +1598,16 @@ export default function TeacherIndex() {
                                             || activity.tab === "LISTENING"
                                             || activity.tab === "VOCABULARY_TEST"
                                             || activity.tab === "WORKBOOK"
+                                            || activity.tab === "GRAMMAR"
                                           )
                                             && result != null
-                                            && (result.status === "partial" || result.status === "completed")
+                                            && (activity.tab === "GRAMMAR"
+                                              || result.status === "partial"
+                                              || result.status === "completed")
                                             && result.correctCount != null
                                             && result.totalCount != null
                                             && result.totalCount > 0
-                                            && result.wrongAnswers.length > 0
+                                            && (activity.tab === "GRAMMAR" || result.wrongAnswers.length > 0)
                                             ? {
                                                 activityLabel: activity.label,
                                                 studentName: student.student.name ?? student.student.email,
@@ -1663,7 +1710,6 @@ export default function TeacherIndex() {
                                                         setSelectedLessonScriptId(scripts[0]?.id ?? null);
                                                         return;
                                                       }
-                                                      navigate(`/teacher/courses/${selectedClass.courseId}/lessons/${selectedLesson.id}/students/${student.student.id}/grammar-history`);
                                                     }}
                                                     className={`${tileClassName} cursor-pointer transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
                                                   >
