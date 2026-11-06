@@ -101,6 +101,23 @@ interface ActivityReviewDialogState {
   wrongAnswers: DashboardWrongAnswer[];
 }
 
+interface LessonReviewDialogState {
+  studentName: string;
+  lessonTitle: string;
+  scripts: {
+    id: string;
+    title: string;
+    attempts: {
+      id: string;
+      scriptText: string;
+      transcript: string;
+      evaluation: string | null;
+      score: number | null;
+      completedAt: string;
+    }[];
+  }[];
+}
+
 interface WorkbookGradingData {
   course: { id: string; title: string };
   lesson: { id: string; title: string };
@@ -224,7 +241,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const reviewSetIds = courseReviewSets.map((reviewSet) => reviewSet.id);
     const mockExamIds = courseMockExams.map((mockExam) => mockExam.id);
     const userIds = cls.enrollments.map((enrollment) => enrollment.userId);
-    const [progressRows, lessonAudioScripts, pronunciationAssessments, phoneticsSections, phoneticsAttempts, grammarAttempts, grammarAutoAttempts, grammarQuestionRows, reviewAttempts, mockExamAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0 || mockExamIds.length > 0) && userIds.length > 0
+    const [progressRows, lessonAudioScripts, pronunciationAssessments, lessonAttempts, phoneticsSections, phoneticsAttempts, grammarAttempts, grammarAutoAttempts, grammarQuestionRows, reviewAttempts, mockExamAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0 || mockExamIds.length > 0) && userIds.length > 0
       ? await Promise.all([
           lessonIds.length > 0 ? prisma.lessonTabProgress.findMany({
             where: {
@@ -272,6 +289,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
               lessonAudioScriptId: true,
               score: true,
             },
+          }) : Promise.resolve([]),
+          lessonIds.length > 0 ? prisma.lessonTabAttempt.findMany({
+            where: {
+              lessonId: { in: lessonIds },
+              userId: { in: userIds },
+              tab: "LESSON",
+            },
+            select: {
+              id: true,
+              userId: true,
+              lessonId: true,
+              score: true,
+              completedAt: true,
+              details: true,
+            },
+            orderBy: { completedAt: "desc" },
           }) : Promise.resolve([]),
           lessonIds.length > 0 ? prisma.phoneticsSection.findMany({
             where: { lessonId: { in: lessonIds }, questions: { some: {} } },
@@ -375,7 +408,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             orderBy: { startedAt: "desc" },
           }) : Promise.resolve([]),
         ])
-      : [[], [], [], [], [], [], [], [], [], []];
+      : [[], [], [], [], [], [], [], [], [], [], []];
 
     const enrollmentsByUserId = new Map(cls.enrollments.map((enrollment) => [enrollment.userId, enrollment]));
     const lessonsById = new Map(courseLessons.map((lesson) => [lesson.id, lesson]));
@@ -640,6 +673,25 @@ export async function loader({ request }: LoaderFunctionArgs) {
           order: lesson.order,
           displayOrder: lesson.displayOrder,
           title: lesson.title,
+          lessonAttempts: lessonAttempts
+            .filter((attempt) => attempt.userId === enrollment.userId && attempt.lessonId === lesson.id)
+            .map((attempt) => {
+              const details = isRecord(attempt.details) ? attempt.details : {};
+              return {
+                id: attempt.id,
+                scriptId: typeof details.lessonAudioScriptId === "string"
+                  ? details.lessonAudioScriptId
+                  : typeof details.scriptTitle === "string"
+                    ? details.scriptTitle
+                    : "Bài khóa",
+                scriptTitle: typeof details.scriptTitle === "string" ? details.scriptTitle : "Bài khóa",
+                scriptText: typeof details.scriptText === "string" ? details.scriptText : "",
+                transcript: typeof details.transcript === "string" ? details.transcript : "",
+                evaluation: typeof details.evaluation === "string" ? details.evaluation : null,
+                score: attempt.score,
+                completedAt: attempt.completedAt.toISOString(),
+              };
+            }),
           activities: DASHBOARD_ACTIVITIES.map(({ tab }) => {
           const progress = progressByKey.get(`${enrollment.userId}:${lesson.id}:${tab}`);
           const attempt = progress?.attempts[0];
@@ -861,6 +913,7 @@ export default function TeacherIndex() {
   const [progressView, setProgressView] = useState<"overview" | "lesson">("overview");
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedActivityReview, setSelectedActivityReview] = useState<ActivityReviewDialogState | null>(null);
+  const [selectedLessonReview, setSelectedLessonReview] = useState<LessonReviewDialogState | null>(null);
   const [pendingGrammarClassId, setPendingGrammarClassId] = useState<string | null>(null);
   const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
   const [workbookGradingAttemptId, setWorkbookGradingAttemptId] = useState<string | null>(null);
@@ -907,6 +960,7 @@ export default function TeacherIndex() {
   const isModalOpen = Boolean(
     selectedStudentId
     || selectedActivityReview
+    || selectedLessonReview
     || pendingGrammarClass
     || gradingAttemptId
     || workbookGradingAttemptId
@@ -926,7 +980,7 @@ export default function TeacherIndex() {
   }, [location.key]);
 
   useEffect(() => {
-    if (!selectedStudentId && !selectedActivityReview && !pendingGrammarClassId && !gradingAttemptId && !workbookGradingAttemptId && !gradingComplete) return;
+    if (!selectedStudentId && !selectedActivityReview && !selectedLessonReview && !pendingGrammarClassId && !gradingAttemptId && !workbookGradingAttemptId && !gradingComplete) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (
         event.key === "Escape"
@@ -935,6 +989,7 @@ export default function TeacherIndex() {
       ) {
         setSelectedStudentId(null);
         setSelectedActivityReview(null);
+        setSelectedLessonReview(null);
         setPendingGrammarClassId(null);
         setGradingAttemptId(null);
         setWorkbookGradingAttemptId(null);
@@ -944,7 +999,7 @@ export default function TeacherIndex() {
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [selectedStudentId, selectedActivityReview, pendingGrammarClassId, gradingAttemptId, workbookGradingAttemptId, gradingComplete, gradeSubmitFetcher.state, workbookGradeSubmitFetcher.state]);
+  }, [selectedStudentId, selectedActivityReview, selectedLessonReview, pendingGrammarClassId, gradingAttemptId, workbookGradingAttemptId, gradingComplete, gradeSubmitFetcher.state, workbookGradeSubmitFetcher.state]);
 
   const gradingData = gradingFetcher.data?.attempt ? gradingFetcher.data : null;
   useEffect(() => {
@@ -1586,7 +1641,23 @@ export default function TeacherIndex() {
                                                     aria-label={`Xem chi tiết ${activity.label} của ${student.student.name ?? student.student.email}`}
                                                     onClick={() => {
                                                       if (activity.tab === "LESSON") {
-                                                        navigate(`/teacher/courses/${selectedClass.courseId}/students/${student.student.id}?lessonId=${encodeURIComponent(selectedLesson.id)}&tab=LESSON`);
+                                                        const scriptMap = new Map<string, LessonReviewDialogState["scripts"][number]>();
+                                                        for (const attempt of lesson?.lessonAttempts ?? []) {
+                                                          const group = scriptMap.get(attempt.scriptId) ?? {
+                                                            id: attempt.scriptId,
+                                                            title: attempt.scriptTitle,
+                                                            attempts: [],
+                                                          };
+                                                          group.attempts.push(attempt);
+                                                          scriptMap.set(attempt.scriptId, group);
+                                                        }
+                                                        setSelectedLessonReview({
+                                                          studentName: student.student.name ?? student.student.email,
+                                                          lessonTitle: selectedLesson.title,
+                                                          scripts: [...scriptMap.values()].sort((first, second) =>
+                                                            first.title.localeCompare(second.title, "vi", { numeric: true, sensitivity: "base" })
+                                                          ),
+                                                        });
                                                         return;
                                                       }
                                                       navigate(`/teacher/courses/${selectedClass.courseId}/lessons/${selectedLesson.id}/students/${student.student.id}/grammar-history`);
@@ -1833,6 +1904,91 @@ export default function TeacherIndex() {
               >
                 Mở hồ sơ tiến độ đầy đủ <ArrowUpRight className="h-4 w-4" />
               </Link>
+            </section>
+          </div>
+        )}
+
+        {selectedLessonReview && (
+          <div
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/45 p-3 sm:p-6"
+            role="presentation"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) setSelectedLessonReview(null);
+            }}
+          >
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="lesson-review-title"
+              className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg border bg-background shadow-xl"
+            >
+              <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b bg-background px-4 py-4 sm:px-5">
+                <div>
+                  <h2 id="lesson-review-title" className="text-base font-semibold">Lịch sử Bài khóa</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {selectedLessonReview.studentName} · {selectedLessonReview.lessonTitle}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Đóng lịch sử Bài khóa"
+                  onClick={() => setSelectedLessonReview(null)}
+                  className="rounded-md p-2 text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="divide-y px-4 sm:px-5">
+                {selectedLessonReview.scripts.length > 0 ? (
+                  selectedLessonReview.scripts.map((script) => (
+                    <section key={script.id} className="py-5 first:pt-4">
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <h3 className="font-semibold">{script.title}</h3>
+                        <span className="text-xs text-muted-foreground tabular-nums">{script.attempts.length} lượt làm</span>
+                      </div>
+                      <div className="divide-y border-t">
+                        {script.attempts.map((attempt, index) => (
+                          <article key={attempt.id} className="py-4 first:pt-3">
+                            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                              <div>
+                                <p className="text-sm font-medium">Lượt {script.attempts.length - index}</p>
+                                <p className="mt-0.5 text-xs text-muted-foreground">
+                                  {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(attempt.completedAt))}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {attempt.evaluation && (
+                                  <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium">
+                                    {attempt.evaluation}
+                                  </span>
+                                )}
+                                <span className="text-sm font-semibold tabular-nums">
+                                  {attempt.score != null ? `${Math.round(attempt.score)} / 100` : "— / 100"}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="grid gap-3 md:grid-cols-2">
+                              <div className="rounded-md border bg-muted/20 p-3">
+                                <p className="text-xs font-semibold text-muted-foreground">Script đúng</p>
+                                <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{attempt.scriptText || "—"}</p>
+                              </div>
+                              <div className="rounded-md border border-rose-200 bg-rose-50/40 p-3 dark:border-rose-900 dark:bg-rose-950/20">
+                                <p className="text-xs font-semibold text-rose-800 dark:text-rose-200">Học viên đã đọc</p>
+                                <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{attempt.transcript || "—"}</p>
+                              </div>
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    </section>
+                  ))
+                ) : (
+                  <p className="py-8 text-center text-sm text-muted-foreground">
+                    Học viên chưa có dữ liệu chi tiết lượt làm Bài khóa.
+                  </p>
+                )}
+              </div>
             </section>
           </div>
         )}
