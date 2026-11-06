@@ -108,7 +108,7 @@ export function getLessonProgress(activities: LessonActivityProgress[]) {
 }
 
 export function isLessonProgressGreen(percent: number) {
-  return percent > 80;
+  return percent >= 80;
 }
 
 export function areAllAvailableActivitiesGreen(activities: LessonActivityProgress[]) {

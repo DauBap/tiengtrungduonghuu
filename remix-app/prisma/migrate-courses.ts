@@ -23,6 +23,10 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const APPLY = process.argv.includes("--apply");
+const ONLY_ARG = process.argv.find((arg) => arg.startsWith("--only="));
+const ONLY_FOLDERS = ONLY_ARG
+  ? new Set(ONLY_ARG.slice("--only=".length).split(",").filter(Boolean))
+  : null;
 
 const COURSES_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "courses");
 const PUBLIC_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "public");
@@ -308,6 +312,7 @@ async function main() {
   }
 
   for (const [folder, meta] of Object.entries(COURSE_META)) {
+    if (ONLY_FOLDERS && !ONLY_FOLDERS.has(folder)) continue;
     const courseDir = path.join(COURSES_DIR, folder);
     if (!fs.existsSync(courseDir)) {
       console.log(`  ⚠ ${folder}: không có folder, bỏ qua`);

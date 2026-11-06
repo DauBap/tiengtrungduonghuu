@@ -1492,7 +1492,7 @@ export default function TeacherIndex() {
                                               : null;
                                           const progressStatus = displayedPercent == null
                                             ? result?.status
-                                            : displayedPercent > 80 ? "completed" : "partial";
+                                            : displayedPercent >= 80 ? "completed" : "partial";
                                           const activityReviewData = (
                                             activity.tab === "PHONETICS"
                                             || activity.tab === "LISTENING"
@@ -1534,7 +1534,7 @@ export default function TeacherIndex() {
                                               )}
                                               <span className="text-[10px]">
                                                 {displayedPercent != null
-                                                  ? result?.status === "completed" || displayedPercent > 80 ? "Đã làm" : "Đang làm"
+                                                  ? result?.status === "completed" || displayedPercent >= 80 ? "Đã làm" : "Đang làm"
                                                   : result?.status === "completed"
                                                     ? "Đã xong"
                                                     : result?.status === "partial"
@@ -1574,6 +1574,23 @@ export default function TeacherIndex() {
                                                     aria-haspopup="dialog"
                                                     aria-label={`Xem kết quả ${activityReviewData.activityLabel} của ${activityReviewData.studentName}: đúng ${activityReviewData.correctCount}/${activityReviewData.totalCount} câu`}
                                                     onClick={() => setSelectedActivityReview(activityReviewData)}
+                                                    className={`${tileClassName} cursor-pointer transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+                                                  >
+                                                    {tileContent}
+                                                  </button>
+                                                ) : (activity.tab === "LESSON" || activity.tab === "GRAMMAR") &&
+                                                  (result.status === "partial" || result.status === "completed") ? (
+                                                  <button
+                                                    type="button"
+                                                    title={`Xem chi tiết ${activity.label}`}
+                                                    aria-label={`Xem chi tiết ${activity.label} của ${student.student.name ?? student.student.email}`}
+                                                    onClick={() => {
+                                                      if (activity.tab === "LESSON") {
+                                                        navigate(`/teacher/courses/${selectedClass.courseId}/students/${student.student.id}?lessonId=${encodeURIComponent(selectedLesson.id)}&tab=LESSON`);
+                                                        return;
+                                                      }
+                                                      navigate(`/teacher/courses/${selectedClass.courseId}/lessons/${selectedLesson.id}/students/${student.student.id}/grammar-history`);
+                                                    }}
                                                     className={`${tileClassName} cursor-pointer transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
                                                   >
                                                     {tileContent}
@@ -1871,7 +1888,11 @@ export default function TeacherIndex() {
                         </span>
                       </div>
                       {answer.groupLabel !== selectedActivityReview.activityLabel && (
-                        <p className="text-xs text-muted-foreground">{answer.groupLabel}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {selectedActivityReview.activityLabel === "Ngữ âm"
+                            ? `Phần: ${answer.groupLabel}`
+                            : answer.groupLabel}
+                        </p>
                       )}
                       {answer.full && (
                         <div>
@@ -1880,7 +1901,9 @@ export default function TeacherIndex() {
                               ? "Câu nghe"
                               : selectedActivityReview.activityLabel === "Ôn từ vựng"
                                 ? "Từ vựng"
-                                : "Nội dung"}
+                                : selectedActivityReview.activityLabel === "Ngữ âm"
+                                  ? "Nội dung câu"
+                                  : "Nội dung"}
                           </p>
                           <p className={`content-text text-base font-medium ${answer.answerMode === "pinyin" ? "pinyin-text" : answer.answerMode === "chinese" ? "hanzi-display" : ""}`}>
                             {answer.full}
