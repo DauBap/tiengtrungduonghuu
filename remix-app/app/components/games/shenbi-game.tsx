@@ -1086,7 +1086,7 @@ export function ShenbiGame({
                   className={`shenbi-falling-word ${isSelected ? "is-selected" : ""} ${displayMode === "pinyin" || displayMode === "meaning" ? "is-clue" : ""}`}
                   style={{
                     left: `${target.leftPercent ?? FALL_LANES[2]}%`,
-                    animationPlayState: isPaused ? "paused" : "running",
+                    animationPlayState: isPaused || isSelected ? "paused" : "running",
                     "--fall-duration": `${target.fallSeconds}s`,
                   } as CSSProperties & { "--fall-duration": string }}
                   aria-pressed={isSelected}
@@ -1126,7 +1126,7 @@ export function ShenbiGame({
                 <span className="shenbi-ink-drop" aria-hidden="true" />
                 <div>
                   <strong>{selectedTarget ? `Viết chữ ${characterIndex + 1} / ${activeCharacters.length}` : "Chọn một chữ đang rơi"}</strong>
-                  <span>{selectedTarget ? `Bài ${selectedTarget.word.lesson} · ${selectedTarget.word.cluePinyin}` : "Chạm vào từ để chọn mục tiêu"}</span>
+                  <span>{selectedTarget ? `Bài ${selectedTarget.word.lesson} · ${selectedTarget.word.cluePinyin} · Kéo từng nét; từ đã chọn đứng yên` : "Chạm vào từ để chọn mục tiêu"}</span>
                 </div>
               </div>
               {recognitionHint && <span className="shenbi-hint">{recognitionHint}</span>}

@@ -1,9 +1,9 @@
 import { cn } from "~/lib/utils";
-import { ClipboardCheck, BookOpen, AudioLines, MoveRight } from "lucide-react";
+import { ClipboardCheck, BookOpen, AudioLines, MoveRight, Languages } from "lucide-react";
 import { BLOCK_TYPES, BLOCK_META, type LearningBlockType } from "~/lib/learning-blocks";
 
 /** Tab ôn từ vựng là tab inline, không phải route riêng nữa. */
-export type LessonTab = LearningBlockType | "TEST" | "LESSON" | "PHONETICS";
+export type LessonTab = LearningBlockType | "TEST" | "LESSON" | "PHONETICS" | "TRANSLATION";
 
 interface LessonTabsProps {
   activeTab: LessonTab;
@@ -13,14 +13,14 @@ interface LessonTabsProps {
    * Gồm cả "PHONETICS" — dạng này không phải LearningBlockType (không soạn
    * trong admin) nhưng vẫn có tab riêng.
    */
-  availableTypes: Set<LearningBlockType | "PHONETICS">;
+  availableTypes: Set<LearningBlockType | "PHONETICS" | "TRANSLATION">;
   /** Bài có từ vựng để tạo quiz hay chưa. */
   hasQuiz: boolean;
 }
 
 export function LessonTabs({ activeTab, onTabChange, availableTypes, hasQuiz }: LessonTabsProps) {
   const baseTab = "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap";
-  const ordered = ["FLASHCARD", "LISTENING", "VOCABULARY", "LESSON", "PHONETICS", "TEST", "GRAMMAR", "WORKBOOK"] as const;
+  const ordered = ["FLASHCARD", "LISTENING", "VOCABULARY", "LESSON", "PHONETICS", "TEST", "GRAMMAR", "WORKBOOK", "TRANSLATION"] as const;
 
   return (
     <div className="border-b border-border">
@@ -87,6 +87,27 @@ export function LessonTabs({ activeTab, onTabChange, availableTypes, hasQuiz }: 
                 >
                   <AudioLines className="h-4 w-4" />
                   Ngữ âm
+                </button>
+              );
+            }
+
+            if (type === "TRANSLATION") {
+              if (!availableTypes.has("TRANSLATION")) return null;
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => onTabChange("TRANSLATION")}
+                  aria-current={activeTab === "TRANSLATION" ? "page" : undefined}
+                  className={cn(
+                    baseTab,
+                    activeTab === "TRANSLATION"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-foreground hover:text-primary hover:border-border"
+                  )}
+                >
+                  <Languages className="h-4 w-4" />
+                  Luyện dịch
                 </button>
               );
             }

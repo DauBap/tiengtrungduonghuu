@@ -138,6 +138,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       PHONETICS: lesson.phoneticsSections.length > 0,
       GRAMMAR: lesson._count.grammarSections > 0,
       WORKBOOK: lesson.learningBlocks.some((block) => block.type === "WORKBOOK"),
+      TRANSLATION: false,
     };
     const activities: LessonActivityProgress[] = LESSON_TAB_KEYS.map((tab) => {
       const progress = progressByTab.get(tab);

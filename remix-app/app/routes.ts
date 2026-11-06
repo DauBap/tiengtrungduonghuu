@@ -28,6 +28,7 @@ export default [
     route("lessons/:lessonId", "routes/admin.lessons.$lessonId.tsx"),
     route("lessons/:lessonId/grammar", "routes/admin.lessons.$lessonId.grammar.tsx"),
     route("lessons/:lessonId/grammar/:sectionId", "routes/admin.lessons.$lessonId.grammar.$sectionId.tsx"),
+    route("lessons/:lessonId/translations", "routes/admin.lessons.$lessonId.translations.tsx"),
     route("lessons/:lessonId/test", "routes/admin.lessons.$lessonId.test.tsx"),
     route("lessons/:lessonId/blocks/new", "routes/admin.lessons.$lessonId.blocks.new.tsx"),
     route("lessons/:lessonId/blocks/:blockId/edit", "routes/admin.lessons.$lessonId.blocks.$blockId.edit.tsx"),

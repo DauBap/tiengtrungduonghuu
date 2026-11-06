@@ -56,6 +56,7 @@ import {
   AudioLines,
   Maximize2,
   Minimize2,
+  Languages,
 } from "lucide-react";
 import { speakChinese } from "~/lib/speech";
 import { parseAnswerVariants } from "~/lib/listening-answer";
@@ -3116,6 +3117,29 @@ export default function AdminLessonDetail() {
                 </div>
               )}
             </CardContent>
+          </Card>
+
+          {/* Luyện dịch */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Languages className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-base">Luyện dịch</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Học viên xem đề và nộp bài ở tab Luyện dịch.
+                  </CardDescription>
+                </div>
+                <Button size="sm" variant="outline" asChild>
+                  <Link to={`/admin/lessons/${lesson.id}/translations`}>
+                    <Languages className="h-4 w-4 mr-1.5" />
+                    Quản lý luyện dịch
+                  </Link>
+                </Button>
+              </div>
+            </CardHeader>
           </Card>
 
           {/* Sách bài tập */}

@@ -18,6 +18,7 @@ const TAB_LABELS: Record<(typeof LESSON_TAB_KEYS)[number], string> = {
   PHONETICS: "Ngữ âm",
   GRAMMAR: "Ngữ pháp",
   WORKBOOK: "Sách bài tập",
+  TRANSLATION: "Luyện dịch",
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {

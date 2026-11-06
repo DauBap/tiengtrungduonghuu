@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs } from "react-router";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Link, useFetcher, useLoaderData, useLocation, useNavigate, useRevalidator } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import { requireRole } from "~/lib/session.server";
@@ -43,6 +43,8 @@ import {
 import { aggregatePhoneticsSections, getBestPhoneticsSectionAttempts, type PhoneticsReviewResult } from "~/lib/phonetics";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
+import { Badge } from "~/components/ui/badge";
+import { Input } from "~/components/ui/input";
 
 const DASHBOARD_ACTIVITIES = [
   { tab: "FLASHCARD", label: "Flashcard" },
@@ -52,6 +54,7 @@ const DASHBOARD_ACTIVITIES = [
   { tab: "LISTENING", label: "Nghe câu" },
   { tab: "GRAMMAR", label: "Ngữ pháp" },
   { tab: "WORKBOOK", label: "Sách bài tập" },
+  { tab: "TRANSLATION", label: "Luyện dịch" },
 ] as const;
 
 type DashboardActivityTab = (typeof DASHBOARD_ACTIVITIES)[number]["tab"];
@@ -146,6 +149,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const searchParams = new URL(request.url).searchParams;
   const initialGradeAttemptId = searchParams.get("gradeAttemptId");
   const initialWorkbookAttemptId = searchParams.get("gradeWorkbookAttemptId");
+  const initialTranslationSubmissionId = searchParams.get("gradeTranslationId");
   const myCourses = await getTeacherCourses(user.id);
   const myClasses = await prisma.class.findMany({
     where: { teacherId: user.id, completedAt: null },
@@ -159,6 +163,37 @@ export async function loader({ request }: LoaderFunctionArgs) {
     },
     orderBy: [{ course: { order: "asc" } }, { name: "asc" }],
   });
+
+  const assignedCourseIds = [...new Set(myClasses.map((cls) => cls.courseId))];
+  const assignedStudentIds = [...new Set(myClasses.flatMap((cls) => cls.enrollments.map((item) => item.userId)))];
+  const [translationSubmissions, initialTranslationSubmission] = await Promise.all([
+    prisma.translationSubmission.findMany({
+      where: {
+        lesson: { courseId: { in: assignedCourseIds } },
+        studentId: { in: assignedStudentIds },
+      },
+      orderBy: { submittedAt: "desc" },
+      include: {
+        student: { select: { id: true, name: true, email: true } },
+        lesson: { select: { id: true, title: true, courseId: true, course: { select: { title: true } } } },
+        teacher: { select: { name: true } },
+      },
+    }),
+    initialTranslationSubmissionId
+      ? prisma.translationSubmission.findFirst({
+          where: {
+            id: initialTranslationSubmissionId,
+            lesson: { courseId: { in: assignedCourseIds } },
+            studentId: { in: assignedStudentIds },
+          },
+          include: {
+            student: { select: { id: true, name: true, email: true } },
+            lesson: { select: { id: true, title: true, courseId: true } },
+            teacher: { select: { name: true } },
+          },
+        })
+      : Promise.resolve(null),
+  ]);
   let initialWorkbookTargetUrl: string | null = null;
   if (initialWorkbookAttemptId) {
     const candidate = await prisma.lessonTabAttempt.findFirst({
@@ -588,6 +623,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         LISTENING: lesson.learningBlocks.some((block) => block.type === "LISTENING" && block.required),
         GRAMMAR: lesson._count.grammarSections > 0,
         WORKBOOK: lesson.learningBlocks.some((block) => block.type === "WORKBOOK" && block.required),
+        TRANSLATION: false,
       },
     }));
     const reviews = courseReviewSets.map((reviewSet, index) => ({
@@ -914,6 +950,58 @@ export async function loader({ request }: LoaderFunctionArgs) {
       activityData,
     };
   }));
+  const requestedGrammarAttempt = initialGradeAttemptId
+    ? await prisma.lessonTabAttempt.findFirst({
+        where: {
+          id: initialGradeAttemptId,
+          userId: { in: assignedStudentIds },
+          tab: "GRAMMAR",
+          mode: "FILL",
+          lesson: { courseId: { in: assignedCourseIds } },
+        },
+        select: {
+          id: true,
+          userId: true,
+          lessonId: true,
+          completedAt: true,
+          details: true,
+          lesson: { select: { courseId: true, title: true } },
+          user: { select: { name: true, email: true } },
+        },
+      })
+    : null;
+  const requestedGrammarDetails = isRecord(requestedGrammarAttempt?.details)
+    ? requestedGrammarAttempt.details
+    : {};
+  const requestedGrammarClass = requestedGrammarAttempt
+    ? myClasses.find((cls) =>
+        cls.courseId === requestedGrammarAttempt.lesson.courseId
+        && cls.enrollments.some((enrollment) => enrollment.userId === requestedGrammarAttempt.userId)
+      )
+    : null;
+  const initialGrammarAttempt = requestedGrammarAttempt
+    && requestedGrammarClass
+    && requestedGrammarDetails.questionType === "FILL"
+    && (
+      requestedGrammarDetails.reviewPending === true
+      || isRecord(requestedGrammarDetails.teacherGrading)
+    )
+    ? {
+        classId: requestedGrammarClass.id,
+        courseId: requestedGrammarAttempt.lesson.courseId,
+        attempt: {
+          id: requestedGrammarAttempt.id,
+          lessonId: requestedGrammarAttempt.lessonId,
+          userId: requestedGrammarAttempt.userId,
+          studentName: requestedGrammarAttempt.user.name ?? requestedGrammarAttempt.user.email,
+          lessonTitle: requestedGrammarAttempt.lesson.title,
+          sectionTitle: typeof requestedGrammarDetails.sectionTitle === "string"
+            ? requestedGrammarDetails.sectionTitle
+            : "Dịch câu",
+          completedAt: requestedGrammarAttempt.completedAt.toISOString(),
+        },
+      }
+    : null;
 
   return {
     user,
@@ -923,9 +1011,117 @@ export async function loader({ request }: LoaderFunctionArgs) {
     totalLessons,
     totalStudents,
     initialGradeAttemptId,
+    initialGrammarAttempt,
     initialWorkbookAttemptId,
     initialWorkbookTargetUrl,
+    initialTranslationSubmissionId,
+    initialTranslationSubmission,
+    translationSubmissions,
   };
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const user = await requireRole(request, ["teacher"]);
+  const form = await request.formData();
+  if (String(form.get("intent")) !== "grade-translation") {
+    return { error: "Thao tác không hợp lệ." };
+  }
+
+  const submissionId = String(form.get("submissionId") ?? "");
+  const score = Number(form.get("score"));
+  const teacherComment = String(form.get("teacherComment") ?? "").trim();
+  if (!submissionId) return { error: "Thiếu bài nộp luyện dịch." };
+  if (!Number.isFinite(score) || score < 0) return { error: "Điểm không hợp lệ." };
+
+  const submission = await prisma.translationSubmission.findUnique({
+    where: { id: submissionId },
+    include: { lesson: { select: { id: true, title: true, courseId: true } } },
+  });
+  if (!submission) return { error: "Không tìm thấy bài nộp." };
+
+  const assignedClass = await prisma.class.findFirst({
+    where: {
+      teacherId: user.id,
+      completedAt: null,
+      courseId: submission.lesson.courseId,
+      enrollments: { some: { userId: submission.studentId } },
+    },
+    select: { id: true },
+  });
+  if (!assignedClass) return { error: "Bạn không có quyền chấm bài này." };
+  const maxScore = 10;
+  if (score > maxScore) return { error: `Điểm tối đa là ${maxScore}.` };
+
+  const gradedAnswers = Array.isArray(submission.answers)
+    ? submission.answers.flatMap((item) => {
+        if (typeof item !== "object" || item === null || Array.isArray(item)) return [];
+        const record = item as Record<string, unknown>;
+        const questionId = String(record.questionId ?? "");
+        return {
+          questionId,
+          prompt: typeof record.prompt === "string" ? record.prompt : "",
+          sampleAnswer: typeof record.sampleAnswer === "string" ? record.sampleAnswer : "",
+          maxScore: typeof record.maxScore === "number" ? record.maxScore : 10,
+          answer: typeof record.answer === "string" ? record.answer : "",
+          teacherComment: String(form.get(`translation-comment-${questionId}`) ?? "").trim(),
+        };
+      })
+    : [];
+
+  await prisma.translationSubmission.update({
+    where: { id: submissionId },
+    data: {
+      score,
+      maxScore,
+      teacherComment,
+      answers: gradedAnswers,
+      teacherId: user.id,
+      status: "GRADED",
+      gradedAt: new Date(),
+    },
+  });
+  const translationAttempt = await prisma.lessonTabAttempt.findFirst({
+    where: { userId: submission.studentId, lessonId: submission.lessonId, tab: "TRANSLATION" },
+    orderBy: { completedAt: "desc" },
+    select: { id: true },
+  });
+  if (translationAttempt) {
+    await prisma.lessonTabAttempt.update({
+      where: { id: translationAttempt.id },
+      data: {
+        score,
+        passed: score >= maxScore * 0.5,
+        completedAt: new Date(),
+        details: { submissionId, status: "GRADED", score, totalQuestions: Array.isArray(submission.answers) ? submission.answers.length : 0 },
+      },
+    });
+  }
+  const notificationData = {
+    actorId: user.id,
+    title: "Giáo viên đã trả bài luyện dịch",
+    message: `Bài “${submission.lesson.title}” đã được chấm: ${score}/${maxScore}.${teacherComment ? ` Nhận xét: ${teacherComment}` : ""}`,
+    targetUrl: `/student/courses/${submission.lesson.courseId}/lessons/${submission.lesson.id}?tab=TRANSLATION`,
+    readAt: null,
+  };
+  const existingNotification = await prisma.userNotification.updateMany({
+    where: {
+      recipientId: submission.studentId,
+      kind: "TRANSLATION_GRADED",
+      entityId: submissionId,
+    },
+    data: notificationData,
+  });
+  if (existingNotification.count === 0) {
+    await prisma.userNotification.create({
+      data: {
+        ...notificationData,
+        recipientId: submission.studentId,
+        kind: "TRANSLATION_GRADED",
+        entityId: submissionId,
+      },
+    });
+  }
+  return { success: true as const };
 }
 
 function activityTone(status: string, isPastLesson: boolean) {
@@ -944,13 +1140,14 @@ function lessonProgressTone(percent: number) {
 }
 
 export default function TeacherIndex() {
-  const { user, myCourses, myClasses, classSummaries, totalLessons, totalStudents, initialGradeAttemptId, initialWorkbookAttemptId, initialWorkbookTargetUrl } = useLoaderData<typeof loader>();
+  const { user, myCourses, myClasses, classSummaries, totalLessons, totalStudents, initialGradeAttemptId, initialGrammarAttempt, initialWorkbookAttemptId, initialWorkbookTargetUrl, initialTranslationSubmissionId, initialTranslationSubmission, translationSubmissions } = useLoaderData<typeof loader>();
   const location = useLocation();
   const navigate = useNavigate();
   const gradingFetcher = useFetcher<GrammarAttemptData & { success?: boolean }>();
   const gradeSubmitFetcher = useFetcher<{ success?: boolean; attemptId?: string; error?: string }>();
   const workbookGradingFetcher = useFetcher<WorkbookGradingData>();
   const workbookGradeSubmitFetcher = useFetcher<{ success?: boolean; attemptId?: string; error?: string }>();
+  const TranslationGradeFetcher = useFetcher<{ success?: boolean; error?: string }>();
   const revalidator = useRevalidator();
   const [selectedClassId, setSelectedClassId] = useState(classSummaries[0]?.id ?? "");
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
@@ -962,15 +1159,17 @@ export default function TeacherIndex() {
   const [pendingGrammarClassId, setPendingGrammarClassId] = useState<string | null>(null);
   const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
   const [workbookGradingAttemptId, setWorkbookGradingAttemptId] = useState<string | null>(null);
+  const [selectedTranslationSubmissionId, setSelectedTranslationSubmissionId] = useState<string | null>(initialTranslationSubmission?.id ?? null);
   const [gradingQueue, setGradingQueue] = useState<{ courseId: string; attempt: PendingGrammarAttempt }[]>([]);
   const [gradingQueueIndex, setGradingQueueIndex] = useState<number | null>(null);
   const [gradingComplete, setGradingComplete] = useState(false);
   const [grades, setGrades] = useState<TeacherGrammarGrade[]>([]);
   const [initializedGradeAttemptId, setInitializedGradeAttemptId] = useState<string | null>(null);
   const handledGradeAttemptId = useRef<string | null>(null);
-  const handledInitialGradeAttemptId = useRef<string | null>(null);
+  const handledInitialGradeNavigationKey = useRef<string | null>(null);
   const handledInitialWorkbookAttemptId = useRef<string | null>(null);
   const handledWorkbookGradeAttemptId = useRef<string | null>(null);
+  const handledInitialTranslationNavigationKey = useRef<string | null>(null);
   const selectedClass = classSummaries.find((cls) => cls.id === selectedClassId) ?? classSummaries[0];
   const pendingGrammarClass = classSummaries.find((cls) => cls.id === pendingGrammarClassId);
   const selectedLesson = selectedClass?.lessons.find((lesson) => lesson.id === selectedLessonId)
@@ -1002,6 +1201,10 @@ export default function TeacherIndex() {
     ? DASHBOARD_ACTIVITIES.filter(({ tab }) => selectedLesson.availableActivities[tab])
     : [];
   const selectedStudent = selectedClass?.activityData.find((item) => item.student.id === selectedStudentId);
+  const selectedTranslationSubmission = selectedTranslationSubmissionId
+    ? translationSubmissions.find((item) => item.id === selectedTranslationSubmissionId)
+      ?? (initialTranslationSubmission?.id === selectedTranslationSubmissionId ? initialTranslationSubmission : null)
+    : null;
   const isModalOpen = Boolean(
     selectedStudentId
     || selectedActivityReview
@@ -1009,6 +1212,7 @@ export default function TeacherIndex() {
     || pendingGrammarClass
     || gradingAttemptId
     || workbookGradingAttemptId
+    || selectedTranslationSubmissionId
     || (pendingGrammarClass && gradingComplete),
   );
   useModalScrollLock(isModalOpen);
@@ -1025,12 +1229,13 @@ export default function TeacherIndex() {
   }, [location.key]);
 
   useEffect(() => {
-    if (!selectedStudentId && !selectedActivityReview && !selectedLessonReview && !pendingGrammarClassId && !gradingAttemptId && !workbookGradingAttemptId && !gradingComplete) return;
+    if (!selectedStudentId && !selectedActivityReview && !selectedLessonReview && !pendingGrammarClassId && !gradingAttemptId && !workbookGradingAttemptId && !selectedTranslationSubmissionId && !gradingComplete) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (
         event.key === "Escape"
         && gradeSubmitFetcher.state !== "submitting"
         && workbookGradeSubmitFetcher.state !== "submitting"
+        && TranslationGradeFetcher.state !== "submitting"
       ) {
         setSelectedStudentId(null);
         setSelectedActivityReview(null);
@@ -1038,24 +1243,30 @@ export default function TeacherIndex() {
         setPendingGrammarClassId(null);
         setGradingAttemptId(null);
         setWorkbookGradingAttemptId(null);
+        setSelectedTranslationSubmissionId(null);
         setGradingQueueIndex(null);
         setGradingComplete(false);
       }
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [selectedStudentId, selectedActivityReview, selectedLessonReview, pendingGrammarClassId, gradingAttemptId, workbookGradingAttemptId, gradingComplete, gradeSubmitFetcher.state, workbookGradeSubmitFetcher.state]);
+  }, [selectedStudentId, selectedActivityReview, selectedLessonReview, pendingGrammarClassId, gradingAttemptId, workbookGradingAttemptId, selectedTranslationSubmissionId, gradingComplete, gradeSubmitFetcher.state, workbookGradeSubmitFetcher.state, TranslationGradeFetcher.state]);
 
   const gradingData = gradingFetcher.data?.attempt ? gradingFetcher.data : null;
   useEffect(() => {
-    if (!gradingData || gradingData.attempt.id !== gradingAttemptId || initializedGradeAttemptId === gradingAttemptId) return;
+    if (
+      gradingFetcher.state !== "idle"
+      || !gradingData
+      || gradingData.attempt.id !== gradingAttemptId
+      || initializedGradeAttemptId === gradingAttemptId
+    ) return;
     setGrades(gradingData.attempt.results.map((result) => ({
       questionId: result.id,
       correct: result.autoCorrect,
       teacherFeedback: result.teacherFeedback,
     })));
     setInitializedGradeAttemptId(gradingAttemptId);
-  }, [gradingData, gradingAttemptId, initializedGradeAttemptId]);
+  }, [gradingData, gradingAttemptId, gradingFetcher.state, initializedGradeAttemptId]);
 
   useEffect(() => {
     const submission = gradeSubmitFetcher.data;
@@ -1098,6 +1309,13 @@ export default function TeacherIndex() {
     setWorkbookGradingAttemptId(null);
     revalidator.revalidate();
   }, [workbookGradeSubmitFetcher.data, workbookGradeSubmitFetcher.state, workbookGradingAttemptId, revalidator]);
+
+  useEffect(() => {
+    if (TranslationGradeFetcher.state === "idle" && TranslationGradeFetcher.data?.success) {
+      setSelectedTranslationSubmissionId(null);
+      revalidator.revalidate();
+    }
+  }, [TranslationGradeFetcher.data, TranslationGradeFetcher.state, revalidator]);
 
   const reminderRows = selectedClass && selectedLesson
     ? selectedClass.activityData.flatMap((student) => {
@@ -1142,12 +1360,28 @@ export default function TeacherIndex() {
   };
 
   useEffect(() => {
-    if (!initialGradeAttemptId || handledInitialGradeAttemptId.current === initialGradeAttemptId) return;
+    if (!initialGradeAttemptId) {
+      handledInitialGradeNavigationKey.current = null;
+      return;
+    }
+    if (handledInitialGradeNavigationKey.current === location.key) return;
     const ownerClass = classSummaries.find((cls) =>
       cls.pendingGrammarAttempts.some((attempt) => attempt.id === initialGradeAttemptId)
     );
-    if (!ownerClass) {
-      handledInitialGradeAttemptId.current = initialGradeAttemptId;
+    if (ownerClass) {
+      const selectedAttempt = ownerClass.pendingGrammarAttempts.find((attempt) => attempt.id === initialGradeAttemptId);
+      if (!selectedAttempt) return;
+      handledInitialGradeNavigationKey.current = location.key;
+      setSelectedClassId(ownerClass.id);
+      startGradingQueue(ownerClass.id, ownerClass.courseId, ownerClass.pendingGrammarAttempts, selectedAttempt);
+    } else if (initialGrammarAttempt?.attempt.id === initialGradeAttemptId) {
+      handledInitialGradeNavigationKey.current = location.key;
+      setSelectedClassId(initialGrammarAttempt.classId);
+      setPendingGrammarClassId(null);
+      setGradingQueue([]);
+      openGradingAttempt(initialGrammarAttempt.courseId, initialGrammarAttempt.attempt, 0);
+    } else {
+      handledInitialGradeNavigationKey.current = location.key;
       const searchParams = new URLSearchParams(location.search);
       searchParams.delete("gradeAttemptId");
       navigate(
@@ -1157,18 +1391,13 @@ export default function TeacherIndex() {
       return;
     }
 
-    const selectedAttempt = ownerClass.pendingGrammarAttempts.find((attempt) => attempt.id === initialGradeAttemptId);
-    if (!selectedAttempt) return;
-    handledInitialGradeAttemptId.current = initialGradeAttemptId;
-    setSelectedClassId(ownerClass.id);
-    startGradingQueue(ownerClass.id, ownerClass.courseId, ownerClass.pendingGrammarAttempts, selectedAttempt);
     const searchParams = new URLSearchParams(location.search);
     searchParams.delete("gradeAttemptId");
     navigate(
       { pathname: location.pathname, search: searchParams.toString() ? `?${searchParams}` : "" },
       { replace: true },
     );
-  }, [classSummaries, initialGradeAttemptId, location.pathname, location.search, navigate]);
+  }, [classSummaries, initialGrammarAttempt, initialGradeAttemptId, location.key, location.pathname, location.search, navigate]);
 
   useEffect(() => {
     if (!initialWorkbookAttemptId || handledInitialWorkbookAttemptId.current === initialWorkbookAttemptId) return;
@@ -1187,6 +1416,30 @@ export default function TeacherIndex() {
     );
   }, [initialWorkbookAttemptId, initialWorkbookTargetUrl, location.pathname, location.search, navigate, workbookGradingFetcher]);
 
+  useEffect(() => {
+    const requestedSubmissionId = new URLSearchParams(location.search).get("gradeTranslationId");
+    if (!requestedSubmissionId) {
+      handledInitialTranslationNavigationKey.current = null;
+      return;
+    }
+    if (handledInitialTranslationNavigationKey.current === location.key) return;
+    if (initialTranslationSubmissionId !== requestedSubmissionId) return;
+    handledInitialTranslationNavigationKey.current = location.key;
+
+    if (initialTranslationSubmission?.id === requestedSubmissionId) {
+      setSelectedTranslationSubmissionId(initialTranslationSubmission.id);
+    } else {
+      setSelectedTranslationSubmissionId(null);
+    }
+
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete("gradeTranslationId");
+    navigate(
+      { pathname: location.pathname, search: searchParams.toString() ? `?${searchParams}` : "" },
+      { replace: true },
+    );
+  }, [initialTranslationSubmissionId, initialTranslationSubmission, location.key, location.pathname, location.search, navigate]);
+
   return (
     <AppShell user={user}>
       <div className="space-y-6">
@@ -1200,6 +1453,38 @@ export default function TeacherIndex() {
           <StatCard label="Tổng học viên" value={totalStudents} icon={Users} accent="success" />
           <StatCard label="Tổng bài học" value={totalLessons} icon={TrendingUp} accent="warning" />
         </div>
+
+        {translationSubmissions.length > 0 && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-semibold">Luyện dịch</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">Bài nộp của học viên trong các lớp đang phụ trách.</p>
+                </div>
+                <Badge variant="secondary">{translationSubmissions.filter((item) => item.status === "SUBMITTED").length} bài chờ chấm</Badge>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {translationSubmissions.slice(0, 8).map((submission) => (
+                  <button
+                    key={submission.id}
+                    type="button"
+                    onClick={() => setSelectedTranslationSubmissionId(submission.id)}
+                    className="flex items-center justify-between gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/50"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{submission.student.name ?? submission.student.email}</p>
+                      <p className="mt-1 truncate text-xs text-muted-foreground">{submission.lesson.title} · {submission.lesson.course.title}</p>
+                    </div>
+                    <Badge variant={submission.status === "GRADED" ? "outline" : "secondary"}>
+                      {submission.status === "GRADED" ? `${submission.score ?? 0}/${submission.maxScore}` : "Chờ chấm"}
+                    </Badge>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {upcomingClasses.length > 0 && (
           <Card>
@@ -2368,6 +2653,9 @@ export default function TeacherIndex() {
                 <gradeSubmitFetcher.Form
                   method="post"
                   action={`/teacher/courses/${gradingData.course.id}/lessons/${gradingData.lesson.id}/students/${gradingData.student.id}/grammar-history/attempts/${gradingAttemptId}`}
+                  onSubmit={() => {
+                    handledGradeAttemptId.current = null;
+                  }}
                   className="flex min-h-0 flex-1 flex-col"
                 >
                   <input type="hidden" name="intent" value="grade-grammar-fill-dashboard" />
@@ -2479,6 +2767,122 @@ export default function TeacherIndex() {
               >
                 Đóng
               </Button>
+            </section>
+          </div>
+        )}
+        {selectedTranslationSubmission && (
+          <div className="fixed inset-0 !mt-0 z-[60] flex items-center justify-center bg-black/50 p-3 sm:p-6" role="presentation">
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="translation-grading-title"
+              className="flex max-h-[calc(100vh-1.5rem)] w-full max-w-4xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl sm:max-h-[calc(100vh-3rem)]"
+            >
+              <header className="flex shrink-0 items-start justify-between gap-3 border-b bg-background px-5 py-4 sm:px-6">
+                <div className="min-w-0">
+                  <h2 id="translation-grading-title" className="text-lg font-semibold">Chấm bài Luyện dịch</h2>
+                  <p className="mt-1 truncate text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">{selectedTranslationSubmission.student?.name ?? selectedTranslationSubmission.student?.email}</span>
+                    <span className="mx-2 text-muted-foreground/60">·</span>
+                    {selectedTranslationSubmission.lesson.title}
+                  </p>
+                </div>
+                <button type="button" aria-label="Đóng bài luyện dịch" onClick={() => setSelectedTranslationSubmissionId(null)} className="rounded-md p-2 text-muted-foreground hover:bg-muted">
+                  <X className="h-4 w-4" />
+                </button>
+              </header>
+
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                {Array.isArray(selectedTranslationSubmission.answers)
+                  ? (selectedTranslationSubmission.answers as Array<{ questionId?: string; prompt?: string; sampleAnswer?: string; maxScore?: number; answer?: string; teacherComment?: string }>).map((item, index) => (
+                      <section key={item.questionId ?? index} className="border-b px-5 py-5 last:border-b-0 sm:px-6">
+                        <div className="mb-3 flex items-start justify-between gap-3">
+                          <p className="text-sm font-semibold">Câu {index + 1}</p>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">Đề bài</p>
+                            <p className="mt-1 whitespace-pre-wrap text-sm font-medium">{item.prompt}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">Bài làm của học viên</p>
+                            <p className={`mt-1 whitespace-pre-wrap rounded-md border p-3 text-sm ${item.answer ? "border-primary/15 bg-primary/[0.04]" : "border-dashed bg-muted/40 text-muted-foreground"}`}>
+                              {item.answer || "Học viên chưa trả lời câu này"}
+                            </p>
+                          </div>
+                        </div>
+                        {item.sampleAnswer && (
+                          <p className="mt-3 rounded-md bg-muted/50 px-3 py-2 text-xs leading-5 text-muted-foreground">
+                            <span className="font-medium text-foreground">Đáp án mẫu:</span> {item.sampleAnswer}
+                          </p>
+                        )}
+                        <div className="mt-3">
+                          <label
+                            htmlFor={`translation-comment-${item.questionId ?? index}`}
+                            className="text-xs font-medium text-foreground"
+                          >
+                            Nhận xét câu {index + 1}
+                          </label>
+                          <Textarea
+                            id={`translation-comment-${item.questionId ?? index}`}
+                            name={`translation-comment-${item.questionId ?? ""}`}
+                            form="translation-grade-form"
+                            defaultValue={item.teacherComment ?? ""}
+                            placeholder="Nhận xét lỗi hoặc cách diễn đạt tốt hơn..."
+                            className="mt-1.5 min-h-16 resize-y bg-background"
+                          />
+                        </div>
+                      </section>
+                    ))
+                  : <p className="px-5 py-8 text-sm text-muted-foreground sm:px-6">Không đọc được nội dung bài làm.</p>}
+              </div>
+
+              <TranslationGradeFetcher.Form
+                  method="post"
+                id="translation-grade-form"
+                onSubmit={() => undefined}
+                  className="grid shrink-0 gap-4 border-t bg-background px-5 py-4 sm:grid-cols-[150px_1fr_auto] sm:px-6"
+                >
+                  <input type="hidden" name="intent" value="grade-translation" />
+                  <input type="hidden" name="submissionId" value={selectedTranslationSubmission.id} />
+                  <div>
+                    <label htmlFor="translation-score" className="text-sm font-medium">Điểm tổng</label>
+                    <Input
+                      id="translation-score"
+                      name="score"
+                      type="number"
+                      min="0"
+                      max={selectedTranslationSubmission.maxScore}
+                      defaultValue={selectedTranslationSubmission.status === "GRADED" ? String(selectedTranslationSubmission.score ?? 0) : ""}
+                      required
+                      className="mt-1.5"
+                    />
+                    <p className="mt-1 text-xs text-muted-foreground">Tối đa {selectedTranslationSubmission.maxScore}</p>
+                  </div>
+                  <div>
+                    <label htmlFor="translation-comment" className="text-sm font-medium">Nhận xét</label>
+                    <Textarea
+                      id="translation-comment"
+                      name="teacherComment"
+                      defaultValue={selectedTranslationSubmission.teacherComment ?? ""}
+                      placeholder="Nhận xét ưu điểm và lỗi cần sửa..."
+                      className="mt-1.5 min-h-20 resize-y"
+                    />
+                  </div>
+                  {TranslationGradeFetcher.data?.error && (
+                    <p className="text-sm text-destructive sm:col-span-2">{TranslationGradeFetcher.data.error}</p>
+                  )}
+                  <div className="flex items-end justify-end gap-2 sm:self-end">
+                    <Button type="button" variant="outline" onClick={() => setSelectedTranslationSubmissionId(null)}>Đóng</Button>
+                    <Button type="submit" disabled={TranslationGradeFetcher.state === "submitting"}>
+                      {TranslationGradeFetcher.state === "submitting"
+                        ? "Đang lưu..."
+                        : selectedTranslationSubmission.status === "GRADED"
+                          ? "Cập nhật kết quả"
+                          : "Trả bài cho học viên"}
+                    </Button>
+                  </div>
+              </TranslationGradeFetcher.Form>
             </section>
           </div>
         )}

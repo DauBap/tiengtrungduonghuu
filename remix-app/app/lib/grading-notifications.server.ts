@@ -5,7 +5,7 @@ export async function notifyAssignedTeacherOfPendingWork(input: {
   courseId: string;
   attemptId: string;
   lessonId: string;
-  kind: "GRAMMAR_GRADING_REQUEST" | "WORKBOOK_GRADING_REQUEST";
+  kind: "GRAMMAR_GRADING_REQUEST" | "WORKBOOK_GRADING_REQUEST" | "TRANSLATION_SUBMISSION";
   studentName: string;
   sectionTitle: string;
   targetUrl: string;

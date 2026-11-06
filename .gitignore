@@ -63,3 +63,6 @@ smoke.mjs
 
 # Generated speech cache is runtime data, not application source
 /remix-app/uploads/audio/tts/
+
+# Local-only server access instructions; do not commit infrastructure details
+/SERVER-DATA-UPLOAD.md

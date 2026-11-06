@@ -29,6 +29,7 @@ import { GrammarSection, type GrammarPracticeSummary } from "~/components/lesson
 import { WorkbookListeningTest } from "~/components/lessons/workbook-listening-test";
 import { VocabularyTest } from "~/components/lessons/vocabulary-test";
 import { PhoneticsPractice, type PhoneticsSectionScore } from "~/components/lessons/phonetics-practice";
+import { TranslationPractice } from "~/components/lessons/translation-practice";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -69,6 +70,7 @@ const FEEDBACK_TAB_LABELS: Record<string, string> = {
   PHONETICS: "Ngữ âm",
   GRAMMAR: "Ngữ pháp",
   WORKBOOK: "Sách bài tập",
+  TRANSLATION: "Luyện dịch",
 };
 
 const PRONUNCIATION_TRANSCRIPTION_TIMEOUT_MS = 300_000;
@@ -240,6 +242,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     workbookSubmissionAttempts,
     phoneticsConfig,
     phoneticsAttempts,
+    translationQuestions,
+    latestTranslationSubmission,
   ] = await Promise.all([
     prisma.lesson.count({
       where: { courseId: lesson.courseId, order: { lte: lesson.order } },
@@ -316,6 +320,15 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       where: { userId: user.id, lessonId: lesson.id, tab: "PHONETICS", score: { not: null } },
       orderBy: [{ score: "desc" }, { completedAt: "desc" }],
       select: { mode: true, score: true, correctCount: true, totalCount: true },
+    }),
+    prisma.translationQuestion.findMany({
+      where: { lessonId: lesson.id },
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+    }),
+    prisma.translationSubmission.findFirst({
+      where: { studentId: user.id, lessonId: lesson.id },
+      orderBy: { submittedAt: "desc" },
+      include: { teacher: { select: { name: true } } },
     }),
   ]);
   const reviewableTabs = ["VOCABULARY_TEST", "PHONETICS", "GRAMMAR", "WORKBOOK"] as const;
@@ -573,6 +586,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     reviewFocus,
     phonetics,
     phoneticsSectionScores,
+    translationQuestions,
+    latestTranslationSubmission: latestTranslationSubmission
+      ? {
+          ...latestTranslationSubmission,
+          submittedAt: latestTranslationSubmission.submittedAt.toISOString(),
+          gradedAt: latestTranslationSubmission.gradedAt?.toISOString() ?? null,
+        }
+      : null,
     latestTabScores: {
       vocabularyTest: latestVocabularyAttempt,
       listening: latestListeningAttempt,
@@ -714,6 +735,61 @@ export async function action({ request, params }: ActionFunctionArgs) {
       tab,
     });
     return { success: true as const, intent: "open-tab" as const, tab };
+  }
+
+  if (intent === "submit-translation") {
+    const questions = await prisma.translationQuestion.findMany({
+      where: { lessonId: params.lessonId! },
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+      select: { id: true, prompt: true, sampleAnswer: true, maxScore: true },
+    });
+    if (questions.length === 0) {
+      return { intent, translationError: "Bài học chưa có câu hỏi luyện dịch." };
+    }
+
+    const answers = questions.map((question) => ({
+      questionId: question.id,
+      prompt: question.prompt,
+      sampleAnswer: question.sampleAnswer,
+      maxScore: question.maxScore,
+      answer: String(form.get(`translation-${question.id}`) ?? "").trim(),
+    }));
+    const missingIndex = answers.findIndex((item) => !item.answer);
+    if (missingIndex >= 0) {
+      return { intent, translationError: `Hãy nhập đáp án cho câu số ${missingIndex + 1}.` };
+    }
+
+    const submission = await prisma.translationSubmission.create({
+      data: {
+        lessonId: params.lessonId!,
+        studentId: user.id,
+        answers,
+        maxScore: 10,
+      },
+    });
+
+    await recordLessonTabAttempt(prisma, {
+      userId: user.id,
+      lessonId: params.lessonId!,
+      tab: "TRANSLATION",
+      score: null,
+      correctCount: null,
+      totalCount: questions.length,
+      passed: null,
+      completedAt: new Date(),
+      details: { submissionId: submission.id, status: "SUBMITTED", totalQuestions: questions.length },
+    });
+    await notifyAssignedTeacherOfPendingWork({
+      studentId: user.id,
+      courseId: params.courseId!,
+      attemptId: submission.id,
+      lessonId: params.lessonId!,
+      kind: "TRANSLATION_SUBMISSION",
+      studentName: user.name ?? user.email,
+      sectionTitle: "Luyện dịch",
+      targetUrl: `/teacher?gradeTranslationId=${encodeURIComponent(submission.id)}`,
+    });
+    return { intent, success: true as const, submissionId: submission.id };
   }
 
   if (intent === "submit-grammar-attempt" && String(form.get("questionType") ?? "") === "FILL") {
@@ -1544,7 +1620,7 @@ function AnswerReviewDetails({ groups }: { groups: AnswerReviewGroup[] }) {
 }
 
 export default function LessonDetail() {
-  const { user, lesson, lessonNumber, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewGroups, reviewFocus, phonetics, phoneticsSectionScores, workbookSubmissions } = useLoaderData<typeof loader>();
+  const { user, lesson, lessonNumber, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewGroups, reviewFocus, phonetics, phoneticsSectionScores, workbookSubmissions, translationQuestions, latestTranslationSubmission } = useLoaderData<typeof loader>();
   const settings = useAppSettings();
   const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; lessonPinyin: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string; error?: string }>();
   const workbookFetcher = useFetcher<{
@@ -1583,16 +1659,19 @@ export default function LessonDetail() {
     phoneticsError?: string;
   }>();
   const progressFetcher = useFetcher();
+  const translationFetcher = useFetcher<{ intent?: string; success?: boolean; translationError?: string }>();
   const [activeTab, setActiveTab] = useState<LessonTab>(() => reviewFocus?.tab ?? "FLASHCARD");
   const hasGrammar = lesson.grammarSections.length > 0;
   const hasWorkbook = blocks.some((block) => block.type === "WORKBOOK");
   const hasPhonetics = phonetics !== null;
+  const hasTranslation = translationQuestions.length > 0;
 
   useEffect(() => {
     if (
       (activeTab === "GRAMMAR" && !hasGrammar)
       || (activeTab === "WORKBOOK" && !hasWorkbook)
       || (activeTab === "PHONETICS" && !hasPhonetics)
+      || (activeTab === "TRANSLATION" && !hasTranslation)
     ) {
       setActiveTab("FLASHCARD");
     }
@@ -1785,13 +1864,14 @@ export default function LessonDetail() {
   // Dạng bài có mặt trong bài này. Dùng để làm mờ tab của dạng bài chưa soạn —
   // block đã tạo nhưng chưa chọn nội dung vẫn tính là có, để học viên bấm vào
   // và thấy lời nhắn cụ thể thay vì tưởng dạng đó không tồn tại.
-  const availableTypes = new Set<LearningBlockTypeKey | "PHONETICS">(blocks.map((b) => b.type));
+  const availableTypes = new Set<LearningBlockTypeKey | "PHONETICS" | "TRANSLATION">(blocks.map((b) => b.type));
   // Từ vựng/Ngữ pháp hiện tab theo nội dung có sẵn, không qua LearningBlock —
   // khác với Flashcard/Nghe câu, admin cấu hình xong mới có block.
   if (lesson.content.length > 0) availableTypes.add("VOCABULARY");
   if (lesson.grammarSections.length > 0) availableTypes.add("GRAMMAR");
   // Ngữ âm đọc từ block riêng, không nằm trong `blocks`.
   if (hasPhonetics) availableTypes.add("PHONETICS");
+  if (hasTranslation) availableTypes.add("TRANSLATION");
 
   const isEmptyLesson =
     lesson.content.length === 0 &&
@@ -1874,6 +1954,17 @@ export default function LessonDetail() {
             />
           ))}
         </div>
+      );
+    }
+
+    if (activeTab === "TRANSLATION") {
+      return (
+        <TranslationPractice
+          questions={translationQuestions}
+          submission={latestTranslationSubmission}
+          error={translationFetcher.data?.translationError ?? null}
+          isSaving={translationFetcher.state !== "idle"}
+        />
       );
     }
 

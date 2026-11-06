@@ -97,28 +97,51 @@ function formatDate(value: string | Date) {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
-  const attempts = await prisma.lessonTabAttempt.findMany({
-    where: {
-      userId: user.id,
-      tab: { in: ["GRAMMAR", "WORKBOOK"] },
-    },
-    orderBy: { completedAt: "desc" },
-    select: {
-      id: true,
-      tab: true,
-      score: true,
-      completedAt: true,
-      details: true,
-      lesson: {
-        select: {
-          id: true,
-          order: true,
-          title: true,
-          course: { select: { id: true, code: true } },
+  const [attempts, translationSubmissions] = await Promise.all([
+    prisma.lessonTabAttempt.findMany({
+      where: {
+        userId: user.id,
+        tab: { in: ["GRAMMAR", "WORKBOOK"] },
+      },
+      orderBy: { completedAt: "desc" },
+      select: {
+        id: true,
+        tab: true,
+        score: true,
+        completedAt: true,
+        details: true,
+        lesson: {
+          select: {
+            id: true,
+            order: true,
+            title: true,
+            course: { select: { id: true, code: true } },
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.translationSubmission.findMany({
+      where: { studentId: user.id },
+      orderBy: { submittedAt: "desc" },
+      select: {
+        id: true,
+        answers: true,
+        status: true,
+        score: true,
+        maxScore: true,
+        submittedAt: true,
+        gradedAt: true,
+        lesson: {
+          select: {
+            id: true,
+            order: true,
+            title: true,
+            course: { select: { id: true, code: true } },
+          },
+        },
+      },
+    }),
+  ]);
 
   const assignments = attempts.flatMap((attempt) => {
     const status = getReviewStatus(attempt.details);
@@ -133,6 +156,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       lessonOrder: attempt.lesson.order,
       lessonTitle: attempt.lesson.title,
       score: attempt.score,
+      maxScore: null,
       questions: getReviewQuestions(attempt.tab, attempt.details, status),
       submittedAt: attempt.completedAt.toISOString(),
       gradedAt: status === "graded" && typeof teacherGrading?.gradedAt === "string"
@@ -141,8 +165,46 @@ export async function loader({ request }: LoaderFunctionArgs) {
       href: `/student/courses/${encodeURIComponent(attempt.lesson.course.id)}/lessons/${encodeURIComponent(attempt.lesson.id)}?reviewAttemptId=${encodeURIComponent(attempt.id)}`,
     }];
   });
+  const translationAssignments = translationSubmissions.map((submission) => {
+    const isGraded = submission.status === "GRADED";
+    const questions: ReviewQuestion[] = Array.isArray(submission.answers)
+      ? submission.answers.flatMap((item, index): ReviewQuestion[] => {
+          if (!isRecord(item)) return [];
+          return [{
+            id: typeof item.questionId === "string" ? item.questionId : `translation-${index + 1}`,
+            number: String(index + 1),
+            prompt: typeof item.prompt === "string" ? item.prompt : `Câu ${index + 1}`,
+            context: null,
+            translation: null,
+            studentAnswer: typeof item.answer === "string" ? item.answer : "",
+            correctAnswer: typeof item.sampleAnswer === "string" ? item.sampleAnswer : null,
+            teacherFeedback: typeof item.teacherComment === "string" && item.teacherComment.trim()
+              ? item.teacherComment.trim()
+              : null,
+            status: isGraded ? "graded" : "pending",
+          }];
+        })
+      : [];
 
-  return { user, assignments };
+    return {
+      id: submission.id,
+      status: isGraded ? "graded" as const : "pending" as const,
+      title: "Luyện dịch",
+      courseCode: submission.lesson.course.code,
+      lessonOrder: submission.lesson.order,
+      lessonTitle: submission.lesson.title,
+      score: submission.score,
+      maxScore: submission.maxScore,
+      questions,
+      submittedAt: submission.submittedAt.toISOString(),
+      gradedAt: submission.gradedAt?.toISOString() ?? null,
+      href: `/student/courses/${encodeURIComponent(submission.lesson.course.id)}/lessons/${encodeURIComponent(submission.lesson.id)}?tab=TRANSLATION`,
+    };
+  });
+
+  return { user, assignments: [...assignments, ...translationAssignments].sort((a, b) =>
+    new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+  ) };
 }
 
 export default function StudentAssignments() {
@@ -189,7 +251,7 @@ export default function StudentAssignments() {
             <div>
               <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Bài cần chấm</h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                Theo dõi bài Ngữ pháp và Sách bài tập cần giáo viên xem.
+                Theo dõi bài Ngữ pháp, Sách bài tập và Luyện dịch cần giáo viên xem.
               </p>
             </div>
           </div>
@@ -274,7 +336,9 @@ export default function StudentAssignments() {
                             </time></>}
                         {!isPending && assignment.score !== null && (
                           <span className="ml-2 font-semibold text-foreground">
-                            {new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(assignment.score)}%
+                            {assignment.maxScore !== null
+                              ? `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(assignment.score)} / ${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(assignment.maxScore)} điểm`
+                              : `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(assignment.score)}%`}
                           </span>
                         )}
                       </p>
@@ -296,7 +360,7 @@ export default function StudentAssignments() {
                 <Clock3 className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
                 <h2 className="mt-3 font-semibold">Không có bài nào đang chờ chấm</h2>
                 <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-                  Bài Ngữ pháp dạng điền câu và bài tập cần giáo viên xem sẽ xuất hiện ở đây sau khi bạn nộp.
+                  Bài Ngữ pháp, Sách bài tập hoặc Luyện dịch cần giáo viên xem sẽ xuất hiện ở đây sau khi bạn nộp.
                 </p>
               </>
             ) : (
@@ -356,7 +420,11 @@ export default function StudentAssignments() {
                 }`}>
                   {selectedAssignment.status === "pending"
                     ? "Đang chờ giáo viên chấm"
-                    : `Đã chấm${selectedAssignment.score === null ? "" : ` · ${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(selectedAssignment.score)}%`}`}
+                    : `Đã chấm${selectedAssignment.score === null
+                        ? ""
+                        : selectedAssignment.maxScore !== null
+                          ? ` · ${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(selectedAssignment.score)} / ${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(selectedAssignment.maxScore)} điểm`
+                          : ` · ${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(selectedAssignment.score)}%`}`}
                 </span>
               </div>
 

@@ -7,6 +7,7 @@ export const LESSON_TAB_KEYS = [
   "PHONETICS",
   "GRAMMAR",
   "WORKBOOK",
+  "TRANSLATION",
 ] as const;
 
 export type LessonTab = (typeof LESSON_TAB_KEYS)[number];

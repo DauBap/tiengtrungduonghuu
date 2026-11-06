@@ -379,6 +379,7 @@ export async function getStudentDashboardStats(userId: string, courseIds: string
       PHONETICS: lesson.phoneticsSections.length > 0,
       GRAMMAR: lesson._count.grammarSections > 0,
       WORKBOOK: lesson.learningBlocks.some((block) => block.type === "WORKBOOK"),
+      TRANSLATION: false,
     };
     const progressByTab = new Map(
       (progressByLesson.get(lessonId) ?? []).map((row) => [row.tab, row]),

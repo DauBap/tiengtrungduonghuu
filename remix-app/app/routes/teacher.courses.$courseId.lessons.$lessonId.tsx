@@ -23,6 +23,7 @@ const TAB_LABELS: Record<string, string> = {
   PHONETICS: "Ngữ âm",
   GRAMMAR: "Ngữ pháp",
   WORKBOOK: "Sách bài tập",
+  TRANSLATION: "Luyện dịch",
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -207,6 +208,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       PHONETICS: phoneticsSectionCount > 0,
       GRAMMAR: (lessonTabContent?._count.grammarSections ?? 0) > 0,
       WORKBOOK: learningBlocks.some((block) => block.type === "WORKBOOK"),
+      TRANSLATION: false,
     },
   };
 }
