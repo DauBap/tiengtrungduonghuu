@@ -20,7 +20,7 @@ interface LessonTabsProps {
 
 export function LessonTabs({ activeTab, onTabChange, availableTypes, hasQuiz }: LessonTabsProps) {
   const baseTab = "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap";
-  const ordered = ["FLASHCARD", "LISTENING", "VOCABULARY", "LESSON", "PHONETICS", "TEST", "GRAMMAR", "WORKBOOK", "TRANSLATION"] as const;
+  const ordered = ["FLASHCARD", "LISTENING", "VOCABULARY", "LESSON", "PHONETICS", "TEST", "GRAMMAR", "TRANSLATION", "WORKBOOK"] as const;
 
   return (
     <div className="border-b border-border">
