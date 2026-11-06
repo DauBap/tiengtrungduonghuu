@@ -12,7 +12,7 @@ import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
-import { ArrowLeft, BookOpen, Layers, FileCheck2, Search, X } from "lucide-react";
+import { ArrowLeft, BookOpen, Layers, FileCheck2, ListChecks, Search, X } from "lucide-react";
 import type { ProgressStatus } from "~/types/progress";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
 import {
@@ -198,6 +198,8 @@ export default function StudentCourseDetail() {
   const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([]);
   const [lessonSearchQuery, setLessonSearchQuery] = useState("");
   useModalScrollLock(showCombinedStudy);
+  const allLessonsSelected = lessonsWithStatus.length > 0
+    && lessonsWithStatus.every((lesson) => selectedLessonIds.includes(lesson.id));
 
   const orderedCourseItems = [
     ...lessonsWithStatus.map((lesson) => ({
@@ -374,11 +376,28 @@ export default function StudentCourseDetail() {
                     </Button>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground" aria-live="polite">
-                  {lessonSearchQuery.trim()
-                    ? `Tìm thấy ${filteredLessons.length}/${lessonsWithStatus.length} bài học`
-                    : `${lessonsWithStatus.length} bài học trong khóa`}
-                </p>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm text-muted-foreground" aria-live="polite">
+                    {lessonSearchQuery.trim()
+                      ? `Tìm thấy ${filteredLessons.length}/${lessonsWithStatus.length} bài học`
+                      : `${lessonsWithStatus.length} bài học trong khóa`}
+                  </p>
+                  {lessonsWithStatus.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      aria-pressed={allLessonsSelected}
+                      onClick={() => setSelectedLessonIds(allLessonsSelected
+                        ? []
+                        : lessonsWithStatus.map((lesson) => lesson.id))}
+                      className="h-9 gap-1.5 border-primary/30 bg-primary/5 px-3 font-medium text-primary shadow-sm hover:bg-primary/10 hover:text-primary"
+                    >
+                      <ListChecks aria-hidden="true" className="h-4 w-4" />
+                      {allLessonsSelected ? "Bỏ chọn tất cả" : "Chọn tất cả"}
+                    </Button>
+                  )}
+                </div>
               </div>
               <div className="max-h-[45vh] space-y-1 overflow-y-auto p-3">
                 {filteredLessons.length === 0 ? (
