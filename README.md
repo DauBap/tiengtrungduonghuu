@@ -58,17 +58,11 @@ GitHub Actions kiểm tra `https://tiengtrungduonghuu.edu.vn/` mỗi 5 phút và
 
 ## Tự động deploy production
 
-Workflow `.github/workflows/deploy-production.yml` chạy khi push lên `main` hoặc khi được chạy thủ công trong **Actions**. Workflow kết nối Tailscale, SSH vào Ubuntu, cập nhật code theo kiểu fast-forward, cài dependencies, generate Prisma Client, build rồi restart `tiengtrungduonghuu.service`; kết quả deploy được gửi qua Telegram.
+Ubuntu dùng user systemd timer `tiengtrung-auto-pull-build.timer` để kiểm tra và triển khai nhánh `main` bằng script `/home/baotn/.local/bin/tiengtrung-auto-pull-build`. Script chỉ fast-forward khi working tree sạch, cài lại dependencies khi manifest thay đổi, generate Prisma Client, chạy migration, build rồi mới restart `tiengtrungduonghuu.service`; kết quả được gửi qua Telegram.
 
-Trước khi bật workflow:
+Migration production được quản lý bằng các file SQL có phiên bản trong `remix-app/prisma/deploy-migrations/`. Khi có migration chưa áp dụng, deploy gọi script backup PostgreSQL hiện có trước; sau đó áp dụng từng migration trong transaction và ghi checksum vào bảng `_AppSchemaMigration`. Nếu backup, migration hoặc build thất bại, deploy dừng trước khi restart app. Không tự chạy `prisma db push` trên production. Các file lịch sử trong `prisma/migrations/` không thuộc runner này.
 
-1. Tạo Tailscale OAuth client với scope `auth_keys`, cho phép tag `tag:github-actions`, và cấu hình Tailnet policy để tag đó được SSH tới máy Ubuntu `100.98.11.60:22`.
-2. Tạo SSH key riêng cho deploy, thêm public key vào `/home/baotn/.ssh/authorized_keys`; lưu private key thành GitHub Actions secret `PRODUCTION_SSH_KEY`.
-3. Xác minh SSH host key của Ubuntu qua Tailscale rồi lưu dòng `known_hosts` tương ứng thành secret `PRODUCTION_SSH_KNOWN_HOSTS`.
-4. Tạo các repository secrets `TS_OAUTH_CLIENT_ID` và `TS_OAUTH_SECRET` từ OAuth client. Hai secrets `TELEGRAM_BOT_TOKEN` và `TELEGRAM_CHAT_ID` được dùng chung với workflow uptime.
-5. Cho phép user `baotn` restart và kiểm tra riêng service ứng dụng không cần nhập mật khẩu sudo; workflow dùng `sudo -n` và sẽ báo lỗi nếu chưa được cấp quyền.
-
-Workflow chỉ deploy code, **không chạy `prisma db push`**. Thay đổi schema cần được backup, xem xét cảnh báo và đồng bộ production theo quy trình riêng trước khi restart app.
+Mỗi thay đổi schema cần thêm một migration mới, có thể chạy `npm run db:migrate:deploy -- --dry-run` trong `remix-app/` để xem migration nào đang chờ. Không chỉnh sửa migration đã áp dụng; hãy tạo migration mới. Migration có thao tác phá hủy dữ liệu vẫn cần được thiết kế và duyệt rõ ràng, không nên tự động thêm vào.
 
 Workflow lưu trạng thái lần kiểm tra trước trong GitHub Actions cache để chỉ gửi tin khi trạng thái thay đổi; không cần token GitHub bổ sung hay quyền ghi repository. Cảnh báo được phát hiện trong tối đa khoảng 5 phút cộng thời gian GitHub Actions khởi chạy; lịch chạy GitHub có thể trễ khi hệ thống bận. Nếu app không có URL công khai thì cần một thiết bị giám sát khác bên ngoài server.
 

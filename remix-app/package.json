@@ -6,6 +6,7 @@
     "build": "react-router build",
     "blob:export": "tsx prisma/export-vercel-blob.ts",
     "blob:migrate-urls": "tsx prisma/migrate-vercel-blob-urls.ts",
+    "db:migrate:deploy": "node scripts/deploy-schema-migrations.mjs",
     "db:migrate:mock-exams": "tsx prisma/migrate-mock-exams.ts",
     "db:migrate:phonetics": "tsx prisma/migrate-phonetics-to-relational.ts",
     "audio:blob:test": "node scripts/audio-blob-test.mjs",
