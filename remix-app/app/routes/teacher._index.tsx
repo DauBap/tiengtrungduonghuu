@@ -43,7 +43,6 @@ import {
 import { aggregatePhoneticsSections, getBestPhoneticsSectionAttempts, type PhoneticsReviewResult } from "~/lib/phonetics";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
-import { Badge } from "~/components/ui/badge";
 import { Input } from "~/components/ui/input";
 import type { loader as courseItemProgressLoader } from "./teacher.courses.$courseId.progress.$type.$itemId";
 import type { loader as mockExamAttemptLoader } from "./teacher.courses.$courseId.progress.mock-exams.$itemId.students.$studentId.attempts.$attemptId";
@@ -994,6 +993,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
       suggestedLessonId: latestProgress?.lessonId ?? lessons[0]?.id ?? null,
       overallPercent,
       pendingGrammarAttempts,
+      pendingTranslationSubmissions: translationSubmissions.filter((submission) =>
+        submission.status === "SUBMITTED"
+        && submission.lesson.courseId === cls.courseId
+        && cls.enrollments.some((enrollment) => enrollment.userId === submission.student.id)
+      ),
       studentSummary,
       activityData,
     };
@@ -1589,38 +1593,6 @@ export default function TeacherIndex() {
           <StatCard label="Tổng bài học" value={totalLessons} icon={TrendingUp} accent="warning" />
         </div>
 
-        {translationSubmissions.length > 0 && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="font-semibold">Luyện dịch</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">Bài nộp của học viên trong các lớp đang phụ trách.</p>
-                </div>
-                <Badge variant="secondary">{translationSubmissions.filter((item) => item.status === "SUBMITTED").length} bài chờ chấm</Badge>
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {translationSubmissions.slice(0, 8).map((submission) => (
-                  <button
-                    key={submission.id}
-                    type="button"
-                    onClick={() => setSelectedTranslationSubmissionId(submission.id)}
-                    className="flex items-center justify-between gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/50"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">{submission.student.name ?? submission.student.email}</p>
-                      <p className="mt-1 truncate text-xs text-muted-foreground">{submission.lesson.title} · {submission.lesson.course.title}</p>
-                    </div>
-                    <Badge variant={submission.status === "GRADED" ? "outline" : "secondary"}>
-                      {submission.status === "GRADED" ? `${submission.score ?? 0}/${submission.maxScore}` : "Chờ chấm"}
-                    </Badge>
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {upcomingClasses.length > 0 && (
           <Card>
             <CardContent className="pt-6 sm:pt-6">
@@ -1662,6 +1634,7 @@ export default function TeacherIndex() {
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {classSummaries.map((cls) => {
                   const selected = cls.id === selectedClass?.id;
+                  const pendingCount = cls.pendingGrammarAttempts.length + cls.pendingTranslationSubmissions.length;
                   return (
                     <div
                       key={cls.id}
@@ -1692,9 +1665,10 @@ export default function TeacherIndex() {
                       </button>
                       <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span>{cls.enrollments.length} học viên · {cls.lessons.length} bài học</span>
-                        {cls.pendingGrammarAttempts.length > 0 && (
+                        {pendingCount > 0 && (
                           <button
                             type="button"
+                            aria-label={`Cần chấm ${pendingCount} bài của lớp ${cls.name}`}
                             onClick={() => {
                               setPendingGrammarClassId(cls.id);
                               setGradingQueue(cls.pendingGrammarAttempts.map((attempt) => ({ courseId: cls.courseId, attempt })));
@@ -1704,7 +1678,7 @@ export default function TeacherIndex() {
                             className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-primary bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                           >
                             <ClipboardList className="h-3.5 w-3.5" aria-hidden="true" />
-                            Cần chấm {cls.pendingGrammarAttempts.length} bài
+                            Cần chấm {pendingCount} bài
                           </button>
                         )}
                       </div>
@@ -2435,7 +2409,10 @@ export default function TeacherIndex() {
           </Card>
         )}
 
-        {pendingGrammarClass && pendingGrammarClass.pendingGrammarAttempts.length > 0 && !gradingAttemptId && !gradingComplete && (
+        {pendingGrammarClass
+          && (pendingGrammarClass.pendingGrammarAttempts.length > 0 || pendingGrammarClass.pendingTranslationSubmissions.length > 0)
+          && !gradingAttemptId
+          && !gradingComplete && (
           <div
             className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
             role="presentation"
@@ -2443,17 +2420,17 @@ export default function TeacherIndex() {
             <section
               role="dialog"
               aria-modal="true"
-              aria-labelledby="pending-grammar-title"
+              aria-labelledby="pending-grading-title"
               className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
             >
               <div className="flex items-start justify-between gap-3 border-b p-4 sm:p-5">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <ClipboardList className="h-4 w-4 shrink-0 text-amber-600" />
-                    <h2 id="pending-grammar-title" className="font-semibold">Bài ngữ pháp chờ chấm</h2>
+                    <h2 id="pending-grading-title" className="font-semibold">Bài cần chấm</h2>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {pendingGrammarClass.pendingGrammarAttempts.length} bài · {pendingGrammarClass.name}
+                    {pendingGrammarClass.pendingGrammarAttempts.length + pendingGrammarClass.pendingTranslationSubmissions.length} bài · {pendingGrammarClass.name}
                   </p>
                 </div>
                 <button
@@ -2469,6 +2446,11 @@ export default function TeacherIndex() {
                 </button>
               </div>
               <ul className="divide-y overflow-y-auto p-4 sm:p-5">
+                {pendingGrammarClass.pendingGrammarAttempts.length > 0 && (
+                  <li className="px-3 pb-2 pt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Ngữ pháp · {pendingGrammarClass.pendingGrammarAttempts.length}
+                  </li>
+                )}
                 {pendingGrammarClass.pendingGrammarAttempts.map((attempt) => (
                   <li key={attempt.id}>
                     <button
@@ -2484,6 +2466,32 @@ export default function TeacherIndex() {
                       className="group flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <span className="min-w-0 flex-1 break-words font-medium">{attempt.studentName} · {attempt.lessonTitle} · {attempt.sectionTitle}</span>
+                      <span className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-md border border-primary px-3 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                        Chấm bài <ArrowUpRight className="h-3.5 w-3.5" />
+                      </span>
+                    </button>
+                  </li>
+                ))}
+                {pendingGrammarClass.pendingTranslationSubmissions.length > 0 && (
+                  <li className="px-3 pb-2 pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Luyện dịch · {pendingGrammarClass.pendingTranslationSubmissions.length}
+                  </li>
+                )}
+                {pendingGrammarClass.pendingTranslationSubmissions.map((submission) => (
+                  <li key={submission.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPendingGrammarClassId(null);
+                        setGradingQueueIndex(null);
+                        setSelectedClassId(pendingGrammarClass.id);
+                        setSelectedTranslationSubmissionId(submission.id);
+                      }}
+                      className="group flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <span className="min-w-0 flex-1 break-words font-medium">
+                        {submission.student.name ?? submission.student.email} · {submission.lesson.title}
+                      </span>
                       <span className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-md border border-primary px-3 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                         Chấm bài <ArrowUpRight className="h-3.5 w-3.5" />
                       </span>
