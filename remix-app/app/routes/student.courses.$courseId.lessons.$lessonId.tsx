@@ -58,6 +58,9 @@ import {
 } from "~/lib/pronunciation";
 import { gradePhoneticsSection, type PhoneticsAnswer } from "~/lib/phonetics";
 import { getListeningGrade } from "~/lib/listening-score";
+
+const LESSON_AUDIO_PLAYBACK_RATES = [0.8, 1, 1.5] as const;
+type LessonAudioPlaybackRate = (typeof LESSON_AUDIO_PLAYBACK_RATES)[number];
 import { getVocabularyAudioUrl } from "~/lib/vocabulary-audio";
 import { notifyAssignedTeacherOfPendingWork } from "~/lib/grading-notifications.server";
 
@@ -1670,6 +1673,8 @@ export default function LessonDetail() {
   const progressFetcher = useFetcher();
   const translationFetcher = useFetcher<{ intent?: string; success?: boolean; translationError?: string }>();
   const [activeTab, setActiveTab] = useState<LessonTab>(() => reviewFocus?.tab ?? "FLASHCARD");
+  const [lessonAudioPlaybackRate, setLessonAudioPlaybackRate] = useState<LessonAudioPlaybackRate>(1);
+  const lessonAudioRef = useRef<HTMLAudioElement>(null);
   const [tabProgressStates, setTabProgressStates] = useState(
     () => toProgressStateByTab(lessonTabProgress),
   );
@@ -1692,6 +1697,12 @@ export default function LessonDetail() {
   useEffect(() => {
     setTabProgressStates(toProgressStateByTab(lessonTabProgress));
   }, [lessonTabProgress]);
+
+  useEffect(() => {
+    if (lessonAudioRef.current) {
+      lessonAudioRef.current.playbackRate = lessonAudioPlaybackRate;
+    }
+  }, [lessonAudioPlaybackRate]);
 
   const feedbackTab = activeTab === "TEST" ? "VOCABULARY_TEST" : activeTab;
   const activeTabComment = feedbackTab === "FLASHCARD" || feedbackTab === "VOCABULARY"
@@ -2664,10 +2675,14 @@ export default function LessonDetail() {
                     {selectedAudioScript.audioUrl ? (
                       <audio
                         key={selectedAudioScript.id}
+                        ref={lessonAudioRef}
                         controls
                         loop={autoReplayLessonAudio}
                         className="min-w-0 flex-1"
                         src={selectedAudioScript.audioUrl}
+                        onLoadedMetadata={(event) => {
+                          event.currentTarget.playbackRate = lessonAudioPlaybackRate;
+                        }}
                       >
                         <source src={selectedAudioScript.audioUrl} />
                       </audio>
@@ -2696,6 +2711,31 @@ export default function LessonDetail() {
                       </Button>
                     )}
                   </div>
+                  {selectedAudioScript.audioUrl && (
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
+                      <span className="text-xs font-medium text-muted-foreground">Tốc độ phát</span>
+                      <div className="inline-flex overflow-hidden rounded-md border" role="group" aria-label="Tốc độ phát">
+                        {LESSON_AUDIO_PLAYBACK_RATES.map((rate) => (
+                          <Button
+                            key={rate}
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            aria-pressed={lessonAudioPlaybackRate === rate}
+                            onClick={() => setLessonAudioPlaybackRate(rate)}
+                            className={cn(
+                              "h-8 rounded-none px-3 text-xs",
+                              lessonAudioPlaybackRate === rate
+                                ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+                                : "text-muted-foreground",
+                            )}
+                          >
+                            {rate.toLocaleString("vi-VN")}×
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="mt-4 border-t pt-4">
                     <Button
                       type="button"
