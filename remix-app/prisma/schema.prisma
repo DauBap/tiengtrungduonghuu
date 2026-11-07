@@ -39,6 +39,7 @@ model User {
   courseStudySessions                CourseStudySession[]
   pronunciationAssessments           PronunciationAssessment[]
   courseReviewAttempts               CourseReviewAttempt[]
+  gradedCourseReviewAttempts         CourseReviewAttempt[]        @relation("CourseReviewGradedBy")
   lessonTabProgresses                LessonTabProgress[]
   lessonTabAttempts                  LessonTabAttempt[]
   lessonTabFeedback                  LessonTabFeedback[]          @relation("TeacherTabFeedback")
@@ -95,6 +96,12 @@ enum ReviewQuestionType {
   REORDER
 }
 
+enum CourseReviewAttemptStatus {
+  SUBMITTED
+  GRADED
+  RETURNED
+}
+
 model CourseReviewSet {
   id        String   @id @default(cuid())
   courseId  String
@@ -130,19 +137,26 @@ model CourseReviewQuestion {
 }
 
 model CourseReviewAttempt {
-  id             String   @id @default(cuid())
+  id             String                    @id @default(cuid())
   reviewSetId    String
   userId         String
   answers        Json
   totalQuestions Int
   correctCount   Int
   percentage     Int
-  completedAt    DateTime @default(now())
+  status         CourseReviewAttemptStatus @default(RETURNED)
+  grades         Json                      @default("[]")
+  teacherId      String?
+  gradedAt       DateTime?
+  returnedAt     DateTime?
+  completedAt    DateTime                  @default(now())
 
   reviewSet CourseReviewSet @relation(fields: [reviewSetId], references: [id], onDelete: Cascade)
   user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gradedBy  User?           @relation("CourseReviewGradedBy", fields: [teacherId], references: [id], onDelete: SetNull)
 
   @@index([reviewSetId, userId, completedAt])
+  @@index([reviewSetId, status, completedAt])
   @@index([userId, completedAt])
 }
 

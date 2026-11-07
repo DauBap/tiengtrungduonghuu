@@ -149,6 +149,8 @@ remix-app/
 - **Migration**: dự án không có migration history, dùng `prisma db push`. `migrate dev` sẽ yêu cầu reset DB.
   Khi cập nhật phiên bản có thay đổi `prisma/schema.prisma`, hãy chạy `npx prisma db push` trong `remix-app/`
   để tạo/cập nhật bảng trước khi khởi động ứng dụng.
+  Quy trình giáo viên chấm Ôn tập cần các field trạng thái/chấm điểm mới của `CourseReviewAttempt`;
+  sao lưu và đồng bộ schema này trước khi triển khai phiên bản có workflow chấm/trả kết quả.
   Trạng thái lớp đã kết thúc được lưu ở `Class.completedAt`; đồng bộ schema trước khi triển khai thay đổi này.
   Kết quả cuối khóa (`ClassFinalResult`), URL bản ghi buổi học (`AttendanceSession.recordingUrl`) và liên kết
   buổi học với bài trong khóa (`AttendanceSession.lessonId`) cũng cần được đồng bộ schema. Backup database

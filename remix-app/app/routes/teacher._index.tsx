@@ -20,6 +20,7 @@ import {
   Loader2,
   MessageCircle,
   TrendingUp,
+  TriangleAlert,
   Users,
   X,
   XCircle,
@@ -44,7 +45,7 @@ import { aggregatePhoneticsSections, getBestPhoneticsSectionAttempts, type Phone
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { Input } from "~/components/ui/input";
-import type { loader as courseItemProgressLoader } from "./teacher.courses.$courseId.progress.$type.$itemId";
+import type { action as courseItemProgressAction, loader as courseItemProgressLoader } from "./teacher.courses.$courseId.progress.$type.$itemId";
 import type { loader as mockExamAttemptLoader } from "./teacher.courses.$courseId.progress.mock-exams.$itemId.students.$studentId.attempts.$attemptId";
 
 const DASHBOARD_ACTIVITIES = [
@@ -447,6 +448,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
               userId: true,
               reviewSetId: true,
               percentage: true,
+              status: true,
               completedAt: true,
             },
             orderBy: { completedAt: "desc" },
@@ -914,7 +916,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
           const attempts = reviewAttemptsByKey.get(key) ?? [];
           return {
             id: review.id,
-            percentage: attempt?.percentage ?? 0,
+            percentage: attempt?.status === "RETURNED" ? attempt.percentage : null,
+            status: attempt?.status ?? null,
             hasAttempt: Boolean(attempt),
             attemptCount: attempts.length,
             lastAttemptAt: attempt?.completedAt.toISOString() ?? null,
@@ -1002,6 +1005,70 @@ export async function loader({ request }: LoaderFunctionArgs) {
       activityData,
     };
   }));
+  const pendingReviewAttempts = assignedCourseIds.length > 0 && assignedStudentIds.length > 0
+    ? await prisma.courseReviewAttempt.findMany({
+        where: {
+          status: { in: ["SUBMITTED", "GRADED"] },
+          userId: { in: assignedStudentIds },
+          reviewSet: { courseId: { in: assignedCourseIds } },
+        },
+        orderBy: { completedAt: "asc" },
+        select: {
+          id: true,
+          status: true,
+          completedAt: true,
+          answers: true,
+          grades: true,
+          reviewSet: {
+            select: {
+              id: true,
+              title: true,
+              courseId: true,
+              questions: {
+                orderBy: [{ order: "asc" }, { id: "asc" }],
+                select: { id: true, prompt: true, answer: true },
+              },
+            },
+          },
+          user: { select: { id: true, name: true, email: true } },
+        },
+      })
+    : [];
+  const pendingReviews = pendingReviewAttempts.flatMap((attempt) => {
+    const assignedClass = myClasses.find((cls) =>
+      cls.courseId === attempt.reviewSet.courseId
+      && cls.enrollments.some((enrollment) => enrollment.userId === attempt.user.id)
+    );
+    return assignedClass
+      ? [{
+          id: attempt.id,
+          status: attempt.status,
+          completedAt: attempt.completedAt.toISOString(),
+          classId: assignedClass.id,
+          className: assignedClass.name,
+          courseId: attempt.reviewSet.courseId,
+          reviewSetId: attempt.reviewSet.id,
+          reviewSetTitle: attempt.reviewSet.title,
+          studentName: attempt.user.name ?? attempt.user.email,
+          questions: attempt.reviewSet.questions.map((question) => {
+            const submittedAnswers = isRecord(attempt.answers) ? attempt.answers : {};
+            const submittedAnswer = submittedAnswers[question.id];
+            const answer = typeof submittedAnswer === "string" ? submittedAnswer : "";
+            const savedGrade = Array.isArray(attempt.grades)
+              ? attempt.grades.find((grade) => isRecord(grade) && grade.questionId === question.id)
+              : null;
+            return {
+              id: question.id,
+              prompt: question.prompt,
+              answer,
+              correctAnswer: question.answer,
+              correct: isRecord(savedGrade) && typeof savedGrade.correct === "boolean" ? savedGrade.correct : null,
+              feedback: isRecord(savedGrade) && typeof savedGrade.feedback === "string" ? savedGrade.feedback : "",
+            };
+          }),
+        }]
+      : [];
+  });
   const requestedGrammarAttempt = initialGradeAttemptId
     ? await prisma.lessonTabAttempt.findFirst({
         where: {
@@ -1060,6 +1127,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     myCourses,
     myClasses,
     classSummaries,
+    pendingReviews,
     totalLessons,
     totalStudents,
     initialGradeAttemptId,
@@ -1192,11 +1260,12 @@ function lessonProgressTone(percent: number) {
 }
 
 export default function TeacherIndex() {
-  const { user, myCourses, myClasses, classSummaries, totalLessons, totalStudents, initialGradeAttemptId, initialGrammarAttempt, initialWorkbookAttemptId, initialWorkbookTargetUrl, initialTranslationSubmissionId, initialTranslationSubmission, translationSubmissions } = useLoaderData<typeof loader>();
+  const { user, myCourses, myClasses, classSummaries, pendingReviews, totalLessons, totalStudents, initialGradeAttemptId, initialGrammarAttempt, initialWorkbookAttemptId, initialWorkbookTargetUrl, initialTranslationSubmissionId, initialTranslationSubmission, translationSubmissions } = useLoaderData<typeof loader>();
   const location = useLocation();
   const navigate = useNavigate();
   const gradingFetcher = useFetcher<GrammarAttemptData & { success?: boolean }>();
   const reviewProgressFetcher = useFetcher<typeof courseItemProgressLoader>();
+  const reviewGradingFetcher = useFetcher<typeof courseItemProgressAction>();
   const mockExamAttemptFetcher = useFetcher<typeof mockExamAttemptLoader>();
   const gradeSubmitFetcher = useFetcher<{ success?: boolean; attemptId?: string; error?: string }>();
   const workbookGradingFetcher = useFetcher<WorkbookGradingData>();
@@ -1215,6 +1284,9 @@ export default function TeacherIndex() {
   const [selectedLessonReview, setSelectedLessonReview] = useState<LessonReviewDialogState | null>(null);
   const [selectedLessonScriptId, setSelectedLessonScriptId] = useState<string | null>(null);
   const [pendingGrammarClassId, setPendingGrammarClassId] = useState<string | null>(null);
+  const [pendingReviewClassId, setPendingReviewClassId] = useState<string | null>(null);
+  const [showUnsavedReviewConfirmation, setShowUnsavedReviewConfirmation] = useState(false);
+  const [dirtyReviewAttemptIds, setDirtyReviewAttemptIds] = useState<Set<string>>(() => new Set());
   const [pendingGradingTab, setPendingGradingTab] = useState<"grammar" | "translation">("grammar");
   const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
   const [workbookGradingAttemptId, setWorkbookGradingAttemptId] = useState<string | null>(null);
@@ -1231,6 +1303,45 @@ export default function TeacherIndex() {
   const handledInitialTranslationNavigationKey = useRef<string | null>(null);
   const selectedClass = classSummaries.find((cls) => cls.id === selectedClassId) ?? classSummaries[0];
   const pendingGrammarClass = classSummaries.find((cls) => cls.id === pendingGrammarClassId);
+  const pendingReviewClass = myClasses.find((cls) => cls.id === pendingReviewClassId);
+  const pendingClassReviews = pendingReviews.filter((attempt) => attempt.classId === pendingReviewClassId);
+  const closePendingReviewModalAndDiscard = () => {
+    setShowUnsavedReviewConfirmation(false);
+    setPendingReviewClassId(null);
+    setDirtyReviewAttemptIds((current) => {
+      const next = new Set(current);
+      for (const attempt of pendingClassReviews) next.delete(attempt.id);
+      return next;
+    });
+  };
+  const closePendingReviewModal = () => {
+    const hasUnsavedChanges = pendingClassReviews.some((attempt) => dirtyReviewAttemptIds.has(attempt.id));
+    if (hasUnsavedChanges) {
+      setShowUnsavedReviewConfirmation(true);
+      return false;
+    }
+    closePendingReviewModalAndDiscard();
+    return true;
+  };
+  const markReviewAttemptDirty = (attemptId: string) => {
+    setDirtyReviewAttemptIds((current) => new Set(current).add(attemptId));
+  };
+  useEffect(() => {
+    const result = reviewGradingFetcher.data;
+    if (
+      reviewGradingFetcher.state !== "idle"
+      || !result?.success
+      || !("attemptId" in result)
+      || !result.attemptId
+    ) return;
+    const attemptId = result.attemptId;
+    setDirtyReviewAttemptIds((current) => {
+      if (!current.has(attemptId)) return current;
+      const next = new Set(current);
+      next.delete(attemptId);
+      return next;
+    });
+  }, [reviewGradingFetcher.data, reviewGradingFetcher.state]);
   const pendingGradingTabs = pendingGrammarClass
     ? [
         { id: "grammar" as const, label: "Ngữ pháp", count: pendingGrammarClass.pendingGrammarAttempts.length },
@@ -1357,6 +1468,7 @@ export default function TeacherIndex() {
     || selectedMockExamProgress
     || selectedLessonReview
     || pendingGrammarClass
+    || pendingReviewClass
     || gradingAttemptId
     || workbookGradingAttemptId
     || selectedTranslationSubmissionId
@@ -1376,14 +1488,20 @@ export default function TeacherIndex() {
   }, [location.key]);
 
   useEffect(() => {
-    if (!selectedStudentId && !selectedActivityReview && !selectedReviewProgress && !selectedMockExamProgress && !selectedLessonReview && !pendingGrammarClassId && !gradingAttemptId && !workbookGradingAttemptId && !selectedTranslationSubmissionId && !gradingComplete) return;
+    if (!selectedStudentId && !selectedActivityReview && !selectedReviewProgress && !selectedMockExamProgress && !selectedLessonReview && !pendingGrammarClassId && !pendingReviewClassId && !gradingAttemptId && !workbookGradingAttemptId && !selectedTranslationSubmissionId && !gradingComplete) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (
         event.key === "Escape"
         && gradeSubmitFetcher.state !== "submitting"
         && workbookGradeSubmitFetcher.state !== "submitting"
         && TranslationGradeFetcher.state !== "submitting"
+        && reviewGradingFetcher.state === "idle"
       ) {
+        if (showUnsavedReviewConfirmation) {
+          setShowUnsavedReviewConfirmation(false);
+          return;
+        }
+        if (pendingReviewClassId && !closePendingReviewModal()) return;
         setSelectedStudentId(null);
         setSelectedActivityReview(null);
         setSelectedReviewProgress(null);
@@ -1399,7 +1517,7 @@ export default function TeacherIndex() {
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [selectedStudentId, selectedActivityReview, selectedReviewProgress, selectedMockExamProgress, selectedLessonReview, pendingGrammarClassId, gradingAttemptId, workbookGradingAttemptId, selectedTranslationSubmissionId, gradingComplete, gradeSubmitFetcher.state, workbookGradeSubmitFetcher.state, TranslationGradeFetcher.state]);
+  }, [selectedStudentId, selectedActivityReview, selectedReviewProgress, selectedMockExamProgress, selectedLessonReview, pendingGrammarClassId, pendingReviewClassId, gradingAttemptId, workbookGradingAttemptId, selectedTranslationSubmissionId, gradingComplete, showUnsavedReviewConfirmation, gradeSubmitFetcher.state, workbookGradeSubmitFetcher.state, TranslationGradeFetcher.state, reviewGradingFetcher.state, closePendingReviewModal]);
 
   const gradingData = gradingFetcher.data?.attempt ? gradingFetcher.data : null;
   useEffect(() => {
@@ -1645,6 +1763,7 @@ export default function TeacherIndex() {
                 {classSummaries.map((cls) => {
                   const selected = cls.id === selectedClass?.id;
                   const pendingCount = cls.pendingGrammarAttempts.length + cls.pendingTranslationSubmissions.length;
+                  const classPendingReviews = pendingReviews.filter((attempt) => attempt.classId === cls.id);
                   return (
                     <div
                       key={cls.id}
@@ -1675,24 +1794,47 @@ export default function TeacherIndex() {
                       </button>
                       <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span>{cls.enrollments.length} học viên · {cls.lessons.length} bài học</span>
-                        {pendingCount > 0 && (
-                          <button
-                            type="button"
-                            aria-label={`Cần chấm ${pendingCount} bài của lớp ${cls.name}`}
-                            onClick={() => {
-                              setPendingGrammarClassId(cls.id);
-                              setPendingGradingTab(cls.pendingGrammarAttempts.length > 0 ? "grammar" : "translation");
-                              setGradingQueue(cls.pendingGrammarAttempts.map((attempt) => ({ courseId: cls.courseId, attempt })));
-                              setGradingQueueIndex(null);
-                              setGradingComplete(false);
-                            }}
-                            className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-primary bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                          >
-                            <ClipboardList className="h-3.5 w-3.5" aria-hidden="true" />
-                            Cần chấm {pendingCount} bài
-                          </button>
-                        )}
                       </div>
+                      {(pendingCount > 0 || classPendingReviews.length > 0) && (
+                        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] items-center gap-x-3 gap-y-2 border-t pt-3">
+                            {pendingCount > 0 && (
+                              <>
+                                <span className="text-left text-base font-medium">Bài tập</span>
+                                <Button
+                                  type="button"
+                                  aria-label={`Cần chấm ${pendingCount} bài của lớp ${cls.name}`}
+                                  onClick={() => {
+                                    setPendingGrammarClassId(cls.id);
+                                    setPendingGradingTab(cls.pendingGrammarAttempts.length > 0 ? "grammar" : "translation");
+                                    setGradingQueue(cls.pendingGrammarAttempts.map((attempt) => ({ courseId: cls.courseId, attempt })));
+                                    setGradingQueueIndex(null);
+                                    setGradingComplete(false);
+                                  }}
+                                  className="h-10 w-full px-3 text-xs"
+                                >
+                                  <ClipboardList className="mr-1.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                  <span className="truncate">Cần chấm {pendingCount} bài</span>
+                                </Button>
+                              </>
+                            )}
+                            {classPendingReviews.length > 0 && (
+                              <>
+                                <span className="text-left text-base font-medium">Ôn tập</span>
+                                <Button
+                                  type="button"
+                                  aria-label={`Cần chấm ${classPendingReviews.length} bài ôn tập của lớp ${cls.name}`}
+                                  onClick={() => setPendingReviewClassId(cls.id)}
+                                  className="h-10 w-full px-3 text-xs"
+                                >
+                                  <>
+                                    <ClipboardList className="mr-1.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                    <span className="truncate">Cần chấm {classPendingReviews.length} bài</span>
+                                  </>
+                                </Button>
+                              </>
+                            )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -1778,8 +1920,8 @@ export default function TeacherIndex() {
                             {sortedActivityData.map((student) => {
                               const lessonScores = student.lessons.map((lesson) => getLessonProgress(lesson.activities));
                               const reviewScores = student.reviews.map((review) => ({
-                                percent: review.percentage,
-                                total: selectedClass.courseItems.some((item) => item.kind === "review" && item.id === review.id && item.questionCount > 0) ? 1 : 0,
+                                percent: review.percentage ?? 0,
+                                total: review.percentage !== null && selectedClass.courseItems.some((item) => item.kind === "review" && item.id === review.id && item.questionCount > 0) ? 1 : 0,
                               }));
                               const mockExamScores = student.mockExams.map((exam) => ({
                                 percent: exam.latest?.percentage ?? 0,
@@ -1814,10 +1956,16 @@ export default function TeacherIndex() {
                                               aria-haspopup="dialog"
                                               aria-label={`Xem các lượt làm ${item.label} của ${student.student.name ?? student.student.email}`}
                                               onClick={() => openReviewProgress(item, student.student)}
-                                              title={`${item.label}: ${review?.percentage ?? 0}%`}
+                                              title={`${item.label}: ${review?.status === "RETURNED" ? `${review.percentage}%` : review?.status === "GRADED" ? "Đã chấm · chờ trả" : review?.hasAttempt ? "Chờ chấm" : "Chưa làm"}`}
                                               className={`min-w-12 rounded-md px-1.5 py-2 text-xs font-semibold transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${lessonProgressTone(review?.percentage ?? 0)}`}
                                             >
-                                              {review?.percentage ?? 0}%
+                                              {review?.percentage != null
+                                                ? `${review.percentage}%`
+                                                : review?.status === "GRADED"
+                                                  ? "Chờ trả"
+                                                  : review?.hasAttempt
+                                                    ? "Chờ chấm"
+                                                    : "—"}
                                             </button>
                                           )}
                                         </td>
@@ -1887,7 +2035,7 @@ export default function TeacherIndex() {
                                 if (item.kind === "review") {
                                   const scores = selectedClass.activityData
                                     .map((student) => student.reviews.find((review) => review.id === item.id))
-                                    .filter((review) => review && item.questionCount > 0);
+                                    .filter((review) => review?.percentage != null && item.questionCount > 0);
                                   const average = scores.length ? Math.round(scores.reduce((sum, review) => sum + (review?.percentage ?? 0), 0) / scores.length) : null;
                                   return <td key={`review:${item.id}`} className="px-1 py-2 text-center">{average === null ? "—" : `${average}%`}</td>;
                                 }
@@ -2018,11 +2166,13 @@ export default function TeacherIndex() {
                                               <button
                                                 type="button"
                                                 aria-haspopup="dialog"
-                                                aria-label={`Xem ${review.percentage}% và bài làm ${selectedReviewItem.label} của ${student.student.name ?? student.student.email}`}
+                                                aria-label={`${review.percentage != null ? `${review.percentage}%` : review.status === "GRADED" ? "Đã chấm, chờ trả kết quả" : "Đang chờ chấm"} và bài làm ${selectedReviewItem.label} của ${student.student.name ?? student.student.email}`}
                                                 onClick={() => openReviewProgress(selectedReviewItem, student.student)}
-                                                className={`min-w-16 rounded-md px-2.5 py-2 font-semibold tabular-nums transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${lessonProgressTone(review.percentage)}`}
+                                                className={`min-w-16 rounded-md px-2.5 py-2 font-semibold tabular-nums transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${lessonProgressTone(review.percentage ?? 0)}`}
                                               >
-                                                {review.percentage}%
+                                                {review.percentage != null
+                                                  ? `${review.percentage}%`
+                                                  : review.status === "GRADED" ? "Chờ trả" : "Chờ chấm"}
                                               </button>
                                             ) : (
                                               <span className="inline-flex min-w-16 justify-center rounded-md bg-muted px-2.5 py-2 text-xs text-muted-foreground">
@@ -2915,7 +3065,9 @@ export default function TeacherIndex() {
                               </time>
                             </div>
                             <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold tabular-nums">
-                              {attempt.correctCount}/{attempt.totalQuestions} câu · {attempt.percentage}%
+                              {attempt.status === "RETURNED"
+                                ? `${attempt.correctCount}/${attempt.totalQuestions} câu · ${attempt.percentage}%`
+                                : attempt.status === "GRADED" ? "Đã chấm · chờ trả" : "Chờ chấm"}
                             </span>
                           </div>
                           <ol className="divide-y rounded-md border">
@@ -2927,37 +3079,50 @@ export default function TeacherIndex() {
                                     <p className="break-words font-semibold">{answer.prompt}</p>
                                   </div>
                                   <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
-                                    answer.correct
+                                    answer.correct === null
+                                      ? "bg-muted text-muted-foreground"
+                                      : answer.correct
                                       ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
                                       : answer.answer
                                         ? "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-200"
                                         : "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
                                   }`}>
-                                    {answer.correct ? "Đúng" : answer.answer ? "Trả lời chưa đúng" : "Chưa trả lời"}
+                                    {answer.correct === null ? "Chưa chấm" : answer.correct ? "Đúng" : "Chưa đúng"}
                                   </span>
                                 </div>
                                 <div className="grid gap-2 sm:grid-cols-2">
                                   <div className={`min-w-0 rounded-md border px-3 py-2.5 ${
-                                    answer.correct
+                                    answer.correct === null
+                                      ? "border-border bg-muted/40"
+                                      : answer.correct
                                       ? "border-emerald-200 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/25"
                                       : answer.answer
                                         ? "border-rose-200 bg-rose-50/70 dark:border-rose-900 dark:bg-rose-950/25"
                                         : "border-amber-200 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/25"
                                   }`}>
                                     <p className={`text-xs font-medium ${
-                                      answer.correct
+                                      answer.correct === null
+                                        ? "text-muted-foreground"
+                                        : answer.correct
                                         ? "text-emerald-800 dark:text-emerald-200"
                                         : answer.answer
                                           ? "text-rose-800 dark:text-rose-200"
                                           : "text-amber-900 dark:text-amber-200"
                                     }`}>Học viên trả lời</p>
                                     <p className={`mt-1 break-words font-medium ${
-                                      answer.correct
+                                      answer.correct === null
+                                        ? "text-foreground"
+                                        : answer.correct
                                         ? "text-emerald-950 dark:text-emerald-100"
                                         : answer.answer
                                           ? "text-rose-950 dark:text-rose-100"
                                           : "text-amber-950 dark:text-amber-100"
                                     }`}>{answer.answer || "Chưa trả lời"}</p>
+                                    {attempt.status === "RETURNED" && answer.feedback && (
+                                      <p className="mt-2 whitespace-pre-wrap border-t pt-2 text-sm text-muted-foreground">
+                                        <span className="font-medium text-foreground">Nhận xét: </span>{answer.feedback}
+                                      </p>
+                                    )}
                                   </div>
                                   <div className="min-w-0 rounded-md border border-emerald-200 bg-emerald-50/70 px-3 py-2.5 dark:border-emerald-900 dark:bg-emerald-950/25">
                                     <p className="text-xs font-medium text-emerald-800 dark:text-emerald-200">Đáp án đúng</p>
@@ -3248,6 +3413,180 @@ export default function TeacherIndex() {
                   </footer>
                 </workbookGradeSubmitFetcher.Form>
               )}
+            </section>
+          </div>
+        )}
+
+        {pendingReviewClass && (
+          <div
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
+            role="presentation"
+            onClick={(event) => {
+              if (event.target === event.currentTarget && reviewGradingFetcher.state === "idle") {
+                closePendingReviewModal();
+              }
+            }}
+          >
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="pending-review-grading-title"
+              className="flex max-h-[90dvh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
+            >
+              <header className="flex items-start justify-between gap-3 border-b px-4 py-3 sm:px-5">
+                <div className="min-w-0">
+                  <h2 id="pending-review-grading-title" className="font-semibold">Chấm bài ôn tập</h2>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{pendingReviewClass.name} · {pendingClassReviews.length} bài cần xử lý</p>
+                </div>
+                <button
+                  type="button"
+                  aria-label="Đóng cửa sổ chấm bài ôn tập"
+                  disabled={reviewGradingFetcher.state !== "idle"}
+                  onClick={closePendingReviewModal}
+                  className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </header>
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+                {reviewGradingFetcher.data?.error && (
+                  <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                    {reviewGradingFetcher.data.error}
+                  </p>
+                )}
+                {pendingClassReviews.length === 0 ? (
+                  <p className="py-8 text-center text-sm text-muted-foreground" role="status">
+                    Không còn bài ôn tập nào cần xử lý.
+                  </p>
+                ) : (
+                  pendingClassReviews.map((attempt) => (
+                    <article key={attempt.id} className="overflow-hidden rounded-lg border">
+                      <div className="flex flex-wrap items-start justify-between gap-2 border-b bg-muted/30 px-3 py-3 sm:px-4">
+                        <div className="min-w-0">
+                          <h3 className="text-sm font-semibold">{attempt.studentName}</h3>
+                          <p className="mt-0.5 text-sm text-muted-foreground">{attempt.reviewSetTitle}</p>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {attempt.status === "GRADED" ? "Đã chấm · chờ trả" : "Chờ chấm"}
+                        </span>
+                      </div>
+                      <reviewGradingFetcher.Form
+                        method="post"
+                        action={`/teacher/courses/${attempt.courseId}/progress/reviews/${attempt.reviewSetId}?classId=${encodeURIComponent(attempt.classId)}`}
+                        className="space-y-3 p-3 sm:p-4"
+                      >
+                        <input type="hidden" name="classId" value={attempt.classId} />
+                        <input type="hidden" name="attemptId" value={attempt.id} />
+                        <ol className="space-y-3">
+                          {attempt.questions.map((question, index) => (
+                            <li key={question.id} className="space-y-2 rounded-md bg-muted/30 p-3">
+                              <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="min-w-0 flex-1 space-y-1">
+                                  <p className="text-xs font-medium text-muted-foreground">Câu {index + 1}</p>
+                                  <p className="whitespace-pre-wrap text-sm font-medium">{question.prompt}</p>
+                                  <p className="whitespace-pre-wrap text-sm">
+                                    <span className="text-muted-foreground">Học viên: </span>{question.answer || "Bỏ trống"}
+                                  </p>
+                                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                                    <span className="font-medium text-foreground">Đáp án tham khảo: </span>{question.correctAnswer}
+                                  </p>
+                                </div>
+                                <label className="flex shrink-0 items-center gap-2 text-sm font-medium">
+                                  Kết quả
+                                  <select
+                                    name={`grade-${question.id}`}
+                                    defaultValue={question.correct === null ? "" : question.correct ? "correct" : "incorrect"}
+                                    aria-label={`Chấm câu ${index + 1}`}
+                                    onChange={() => markReviewAttemptDirty(attempt.id)}
+                                    className="h-9 rounded-md border border-input bg-background px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                  >
+                                    <option value="">Chọn</option>
+                                    <option value="correct">Đúng</option>
+                                    <option value="incorrect">Chưa đúng</option>
+                                  </select>
+                                </label>
+                              </div>
+                              <label className="block text-xs font-medium">
+                                Nhận xét (không bắt buộc)
+                                <textarea
+                                  name={`feedback-${question.id}`}
+                                  defaultValue={question.feedback}
+                                  maxLength={2000}
+                                  rows={2}
+                                  onChange={() => markReviewAttemptDirty(attempt.id)}
+                                  className="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-2 text-sm font-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                />
+                              </label>
+                            </li>
+                          ))}
+                        </ol>
+                        <footer className="flex justify-end border-t pt-3">
+                          <Button
+                            type="submit"
+                            name="intent"
+                            value="return-review-grades"
+                            disabled={reviewGradingFetcher.state !== "idle"}
+                          >
+                            {reviewGradingFetcher.state !== "idle" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Trả kết quả
+                          </Button>
+                        </footer>
+                      </reviewGradingFetcher.Form>
+                    </article>
+                  ))
+                )}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {showUnsavedReviewConfirmation && pendingReviewClass && (
+          <div
+            className="fixed inset-0 !mt-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+            role="presentation"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) setShowUnsavedReviewConfirmation(false);
+            }}
+          >
+            <section
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="unsaved-review-confirmation-title"
+              aria-describedby="unsaved-review-confirmation-description"
+              className="w-full max-w-md rounded-xl border bg-background p-5 shadow-xl sm:p-6"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                  <TriangleAlert className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <h2 id="unsaved-review-confirmation-title" className="text-base font-semibold">
+                    Bạn chưa gửi phần chấm
+                  </h2>
+                  <p id="unsaved-review-confirmation-description" className="mt-1.5 text-sm leading-6 text-muted-foreground">
+                    Điểm và nhận xét bạn vừa nhập sẽ bị mất nếu đóng cửa sổ này.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  autoFocus
+                  onClick={() => setShowUnsavedReviewConfirmation(false)}
+                  className="w-full sm:w-auto"
+                >
+                  Tiếp tục chấm
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={closePendingReviewModalAndDiscard}
+                  className="w-full sm:w-auto"
+                >
+                  Đóng và bỏ thay đổi
+                </Button>
+              </div>
             </section>
           </div>
         )}

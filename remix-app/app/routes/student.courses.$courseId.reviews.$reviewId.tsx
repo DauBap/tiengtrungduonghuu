@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Link, useFetcher, useLoaderData } from "react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, BookOpen, CheckCircle2, Clock3, Sparkles } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
@@ -23,14 +23,70 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const reviewSet = await getCourseReviewSetById(course.id, params.reviewId!);
   if (!reviewSet) throw new Response("Không tìm thấy bộ ôn tập", { status: 404 });
 
+  const attempt = await prisma.courseReviewAttempt.findFirst({
+    where: { reviewSetId: reviewSet.id, userId: user.id },
+    orderBy: { completedAt: "desc" },
+    select: {
+      status: true,
+      answers: true,
+      grades: true,
+      correctCount: true,
+      totalQuestions: true,
+      percentage: true,
+      completedAt: true,
+      returnedAt: true,
+    },
+  });
+  const submittedAnswers = isRecord(attempt?.answers) ? attempt.answers : {};
+  const gradesByQuestion = new Map<string, Record<string, unknown>>();
+  if (Array.isArray(attempt?.grades)) {
+    for (const grade of attempt.grades) {
+      if (isRecord(grade) && typeof grade.questionId === "string") {
+        gradesByQuestion.set(grade.questionId, grade);
+      }
+    }
+  }
+  const returnedResults = attempt?.status === "RETURNED"
+    ? reviewSet.questions.map((question) => {
+        const submitted = submittedAnswers[question.id];
+        const answer = typeof submitted === "string" ? submitted : "";
+        const grade = gradesByQuestion.get(question.id);
+        const correct = typeof grade?.correct === "boolean"
+          ? grade.correct
+          : isQuestionCorrect(question, answer);
+        return {
+          prompt: question.prompt,
+          answer,
+          correctAnswer: question.answer,
+          correct,
+          teacherFeedback: typeof grade?.feedback === "string" ? grade.feedback : "",
+        };
+      })
+    : null;
+
   return {
     user,
     course: { ...course, createdAt: course.createdAt.toISOString(), updatedAt: course.updatedAt.toISOString() },
+    latestAttempt: attempt ? {
+      status: attempt.status,
+      completedAt: attempt.completedAt.toISOString(),
+      returnedAt: attempt.returnedAt?.toISOString() ?? null,
+      correctCount: attempt.correctCount,
+      totalQuestions: attempt.totalQuestions,
+      percentage: attempt.percentage,
+      results: returnedResults,
+    } : null,
     reviewSet: {
-      ...reviewSet,
-      questions: reviewSet.questions.map((question, index) => ({
-        ...question,
-        order: question.order || index,
+      id: reviewSet.id,
+      title: reviewSet.title,
+      subtitle: reviewSet.subtitle,
+      questions: reviewSet.questions.map((question) => ({
+        id: question.id,
+        direction: question.direction,
+        type: question.type,
+        prompt: question.prompt,
+        tokens: question.tokens,
+        order: question.order,
       })),
     },
   };
@@ -41,6 +97,10 @@ function isStringRecord(value: unknown): value is Record<string, string> {
     && value !== null
     && !Array.isArray(value)
     && Object.values(value).every((answer) => typeof answer === "string");
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -73,21 +133,47 @@ export async function action({ request, params }: ActionFunctionArgs) {
     question.id,
     parsedAnswers[question.id] ?? "",
   ]));
-  const correctCount = reviewSet.questions.filter((question) =>
-    isQuestionCorrect(question, answers[question.id] ?? ""),
-  ).length;
-  const totalQuestions = reviewSet.questions.length;
-  const percentage = totalQuestions === 0 ? 0 : Math.round((correctCount / totalQuestions) * 100);
+  const enrollment = await prisma.enrollment.findUnique({
+    where: { userId_courseId: { userId: user.id, courseId: course.id } },
+    select: { classId: true, class: { select: { teacherId: true } } },
+  });
+  if (!enrollment?.classId || !enrollment.class?.teacherId) {
+    return { ok: false as const, error: "Lớp học chưa có giáo viên phụ trách để nhận bài ôn tập." };
+  }
+  const classId = enrollment.classId;
+  const teacherId = enrollment.class.teacherId;
+  const pendingAttempt = await prisma.courseReviewAttempt.findFirst({
+    where: { reviewSetId: reviewSet.id, userId: user.id, status: { in: ["SUBMITTED", "GRADED"] } },
+    select: { id: true },
+  });
+  if (pendingAttempt) {
+    return { ok: false as const, error: "Bạn đã nộp một lượt và đang chờ giáo viên trả kết quả." };
+  }
 
-  await prisma.courseReviewAttempt.create({
-    data: {
-      reviewSetId: reviewSet.id,
-      userId: user.id,
-      answers,
-      totalQuestions,
-      correctCount,
-      percentage,
-    },
+  await prisma.$transaction(async (transaction) => {
+    const attempt = await transaction.courseReviewAttempt.create({
+      data: {
+        reviewSetId: reviewSet.id,
+        userId: user.id,
+        answers,
+        totalQuestions: reviewSet.questions.length,
+        correctCount: 0,
+        percentage: 0,
+        status: "SUBMITTED",
+      },
+      select: { id: true },
+    });
+    await transaction.userNotification.create({
+      data: {
+        recipientId: teacherId,
+        actorId: user.id,
+        kind: "REVIEW_GRADING_REQUEST",
+        entityId: attempt.id,
+        title: "Bài ôn tập cần chấm",
+        message: `${user.name ?? "Học viên"} đã nộp bộ ôn tập “${reviewSet.title}”. Bạn hãy chấm bài nhé.`,
+        targetUrl: `/teacher/courses/${course.id}/progress/reviews/${reviewSet.id}?classId=${encodeURIComponent(classId)}&attemptId=${encodeURIComponent(attempt.id)}`,
+      },
+    });
   });
 
   return { ok: true };
@@ -98,7 +184,7 @@ function isQuestionCorrect(question: { answer: string; acceptedAnswers?: string[
 }
 
 export default function StudentCourseReviewPage() {
-  const { user, course, reviewSet } = useLoaderData<typeof loader>();
+  const { user, course, reviewSet, latestAttempt } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   const [started, setStarted] = useState(false);
   const [index, setIndex] = useState(0);
@@ -110,9 +196,15 @@ export default function StudentCourseReviewPage() {
     [reviewSet.questions]
   );
 
+  useEffect(() => {
+    if (fetcher.data?.ok === false) setSubmitted(false);
+  }, [fetcher.data]);
+
   const currentQuestion = orderedQuestions[index];
-  const correctCount = orderedQuestions.filter((q) => isQuestionCorrect(q, answers[q.id] ?? "")).length;
-  const percentage = orderedQuestions.length === 0 ? 0 : Math.round((correctCount / orderedQuestions.length) * 100);
+  const hasPendingAttempt = latestAttempt?.status === "SUBMITTED" || latestAttempt?.status === "GRADED";
+  const waitingForTeacher = submitted || hasPendingAttempt;
+  const awaitingReturn = latestAttempt?.status === "GRADED";
+  const canStartAttempt = !waitingForTeacher;
 
   const setAnswer = (questionId: string, value: string) => {
     setAnswers((previous) => ({ ...previous, [questionId]: value }));
@@ -182,21 +274,27 @@ export default function StudentCourseReviewPage() {
           </Card>
         </div>
 
-        {!started && !submitted && (
+        {fetcher.data?.ok === false && (
+          <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            {fetcher.data.error}
+          </p>
+        )}
+
+        {canStartAttempt && !started && (
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Bắt đầu luyện tập</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Bộ ôn tập này gồm các câu dịch và sắp xếp câu từ các bài đã học. Hãy trả lời từng câu và chấm điểm cuối bài.
+                Bộ ôn tập gồm các câu dịch và sắp xếp câu. Sau khi nộp, giáo viên sẽ chấm từng câu và trả kết quả cho bạn.
               </p>
               <Button type="button" className="w-full" onClick={() => setStarted(true)}>Bắt đầu ôn tập</Button>
             </CardContent>
           </Card>
         )}
 
-        {started && !submitted && currentQuestion && (
+        {started && !waitingForTeacher && currentQuestion && (
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between gap-2">
@@ -246,48 +344,80 @@ export default function StudentCourseReviewPage() {
           </Card>
         )}
 
-        {submitted && (
+        {waitingForTeacher && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Đã nộp bài ôn tập</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-3 rounded-lg border bg-primary/5 p-4">
+                <Clock3 aria-hidden="true" className="h-6 w-6 shrink-0 text-primary" />
+                <div>
+                  <p className="font-medium">
+                    {fetcher.state !== "idle"
+                      ? "Đang gửi bài..."
+                      : awaitingReturn
+                        ? "Giáo viên đã chấm, đang chờ trả kết quả"
+                        : "Đang chờ giáo viên chấm"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Kết quả và nhận xét sẽ hiển thị sau khi giáo viên trả bài.
+                  </p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {latestAttempt?.completedAt
+                  ? `Đã nộp lúc ${new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(latestAttempt.completedAt))}`
+                  : "Bài làm sẽ được gửi thông báo tới giáo viên."}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {!started && !submitted && latestAttempt?.status === "RETURNED" && latestAttempt.results && (
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Kết quả ôn tập</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="flex items-center gap-3 rounded-lg border bg-primary/5 p-4">
-                <CheckCircle2 className="h-6 w-6 text-primary" />
+                <CheckCircle2 aria-hidden="true" className="h-6 w-6 text-primary" />
                 <div>
-                  <p className="text-lg font-semibold">{correctCount}/{orderedQuestions.length} câu đúng</p>
-                  <p className="text-sm text-muted-foreground">Điểm số: {percentage}%</p>
+                  <p className="text-lg font-semibold">{latestAttempt.correctCount}/{latestAttempt.totalQuestions} câu đúng</p>
+                  <p className="text-sm text-muted-foreground">Điểm số: {latestAttempt.percentage}%</p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground" role="status">
-                {fetcher.state !== "idle"
-                  ? "Đang lưu tiến độ..."
-                  : fetcher.data?.ok
-                    ? "Đã lưu tiến độ ôn tập."
-                    : "Đang lưu kết quả ôn tập."}
+                Giáo viên đã trả kết quả
+                {latestAttempt.returnedAt
+                  ? ` lúc ${new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(latestAttempt.returnedAt))}`
+                  : "."}
               </p>
 
               <div className="space-y-3">
-                {orderedQuestions.map((question, questionIndex) => {
-                  const answer = answers[question.id] ?? "";
-                  const isCorrect = isQuestionCorrect(question, answer);
-                  return (
-                    <div key={question.id} className="rounded-lg border p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="font-medium">Câu {questionIndex + 1}</p>
-                        <span className={isCorrect ? "text-green-600" : "text-red-600"}> {isCorrect ? "Đúng" : "Sai"}</span>
-                      </div>
-                      <p className="content-text hanzi-display mt-2 text-sm text-muted-foreground">{question.prompt}</p>
-                      <p className="content-text mt-2 text-sm"><span className="font-medium">Câu trả lời của bạn:</span> {answer || "(chưa trả lời)"}</p>
-                      <p className="content-text mt-1 text-sm"><span className="font-medium">Đáp án:</span> {question.answer}</p>
+                {latestAttempt.results.map((result, questionIndex) => (
+                  <div key={`${questionIndex}-${result.prompt}`} className="rounded-lg border p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-medium">Câu {questionIndex + 1}</p>
+                      <span className={result.correct ? "text-green-600" : "text-red-600"}>
+                        {result.correct ? "Đúng" : "Chưa đúng"}
+                      </span>
                     </div>
-                  );
-                })}
+                    <p className="content-text hanzi-display mt-2 text-sm text-muted-foreground">{result.prompt}</p>
+                    <p className="content-text mt-2 whitespace-pre-wrap text-sm">
+                      <span className="font-medium">Câu trả lời của bạn: </span>{result.answer || "(chưa trả lời)"}
+                    </p>
+                    <p className="content-text mt-1 whitespace-pre-wrap text-sm">
+                      <span className="font-medium">Đáp án tham khảo: </span>{result.correctAnswer}
+                    </p>
+                    {result.teacherFeedback && (
+                      <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
+                        <span className="font-medium text-foreground">Nhận xét giáo viên: </span>{result.teacherFeedback}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
-
-              <Button asChild className="w-full">
-                <Link to={`/student/courses/${course.id}`}>Về khóa học</Link>
-              </Button>
             </CardContent>
           </Card>
         )}
