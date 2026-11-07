@@ -62,6 +62,8 @@ Ubuntu dùng user systemd timer `tiengtrung-auto-pull-build.timer` để kiểm 
 
 Migration production được quản lý bằng các file SQL có phiên bản trong `remix-app/prisma/deploy-migrations/`. Khi có migration chưa áp dụng, deploy gọi script backup PostgreSQL hiện có trước; sau đó áp dụng từng migration trong transaction và ghi checksum vào bảng `_AppSchemaMigration`. Nếu backup, migration hoặc build thất bại, deploy dừng trước khi restart app. Không tự chạy `prisma db push` trên production. Các file lịch sử trong `prisma/migrations/` không thuộc runner này.
 
+Migration `20261108_requeue_legacy_review_attempts.sql` đưa các lượt Ôn tập cũ do app tự chấm (đã trả kết quả, chưa có giáo viên chấm và chưa có dữ liệu chấm tay) về trạng thái **Chờ chấm**. Migration giữ nguyên câu trả lời và thời gian nộp, xóa điểm/tỷ lệ tự động; lượt đã được giáo viên chấm được giữ nguyên.
+
 Mỗi thay đổi schema cần thêm một migration mới, có thể chạy `npm run db:migrate:deploy -- --dry-run` trong `remix-app/` để xem migration nào đang chờ. Không chỉnh sửa migration đã áp dụng; hãy tạo migration mới. Migration có thao tác phá hủy dữ liệu vẫn cần được thiết kế và duyệt rõ ràng, không nên tự động thêm vào.
 
 Workflow lưu trạng thái lần kiểm tra trước trong GitHub Actions cache để chỉ gửi tin khi trạng thái thay đổi; không cần token GitHub bổ sung hay quyền ghi repository. Cảnh báo được phát hiện trong tối đa khoảng 5 phút cộng thời gian GitHub Actions khởi chạy; lịch chạy GitHub có thể trễ khi hệ thống bận. Nếu app không có URL công khai thì cần một thiết bị giám sát khác bên ngoài server.
