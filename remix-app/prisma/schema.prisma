@@ -34,6 +34,8 @@ model User {
   authoredExams                      Exam[]                       @relation("ExamAuthor")
   authoredQuestions                  Question[]                   @relation("QuestionAuthor")
   taughtClasses                      Class[]                      @relation("ClassTeacher")
+  classFinalResults                  ClassFinalResult[]
+  classStudentScores                 ClassStudentScore[]
   courseStudySessions                CourseStudySession[]
   pronunciationAssessments           PronunciationAssessment[]
   courseReviewAttempts               CourseReviewAttempt[]
@@ -173,6 +175,7 @@ model Lesson {
   tabAttempts            LessonTabAttempt[]
   exams                  Exam[]
   audioScripts           LessonAudioScript[]
+  attendanceSessions     AttendanceSession[]
   translationQuestions   TranslationQuestion[]
   translationSubmissions TranslationSubmission[]
 
@@ -499,6 +502,8 @@ model Class {
   enrollments                 Enrollment[]
   shenbiAssignments           ShenbiAssignment[]
   attendanceSessions          AttendanceSession[]
+  finalResults                ClassFinalResult[]
+  studentScores               ClassStudentScore[]
   attendanceAbsenceDismissals AttendanceAbsenceDismissal[]
 
   @@index([courseId])
@@ -536,20 +541,62 @@ enum AttendanceAbsenceReason {
   UNEXCUSED
 }
 
+enum ClassPromotionDecision {
+  PROMOTE
+  REPEAT
+}
+
 model AttendanceSession {
-  id        String   @id @default(cuid())
-  classId   String
-  title     String
-  lesson    String   @default("")
-  date      DateTime @db.Date
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  classId      String
+  lessonId     String?
+  title        String
+  lesson       String   @default("")
+  recordingUrl String?
+  date         DateTime @db.Date
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   class             Class                        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  courseLesson      Lesson?                      @relation(fields: [lessonId], references: [id], onDelete: SetNull)
   records           AttendanceRecord[]
   absenceDismissals AttendanceAbsenceDismissal[]
 
   @@index([classId, date])
+}
+
+model ClassFinalResult {
+  id               String                 @id @default(cuid())
+  classId          String
+  studentId        String
+  score            Float
+  comment          String
+  attendedSessions Int
+  totalSessions    Int
+  decision         ClassPromotionDecision
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  classroom Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student   User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, studentId])
+  @@index([studentId, createdAt])
+}
+
+model ClassStudentScore {
+  id        String   @id @default(cuid())
+  classId   String
+  studentId String
+  score     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classroom Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student   User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, studentId])
+  @@index([studentId])
 }
 
 model AttendanceRecord {

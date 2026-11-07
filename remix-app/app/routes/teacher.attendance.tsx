@@ -34,6 +34,7 @@ interface AttendanceClass {
   id: string;
   name: string;
   course: string;
+  courseLessons: { id: string; order: number; title: string }[];
   sessions: AttendanceSession[];
   students: AttendanceStudent[];
   consecutiveAbsenceAlerts: ConsecutiveAbsenceAlert[];
@@ -42,7 +43,9 @@ interface AttendanceClass {
 interface AttendanceSession {
   id: string;
   title: string;
+  lessonId: string | null;
   lesson: string;
+  recordingUrl: string | null;
   date: string;
   records: Record<string, AttendanceRecord>;
 }
@@ -133,7 +136,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
     select: {
       id: true,
       name: true,
-      course: { select: { title: true } },
+      course: {
+        select: {
+          title: true,
+          lessons: { orderBy: { order: "asc" }, select: { id: true, order: true, title: true } },
+        },
+      },
       enrollments: {
         where: { user: { is: { role: "student", isActive: true, deletedAt: null } } },
         orderBy: { createdAt: "asc" },
@@ -144,7 +152,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
         select: {
           id: true,
           title: true,
+          lessonId: true,
           lesson: true,
+          recordingUrl: true,
           date: true,
           createdAt: true,
           records: {
@@ -208,11 +218,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
       id: classroom.id,
       name: classroom.name,
       course: classroom.course.title,
+      courseLessons: classroom.course.lessons,
       students: classroom.enrollments.map(({ user: student }) => ({ id: student.id, name: student.name })),
       sessions: classroom.attendanceSessions.map((session) => ({
         id: session.id,
         title: session.title,
+        lessonId: session.lessonId,
         lesson: session.lesson,
+        recordingUrl: session.recordingUrl,
         date: session.date.toISOString().slice(0, 10),
         records: Object.fromEntries(session.records.map((record) => [record.studentId, {
           status: fromDatabaseStatus(record.status),
@@ -284,7 +297,7 @@ export async function action({ request }: ActionFunctionArgs) {
           lesson: "",
           date: new Date(`${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`),
         },
-        select: { id: true, title: true, lesson: true, date: true },
+        select: { id: true, title: true, lessonId: true, lesson: true, recordingUrl: true, date: true },
       });
       if (enrolledStudents.length > 0) {
         await tx.attendanceRecord.createMany({
@@ -303,6 +316,8 @@ export async function action({ request }: ActionFunctionArgs) {
       classId,
       session: {
         ...session,
+        lessonId: session.lessonId,
+        recordingUrl: session.recordingUrl,
         date: session.date.toISOString().slice(0, 10),
         records: Object.fromEntries(enrolledStudents.map(({ userId }) => [
           userId,
@@ -320,7 +335,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const session = sessionId
     ? await prisma.attendanceSession.findFirst({
         where: { id: sessionId, class: { is: { teacherId: user.id, completedAt: null } } },
-        select: { id: true, classId: true },
+        select: { id: true, classId: true, class: { select: { courseId: true } } },
       })
     : null;
   if (!session) return { success: false as const, error: "Không tìm thấy buổi học hoặc bạn không có quyền sửa buổi này." };
@@ -332,8 +347,30 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (intent === "save-attendance") {
     const lesson = String(form.get("lesson") ?? "").trim();
+    const rawLessonId = String(form.get("lessonId") ?? "").trim();
+    const lessonId = rawLessonId || null;
+    const rawRecordingUrl = String(form.get("recordingUrl") ?? "").trim();
+    let recordingUrl: string | null = null;
+    if (rawRecordingUrl) {
+      try {
+        const parsedUrl = new URL(rawRecordingUrl);
+        if ((parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") || rawRecordingUrl.length > 2048) {
+          return { success: false as const, error: "Link bản ghi cần là URL HTTP hoặc HTTPS và tối đa 2048 ký tự." };
+        }
+        recordingUrl = parsedUrl.toString();
+      } catch {
+        return { success: false as const, error: "Vui lòng nhập URL bản ghi hợp lệ." };
+      }
+    }
     const date = parseAttendanceDate(String(form.get("date") ?? ""));
     if (lesson.length > 120) return { success: false as const, error: "Tên bài học không được vượt quá 120 ký tự." };
+    if (lessonId) {
+      const courseLesson = await prisma.lesson.findFirst({
+        where: { id: lessonId, courseId: session.class.courseId },
+        select: { id: true },
+      });
+      if (!courseLesson) return { success: false as const, error: "Bài học không thuộc khóa học của lớp này." };
+    }
     if (!date) {
       return { success: false as const, error: "Vui lòng chọn ngày học hợp lệ." };
     }
@@ -395,7 +432,7 @@ export async function action({ request }: ActionFunctionArgs) {
     await prisma.$transaction([
       prisma.attendanceSession.update({
         where: { id: session.id },
-        data: { lesson, date },
+        data: { lesson, lessonId, date, recordingUrl },
       }),
       ...records.map((record) => prisma.attendanceRecord.upsert({
         where: { sessionId_studentId: { sessionId: session.id, studentId: record.studentId } },
@@ -597,7 +634,7 @@ export default function TeacherAttendance() {
     setFeedback("");
   }
 
-  function updateAttendanceSession(field: "lesson" | "date", value: string) {
+  function updateAttendanceSession(field: "lesson" | "lessonId" | "date" | "recordingUrl", value: string) {
     if (!selectedClass || !selectedAttendanceSession) return;
     setSessionsByClass((current) => ({
       ...current,
@@ -695,7 +732,9 @@ export default function TeacherAttendance() {
       {
         intent: "save-attendance",
         sessionId: selectedAttendanceSession.id,
+        lessonId: selectedAttendanceSession.lessonId ?? "",
         lesson: selectedAttendanceSession.lesson,
+        recordingUrl: selectedAttendanceSession.recordingUrl ?? "",
         date: selectedAttendanceSession.date,
         records: JSON.stringify(records),
       },
@@ -827,6 +866,21 @@ export default function TeacherAttendance() {
                     className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm sm:w-36 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   />
                 </div>
+                <div className="flex min-w-0 items-center gap-2">
+                  <label htmlFor="attendance-course-lesson" className="shrink-0 text-sm text-muted-foreground">Gắn với bài</label>
+                  <select
+                    id="attendance-course-lesson"
+                    value={selectedAttendanceSession.lessonId ?? ""}
+                    onChange={(event) => updateAttendanceSession("lessonId", event.currentTarget.value)}
+                    disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
+                    className="h-10 min-w-0 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-56"
+                  >
+                    <option value="">Không gắn bài học</option>
+                    {selectedClass.courseLessons.map((lesson, index) => (
+                      <option key={lesson.id} value={lesson.id}>Bài {index + 1} · {lesson.title}</option>
+                    ))}
+                  </select>
+                </div>
                 <div className="flex items-center gap-2">
                   <label htmlFor="attendance-date" className="shrink-0 text-sm text-muted-foreground">Ngày</label>
                   <input
@@ -836,6 +890,20 @@ export default function TeacherAttendance() {
                     onChange={(event) => updateAttendanceSession("date", event.currentTarget.value)}
                     disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
                     className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm sm:w-44 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </div>
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <label htmlFor="attendance-recording-url" className="shrink-0 text-sm text-muted-foreground">Link record</label>
+                  <input
+                    id="attendance-recording-url"
+                    type="url"
+                    inputMode="url"
+                    value={selectedAttendanceSession.recordingUrl ?? ""}
+                    onChange={(event) => updateAttendanceSession("recordingUrl", event.currentTarget.value)}
+                    maxLength={2048}
+                    placeholder="https://..."
+                    disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
+                    className="h-10 min-w-0 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   />
                 </div>
                 <Button

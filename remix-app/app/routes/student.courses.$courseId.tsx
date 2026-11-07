@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link, useNavigate } from "react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import { getCourseById, getLessonSummariesByCourse, getCourseReviewSetSummaries, computeTrackedCourseProgress, isEnrolled } from "~/lib/db.server";
 import { AppShell } from "~/components/layout/app-shell";
@@ -12,7 +12,7 @@ import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
-import { ArrowLeft, BookOpen, Layers, FileCheck2, ListChecks, Search, X } from "lucide-react";
+import { ArrowLeft, BookOpen, Layers, FileCheck2, ListChecks, Search, X, ClipboardCheck, Award } from "lucide-react";
 import type { ProgressStatus } from "~/types/progress";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
 import {
@@ -36,7 +36,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   if (!course) throw new Response("Không tìm thấy", { status: 404 });
   if (!enrolled) throw new Response("Không có quyền truy cập", { status: 403 });
 
-  const [lessons, reviewSets, tabProgressRows, grammarAttempts, grammarQuestionRows] = await Promise.all([
+  const [lessons, reviewSets, tabProgressRows, grammarAttempts, grammarQuestionRows, enrollment] = await Promise.all([
     getLessonSummariesByCourse(course.id),
     getCourseReviewSetSummaries(course.id),
     prisma.lessonTabProgress.findMany({
@@ -63,7 +63,47 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       where: { section: { lesson: { courseId: course.id } } },
       select: { type: true, sectionId: true, section: { select: { lessonId: true } } },
     }),
+    prisma.enrollment.findUnique({
+      where: { userId_courseId: { userId: user.id, courseId: course.id } },
+      select: {
+        class: {
+          select: {
+            name: true,
+            completedAt: true,
+            finalResults: {
+              where: { studentId: user.id },
+              select: {
+                score: true,
+                comment: true,
+                attendedSessions: true,
+                totalSessions: true,
+                decision: true,
+              },
+            },
+            attendanceSessions: {
+              where: { lessonId: { not: null } },
+              orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+              select: { lessonId: true, recordingUrl: true },
+            },
+          },
+        },
+      },
+    }),
   ]);
+  const classFinalResult = enrollment?.class?.finalResults[0] ?? null;
+  const isClassCompleted = Boolean(enrollment?.class?.completedAt);
+  const lessonVideoById: Record<string, string> = {};
+  for (const session of enrollment?.class?.attendanceSessions ?? []) {
+    if (!session.lessonId || !session.recordingUrl || lessonVideoById[session.lessonId]) continue;
+    try {
+      const url = new URL(session.recordingUrl);
+      if (url.protocol === "https:" || url.protocol === "http:") {
+        lessonVideoById[session.lessonId] = url.toString();
+      }
+    } catch {
+      // Invalid legacy URLs stay unavailable; teachers can replace them from attendance.
+    }
+  }
   const mockExams = await prisma.mockExam.findMany({
     where: { courseId: course.id, isPublished: true },
     orderBy: { createdAt: "asc" },
@@ -185,19 +225,80 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     user,
     course: { ...course, createdAt: course.createdAt.toISOString(), updatedAt: course.updatedAt.toISOString() },
     lessonsWithStatus,
+    lessonVideoById,
     reviewSets,
     courseProgress,
     mockExams: mockExamsWithLabels,
+    isClassCompleted,
+    className: enrollment?.class?.name ?? null,
+    classFinalResult,
   };
 }
 
 export default function StudentCourseDetail() {
-  const { user, course, lessonsWithStatus, reviewSets, courseProgress, mockExams } = useLoaderData<typeof loader>();
+  const {
+    user,
+    course,
+    lessonsWithStatus,
+    lessonVideoById,
+    reviewSets,
+    courseProgress,
+    mockExams,
+    isClassCompleted,
+    className,
+    classFinalResult,
+  } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
-  const [showCombinedStudy, setShowCombinedStudy] = useState(false);
+  const [isFinalResultOpen, setIsFinalResultOpen] = useState(false);
+  const finalResultDialogRef = useRef<HTMLElement>(null);
+  const finalResultCloseRef = useRef<HTMLButtonElement>(null);
+  const [combinedMode, setCombinedMode] = useState<"study" | "test" | null>(null);
   const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([]);
   const [lessonSearchQuery, setLessonSearchQuery] = useState("");
-  useModalScrollLock(showCombinedStudy);
+  useModalScrollLock(combinedMode !== null || isFinalResultOpen);
+  useEffect(() => {
+    if (!isFinalResultOpen) return;
+
+    const dialog = finalResultDialogRef.current;
+    if (!dialog) return;
+
+    const previouslyFocusedElement = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    finalResultCloseRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setIsFinalResultOpen(false);
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+      const focusableElements = dialog.querySelectorAll<HTMLElement>(
+        'a[href], button:not(:disabled), [tabindex]:not([tabindex="-1"])',
+      );
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (!firstElement || !lastElement) {
+        event.preventDefault();
+        dialog.focus();
+      } else if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    dialog.addEventListener("keydown", handleKeyDown);
+    return () => {
+      dialog.removeEventListener("keydown", handleKeyDown);
+      if (previouslyFocusedElement?.isConnected) previouslyFocusedElement.focus();
+    };
+  }, [isFinalResultOpen]);
   const allLessonsSelected = lessonsWithStatus.length > 0
     && lessonsWithStatus.every((lesson) => selectedLessonIds.includes(lesson.id));
 
@@ -265,13 +366,108 @@ export default function StudentCourseDetail() {
           <CardContent><ProgressBar value={courseProgress} /></CardContent>
         </Card>
 
+        {isClassCompleted && (
+          <section className="space-y-3">
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => setIsFinalResultOpen(true)}
+              className="w-full justify-start gap-2 sm:w-auto"
+            >
+              <Award aria-hidden="true" className="h-4 w-4" />
+              Xem kết quả cuối khóa
+            </Button>
+            {isFinalResultOpen && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                role="presentation"
+                onMouseDown={(event) => {
+                  if (event.target === event.currentTarget) setIsFinalResultOpen(false);
+                }}
+              >
+                <section
+                  ref={finalResultDialogRef}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="student-final-result-heading"
+                  tabIndex={-1}
+                  className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-xl border bg-background shadow-xl"
+                >
+                  <header className="flex items-start justify-between gap-4 border-b bg-muted/30 px-4 py-4 sm:px-6">
+                    <div>
+                      <h2 id="student-final-result-heading" className="font-semibold">Kết quả cuối khóa</h2>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {className ? `Lớp ${className}` : "Lớp học"} · Đã kết thúc
+                      </p>
+                    </div>
+                    <Button
+                      ref={finalResultCloseRef}
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Đóng kết quả cuối khóa"
+                      onClick={() => setIsFinalResultOpen(false)}
+                      className="h-8 w-8 shrink-0"
+                    >
+                      <X aria-hidden="true" className="h-4 w-4" />
+                    </Button>
+                  </header>
+                  {classFinalResult ? (
+                    <div className="space-y-4 p-4 sm:p-6">
+                      <dl className="grid gap-4 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                        <div className="pt-3 first:pt-0 sm:px-4 sm:pt-0 sm:first:pl-0">
+                          <dt className="text-xs font-medium text-muted-foreground">Điểm cuối khóa</dt>
+                          <dd className="mt-1 text-2xl font-semibold tabular-nums">
+                            {classFinalResult.score}<span className="text-sm font-normal text-muted-foreground"> / 10</span>
+                          </dd>
+                        </div>
+                        <div className="pt-3 sm:px-4 sm:pt-0">
+                          <dt className="text-xs font-medium text-muted-foreground">Chuyên cần</dt>
+                          <dd className="mt-1 text-2xl font-semibold tabular-nums">
+                            {classFinalResult.totalSessions > 0
+                              ? Math.round((classFinalResult.attendedSessions / classFinalResult.totalSessions) * 100)
+                              : 0}
+                            <span className="text-sm font-normal text-muted-foreground">%</span>
+                          </dd>
+                          <p className="text-xs text-muted-foreground">
+                            {classFinalResult.attendedSessions}/{classFinalResult.totalSessions} buổi có mặt
+                          </p>
+                        </div>
+                        <div className="pt-3 sm:px-4 sm:pt-0 sm:last:pr-0">
+                          <dt className="text-xs font-medium text-muted-foreground">Kết quả</dt>
+                          <dd className="mt-1 text-base font-semibold">
+                            {classFinalResult.decision === "PROMOTE" ? "Lên lớp" : "Ở lại"}
+                          </dd>
+                        </div>
+                      </dl>
+                      <div className="border-t pt-4">
+                        <h3 className="text-sm font-semibold">Nhận xét của giáo viên</h3>
+                        <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{classFinalResult.comment}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p role="status" className="p-4 text-sm text-muted-foreground sm:p-6">
+                      Giáo viên chưa cập nhật kết quả cuối khóa. Kết quả sẽ hiển thị tại đây sau khi được hoàn tất.
+                    </p>
+                  )}
+                </section>
+              </div>
+            )}
+          </section>
+        )}
+
         <div>
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-lg font-semibold">Bài học</h2>
             {lessonsWithStatus.length > 0 && (
-              <Button variant="outline" size="sm" onClick={() => setShowCombinedStudy(true)}>
-                <Layers className="mr-1.5 h-4 w-4" />Học tổng hợp
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={() => setCombinedMode("study")}>
+                  <Layers className="mr-1.5 h-4 w-4" />Học tổng hợp
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setCombinedMode("test")}>
+                  <ClipboardCheck className="mr-1.5 h-4 w-4" />Thi tổng hợp
+                </Button>
+              </div>
             )}
           </div>
           {orderedCourseItems.length === 0
@@ -280,6 +476,7 @@ export default function StudentCourseDetail() {
                 {orderedCourseItems.map((entry) => {
                   if (entry.kind === "lesson") {
                     const lesson = entry.item as (typeof lessonsWithStatus)[number];
+                    const videoUrl = lessonVideoById[lesson.id];
                     return (
                       <LessonCard
                         key={lesson.id}
@@ -287,6 +484,7 @@ export default function StudentCourseDetail() {
                         status={lesson.status}
                         index={(lessonNumbers.get(lesson.id) ?? 1) - 1}
                         href={`/student/courses/${course.id}/lessons/${lesson.id}`}
+                        videoUrl={videoUrl}
                       />
                     );
                   }
@@ -340,15 +538,17 @@ export default function StudentCourseDetail() {
               </div>}
         </section>
 
-        {showCombinedStudy && (
+        {combinedMode !== null && (
           <div
             className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-4"
             role="presentation"
           >
-            <section role="dialog" aria-modal="true" aria-labelledby="combined-study-title"
+            <section role="dialog" aria-modal="true" aria-labelledby="combined-action-title"
               className="w-full max-w-lg rounded-lg border bg-background shadow-xl">
               <div className="border-b p-5">
-                <h2 id="combined-study-title" className="text-lg font-semibold">Học tổng hợp</h2>
+                <h2 id="combined-action-title" className="text-lg font-semibold">
+                  {combinedMode === "study" ? "Học tổng hợp" : "Thi tổng hợp"}
+                </h2>
                 <p className="mt-1 text-sm text-muted-foreground">Chọn các bài học trong khóa {course.title}.</p>
               </div>
               <div className="space-y-3 border-b p-4">
@@ -425,13 +625,18 @@ export default function StudentCourseDetail() {
               <div className="flex items-center justify-between gap-3 border-t p-4">
                 <span className="text-xs text-muted-foreground">Đã chọn {selectedLessonIds.length} bài</span>
                 <div className="flex gap-2">
-                  <Button variant="ghost" onClick={() => setShowCombinedStudy(false)}>Hủy</Button>
+                  <Button variant="ghost" onClick={() => setCombinedMode(null)}>Hủy</Button>
                   <Button disabled={selectedLessonIds.length === 0} onClick={() => {
                     const search = new URLSearchParams();
                     selectedLessonIds.forEach((id) => search.append("lessonId", id));
-                    navigate(`/student/courses/${course.id}/flashcards?${search.toString()}`);
+                    const destination = combinedMode === "study" ? "flashcards" : "combined-test";
+                    navigate(`/student/courses/${course.id}/${destination}?${search.toString()}`);
                   }}>
-                    <BookOpen className="mr-1.5 h-4 w-4" />Học bài
+                    {combinedMode === "study" ? (
+                      <><BookOpen className="mr-1.5 h-4 w-4" />Học bài</>
+                    ) : (
+                      <><ClipboardCheck className="mr-1.5 h-4 w-4" />Bắt đầu thi</>
+                    )}
                   </Button>
                 </div>
               </div>

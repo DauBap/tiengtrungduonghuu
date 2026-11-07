@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { CourseStatusBadge } from "~/components/courses/course-status-badge";
 import { ProgressBar } from "~/components/progress/progress-bar";
 import type { Course } from "~/types/course";
-import { BookOpen, ArrowRight } from "lucide-react";
+import { BookOpen, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
@@ -12,6 +12,7 @@ interface CourseCardProps {
   href: string;
   progress?: number;
   showStatus?: boolean;
+  isClassCompleted?: boolean;
   ctaLabel?: string;
   compactOnMobile?: boolean;
 }
@@ -31,6 +32,7 @@ export function CourseCard({
   href,
   progress,
   showStatus = false,
+  isClassCompleted = false,
   ctaLabel = "Xem khóa học",
   compactOnMobile = false,
 }: CourseCardProps) {
@@ -46,9 +48,17 @@ export function CourseCard({
             HSK {course.hskLevel}
           </span>
         </div>
-        {showStatus && (
+        {showStatus && !isClassCompleted && (
           <div className={cn("absolute right-3 top-3", compactOnMobile && "max-sm:right-2 max-sm:top-2")}>
             <CourseStatusBadge status={course.status} />
+          </div>
+        )}
+        {isClassCompleted && (
+          <div className={cn("absolute right-3 top-3", compactOnMobile && "max-sm:right-2 max-sm:top-2")}>
+            <span className="inline-flex items-center gap-1 rounded-md bg-background/90 px-2 py-1 text-xs font-semibold text-muted-foreground shadow-sm">
+              <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-300" />
+              Đã kết thúc
+            </span>
           </div>
         )}
       </div>

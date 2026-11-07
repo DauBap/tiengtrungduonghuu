@@ -150,6 +150,9 @@ remix-app/
   Khi cập nhật phiên bản có thay đổi `prisma/schema.prisma`, hãy chạy `npx prisma db push` trong `remix-app/`
   để tạo/cập nhật bảng trước khi khởi động ứng dụng.
   Trạng thái lớp đã kết thúc được lưu ở `Class.completedAt`; đồng bộ schema trước khi triển khai thay đổi này.
+  Kết quả cuối khóa (`ClassFinalResult`), URL bản ghi buổi học (`AttendanceSession.recordingUrl`) và liên kết
+  buổi học với bài trong khóa (`AttendanceSession.lessonId`) cũng cần được đồng bộ schema. Backup database
+  và xem lại thay đổi trước khi chạy `db push`; workflow production không tự cập nhật schema.
   Trạng thái này chỉ ẩn lớp khỏi các danh sách giảng dạy của giáo viên, không xóa đăng ký hay quyền học của học sinh.
   Tài khoản học viên do giáo viên tạo cần đồng bộ field `User.isActivated`; admin phải xác nhận kích hoạt
   trong tab **Chưa được kích hoạt** trước khi học viên có thể đăng nhập.

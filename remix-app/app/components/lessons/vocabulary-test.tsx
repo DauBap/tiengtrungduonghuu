@@ -32,23 +32,29 @@ export function VocabularyTest({
   timeLimitMinutes,
   isSubmitting = false,
   previewOnly = false,
+  fixedDirection,
+  pageSize,
 }: {
   questionSets: { sameWordType: VocabularyTestQuestion[]; random: VocabularyTestQuestion[] };
   timeLimitMinutes: number | null;
   isSubmitting?: boolean;
   previewOnly?: boolean;
+  fixedDirection?: QuestionDirection;
+  pageSize?: number;
 }) {
   const settings = useAppSettings();
   const questions = questionSets.sameWordType;
-  const [direction, setDirection] = useState<QuizDirection>("mixed");
+  const [direction, setDirection] = useState<QuizDirection>(fixedDirection ?? "mixed");
   const [displayMode, setDisplayMode] = useState<DisplayMode>("paged");
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [runQuestions, setRunQuestions] = useState<ActiveQuestion[]>([]);
   const [index, setIndex] = useState(0);
+  const [pageIndex, setPageIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
   const started = startedAt !== null;
+  const effectiveDirection = fixedDirection ?? direction;
   const answeredCount = runQuestions.filter((item) => Boolean(answers[item.id])).length;
 
   useEffect(() => {
@@ -69,9 +75,9 @@ export function VocabularyTest({
 
   const startTest = () => {
     const nextQuestions = questions.map((question): ActiveQuestion => {
-      const questionDirection: QuestionDirection = direction === "mixed"
+      const questionDirection: QuestionDirection = effectiveDirection === "mixed"
         ? (Math.random() < 0.5 ? "zh2vi" : "vi2zh")
-        : direction;
+        : effectiveDirection;
 
       return {
         ...question,
@@ -85,6 +91,7 @@ export function VocabularyTest({
     setRunQuestions(nextQuestions);
     setAnswers({});
     setIndex(0);
+    setPageIndex(0);
     setSecondsLeft(timeLimitMinutes === null ? null : timeLimitMinutes * 60);
     setStartedAt(Date.now());
   };
@@ -93,6 +100,7 @@ export function VocabularyTest({
     setRunQuestions([]);
     setAnswers({});
     setIndex(0);
+    setPageIndex(0);
     setSecondsLeft(null);
     setStartedAt(null);
   };
@@ -145,45 +153,49 @@ export function VocabularyTest({
           </span>
         </div>
 
-        <fieldset className="space-y-2">
-          <legend className="text-sm font-medium">Chế độ thi</legend>
-          <div className="flex flex-wrap gap-2">
-            {DIRECTIONS.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                aria-pressed={direction === option.id}
-                onClick={() => setDirection(option.id)}
-                className={cn(
-                  "rounded-md border px-3 py-2 text-sm transition-colors",
-                  direction === option.id ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted/50"
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </fieldset>
+        {!fixedDirection && (
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium">Chế độ thi</legend>
+            <div className="flex flex-wrap gap-2">
+              {DIRECTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  aria-pressed={direction === option.id}
+                  onClick={() => setDirection(option.id)}
+                  className={cn(
+                    "rounded-md border px-3 py-2 text-sm transition-colors",
+                    direction === option.id ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted/50"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        )}
 
-        <fieldset className="space-y-2">
-          <legend className="text-sm font-medium">Chế độ hiển thị</legend>
-          <div className="flex flex-wrap gap-2">
-            {DISPLAY_MODES.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                aria-pressed={displayMode === option.id}
-                onClick={() => setDisplayMode(option.id)}
-                className={cn(
-                  "rounded-md border px-3 py-2 text-sm transition-colors",
-                  displayMode === option.id ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted/50"
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </fieldset>
+        {!pageSize && (
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium">Chế độ hiển thị</legend>
+            <div className="flex flex-wrap gap-2">
+              {DISPLAY_MODES.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  aria-pressed={displayMode === option.id}
+                  onClick={() => setDisplayMode(option.id)}
+                  className={cn(
+                    "rounded-md border px-3 py-2 text-sm transition-colors",
+                    displayMode === option.id ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted/50"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        )}
 
         <Button type="button" className="w-full" onClick={startTest}>
           Bắt đầu thi
@@ -224,7 +236,7 @@ export function VocabularyTest({
               aria-pressed={selected}
               onClick={() => {
                 setAnswers((previous) => ({ ...previous, [question.id]: option }));
-                if (displayMode === "paged" && questionIndex === index && index < runQuestions.length - 1) {
+                if (!pageSize && displayMode === "paged" && questionIndex === index && index < runQuestions.length - 1) {
                   setIndex(index + 1);
                 }
               }}
@@ -243,10 +255,13 @@ export function VocabularyTest({
   );
 
   const currentQuestion = runQuestions[index];
+  const pageCount = pageSize ? Math.ceil(runQuestions.length / pageSize) : 0;
+  const pageStart = pageIndex * (pageSize ?? 0);
+  const pageQuestions = pageSize ? runQuestions.slice(pageStart, pageStart + pageSize) : [];
 
   return (
     <div className="space-y-4">
-      <input type="hidden" name="quizMode" value={direction} />
+      <input type="hidden" name="quizMode" value={effectiveDirection} />
       {runQuestions.map((question) => (
         <span key={question.id} className="hidden">
           <input type="hidden" name={`response-${question.id}`} value={answers[question.id] ?? ""} />
@@ -259,10 +274,45 @@ export function VocabularyTest({
         <span className="flex items-center gap-1.5 tabular-nums text-muted-foreground">
           {timeLimitMinutes === null ? "Không giới hạn" : <><Timer className="h-4 w-4" />{formatTime(secondsLeft ?? timeLimitMinutes * 60)}</>}
         </span>
-        <span className="text-right text-muted-foreground">{displayMode === "paged" ? `${index + 1} / ${runQuestions.length}` : "Cuộn xuống"}</span>
+        <span className="text-right text-muted-foreground">
+          {pageSize
+            ? `Câu ${pageStart + 1}–${Math.min(pageStart + pageSize, runQuestions.length)} / ${runQuestions.length}`
+            : displayMode === "paged" ? `${index + 1} / ${runQuestions.length}` : "Cuộn xuống"}
+        </span>
       </div>
 
-      {displayMode === "paged" ? (
+      {pageSize ? (
+        <>
+          <div className="space-y-5">{pageQuestions.map((question, offset) => renderQuestion(question, pageStart + offset))}</div>
+          <div className="flex items-center justify-between gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPageIndex((value) => Math.max(0, value - 1))}
+              aria-label="10 câu trước"
+              disabled={pageIndex === 0 || isSubmitting}
+            >
+              <ChevronLeft className="mr-1 h-4 w-4" />
+              <span className="hidden sm:inline">10 câu trước</span>
+              <span className="sm:hidden">Trước</span>
+            </Button>
+            <span className="text-sm tabular-nums text-muted-foreground">Trang {pageIndex + 1} / {pageCount}</span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPageIndex((value) => Math.min(pageCount - 1, value + 1))}
+              aria-label="10 câu tiếp theo"
+              disabled={pageIndex >= pageCount - 1 || isSubmitting}
+            >
+              <span className="hidden sm:inline">10 câu tiếp theo</span>
+              <span className="sm:hidden">Tiếp</span>
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+        </>
+      ) : displayMode === "paged" ? (
         <>
           <div className="flex flex-wrap gap-1.5" aria-label="Chọn câu hỏi">
             {runQuestions.map((question, questionIndex) => (

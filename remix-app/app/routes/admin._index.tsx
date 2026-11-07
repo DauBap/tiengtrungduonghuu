@@ -2,6 +2,7 @@ import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { getAllCourses } from "~/lib/db.server";
+import { prisma } from "~/lib/prisma.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { StatCard } from "~/components/common/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -11,12 +12,25 @@ import { Button } from "~/components/ui/button";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
-  const courses = await getAllCourses();
-  return { user, courses };
+  const [courses, activeClasses] = await Promise.all([
+    getAllCourses(),
+    prisma.class.findMany({
+      where: { completedAt: null },
+      select: { teacherId: true, course: { select: { hskLevel: true } } },
+    }),
+  ]);
+  const classCountsByHsk = Array.from(new Set(courses.map(({ hskLevel }) => hskLevel)))
+    .sort((left, right) => left - right)
+    .map((hskLevel) => ({
+    hskLevel,
+    count: activeClasses.filter(({ course }) => course.hskLevel === hskLevel).length,
+    }));
+  const assignedTeacherCount = new Set(activeClasses.map(({ teacherId }) => teacherId).filter(Boolean)).size;
+  return { user, courses, activeClassCount: activeClasses.length, classCountsByHsk, assignedTeacherCount };
 }
 
 export default function AdminIndex() {
-  const { user, courses } = useLoaderData<typeof loader>();
+  const { user, courses, activeClassCount, classCountsByHsk, assignedTeacherCount } = useLoaderData<typeof loader>();
   const total = courses.length;
   const published = courses.filter((c) => c.status === "PUBLISHED").length;
   const draft = courses.filter((c) => c.status === "DRAFT").length;
@@ -38,6 +52,30 @@ export default function AdminIndex() {
           <StatCard label="Bản nháp" value={draft} icon={FileEdit} accent="warning" />
           <StatCard label="Đã lưu trữ" value={archived} icon={Archive} accent="accent" />
         </div>
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between gap-3">
+            <div>
+              <CardTitle className="text-base">Lớp đang học</CardTitle>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {activeClassCount} lớp · {assignedTeacherCount} giáo viên đang phụ trách
+              </p>
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/admin/class-overview">Xem tổng quan lớp</Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-x-8 gap-y-3">
+              {classCountsByHsk.map(({ hskLevel, count }) => (
+                <div key={hskLevel} className="flex items-baseline gap-2">
+                  <span className="text-sm text-muted-foreground">HSK {hskLevel}</span>
+                  <span className="text-lg font-semibold tabular-nums">{count}</span>
+                  <span className="text-xs text-muted-foreground">lớp</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Khóa học cập nhật gần đây</CardTitle>

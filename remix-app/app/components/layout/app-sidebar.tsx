@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useFetcher } from "react-router";
 import { cn } from "~/lib/utils";
-import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, School, ListChecks, FileCheck2, CalendarDays, Volume2, ClipboardCheck, Brush, GraduationCap } from "lucide-react";
+import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, School, ListChecks, FileCheck2, CalendarDays, Volume2, ClipboardCheck, Brush, GraduationCap, ClipboardList } from "lucide-react";
 import type { UserRole, SessionUser } from "~/lib/session.server";
 import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -14,6 +14,7 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
     { label: "Bảng điều khiển", href: "/admin", icon: LayoutDashboard },
     { label: "Dữ liệu Thần Bút", href: "/admin/shen-bi-data", icon: Brush },
     { label: "Lớp học", href: "/admin/classes", icon: School },
+    { label: "Tổng quan lớp học", href: "/admin/class-overview", icon: ClipboardList },
     { label: "Điểm danh", href: "/admin/attendance", icon: ClipboardCheck },
     { label: "Lịch giáo viên", href: "/admin/teachers", icon: GraduationCap },
     { label: "Khóa học", href: "/admin/courses", icon: BookOpen },

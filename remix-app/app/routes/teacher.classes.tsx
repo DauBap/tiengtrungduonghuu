@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { requireRole } from "~/lib/session.server";
 import { prisma } from "~/lib/prisma.server";
 import { DEFAULT_ACCOUNT_PASSWORD } from "~/lib/account-credentials";
+import { getClassAttendanceSummary, type ClassAttendanceStatus } from "~/lib/class-attendance";
 import { Archive, CheckCircle2, Loader2, Plus, UserPlus, Users, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -25,7 +26,11 @@ type ActionResult =
       email: string;
       initialPassword?: string;
     }
+  | { success: true; kind: "score-saved"; classId: string; studentId: string; score: number | null }
   | { success: true; kind: "completed"; classId: string };
+
+type PromotionDecision = "PROMOTE" | "REPEAT";
+type CompletionDraft = { score: string; comment: string; decision: PromotionDecision | "" };
 
 function parseStudentDetails(form: FormData) {
   const name = String(form.get("name") ?? "").trim();
@@ -51,6 +56,12 @@ function getKnownRequestError(error: unknown) {
   return error instanceof Prisma.PrismaClientKnownRequestError ? error.code : null;
 }
 
+function parseScore(value: string) {
+  const normalized = value.trim().replace(",", ".");
+  if (!/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(normalized)) return Number.NaN;
+  return Number(normalized);
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
   const classes = await prisma.class.findMany({
@@ -68,6 +79,23 @@ export async function loader({ request }: LoaderFunctionArgs) {
           user: { select: { id: true, name: true, email: true, phone: true, isActive: true, isActivated: true } },
         },
       },
+      attendanceSessions: {
+        select: {
+          records: { select: { studentId: true, status: true } },
+        },
+      },
+      finalResults: {
+        select: {
+          studentId: true,
+          score: true,
+          comment: true,
+          attendedSessions: true,
+          totalSessions: true,
+          decision: true,
+          student: { select: { name: true } },
+        },
+      },
+      studentScores: { select: { studentId: true, score: true } },
     },
     orderBy: [{ course: { order: "asc" } }, { name: "asc" }],
   });
@@ -80,15 +108,155 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
   const intent = String(form.get("intent") ?? "");
   const classId = String(form.get("classId") ?? "").trim();
   if (!classId) return { error: "Vui lòng chọn lớp học." };
-  if (intent === "complete-class") {
-    const result = await prisma.class.updateMany({
-      where: { id: classId, teacherId: user.id, completedAt: null },
-      data: { completedAt: new Date() },
-    });
-    if (result.count === 0) {
-      return { error: "Không tìm thấy lớp đang dạy hoặc lớp đã được kết thúc.", classId };
+  if (intent === "save-student-score") {
+    const studentId = String(form.get("studentId") ?? "").trim();
+    const rawScore = String(form.get("score") ?? "").trim();
+    const score = rawScore === "" ? null : parseScore(rawScore);
+    if (!studentId || studentId.length > 100) {
+      return { error: "Không tìm thấy học viên cần lưu điểm.", classId };
     }
-    return { success: true, kind: "completed", classId };
+    if (score !== null && (!Number.isFinite(score) || score < 0 || score > 10)) {
+      return { error: "Điểm cuối khóa phải nằm trong khoảng 0 đến 10.", classId };
+    }
+    return prisma.$transaction(async (tx) => {
+      const classroom = await tx.class.findFirst({
+        where: {
+          id: classId,
+          teacherId: user.id,
+          completedAt: null,
+          enrollments: {
+            some: {
+              userId: studentId,
+              user: { is: { role: "student", deletedAt: null } },
+            },
+          },
+        },
+        select: { id: true },
+      });
+      if (!classroom) {
+        return { error: "Không tìm thấy học viên trong lớp đang dạy hoặc lớp đã kết thúc.", classId };
+      }
+      if (score === null) {
+        await tx.classStudentScore.deleteMany({ where: { classId, studentId } });
+      } else {
+        await tx.classStudentScore.upsert({
+          where: { classId_studentId: { classId, studentId } },
+          create: { classId, studentId, score },
+          update: { score },
+        });
+      }
+      return { success: true as const, kind: "score-saved" as const, classId, studentId, score };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  }
+  if (intent === "complete-class") {
+    const rawResults = String(form.get("results") ?? "");
+    let parsedResults: unknown;
+    try {
+      parsedResults = JSON.parse(rawResults);
+    } catch {
+      return { error: "Bảng kết quả cuối khóa không hợp lệ. Hãy kiểm tra và thử lại.", classId };
+    }
+    if (!Array.isArray(parsedResults) || parsedResults.length === 0) {
+      return { error: "Lớp cần có học viên và kết quả cuối khóa trước khi kết thúc.", classId };
+    }
+
+    const results: { studentId: string; score: number; comment: string; decision: PromotionDecision }[] = [];
+    for (const value of parsedResults) {
+      if (!value || typeof value !== "object" || Array.isArray(value)) {
+        return { error: "Có kết quả học viên không hợp lệ.", classId };
+      }
+      const record = value as Record<string, unknown>;
+      const score = typeof record.score === "number"
+        ? record.score
+        : typeof record.score === "string" && record.score.trim() !== ""
+          ? parseScore(record.score)
+          : Number.NaN;
+      const comment = typeof record.comment === "string" ? record.comment.trim() : "";
+      if (
+        typeof record.studentId !== "string"
+        || !record.studentId
+        || !Number.isFinite(score)
+        || score < 0
+        || score > 10
+        || comment.length === 0
+        || comment.length > 2000
+        || (record.decision !== "PROMOTE" && record.decision !== "REPEAT")
+      ) {
+        return { error: "Mỗi học viên cần có điểm từ 0 đến 10, nhận xét và lựa chọn kết quả.", classId };
+      }
+      results.push({
+        studentId: record.studentId,
+        score,
+        comment,
+        decision: record.decision,
+      });
+    }
+    if (new Set(results.map(({ studentId }) => studentId)).size !== results.length) {
+      return { error: "Danh sách kết quả có học viên bị trùng.", classId };
+    }
+
+    return prisma.$transaction(async (tx) => {
+      const classroom = await tx.class.findFirst({
+        where: { id: classId, teacherId: user.id, completedAt: null },
+        select: {
+          id: true,
+          enrollments: {
+            where: { user: { is: { role: "student", deletedAt: null } } },
+            select: { userId: true },
+          },
+          attendanceSessions: {
+            select: {
+              records: {
+                select: { studentId: true, status: true },
+              },
+            },
+          },
+        },
+      });
+      if (!classroom) {
+        return { error: "Không tìm thấy lớp đang dạy hoặc lớp đã được kết thúc.", classId };
+      }
+      const enrolledIds = new Set(classroom.enrollments.map(({ userId }) => userId));
+      if (
+        results.length !== enrolledIds.size
+        || results.some(({ studentId }) => !enrolledIds.has(studentId))
+      ) {
+        return { error: "Danh sách kết quả không khớp với học viên hiện tại của lớp. Hãy tải lại trang.", classId };
+      }
+
+      const attendanceByStudent = new Map<string, ClassAttendanceStatus[]>(
+        classroom.enrollments.map(({ userId }) => [userId, []]),
+      );
+      for (const session of classroom.attendanceSessions) {
+        const sessionStatusByStudent = new Map(session.records.map(({ studentId, status }) => [studentId, status]));
+        for (const [studentId, statuses] of attendanceByStudent) {
+          statuses.push(sessionStatusByStudent.get(studentId) ?? null);
+        }
+      }
+      const update = await tx.class.updateMany({
+        where: { id: classroom.id, teacherId: user.id, completedAt: null },
+        data: { completedAt: new Date() },
+      });
+      if (update.count !== 1) {
+        return { error: "Lớp vừa được kết thúc ở nơi khác. Hãy tải lại trang.", classId };
+      }
+      await tx.classFinalResult.createMany({
+        data: results.map(({ studentId, score, comment, decision }) => {
+          const attendance = getClassAttendanceSummary(attendanceByStudent.get(studentId) ?? []);
+          return {
+            classId: classroom.id,
+            studentId,
+            score,
+            comment,
+            attendedSessions: attendance.attendedSessions,
+            totalSessions: attendance.totalSessions,
+            decision,
+          };
+        }),
+      });
+      await tx.classStudentScore.deleteMany({ where: { classId: classroom.id } });
+      return { success: true as const, kind: "completed" as const, classId };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   }
   if (intent !== "create-student" && intent !== "add-existing-student") {
     return { error: "Thao tác không hợp lệ.", classId };
@@ -220,6 +388,8 @@ export default function TeacherClassesPage() {
   const [classView, setClassView] = useState<"active" | "completed">("active");
   const [optimisticallyCompletedClassIds, setOptimisticallyCompletedClassIds] = useState<string[]>([]);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [completionDraft, setCompletionDraft] = useState<Record<string, CompletionDraft>>({});
+  const [scoreDraft, setScoreDraft] = useState<Record<string, string>>({});
   const [modalMode, setModalMode] = useState<"create" | "existing" | null>(null);
   const [studentQuery, setStudentQuery] = useState("");
   const [searchedQuery, setSearchedQuery] = useState("");
@@ -227,6 +397,7 @@ export default function TeacherClassesPage() {
   const createFetcher = useFetcher<typeof action>();
   const existingFetcher = useFetcher<typeof action>();
   const completeFetcher = useFetcher<typeof action>();
+  const scoreFetcher = useFetcher<typeof action>();
   const searchFetcher = useFetcher<{ query: string; students: { id: string; name: string; email: string }[] }>();
   const optimisticallyCompletedClassIdSet = new Set(optimisticallyCompletedClassIds);
   const activeClasses = classes.filter((item) =>
@@ -240,6 +411,10 @@ export default function TeacherClassesPage() {
   const createBusy = createFetcher.state !== "idle";
   const existingBusy = existingFetcher.state !== "idle";
   const isCompleting = completeFetcher.state !== "idle";
+  const isSavingScore = scoreFetcher.state !== "idle";
+  const provisionalScoreByStudent = new Map(
+    (selectedClass?.studentScores ?? []).map(({ studentId, score }) => [studentId, score]),
+  );
   const normalizedStudentQuery = studentQuery.trim();
   const searchResults = searchFetcher.data?.query === normalizedStudentQuery
     ? searchFetcher.data.students
@@ -286,6 +461,17 @@ export default function TeacherClassesPage() {
     setSelectedClassId(result.classId);
     completeFetcher.reset();
   }, [completeFetcher.data]);
+
+  useEffect(() => {
+    const result = scoreFetcher.data;
+    if (!result) return;
+    if ("error" in result) {
+      toast.error(result.error);
+    } else if (result.kind === "score-saved") {
+      toast.success(result.score === null ? "Đã xóa điểm tạm thời." : "Đã lưu điểm cuối khóa.");
+      scoreFetcher.reset();
+    }
+  }, [scoreFetcher.data]);
 
   useEffect(() => {
     if (!showCompleteDialog || isCompleting) return;
@@ -337,15 +523,53 @@ export default function TeacherClassesPage() {
   };
   const completeSelectedClass = () => {
     if (!selectedClass) return;
+    setCompletionDraft(Object.fromEntries(selectedClass.enrollments.map(({ user: student }) => [
+      student.id,
+      { score: String(provisionalScoreByStudent.get(student.id) ?? ""), comment: "", decision: "" },
+    ])));
     setShowCompleteDialog(true);
+  };
+  const saveStudentScore = (studentId: string) => {
+    if (!selectedClass) return;
+    scoreFetcher.submit(
+      {
+        intent: "save-student-score",
+        classId: selectedClass.id,
+        studentId,
+        score: scoreDraft[studentId] ?? String(provisionalScoreByStudent.get(studentId) ?? ""),
+      },
+      { method: "post" },
+    );
   };
   const confirmCompleteClass = () => {
     if (!selectedClass) return;
     completeFetcher.submit(
-      { intent: "complete-class", classId: selectedClass.id },
+      {
+        intent: "complete-class",
+        classId: selectedClass.id,
+        results: JSON.stringify(selectedClass.enrollments.map(({ user: student }) => ({
+          studentId: student.id,
+          score: parseScore(completionDraft[student.id]?.score ?? ""),
+          comment: completionDraft[student.id]?.comment,
+          decision: completionDraft[student.id]?.decision,
+        }))),
+      },
       { method: "post" },
     );
   };
+  const completionIsReady = Boolean(selectedClass?.enrollments.length)
+    && selectedClass.enrollments.every(({ user: student }) => {
+      const result = completionDraft[student.id];
+      const score = parseScore(result?.score ?? "");
+      return result
+        && result.score.trim() !== ""
+        && Number.isFinite(score)
+        && score >= 0
+        && score <= 10
+        && result.comment.trim().length > 0
+        && result.comment.length <= 2000
+        && (result.decision === "PROMOTE" || result.decision === "REPEAT");
+    });
 
   return (
     <AppShell user={user}>
@@ -356,7 +580,7 @@ export default function TeacherClassesPage() {
         </header>
 
         {showCompleteDialog && selectedClass && (
-          <Overlay onClose={() => setShowCompleteDialog(false)} className="max-w-md">
+          <Overlay onClose={() => setShowCompleteDialog(false)} className="max-w-6xl">
             <section
               role="alertdialog"
               aria-modal="true"
@@ -364,18 +588,120 @@ export default function TeacherClassesPage() {
               aria-describedby="complete-class-description"
               className="space-y-5"
             >
-              <div className="flex items-start gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <CheckCircle2 aria-hidden="true" className="h-5 w-5" />
-                </span>
-                <div className="min-w-0 space-y-1">
-                  <h2 id="complete-class-title" className="text-lg font-semibold">Hoàn thành lớp học?</h2>
-                  <p className="break-words text-sm font-medium text-foreground">{selectedClass.name}</p>
-                  <p id="complete-class-description" className="text-sm leading-relaxed text-muted-foreground">
-                    Lớp sẽ được chuyển sang tab “Lớp học đã kết thúc” và không còn xuất hiện trong lịch dạy. Học sinh vẫn xem bài và tiếp tục làm bài như bình thường.
-                  </p>
+              <header className="space-y-1">
+                <h2 id="complete-class-title" className="text-xl font-semibold">Đánh giá cuối khóa · {selectedClass.name}</h2>
+                <p id="complete-class-description" className="text-sm text-muted-foreground">
+                  Nhập điểm từ 0 đến 10, nhận xét và chọn kết quả cho từng học viên. Chuyên cần được tính tự động; đi muộn vẫn tính là có mặt.
+                </p>
+              </header>
+              {completeFetcher.data && "error" in completeFetcher.data && (
+                <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                  {completeFetcher.data.error}
+                </p>
+              )}
+              {selectedClass.enrollments.length === 0 ? (
+                <p className="rounded-md border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+                  Lớp chưa có học viên để đánh giá.
+                </p>
+              ) : (
+                <div className="max-h-[55vh] overflow-auto rounded-lg border">
+                  <table className="w-full min-w-[940px] border-collapse text-left">
+                    <caption className="sr-only">Điểm cuối khóa, chuyên cần, nhận xét và kết quả từng học viên</caption>
+                    <thead className="sticky top-0 bg-muted">
+                      <tr className="border-b">
+                        <th scope="col" className="px-3 py-3 text-xs font-semibold text-muted-foreground">Học viên</th>
+                        <th scope="col" className="w-36 px-3 py-3 text-xs font-semibold text-muted-foreground">Điểm cuối khóa</th>
+                        <th scope="col" className="w-36 px-3 py-3 text-xs font-semibold text-muted-foreground">Chuyên cần</th>
+                        <th scope="col" className="min-w-[280px] px-3 py-3 text-xs font-semibold text-muted-foreground">Nhận xét</th>
+                        <th scope="col" className="w-44 px-3 py-3 text-xs font-semibold text-muted-foreground">Kết quả</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {selectedClass.enrollments.map(({ user: student }) => {
+                        const attendanceSummary = getClassAttendanceSummary(
+                          selectedClass.attendanceSessions.map((session) =>
+                            session.records.find((record) => record.studentId === student.id)?.status ?? null
+                          ),
+                        );
+                        const draft = completionDraft[student.id] ?? { score: "", comment: "", decision: "" };
+                        return (
+                          <tr key={student.id}>
+                            <th scope="row" className="px-3 py-3 text-sm font-medium">{student.name}</th>
+                            <td className="px-3 py-3">
+                              <input
+                                aria-label={`Điểm cuối khóa của ${student.name}`}
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="0–10"
+                                value={draft.score}
+                                onChange={(event) => {
+                                  const score = event.currentTarget.value;
+                                  setCompletionDraft((current) => ({
+                                    ...current,
+                                    [student.id]: {
+                                      ...(current[student.id] ?? draft),
+                                      score,
+                                    },
+                                  }));
+                                }}
+                                disabled={isCompleting}
+                                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              />
+                            </td>
+                            <td className="px-3 py-3 text-sm tabular-nums">
+                              <span className="font-medium">{attendanceSummary.percentage}%</span>
+                              <span className="block text-xs text-muted-foreground">{attendanceSummary.attendedSessions}/{attendanceSummary.totalSessions} buổi</span>
+                            </td>
+                            <td className="px-3 py-3">
+                              <textarea
+                                aria-label={`Nhận xét cuối khóa cho ${student.name}`}
+                                value={draft.comment}
+                                onChange={(event) => {
+                                  const comment = event.currentTarget.value;
+                                  setCompletionDraft((current) => ({
+                                    ...current,
+                                    [student.id]: {
+                                      ...(current[student.id] ?? draft),
+                                      comment,
+                                    },
+                                  }));
+                                }}
+                                maxLength={2000}
+                                rows={2}
+                                disabled={isCompleting}
+                                className="min-h-16 w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              />
+                            </td>
+                            <td className="px-3 py-3">
+                              <select
+                                aria-label={`Kết quả cuối khóa của ${student.name}`}
+                                value={draft.decision}
+                                onChange={(event) => {
+                                  const value = event.currentTarget.value;
+                                  const decision = value === "PROMOTE" || value === "REPEAT" ? value : "";
+                                  setCompletionDraft((current) => ({
+                                    ...current,
+                                    [student.id]: {
+                                      ...(current[student.id] ?? draft),
+                                      decision,
+                                    },
+                                  }));
+                                }}
+                                disabled={isCompleting}
+                                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <option value="">Chọn kết quả</option>
+                                <option value="PROMOTE">Lên lớp</option>
+                                <option value="REPEAT">Ở lại</option>
+                              </select>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
-              </div>
+              )}
               <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
                 <Button
                   type="button"
@@ -389,11 +715,11 @@ export default function TeacherClassesPage() {
                 <Button
                   type="button"
                   onClick={confirmCompleteClass}
-                  disabled={isCompleting}
+                  disabled={isCompleting || !completionIsReady}
                   className="w-full sm:w-auto"
                 >
                   {isCompleting && <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />}
-                  {isCompleting ? "Đang hoàn thành..." : "Hoàn thành lớp"}
+                  {isCompleting ? "Đang lưu kết quả..." : "Lưu kết quả và kết thúc khóa"}
                 </Button>
               </div>
             </section>
@@ -471,14 +797,60 @@ export default function TeacherClassesPage() {
               {selectedClass && classView === "active" && (
                 <section className="flex flex-col justify-end gap-3 sm:flex-row">
                   <Button type="button" variant="outline" onClick={completeSelectedClass} disabled={isCompleting} className="w-full sm:w-auto">
-                    <CheckCircle2 className="mr-2 h-4 w-4" />{isCompleting ? "Đang hoàn thành..." : "Hoàn thành lớp học"}
+                    <CheckCircle2 className="mr-2 h-4 w-4" />{isCompleting ? "Đang lưu kết quả..." : "Kết thúc khóa học"}
                   </Button>
                 </section>
               )}
               {selectedClass && classView === "completed" && (
-                <p className="text-sm text-muted-foreground sm:self-end">
-                  Học sinh vẫn có thể truy cập khóa học và tiếp tục làm bài.
-                </p>
+                <div className="space-y-3 lg:col-span-2">
+                  <p className="text-sm text-muted-foreground">
+                    Học sinh vẫn có thể truy cập khóa học và tiếp tục làm bài.
+                  </p>
+                  <section aria-labelledby="final-results-heading" className="overflow-hidden rounded-lg border">
+                    <div className="border-b px-4 py-3">
+                      <h2 id="final-results-heading" className="text-sm font-semibold">Kết quả cuối khóa</h2>
+                    </div>
+                    {selectedClass.finalResults.length === 0 ? (
+                      <p className="px-4 py-5 text-sm text-muted-foreground">
+                        Lớp này được kết thúc trước khi có bảng đánh giá cuối khóa.
+                      </p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full min-w-[700px] border-collapse text-left">
+                          <thead className="bg-muted/50">
+                            <tr className="border-b">
+                              <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Học viên</th>
+                              <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Điểm</th>
+                              <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Chuyên cần</th>
+                              <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Kết quả</th>
+                              <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Nhận xét</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y">
+                            {selectedClass.finalResults.map((result) => {
+                              return (
+                                <tr key={result.studentId}>
+                                  <th scope="row" className="px-4 py-3 text-sm font-medium">{result.student.name}</th>
+                                  <td className="px-4 py-3 text-sm tabular-nums">{result.score}/10</td>
+                                  <td className="px-4 py-3 text-sm tabular-nums">
+                                    {result.totalSessions > 0
+                                      ? `${Math.round((result.attendedSessions / result.totalSessions) * 100)}%`
+                                      : "0%"}
+                                    <span className="ml-1 text-xs text-muted-foreground">
+                                      ({result.attendedSessions}/{result.totalSessions})
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3 text-sm">{result.decision === "PROMOTE" ? "Lên lớp" : "Ở lại"}</td>
+                                  <td className="max-w-sm whitespace-pre-wrap px-4 py-3 text-sm text-muted-foreground">{result.comment}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </section>
+                </div>
               )}
             </div>
             )}
@@ -716,19 +1088,65 @@ export default function TeacherClassesPage() {
                       Lớp chưa có học viên. Tạo tài khoản mới hoặc thêm tài khoản có sẵn.
                     </p>
                   ) : (
-                    <ul className="divide-y rounded-md border">
-                      {selectedClass.enrollments.map(({ user: student }) => (
-                        <li key={student.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-3">
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-medium">{student.name}</p>
-                            <p className="break-all text-xs text-muted-foreground">{student.email}</p>
-                          </div>
-                          <span className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${!student.isActivated ? "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200" : student.isActive ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" : "bg-muted text-muted-foreground"}`}>
-                            {!student.isActivated ? "Chưa kích hoạt" : student.isActive ? "Đang hoạt động" : "Đã khóa"}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
+                    <>
+                      {classView === "active" && (
+                        <p className="mb-3 text-xs text-muted-foreground">
+                          Có thể lưu điểm trước; điểm này sẽ được điền sẵn khi kết thúc khóa. Để trống điểm rồi lưu để xóa.
+                        </p>
+                      )}
+                      <ul className="divide-y rounded-md border">
+                        {selectedClass.enrollments.map(({ user: student }) => {
+                          const savedScore = provisionalScoreByStudent.get(student.id);
+                          const scoreValue = scoreDraft[student.id] ?? String(savedScore ?? "");
+                          return (
+                            <li key={student.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-3">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-medium">{student.name}</p>
+                                <p className="break-all text-xs text-muted-foreground">{student.email}</p>
+                              </div>
+                              <div className="flex w-full items-center gap-2 sm:w-auto">
+                                {classView === "active" && (
+                                  <>
+                                    <label className="min-w-0 flex-1 space-y-1 sm:w-36 sm:flex-none">
+                                      <span className="text-xs text-muted-foreground">Điểm cuối khóa</span>
+                                      <input
+                                        aria-label={`Điểm cuối khóa của ${student.name}`}
+                                        type="text"
+                                        inputMode="decimal"
+                                        placeholder="0–10"
+                                        value={scoreValue}
+                                        onChange={(event) => {
+                                          const score = event.currentTarget.value;
+                                          setScoreDraft((current) => ({
+                                            ...current,
+                                            [student.id]: score,
+                                          }));
+                                        }}
+                                        disabled={isSavingScore || isCompleting}
+                                        className="h-9 w-full rounded-md border border-input bg-background px-2.5 text-sm tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                      />
+                                    </label>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => saveStudentScore(student.id)}
+                                      disabled={isSavingScore || isCompleting}
+                                      className="shrink-0"
+                                    >
+                                      {isSavingScore ? "Đang lưu..." : "Lưu điểm"}
+                                    </Button>
+                                  </>
+                                )}
+                                <span className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${!student.isActivated ? "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200" : student.isActive ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" : "bg-muted text-muted-foreground"}`}>
+                                  {!student.isActivated ? "Chưa kích hoạt" : student.isActive ? "Đang học" : "Đã khóa"}
+                                </span>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </>
                   )}
                 </CardContent>
               </Card>
