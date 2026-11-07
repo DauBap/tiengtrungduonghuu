@@ -13,8 +13,11 @@ const APP_ROOT = path.resolve(SCRIPT_DIR, "..");
 const COURSES_DIR = path.join(PROJECT_ROOT, "courses");
 const PUBLIC_DIR = path.join(APP_ROOT, "public");
 const COURSE_MAP = {
+  "hsk1_2-0": { code: "HSK1-2.0", level: 1 },
   "hsk1_3-0": { code: "HSK1-3.0", level: 1 },
+  "hsk2_2-0": { code: "HSK2-2.0", level: 2 },
   "hsk2_3-0": { code: "HSK2-3.0", level: 2 },
+  "hsk3_2-0": { code: "HSK3-2.0", level: 3 },
   "hsk3_3-0": { code: "HSK3-3.0", level: 3 },
 } as const;
 const OPTION_LABELS = ["A", "B", "C", "D", "E", "F"] as const;
@@ -419,7 +422,7 @@ function sourceWorkbooks(courseFolder?: keyof typeof COURSE_MAP) {
 }
 
 async function main() {
-  if (!ALL) throw new Error("Pass --all to inventory/migrate the three 3.0 workbook sets.");
+  if (!ALL) throw new Error("Pass --all to inventory/migrate the configured workbook sets.");
   const sources = sourceWorkbooks();
   const courseCodes = Object.values(COURSE_MAP).map((item) => item.code);
   const targetCourses = await prisma.course.findMany({
