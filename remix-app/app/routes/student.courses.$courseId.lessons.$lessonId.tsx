@@ -22,7 +22,7 @@ import {
   isLearningBlockType, parseFlashcardConfig, parseListeningConfig, parseWorkbookConfig,
   type WorkbookConfig, type PhoneticsConfig, type LearningBlockType as LearningBlockTypeKey,
 } from "~/lib/learning-blocks";
-import { LessonTabs, type LessonTab } from "~/components/lessons/lesson-tabs";
+import { LessonTabs, type LessonTab, type LessonTabProgressState } from "~/components/lessons/lesson-tabs";
 import { LessonTabEmpty } from "~/components/lessons/lesson-tab-empty";
 import { VocabularyTable } from "~/components/lessons/vocabulary-table";
 import { GrammarSection, type GrammarPracticeSummary } from "~/components/lessons/grammar-section";
@@ -224,6 +224,13 @@ declare global {
   }
 }
 
+function toProgressStateByTab(rows: { tab: string; state: LessonTabProgressState }[]) {
+  return rows.reduce<Record<string, LessonTabProgressState>>((states, { tab, state }) => {
+    states[tab] = state;
+    return states;
+  }, {});
+}
+
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
   const lesson = await requireEnrolledLesson(user.id, params.courseId!, params.lessonId!);
@@ -260,6 +267,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       where: { userId: user.id, lessonId: lesson.id },
       select: {
         tab: true,
+        state: true,
         feedback: {
           orderBy: { createdAt: "desc" },
           take: 1,
@@ -581,6 +589,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     passScore,
     timeLimitMinutes,
     teacherTabComments,
+    lessonTabProgress: teacherTabFeedback.map(({ tab, state }) => ({ tab, state })),
     grammarAttemptsBySection,
     answerReviewGroups,
     reviewFocus,
@@ -1620,7 +1629,7 @@ function AnswerReviewDetails({ groups }: { groups: AnswerReviewGroup[] }) {
 }
 
 export default function LessonDetail() {
-  const { user, lesson, lessonNumber, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewGroups, reviewFocus, phonetics, phoneticsSectionScores, workbookSubmissions, translationQuestions, latestTranslationSubmission } = useLoaderData<typeof loader>();
+  const { user, lesson, lessonNumber, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, lessonTabProgress, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewGroups, reviewFocus, phonetics, phoneticsSectionScores, workbookSubmissions, translationQuestions, latestTranslationSubmission } = useLoaderData<typeof loader>();
   const settings = useAppSettings();
   const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; lessonPinyin: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string; error?: string }>();
   const workbookFetcher = useFetcher<{
@@ -1661,6 +1670,9 @@ export default function LessonDetail() {
   const progressFetcher = useFetcher();
   const translationFetcher = useFetcher<{ intent?: string; success?: boolean; translationError?: string }>();
   const [activeTab, setActiveTab] = useState<LessonTab>(() => reviewFocus?.tab ?? "FLASHCARD");
+  const [tabProgressStates, setTabProgressStates] = useState(
+    () => toProgressStateByTab(lessonTabProgress),
+  );
   const hasGrammar = lesson.grammarSections.length > 0;
   const hasWorkbook = blocks.some((block) => block.type === "WORKBOOK");
   const hasPhonetics = phonetics !== null;
@@ -1676,6 +1688,10 @@ export default function LessonDetail() {
       setActiveTab("FLASHCARD");
     }
   }, [activeTab, hasGrammar, hasWorkbook, hasPhonetics]);
+
+  useEffect(() => {
+    setTabProgressStates(toProgressStateByTab(lessonTabProgress));
+  }, [lessonTabProgress]);
 
   const feedbackTab = activeTab === "TEST" ? "VOCABULARY_TEST" : activeTab;
   const activeTabComment = feedbackTab === "FLASHCARD" || feedbackTab === "VOCABULARY"
@@ -3011,9 +3027,19 @@ export default function LessonDetail() {
           <>
             <LessonTabs
               activeTab={activeTab}
+              progressStates={tabProgressStates}
               onTabChange={(tab) => {
                 setActiveTab(tab);
                 setShowAnswerReview(false);
+                const progressKey = tab === "TEST" ? "VOCABULARY_TEST" : tab;
+                setTabProgressStates((current) => {
+                  const currentState = current[progressKey];
+                  if (currentState === "COMPLETED" || currentState === "NEEDS_REVIEW") return current;
+                  return {
+                    ...current,
+                    [progressKey]: tab === "VOCABULARY" ? "COMPLETED" : "IN_PROGRESS",
+                  };
+                });
                 progressFetcher.submit(
                   { intent: "open-tab", tab },
                   { method: "post" },

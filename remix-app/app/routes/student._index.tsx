@@ -25,7 +25,10 @@ function formatStudyTime(totalSeconds: number) {
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
   const enrollments = await getEnrolledCoursesWithClass(user.id);
-  const myCourses = enrollments.map((e) => e.course);
+  const myCourses = enrollments.map(({ course, class: classroom }) => ({
+    ...course,
+    classroom,
+  }));
 
   const { totalCompleted, currentLesson, courseProgress, overallProgress } =
     await getStudentDashboardStats(user.id, myCourses.map((c) => c.id));
@@ -321,10 +324,20 @@ export default function StudentIndex() {
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className="min-w-0 flex-1 truncate font-semibold">{course.title}</span>
+                          <span className="min-w-0 flex-1 truncate font-semibold">{course.classroom?.name ?? course.title}</span>
                           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">HSK {course.hskLevel}</span>
                         </span>
-                        <span className="mt-1 block truncate text-xs text-muted-foreground">{course.code}</span>
+                        <span className="mt-1 block truncate text-xs text-muted-foreground">{course.title}</span>
+                        {course.classroom && (
+                          <span className="mt-1 block truncate text-xs text-muted-foreground">
+                            {formatSchedule(course.classroom.schedule)}
+                          </span>
+                        )}
+                        {course.classroom?.teacher?.name && (
+                          <span className="mt-1 block truncate text-xs text-muted-foreground">
+                            Giáo viên: {course.classroom.teacher.name}
+                          </span>
+                        )}
                       </span>
                       <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
                     </span>

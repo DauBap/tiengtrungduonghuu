@@ -6,6 +6,7 @@ import type { Course } from "~/types/course";
 import { BookOpen, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
+import { formatSchedule } from "~/lib/schedule-utils";
 
 interface CourseCardProps {
   course: Course;
@@ -13,6 +14,9 @@ interface CourseCardProps {
   progress?: number;
   showStatus?: boolean;
   isClassCompleted?: boolean;
+  classTitle?: string | null;
+  classSchedule?: unknown;
+  teacherName?: string | null;
   ctaLabel?: string;
   compactOnMobile?: boolean;
 }
@@ -33,10 +37,14 @@ export function CourseCard({
   progress,
   showStatus = false,
   isClassCompleted = false,
+  classTitle,
+  classSchedule,
+  teacherName,
   ctaLabel = "Xem khóa học",
   compactOnMobile = false,
 }: CourseCardProps) {
   const shade = HSK_SHADE[course.hskLevel] ?? HSK_SHADE[1];
+  const classScheduleLabel = classSchedule ? formatSchedule(classSchedule) : null;
   return (
     <Card className="group overflow-hidden transition-all hover:shadow-md hover:border-primary/30">
       <div className={cn("relative flex h-32 items-center justify-center bg-gradient-to-br", shade.tint, compactOnMobile && "max-sm:h-16")}>
@@ -63,11 +71,23 @@ export function CourseCard({
         )}
       </div>
       <CardHeader className={cn("pb-2", compactOnMobile && "max-sm:space-y-1 max-sm:p-3 max-sm:pb-1")}>
-        <CardTitle className="text-base font-semibold leading-tight line-clamp-1">{course.title}</CardTitle>
-        <p className="text-xs text-muted-foreground font-mono">{course.code}</p>
+        <CardTitle className="text-base font-semibold leading-tight line-clamp-1">{classTitle || course.title}</CardTitle>
+        {!classTitle && <p className="text-xs text-muted-foreground">{course.code}</p>}
       </CardHeader>
       <CardContent className={cn("space-y-3", compactOnMobile && "max-sm:space-y-2 max-sm:p-3 max-sm:pt-0")}>
-        <p className={cn("text-sm text-muted-foreground line-clamp-2", compactOnMobile && "max-sm:line-clamp-1")}>{course.description}</p>
+        {!classTitle && (
+          <p className={cn("text-sm text-muted-foreground line-clamp-2", compactOnMobile && "max-sm:line-clamp-1")}>{course.description}</p>
+        )}
+        {classScheduleLabel && (
+          <p className="text-sm text-muted-foreground">
+            Lịch học: <span className="font-medium text-foreground">{classScheduleLabel}</span>
+          </p>
+        )}
+        {teacherName && (
+          <p className="text-sm text-muted-foreground">
+            Giáo viên: <span className="font-medium text-foreground">{teacherName}</span>
+          </p>
+        )}
         {typeof progress === "number" && <ProgressBar value={progress} className={compactOnMobile ? "max-sm:space-y-1" : undefined} />}
         <Button asChild size="sm" className={cn("w-full", compactOnMobile && "max-sm:h-8")}>
           <Link to={href}>

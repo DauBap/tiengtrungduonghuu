@@ -12,7 +12,7 @@ import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
-import { ArrowLeft, BookOpen, Layers, FileCheck2, ListChecks, Search, X, ClipboardCheck, Award } from "lucide-react";
+import { ArrowLeft, BookOpen, Layers, FileCheck2, ListChecks, Search, X, ClipboardCheck, Award, CheckCircle2 } from "lucide-react";
 import type { ProgressStatus } from "~/types/progress";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
 import {
@@ -362,7 +362,15 @@ export default function StudentCourseDetail() {
         </div>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Tiến độ khóa học</CardTitle></CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between gap-3">
+            <CardTitle className="text-base">Tiến độ khóa học</CardTitle>
+            {isClassCompleted && (
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-emerald-700/20 bg-emerald-700/10 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-300/20 dark:bg-emerald-300/10 dark:text-emerald-300">
+                <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5" />
+                Khóa học đã kết thúc
+              </span>
+            )}
+          </CardHeader>
           <CardContent><ProgressBar value={courseProgress} /></CardContent>
         </Card>
 

@@ -14,13 +14,23 @@ export async function loader({ request }: LoaderFunctionArgs) {
     where: { userId: user.id },
     select: {
       course: true,
-      class: { select: { completedAt: true } },
+      class: {
+        select: {
+          completedAt: true,
+          name: true,
+          schedule: true,
+          teacher: { select: { name: true } },
+        },
+      },
     },
     orderBy: { course: { order: "asc" } },
   });
   const myCourses = enrollments.map(({ course, class: classroom }) => ({
     course,
     isClassCompleted: Boolean(classroom?.completedAt),
+    classTitle: classroom?.name ?? null,
+    classSchedule: classroom?.schedule,
+    teacherName: classroom?.teacher?.name ?? null,
   }));
   const courseList = myCourses.map(({ course }) => course);
 
@@ -44,10 +54,10 @@ export default function StudentCourses() {
         {myCourses.length === 0
           ? <EmptyState icon={<BookOpen className="h-10 w-10" />} title="Chưa đăng ký khóa học nào" message="Bạn chưa đăng ký khóa học nào." />
           : <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-              {myCourses.map(({ course, isClassCompleted }) => (
+              {myCourses.map(({ course, isClassCompleted, classTitle, classSchedule, teacherName }) => (
                 <CourseCard key={course.id} course={{ ...course, createdAt: course.createdAt.toISOString(), updatedAt: course.updatedAt.toISOString() }}
                   href={`/student/courses/${course.id}`} progress={courseProgress[course.id]} ctaLabel="Tiếp tục học" compactOnMobile
-                  isClassCompleted={isClassCompleted} />
+                  isClassCompleted={isClassCompleted} classTitle={classTitle} classSchedule={classSchedule} teacherName={teacherName} />
               ))}
             </div>}
       </div>

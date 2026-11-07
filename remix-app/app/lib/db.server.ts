@@ -61,7 +61,15 @@ export async function getEnrolledCoursesWithClass(userId: string) {
     where: { userId },
     include: {
       course: true,
-      class: { select: { id: true, name: true, schedule: true, maxStudents: true } }
+      class: {
+        select: {
+          id: true,
+          name: true,
+          schedule: true,
+          maxStudents: true,
+          teacher: { select: { name: true } },
+        },
+      }
     },
     orderBy: { course: { order: "asc" } },
   });
