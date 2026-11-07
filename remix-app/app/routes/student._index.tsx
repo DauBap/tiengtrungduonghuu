@@ -96,6 +96,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       className: classEnrollments[0].class!.name,
       title: course.title,
       code: course.code,
+      isMyClass: classEnrollments.some((enrollment) => enrollment.userId === user.id),
       students: classEnrollments
         .map((enrollment) => ({
           userId: enrollment.userId,
@@ -108,7 +109,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
           || left.name.localeCompare(right.name, "vi")
         ),
     }));
-  });
+  }).sort((left, right) =>
+    Number(right.isMyClass) - Number(left.isMyClass)
+    || left.className.localeCompare(right.className, "vi")
+    || left.title.localeCompare(right.title, "vi")
+  );
 
   return {
     user,
@@ -363,7 +368,7 @@ export default function StudentIndex() {
 
             {isLeaderboardOpen && (
               <div
-                className="fixed inset-0 !mt-0 z-50 flex items-end justify-end bg-black/40 p-3 sm:p-6"
+                className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-6"
                 role="presentation"
               >
                 <section
@@ -409,6 +414,11 @@ export default function StudentIndex() {
                           }`}
                         >
                           {classLeaderboard.className}
+                          {classLeaderboard.isMyClass && (
+                            <span className="ml-2 rounded-full bg-background/20 px-2 py-0.5 text-[11px] font-semibold">
+                              Lớp của bạn
+                            </span>
+                          )}
                         </button>
                       ))}
                     </div>
@@ -428,10 +438,10 @@ export default function StudentIndex() {
                               {selectedLeaderboard.students.length} học viên
                             </span>
                           </div>
-                          <div className="overflow-x-auto">
+                          <div className="max-h-[min(30rem,65vh)] overflow-auto">
                             <table className="w-full min-w-[480px] text-xs">
                               <thead>
-                                <tr className="border-b text-left text-muted-foreground">
+                                <tr className="sticky top-0 border-b bg-background text-left text-muted-foreground">
                                   <th scope="col" className="px-2 py-2 font-medium">#</th>
                                   <th scope="col" className="px-2 py-2 font-medium">Học viên</th>
                                   <th scope="col" className="w-[40%] px-2 py-2 font-medium">Thời gian học</th>
