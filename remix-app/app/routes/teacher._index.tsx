@@ -1215,6 +1215,7 @@ export default function TeacherIndex() {
   const [selectedLessonReview, setSelectedLessonReview] = useState<LessonReviewDialogState | null>(null);
   const [selectedLessonScriptId, setSelectedLessonScriptId] = useState<string | null>(null);
   const [pendingGrammarClassId, setPendingGrammarClassId] = useState<string | null>(null);
+  const [pendingGradingTab, setPendingGradingTab] = useState<"grammar" | "translation">("grammar");
   const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
   const [workbookGradingAttemptId, setWorkbookGradingAttemptId] = useState<string | null>(null);
   const [selectedTranslationSubmissionId, setSelectedTranslationSubmissionId] = useState<string | null>(initialTranslationSubmission?.id ?? null);
@@ -1230,6 +1231,15 @@ export default function TeacherIndex() {
   const handledInitialTranslationNavigationKey = useRef<string | null>(null);
   const selectedClass = classSummaries.find((cls) => cls.id === selectedClassId) ?? classSummaries[0];
   const pendingGrammarClass = classSummaries.find((cls) => cls.id === pendingGrammarClassId);
+  const pendingGradingTabs = pendingGrammarClass
+    ? [
+        { id: "grammar" as const, label: "Ngữ pháp", count: pendingGrammarClass.pendingGrammarAttempts.length },
+        { id: "translation" as const, label: "Luyện dịch", count: pendingGrammarClass.pendingTranslationSubmissions.length },
+      ].filter((tab) => tab.count > 0)
+    : [];
+  const activePendingGradingTab = pendingGradingTabs.some((tab) => tab.id === pendingGradingTab)
+    ? pendingGradingTab
+    : pendingGradingTabs[0]?.id ?? "grammar";
   const openReviewProgress = (
     review: { id: string; title: string },
     student: { id: string; name: string | null; email: string },
@@ -1671,6 +1681,7 @@ export default function TeacherIndex() {
                             aria-label={`Cần chấm ${pendingCount} bài của lớp ${cls.name}`}
                             onClick={() => {
                               setPendingGrammarClassId(cls.id);
+                              setPendingGradingTab(cls.pendingGrammarAttempts.length > 0 ? "grammar" : "translation");
                               setGradingQueue(cls.pendingGrammarAttempts.map((attempt) => ({ courseId: cls.courseId, attempt })));
                               setGradingQueueIndex(null);
                               setGradingComplete(false);
@@ -2445,60 +2456,108 @@ export default function TeacherIndex() {
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              <ul className="divide-y overflow-y-auto p-4 sm:p-5">
-                {pendingGrammarClass.pendingGrammarAttempts.length > 0 && (
-                  <li className="px-3 pb-2 pt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Ngữ pháp · {pendingGrammarClass.pendingGrammarAttempts.length}
-                  </li>
-                )}
-                {pendingGrammarClass.pendingGrammarAttempts.map((attempt) => (
-                  <li key={attempt.id}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        startGradingQueue(
-                          pendingGrammarClass.id,
-                          pendingGrammarClass.courseId,
-                          pendingGrammarClass.pendingGrammarAttempts,
-                          attempt,
-                        );
-                      }}
-                      className="group flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <span className="min-w-0 flex-1 break-words font-medium">{attempt.studentName} · {attempt.lessonTitle} · {attempt.sectionTitle}</span>
-                      <span className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-md border border-primary px-3 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                        Chấm bài <ArrowUpRight className="h-3.5 w-3.5" />
-                      </span>
-                    </button>
-                  </li>
+              <div
+                role="tablist"
+                aria-label="Loại bài cần chấm"
+                className="flex shrink-0 gap-5 border-b px-4 sm:px-5"
+              >
+                {pendingGradingTabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    id={`pending-grading-tab-${tab.id}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={activePendingGradingTab === tab.id}
+                    aria-controls="pending-grading-panel"
+                    data-grading-tab={tab.id}
+                    tabIndex={activePendingGradingTab === tab.id ? 0 : -1}
+                    onClick={() => setPendingGradingTab(tab.id)}
+                    onKeyDown={(event) => {
+                      const currentIndex = pendingGradingTabs.findIndex((item) => item.id === tab.id);
+                      let nextIndex: number | null = null;
+                      if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % pendingGradingTabs.length;
+                      if (event.key === "ArrowLeft") nextIndex = (currentIndex - 1 + pendingGradingTabs.length) % pendingGradingTabs.length;
+                      if (event.key === "Home") nextIndex = 0;
+                      if (event.key === "End") nextIndex = pendingGradingTabs.length - 1;
+                      if (nextIndex === null) return;
+                      event.preventDefault();
+                      const nextTab = pendingGradingTabs[nextIndex];
+                      setPendingGradingTab(nextTab.id);
+                      event.currentTarget.parentElement
+                        ?.querySelector<HTMLButtonElement>(`[data-grading-tab="${nextTab.id}"]`)
+                        ?.focus();
+                    }}
+                    className={`-mb-px inline-flex min-h-12 items-center gap-2 border-b-2 px-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      activePendingGradingTab === tab.id
+                        ? "border-primary text-foreground"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {tab.label}
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${
+                      activePendingGradingTab === tab.id ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                    }`}>
+                      {tab.count}
+                    </span>
+                  </button>
                 ))}
-                {pendingGrammarClass.pendingTranslationSubmissions.length > 0 && (
-                  <li className="px-3 pb-2 pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Luyện dịch · {pendingGrammarClass.pendingTranslationSubmissions.length}
-                  </li>
+              </div>
+              <div
+                id="pending-grading-panel"
+                role="tabpanel"
+                aria-labelledby={`pending-grading-tab-${activePendingGradingTab}`}
+                className="min-h-0 overflow-y-auto p-4 sm:p-5"
+              >
+                {activePendingGradingTab === "grammar" ? (
+                  <ul className="divide-y">
+                    {pendingGrammarClass.pendingGrammarAttempts.map((attempt) => (
+                      <li key={attempt.id}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            startGradingQueue(
+                              pendingGrammarClass.id,
+                              pendingGrammarClass.courseId,
+                              pendingGrammarClass.pendingGrammarAttempts,
+                              attempt,
+                            );
+                          }}
+                          className="group flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <span className="min-w-0 flex-1 break-words font-medium">{attempt.studentName} · {attempt.lessonTitle} · {attempt.sectionTitle}</span>
+                          <span className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-md border border-primary px-3 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                            Chấm bài <ArrowUpRight className="h-3.5 w-3.5" />
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <ul className="divide-y">
+                    {pendingGrammarClass.pendingTranslationSubmissions.map((submission) => (
+                      <li key={submission.id}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPendingGrammarClassId(null);
+                            setGradingQueueIndex(null);
+                            setSelectedClassId(pendingGrammarClass.id);
+                            setSelectedTranslationSubmissionId(submission.id);
+                          }}
+                          className="group flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <span className="min-w-0 flex-1 break-words font-medium">
+                            {submission.student.name ?? submission.student.email} · {submission.lesson.title}
+                          </span>
+                          <span className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-md border border-primary px-3 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                            Chấm bài <ArrowUpRight className="h-3.5 w-3.5" />
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 )}
-                {pendingGrammarClass.pendingTranslationSubmissions.map((submission) => (
-                  <li key={submission.id}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPendingGrammarClassId(null);
-                        setGradingQueueIndex(null);
-                        setSelectedClassId(pendingGrammarClass.id);
-                        setSelectedTranslationSubmissionId(submission.id);
-                      }}
-                      className="group flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <span className="min-w-0 flex-1 break-words font-medium">
-                        {submission.student.name ?? submission.student.email} · {submission.lesson.title}
-                      </span>
-                      <span className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-md border border-primary px-3 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                        Chấm bài <ArrowUpRight className="h-3.5 w-3.5" />
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              </div>
             </section>
           </div>
         )}
