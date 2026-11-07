@@ -3043,7 +3043,7 @@ export default function TeacherIndex() {
 
         {selectedReviewProgress && (
           <div
-            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/45 p-3 sm:p-6"
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-5"
             role="presentation"
             onClick={(event) => {
               if (event.target === event.currentTarget && reviewGradingFetcher.state === "idle") {
@@ -3055,13 +3055,15 @@ export default function TeacherIndex() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="review-progress-title"
-              className="max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-lg border bg-background p-5 shadow-xl"
+              className="flex max-h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-2xl"
             >
-              <div className="mb-3 flex items-start justify-between gap-3">
+              <header className="flex shrink-0 items-start justify-between gap-4 border-b px-4 py-3.5 sm:px-6">
                 <div className="min-w-0">
-                  <h2 id="review-progress-title" className="break-words text-base font-semibold leading-tight">{selectedReviewProgress.reviewTitle}</h2>
-                  <p className="mt-1 break-words text-sm text-muted-foreground">
-                    {selectedReviewProgress.studentName} · {selectedReviewProgressData?.selectedClass?.name ?? "Tiến độ ôn tập"}
+                  <h2 id="review-progress-title" className="break-words text-lg font-semibold leading-tight">{selectedReviewProgress.reviewTitle}</h2>
+                  <p className="mt-1.5 break-words text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">{selectedReviewProgress.studentName}</span>
+                    {" · "}
+                    {selectedReviewProgressData?.selectedClass?.name ?? "Tiến độ ôn tập"}
                   </p>
                 </div>
                 <button
@@ -3069,14 +3071,14 @@ export default function TeacherIndex() {
                   aria-label="Đóng tiến độ ôn tập"
                   disabled={reviewGradingFetcher.state !== "idle"}
                   onClick={closeReviewProgress}
-                  className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                  className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
                 >
                   <X className="h-4 w-4" />
                 </button>
-              </div>
-              <div>
+              </header>
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4 sm:px-6 sm:py-5">
                 {reviewGradingFetcher.data?.error && (
-                  <p role="alert" className="mb-3 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                  <p role="alert" className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-3.5 py-3 text-sm text-destructive">
                     {reviewGradingFetcher.data.error}
                   </p>
                 )}
@@ -3094,13 +3096,12 @@ export default function TeacherIndex() {
                     Học viên chưa có lượt làm bài ôn tập này.
                   </p>
                 ) : (
-                    <ol className="space-y-4">
+                    <ol className="space-y-5">
                       {selectedReviewAttempts.map((attempt, index) => (
-                        <li key={attempt.id}>
+                        <li key={attempt.id} className="overflow-hidden rounded-xl border bg-card">
                           <reviewGradingFetcher.Form
                             method="post"
                             action={`/teacher/courses/${selectedReviewProgressData.course.id}/progress/reviews/${selectedReviewProgress.reviewId}?classId=${encodeURIComponent(selectedReviewProgress.classId)}`}
-                            className="space-y-3"
                           >
                             {attempt.status !== "RETURNED" && (
                               <>
@@ -3108,26 +3109,32 @@ export default function TeacherIndex() {
                                 <input type="hidden" name="attemptId" value={attempt.id} />
                               </>
                             )}
-                            <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b bg-muted/30 px-4 py-3.5 sm:px-5">
                               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                                <h3 className="font-medium">Lượt làm {selectedReviewAttempts.length - index}</h3>
+                                <h3 className="font-semibold">Lượt làm {selectedReviewAttempts.length - index}</h3>
                                 <time className="text-xs text-muted-foreground" dateTime={attempt.date}>
                                   {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(attempt.date))}
                                 </time>
                               </div>
-                              <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold tabular-nums">
+                              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                attempt.status === "RETURNED"
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+                                  : attempt.status === "GRADED"
+                                    ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-200"
+                                    : "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
+                              }`}>
                                 {attempt.status === "RETURNED"
                                   ? `${attempt.correctCount}/${attempt.totalQuestions} câu · ${attempt.percentage}%`
                                   : attempt.status === "GRADED" ? "Đã chấm · chờ trả" : "Chờ chấm"}
                               </span>
                             </div>
-                            <ol className="divide-y rounded-md border">
+                            <ol className="divide-y">
                               {attempt.answers.map((answer, answerIndex) => (
-                                <li key={`${attempt.id}-${answerIndex}`} className="space-y-3 px-3 py-4 text-sm">
-                                  <div className="flex flex-wrap items-center justify-between gap-2">
-                                    <div className="flex min-w-0 items-baseline gap-2">
-                                      <span className="shrink-0 font-semibold">Câu {answerIndex + 1}</span>
-                                      <p className="break-words font-semibold">{answer.prompt}</p>
+                                <li key={`${attempt.id}-${answerIndex}`} className="space-y-3.5 px-4 py-4 sm:px-5">
+                                  <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
+                                    <div className="flex min-w-0 flex-1 items-start gap-2.5">
+                                      <span className="mt-px shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Câu {answerIndex + 1}</span>
+                                      <p className="min-w-0 break-words text-sm font-semibold leading-5">{answer.prompt}</p>
                                     </div>
                                     {attempt.status === "RETURNED" ? (
                                       <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -3140,90 +3147,87 @@ export default function TeacherIndex() {
                                         {answer.correct ? "Đúng" : "Chưa đúng"}
                                       </span>
                                     ) : (
-                                      <label className="flex shrink-0 items-center gap-2 text-sm font-medium">
-                                        Kết quả
-                                        <select
-                                          name={`grade-${answer.questionId}`}
-                                          required
-                                          defaultValue={answer.correct === null ? "" : answer.correct ? "correct" : "incorrect"}
-                                          aria-label={`Chấm câu ${answerIndex + 1}`}
-                                          onChange={() => markReviewAttemptDirty(attempt.id)}
-                                          className="rounded-md border bg-background px-2 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                        >
-                                          <option value="" disabled>Chọn</option>
-                                          <option value="correct">Đúng</option>
-                                          <option value="incorrect">Sai</option>
-                                        </select>
-                                      </label>
+                                      <fieldset
+                                        aria-label={`Chấm câu ${answerIndex + 1}`}
+                                        className="flex shrink-0 items-center gap-1.5"
+                                      >
+                                        <legend className="sr-only">Chấm câu {answerIndex + 1}</legend>
+                                        <label className="cursor-pointer">
+                                          <input
+                                            type="radio"
+                                            name={`grade-${answer.questionId}`}
+                                            value="correct"
+                                            required
+                                            defaultChecked={answer.correct === true}
+                                            onChange={() => markReviewAttemptDirty(attempt.id)}
+                                            className="peer sr-only"
+                                          />
+                                          <span className="flex min-h-9 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted peer-checked:border-emerald-600 peer-checked:bg-emerald-600 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
+                                            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                            Đúng
+                                          </span>
+                                        </label>
+                                        <label className="cursor-pointer">
+                                          <input
+                                            type="radio"
+                                            name={`grade-${answer.questionId}`}
+                                            value="incorrect"
+                                            required
+                                            defaultChecked={answer.correct === false}
+                                            onChange={() => markReviewAttemptDirty(attempt.id)}
+                                            className="peer sr-only"
+                                          />
+                                          <span className="flex min-h-9 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted peer-checked:border-rose-600 peer-checked:bg-rose-600 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
+                                            <XCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                                            Sai
+                                          </span>
+                                        </label>
+                                      </fieldset>
                                     )}
                                   </div>
                                   <div className="grid gap-2 sm:grid-cols-2">
-                                    <div className={`min-w-0 rounded-md border px-3 py-2.5 ${
-                                      answer.correct === null
-                                        ? "border-border bg-muted/40"
-                                        : answer.correct
-                                        ? "border-emerald-200 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/25"
-                                        : answer.answer
-                                          ? "border-rose-200 bg-rose-50/70 dark:border-rose-900 dark:bg-rose-950/25"
-                                          : "border-amber-200 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/25"
-                                    }`}>
-                                      <p className={`text-xs font-medium ${
-                                        answer.correct === null
-                                          ? "text-muted-foreground"
-                                          : answer.correct
-                                          ? "text-emerald-800 dark:text-emerald-200"
-                                          : answer.answer
-                                            ? "text-rose-800 dark:text-rose-200"
-                                            : "text-amber-900 dark:text-amber-200"
-                                      }`}>Học viên trả lời</p>
-                                      <p className={`mt-1 break-words font-medium ${
-                                        answer.correct === null
-                                          ? "text-foreground"
-                                          : answer.correct
-                                          ? "text-emerald-950 dark:text-emerald-100"
-                                          : answer.answer
-                                            ? "text-rose-950 dark:text-rose-100"
-                                            : "text-amber-950 dark:text-amber-100"
-                                      }`}>{answer.answer || "Chưa trả lời"}</p>
-                                      {attempt.status === "RETURNED" && answer.feedback && (
-                                        <p className="mt-2 whitespace-pre-wrap border-t pt-2 text-sm text-muted-foreground">
-                                          <span className="font-medium text-foreground">Nhận xét: </span>{answer.feedback}
-                                        </p>
-                                      )}
-                                      {attempt.status !== "RETURNED" && (
-                                        <label className="mt-2 block text-xs font-medium">
-                                          Nhận xét (không bắt buộc)
-                                          <textarea
-                                            name={`feedback-${answer.questionId}`}
-                                            defaultValue={answer.feedback}
-                                            maxLength={2000}
-                                            rows={2}
-                                            onChange={() => markReviewAttemptDirty(attempt.id)}
-                                            className="mt-1 w-full resize-y rounded-md border bg-background px-2 py-1.5 text-sm font-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                          />
-                                        </label>
-                                      )}
+                                    <div className="min-w-0 rounded-md border bg-muted/20 px-3 py-2.5">
+                                      <p className="text-xs font-medium text-muted-foreground">Học viên trả lời</p>
+                                      <p className="mt-1 break-words text-sm font-medium leading-5 text-foreground">{answer.answer || "Chưa trả lời"}</p>
                                     </div>
-                                    <div className="min-w-0 rounded-md border border-emerald-200 bg-emerald-50/70 px-3 py-2.5 dark:border-emerald-900 dark:bg-emerald-950/25">
+                                    <div className="min-w-0 rounded-md border border-emerald-200 bg-emerald-50/50 px-3 py-2.5 dark:border-emerald-900 dark:bg-emerald-950/20">
                                       <p className="text-xs font-medium text-emerald-800 dark:text-emerald-200">Đáp án đúng</p>
-                                      <p className="mt-1 break-words font-medium text-emerald-950 dark:text-emerald-100">{answer.correctAnswer}</p>
+                                      <p className="mt-1 break-words text-sm font-medium leading-5 text-emerald-950 dark:text-emerald-100">{answer.correctAnswer}</p>
                                     </div>
                                   </div>
+                                  {attempt.status === "RETURNED" && answer.feedback ? (
+                                    <p className="whitespace-pre-wrap text-sm leading-5 text-muted-foreground">
+                                      <span className="font-medium text-foreground">Nhận xét: </span>{answer.feedback}
+                                    </p>
+                                  ) : attempt.status !== "RETURNED" ? (
+                                    <label className="block text-xs font-medium text-muted-foreground">
+                                      Nhận xét <span className="font-normal">(không bắt buộc)</span>
+                                      <textarea
+                                        name={`feedback-${answer.questionId}`}
+                                        defaultValue={answer.feedback}
+                                        maxLength={2000}
+                                        rows={2}
+                                        onChange={() => markReviewAttemptDirty(attempt.id)}
+                                        className="mt-1 w-full resize-y rounded-md border bg-background px-3 py-2 text-sm font-normal text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                      />
+                                    </label>
+                                  ) : null}
                                 </li>
                               ))}
                             </ol>
                             {attempt.status !== "RETURNED" && (
-                              <div className="flex justify-end">
+                              <footer className="sticky bottom-0 flex justify-end border-t bg-background/95 px-4 py-3 backdrop-blur-sm sm:px-5">
                                 <Button
                                   type="submit"
                                   name="intent"
                                   value="return-review-grades"
                                   disabled={reviewGradingFetcher.state !== "idle"}
+                                  className="min-h-10"
                                 >
                                   {reviewGradingFetcher.state !== "idle" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                   Trả kết quả
                                 </Button>
-                              </div>
+                              </footer>
                             )}
                           </reviewGradingFetcher.Form>
                         </li>
