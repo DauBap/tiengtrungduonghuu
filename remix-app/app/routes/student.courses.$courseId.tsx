@@ -12,7 +12,7 @@ import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
-import { ArrowLeft, BookOpen, Layers, FileCheck2, ListChecks, Search, X, ClipboardCheck, Award, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, BookOpen, Layers, FileCheck2, ListChecks, Search, X, ClipboardCheck, Award, CheckCircle2, Video } from "lucide-react";
 import type { ProgressStatus } from "~/types/progress";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
 import {
@@ -68,6 +68,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       select: {
         class: {
           select: {
+            id: true,
             name: true,
             completedAt: true,
             finalResults: {
@@ -81,9 +82,15 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
               },
             },
             attendanceSessions: {
-              where: { lessonId: { not: null } },
               orderBy: [{ date: "desc" }, { createdAt: "desc" }],
-              select: { lessonId: true, recordingUrl: true },
+              select: {
+                id: true,
+                title: true,
+                lesson: true,
+                date: true,
+                recordingUrl: true,
+                courseLesson: { select: { order: true, title: true } },
+              },
             },
           },
         },
@@ -92,18 +99,18 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   ]);
   const classFinalResult = enrollment?.class?.finalResults[0] ?? null;
   const isClassCompleted = Boolean(enrollment?.class?.completedAt);
-  const lessonVideoById: Record<string, string> = {};
-  for (const session of enrollment?.class?.attendanceSessions ?? []) {
-    if (!session.lessonId || !session.recordingUrl || lessonVideoById[session.lessonId]) continue;
-    try {
-      const url = new URL(session.recordingUrl);
-      if (url.protocol === "https:" || url.protocol === "http:") {
-        lessonVideoById[session.lessonId] = url.toString();
+  const attendanceSessions = (enrollment?.class?.attendanceSessions ?? []).map((session) => {
+    let recordingUrl: string | null = null;
+    if (session.recordingUrl) {
+      try {
+        const url = new URL(session.recordingUrl);
+        if (url.protocol === "https:" || url.protocol === "http:") recordingUrl = url.toString();
+      } catch {
+        recordingUrl = null;
       }
-    } catch {
-      // Invalid legacy URLs stay unavailable; teachers can replace them from attendance.
     }
-  }
+    return { ...session, recordingUrl };
+  });
   const mockExams = await prisma.mockExam.findMany({
     where: { courseId: course.id, isPublished: true },
     orderBy: { createdAt: "asc" },
@@ -225,12 +232,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     user,
     course: { ...course, createdAt: course.createdAt.toISOString(), updatedAt: course.updatedAt.toISOString() },
     lessonsWithStatus,
-    lessonVideoById,
     reviewSets,
     courseProgress,
     mockExams: mockExamsWithLabels,
     isClassCompleted,
+    classId: enrollment?.class?.id ?? null,
     className: enrollment?.class?.name ?? null,
+    attendanceSessions,
     classFinalResult,
   };
 }
@@ -240,22 +248,35 @@ export default function StudentCourseDetail() {
     user,
     course,
     lessonsWithStatus,
-    lessonVideoById,
     reviewSets,
     courseProgress,
     mockExams,
     isClassCompleted,
+    classId,
     className,
+    attendanceSessions,
     classFinalResult,
   } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const [isFinalResultOpen, setIsFinalResultOpen] = useState(false);
   const finalResultDialogRef = useRef<HTMLElement>(null);
   const finalResultCloseRef = useRef<HTMLButtonElement>(null);
+  const recordingsDialogRef = useRef<HTMLDialogElement>(null);
+  const recordingsCloseRef = useRef<HTMLButtonElement>(null);
+  const [isRecordingsOpen, setIsRecordingsOpen] = useState(false);
   const [combinedMode, setCombinedMode] = useState<"study" | "test" | null>(null);
   const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([]);
   const [lessonSearchQuery, setLessonSearchQuery] = useState("");
-  useModalScrollLock(combinedMode !== null || isFinalResultOpen);
+  useModalScrollLock(combinedMode !== null || isFinalResultOpen || isRecordingsOpen);
+  useEffect(() => {
+    const dialog = recordingsDialogRef.current;
+    if (!dialog) return;
+    if (isRecordingsOpen && !dialog.open) {
+      dialog.showModal();
+      recordingsCloseRef.current?.focus();
+    }
+    if (!isRecordingsOpen && dialog.open) dialog.close();
+  }, [isRecordingsOpen]);
   useEffect(() => {
     if (!isFinalResultOpen) return;
 
@@ -467,14 +488,39 @@ export default function StudentCourseDetail() {
         <div>
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-lg font-semibold">Bài học</h2>
-            {lessonsWithStatus.length > 0 && (
+            {(lessonsWithStatus.length > 0 || classId) && (
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={() => setCombinedMode("study")}>
-                  <Layers className="mr-1.5 h-4 w-4" />Học tổng hợp
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setCombinedMode("test")}>
-                  <ClipboardCheck className="mr-1.5 h-4 w-4" />Thi tổng hợp
-                </Button>
+                {classId && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsRecordingsOpen(true)}
+                    className="hover:border-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <Video aria-hidden="true" className="mr-1.5 h-4 w-4" />Bản ghi buổi học
+                  </Button>
+                )}
+                {lessonsWithStatus.length > 0 && (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCombinedMode("study")}
+                      className="hover:border-primary hover:bg-primary hover:text-primary-foreground"
+                    >
+                      <Layers className="mr-1.5 h-4 w-4" />Học tổng hợp
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCombinedMode("test")}
+                      className="hover:border-primary hover:bg-primary hover:text-primary-foreground"
+                    >
+                      <ClipboardCheck className="mr-1.5 h-4 w-4" />Thi tổng hợp
+                    </Button>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -484,7 +530,6 @@ export default function StudentCourseDetail() {
                 {orderedCourseItems.map((entry) => {
                   if (entry.kind === "lesson") {
                     const lesson = entry.item as (typeof lessonsWithStatus)[number];
-                    const videoUrl = lessonVideoById[lesson.id];
                     return (
                       <LessonCard
                         key={lesson.id}
@@ -492,7 +537,6 @@ export default function StudentCourseDetail() {
                         status={lesson.status}
                         index={(lessonNumbers.get(lesson.id) ?? 1) - 1}
                         href={`/student/courses/${course.id}/lessons/${lesson.id}`}
-                        videoUrl={videoUrl}
                       />
                     );
                   }
@@ -545,6 +589,79 @@ export default function StudentCourseDetail() {
                 ))}
               </div>}
         </section>
+
+        {classId && (
+          <dialog
+            ref={recordingsDialogRef}
+            aria-labelledby="student-recordings-heading"
+            onClose={() => setIsRecordingsOpen(false)}
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setIsRecordingsOpen(false);
+            }}
+            className="fixed left-1/2 top-1/2 m-0 max-h-[85vh] w-[calc(100%-1rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border bg-background p-0 text-foreground shadow-xl backdrop:bg-black/50"
+          >
+            <section className="flex max-h-[85vh] flex-col">
+              <header className="flex items-start justify-between gap-4 border-b bg-muted/30 px-4 py-4 sm:px-6">
+                <div>
+                  <h2 id="student-recordings-heading" className="font-semibold">Bản ghi buổi học</h2>
+                  <p className="mt-0.5 text-sm text-muted-foreground">
+                    {className ?? course.title} · {attendanceSessions.length} buổi
+                  </p>
+                </div>
+                <Button
+                  ref={recordingsCloseRef}
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Đóng danh sách bản ghi"
+                  onClick={() => setIsRecordingsOpen(false)}
+                  className="h-8 w-8 shrink-0"
+                >
+                  <X aria-hidden="true" className="h-4 w-4" />
+                </Button>
+              </header>
+              {attendanceSessions.length === 0 ? (
+                <div className="px-5 py-10 text-center">
+                  <Video aria-hidden="true" className="mx-auto h-7 w-7 text-muted-foreground" />
+                  <p className="mt-3 text-sm font-medium">Chưa có buổi học hoặc bản ghi</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Khi giáo viên đăng link, buổi học sẽ xuất hiện tại đây.</p>
+                </div>
+              ) : (
+                <ol className="divide-y overflow-y-auto">
+                  {attendanceSessions.map((session) => (
+                    <li key={session.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <h3 className="font-medium">{session.title}</h3>
+                        {(session.courseLesson || session.lesson) && (
+                          <p className="mt-0.5 text-sm text-muted-foreground">
+                            {session.courseLesson
+                              ? `Bài ${session.courseLesson.order} · ${session.courseLesson.title}`
+                              : session.lesson}
+                          </p>
+                        )}
+                        <time className="mt-1 block text-sm text-muted-foreground">
+                          {session.date.toLocaleDateString("vi-VN")}
+                        </time>
+                      </div>
+                      {session.recordingUrl ? (
+                        <a
+                          href={session.recordingUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          Xem bản ghi<ArrowUpRight aria-hidden="true" className="h-4 w-4" />
+                        </a>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">Chưa có bản ghi</span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </section>
+          </dialog>
+        )}
 
         {combinedMode !== null && (
           <div

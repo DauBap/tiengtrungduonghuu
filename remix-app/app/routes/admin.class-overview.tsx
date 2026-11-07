@@ -67,6 +67,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             lesson: true,
             date: true,
             recordingUrl: true,
+            courseLesson: { select: { order: true, title: true } },
             records: { select: { studentId: true, status: true } },
           },
         },
@@ -274,14 +275,9 @@ export default function AdminClassOverview() {
           ) : (
             <div className="divide-y rounded-lg border bg-card">
               {filteredClasses.map((classroom) => {
-                const lessonVideoById = new Map<string, string>();
-                for (const session of classroom.attendanceSessions) {
-                  const recordUrl = getSafeRecordUrl(session.recordingUrl);
-                  if (session.lessonId && recordUrl && !lessonVideoById.has(session.lessonId)) {
-                    lessonVideoById.set(session.lessonId, recordUrl);
-                  }
-                }
-                const linkedLessonCount = classroom.course.lessons.filter(({ id }) => lessonVideoById.has(id)).length;
+                const linkedSessionCount = classroom.attendanceSessions.filter(
+                  ({ recordingUrl }) => getSafeRecordUrl(recordingUrl),
+                ).length;
                 const scoresByStudent = new Map(classroom.studentScores.map(({ studentId, score }) => [studentId, score]));
                 const studentsRegisteredForHigherHsk = new Set(
                   classroom.enrollments
@@ -336,13 +332,13 @@ export default function AdminClassOverview() {
                             type="button"
                             variant="outline"
                             onClick={() => setSelectedRecordClassId(classroom.id)}
-                            disabled={classroom.course.lessons.length === 0}
-                            aria-label={`Xem video bài học của lớp ${classroom.name}`}
+                            disabled={classroom.attendanceSessions.length === 0}
+                            aria-label={`Xem bản ghi buổi học của lớp ${classroom.name}`}
                             className="shrink-0"
                           >
                             <Video aria-hidden="true" className="mr-2 h-4 w-4" />
-                            Video bài học
-                            <span className="ml-2 text-xs text-muted-foreground">{linkedLessonCount}/{classroom.course.lessons.length}</span>
+                            Bản ghi buổi học
+                            <span className="ml-2 text-xs text-muted-foreground">{linkedSessionCount}/{classroom.attendanceSessions.length}</span>
                           </Button>
                         </div>
                       ) : (
@@ -352,12 +348,12 @@ export default function AdminClassOverview() {
                             type="button"
                             variant="outline"
                             onClick={() => setSelectedRecordClassId(classroom.id)}
-                            disabled={classroom.course.lessons.length === 0}
-                            aria-label={`Xem video bài học của lớp ${classroom.name}`}
+                            disabled={classroom.attendanceSessions.length === 0}
+                            aria-label={`Xem bản ghi buổi học của lớp ${classroom.name}`}
                           >
                             <Video aria-hidden="true" className="mr-2 h-4 w-4" />
-                            Video bài học
-                            <span className="ml-2 text-xs text-muted-foreground">{linkedLessonCount}/{classroom.course.lessons.length}</span>
+                            Bản ghi buổi học
+                            <span className="ml-2 text-xs text-muted-foreground">{linkedSessionCount}/{classroom.attendanceSessions.length}</span>
                           </Button>
                         </div>
                       )}
@@ -487,7 +483,7 @@ export default function AdminClassOverview() {
           <section role="dialog" aria-modal="true" aria-labelledby="lesson-video-dialog-title" className="space-y-4">
             <header className="flex items-start justify-between gap-4">
               <div>
-                <h2 id="lesson-video-dialog-title" className="text-lg font-semibold">Video bài học</h2>
+                <h2 id="lesson-video-dialog-title" className="text-lg font-semibold">Bản ghi buổi học</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {selectedRecordClass.name} · {selectedRecordClass.course.title}
                 </p>
@@ -497,31 +493,28 @@ export default function AdminClassOverview() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setSelectedRecordClassId(null)}
-                aria-label="Đóng danh sách video bài học"
+                aria-label="Đóng danh sách bản ghi buổi học"
                 className="shrink-0"
               >
                 <X aria-hidden="true" className="h-4 w-4" />
               </Button>
             </header>
             <div className="max-h-[60vh] overflow-y-auto rounded-lg border">
-              {selectedRecordClass.course.lessons.length === 0 ? (
-                <p className="px-4 py-8 text-center text-sm text-muted-foreground">Khóa học chưa có bài học.</p>
+              {selectedRecordClass.attendanceSessions.length === 0 ? (
+                <p className="px-4 py-8 text-center text-sm text-muted-foreground">Lớp chưa có buổi học.</p>
               ) : (
                 <ul className="divide-y">
-                  {selectedRecordClass.course.lessons.map((lesson) => {
-                    const linkedSession = selectedRecordClass.attendanceSessions.find(
-                      (session) => session.lessonId === lesson.id && getSafeRecordUrl(session.recordingUrl),
-                    );
-                    const recordUrl = getSafeRecordUrl(linkedSession?.recordingUrl ?? null);
+                  {selectedRecordClass.attendanceSessions.map((session) => {
+                    const recordUrl = getSafeRecordUrl(session.recordingUrl);
                     return (
-                      <li key={lesson.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                      <li key={session.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
                         <div className="min-w-0">
-                          <p className="text-sm font-medium">Bài {lesson.order} · {lesson.title}</p>
-                          {linkedSession && (
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                              {linkedSession.title} · {linkedSession.date.toLocaleDateString("vi-VN")}
-                            </p>
-                          )}
+                          <p className="text-sm font-medium">{session.title}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            {session.date.toLocaleDateString("vi-VN")}
+                            {session.courseLesson && ` · Bài ${session.courseLesson.order} · ${session.courseLesson.title}`}
+                            {!session.courseLesson && session.lesson && ` · ${session.lesson}`}
+                          </p>
                         </div>
                         {recordUrl ? (
                           <a
@@ -530,7 +523,7 @@ export default function AdminClassOverview() {
                             rel="noopener noreferrer"
                             className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           >
-                            Mở video<ArrowUpRight aria-hidden="true" className="h-4 w-4" />
+                            Mở bản ghi<ArrowUpRight aria-hidden="true" className="h-4 w-4" />
                           </a>
                         ) : (
                           <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">

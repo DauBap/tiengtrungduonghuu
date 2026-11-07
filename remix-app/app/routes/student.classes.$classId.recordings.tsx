@@ -21,7 +21,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
           teacher: { select: { name: true } },
           attendanceSessions: {
             orderBy: [{ date: "desc" }, { createdAt: "desc" }],
-            select: { id: true, title: true, lesson: true, date: true, recordingUrl: true },
+            select: {
+              id: true,
+              title: true,
+              lesson: true,
+              date: true,
+              recordingUrl: true,
+              courseLesson: { select: { order: true, title: true } },
+            },
           },
         },
       },
@@ -71,7 +78,14 @@ export default function StudentClassRecordings() {
             {classroom.attendanceSessions.map((session) => (
               <li key={session.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
-                  <h2 className="font-medium">{session.title}{session.lesson && ` · ${session.lesson}`}</h2>
+                  <h2 className="font-medium">{session.title}</h2>
+                  {(session.courseLesson || session.lesson) && (
+                    <p className="mt-0.5 text-sm text-muted-foreground">
+                      {session.courseLesson
+                        ? `Bài ${session.courseLesson.order} · ${session.courseLesson.title}`
+                        : session.lesson}
+                    </p>
+                  )}
                   <time className="mt-1 block text-sm text-muted-foreground">{session.date.toLocaleDateString("vi-VN")}</time>
                 </div>
                 {session.recordingUrl ? (

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { useFetcher, useLoaderData } from "react-router";
-import { ClipboardCheck, Search, Users } from "lucide-react";
+import { ClipboardCheck, LoaderCircle, Plus, Search, Trash2, Users } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
 import { Button } from "~/components/ui/button";
@@ -809,38 +809,68 @@ export default function TeacherAttendance() {
                   Tổng
                 </button>
                 {attendanceSessions.map((session) => (
-                  <button
+                  <div
                     key={session.id}
-                    id={`attendance-tab-${session.id}`}
-                    type="button"
-                    role="tab"
-                    aria-selected={activeTabId === session.id}
-                    aria-controls="attendance-session-panel"
-                    disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
-                    onClick={() => {
-                      setActiveTabId(session.id);
-                      setFilter("all");
-                      setSearch("");
-                      setFeedback("");
-                    }}
-                    className={`h-10 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                      activeTabId === session.id
-                        ? "border-foreground bg-foreground text-background"
-                        : "border-border bg-background text-foreground hover:bg-muted"
+                    role="presentation"
+                    className={`inline-flex items-center ${
+                      selectedAttendanceSession?.id === session.id
+                        ? "h-10 gap-1 rounded-md bg-primary px-1"
+                        : ""
                     }`}
                   >
-                    {session.lesson.trim() ? `${session.title} - ${session.lesson.trim()}` : session.title}
-                  </button>
+                    <button
+                      id={`attendance-tab-${session.id}`}
+                      type="button"
+                      role="tab"
+                      aria-selected={activeTabId === session.id}
+                      aria-controls="attendance-session-panel"
+                      disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
+                      onClick={() => {
+                        setActiveTabId(session.id);
+                        setFilter("all");
+                        setSearch("");
+                        setFeedback("");
+                      }}
+                      className={`border px-3 text-sm font-medium transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                        activeTabId === session.id
+                          ? selectedAttendanceSession?.id === session.id
+                            ? "h-8 rounded-md border-transparent bg-transparent text-primary-foreground"
+                            : "h-10 rounded-md border-primary bg-primary text-primary-foreground"
+                          : "h-10 rounded-md border-border bg-background text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {session.lesson.trim() ? `${session.title} - ${session.lesson.trim()}` : session.title}
+                    </button>
+                    {selectedAttendanceSession?.id === session.id && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={deleteAttendanceSession}
+                        disabled={deleteSessionFetcher.state !== "idle" || saveAttendanceFetcher.state !== "idle"}
+                        aria-label={`Xóa ${session.title}`}
+                        title={`Xóa ${session.title}`}
+                        className="h-8 w-8 shrink-0 rounded-full border border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 hover:text-primary-foreground"
+                      >
+                        <Trash2 aria-hidden="true" className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 ))}
               </div>
-              <button
+              <Button
                 type="button"
+                variant="default"
+                size="icon"
                 onClick={addAttendanceSession}
                 disabled={addSessionFetcher.state !== "idle" || saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
-                className="h-10 rounded-md border border-primary bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                aria-label={addSessionFetcher.state !== "idle" ? "Đang thêm buổi học" : "Thêm buổi học"}
+                title={addSessionFetcher.state !== "idle" ? "Đang thêm buổi học" : "Thêm buổi học"}
               >
-                {addSessionFetcher.state !== "idle" ? "Đang thêm..." : "Thêm buổi"}
-              </button>
+                {addSessionFetcher.state !== "idle"
+                  ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" />
+                  : <Plus aria-hidden="true" className="h-4 w-4" />}
+              </Button>
             </div>
 
             {isTotalView ? (
@@ -853,9 +883,9 @@ export default function TeacherAttendance() {
                 </div>
               </div>
             ) : selectedAttendanceSession ? (
-              <div id="attendance-session-panel" role="tabpanel" aria-labelledby={`attendance-tab-${selectedAttendanceSession.id}`} className="flex flex-col gap-3 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:p-5">
-                <div className="flex items-center gap-2">
-                  <label htmlFor="attendance-lesson" className="shrink-0 text-sm text-muted-foreground">Bài học</label>
+              <div id="attendance-session-panel" role="tabpanel" aria-labelledby={`attendance-tab-${selectedAttendanceSession.id}`} className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-12">
+                <div className="flex min-w-0 flex-col gap-1 xl:col-span-2">
+                  <label htmlFor="attendance-lesson" className="text-sm text-muted-foreground">Bài học</label>
                   <input
                     id="attendance-lesson"
                     type="text"
@@ -863,17 +893,17 @@ export default function TeacherAttendance() {
                     onChange={(event) => updateAttendanceSession("lesson", event.currentTarget.value)}
                     maxLength={120}
                     disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm sm:w-36 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   />
                 </div>
-                <div className="flex min-w-0 items-center gap-2">
-                  <label htmlFor="attendance-course-lesson" className="shrink-0 text-sm text-muted-foreground">Gắn với bài</label>
+                <div className="flex min-w-0 flex-col gap-1 xl:col-span-3">
+                  <label htmlFor="attendance-course-lesson" className="text-sm text-muted-foreground">Bài học trong buổi</label>
                   <select
                     id="attendance-course-lesson"
                     value={selectedAttendanceSession.lessonId ?? ""}
                     onChange={(event) => updateAttendanceSession("lessonId", event.currentTarget.value)}
                     disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
-                    className="h-10 min-w-0 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-56"
+                    className="h-10 min-w-0 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <option value="">Không gắn bài học</option>
                     {selectedClass.courseLessons.map((lesson, index) => (
@@ -881,19 +911,19 @@ export default function TeacherAttendance() {
                     ))}
                   </select>
                 </div>
-                <div className="flex items-center gap-2">
-                  <label htmlFor="attendance-date" className="shrink-0 text-sm text-muted-foreground">Ngày</label>
+                <div className="flex min-w-0 flex-col gap-1 xl:col-span-2">
+                  <label htmlFor="attendance-date" className="text-sm text-muted-foreground">Ngày</label>
                   <input
                     id="attendance-date"
                     type="date"
                     value={selectedAttendanceSession.date}
                     onChange={(event) => updateAttendanceSession("date", event.currentTarget.value)}
                     disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm sm:w-44 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   />
                 </div>
-                <div className="flex min-w-0 flex-1 items-center gap-2">
-                  <label htmlFor="attendance-recording-url" className="shrink-0 text-sm text-muted-foreground">Link record</label>
+                <div className="flex min-w-0 flex-col gap-1 sm:col-span-2 xl:col-span-3">
+                  <label htmlFor="attendance-recording-url" className="text-sm text-muted-foreground">Link bản ghi buổi học</label>
                   <input
                     id="attendance-recording-url"
                     type="url"
@@ -906,15 +936,6 @@ export default function TeacherAttendance() {
                     className="h-10 min-w-0 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   />
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={deleteAttendanceSession}
-                  disabled={deleteSessionFetcher.state !== "idle" || saveAttendanceFetcher.state !== "idle"}
-                  className="w-full sm:ml-auto sm:w-auto"
-                >
-                  {deleteSessionFetcher.state !== "idle" ? "Đang xóa..." : "Xóa buổi này"}
-                </Button>
               </div>
             ) : (
               <div id="attendance-session-panel" role="tabpanel" className="p-5 text-sm text-muted-foreground">
