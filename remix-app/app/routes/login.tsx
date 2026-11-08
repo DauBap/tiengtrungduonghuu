@@ -13,8 +13,9 @@ import { Loader2, Mail, Lock, ArrowRight } from "lucide-react";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type LoginFailureStage = "session-check" | "read-form" | "find-account" | "verify-password" | "create-session" | "session-cookie";
+type LoginFailureStage = "session-check" | "read-public-stats" | "read-form" | "find-account" | "verify-password" | "create-session" | "session-cookie";
 type LoginDiagnostic = { reference: string; stage: LoginFailureStage };
+type PublicLearningStats = { hskLevels: number[]; lessons: number; vocabulary: number };
 
 function createLoginDiagnostic(stage: LoginFailureStage): LoginDiagnostic {
   return { reference: `LGN-${randomUUID().slice(0, 8).toUpperCase()}`, stage };
@@ -37,12 +38,42 @@ export async function loader({ request }: LoaderFunctionArgs) {
       const dest = { admin: "/admin", teacher: "/teacher", student: "/student" };
       return redirect(dest[user.role]);
     }
+
+    let learningStats: PublicLearningStats | null = null;
+    let learningStatsUnavailable = false;
+    try {
+      const [hskLevels, lessons, vocabulary] = await Promise.all([
+        prisma.course.groupBy({
+          by: ["hskLevel"],
+          where: { status: "PUBLISHED" },
+        }),
+        prisma.lesson.count({
+          where: { course: { status: "PUBLISHED" } },
+        }),
+        prisma.vocabItem.groupBy({
+          by: ["chinese"],
+          where: { lesson: { course: { status: "PUBLISHED" } } },
+        }),
+      ]);
+      learningStats = {
+        hskLevels: hskLevels.map((item) => item.hskLevel).sort((a, b) => a - b),
+        lessons,
+        vocabulary: vocabulary.filter((item) => item.chinese.trim().length > 0).length,
+      };
+    } catch (error) {
+      const diagnostic = createLoginDiagnostic("read-public-stats");
+      logLoginFailure(diagnostic, error);
+      learningStatsUnavailable = true;
+    }
+
     if (sessionCheck && /^LGN-[A-F0-9]{8}$/.test(sessionCheck)) {
       return {
         diagnostic: { reference: sessionCheck, stage: "session-cookie" as const },
+        learningStats,
+        learningStatsUnavailable,
       };
     }
-    return null;
+    return { learningStats, learningStatsUnavailable };
   } catch (error) {
     if (error instanceof Response && error.status >= 300 && error.status < 400) throw error;
     const diagnostic = createLoginDiagnostic("session-check");
@@ -132,6 +163,8 @@ export default function LoginPage() {
       ? "Tài khoản và mật khẩu đã được xác nhận nhưng trình duyệt chưa giữ được phiên đăng nhập. Hãy mở trang bằng HTTPS, cho phép cookie và thử lại. Nếu vẫn gặp lỗi, gửi mã hỗ trợ bên dưới cho trung tâm."
       : "Tạm thời chưa kiểm tra được phiên đăng nhập. Bạn vẫn có thể thử đăng nhập lại."
     : null);
+  const learningStats = loaderData?.learningStats;
+  const learningStatsUnavailable = loaderData?.learningStatsUnavailable ?? !learningStats;
 
   const fillDemo = (email: string, password: string) => {
     const f = document.getElementById("login-form") as HTMLFormElement;
@@ -162,12 +195,23 @@ export default function LoginPage() {
               Nền tảng học có cấu trúc theo hệ thống HSK chính thức, từ mới bắt đầu đến thành thạo.
             </p>
             <div className="flex gap-8">
-              <div><p className="stat-num text-3xl font-bold">6</p><p className="text-sm text-white/70">Cấp độ HSK</p></div>
-              <div><p className="stat-num text-3xl font-bold">100+</p><p className="text-sm text-white/70">Bài học</p></div>
-              <div><p className="stat-num text-3xl font-bold">5.000+</p><p className="text-sm text-white/70">Từ vựng</p></div>
+              <div><p className="stat-num text-3xl font-bold">{learningStats?.hskLevels.length.toLocaleString("vi-VN") ?? "—"}</p><p className="text-sm text-white/70">Cấp độ HSK</p></div>
+              <div><p className="stat-num text-3xl font-bold">{learningStats?.lessons.toLocaleString("vi-VN") ?? "—"}</p><p className="text-sm text-white/70">Bài học</p></div>
+              <div><p className="stat-num text-3xl font-bold">{learningStats?.vocabulary.toLocaleString("vi-VN") ?? "—"}</p><p className="text-sm text-white/70">Từ vựng duy nhất</p></div>
             </div>
+            {learningStatsUnavailable && (
+              <p role="status" className="text-sm text-white/80">
+                Chưa tải được số liệu nội dung. Vui lòng thử tải lại trang.
+              </p>
+            )}
           </div>
-          <p className="text-sm text-white/60">HSK 1 đến HSK 6 - Chuẩn quốc tế</p>
+          <p className="text-sm text-white/60">
+            {learningStats?.hskLevels.length
+              ? `Đang có khóa học HSK ${learningStats.hskLevels.map((level) => level === 7 ? "7–9" : level).join(" · HSK ")}`
+              : learningStatsUnavailable
+                ? "Chưa tải được danh sách khóa học"
+                : "Chưa có khóa học được xuất bản"}
+          </p>
         </div>
       </div>
 
@@ -200,6 +244,7 @@ export default function LoginPage() {
                         <p className="mt-1 text-xs text-muted-foreground">
                           Bước gặp lỗi: {{
                             "session-check": "kiểm tra phiên đăng nhập",
+                            "read-public-stats": "tải số liệu nội dung",
                             "read-form": "nhận thông tin đăng nhập",
                             "find-account": "tìm tài khoản",
                             "verify-password": "xác thực mật khẩu",

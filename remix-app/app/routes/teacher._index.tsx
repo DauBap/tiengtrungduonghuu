@@ -1170,6 +1170,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
 }
 
+function translationQuestionWeight(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : 1;
+}
+
 export async function action({ request }: ActionFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
   const form = await request.formData();
@@ -1178,10 +1182,16 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   const submissionId = String(form.get("submissionId") ?? "");
-  const score = Number(form.get("score"));
   const teacherComment = String(form.get("teacherComment") ?? "").trim();
   if (!submissionId) return { error: "Thiếu bài nộp luyện dịch." };
-  if (!Number.isFinite(score) || score < 0) return { error: "Điểm không hợp lệ." };
+
+  let questionGrades: unknown;
+  try {
+    questionGrades = JSON.parse(String(form.get("questionGrades") ?? ""));
+  } catch {
+    return { error: "Không đọc được kết quả chấm từng câu. Vui lòng kiểm tra và thử lại." };
+  }
+  if (!Array.isArray(questionGrades)) return { error: "Thiếu kết quả chấm từng câu." };
 
   const submission = await prisma.translationSubmission.findUnique({
     where: { id: submissionId },
@@ -1196,27 +1206,64 @@ export async function action({ request }: ActionFunctionArgs) {
       courseId: submission.lesson.courseId,
       enrollments: { some: { userId: submission.studentId } },
     },
-    select: { id: true },
+    select: { id: true, enrollments: { select: { userId: true } } },
   });
   if (!assignedClass) return { error: "Bạn không có quyền chấm bài này." };
-  const maxScore = 10;
-  if (score > maxScore) return { error: `Điểm tối đa là ${maxScore}.` };
+  const maxScore = submission.maxScore > 0 ? submission.maxScore : 10;
 
-  const gradedAnswers = Array.isArray(submission.answers)
-    ? submission.answers.flatMap((item) => {
-        if (typeof item !== "object" || item === null || Array.isArray(item)) return [];
-        const record = item as Record<string, unknown>;
-        const questionId = String(record.questionId ?? "");
-        return {
-          questionId,
-          prompt: typeof record.prompt === "string" ? record.prompt : "",
-          sampleAnswer: typeof record.sampleAnswer === "string" ? record.sampleAnswer : "",
-          maxScore: typeof record.maxScore === "number" ? record.maxScore : 10,
-          answer: typeof record.answer === "string" ? record.answer : "",
-          teacherComment: String(form.get(`translation-comment-${questionId}`) ?? "").trim(),
-        };
-      })
-    : [];
+  if (!Array.isArray(submission.answers) || submission.answers.length === 0) {
+    return { error: "Bài nộp không có câu trả lời để chấm." };
+  }
+  const answerRecords = submission.answers.map((item) => {
+    if (typeof item !== "object" || item === null || Array.isArray(item)) return null;
+    return item as Record<string, unknown>;
+  });
+  if (answerRecords.some((record) => record === null)) {
+    return { error: "Dữ liệu câu trả lời không hợp lệ. Không thể lưu điểm." };
+  }
+
+  const gradeByQuestionId = new Map<string, boolean>();
+  for (const grade of questionGrades) {
+    if (typeof grade !== "object" || grade === null || Array.isArray(grade)) {
+      return { error: "Kết quả chấm câu không hợp lệ." };
+    }
+    const record = grade as Record<string, unknown>;
+    if (typeof record.questionId !== "string" || typeof record.correct !== "boolean") {
+      return { error: "Hãy chọn Đúng hoặc Sai cho từng câu." };
+    }
+    gradeByQuestionId.set(record.questionId, record.correct);
+  }
+
+  const validAnswerRecords = answerRecords as Record<string, unknown>[];
+  const questionIds = validAnswerRecords.map((record) => String(record.questionId ?? ""));
+  const questionIdSet = new Set(questionIds);
+  if (
+    questionIds.some((questionId) => !questionId || !gradeByQuestionId.has(questionId))
+    || gradeByQuestionId.size !== questionIds.length
+    || questionIdSet.size !== questionIds.length
+    || Array.from(gradeByQuestionId.keys()).some((questionId) => !questionIdSet.has(questionId))
+  ) {
+    return { error: "Hãy chọn Đúng hoặc Sai cho từng câu." };
+  }
+
+  const totalWeight = validAnswerRecords.reduce((sum, record) => sum + translationQuestionWeight(record.maxScore), 0);
+  const correctWeight = validAnswerRecords.reduce((sum, record) => {
+    const weight = translationQuestionWeight(record.maxScore);
+    return sum + (gradeByQuestionId.get(String(record.questionId)) ? weight : 0);
+  }, 0);
+  const score = Math.round((correctWeight / totalWeight) * maxScore * 10) / 10;
+  const gradedAnswers = validAnswerRecords.map((record) => {
+    const questionId = String(record.questionId);
+    return {
+      questionId,
+      prompt: typeof record.prompt === "string" ? record.prompt : "",
+      sampleAnswer: typeof record.sampleAnswer === "string" ? record.sampleAnswer : "",
+      maxScore: typeof record.maxScore === "number" ? record.maxScore : 10,
+      answer: typeof record.answer === "string" ? record.answer : "",
+      teacherComment: String(form.get(`translation-comment-${questionId}`) ?? "").trim(),
+      teacherCorrect: gradeByQuestionId.get(questionId) === true,
+    };
+  });
 
   await prisma.translationSubmission.update({
     where: { id: submissionId },
@@ -1271,7 +1318,17 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     });
   }
-  return { success: true as const };
+  const nextSubmission = await prisma.translationSubmission.findFirst({
+    where: {
+      id: { not: submissionId },
+      status: "SUBMITTED",
+      lesson: { courseId: submission.lesson.courseId },
+      studentId: { in: assignedClass.enrollments.map((enrollment) => enrollment.userId) },
+    },
+    orderBy: [{ submittedAt: "asc" }, { id: "asc" }],
+    select: { id: true },
+  });
+  return { success: true as const, submissionId, nextSubmissionId: nextSubmission?.id ?? null };
 }
 
 function activityTone(status: string, isPastLesson: boolean) {
@@ -1300,7 +1357,12 @@ export default function TeacherIndex() {
   const gradeSubmitFetcher = useFetcher<{ success?: boolean; attemptId?: string; error?: string }>();
   const workbookGradingFetcher = useFetcher<WorkbookGradingData>();
   const workbookGradeSubmitFetcher = useFetcher<{ success?: boolean; attemptId?: string; error?: string }>();
-  const TranslationGradeFetcher = useFetcher<{ success?: boolean; error?: string }>();
+  const TranslationGradeFetcher = useFetcher<{
+    success?: boolean;
+    error?: string;
+    submissionId?: string;
+    nextSubmissionId?: string | null;
+  }>();
   const revalidator = useRevalidator();
   const [selectedClassId, setSelectedClassId] = useState(classSummaries[0]?.id ?? "");
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
@@ -1322,6 +1384,7 @@ export default function TeacherIndex() {
   const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
   const [workbookGradingAttemptId, setWorkbookGradingAttemptId] = useState<string | null>(null);
   const [selectedTranslationSubmissionId, setSelectedTranslationSubmissionId] = useState<string | null>(initialTranslationSubmission?.id ?? null);
+  const [translationQuestionGrades, setTranslationQuestionGrades] = useState<Record<string, boolean | null>>({});
   const [gradingQueue, setGradingQueue] = useState<{ courseId: string; attempt: PendingGrammarAttempt }[]>([]);
   const [gradingQueueIndex, setGradingQueueIndex] = useState<number | null>(null);
   const [gradingComplete, setGradingComplete] = useState(false);
@@ -1333,6 +1396,7 @@ export default function TeacherIndex() {
   const handledInitialWorkbookAttemptId = useRef<string | null>(null);
   const handledWorkbookGradeAttemptId = useRef<string | null>(null);
   const handledInitialTranslationNavigationKey = useRef<string | null>(null);
+  const handledTranslationGradeSubmissionId = useRef<string | null>(null);
   const selectedClass = classSummaries.find((cls) => cls.id === selectedClassId) ?? classSummaries[0];
   const pendingGrammarClass = classSummaries.find((cls) => cls.id === pendingGrammarClassId);
   const pendingReviewClass = myClasses.find((cls) => cls.id === pendingReviewClassId);
@@ -1537,11 +1601,66 @@ export default function TeacherIndex() {
       ?? (initialTranslationSubmission?.id === selectedTranslationSubmissionId ? initialTranslationSubmission : null)
     : null;
   const selectedTranslationClass = selectedTranslationSubmission
-    ? myClasses.find((cls) =>
+    ? classSummaries.find((cls) =>
         cls.courseId === selectedTranslationSubmission.lesson.courseId
         && cls.enrollments.some((enrollment) => enrollment.userId === selectedTranslationSubmission.student.id)
       )
     : null;
+  const selectedTranslationAnswers = Array.isArray(selectedTranslationSubmission?.answers)
+    ? selectedTranslationSubmission.answers as Array<{
+        questionId?: string;
+        prompt?: string;
+        sampleAnswer?: string;
+        maxScore?: number;
+        answer?: string;
+        teacherComment?: string;
+        teacherCorrect?: boolean;
+      }>
+    : [];
+  const nextTranslationSubmission = selectedTranslationClass?.pendingTranslationSubmissions.find(
+    (submission) => submission.id !== selectedTranslationSubmissionId,
+  ) ?? null;
+  const translationQuestionsFullyGraded = selectedTranslationAnswers.length > 0
+    && selectedTranslationAnswers.every((item) =>
+      typeof item.questionId === "string"
+      && typeof translationQuestionGrades[item.questionId] === "boolean"
+    );
+  const expectedTranslationScore = translationQuestionsFullyGraded && selectedTranslationSubmission
+    ? (() => {
+        const totalWeight = selectedTranslationAnswers.reduce((sum, item) =>
+          sum + translationQuestionWeight(item.maxScore), 0);
+        const correctWeight = selectedTranslationAnswers.reduce((sum, item) =>
+          sum + (item.questionId && translationQuestionGrades[item.questionId]
+            ? translationQuestionWeight(item.maxScore)
+            : 0), 0);
+        return Math.round((correctWeight / totalWeight) * (selectedTranslationSubmission.maxScore || 10) * 10) / 10;
+      })()
+    : null;
+  useEffect(() => {
+    if (!selectedTranslationSubmissionId || !selectedTranslationSubmission) {
+      setTranslationQuestionGrades({});
+      return;
+    }
+    setTranslationQuestionGrades(Object.fromEntries(
+      selectedTranslationAnswers.flatMap((item) =>
+        typeof item.questionId === "string" && typeof item.teacherCorrect === "boolean"
+          ? [[item.questionId, item.teacherCorrect]]
+          : [],
+      ),
+    ));
+  }, [selectedTranslationSubmissionId, selectedTranslationSubmission?.answers]);
+  useEffect(() => {
+    const result = TranslationGradeFetcher.data;
+    const submittedId = handledTranslationGradeSubmissionId.current;
+    if (
+      TranslationGradeFetcher.state !== "idle"
+      || !result?.success
+      || !submittedId
+      || result.submissionId !== submittedId
+    ) return;
+    handledTranslationGradeSubmissionId.current = null;
+    setSelectedTranslationSubmissionId(result.nextSubmissionId ?? null);
+  }, [TranslationGradeFetcher.data, TranslationGradeFetcher.state]);
   const isModalOpen = Boolean(
     selectedStudentId
     || selectedActivityReview
@@ -4002,14 +4121,14 @@ export default function TeacherIndex() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="translation-grading-title"
-              className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
+              className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
             >
-              <header className="flex shrink-0 items-start justify-between gap-3 border-b p-4 sm:p-5">
+              <header className="flex shrink-0 items-start justify-between gap-3 border-b p-4 sm:px-5 sm:py-4">
                 <div className="min-w-0">
-                  <h2 id="translation-grading-title" className="text-lg font-semibold">Chấm bài Luyện dịch</h2>
+                  <h2 id="translation-grading-title" className="text-xl font-semibold">Chấm bài Luyện dịch</h2>
                   {selectedTranslationClass && (
-                    <p className="mt-1 text-sm font-medium text-primary">
-                      {selectedTranslationClass.name} · {selectedTranslationClass.course.title}
+                    <p className="mt-1 text-sm font-semibold text-primary">
+                      {selectedTranslationClass.name} · {selectedTranslationClass.course.title} · HSK {selectedTranslationClass.course.hskLevel}
                     </p>
                   )}
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -4017,103 +4136,150 @@ export default function TeacherIndex() {
                     {" · "}{selectedTranslationSubmission.lesson.title}
                   </p>
                 </div>
-                <button type="button" aria-label="Đóng bài luyện dịch" onClick={() => setSelectedTranslationSubmissionId(null)} className="rounded-md p-2 text-muted-foreground hover:bg-muted">
+                <button type="button" aria-label="Đóng bài luyện dịch" onClick={() => {
+                  handledTranslationGradeSubmissionId.current = null;
+                  setSelectedTranslationSubmissionId(null);
+                }} className="rounded-md p-2 text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <X className="h-4 w-4" />
                 </button>
               </header>
 
               <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
-                {Array.isArray(selectedTranslationSubmission.answers)
-                  ? (selectedTranslationSubmission.answers as Array<{ questionId?: string; prompt?: string; sampleAnswer?: string; maxScore?: number; answer?: string; teacherComment?: string }>).map((item, index) => (
-                      <article key={item.questionId ?? index} className="space-y-3 rounded-lg border p-3 sm:p-4">
-                        <div className="flex flex-wrap items-start gap-2">
-                          <span className="mt-0.5 font-mono text-xs text-muted-foreground">{index + 1}.</span>
-                          <div className="min-w-0 flex-1 space-y-3">
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground">Đề bài</p>
-                              <p className="content-text mt-1 whitespace-pre-wrap text-base font-medium">{item.prompt || "Không có đề bài"}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground">Học viên trả lời</p>
-                              <p className={`content-text mt-1 whitespace-pre-wrap rounded-md border p-3 text-sm ${item.answer ? "border-primary/15 bg-primary/[0.04]" : "border-dashed bg-muted/40 text-muted-foreground"}`}>
-                                {item.answer || "Học viên chưa trả lời câu này"}
-                              </p>
-                            </div>
+                {selectedTranslationAnswers.map((item, index) => {
+                  const questionId = item.questionId ?? "";
+                  const grade = questionId ? translationQuestionGrades[questionId] : null;
+                  return (
+                    <article key={questionId || index} className="space-y-3 rounded-lg border p-3 sm:p-4">
+                      <div className="flex flex-wrap items-start gap-2">
+                        <span className="mt-0.5 font-mono text-xs text-muted-foreground">{index + 1}.</span>
+                        <div className="min-w-0 flex-1 space-y-3">
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">Đề bài</p>
+                            <p className="content-text mt-1 whitespace-pre-wrap text-lg font-medium">{item.prompt || "Không có đề bài"}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">Học viên trả lời</p>
+                            <p className={`content-text mt-1 whitespace-pre-wrap rounded-md border p-3 text-sm ${item.answer ? "border-primary/15 bg-primary/[0.04]" : "border-dashed bg-muted/40 text-muted-foreground"}`}>
+                              {item.answer || "Học viên chưa trả lời câu này"}
+                            </p>
                           </div>
                         </div>
-                        {item.sampleAnswer && (
-                          <p className="rounded-md bg-muted/50 px-3 py-2 text-sm leading-6 text-muted-foreground">
-                            <span className="font-medium text-foreground">Đáp án mẫu: </span>{item.sampleAnswer}
-                          </p>
-                        )}
-                        <div className="space-y-2 border-t pt-3">
+                      </div>
+                      {item.sampleAnswer && (
+                        <p className="rounded-md bg-muted/50 px-3 py-2 text-sm leading-6 text-muted-foreground">
+                          <span className="font-medium text-foreground">Đáp án mẫu: </span>{item.sampleAnswer}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={grade === true ? "default" : "outline"}
+                            aria-pressed={grade === true}
+                            disabled={!questionId || TranslationGradeFetcher.state === "submitting"}
+                            onClick={() => setTranslationQuestionGrades((current) => ({ ...current, [questionId]: true }))}
+                          >
+                            Đúng
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={grade === false ? "destructive" : "outline"}
+                            aria-pressed={grade === false}
+                            disabled={!questionId || TranslationGradeFetcher.state === "submitting"}
+                            onClick={() => setTranslationQuestionGrades((current) => ({ ...current, [questionId]: false }))}
+                          >
+                            Sai
+                          </Button>
+                          <span className="text-xs text-muted-foreground">Tối đa {translationQuestionWeight(item.maxScore)} điểm</span>
+                        </div>
+                        <div className="min-w-[min(100%,18rem)] flex-1 sm:max-w-sm">
                           <label
-                            htmlFor={`translation-comment-${item.questionId ?? index}`}
+                            htmlFor={`translation-comment-${questionId || index}`}
                             className="text-xs font-medium"
                           >
-                            Nhận xét / gợi ý sửa câu {index + 1} <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
+                            Nhận xét câu {index + 1} <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
                           </label>
                           <Textarea
-                            id={`translation-comment-${item.questionId ?? index}`}
-                            name={`translation-comment-${item.questionId ?? ""}`}
+                            id={`translation-comment-${questionId || index}`}
+                            name={`translation-comment-${questionId}`}
                             form="translation-grade-form"
                             defaultValue={item.teacherComment ?? ""}
                             placeholder="Ghi chú lỗi hoặc gợi ý cách diễn đạt tự nhiên hơn..."
-                            rows={2}
-                            className="resize-y"
+                            rows={1}
+                            className="mt-1 resize-y"
                           />
                         </div>
-                      </article>
-                    ))
-                  : <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-3 text-sm text-destructive">Không đọc được nội dung bài làm.</p>}
+                      </div>
+                    </article>
+                  );
+                })}
+                {selectedTranslationAnswers.length === 0 && (
+                  <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-3 text-sm text-destructive">Không đọc được nội dung bài làm.</p>
+                )}
+                <div className="space-y-2 pt-1">
+                  <label htmlFor="translation-comment" className="text-sm font-medium">
+                    Nhận xét chung <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
+                  </label>
+                  <Textarea
+                    key={selectedTranslationSubmission.id}
+                    id="translation-comment"
+                    name="teacherComment"
+                    form="translation-grade-form"
+                    defaultValue={selectedTranslationSubmission.teacherComment ?? ""}
+                    placeholder="Nhận xét ưu điểm và điểm cần cải thiện..."
+                    rows={2}
+                    className="resize-y"
+                  />
+                </div>
               </div>
 
               <TranslationGradeFetcher.Form
                 method="post"
                 id="translation-grade-form"
-                onSubmit={() => undefined}
-                className="grid shrink-0 gap-3 border-t bg-background p-4 sm:grid-cols-[132px_minmax(0,1fr)_auto] sm:items-end sm:p-5"
+                onSubmit={() => { handledTranslationGradeSubmissionId.current = selectedTranslationSubmission.id; }}
+                className="shrink-0 border-t bg-background"
               >
                 <input type="hidden" name="intent" value="grade-translation" />
                 <input type="hidden" name="submissionId" value={selectedTranslationSubmission.id} />
-                <div>
-                  <label htmlFor="translation-score" className="text-sm font-medium">Điểm tổng</label>
-                  <Input
-                    id="translation-score"
-                    name="score"
-                    type="number"
-                    min="0"
-                    max={selectedTranslationSubmission.maxScore}
-                    defaultValue={selectedTranslationSubmission.status === "GRADED" ? String(selectedTranslationSubmission.score ?? 0) : ""}
-                    required
-                    className="mt-1.5"
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">Tối đa {selectedTranslationSubmission.maxScore}</p>
+                <input
+                  type="hidden"
+                  name="questionGrades"
+                  value={JSON.stringify(selectedTranslationAnswers.map((item) => ({
+                    questionId: item.questionId,
+                    correct: item.questionId ? translationQuestionGrades[item.questionId] : null,
+                  })))}
+                />
+                {TranslationGradeFetcher.data?.error
+                  && handledTranslationGradeSubmissionId.current === selectedTranslationSubmission.id && (
+                    <p role="alert" className="px-4 pt-3 text-sm text-destructive sm:px-5">{TranslationGradeFetcher.data.error}</p>
+                  )}
+                <div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:px-5">
+                  <p className="text-sm text-muted-foreground" aria-live="polite">
+                    Điểm dự kiến: {expectedTranslationScore === null
+                      ? "Chấm đủ câu để tính điểm"
+                      : `${expectedTranslationScore} / ${selectedTranslationSubmission.maxScore || 10}`}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button type="button" variant="outline" onClick={() => {
+                      handledTranslationGradeSubmissionId.current = null;
+                      setSelectedTranslationSubmissionId(null);
+                    }}>Đóng</Button>
+                    <Button
+                      type="submit"
+                      disabled={TranslationGradeFetcher.state === "submitting" || !translationQuestionsFullyGraded}
+                    >
+                      {TranslationGradeFetcher.state === "submitting"
+                        ? "Đang lưu..."
+                        : nextTranslationSubmission
+                          ? "Lưu & chấm bài tiếp"
+                          : selectedTranslationSubmission.status === "GRADED"
+                            ? "Cập nhật kết quả"
+                            : "Lưu điểm"}
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <label htmlFor="translation-comment" className="text-sm font-medium">Nhận xét chung</label>
-                  <Textarea
-                    id="translation-comment"
-                    name="teacherComment"
-                    defaultValue={selectedTranslationSubmission.teacherComment ?? ""}
-                    placeholder="Nhận xét ưu điểm và điểm cần cải thiện..."
-                    rows={2}
-                    className="mt-1.5 resize-y"
-                  />
-                </div>
-                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                  <Button type="button" variant="outline" onClick={() => setSelectedTranslationSubmissionId(null)}>Đóng</Button>
-                  <Button type="submit" disabled={TranslationGradeFetcher.state === "submitting"}>
-                    {TranslationGradeFetcher.state === "submitting"
-                      ? "Đang lưu..."
-                      : selectedTranslationSubmission.status === "GRADED"
-                        ? "Cập nhật kết quả"
-                        : "Trả bài cho học viên"}
-                  </Button>
-                </div>
-                {TranslationGradeFetcher.data?.error && (
-                  <p role="alert" className="text-sm text-destructive sm:col-span-2">{TranslationGradeFetcher.data.error}</p>
-                )}
               </TranslationGradeFetcher.Form>
             </section>
           </div>
