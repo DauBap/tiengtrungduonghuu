@@ -4,6 +4,14 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const APPLY = process.argv.includes("--apply");
+const onlyArg = process.argv.find((arg) => arg.startsWith("--only="));
+const ONLY_COURSES = onlyArg
+  ? new Set(onlyArg.slice("--only=".length).split(",").map((value) => value.trim()).filter(Boolean))
+  : null;
+const onlyLessonsArg = process.argv.find((arg) => arg.startsWith("--only-lessons="));
+const ONLY_LESSONS = onlyLessonsArg
+  ? new Set(onlyLessonsArg.slice("--only-lessons=".length).split(",").map(Number).filter(Number.isInteger))
+  : null;
 const COURSES_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "courses");
 const PROJECT_ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const prisma = new PrismaClient();
@@ -160,12 +168,13 @@ async function migrateCourseListening(folder: string) {
 
     const dialogue = JSON.parse(fs.readFileSync(dialoguePath, "utf8")) as DialogueFile;
     const lessonNumber = dialogue.lesson;
+    if (ONLY_LESSONS && !ONLY_LESSONS.has(lessonNumber)) continue;
     const lesson = course
-      ? await prisma.lesson.findFirst({ where: { courseId: course.id, order: lessonNumber } })
-      : await prisma.lesson.findFirst({ where: { course: { code: meta.code }, order: lessonNumber } });
+      ? await prisma.lesson.findFirst({ where: { courseId: course.id, title: dialogue.title.trim() } })
+      : await prisma.lesson.findFirst({ where: { course: { code: meta.code }, title: dialogue.title.trim() } });
 
     if (!lesson) {
-      console.log(`  ⚠ ${folder}/lesson ${lessonNumber}: không tìm thấy lesson trong DB`);
+      console.log(`  ⚠ ${folder}/lesson ${lessonNumber} (${dialogue.title}): không tìm thấy bài khớp tên trong DB`);
       continue;
     }
 
@@ -229,6 +238,7 @@ async function main() {
 
   let total = 0;
   for (const folder of Object.keys(COURSE_META)) {
+    if (ONLY_COURSES && !ONLY_COURSES.has(folder)) continue;
     const courseDir = path.join(COURSES_DIR, folder);
     if (!fs.existsSync(courseDir)) continue;
     total += await migrateCourseListening(folder);
