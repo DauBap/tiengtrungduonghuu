@@ -1536,6 +1536,12 @@ export default function TeacherIndex() {
     ? translationSubmissions.find((item) => item.id === selectedTranslationSubmissionId)
       ?? (initialTranslationSubmission?.id === selectedTranslationSubmissionId ? initialTranslationSubmission : null)
     : null;
+  const selectedTranslationClass = selectedTranslationSubmission
+    ? myClasses.find((cls) =>
+        cls.courseId === selectedTranslationSubmission.lesson.courseId
+        && cls.enrollments.some((enrollment) => enrollment.userId === selectedTranslationSubmission.student.id)
+      )
+    : null;
   const isModalOpen = Boolean(
     selectedStudentId
     || selectedActivityReview
@@ -3996,15 +4002,19 @@ export default function TeacherIndex() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="translation-grading-title"
-              className="flex max-h-[calc(100vh-1.5rem)] w-full max-w-4xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl sm:max-h-[calc(100vh-3rem)]"
+              className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
             >
-              <header className="flex shrink-0 items-start justify-between gap-3 border-b bg-background px-5 py-4 sm:px-6">
+              <header className="flex shrink-0 items-start justify-between gap-3 border-b p-4 sm:p-5">
                 <div className="min-w-0">
                   <h2 id="translation-grading-title" className="text-lg font-semibold">Chấm bài Luyện dịch</h2>
-                  <p className="mt-1 truncate text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">{selectedTranslationSubmission.student?.name ?? selectedTranslationSubmission.student?.email}</span>
-                    <span className="mx-2 text-muted-foreground/60">·</span>
-                    {selectedTranslationSubmission.lesson.title}
+                  {selectedTranslationClass && (
+                    <p className="mt-1 text-sm font-medium text-primary">
+                      {selectedTranslationClass.name} · {selectedTranslationClass.course.title}
+                    </p>
+                  )}
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {selectedTranslationSubmission.student?.name ?? selectedTranslationSubmission.student?.email}
+                    {" · "}{selectedTranslationSubmission.lesson.title}
                   </p>
                 </div>
                 <button type="button" aria-label="Đóng bài luyện dịch" onClick={() => setSelectedTranslationSubmissionId(null)} className="rounded-md p-2 text-muted-foreground hover:bg-muted">
@@ -4012,96 +4022,98 @@ export default function TeacherIndex() {
                 </button>
               </header>
 
-              <div className="min-h-0 flex-1 overflow-y-auto">
+              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
                 {Array.isArray(selectedTranslationSubmission.answers)
                   ? (selectedTranslationSubmission.answers as Array<{ questionId?: string; prompt?: string; sampleAnswer?: string; maxScore?: number; answer?: string; teacherComment?: string }>).map((item, index) => (
-                      <section key={item.questionId ?? index} className="border-b px-5 py-5 last:border-b-0 sm:px-6">
-                        <div className="mb-3 flex items-start justify-between gap-3">
-                          <p className="text-sm font-semibold">Câu {index + 1}</p>
-                        </div>
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground">Đề bài</p>
-                            <p className="mt-1 whitespace-pre-wrap text-sm font-medium">{item.prompt}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground">Bài làm của học viên</p>
-                            <p className={`mt-1 whitespace-pre-wrap rounded-md border p-3 text-sm ${item.answer ? "border-primary/15 bg-primary/[0.04]" : "border-dashed bg-muted/40 text-muted-foreground"}`}>
-                              {item.answer || "Học viên chưa trả lời câu này"}
-                            </p>
+                      <article key={item.questionId ?? index} className="space-y-3 rounded-lg border p-3 sm:p-4">
+                        <div className="flex flex-wrap items-start gap-2">
+                          <span className="mt-0.5 font-mono text-xs text-muted-foreground">{index + 1}.</span>
+                          <div className="min-w-0 flex-1 space-y-3">
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground">Đề bài</p>
+                              <p className="content-text mt-1 whitespace-pre-wrap text-base font-medium">{item.prompt || "Không có đề bài"}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground">Học viên trả lời</p>
+                              <p className={`content-text mt-1 whitespace-pre-wrap rounded-md border p-3 text-sm ${item.answer ? "border-primary/15 bg-primary/[0.04]" : "border-dashed bg-muted/40 text-muted-foreground"}`}>
+                                {item.answer || "Học viên chưa trả lời câu này"}
+                              </p>
+                            </div>
                           </div>
                         </div>
                         {item.sampleAnswer && (
-                          <p className="mt-3 rounded-md bg-muted/50 px-3 py-2 text-xs leading-5 text-muted-foreground">
-                            <span className="font-medium text-foreground">Đáp án mẫu:</span> {item.sampleAnswer}
+                          <p className="rounded-md bg-muted/50 px-3 py-2 text-sm leading-6 text-muted-foreground">
+                            <span className="font-medium text-foreground">Đáp án mẫu: </span>{item.sampleAnswer}
                           </p>
                         )}
-                        <div className="mt-3">
+                        <div className="space-y-2 border-t pt-3">
                           <label
                             htmlFor={`translation-comment-${item.questionId ?? index}`}
-                            className="text-xs font-medium text-foreground"
+                            className="text-xs font-medium"
                           >
-                            Nhận xét câu {index + 1}
+                            Nhận xét / gợi ý sửa câu {index + 1} <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
                           </label>
                           <Textarea
                             id={`translation-comment-${item.questionId ?? index}`}
                             name={`translation-comment-${item.questionId ?? ""}`}
                             form="translation-grade-form"
                             defaultValue={item.teacherComment ?? ""}
-                            placeholder="Nhận xét lỗi hoặc cách diễn đạt tốt hơn..."
-                            className="mt-1.5 min-h-16 resize-y bg-background"
+                            placeholder="Ghi chú lỗi hoặc gợi ý cách diễn đạt tự nhiên hơn..."
+                            rows={2}
+                            className="resize-y"
                           />
                         </div>
-                      </section>
+                      </article>
                     ))
-                  : <p className="px-5 py-8 text-sm text-muted-foreground sm:px-6">Không đọc được nội dung bài làm.</p>}
+                  : <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-3 text-sm text-destructive">Không đọc được nội dung bài làm.</p>}
               </div>
 
               <TranslationGradeFetcher.Form
-                  method="post"
+                method="post"
                 id="translation-grade-form"
                 onSubmit={() => undefined}
-                  className="grid shrink-0 gap-4 border-t bg-background px-5 py-4 sm:grid-cols-[150px_1fr_auto] sm:px-6"
-                >
-                  <input type="hidden" name="intent" value="grade-translation" />
-                  <input type="hidden" name="submissionId" value={selectedTranslationSubmission.id} />
-                  <div>
-                    <label htmlFor="translation-score" className="text-sm font-medium">Điểm tổng</label>
-                    <Input
-                      id="translation-score"
-                      name="score"
-                      type="number"
-                      min="0"
-                      max={selectedTranslationSubmission.maxScore}
-                      defaultValue={selectedTranslationSubmission.status === "GRADED" ? String(selectedTranslationSubmission.score ?? 0) : ""}
-                      required
-                      className="mt-1.5"
-                    />
-                    <p className="mt-1 text-xs text-muted-foreground">Tối đa {selectedTranslationSubmission.maxScore}</p>
-                  </div>
-                  <div>
-                    <label htmlFor="translation-comment" className="text-sm font-medium">Nhận xét</label>
-                    <Textarea
-                      id="translation-comment"
-                      name="teacherComment"
-                      defaultValue={selectedTranslationSubmission.teacherComment ?? ""}
-                      placeholder="Nhận xét ưu điểm và lỗi cần sửa..."
-                      className="mt-1.5 min-h-20 resize-y"
-                    />
-                  </div>
-                  {TranslationGradeFetcher.data?.error && (
-                    <p className="text-sm text-destructive sm:col-span-2">{TranslationGradeFetcher.data.error}</p>
-                  )}
-                  <div className="flex items-end justify-end gap-2 sm:self-end">
-                    <Button type="button" variant="outline" onClick={() => setSelectedTranslationSubmissionId(null)}>Đóng</Button>
-                    <Button type="submit" disabled={TranslationGradeFetcher.state === "submitting"}>
-                      {TranslationGradeFetcher.state === "submitting"
-                        ? "Đang lưu..."
-                        : selectedTranslationSubmission.status === "GRADED"
-                          ? "Cập nhật kết quả"
-                          : "Trả bài cho học viên"}
-                    </Button>
-                  </div>
+                className="grid shrink-0 gap-3 border-t bg-background p-4 sm:grid-cols-[132px_minmax(0,1fr)_auto] sm:items-end sm:p-5"
+              >
+                <input type="hidden" name="intent" value="grade-translation" />
+                <input type="hidden" name="submissionId" value={selectedTranslationSubmission.id} />
+                <div>
+                  <label htmlFor="translation-score" className="text-sm font-medium">Điểm tổng</label>
+                  <Input
+                    id="translation-score"
+                    name="score"
+                    type="number"
+                    min="0"
+                    max={selectedTranslationSubmission.maxScore}
+                    defaultValue={selectedTranslationSubmission.status === "GRADED" ? String(selectedTranslationSubmission.score ?? 0) : ""}
+                    required
+                    className="mt-1.5"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">Tối đa {selectedTranslationSubmission.maxScore}</p>
+                </div>
+                <div>
+                  <label htmlFor="translation-comment" className="text-sm font-medium">Nhận xét chung</label>
+                  <Textarea
+                    id="translation-comment"
+                    name="teacherComment"
+                    defaultValue={selectedTranslationSubmission.teacherComment ?? ""}
+                    placeholder="Nhận xét ưu điểm và điểm cần cải thiện..."
+                    rows={2}
+                    className="mt-1.5 resize-y"
+                  />
+                </div>
+                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                  <Button type="button" variant="outline" onClick={() => setSelectedTranslationSubmissionId(null)}>Đóng</Button>
+                  <Button type="submit" disabled={TranslationGradeFetcher.state === "submitting"}>
+                    {TranslationGradeFetcher.state === "submitting"
+                      ? "Đang lưu..."
+                      : selectedTranslationSubmission.status === "GRADED"
+                        ? "Cập nhật kết quả"
+                        : "Trả bài cho học viên"}
+                  </Button>
+                </div>
+                {TranslationGradeFetcher.data?.error && (
+                  <p role="alert" className="text-sm text-destructive sm:col-span-2">{TranslationGradeFetcher.data.error}</p>
+                )}
               </TranslationGradeFetcher.Form>
             </section>
           </div>
