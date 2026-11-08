@@ -465,7 +465,11 @@ export default function StudentCourseDetail() {
                         <div className="pt-3 sm:px-4 sm:pt-0 sm:last:pr-0">
                           <dt className="text-xs font-medium text-muted-foreground">Kết quả</dt>
                           <dd className="mt-1 text-base font-semibold">
-                            {classFinalResult.decision === "PROMOTE" ? "Lên lớp" : "Ở lại"}
+                            {classFinalResult.decision === "PROMOTE"
+                              ? "Học lên"
+                              : classFinalResult.decision === "ELIGIBLE_NOT_ENROLLED"
+                                ? "Đủ điều kiện, chưa đăng ký"
+                                : "Không đủ học lực"}
                           </dd>
                         </div>
                       </dl>

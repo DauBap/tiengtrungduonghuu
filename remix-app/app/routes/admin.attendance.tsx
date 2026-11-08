@@ -5,7 +5,6 @@ import { Form, Link, useFetcher, useLoaderData, useNavigate } from "react-router
 import type { Prisma } from "@prisma/client";
 import {
   CalendarDays,
-  Check,
   CheckCircle2,
   ChevronDown,
   Clock3,
@@ -110,133 +109,6 @@ function normalizeSearchText(value: string) {
     .replace(/đ/gi, "d")
     .toLocaleLowerCase("vi")
     .trim();
-}
-
-function SearchableClassSelect({
-  classes,
-  selectedClassId,
-  onSelect,
-}: {
-  classes: AttendanceData["classes"];
-  selectedClassId: string;
-  onSelect: (classId: string) => void;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const selectedClass = classes.find((classroom) => classroom.id === selectedClassId);
-  const selectedLabel = selectedClass?.name ?? "";
-  const [inputValue, setInputValue] = useState(selectedLabel);
-  const [query, setQuery] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const listboxId = "attendance-class-options";
-  const filteredClasses = classes.filter((classroom) =>
-    normalizeSearchText(`${classroom.name} ${classroom.course} ${classroom.teacher}`)
-      .includes(normalizeSearchText(query)),
-  );
-
-  useEffect(() => {
-    setInputValue(selectedLabel);
-    setQuery("");
-    setIsOpen(false);
-  }, [selectedClassId, selectedLabel]);
-
-  return (
-    <div
-      ref={containerRef}
-      className="relative w-full sm:max-w-xs"
-      onBlur={(event) => {
-        if (!containerRef.current?.contains(event.relatedTarget as Node | null)) {
-          setIsOpen(false);
-          setQuery("");
-          setInputValue(selectedLabel);
-        }
-      }}
-    >
-      <Label htmlFor="filter-class">Lớp học</Label>
-      <div className="relative mt-1.5">
-        <Input
-          id="filter-class"
-          role="combobox"
-          aria-autocomplete="list"
-          aria-expanded={isOpen}
-          aria-controls={listboxId}
-          aria-activedescendant={isOpen && filteredClasses[activeIndex] ? `${listboxId}-${activeIndex}` : undefined}
-          autoComplete="off"
-          placeholder="Tìm tên lớp..."
-          className="pr-10"
-          value={inputValue}
-          onFocus={(event) => {
-            event.currentTarget.select();
-            setQuery("");
-            setActiveIndex(0);
-            setIsOpen(true);
-          }}
-          onChange={(event) => {
-            setInputValue(event.currentTarget.value);
-            setQuery(event.currentTarget.value);
-            setActiveIndex(0);
-            setIsOpen(true);
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "ArrowDown") {
-              event.preventDefault();
-              setIsOpen(true);
-              setActiveIndex((index) => Math.min(index + 1, filteredClasses.length - 1));
-            } else if (event.key === "ArrowUp") {
-              event.preventDefault();
-              setActiveIndex((index) => Math.max(index - 1, 0));
-            } else if (event.key === "Enter" && isOpen && filteredClasses[activeIndex]) {
-              event.preventDefault();
-              onSelect(filteredClasses[activeIndex].id);
-            } else if (event.key === "Escape") {
-              setIsOpen(false);
-              setQuery("");
-              setInputValue(selectedLabel);
-            }
-          }}
-        />
-        <ChevronDown
-          aria-hidden="true"
-          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-        />
-      </div>
-      {isOpen && (
-        <div
-          id={listboxId}
-          role="listbox"
-          aria-label="Kết quả tìm lớp"
-          className="absolute left-0 top-full z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
-        >
-          {filteredClasses.length === 0 ? (
-            <p className="px-3 py-2 text-sm text-muted-foreground">Không tìm thấy lớp phù hợp.</p>
-          ) : filteredClasses.map((classroom, index) => {
-            return (
-              <button
-                key={classroom.id}
-                id={`${listboxId}-${index}`}
-                type="button"
-                role="option"
-                aria-selected={classroom.id === selectedClassId}
-                onMouseDown={(event) => event.preventDefault()}
-                onMouseEnter={() => setActiveIndex(index)}
-                onClick={() => onSelect(classroom.id)}
-                className={`flex min-h-9 w-full items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  index === activeIndex ? "bg-accent text-accent-foreground" : "hover:bg-muted"
-                }`}
-              >
-                <span className="min-w-0 truncate">
-                  {classroom.name}
-                  {classroom.isCompleted && <span className="ml-1 text-muted-foreground">· Đã kết thúc</span>}
-                  <span className="mt-0.5 block truncate text-xs text-muted-foreground">{classroom.course}</span>
-                </span>
-                {classroom.id === selectedClassId && <Check aria-hidden="true" className="h-4 w-4 shrink-0" />}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -1880,6 +1752,8 @@ export default function AdminAttendance() {
   const createFetcher = useFetcher<typeof action>();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [teacherSearch, setTeacherSearch] = useState("");
+  const [attendancePage, setAttendancePage] = useState(1);
+  const [detailOverviewStatus, setDetailOverviewStatus] = useState<AttendanceOverviewStatus>("ALL");
   const selectedClass = classes.find((classroom) => classroom.id === filters.classId) ?? null;
   const selectedTeacher = teachers.find((teacher) => teacher.id === selectedTeacherId) ?? null;
   const teacherClasses = classes.filter((classroom) => (
@@ -1942,47 +1816,45 @@ export default function AdminAttendance() {
     }
   }, [createFetcher.data, createFetcher.state, filters.sessionId, getAttendanceHref, navigate]);
 
-  const matchesOverviewStatus = (
+  const matchesDetailOverviewStatus = (
     sessionCount: number,
     completedSessionCount: number,
     emptySessionCount: number,
   ) => {
-    if (filters.overviewStatus === "NO_SESSION") return sessionCount === 0;
-    if (filters.overviewStatus === "NO_STUDENTS") return emptySessionCount > 0;
-    if (filters.overviewStatus === "NEEDS_ATTENTION") {
+    if (detailOverviewStatus === "NO_SESSION") return sessionCount === 0;
+    if (detailOverviewStatus === "NO_STUDENTS") return emptySessionCount > 0;
+    if (detailOverviewStatus === "NEEDS_ATTENTION") {
       return sessionCount > 0 && completedSessionCount + emptySessionCount < sessionCount;
     }
-    if (filters.overviewStatus === "COMPLETE") {
+    if (detailOverviewStatus === "COMPLETE") {
       return sessionCount > 0 && completedSessionCount === sessionCount;
     }
     return true;
   };
+  const activeClassIds = new Set(classes.filter((classroom) => !classroom.isCompleted).map(({ id }) => id));
   const visibleTeachers = teachers
     .filter((teacher) =>
       normalizeSearchText(teacher.name).includes(normalizeSearchText(teacherSearch))
-      && matchesOverviewStatus(
-        teacher.dailySessionCount,
-        teacher.dailyCompletedSessionCount,
-        teacher.dailyEmptySessionCount,
-      ),
     )
     .sort((left, right) =>
-      right.activeClassCount - left.activeClassCount
+      Number(right.consecutiveAbsenceClasses.some(({ classId }) => activeClassIds.has(classId)))
+        - Number(left.consecutiveAbsenceClasses.some(({ classId }) => activeClassIds.has(classId)))
+      || right.activeClassCount - left.activeClassCount
       || left.name.localeCompare(right.name, "vi"),
     );
   const filteredVisibleClasses = visibleClasses.filter((classroom) => {
     if (classroom.isCompleted) return false;
     const classSessions = sessions.filter((session) => session.classId === classroom.id);
-    if (filters.overviewStatus === "NO_SESSION") return classSessions.length === 0;
-    if (filters.overviewStatus === "NEEDS_ATTENTION") {
+    if (detailOverviewStatus === "NO_SESSION") return classSessions.length === 0;
+    if (detailOverviewStatus === "NEEDS_ATTENTION") {
       return classSessions.some((session) => session.recordCount > 0 && session.unmarked > 0);
     }
-    if (filters.overviewStatus === "COMPLETE") {
+    if (detailOverviewStatus === "COMPLETE") {
       return classSessions.length > 0 && classSessions.every((session) => (
         session.recordCount > 0 && session.unmarked === 0
       ));
     }
-    if (filters.overviewStatus === "NO_STUDENTS") {
+    if (detailOverviewStatus === "NO_STUDENTS") {
       return classSessions.some((session) => session.recordCount === 0);
     }
     return true;
@@ -1990,15 +1862,28 @@ export default function AdminAttendance() {
   const unassignedClasses = classes.filter((classroom) => classroom.teacherId === null);
   const activeUnassignedClasses = unassignedClasses.filter((classroom) => !classroom.isCompleted);
   const showUnassignedClasses = activeUnassignedClasses.length > 0
-    && matchesOverviewStatus(
-      unassignedAttendanceSummary.sessionCount,
-      unassignedAttendanceSummary.completedSessionCount,
-      unassignedAttendanceSummary.emptySessionCount,
-    )
     && (!teacherSearch.trim()
       || normalizeSearchText("Chưa phân công giáo viên").includes(normalizeSearchText(teacherSearch)));
+  const attendanceOverviewRows = [
+    ...visibleTeachers.map((teacher) => ({ kind: "teacher" as const, teacher })),
+    ...(showUnassignedClasses ? [{ kind: "unassigned" as const }] : []),
+  ];
+  const attendancePageCount = Math.max(1, Math.ceil(attendanceOverviewRows.length / 10));
+  const currentAttendancePage = Math.min(attendancePage, attendancePageCount);
+  const attendancePageRows = attendanceOverviewRows.slice(
+    (currentAttendancePage - 1) * 10,
+    currentAttendancePage * 10,
+  );
   const activeClassCount = classes.filter((classroom) => !classroom.isCompleted).length;
   const markedRecordCount = attendanceSummary.present + attendanceSummary.late + attendanceSummary.absent;
+
+  useEffect(() => {
+    setAttendancePage(1);
+  }, [teacherSearch, filters.date]);
+
+  useEffect(() => {
+    setDetailOverviewStatus("ALL");
+  }, [selectedTeacherId]);
 
   return (
     <AppShell user={user}>
@@ -2174,7 +2059,7 @@ export default function AdminAttendance() {
                   {visibleTeachers.length} / {teachers.length} giáo viên · {activeClassCount} lớp đang hoạt động
                 </p>
               </div>
-              <div className="grid w-full gap-3 sm:max-w-xl sm:grid-cols-[1fr_auto] sm:items-end">
+              <div className="w-full sm:max-w-sm">
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                   <Input
@@ -2185,120 +2070,134 @@ export default function AdminAttendance() {
                     className="pl-9"
                   />
                 </div>
-                <div className="space-y-1.5 sm:w-52">
-                  <Label htmlFor="attendance-overview-status">Tình trạng điểm danh</Label>
-                  <select
-                    id="attendance-overview-status"
-                    className={SELECT_CLASS}
-                    value={filters.overviewStatus}
-                    onChange={(event) => {
-                      const value = event.currentTarget.value;
-                      if (isAttendanceOverviewStatus(value)) {
-                        navigate(getAttendanceHref({ overviewStatus: value, sessionId: "" }));
-                      }
-                    }}
-                  >
-                    <option value="ALL">Tất cả tình trạng</option>
-                    <option value="NEEDS_ATTENTION">Còn lượt chưa ghi nhận</option>
-                    <option value="COMPLETE">Đã ghi nhận đầy đủ</option>
-                    <option value="NO_SESSION">Chưa có buổi trong ngày</option>
-                    <option value="NO_STUDENTS">Buổi chưa có học viên</option>
-                  </select>
-                </div>
               </div>
             </div>
 
             {visibleTeachers.length > 0 || showUnassignedClasses ? (
-              <div className="overflow-hidden rounded-xl border bg-card">
-                {visibleTeachers.map((teacher) => (
-                  <div key={teacher.id} className="border-b last:border-b-0">
-                  <Link
-                    to={getAttendanceHref({ teacherId: teacher.id })}
-                    className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:px-5"
-                  >
-                    <span className="min-w-0 flex-1">
-                      <span className="flex flex-wrap items-center gap-2 font-medium">
-                        {teacher.name}
-                        {!teacher.isActive && <Badge variant="outline">Đã tạm khóa</Badge>}
-                        {teacher.isActive && !teacher.isActivated && <Badge variant="outline">Chưa kích hoạt</Badge>}
-                        {teacher.isDeleted && <Badge variant="outline">Đã xóa</Badge>}
-                      </span>
-                      <span className="mt-1 block text-sm text-muted-foreground">
-                        {teacher.activeClassCount} lớp đang hoạt động · {teacher.dailySessionCount} buổi ngày {formatAttendanceDate(filters.date)}
-                      </span>
-                      {teacher.dailySessionCount > 0 && (
-                        <span className="mt-2 block max-w-sm">
-                          <span className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-                            <span>
-                              {teacher.dailyCompletedSessionCount}/{teacher.dailySessionCount} buổi đủ lượt
-                              {teacher.dailyUnmarked > 0 ? ` · ${teacher.dailyUnmarked} chưa ghi nhận` : ""}
-                              {teacher.dailyEmptySessionCount > 0 ? ` · ${teacher.dailyEmptySessionCount} buổi chưa có học viên` : ""}
-                            </span>
-                            <span className="tabular-nums">
-                              {teacher.dailyAttendanceRate === null ? "—" : `${teacher.dailyAttendanceRate}% có mặt`}
-                            </span>
+              <>
+                <div className="overflow-hidden rounded-xl border bg-card">
+                  {attendancePageRows.map((row) => row.kind === "teacher" ? (
+                    <div key={row.teacher.id} className="border-b last:border-b-0">
+                      <Link
+                        to={getAttendanceHref({ teacherId: row.teacher.id })}
+                        aria-label={`Mở điểm danh của ${row.teacher.name}`}
+                        className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                      >
+                        <span className="min-w-0 flex-1">
+                          <span className="flex flex-wrap items-center gap-2 font-medium">
+                            {row.teacher.name}
+                            {!row.teacher.isActive && <Badge variant="outline">Đã tạm khóa</Badge>}
+                            {row.teacher.isActive && !row.teacher.isActivated && <Badge variant="outline">Chưa kích hoạt</Badge>}
+                            {row.teacher.isDeleted && <Badge variant="outline">Đã xóa</Badge>}
                           </span>
-                          <span className="mt-1.5 block h-1.5 overflow-hidden rounded-full bg-muted">
-                            <span
-                              className="block h-full rounded-full bg-success transition-[width]"
-                              style={{ width: `${teacher.dailyAttendanceRate ?? 0}%` }}
-                            />
+                          <span className="mt-1 block text-sm text-muted-foreground">
+                            {row.teacher.activeClassCount} lớp đang hoạt động · {row.teacher.dailySessionCount} buổi ngày {formatAttendanceDate(filters.date)}
                           </span>
+                          {row.teacher.dailySessionCount > 0 && (
+                            <span className="mt-2 block max-w-sm">
+                              <span className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                                <span>
+                                  {row.teacher.dailyCompletedSessionCount}/{row.teacher.dailySessionCount} buổi đủ lượt
+                                  {row.teacher.dailyUnmarked > 0 ? ` · ${row.teacher.dailyUnmarked} chưa ghi nhận` : ""}
+                                  {row.teacher.dailyEmptySessionCount > 0 ? ` · ${row.teacher.dailyEmptySessionCount} buổi chưa có học viên` : ""}
+                                </span>
+                                <span className="tabular-nums">
+                                  {row.teacher.dailyAttendanceRate === null ? "—" : `${row.teacher.dailyAttendanceRate}% có mặt`}
+                                </span>
+                              </span>
+                              <span className="mt-1.5 block h-1.5 overflow-hidden rounded-full bg-muted">
+                                <span
+                                  className="block h-full rounded-full bg-success transition-[width]"
+                                  style={{ width: `${row.teacher.dailyAttendanceRate ?? 0}%` }}
+                                />
+                              </span>
+                            </span>
+                          )}
                         </span>
+                        <span className="flex items-center justify-between gap-3 text-sm text-muted-foreground sm:justify-end">
+                          <span>{row.teacher.sessionCount} buổi tổng cộng</span>
+                          <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        </span>
+                      </Link>
+                      {row.teacher.consecutiveAbsenceClasses.length > 0 && (
+                        <div className="px-4 pb-4 sm:px-5">
+                          <ConsecutiveAbsenceNotice
+                            alerts={row.teacher.consecutiveAbsenceClasses.flatMap(({ alerts }) => alerts)}
+                          />
+                        </div>
                       )}
-                    </span>
-                    <span className="flex items-center justify-between gap-3 text-sm text-muted-foreground sm:justify-end">
-                      <span>{teacher.sessionCount} buổi tổng cộng</span>
-                      <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    </span>
-                  </Link>
-                  {teacher.consecutiveAbsenceClasses.length > 0 && (
-                    <div className="px-4 pb-4 sm:px-5">
-                      <ConsecutiveAbsenceNotice
-                        alerts={teacher.consecutiveAbsenceClasses.flatMap(({ alerts }) => alerts)}
-                      />
                     </div>
-                  )}
-                  </div>
-                ))}
-                {showUnassignedClasses && (
-                  <div>
-                  <Link
-                    to={getAttendanceHref({ teacherId: "unassigned" })}
-                    className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:px-5"
-                  >
-                    <span className="min-w-0 flex-1">
-                      <span className="font-medium">Chưa phân công giáo viên</span>
-                      <span className="mt-1 block text-sm text-muted-foreground">
-                        {activeUnassignedClasses.length} lớp đang hoạt động · {unassignedAttendanceSummary.sessionCount} buổi ngày {formatAttendanceDate(filters.date)}
+                  ) : (
+                    <div key="unassigned" className="border-b last:border-b-0">
+                      <Link
+                        to={getAttendanceHref({ teacherId: "unassigned" })}
+                        aria-label="Mở điểm danh các lớp chưa phân công giáo viên"
+                        className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                      >
+                        <span className="min-w-0 flex-1">
+                          <span className="font-medium">Chưa phân công giáo viên</span>
+                          <span className="mt-1 block text-sm text-muted-foreground">
+                            {activeUnassignedClasses.length} lớp đang hoạt động · {unassignedAttendanceSummary.sessionCount} buổi ngày {formatAttendanceDate(filters.date)}
+                          </span>
+                          {unassignedAttendanceSummary.sessionCount > 0 && (
+                            <span className="mt-1 block text-xs text-muted-foreground">
+                              {unassignedAttendanceSummary.completedSessionCount}/{unassignedAttendanceSummary.sessionCount} buổi đủ lượt
+                              {" · "}{unassignedAttendanceSummary.attendanceRate === null
+                                ? "Chưa có lượt đã ghi nhận"
+                                : `${unassignedAttendanceSummary.attendanceRate}% có mặt`}
+                              {unassignedAttendanceSummary.emptySessionCount > 0
+                                ? ` · ${unassignedAttendanceSummary.emptySessionCount} buổi chưa có học viên`
+                                : ""}
+                            </span>
+                          )}
+                        </span>
+                        <span className="flex items-center justify-between gap-4 text-sm text-muted-foreground sm:justify-end">
+                          <span>{unassignedClasses.reduce((total, classroom) => total + classroom.sessionCount, 0)} buổi điểm danh</span>
+                          <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        </span>
+                      </Link>
+                      {unassignedAttendanceSummary.consecutiveAbsenceClasses.length > 0 && (
+                        <div className="px-4 pb-4 sm:px-5">
+                          <ConsecutiveAbsenceNotice
+                            alerts={unassignedAttendanceSummary.consecutiveAbsenceClasses.flatMap(({ alerts }) => alerts)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {attendancePageCount > 1 && (
+                  <nav aria-label="Phân trang danh sách điểm danh" className="flex flex-wrap items-center justify-between gap-3">
+                    <span className="text-sm text-muted-foreground" aria-live="polite">
+                      Hiển thị {(currentAttendancePage - 1) * 10 + 1}–
+                      {Math.min(currentAttendancePage * 10, attendanceOverviewRows.length)} / {attendanceOverviewRows.length} kết quả
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setAttendancePage((page) => Math.max(1, page - 1))}
+                        disabled={currentAttendancePage === 1}
+                      >
+                        Trang trước
+                      </Button>
+                      <span className="min-w-16 text-center text-sm tabular-nums text-muted-foreground">
+                        {currentAttendancePage} / {attendancePageCount}
                       </span>
-                      {unassignedAttendanceSummary.sessionCount > 0 && (
-                        <span className="mt-1 block text-xs text-muted-foreground">
-                          {unassignedAttendanceSummary.completedSessionCount}/{unassignedAttendanceSummary.sessionCount} buổi đủ lượt
-                          {" · "}{unassignedAttendanceSummary.attendanceRate === null
-                            ? "Chưa có lượt đã ghi nhận"
-                            : `${unassignedAttendanceSummary.attendanceRate}% có mặt`}
-                          {unassignedAttendanceSummary.emptySessionCount > 0
-                            ? ` · ${unassignedAttendanceSummary.emptySessionCount} buổi chưa có học viên`
-                            : ""}
-                        </span>
-                      )}
-                    </span>
-                    <span className="flex items-center justify-between gap-4 text-sm text-muted-foreground sm:justify-end">
-                      <span>{unassignedClasses.reduce((total, classroom) => total + classroom.sessionCount, 0)} buổi điểm danh</span>
-                      <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    </span>
-                  </Link>
-                  {unassignedAttendanceSummary.consecutiveAbsenceClasses.length > 0 && (
-                    <div className="px-4 pb-4 sm:px-5">
-                      <ConsecutiveAbsenceNotice
-                        alerts={unassignedAttendanceSummary.consecutiveAbsenceClasses.flatMap(({ alerts }) => alerts)}
-                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setAttendancePage((page) => Math.min(attendancePageCount, page + 1))}
+                        disabled={currentAttendancePage === attendancePageCount}
+                      >
+                        Trang sau
+                      </Button>
                     </div>
-                  )}
-                  </div>
+                  </nav>
                 )}
-              </div>
+              </>
             ) : (
               <Card>
                 <CardContent className="px-5 py-10 text-center">
@@ -2310,7 +2209,11 @@ export default function AdminAttendance() {
             )}
           </section>
         ) : (
-          <section aria-labelledby="attendance-teacher-heading" className="space-y-4">
+          <Overlay
+            onClose={() => navigate(getAttendanceHref({ teacherId: "", classId: "", sessionId: "" }))}
+            className="max-w-6xl"
+          >
+          <section role="dialog" aria-modal="true" aria-labelledby="attendance-teacher-heading" className="space-y-4">
             <div className="space-y-3">
               <Button variant="ghost" size="sm" asChild className="-ml-2">
                 <Link to={getAttendanceHref({ teacherId: "", classId: "", sessionId: "" })}>
@@ -2338,15 +2241,6 @@ export default function AdminAttendance() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              {activeTeacherClasses.length > 1 && (
-                <div className="w-full sm:max-w-xs">
-                  <SearchableClassSelect
-                    classes={activeTeacherClasses}
-                    selectedClassId={filters.classId}
-                    onSelect={(classId) => navigate(getAttendanceHref({ classId }))}
-                  />
-                </div>
-              )}
               {selectedClass && (
                 <Button variant="outline" size="sm" asChild>
                   <Link to={getAttendanceHref({ classId: "", sessionId: "" })}>
@@ -2359,11 +2253,11 @@ export default function AdminAttendance() {
                 <select
                   id="attendance-detail-overview-status"
                   className={SELECT_CLASS}
-                  value={filters.overviewStatus}
+                  value={detailOverviewStatus}
                   onChange={(event) => {
                     const value = event.currentTarget.value;
                     if (isAttendanceOverviewStatus(value)) {
-                      navigate(getAttendanceHref({ overviewStatus: value, sessionId: "" }));
+                      setDetailOverviewStatus(value);
                     }
                   }}
                 >
@@ -2491,6 +2385,7 @@ export default function AdminAttendance() {
               </p>
             ) : null}
           </section>
+          </Overlay>
         )}
 
         <p className="flex items-center gap-2 text-xs text-muted-foreground">

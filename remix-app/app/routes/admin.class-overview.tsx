@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { LoaderFunctionArgs } from "react-router";
 import { Link, useLoaderData } from "react-router";
-import { ArrowUpRight, CheckCircle2, ChevronDown, Circle, Search, Video, X } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, Circle, Search, Video, X } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Overlay } from "~/components/common/overlay";
 import { Button } from "~/components/ui/button";
@@ -12,7 +12,7 @@ import { requireRole } from "~/lib/session.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
-  const [classes, completedClassesWithResults, hskLevels] = await Promise.all([
+  const [classes, hskLevels] = await Promise.all([
     prisma.class.findMany({
       where: { completedAt: null },
       select: {
@@ -71,31 +71,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
             records: { select: { studentId: true, status: true } },
           },
         },
-        studentScores: { select: { studentId: true, score: true } },
+        studentScores: { select: { studentId: true, score: true, decision: true } },
       },
       orderBy: [{ course: { order: "asc" } }, { name: "asc" }],
-    }),
-    prisma.class.findMany({
-      where: { completedAt: { not: null }, finalResults: { some: {} } },
-      orderBy: { completedAt: "desc" },
-      select: {
-        id: true,
-        name: true,
-        completedAt: true,
-        course: { select: { hskLevel: true, code: true } },
-        teacher: { select: { name: true } },
-        finalResults: {
-          orderBy: { student: { name: "asc" } },
-          select: {
-            score: true,
-            comment: true,
-            attendedSessions: true,
-            totalSessions: true,
-            decision: true,
-            student: { select: { id: true, name: true } },
-          },
-        },
-      },
     }),
     prisma.course.findMany({
       distinct: ["hskLevel"],
@@ -107,7 +85,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     hskLevel,
     count: classes.filter(({ course }) => course.hskLevel === hskLevel).length,
   }));
-  return { user, classes, completedClassesWithResults, hskCounts };
+  return { user, classes, hskCounts };
 }
 
 function getSafeRecordUrl(value: string | null) {
@@ -121,11 +99,14 @@ function getSafeRecordUrl(value: string | null) {
 }
 
 export default function AdminClassOverview() {
-  const { user, classes, completedClassesWithResults, hskCounts } = useLoaderData<typeof loader>();
+  const { user, classes, hskCounts } = useLoaderData<typeof loader>();
   const [query, setQuery] = useState("");
   const [selectedHsk, setSelectedHsk] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState("");
   const [selectedRecordClassId, setSelectedRecordClassId] = useState<string | null>(null);
+  const [showClassRecordings, setShowClassRecordings] = useState(false);
+  const [classPage, setClassPage] = useState(1);
+  const classesPerPage = 10;
   const teacherCounts = useMemo(() => {
     const counts = new Map<string, { id: string; name: string; count: number }>();
     for (const classroom of classes) {
@@ -142,6 +123,7 @@ export default function AdminClassOverview() {
   const hasActiveFilters = Boolean(query.trim() || selectedHsk || selectedTeacher);
   function changeSelectedHsk(nextHsk: string) {
     setSelectedHsk(nextHsk);
+    setClassPage(1);
     if (selectedTeacher && !classes.some((classroom) => (
       (!nextHsk || String(classroom.course.hskLevel) === nextHsk)
       && (classroom.teacher?.id ?? "unassigned") === selectedTeacher
@@ -159,16 +141,49 @@ export default function AdminClassOverview() {
       return matchesHsk && matchesTeacher && (!normalizedQuery || searchText.includes(normalizedQuery));
     });
   }, [classes, query, selectedHsk, selectedTeacher]);
+  const classPageCount = Math.max(1, Math.ceil(filteredClasses.length / classesPerPage));
+  const currentClassPage = Math.min(classPage, classPageCount);
+  const pageClasses = filteredClasses.slice(
+    (currentClassPage - 1) * classesPerPage,
+    currentClassPage * classesPerPage,
+  );
   const selectedRecordClass = classes.find(({ id }) => id === selectedRecordClassId) ?? null;
+  const selectedClassScoresByStudent = new Map(
+    selectedRecordClass?.studentScores.map((score) => [score.studentId, score]) ?? [],
+  );
+  const selectedClassHigherHskStudents = new Set(
+    selectedRecordClass?.enrollments
+      .filter(({ user: student }) => student.enrollments.some(
+        ({ course }) => course.hskLevel > (selectedRecordClass?.course.hskLevel ?? 0),
+      ))
+      .map(({ user: student }) => student.id) ?? [],
+  );
+  const selectedClassTrackedSessions = selectedRecordClass?.attendanceSessions.filter(
+    (session) => session.records.some(({ status }) => status !== null),
+  ) ?? [];
+  const selectedClassHasFinalScores = selectedClassScoresByStudent.size > 0;
+  const selectedClassHasOutcomeDecisions = selectedRecordClass?.studentScores.some(({ decision }) => decision !== null) ?? false;
+  const selectedClassHasHigherHskRegistrations = selectedClassHigherHskStudents.size > 0;
+  const selectedClassDynamicColumnCount = Number(selectedClassHasFinalScores)
+    + Number(selectedClassHasOutcomeDecisions)
+    + Number(selectedClassHasHigherHskRegistrations);
+  const selectedClassLatestSession = selectedClassTrackedSessions[0]
+    ?? selectedRecordClass?.attendanceSessions[0]
+    ?? null;
 
   useEffect(() => {
     if (!selectedRecordClassId) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelectedRecordClassId(null);
+      if (event.key !== "Escape") return;
+      if (showClassRecordings) {
+        setShowClassRecordings(false);
+      } else {
+        setSelectedRecordClassId(null);
+      }
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [selectedRecordClassId]);
+  }, [selectedRecordClassId, showClassRecordings]);
 
   return (
     <AppShell user={user}>
@@ -219,13 +234,23 @@ export default function AdminClassOverview() {
               <label className="relative sm:w-64">
                 <span className="sr-only">Tìm lớp, khóa học hoặc giáo viên</span>
                 <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input value={query} onChange={(event) => setQuery(event.currentTarget.value)} placeholder="Tìm lớp, giáo viên..." className="pl-9" />
+                <Input
+                  value={query}
+                  onChange={(event) => {
+                    setQuery(event.currentTarget.value);
+                    setClassPage(1);
+                  }}
+                  placeholder="Tìm lớp, giáo viên..."
+                  className="pl-9"
+                />
               </label>
               <label>
                 <span className="sr-only">Lọc theo HSK</span>
                 <select
                   value={selectedHsk}
-                  onChange={(event) => changeSelectedHsk(event.currentTarget.value)}
+                  onChange={(event) => {
+                    changeSelectedHsk(event.currentTarget.value);
+                  }}
                   className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-32"
                 >
                   <option value="">Tất cả HSK</option>
@@ -238,7 +263,10 @@ export default function AdminClassOverview() {
                 <span className="sr-only">Lọc theo giáo viên</span>
                 <select
                   value={selectedTeacher}
-                  onChange={(event) => setSelectedTeacher(event.currentTarget.value)}
+                  onChange={(event) => {
+                    setSelectedTeacher(event.currentTarget.value);
+                    setClassPage(1);
+                  }}
                   className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-52"
                 >
                   <option value="">Tất cả giáo viên</option>
@@ -260,6 +288,7 @@ export default function AdminClassOverview() {
                   setQuery("");
                   setSelectedHsk("");
                   setSelectedTeacher("");
+                  setClassPage(1);
                 }}
                 className="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
@@ -274,27 +303,18 @@ export default function AdminClassOverview() {
             </p>
           ) : (
             <div className="divide-y rounded-lg border bg-card">
-              {filteredClasses.map((classroom) => {
-                const linkedSessionCount = classroom.attendanceSessions.filter(
-                  ({ recordingUrl }) => getSafeRecordUrl(recordingUrl),
-                ).length;
-                const scoresByStudent = new Map(classroom.studentScores.map(({ studentId, score }) => [studentId, score]));
-                const studentsRegisteredForHigherHsk = new Set(
-                  classroom.enrollments
-                    .filter(({ user: student }) => student.enrollments.some(
-                      ({ course }) => course.hskLevel > classroom.course.hskLevel,
-                    ))
-                    .map(({ user: student }) => student.id),
-                );
-                const hasFinalScores = scoresByStudent.size > 0;
-                const hasHigherHskRegistrations = studentsRegisteredForHigherHsk.size > 0;
+              {pageClasses.map((classroom) => {
                 const trackedSessions = classroom.attendanceSessions.filter(
                   (session) => session.records.some(({ status }) => status !== null),
                 );
-                const latestSession = trackedSessions[0] ?? classroom.attendanceSessions[0] ?? null;
                 return (
-                  <details key={classroom.id} className="group">
-                    <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 p-4 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-5 [&::-webkit-details-marker]:hidden">
+                  <button
+                    key={classroom.id}
+                    type="button"
+                    onClick={() => setSelectedRecordClassId(classroom.id)}
+                    aria-label={`Xem chi tiết lớp ${classroom.name}`}
+                    className="flex w-full flex-wrap items-center justify-between gap-3 p-4 text-left hover:bg-muted/30 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-5"
+                  >
                       <div className="min-w-0 flex-1 space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="font-semibold">{classroom.name}</h3>
@@ -315,177 +335,58 @@ export default function AdminClassOverview() {
                           <span className="block font-semibold">{trackedSessions.length}</span>
                           <span className="text-xs text-muted-foreground">buổi đã điểm danh</span>
                         </span>
-                        <ChevronDown aria-hidden="true" className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+                          Chi tiết <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
+                        </span>
                       </div>
-                    </summary>
-
-                    <div className="space-y-4 border-t px-4 py-4 sm:px-5">
-                      {latestSession ? (
-                        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-muted/50 px-4 py-3">
-                          <div>
-                            <p className="font-medium">Buổi gần nhất: {latestSession.title}</p>
-                            <p className="mt-0.5 text-sm text-muted-foreground">
-                              {latestSession.date.toLocaleDateString("vi-VN")} · {latestSession.records.filter(({ status }) => status !== null).length}/{classroom.enrollments.length} học viên đã điểm danh
-                            </p>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setSelectedRecordClassId(classroom.id)}
-                            disabled={classroom.attendanceSessions.length === 0}
-                            aria-label={`Xem bản ghi buổi học của lớp ${classroom.name}`}
-                            className="shrink-0"
-                          >
-                            <Video aria-hidden="true" className="mr-2 h-4 w-4" />
-                            Bản ghi buổi học
-                            <span className="ml-2 text-xs text-muted-foreground">{linkedSessionCount}/{classroom.attendanceSessions.length}</span>
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-muted/50 px-4 py-3">
-                          <p className="text-sm text-muted-foreground">Lớp chưa có buổi điểm danh.</p>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setSelectedRecordClassId(classroom.id)}
-                            disabled={classroom.attendanceSessions.length === 0}
-                            aria-label={`Xem bản ghi buổi học của lớp ${classroom.name}`}
-                          >
-                            <Video aria-hidden="true" className="mr-2 h-4 w-4" />
-                            Bản ghi buổi học
-                            <span className="ml-2 text-xs text-muted-foreground">{linkedSessionCount}/{classroom.attendanceSessions.length}</span>
-                          </Button>
-                        </div>
-                      )}
-
-                      <div>
-                        <h4 className="mb-2 text-sm font-semibold">Danh sách học viên</h4>
-                        {classroom.enrollments.length === 0 ? (
-                          <p className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">Lớp chưa có học viên.</p>
-                        ) : (
-                          <div className="overflow-x-auto rounded-lg border">
-                            <table className={`w-full border-collapse text-left ${hasFinalScores && hasHigherHskRegistrations ? "min-w-[760px]" : hasFinalScores || hasHigherHskRegistrations ? "min-w-[650px]" : "min-w-[560px]"}`}>
-                              <caption className="sr-only">Thông tin học viên lớp {classroom.name}</caption>
-                              <thead className="bg-muted/40">
-                                <tr className="border-b">
-                                  <th scope="col" className="w-12 px-3 py-2.5 text-xs font-semibold text-muted-foreground">STT</th>
-                                  <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Học viên</th>
-                                  <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Vắng / tổng buổi</th>
-                                  {hasFinalScores && <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Điểm cuối khóa</th>}
-                                  {hasHigherHskRegistrations && <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Đăng ký khóa sau</th>}
-                                  <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Trạng thái</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y">
-                                {classroom.enrollments.map(({ user: student }, index) => {
-                                  const absentCount = trackedSessions.reduce((count, session) => (
-                                    count + (session.records.find(({ studentId }) => studentId === student.id)?.status === "ABSENT" ? 1 : 0)
-                                  ), 0);
-                                  const isRegisteredForHigherHsk = studentsRegisteredForHigherHsk.has(student.id);
-                                  const status = !student.isActive
-                                    ? { label: "Đã khóa", className: "bg-muted text-muted-foreground" }
-                                    : !student.isActivated
-                                      ? { label: "Chưa kích hoạt", className: "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200" }
-                                      : { label: "Đang học", className: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" };
-                                  return (
-                                    <tr key={student.id}>
-                                      <td className="px-3 py-2.5 text-sm tabular-nums text-muted-foreground">{index + 1}</td>
-                                      <th scope="row" className="px-3 py-2.5 text-sm font-medium">{student.name}</th>
-                                      <td className="px-3 py-2.5 text-sm tabular-nums">{absentCount}/{trackedSessions.length} buổi</td>
-                                      {hasFinalScores && (
-                                        <td className="px-3 py-2.5 text-sm tabular-nums">
-                                          {scoresByStudent.has(student.id) ? `${scoresByStudent.get(student.id)}/10` : "—"}
-                                        </td>
-                                      )}
-                                      {hasHigherHskRegistrations && (
-                                        <td className="px-3 py-2.5 text-sm">
-                                          <span className="inline-flex items-center gap-1.5">
-                                            {isRegisteredForHigherHsk
-                                              ? <CheckCircle2 aria-hidden="true" className="h-4 w-4 text-emerald-700" />
-                                              : <Circle aria-hidden="true" className="h-4 w-4 text-muted-foreground" />}
-                                            {isRegisteredForHigherHsk ? "Rồi" : "Chưa"}
-                                          </span>
-                                        </td>
-                                      )}
-                                      <td className="px-3 py-2.5 text-sm">
-                                        <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${status.className}`}>{status.label}</span>
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </details>
+                  </button>
                 );
               })}
             </div>
           )}
-        </section>
-
-        <section aria-labelledby="completed-classes-heading" className="space-y-4">
-          <div>
-            <h2 id="completed-classes-heading" className="text-base font-semibold">Kết quả cuối khóa</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Chỉ xem điểm, chuyên cần, nhận xét và lựa chọn của giáo viên.</p>
-          </div>
-          {completedClassesWithResults.length === 0 ? (
-            <p className="rounded-lg border border-dashed px-4 py-6 text-sm text-muted-foreground">Chưa có lớp nào kết thúc với kết quả cuối khóa.</p>
-          ) : (
-            <div className="space-y-4">
-              {completedClassesWithResults.map((classroom) => (
-                <article key={classroom.id} className="overflow-hidden rounded-lg border bg-card">
-                  <header className="flex flex-wrap items-baseline justify-between gap-2 border-b px-4 py-3">
-                    <div className="space-x-2">
-                      <span className="font-semibold">{classroom.name}</span>
-                      <span className="text-sm text-muted-foreground">HSK {classroom.course.hskLevel} · {classroom.course.code}</span>
-                      {classroom.teacher && <span className="text-sm text-muted-foreground">· {classroom.teacher.name}</span>}
-                    </div>
-                    <time className="text-xs text-muted-foreground">{classroom.completedAt?.toLocaleDateString("vi-VN")}</time>
-                  </header>
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[760px] border-collapse text-left">
-                      <thead className="bg-muted/40">
-                        <tr className="border-b">
-                          <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Học viên</th>
-                          <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Điểm</th>
-                          <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Chuyên cần</th>
-                          <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Kết quả</th>
-                          <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Nhận xét</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y">
-                        {classroom.finalResults.map((result) => (
-                          <tr key={result.student.id}>
-                            <th scope="row" className="px-4 py-3 text-sm font-medium">{result.student.name}</th>
-                            <td className="px-4 py-3 text-sm tabular-nums">{result.score}/10</td>
-                            <td className="px-4 py-3 text-sm tabular-nums">
-                              {result.totalSessions > 0 ? Math.round((result.attendedSessions / result.totalSessions) * 100) : 0}%
-                              <span className="ml-1 text-xs text-muted-foreground">({result.attendedSessions}/{result.totalSessions})</span>
-                            </td>
-                            <td className="px-4 py-3 text-sm">{result.decision === "PROMOTE" ? "Lên lớp" : "Ở lại"}</td>
-                            <td className="max-w-md whitespace-pre-wrap px-4 py-3 text-sm text-muted-foreground">{result.comment}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </article>
-              ))}
-            </div>
+          {classPageCount > 1 && (
+            <nav aria-label="Phân trang danh sách lớp" className="flex flex-wrap items-center justify-between gap-3">
+              <span className="text-sm text-muted-foreground" aria-live="polite">
+                Hiển thị {(currentClassPage - 1) * classesPerPage + 1}–
+                {Math.min(currentClassPage * classesPerPage, filteredClasses.length)} / {filteredClasses.length} lớp
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setClassPage((page) => Math.max(1, page - 1))}
+                  disabled={currentClassPage === 1}
+                >
+                  Trang trước
+                </Button>
+                <span className="min-w-16 text-center text-sm tabular-nums text-muted-foreground">
+                  {currentClassPage} / {classPageCount}
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setClassPage((page) => Math.min(classPageCount, page + 1))}
+                  disabled={currentClassPage === classPageCount}
+                >
+                  Trang sau
+                </Button>
+              </div>
+            </nav>
           )}
         </section>
+
       </div>
       {selectedRecordClass && (
-        <Overlay onClose={() => setSelectedRecordClassId(null)} className="max-w-2xl">
-          <section role="dialog" aria-modal="true" aria-labelledby="lesson-video-dialog-title" className="space-y-4">
+        <>
+          <Overlay onClose={() => setSelectedRecordClassId(null)} className="max-w-5xl">
+            <section role="dialog" aria-modal="true" aria-labelledby="class-details-dialog-title" className="space-y-5">
             <header className="flex items-start justify-between gap-4">
               <div>
-                <h2 id="lesson-video-dialog-title" className="text-lg font-semibold">Bản ghi buổi học</h2>
+                <h2 id="class-details-dialog-title" className="text-lg font-semibold">{selectedRecordClass.name}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {selectedRecordClass.name} · {selectedRecordClass.course.title}
+                  HSK {selectedRecordClass.course.hskLevel} · {selectedRecordClass.course.code} · {selectedRecordClass.course.title}
                 </p>
               </div>
               <Button
@@ -493,55 +394,185 @@ export default function AdminClassOverview() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setSelectedRecordClassId(null)}
-                aria-label="Đóng danh sách bản ghi buổi học"
+                aria-label="Đóng chi tiết lớp học"
                 className="shrink-0"
               >
                 <X aria-hidden="true" className="h-4 w-4" />
               </Button>
             </header>
-            <div className="max-h-[60vh] overflow-y-auto rounded-lg border">
-              {selectedRecordClass.attendanceSessions.length === 0 ? (
-                <p className="px-4 py-8 text-center text-sm text-muted-foreground">Lớp chưa có buổi học.</p>
-              ) : (
-                <ul className="divide-y">
-                  {selectedRecordClass.attendanceSessions.map((session) => {
-                    const recordUrl = getSafeRecordUrl(session.recordingUrl);
-                    return (
-                      <li key={session.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium">{session.title}</p>
-                          <p className="mt-0.5 text-xs text-muted-foreground">
-                            {session.date.toLocaleDateString("vi-VN")}
-                            {session.courseLesson && ` · Bài ${session.courseLesson.order} · ${session.courseLesson.title}`}
-                            {!session.courseLesson && session.lesson && ` · ${session.lesson}`}
-                          </p>
-                        </div>
-                        {recordUrl ? (
-                          <a
-                            href={recordUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          >
-                            Mở bản ghi<ArrowUpRight aria-hidden="true" className="h-4 w-4" />
-                          </a>
-                        ) : (
-                          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
-                            <Circle aria-hidden="true" className="h-3.5 w-3.5" />
-                            Chưa có link
-                          </span>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
+
+            <div className="grid gap-3 rounded-lg border bg-muted/30 p-4 text-sm sm:grid-cols-3">
+              <p><span className="text-muted-foreground">Lịch học: </span>{formatSchedule(selectedRecordClass.schedule)}</p>
+              <p><span className="text-muted-foreground">Giáo viên: </span>{selectedRecordClass.teacher?.name ?? "Chưa phân công"}</p>
+              <p><span className="text-muted-foreground">Học viên: </span>{selectedRecordClass._count.enrollments}/{selectedRecordClass.maxStudents}</p>
             </div>
+
+            {selectedClassLatestSession ? (
+              <div className="rounded-lg bg-muted/50 px-4 py-3">
+                <p className="font-medium">Buổi gần nhất: {selectedClassLatestSession.title}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  {selectedClassLatestSession.date.toLocaleDateString("vi-VN")} · {selectedClassLatestSession.records.filter(({ status }) => status !== null).length}/{selectedRecordClass.enrollments.length} học viên đã điểm danh
+                </p>
+              </div>
+            ) : (
+              <p className="rounded-lg bg-muted/50 px-4 py-3 text-sm text-muted-foreground">Lớp chưa có buổi điểm danh.</p>
+            )}
+
+            <section aria-labelledby="class-detail-students-title" className="space-y-2">
+              <h3 id="class-detail-students-title" className="text-sm font-semibold">Danh sách học viên</h3>
+              {selectedRecordClass.enrollments.length === 0 ? (
+                <p className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">Lớp chưa có học viên.</p>
+              ) : (
+                <div className="max-h-[35vh] overflow-auto rounded-lg border">
+                  <table className={`w-full border-collapse text-left ${selectedClassDynamicColumnCount >= 3 ? "min-w-[860px]" : selectedClassDynamicColumnCount === 2 ? "min-w-[760px]" : selectedClassDynamicColumnCount === 1 ? "min-w-[650px]" : "min-w-[560px]"}`}>
+                    <caption className="sr-only">Thông tin học viên lớp {selectedRecordClass.name}</caption>
+                    <thead className="bg-muted/40">
+                      <tr className="border-b">
+                        <th scope="col" className="w-12 px-3 py-2.5 text-xs font-semibold text-muted-foreground">STT</th>
+                        <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Học viên</th>
+                        <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Vắng / tổng buổi</th>
+                        {selectedClassHasFinalScores && <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Điểm cuối khóa</th>}
+                        {selectedClassHasOutcomeDecisions && <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Kết quả dự kiến</th>}
+                        {selectedClassHasHigherHskRegistrations && <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Đăng ký khóa sau</th>}
+                        <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Trạng thái</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {selectedRecordClass.enrollments.map(({ user: student }, index) => {
+                        const absentCount = selectedClassTrackedSessions.reduce((count, session) => (
+                          count + (session.records.find(({ studentId }) => studentId === student.id)?.status === "ABSENT" ? 1 : 0)
+                        ), 0);
+                        const isRegisteredForHigherHsk = selectedClassHigherHskStudents.has(student.id);
+                        const savedScore = selectedClassScoresByStudent.get(student.id);
+                        const status = !student.isActive
+                          ? { label: "Đã khóa", className: "bg-muted text-muted-foreground" }
+                          : !student.isActivated
+                            ? { label: "Chưa kích hoạt", className: "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200" }
+                            : { label: "Đang học", className: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" };
+                        return (
+                          <tr key={student.id}>
+                            <td className="px-3 py-2.5 text-sm tabular-nums text-muted-foreground">{index + 1}</td>
+                            <th scope="row" className="px-3 py-2.5 text-sm font-medium">{student.name}</th>
+                            <td className="px-3 py-2.5 text-sm tabular-nums">{absentCount}/{selectedClassTrackedSessions.length} buổi</td>
+                            {selectedClassHasFinalScores && (
+                              <td className="px-3 py-2.5 text-sm tabular-nums">{savedScore ? `${savedScore.score}/10` : "—"}</td>
+                            )}
+                            {selectedClassHasOutcomeDecisions && (
+                              <td className="px-3 py-2.5 text-sm">
+                                {savedScore?.decision === "PROMOTE"
+                                  ? "Học lên"
+                                  : savedScore?.decision === "ELIGIBLE_NOT_ENROLLED"
+                                    ? "Đủ điều kiện, chưa đăng ký"
+                                    : savedScore?.decision === "REPEAT"
+                                      ? "Không đủ học lực"
+                                      : "—"}
+                              </td>
+                            )}
+                            {selectedClassHasHigherHskRegistrations && (
+                              <td className="px-3 py-2.5 text-sm">
+                                <span className="inline-flex items-center gap-1.5">
+                                  {isRegisteredForHigherHsk
+                                    ? <CheckCircle2 aria-hidden="true" className="h-4 w-4 text-emerald-700" />
+                                    : <Circle aria-hidden="true" className="h-4 w-4 text-muted-foreground" />}
+                                  {isRegisteredForHigherHsk ? "Rồi" : "Chưa"}
+                                </span>
+                              </td>
+                            )}
+                            <td className="px-3 py-2.5 text-sm">
+                              <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${status.className}`}>{status.label}</span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowClassRecordings(true)}
+              aria-haspopup="dialog"
+              className="w-full justify-between transition-colors hover:border-red-700 hover:bg-red-700 hover:text-white active:border-red-800 active:bg-red-800 sm:w-auto"
+            >
+              <span className="inline-flex items-center gap-2">
+                <Video aria-hidden="true" className="h-4 w-4" />
+                Bản ghi buổi học
+              </span>
+              <span className="ml-3 text-xs text-muted-foreground">
+                {selectedRecordClass.attendanceSessions.filter(({ recordingUrl }) => getSafeRecordUrl(recordingUrl)).length}/{selectedRecordClass.attendanceSessions.length}
+              </span>
+            </Button>
             <div className="flex justify-end border-t pt-3">
               <Button type="button" variant="outline" onClick={() => setSelectedRecordClassId(null)}>Đóng</Button>
             </div>
-          </section>
-        </Overlay>
+            </section>
+          </Overlay>
+          {showClassRecordings && (
+            <Overlay onClose={() => setShowClassRecordings(false)} className="max-w-2xl">
+              <section role="dialog" aria-modal="true" aria-labelledby="class-recordings-dialog-title" className="space-y-4">
+                <header className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 id="class-recordings-dialog-title" className="text-lg font-semibold">Bản ghi buổi học</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">{selectedRecordClass.name}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowClassRecordings(false)}
+                    aria-label="Đóng bản ghi buổi học"
+                  >
+                    <X aria-hidden="true" className="h-4 w-4" />
+                  </Button>
+                </header>
+                <div className="max-h-[65vh] overflow-y-auto rounded-lg border">
+                  {selectedRecordClass.attendanceSessions.length === 0 ? (
+                    <p className="px-4 py-8 text-center text-sm text-muted-foreground">Lớp chưa có buổi học.</p>
+                  ) : (
+                    <ul className="divide-y">
+                      {selectedRecordClass.attendanceSessions.map((session) => {
+                        const recordUrl = getSafeRecordUrl(session.recordingUrl);
+                        return (
+                          <li key={session.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium">{session.title}</p>
+                              <p className="mt-0.5 text-xs text-muted-foreground">
+                                {session.date.toLocaleDateString("vi-VN")}
+                                {session.courseLesson && ` · Bài ${session.courseLesson.order} · ${session.courseLesson.title}`}
+                                {!session.courseLesson && session.lesson && ` · ${session.lesson}`}
+                              </p>
+                            </div>
+                            {recordUrl ? (
+                              <a
+                                href={recordUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                Mở bản ghi<ArrowUpRight aria-hidden="true" className="h-4 w-4" />
+                              </a>
+                            ) : (
+                              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+                                <Circle aria-hidden="true" className="h-3.5 w-3.5" />
+                                Chưa có link
+                              </span>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+                <div className="flex justify-end border-t pt-3">
+                  <Button type="button" variant="outline" onClick={() => setShowClassRecordings(false)}>Đóng</Button>
+                </div>
+              </section>
+            </Overlay>
+          )}
+        </>
       )}
     </AppShell>
   );

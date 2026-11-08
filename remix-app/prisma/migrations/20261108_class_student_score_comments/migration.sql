@@ -1,0 +1,2 @@
+ALTER TABLE "ClassStudentScore"
+ADD COLUMN "comment" TEXT NOT NULL DEFAULT '';

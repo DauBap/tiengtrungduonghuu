@@ -7,15 +7,27 @@ import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { AppearanceMenu } from "~/components/layout/appearance-menu";
 
-interface NavItem { label: string; href: string; icon: React.ComponentType<{ className?: string }>; }
+interface NavItem {
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  children?: Omit<NavItem, "children">[];
+}
 
 const ROLE_NAV: Record<UserRole, NavItem[]> = {
   admin: [
     { label: "Bảng điều khiển", href: "/admin", icon: LayoutDashboard },
     { label: "Dữ liệu Thần Bút", href: "/admin/shen-bi-data", icon: Brush },
-    { label: "Lớp học", href: "/admin/classes", icon: School },
-    { label: "Tổng quan lớp học", href: "/admin/class-overview", icon: ClipboardList },
-    { label: "Điểm danh", href: "/admin/attendance", icon: ClipboardCheck },
+    {
+      label: "Lớp học",
+      href: "/admin/classes",
+      icon: School,
+      children: [
+        { label: "Tổng quan lớp học", href: "/admin/class-overview", icon: ClipboardList },
+        { label: "Điểm danh", href: "/admin/attendance", icon: ClipboardCheck },
+        { label: "Kết quả cuối khóa", href: "/admin/class-final-results", icon: TrendingUp },
+      ],
+    },
     { label: "Lịch giáo viên", href: "/admin/teachers", icon: GraduationCap },
     { label: "Khóa học", href: "/admin/courses", icon: BookOpen },
     { label: "Bài thi", href: "/admin/exams", icon: FileCheck2 },
@@ -91,34 +103,62 @@ export function AppSidebar({ user }: { user: SessionUser }) {
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {navItems.map((item) => {
           const isActive = item.href === `/${user.role}` ? location.pathname === item.href : location.pathname.startsWith(item.href);
+          const isChildActive = item.children?.some((child) => location.pathname.startsWith(child.href)) ?? false;
           const Icon = item.icon;
           return (
-            <Link key={item.href} to={item.href} onClick={() => setMobileOpen(false)}
-              className={cn("flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                // Sidebar đã là nền đỏ nên item active phải nổi bằng lớp sáng,
-                // không dùng bg-primary (cùng tông đỏ → chìm hẳn vào nền).
-                // Chữ dùng text-sidebar (không phải text-primary): ở dark mode
-                // primary bị sáng lên nên trên viên pill trắng chỉ còn 3.5:1.
-                isActive ? "bg-sidebar-foreground text-sidebar shadow-sm" : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground"
-              )}>
-              <Icon className="h-4 w-4 shrink-0" />
-              <span className="min-w-0 flex-1 truncate">{item.label}</span>
-              {user.role === "student"
-                && item.href === "/student/assignments"
-                && pendingReviewCount > 0 && (
-                  <span
-                    aria-label={`${pendingReviewCount} bài đang chờ chấm`}
-                    className={cn(
-                      "inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums",
-                      isActive
-                        ? "bg-sidebar text-sidebar-foreground"
-                        : "bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-100",
-                    )}
-                  >
-                    {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
-                  </span>
-                )}
-            </Link>
+            <div key={item.href}>
+              <Link to={item.href} onClick={() => setMobileOpen(false)}
+                className={cn("flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  // Sidebar đã là nền đỏ nên item active phải nổi bằng lớp sáng,
+                  // không dùng bg-primary (cùng tông đỏ → chìm hẳn vào nền).
+                  // Chữ dùng text-sidebar (không phải text-primary): ở dark mode
+                  // primary bị sáng lên nên trên viên pill trắng chỉ còn 3.5:1.
+                  isActive ? "bg-sidebar-foreground text-sidebar shadow-sm" : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground"
+                )}>
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                {user.role === "student"
+                  && item.href === "/student/assignments"
+                  && pendingReviewCount > 0 && (
+                    <span
+                      aria-label={`${pendingReviewCount} bài đang chờ chấm`}
+                      className={cn(
+                        "inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums",
+                        isActive
+                          ? "bg-sidebar text-sidebar-foreground"
+                          : "bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-100",
+                      )}
+                    >
+                      {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
+                    </span>
+                  )}
+              </Link>
+              {item.children && (isActive || isChildActive) && (
+                <div className="ml-3 mt-1 space-y-1 border-l border-sidebar-border pl-3">
+                  {item.children.map((child) => {
+                    const isChildSelected = location.pathname.startsWith(child.href);
+                    const ChildIcon = child.icon;
+                    return (
+                      <Link
+                        key={child.href}
+                        to={child.href}
+                        onClick={() => setMobileOpen(false)}
+                        aria-current={isChildSelected ? "page" : undefined}
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                          isChildSelected
+                            ? "bg-sidebar-foreground text-sidebar shadow-sm"
+                            : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground",
+                        )}
+                      >
+                        <ChildIcon className="h-4 w-4 shrink-0" />
+                        <span className="min-w-0 truncate">{child.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           );
         })}
       </nav>

@@ -58,6 +58,7 @@ export default [
     route("students", "routes/admin.students.tsx"),
     route("classes", "routes/admin.classes.tsx"),
     route("class-overview", "routes/admin.class-overview.tsx"),
+    route("class-final-results", "routes/admin.class-final-results.tsx"),
     route("schedule", "routes/admin.schedule.tsx"),
     route("tuition", "routes/admin.tuition.tsx"),
     route("attendance", "routes/admin.attendance.tsx"),

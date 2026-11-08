@@ -1,0 +1,1 @@
+ALTER TYPE "ClassPromotionDecision" ADD VALUE 'ELIGIBLE_NOT_ENROLLED';
