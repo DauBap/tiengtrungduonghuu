@@ -98,6 +98,12 @@ function getSafeRecordUrl(value: string | null) {
   }
 }
 
+function getTrackedAttendanceSessionCount(
+  sessions: Array<{ records: Array<{ status: string | null }> }>,
+) {
+  return sessions.filter((session) => session.records.some(({ status }) => status !== null)).length;
+}
+
 export default function AdminClassOverview() {
   const { user, classes, hskCounts } = useLoaderData<typeof loader>();
   const [query, setQuery] = useState("");
@@ -134,12 +140,17 @@ export default function AdminClassOverview() {
 
   const filteredClasses = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("vi");
-    return classes.filter((classroom) => {
-      const matchesHsk = !selectedHsk || String(classroom.course.hskLevel) === selectedHsk;
-      const matchesTeacher = !selectedTeacher || (classroom.teacher?.id ?? "unassigned") === selectedTeacher;
-      const searchText = `${classroom.name} ${classroom.course.code} ${classroom.course.title} ${classroom.teacher?.name ?? ""}`.toLocaleLowerCase("vi");
-      return matchesHsk && matchesTeacher && (!normalizedQuery || searchText.includes(normalizedQuery));
-    });
+    return classes
+      .filter((classroom) => {
+        const matchesHsk = !selectedHsk || String(classroom.course.hskLevel) === selectedHsk;
+        const matchesTeacher = !selectedTeacher || (classroom.teacher?.id ?? "unassigned") === selectedTeacher;
+        const searchText = `${classroom.name} ${classroom.course.code} ${classroom.course.title} ${classroom.teacher?.name ?? ""}`.toLocaleLowerCase("vi");
+        return matchesHsk && matchesTeacher && (!normalizedQuery || searchText.includes(normalizedQuery));
+      })
+      .sort((left, right) => (
+        getTrackedAttendanceSessionCount(right.attendanceSessions)
+        - getTrackedAttendanceSessionCount(left.attendanceSessions)
+      ));
   }, [classes, query, selectedHsk, selectedTeacher]);
   const classPageCount = Math.max(1, Math.ceil(filteredClasses.length / classesPerPage));
   const currentClassPage = Math.min(classPage, classPageCount);
@@ -304,9 +315,7 @@ export default function AdminClassOverview() {
           ) : (
             <div className="divide-y rounded-lg border bg-card">
               {pageClasses.map((classroom) => {
-                const trackedSessions = classroom.attendanceSessions.filter(
-                  (session) => session.records.some(({ status }) => status !== null),
-                );
+                const trackedSessions = getTrackedAttendanceSessionCount(classroom.attendanceSessions);
                 return (
                   <button
                     key={classroom.id}
@@ -332,7 +341,7 @@ export default function AdminClassOverview() {
                           <span className="text-xs text-muted-foreground">học viên</span>
                         </span>
                         <span className="text-right text-sm tabular-nums">
-                          <span className="block font-semibold">{trackedSessions.length}</span>
+                          <span className="block font-semibold">{trackedSessions}</span>
                           <span className="text-xs text-muted-foreground">buổi đã điểm danh</span>
                         </span>
                         <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
