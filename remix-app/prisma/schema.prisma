@@ -586,17 +586,18 @@ model AttendanceSession {
 }
 
 model ClassFinalResult {
-  id               String                       @id @default(cuid())
-  classId          String
-  studentId        String
-  score            Float
-  comment          String
-  attendedSessions Int
-  totalSessions    Int
-  decision         ClassPromotionDecision
-  adminAction      ClassFinalResultAdminAction?
-  createdAt        DateTime                     @default(now())
-  updatedAt        DateTime                     @updatedAt
+  id                String                       @id @default(cuid())
+  classId           String
+  studentId         String
+  score             Float
+  comment           String
+  attendedSessions  Int
+  totalSessions     Int
+  decision          ClassPromotionDecision
+  adminAction       ClassFinalResultAdminAction?
+  adminActionReason String?
+  createdAt         DateTime                     @default(now())
+  updatedAt         DateTime                     @updatedAt
 
   classroom Class @relation(fields: [classId], references: [id], onDelete: Cascade)
   student   User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
