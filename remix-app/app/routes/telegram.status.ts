@@ -93,18 +93,17 @@ export async function action({ request }: ActionFunctionArgs) {
     return Response.json({ ok: true });
   }
 
-  const result = await prisma.$queryRaw<{ count: bigint }[]>`
-    SELECT COUNT(DISTINCT session."userId")::bigint AS count
-    FROM public."CourseStudySession" AS session
-    INNER JOIN public."User" AS app_user ON app_user.id = session."userId"
-    WHERE session."lastActiveAt" >= NOW() - (${ONLINE_WINDOW_SECONDS} * INTERVAL '1 second')
-      AND session."endedAt" IS NULL
-      AND app_user.role = 'student'
-      AND app_user."isActive" = true
-      AND app_user."deletedAt" IS NULL
-  `;
-  const onlineCount = Number(result[0]?.count ?? 0n);
-  const reply = `👥 Học viên đang online trong khóa học: ${onlineCount}\n(hoạt động trong 2 phút gần nhất)`;
+  const onlineSince = new Date(Date.now() - ONLINE_WINDOW_SECONDS * 1000);
+  const onlineCount = await prisma.user.count({
+    where: {
+      role: { in: ["teacher", "student"] },
+      isActive: true,
+      isActivated: true,
+      deletedAt: null,
+      lastSeenAt: { gte: onlineSince },
+    },
+  });
+  const reply = `👥 Người đang online trên app: ${onlineCount}\n(Giáo viên và học viên hoạt động trong 2 phút gần nhất)`;
 
   await sendTelegramMessage(botToken, allowedChatId, reply);
   return Response.json({ ok: true });
