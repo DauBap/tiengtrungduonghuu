@@ -185,30 +185,30 @@ export function GradingNotifications() {
           aria-label="Thông báo"
           className="absolute right-0 top-14 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-lg border bg-background shadow-xl"
         >
-          <header className="flex flex-wrap items-center justify-between gap-y-2 border-b px-4 py-3">
-            <h2 className="font-semibold">Thông báo</h2>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">
+          <header className="flex items-start justify-between gap-2 border-b px-4 py-3">
+            <div className="min-w-0">
+              <h2 className="font-semibold">Thông báo</h2>
+              <span className="mt-1 block text-xs text-muted-foreground">
                 {unreadCount > 0 ? `${unreadCount} chưa đọc` : "Đã cập nhật"}
               </span>
-              {unreadCount > 0 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  disabled={markFetcher.state !== "idle"}
-                  onClick={markAllAsRead}
-                  className="h-8 gap-1 px-2 text-xs"
-                >
-                  {markFetcher.state !== "idle" && !openingId
-                    ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    : <CheckCheck className="h-3.5 w-3.5" />}
-                  {markFetcher.state !== "idle" && !openingId
-                    ? "Đang cập nhật..."
-                    : "Đánh dấu tất cả là đã đọc"}
-                </Button>
-              )}
             </div>
+            {unreadCount > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={markFetcher.state !== "idle"}
+                onClick={markAllAsRead}
+                className="h-8 shrink-0 gap-1 px-2 text-xs hover:bg-destructive/10 hover:text-destructive"
+              >
+                {markFetcher.state !== "idle" && !openingId
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <CheckCheck className="h-3.5 w-3.5" />}
+                {markFetcher.state !== "idle" && !openingId
+                  ? "Đang cập nhật..."
+                  : "Đánh dấu tất cả là đã đọc"}
+              </Button>
+            )}
           </header>
           {markFetcher.data?.error && (
             <p role="alert" className="border-b bg-destructive/5 px-4 py-2 text-sm text-destructive">
