@@ -45,6 +45,7 @@ import {
 import { cn } from "~/lib/utils";
 import { speakChinese } from "~/lib/speech";
 import { useAppSettings } from "~/lib/app-settings";
+import { LessonPinyinVisibilityProvider } from "~/components/lessons/lesson-pinyin-visibility";
 import { SettingsMenu } from "~/components/layout/settings-menu";
 import { isLessonTabKey, openLessonTab, recordLessonTabAttempt } from "~/lib/lesson-tab-progress.server";
 import type { LessonTab as ProgressTab } from "~/lib/lesson-tab-progress";
@@ -1673,6 +1674,7 @@ export default function LessonDetail() {
   const progressFetcher = useFetcher();
   const translationFetcher = useFetcher<{ intent?: string; success?: boolean; translationError?: string }>();
   const [activeTab, setActiveTab] = useState<LessonTab>(() => reviewFocus?.tab ?? "FLASHCARD");
+  const showPinyinInActiveTab = settings.showPinyinByTab[activeTab] ?? false;
   const [lessonAudioPlaybackRate, setLessonAudioPlaybackRate] = useState<LessonAudioPlaybackRate>(1);
   const lessonAudioRef = useRef<HTMLAudioElement>(null);
   const [tabProgressStates, setTabProgressStates] = useState(
@@ -1951,9 +1953,6 @@ export default function LessonDetail() {
     if (activeTab === "VOCABULARY") {
       return (
         <div className="mx-auto max-w-6xl space-y-3">
-          <div className="flex justify-end">
-            <SettingsMenu align="right" />
-          </div>
           <VocabularyTable items={lesson.content} searchable />
         </div>
       );
@@ -2087,7 +2086,7 @@ export default function LessonDetail() {
                       : <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />}
                     <div className="min-w-0 space-y-1">
                       <p className="content-text hanzi-display font-medium">{index + 1}. {result.prompt}</p>
-                      {result.lessonPinyin && (
+                      {showPinyinInActiveTab && result.lessonPinyin && (
                         <p className="content-text pinyin-text text-sm text-muted-foreground">{result.lessonPinyin}</p>
                       )}
                       <p className="text-sm">
@@ -2630,9 +2629,6 @@ export default function LessonDetail() {
 
       return (
         <div className="mx-auto max-w-6xl space-y-3">
-          <div className="flex justify-end">
-            <SettingsMenu align="right" />
-          </div>
           <div className="rounded-xl border bg-card shadow-sm">
             <div className="border-b px-6 py-4">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -2760,7 +2756,7 @@ export default function LessonDetail() {
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm font-bold uppercase tracking-wide text-primary">Script</span>
                   <div className="flex items-center gap-2">
-                    {scriptSpeakers.some((speaker) => speaker.pinyin.trim()) && (
+                    {showPinyinInActiveTab && scriptSpeakers.some((speaker) => speaker.pinyin.trim()) && (
                       <Button
                         type="button"
                         variant="outline"
@@ -2787,7 +2783,7 @@ export default function LessonDetail() {
                         </div>
                         <div className="mt-2 space-y-2 text-base">
                           <p className="content-text hanzi-display !text-[26px] font-medium leading-relaxed text-foreground">{speaker.chinese}</p>
-                          {showLessonPinyin && speaker.pinyin.trim() && (
+                          {showPinyinInActiveTab && showLessonPinyin && speaker.pinyin.trim() && (
                             <p className="content-text pinyin-text !text-[24px] leading-relaxed text-muted-foreground">{speaker.pinyin}</p>
                           )}
                           {speaker.translation.trim() && (
@@ -2893,7 +2889,7 @@ export default function LessonDetail() {
                 </div>
               )}
 
-              {!isRecording && bestPronunciationAssessment && (
+              {showPinyinInActiveTab && !isRecording && bestPronunciationAssessment && (
                 <div className="mt-4 space-y-3 rounded-lg border p-3 text-sm">
                   <div className="text-xs font-bold uppercase text-muted-foreground">
                     Kết quả tốt nhất · {new Date(bestPronunciationAssessment.createdAt).toLocaleString("vi-VN")}
@@ -2913,14 +2909,14 @@ export default function LessonDetail() {
                 </div>
               )}
 
-              {recognizedTranscript && !isRecording && (
+              {showPinyinInActiveTab && recognizedTranscript && !isRecording && (
                 <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
                   <div className="font-medium text-foreground">Phiên âm nhận diện (Pinyin):</div>
                   <p className="mt-1 text-muted-foreground">{toPinyinText(recognizedTranscript)}</p>
                 </div>
               )}
 
-              {showScript && recognizedTranscript && visiblePinyinComparison.length > 0 && (
+              {showPinyinInActiveTab && showScript && recognizedTranscript && visiblePinyinComparison.length > 0 && (
                 <div
                   className="mt-4 space-y-3 rounded-lg border p-4"
                   aria-live="polite"
@@ -3064,8 +3060,9 @@ export default function LessonDetail() {
             message="Nội dung bài học này đang được soạn. Bạn hãy quay lại sau nhé."
           />
         ) : (
+          <LessonPinyinVisibilityProvider tab={activeTab}>
           <>
-            <LessonTabs
+          <LessonTabs
               activeTab={activeTab}
               progressStates={tabProgressStates}
               onTabChange={(tab) => {
@@ -3089,6 +3086,10 @@ export default function LessonDetail() {
               hasQuiz={lesson.content.length > 0}
             />
 
+            <div className="mx-auto flex max-w-6xl justify-end">
+              <SettingsMenu align="right" pinyinTabKey={activeTab} />
+            </div>
+
             {activeTabComment && (
               <aside className="mx-auto mt-4 max-w-6xl rounded-md border border-primary/20 bg-primary/5 px-4 py-3">
                 <h2 className="flex items-center gap-2 text-sm font-semibold text-primary">
@@ -3102,11 +3103,6 @@ export default function LessonDetail() {
             )}
 
             <div className="mx-auto max-w-6xl space-y-3">
-              {activeTab === "TEST" && (testResult || vocabularyQuestionSets.sameWordType.length > 0) && (
-                <div className="flex justify-end">
-                  <SettingsMenu align="right" />
-                </div>
-              )}
               {activeScore && (
                 <section className="rounded-md border bg-card px-4 py-3" aria-label="Điểm cao nhất">
                   <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
@@ -3191,6 +3187,7 @@ export default function LessonDetail() {
               <div key="active-tab-content">{renderTabContent()}</div>
             </div>
           </>
+          </LessonPinyinVisibilityProvider>
         )}
       </div>
     </AppShell>

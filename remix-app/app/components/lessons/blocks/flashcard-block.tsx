@@ -6,7 +6,7 @@ import { Check, CheckCircle2, ChevronLeft, ChevronRight, CircleHelp, RefreshCw, 
 import { speakChinese, isSpeechSupported } from "~/lib/speech";
 import type { FlashcardConfig } from "~/lib/learning-blocks";
 import { WORD_TYPE_META, type WordType } from "~/lib/word-types";
-import { useAppSettings } from "~/lib/app-settings";
+import { usePinyinVisibility } from "~/components/lessons/lesson-pinyin-visibility";
 import { VocabularyTable } from "~/components/lessons/vocabulary-table";
 
 export interface FlashcardVocab {
@@ -45,7 +45,7 @@ function shuffled<T>(arr: T[]): T[] {
 }
 
 export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted, onComplete, onIncomplete, progressStorageKey, previewOnly = false }: FlashcardBlockProps) {
-  const settings = useAppSettings();
+  const showPinyin = usePinyinVisibility();
   const storageKey = progressStorageKey ?? `flashcard-progress:${courseId}:${lessonId}`;
   const [round, setRound] = useState(0);
   const cards = useMemo(() => (config.shuffle ? shuffled(items) : items), [items, config.shuffle, round]);
@@ -427,12 +427,12 @@ export function FlashcardBlock({ config, items, courseId, lessonId, isCompleted,
           <div className={cn("relative h-72 w-full transition-transform duration-500 [transform-style:preserve-3d]", flipped && "[transform:rotateY(180deg)]")}>
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/20 bg-primary/5 p-6 transition-colors [backface-visibility:hidden] group-hover:border-primary/40">
               <p className={cn("content-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center font-semibold [overflow-wrap:anywhere]", frontIsChinese ? "hanzi-display text-5xl" : "text-2xl")}>{frontMain}</p>
-              {frontIsChinese && config.showPinyinOnFront && settings.showPinyin && <p className="content-text pinyin-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center text-lg text-primary [overflow-wrap:anywhere]">{card.pinyin}</p>}
+              {frontIsChinese && config.showPinyinOnFront && showPinyin && <p className="content-text pinyin-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center text-lg text-primary [overflow-wrap:anywhere]">{card.pinyin}</p>}
               <p className="absolute bottom-4 text-xs text-muted-foreground">Bấm để lật thẻ</p>
             </div>
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-primary/30 bg-primary/10 p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]">
               <p className={cn("content-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center font-semibold [overflow-wrap:anywhere]", frontIsChinese ? "text-2xl" : "hanzi-display text-5xl")}>{backMain}</p>
-              {settings.showPinyin && <p className="content-text pinyin-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center text-base text-primary [overflow-wrap:anywhere]">{card.pinyin}</p>}
+              {showPinyin && <p className="content-text pinyin-text w-full min-w-0 max-w-full break-words whitespace-normal px-1 text-center text-base text-primary [overflow-wrap:anywhere]">{card.pinyin}</p>}
               {!!card.wordTypes?.length && <div className="flex flex-wrap justify-center gap-1">{card.wordTypes.map((type) => <span key={type} className="rounded-full border border-border bg-background/60 px-2.5 py-0.5 text-xs text-muted-foreground">{WORD_TYPE_META[type].label}</span>)}</div>}
               {card.note && <p className="content-text mt-1 w-full min-w-0 max-w-xs break-words whitespace-normal text-center text-sm text-muted-foreground [overflow-wrap:anywhere]">{card.note}</p>}
             </div>

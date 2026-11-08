@@ -9,7 +9,7 @@ import { speakChinese } from "~/lib/speech";
 import { WORD_TYPE_META, type WordType } from "~/lib/word-types";
 import { LessonTabEmpty } from "./lesson-tab-empty";
 import { StrokeOrderDialog, splitHanCharacters } from "./stroke-order-dialog";
-import { useAppSettings } from "~/lib/app-settings";
+import { usePinyinVisibility } from "~/components/lessons/lesson-pinyin-visibility";
 
 export interface VocabularyItem {
   id: string;
@@ -34,7 +34,7 @@ function normalizeSearchText(value: string) {
 }
 
 export function VocabularyTable({ items, searchable = false }: VocabularyTableProps) {
-  const settings = useAppSettings();
+  const showPinyin = usePinyinVisibility();
   // Từ đang xem cách viết; null = đóng hộp thoại.
   const [strokeItem, setStrokeItem] = useState<VocabularyItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,7 +82,7 @@ export function VocabularyTable({ items, searchable = false }: VocabularyTablePr
               <TableRow>
                 <TableHead className="sticky left-0 z-30 w-10 whitespace-nowrap bg-background px-2 text-center shadow-[2px_0_4px_-2px_hsl(var(--border))] sm:w-12 sm:px-4">#</TableHead>
                 <TableHead className="sticky left-10 z-20 whitespace-nowrap bg-background px-2 shadow-[2px_0_4px_-2px_hsl(var(--border))] sm:left-12 sm:px-4">Chữ Hán</TableHead>
-                {settings.showPinyin && <TableHead className="whitespace-nowrap px-3 sm:px-4">Pinyin</TableHead>}
+                {showPinyin && <TableHead className="whitespace-nowrap px-3 sm:px-4">Pinyin</TableHead>}
                 <TableHead className="whitespace-nowrap px-3 sm:px-4">Từ loại</TableHead>
                 <TableHead className="whitespace-nowrap px-3 sm:px-4">Tiếng Việt</TableHead>
               </TableRow>
@@ -122,7 +122,7 @@ export function VocabularyTable({ items, searchable = false }: VocabularyTablePr
                       )}
                     </div>
                   </TableCell>
-                  {settings.showPinyin && <TableCell className="content-text pinyin-text !text-[16px] whitespace-nowrap px-3 py-3 text-primary sm:px-4 sm:py-4">{item.pinyin}</TableCell>}
+                  {showPinyin && <TableCell className="content-text pinyin-text !text-[16px] whitespace-nowrap px-3 py-3 text-primary sm:px-4 sm:py-4">{item.pinyin}</TableCell>}
                   <TableCell className="whitespace-nowrap px-3 py-3 sm:px-4 sm:py-4">
                     {item.wordTypes?.length ? (
                       <div className="flex w-max gap-1">
@@ -150,7 +150,7 @@ export function VocabularyTable({ items, searchable = false }: VocabularyTablePr
           chinese={strokeItem.chinese}
           pinyin={strokeItem.pinyin}
           translation={strokeItem.translation}
-          showPinyin={settings.showPinyin}
+          showPinyin={showPinyin}
           onClose={() => setStrokeItem(null)}
         />
       )}

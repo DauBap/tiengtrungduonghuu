@@ -3,7 +3,7 @@ import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import type { VocabularyTestQuestion } from "~/lib/vocabulary-test";
 import { ChevronLeft, ChevronRight, RotateCcw, Send, Timer } from "lucide-react";
-import { useAppSettings } from "~/lib/app-settings";
+import { usePinyinVisibility } from "~/components/lessons/lesson-pinyin-visibility";
 
 type QuizDirection = "zh2vi" | "vi2zh" | "mixed";
 type QuestionDirection = Exclude<QuizDirection, "mixed">;
@@ -42,7 +42,7 @@ export function VocabularyTest({
   fixedDirection?: QuestionDirection;
   pageSize?: number;
 }) {
-  const settings = useAppSettings();
+  const showPinyin = usePinyinVisibility();
   const questions = questionSets.sameWordType;
   const [direction, setDirection] = useState<QuizDirection>(fixedDirection ?? "mixed");
   const [displayMode, setDisplayMode] = useState<DisplayMode>("paged");
@@ -124,7 +124,7 @@ export function VocabularyTest({
             </div>
             <div className="flex min-h-36 flex-col items-center justify-center gap-2 rounded-lg border bg-card px-5 py-6 text-center">
               <p className="content-text hanzi-display text-5xl font-semibold">{question.chinese}</p>
-              {settings.showPinyin && <p className="content-text pinyin-text text-sm text-muted-foreground">{question.pinyin}</p>}
+              {showPinyin && <p className="content-text pinyin-text text-sm text-muted-foreground">{question.pinyin}</p>}
               {question.wordTypeLabels.length > 0 && (
                 <div className="flex flex-wrap justify-center gap-1.5">
                   {question.wordTypeLabels.map((label) => <span key={label} className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-900">{label}</span>)}
@@ -214,7 +214,7 @@ export function VocabularyTest({
         <p className={cn("content-text w-full max-w-full break-words font-semibold leading-tight", question.direction === "zh2vi" ? "hanzi-display text-5xl" : "text-2xl") }>
           {question.prompt}
         </p>
-        {settings.showPinyin && question.promptDetail && <p className="content-text w-full max-w-full break-words pinyin-text text-sm text-muted-foreground">{question.promptDetail}</p>}
+        {showPinyin && question.promptDetail && <p className="content-text w-full max-w-full break-words pinyin-text text-sm text-muted-foreground">{question.promptDetail}</p>}
         {question.wordTypeLabels.length > 0 && (
           <div className="flex flex-wrap justify-center gap-1.5">
             {question.wordTypeLabels.map((label) => (

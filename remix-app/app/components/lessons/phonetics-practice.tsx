@@ -5,6 +5,7 @@ import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { cn } from "~/lib/utils";
 import type { PhoneticsConfig, PhoneticsItem, PhoneticsSection } from "~/lib/learning-blocks";
 import { TONES, isPhoneticsAnswerCorrect, type PhoneticsAnswer } from "~/lib/phonetics";
+import { usePinyinVisibility } from "~/components/lessons/lesson-pinyin-visibility";
 
 const playbackRates = [0.8, 1, 1.5] as const;
 
@@ -151,6 +152,7 @@ function PhoneticsSectionCard({
 }) {
   const [answers, setAnswers] = useState<Record<number, PhoneticsAnswer>>({});
   const [checked, setChecked] = useState(false);
+  const showPinyin = usePinyinVisibility();
   const [showReview, setShowReview] = useState(false);
   const [playbackRate, setPlaybackRate] = useState<(typeof playbackRates)[number]>(1);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
@@ -277,16 +279,16 @@ function PhoneticsSectionCard({
                       : "border-destructive/30 bg-destructive/5",
                   )}
                 >
-                  <p className="content-text pinyin-text font-medium">{index + 1}. {result.prompt}</p>
+                  {showPinyin && <p className="content-text pinyin-text font-medium">{index + 1}. {result.prompt}</p>}
                   <p className="mt-1 text-sm">
                     <span className="text-muted-foreground">Bạn trả lời: </span>
-                    <span className="content-text pinyin-text">{result.given || "Bỏ trống"}</span>
+                    <span className="content-text pinyin-text">{showPinyin ? result.given || "Bỏ trống" : "Đã ẩn"}</span>
                   </p>
                   <p className="text-sm">
                     <span className="text-muted-foreground">Đáp án đúng: </span>
-                    <span className="content-text pinyin-text">{result.correctAnswer || "—"}</span>
+                    <span className="content-text pinyin-text">{showPinyin ? result.correctAnswer || "—" : "Đã ẩn"}</span>
                   </p>
-                  {result.completeAnswer && (
+                  {showPinyin && result.completeAnswer && (
                     <p className="text-sm">
                       <span className="text-muted-foreground">Âm tiết hoàn chỉnh: </span>
                       <span className="content-text pinyin-text">{result.completeAnswer}</span>

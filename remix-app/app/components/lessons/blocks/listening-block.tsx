@@ -11,6 +11,7 @@ import { preloadAudioUrls } from "~/lib/audio-preload";
 import type { AudioPreloadSession } from "~/lib/audio-preload";
 import type { ListeningConfig } from "~/lib/learning-blocks";
 import { getListeningGrade } from "~/lib/listening-score";
+import { usePinyinVisibility } from "~/components/lessons/lesson-pinyin-visibility";
 
 const playbackRates = [0.8, 1, 1.5] as const;
 type PlaybackRate = (typeof playbackRates)[number];
@@ -76,6 +77,7 @@ export function ListeningBlock({
   submissionError = null,
   previewOnly = false,
 }: ListeningBlockProps) {
+  const showPinyin = usePinyinVisibility();
   const [round, setRound] = useState(0);
   const items = useMemo(
     () => (config.shuffle ? shuffled(questions) : questions),
@@ -275,18 +277,18 @@ export function ListeningBlock({
                       </p>
                       <p className="content-text text-sm leading-7">
                         <span className="text-muted-foreground">Đáp án đúng: </span>
-                        <span className={result.answerMode === "chinese" ? "hanzi-display" : "pinyin-text"}>
-                          {result.correctAnswer}
-                        </span>
+                        {result.answerMode === "chinese"
+                          ? <span className="hanzi-display">{result.correctAnswer}</span>
+                          : <span className="pinyin-text">{showPinyin ? result.correctAnswer : "Đã ẩn"}</span>}
                       </p>
                       {((result.answerMode !== "chinese" && result.chinese)
-                        || (result.answerMode !== "pinyin" && result.pinyin)
+                        || (showPinyin && result.answerMode !== "pinyin" && result.pinyin)
                         || result.translation) && (
                         <p className="content-text text-sm leading-7 text-muted-foreground">
                           {result.answerMode !== "chinese" && result.chinese && (
                             <span className="hanzi-display">{result.chinese}</span>
                           )}
-                          {result.answerMode !== "pinyin" && result.pinyin && (
+                          {showPinyin && result.answerMode !== "pinyin" && result.pinyin && (
                             <>{result.answerMode !== "chinese" && result.chinese ? " · " : ""}{result.pinyin}</>
                           )}
                           {result.translation && (

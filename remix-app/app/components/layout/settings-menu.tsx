@@ -8,17 +8,20 @@ import {
   type SpeechEngine,
 } from "~/lib/app-settings";
 import { cn } from "~/lib/utils";
+import { Switch } from "~/components/ui/switch";
 
 export function SettingsMenu({
   align = "left",
   side = "bottom",
   triggerClassName,
   triggerLabel,
+  pinyinTabKey,
 }: {
   align?: "left" | "right";
   side?: "top" | "bottom";
   triggerClassName?: string;
   triggerLabel?: string;
+  pinyinTabKey?: string;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -46,6 +49,13 @@ export function SettingsMenu({
   }, [open]);
 
   const setEngine = (engine: SpeechEngine) => updateAppSetting("speechEngine", engine);
+  const setTabPinyin = (show: boolean) => {
+    if (!pinyinTabKey) return;
+    updateAppSetting("showPinyinByTab", {
+      ...settings.showPinyinByTab,
+      [pinyinTabKey]: show,
+    });
+  };
 
   return (
     <div ref={rootRef} className="relative">
@@ -74,6 +84,19 @@ export function SettingsMenu({
           )}
         >
           <h2 className="px-2 pb-2 text-sm font-semibold">Cài đặt</h2>
+          {pinyinTabKey && (
+            <div className="flex items-center justify-between gap-3 border-t px-2 py-3">
+              <span className="min-w-0">
+                <span className="block text-sm font-medium">Phiên âm</span>
+                <span className="block text-xs text-muted-foreground">Hiện pinyin trong tab này</span>
+              </span>
+              <Switch
+                checked={settings.showPinyinByTab[pinyinTabKey] ?? false}
+                onCheckedChange={setTabPinyin}
+                aria-label="Hiện phiên âm trong tab này"
+              />
+            </div>
+          )}
           <fieldset className="mt-2 border-t pt-2">
             <legend className="px-2 text-xs font-semibold text-muted-foreground">Giọng đọc</legend>
             {([
