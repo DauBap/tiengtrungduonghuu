@@ -1606,6 +1606,9 @@ export default function TeacherIndex() {
         && cls.enrollments.some((enrollment) => enrollment.userId === selectedTranslationSubmission.student.id)
       )
     : null;
+  const selectedTranslationLessonOrder = selectedTranslationClass?.lessons.find(
+    (lesson) => lesson.id === selectedTranslationSubmission?.lesson.id,
+  )?.displayOrder;
   const selectedTranslationAnswers = Array.isArray(selectedTranslationSubmission?.answers)
     ? selectedTranslationSubmission.answers as Array<{
         questionId?: string;
@@ -1635,6 +1638,9 @@ export default function TeacherIndex() {
             : 0), 0);
         return Math.round((correctWeight / totalWeight) * (selectedTranslationSubmission.maxScore || 10) * 10) / 10;
       })()
+    : null;
+  const expectedTranslationPercentage = expectedTranslationScore !== null && selectedTranslationSubmission
+    ? Math.round((expectedTranslationScore / (selectedTranslationSubmission.maxScore || 10)) * 100)
     : null;
   useEffect(() => {
     if (!selectedTranslationSubmissionId || !selectedTranslationSubmission) {
@@ -4121,14 +4127,18 @@ export default function TeacherIndex() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="translation-grading-title"
-              className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
+              className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
             >
-              <header className="flex shrink-0 items-start justify-between gap-3 border-b p-4 sm:px-5 sm:py-4">
+              <header className="flex shrink-0 items-start justify-between gap-3 border-b p-4 sm:p-5">
                 <div className="min-w-0">
-                  <h2 id="translation-grading-title" className="text-xl font-semibold">Chấm bài Luyện dịch</h2>
+                  <h2 id="translation-grading-title" className="text-lg font-semibold">Chấm bài Luyện dịch</h2>
                   {selectedTranslationClass && (
-                    <p className="mt-1 text-sm font-semibold text-primary">
-                      {selectedTranslationClass.name} · {selectedTranslationClass.course.title} · HSK {selectedTranslationClass.course.hskLevel}
+                    <p className="mt-1 text-sm font-medium text-primary">
+                      {selectedTranslationLessonOrder && selectedTranslationClass.lessons.length > 0
+                        ? `Bài ${selectedTranslationLessonOrder}/${selectedTranslationClass.lessons.length} · `
+                        : ""}
+                      LỚP {selectedTranslationClass.name} HSK {selectedTranslationClass.course.hskLevel} {selectedTranslationClass.course.title}
+                      {formatSchedule(selectedTranslationClass.schedule) ? ` ${formatSchedule(selectedTranslationClass.schedule)}` : ""}
                     </p>
                   )}
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -4149,29 +4159,32 @@ export default function TeacherIndex() {
                   const questionId = item.questionId ?? "";
                   const grade = questionId ? translationQuestionGrades[questionId] : null;
                   return (
-                    <article key={questionId || index} className="space-y-3 rounded-lg border p-3 sm:p-4">
-                      <div className="flex flex-wrap items-start gap-2">
-                        <span className="mt-0.5 font-mono text-xs text-muted-foreground">{index + 1}.</span>
-                        <div className="min-w-0 flex-1 space-y-3">
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground">Đề bài</p>
-                            <p className="content-text mt-1 whitespace-pre-wrap text-lg font-medium">{item.prompt || "Không có đề bài"}</p>
+                    <article key={questionId || index} className="space-y-3 rounded-lg border p-4">
+                      <div className="flex items-start gap-2">
+                        <span className="mt-1 text-xs text-muted-foreground">{index + 1}.</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="content-text whitespace-pre-wrap text-lg">{item.prompt || "Không có đề bài"}</p>
+                            {!item.answer && (
+                              <span className="rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground">
+                                Chưa nhập câu trả lời
+                              </span>
+                            )}
                           </div>
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground">Học viên trả lời</p>
-                            <p className={`content-text mt-1 whitespace-pre-wrap rounded-md border p-3 text-sm ${item.answer ? "border-primary/15 bg-primary/[0.04]" : "border-dashed bg-muted/40 text-muted-foreground"}`}>
-                              {item.answer || "Học viên chưa trả lời câu này"}
+                          <p className="content-text mt-2 whitespace-pre-wrap text-sm">
+                            <span className="text-muted-foreground">Học viên trả lời: </span>
+                            {item.answer || <em className="text-muted-foreground">bỏ trống</em>}
+                          </p>
+                          {item.sampleAnswer && (
+                            <p className="content-text mt-2 whitespace-pre-wrap text-sm">
+                              <span className="text-muted-foreground">Đáp án chuẩn: </span>
+                              <span className="font-medium">{item.sampleAnswer}</span>
                             </p>
-                          </div>
+                          )}
                         </div>
                       </div>
-                      {item.sampleAnswer && (
-                        <p className="rounded-md bg-muted/50 px-3 py-2 text-sm leading-6 text-muted-foreground">
-                          <span className="font-medium text-foreground">Đáp án mẫu: </span>{item.sampleAnswer}
-                        </p>
-                      )}
-                      <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
-                        <div className="flex flex-wrap items-center gap-2">
+                      <div className="space-y-2 border-t pt-3">
+                        <div className="flex flex-wrap items-center gap-2" role="group" aria-label={`Chấm câu ${index + 1}`}>
                           <Button
                             type="button"
                             size="sm"
@@ -4180,6 +4193,7 @@ export default function TeacherIndex() {
                             disabled={!questionId || TranslationGradeFetcher.state === "submitting"}
                             onClick={() => setTranslationQuestionGrades((current) => ({ ...current, [questionId]: true }))}
                           >
+                            <CheckCircle2 className="mr-1.5 h-4 w-4" aria-hidden="true" />
                             Đúng
                           </Button>
                           <Button
@@ -4190,27 +4204,27 @@ export default function TeacherIndex() {
                             disabled={!questionId || TranslationGradeFetcher.state === "submitting"}
                             onClick={() => setTranslationQuestionGrades((current) => ({ ...current, [questionId]: false }))}
                           >
+                            <XCircle className="mr-1.5 h-4 w-4" aria-hidden="true" />
                             Sai
                           </Button>
-                          <span className="text-xs text-muted-foreground">Tối đa {translationQuestionWeight(item.maxScore)} điểm</span>
+                          {grade !== null && (
+                            <span className="text-xs text-muted-foreground">
+                              Tối đa {translationQuestionWeight(item.maxScore)} điểm
+                            </span>
+                          )}
                         </div>
-                        <div className="min-w-[min(100%,18rem)] flex-1 sm:max-w-sm">
-                          <label
-                            htmlFor={`translation-comment-${questionId || index}`}
-                            className="text-xs font-medium"
-                          >
-                            Nhận xét câu {index + 1} <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
-                          </label>
-                          <Textarea
-                            id={`translation-comment-${questionId || index}`}
-                            name={`translation-comment-${questionId}`}
-                            form="translation-grade-form"
-                            defaultValue={item.teacherComment ?? ""}
-                            placeholder="Ghi chú lỗi hoặc gợi ý cách diễn đạt tự nhiên hơn..."
-                            rows={1}
-                            className="mt-1 resize-y"
-                          />
-                        </div>
+                        <label htmlFor={`translation-comment-${questionId || index}`} className="text-xs font-medium">
+                          Đáp án/Nhận xét <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
+                        </label>
+                        <Textarea
+                          id={`translation-comment-${questionId || index}`}
+                          name={`translation-comment-${questionId}`}
+                          form="translation-grade-form"
+                          defaultValue={item.teacherComment ?? ""}
+                          placeholder="Nhập nhận xét hoặc đáp án thay thế"
+                          rows={3}
+                          className="resize-y"
+                        />
                       </div>
                     </article>
                   );
@@ -4218,8 +4232,8 @@ export default function TeacherIndex() {
                 {selectedTranslationAnswers.length === 0 && (
                   <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-3 text-sm text-destructive">Không đọc được nội dung bài làm.</p>
                 )}
-                <div className="space-y-2 pt-1">
-                  <label htmlFor="translation-comment" className="text-sm font-medium">
+                <div className="space-y-2 rounded-lg border p-4">
+                  <label htmlFor="translation-comment" className="text-xs font-medium">
                     Nhận xét chung <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
                   </label>
                   <Textarea
@@ -4229,7 +4243,7 @@ export default function TeacherIndex() {
                     form="translation-grade-form"
                     defaultValue={selectedTranslationSubmission.teacherComment ?? ""}
                     placeholder="Nhận xét ưu điểm và điểm cần cải thiện..."
-                    rows={2}
+                    rows={3}
                     className="resize-y"
                   />
                 </div>
@@ -4255,11 +4269,11 @@ export default function TeacherIndex() {
                   && handledTranslationGradeSubmissionId.current === selectedTranslationSubmission.id && (
                     <p role="alert" className="px-4 pt-3 text-sm text-destructive sm:px-5">{TranslationGradeFetcher.data.error}</p>
                   )}
-                <div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:px-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t p-4 sm:px-5">
                   <p className="text-sm text-muted-foreground" aria-live="polite">
-                    Điểm dự kiến: {expectedTranslationScore === null
-                      ? "Chấm đủ câu để tính điểm"
-                      : `${expectedTranslationScore} / ${selectedTranslationSubmission.maxScore || 10}`}
+                    Điểm dự kiến: {expectedTranslationPercentage === null
+                      ? `${Object.values(translationQuestionGrades).filter((grade) => typeof grade === "boolean").length}/${selectedTranslationAnswers.length} câu đã chấm`
+                      : `${expectedTranslationPercentage}%`}
                   </p>
                   <div className="flex gap-2">
                     <Button type="button" variant="outline" onClick={() => {
