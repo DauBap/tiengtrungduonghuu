@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useFetcher, useNavigate } from "react-router";
-import { Bell, Check, Loader2 } from "lucide-react";
+import { Bell, Check, CheckCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 
@@ -23,6 +23,7 @@ interface NotificationList {
 interface MarkNotificationResult {
   success?: boolean;
   notificationId?: string;
+  markedAllAsRead?: boolean;
   targetUrl?: string;
   error?: string;
 }
@@ -37,6 +38,7 @@ export function GradingNotifications() {
   const [isOpen, setIsOpen] = useState(false);
   const [openingId, setOpeningId] = useState<string | null>(null);
   const handledNotificationId = useRef<string | null>(null);
+  const handledMarkAllResult = useRef<MarkNotificationResult | null>(null);
   const hasHandledInitialNotifications = useRef(false);
   const knownNotificationIds = useRef(new Set<string>());
   const openNotification = (notificationId: string) => {
@@ -45,6 +47,14 @@ export function GradingNotifications() {
     setOpeningId(notificationId);
     markFetcher.submit(
       { notificationId },
+      { method: "post", action: "/api/notifications" },
+    );
+  };
+  const markAllAsRead = () => {
+    if (markFetcher.state !== "idle") return;
+    setOpeningId(null);
+    markFetcher.submit(
+      { markAllAsRead: "true" },
       { method: "post", action: "/api/notifications" },
     );
   };
@@ -124,7 +134,18 @@ export function GradingNotifications() {
     if (
       markFetcher.state !== "idle"
       || !result?.success
-      || !result.notificationId
+    ) return;
+
+    if (result.markedAllAsRead) {
+      if (handledMarkAllResult.current === result) return;
+      handledMarkAllResult.current = result;
+      listFetcherRef.current.load("/api/notifications");
+      toast.success("Đã đánh dấu tất cả thông báo là đã đọc.");
+      return;
+    }
+
+    if (
+      !result.notificationId
       || !result.targetUrl
       || result.notificationId !== openingId
       || handledNotificationId.current === result.notificationId
@@ -164,11 +185,30 @@ export function GradingNotifications() {
           aria-label="Thông báo"
           className="absolute right-0 top-14 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-lg border bg-background shadow-xl"
         >
-          <header className="flex items-center justify-between border-b px-4 py-3">
+          <header className="flex flex-wrap items-center justify-between gap-y-2 border-b px-4 py-3">
             <h2 className="font-semibold">Thông báo</h2>
-            <span className="text-xs text-muted-foreground">
-              {unreadCount > 0 ? `${unreadCount} chưa đọc` : "Đã cập nhật"}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {unreadCount > 0 ? `${unreadCount} chưa đọc` : "Đã cập nhật"}
+              </span>
+              {unreadCount > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={markFetcher.state !== "idle"}
+                  onClick={markAllAsRead}
+                  className="h-8 gap-1 px-2 text-xs"
+                >
+                  {markFetcher.state !== "idle" && !openingId
+                    ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    : <CheckCheck className="h-3.5 w-3.5" />}
+                  {markFetcher.state !== "idle" && !openingId
+                    ? "Đang cập nhật..."
+                    : "Đánh dấu tất cả là đã đọc"}
+                </Button>
+              )}
+            </div>
           </header>
           {markFetcher.data?.error && (
             <p role="alert" className="border-b bg-destructive/5 px-4 py-2 text-sm text-destructive">

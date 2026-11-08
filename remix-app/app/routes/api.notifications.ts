@@ -45,6 +45,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export async function action({ request }: ActionFunctionArgs) {
   const user = await requireRole(request, ["admin", "teacher", "student"]);
   const form = await request.formData();
+  if (form.get("markAllAsRead") === "true") {
+    try {
+      const result = await prisma.userNotification.updateMany({
+        where: { recipientId: user.id, readAt: null },
+        data: { readAt: new Date() },
+      });
+      return { success: true, markedAllAsRead: true, updatedCount: result.count };
+    } catch (error) {
+      if (isMissingNotificationTable(error)) {
+        return { error: "Cần cập nhật database trước khi dùng thông báo. Hãy chạy npx prisma db push trong thư mục remix-app." };
+      }
+      throw error;
+    }
+  }
+
   const notificationId = String(form.get("notificationId") ?? "").trim();
   if (!notificationId) return { error: "Không tìm thấy thông báo cần mở." };
 
