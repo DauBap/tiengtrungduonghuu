@@ -50,16 +50,24 @@ import type { loader as mockExamAttemptLoader } from "./teacher.courses.$courseI
 
 const DASHBOARD_ACTIVITIES = [
   { tab: "FLASHCARD", label: "Flashcard" },
+  { tab: "LISTENING", label: "Nghe câu" },
+  { tab: "VOCABULARY", label: "Từ vựng" },
   { tab: "LESSON", label: "Bài khóa" },
   { tab: "PHONETICS", label: "Ngữ âm" },
   { tab: "VOCABULARY_TEST", label: "Ôn từ vựng" },
-  { tab: "LISTENING", label: "Nghe câu" },
   { tab: "GRAMMAR", label: "Ngữ pháp" },
-  { tab: "WORKBOOK", label: "Sách bài tập" },
   { tab: "TRANSLATION", label: "Luyện dịch" },
+  { tab: "WORKBOOK", label: "Sách bài tập" },
 ] as const;
 
 type DashboardActivityTab = (typeof DASHBOARD_ACTIVITIES)[number]["tab"];
+const STUDENT_ALWAYS_VISIBLE_ACTIVITIES: readonly DashboardActivityTab[] = [
+  "FLASHCARD",
+  "LISTENING",
+  "VOCABULARY",
+  "LESSON",
+  "VOCABULARY_TEST",
+];
 
 type PendingGrammarAttempt = Awaited<ReturnType<typeof loader>>["classSummaries"][number]["pendingGrammarAttempts"][number];
 type DashboardReviewItem = Extract<
@@ -254,7 +262,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
           id: true,
           order: true,
           title: true,
-          _count: { select: { content: true, grammarSections: true, phoneticsSections: true, audioScripts: true } },
+          _count: {
+            select: {
+              content: true,
+              grammarSections: true,
+              phoneticsSections: true,
+              audioScripts: true,
+              translationQuestions: true,
+            },
+          },
           learningBlocks: { select: { type: true, required: true } },
         },
         orderBy: { order: "asc" },
@@ -650,13 +666,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
       title: lesson.title,
       availableActivities: {
         FLASHCARD: lesson.learningBlocks.some((block) => block.type === "FLASHCARD" && block.required),
+        LISTENING: lesson.learningBlocks.some((block) => block.type === "LISTENING" && block.required),
+        VOCABULARY: lesson._count.content > 0,
         LESSON: lesson._count.audioScripts > 0,
         PHONETICS: (phoneticsSectionsByLesson.get(lesson.id)?.length ?? 0) > 0,
         VOCABULARY_TEST: lesson._count.content > 0,
-        LISTENING: lesson.learningBlocks.some((block) => block.type === "LISTENING" && block.required),
         GRAMMAR: lesson._count.grammarSections > 0,
         WORKBOOK: lesson.learningBlocks.some((block) => block.type === "WORKBOOK" && block.required),
-        TRANSLATION: false,
+        TRANSLATION: lesson._count.translationQuestions > 0,
       },
     }));
     const reviews = courseReviewSets.map((reviewSet, index) => ({
@@ -764,6 +781,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
           activities: DASHBOARD_ACTIVITIES.map(({ tab }) => {
           const progress = progressByKey.get(`${enrollment.userId}:${lesson.id}:${tab}`);
           const attempt = progress?.attempts[0];
+          const translationSubmission = tab === "TRANSLATION"
+            ? translationSubmissions.find((submission) =>
+                submission.lesson.id === lesson.id && submission.student.id === enrollment.userId
+              )
+            : undefined;
           const grammarSummary = tab === "GRAMMAR"
             ? grammarSummaryByUserLesson.get(`${enrollment.userId}:${lesson.id}`)
             : undefined;
@@ -857,9 +879,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
               ? lessonScriptProgress.completed
             : tab === "GRAMMAR"
               ? grammarProgress.completed
+            : tab === "TRANSLATION"
+              ? translationSubmission?.status === "GRADED"
               : progress?.completed === true;
           const hasStarted = Boolean(
             attempt
+            || translationSubmission
             || (tab === "LESSON" && lessonScriptProgress.started)
             || (tab === "GRAMMAR" && grammarProgress.hasStarted)
             || progress?.opened
@@ -870,6 +895,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
             ? "unavailable"
             : tab === "GRAMMAR" && grammarProgress.waiting
               ? "waiting"
+              : tab === "TRANSLATION" && translationSubmission?.status === "SUBMITTED"
+                ? "waiting"
               : completed
                 ? "completed"
                 : hasStarted
@@ -882,6 +909,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
               ? phoneticsSummary.score
               : tab === "LESSON"
                 ? lessonScriptProgress.score
+                : tab === "TRANSLATION" && translationSubmission?.status === "GRADED"
+                  ? ((translationSubmission.score ?? 0) / Math.max(1, translationSubmission.maxScore)) * 100
                 : grammarSummary && grammarSummary.totalCount > 0
                   ? (grammarSummary.correctCount / grammarSummary.totalCount) * 100
                   : attempt?.score ?? progress?.currentScore ?? progress?.bestScore ?? progress?.percent ?? 0),
@@ -898,6 +927,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
               ? phoneticsSummary.totalCount
               : grammarSummary?.totalCount ?? attempt?.totalCount,
             wrongAnswers: tab === "PHONETICS" ? phoneticsWrongAnswers : reviewableAttemptResults,
+            translationSubmissionId: translationSubmission?.id ?? null,
           };
           }),
         };
@@ -1440,7 +1470,9 @@ export default function TeacherIndex() {
         .map(({ student }) => student)
     : [];
   const selectedLessonActivities = selectedLesson
-    ? DASHBOARD_ACTIVITIES.filter(({ tab }) => selectedLesson.availableActivities[tab])
+    ? DASHBOARD_ACTIVITIES.filter(({ tab }) =>
+        STUDENT_ALWAYS_VISIBLE_ACTIVITIES.includes(tab) || selectedLesson.availableActivities[tab]
+      )
     : [];
   const selectedStudent = selectedClass?.activityData.find((item) => item.student.id === selectedStudentId);
   const reviewProgressData = reviewProgressFetcher.data;
@@ -2322,7 +2354,7 @@ export default function TeacherIndex() {
                                 <p className="text-xs text-muted-foreground">Bài được gợi ý dựa trên hoạt động gần nhất của lớp.</p>
                               </div>
                               <span className="text-xs text-muted-foreground">
-                                {selectedClass.activityData.length} học viên · {selectedLesson.availableActivities && Object.values(selectedLesson.availableActivities).filter(Boolean).length} phần theo dõi
+                                {selectedClass.activityData.length} học viên · {selectedLessonActivities.length} phần theo dõi
                               </span>
                             </div>
                             <div className="overflow-x-auto rounded-lg border">
@@ -2355,6 +2387,10 @@ export default function TeacherIndex() {
                                           const pending = activity.tab === "GRAMMAR" && result?.status === "waiting"
                                             ? selectedClass.pendingGrammarAttempts.find((attempt) => attempt.userId === student.student.id && attempt.lessonId === selectedLesson.id)
                                             : undefined;
+                                          const pendingTranslationSubmissionId = activity.tab === "TRANSLATION"
+                                            && result?.status === "waiting"
+                                            ? result.translationSubmissionId
+                                            : null;
                                           const displayedPercent = result?.status === "completed"
                                             ? result.score
                                             : result?.status === "partial"
@@ -2422,18 +2458,22 @@ export default function TeacherIndex() {
                                             <td key={activity.tab} className="px-2 py-2 text-center">
                                               {!result || result.status === "unavailable" ? (
                                                 <span className="text-xs text-muted-foreground">Không áp dụng</span>
-                                              ) : result.status === "waiting" && pending ? (
+                                              ) : result.status === "waiting" && (pending || pendingTranslationSubmissionId) ? (
                                                 <button
                                                   type="button"
                                                   onClick={() => {
-                                                    startGradingQueue(
-                                                      selectedClass.id,
-                                                      selectedClass.courseId,
-                                                      selectedClass.pendingGrammarAttempts,
-                                                      pending,
-                                                    );
+                                                    if (pendingTranslationSubmissionId) {
+                                                      setSelectedTranslationSubmissionId(pendingTranslationSubmissionId);
+                                                    } else if (pending) {
+                                                      startGradingQueue(
+                                                        selectedClass.id,
+                                                        selectedClass.courseId,
+                                                        selectedClass.pendingGrammarAttempts,
+                                                        pending,
+                                                      );
+                                                    }
                                                   }}
-                                                  className="inline-flex rounded-md bg-blue-100 px-2.5 py-2 text-xs font-medium text-blue-800 hover:bg-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:hover:bg-blue-950"
+                                                  className="inline-flex rounded-md bg-blue-100 px-2.5 py-2 text-xs font-medium text-blue-800 hover:bg-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-blue-950/50 dark:text-blue-300 dark:hover:bg-blue-950"
                                                 >
                                                   Chờ chấm <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                                                 </button>
@@ -2447,6 +2487,16 @@ export default function TeacherIndex() {
                                                     aria-haspopup="dialog"
                                                     aria-label={`Xem kết quả ${activityReviewData.activityLabel} của ${activityReviewData.studentName}: đúng ${activityReviewData.correctCount}/${activityReviewData.totalCount} câu`}
                                                     onClick={() => setSelectedActivityReview(activityReviewData)}
+                                                    className={`${tileClassName} cursor-pointer transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+                                                  >
+                                                    {tileContent}
+                                                  </button>
+                                                ) : activity.tab === "TRANSLATION" && result.translationSubmissionId ? (
+                                                  <button
+                                                    type="button"
+                                                    title="Xem bài luyện dịch"
+                                                    aria-label={`Xem bài luyện dịch của ${student.student.name ?? student.student.email}`}
+                                                    onClick={() => setSelectedTranslationSubmissionId(result.translationSubmissionId)}
                                                     className={`${tileClassName} cursor-pointer transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
                                                   >
                                                     {tileContent}
