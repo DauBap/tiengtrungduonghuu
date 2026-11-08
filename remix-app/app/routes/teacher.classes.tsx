@@ -13,7 +13,7 @@ import { requireRole } from "~/lib/session.server";
 import { prisma } from "~/lib/prisma.server";
 import { DEFAULT_ACCOUNT_PASSWORD } from "~/lib/account-credentials";
 import { getClassAttendanceSummary, type ClassAttendanceStatus } from "~/lib/class-attendance";
-import { Archive, CheckCircle2, Loader2, Plus, UserPlus, Users, X } from "lucide-react";
+import { Archive, CheckCircle2, Loader2, LockKeyhole, Plus, UserPlus, Users, X } from "lucide-react";
 import { toast } from "sonner";
 
 type ActionResult =
@@ -26,7 +26,16 @@ type ActionResult =
       email: string;
       initialPassword?: string;
     }
-  | { success: true; kind: "score-saved"; classId: string; studentId: string; score: number | null }
+  | {
+      success: true;
+      kind: "password-reset";
+      classId: string;
+      studentId: string;
+      studentName: string;
+      studentIsActivated: boolean;
+      studentIsActive: boolean;
+      initialPassword: string;
+    }
   | { success: true; kind: "completed"; classId: string };
 
 type PromotionDecision = "PROMOTE" | "REPEAT";
@@ -108,45 +117,56 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
   const intent = String(form.get("intent") ?? "");
   const classId = String(form.get("classId") ?? "").trim();
   if (!classId) return { error: "Vui lòng chọn lớp học." };
-  if (intent === "save-student-score") {
+  if (intent === "reset-student-password") {
     const studentId = String(form.get("studentId") ?? "").trim();
-    const rawScore = String(form.get("score") ?? "").trim();
-    const score = rawScore === "" ? null : parseScore(rawScore);
     if (!studentId || studentId.length > 100) {
-      return { error: "Không tìm thấy học viên cần lưu điểm.", classId };
+      return { error: "Không tìm thấy học viên cần cấp lại mật khẩu.", classId };
     }
-    if (score !== null && (!Number.isFinite(score) || score < 0 || score > 10)) {
-      return { error: "Điểm cuối khóa phải nằm trong khoảng 0 đến 10.", classId };
-    }
-    return prisma.$transaction(async (tx) => {
-      const classroom = await tx.class.findFirst({
-        where: {
-          id: classId,
-          teacherId: user.id,
-          completedAt: null,
-          enrollments: {
-            some: {
-              userId: studentId,
-              user: { is: { role: "student", deletedAt: null } },
-            },
+    try {
+      return await prisma.$transaction(async (tx) => {
+        const enrollment = await tx.enrollment.findFirst({
+          where: {
+            classId,
+            userId: studentId,
+            class: { teacherId: user.id, completedAt: null },
+            user: { is: { role: "student", deletedAt: null } },
           },
-        },
-        select: { id: true },
-      });
-      if (!classroom) {
-        return { error: "Không tìm thấy học viên trong lớp đang dạy hoặc lớp đã kết thúc.", classId };
-      }
-      if (score === null) {
-        await tx.classStudentScore.deleteMany({ where: { classId, studentId } });
-      } else {
-        await tx.classStudentScore.upsert({
-          where: { classId_studentId: { classId, studentId } },
-          create: { classId, studentId, score },
-          update: { score },
+          select: {
+            user: { select: { id: true, name: true, isActivated: true, isActive: true } },
+          },
         });
+        if (!enrollment) {
+          return { error: "Không tìm thấy học viên trong lớp đang dạy hoặc lớp đã kết thúc.", classId };
+        }
+
+        const update = await tx.user.updateMany({
+          where: { id: enrollment.user.id, role: "student", deletedAt: null },
+          data: {
+            password: await bcrypt.hash(DEFAULT_ACCOUNT_PASSWORD, 10),
+            mustChangePassword: true,
+          },
+        });
+        if (update.count !== 1) {
+          return { error: "Không thể cấp lại mật khẩu cho tài khoản này. Hãy tải lại trang và thử lại.", classId };
+        }
+
+        return {
+          success: true as const,
+          kind: "password-reset" as const,
+          classId,
+          studentId: enrollment.user.id,
+          studentName: enrollment.user.name,
+          studentIsActivated: enrollment.user.isActivated,
+          studentIsActive: enrollment.user.isActive,
+          initialPassword: DEFAULT_ACCOUNT_PASSWORD,
+        };
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    } catch (error) {
+      if (getKnownRequestError(error) === "P2034") {
+        return { error: "Lớp vừa thay đổi. Vui lòng tải lại trang và thử lại.", classId };
       }
-      return { success: true as const, kind: "score-saved" as const, classId, studentId, score };
-    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+      throw error;
+    }
   }
   if (intent === "complete-class") {
     const rawResults = String(form.get("results") ?? "");
@@ -389,7 +409,8 @@ export default function TeacherClassesPage() {
   const [optimisticallyCompletedClassIds, setOptimisticallyCompletedClassIds] = useState<string[]>([]);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [completionDraft, setCompletionDraft] = useState<Record<string, CompletionDraft>>({});
-  const [scoreDraft, setScoreDraft] = useState<Record<string, string>>({});
+  const [studentToResetPassword, setStudentToResetPassword] = useState<{ id: string; name: string } | null>(null);
+  const [passwordResetResult, setPasswordResetResult] = useState<Extract<ActionResult, { kind: "password-reset" }> | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "existing" | null>(null);
   const [studentQuery, setStudentQuery] = useState("");
   const [searchedQuery, setSearchedQuery] = useState("");
@@ -397,7 +418,7 @@ export default function TeacherClassesPage() {
   const createFetcher = useFetcher<typeof action>();
   const existingFetcher = useFetcher<typeof action>();
   const completeFetcher = useFetcher<typeof action>();
-  const scoreFetcher = useFetcher<typeof action>();
+  const passwordResetFetcher = useFetcher<typeof action>();
   const searchFetcher = useFetcher<{ query: string; students: { id: string; name: string; email: string }[] }>();
   const optimisticallyCompletedClassIdSet = new Set(optimisticallyCompletedClassIds);
   const activeClasses = classes.filter((item) =>
@@ -411,7 +432,7 @@ export default function TeacherClassesPage() {
   const createBusy = createFetcher.state !== "idle";
   const existingBusy = existingFetcher.state !== "idle";
   const isCompleting = completeFetcher.state !== "idle";
-  const isSavingScore = scoreFetcher.state !== "idle";
+  const isResettingPassword = passwordResetFetcher.state !== "idle";
   const provisionalScoreByStudent = new Map(
     (selectedClass?.studentScores ?? []).map(({ studentId, score }) => [studentId, score]),
   );
@@ -463,15 +484,13 @@ export default function TeacherClassesPage() {
   }, [completeFetcher.data]);
 
   useEffect(() => {
-    const result = scoreFetcher.data;
-    if (!result) return;
-    if ("error" in result) {
-      toast.error(result.error);
-    } else if (result.kind === "score-saved") {
-      toast.success(result.score === null ? "Đã xóa điểm tạm thời." : "Đã lưu điểm cuối khóa.");
-      scoreFetcher.reset();
+    const result = passwordResetFetcher.data;
+    if (passwordResetFetcher.state !== "idle" || !result || "error" in result) return;
+    if (result.kind === "password-reset") {
+      setPasswordResetResult(result);
+      setStudentToResetPassword(null);
     }
-  }, [scoreFetcher.data]);
+  }, [passwordResetFetcher.data, passwordResetFetcher.state]);
 
   useEffect(() => {
     if (!showCompleteDialog || isCompleting) return;
@@ -510,6 +529,8 @@ export default function TeacherClassesPage() {
     createFetcher.reset();
     existingFetcher.reset();
     searchFetcher.reset();
+    setStudentToResetPassword(null);
+    setPasswordResetResult(null);
     setStudentQuery("");
     setSearchedQuery("");
     setSelectedStudent(null);
@@ -528,18 +549,6 @@ export default function TeacherClassesPage() {
       { score: String(provisionalScoreByStudent.get(student.id) ?? ""), comment: "", decision: "" },
     ])));
     setShowCompleteDialog(true);
-  };
-  const saveStudentScore = (studentId: string) => {
-    if (!selectedClass) return;
-    scoreFetcher.submit(
-      {
-        intent: "save-student-score",
-        classId: selectedClass.id,
-        studentId,
-        score: scoreDraft[studentId] ?? String(provisionalScoreByStudent.get(studentId) ?? ""),
-      },
-      { method: "post" },
-    );
   };
   const confirmCompleteClass = () => {
     if (!selectedClass) return;
@@ -578,6 +587,82 @@ export default function TeacherClassesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Lớp học</h1>
           <p className="text-sm text-muted-foreground">Tạo tài khoản học viên mới hoặc thêm tài khoản đã có vào lớp bạn phụ trách.</p>
         </header>
+
+        {studentToResetPassword && selectedClass && classView === "active" && (
+          <Overlay onClose={() => setStudentToResetPassword(null)} className="max-w-md">
+            <section
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="reset-student-password-title"
+              aria-describedby="reset-student-password-description"
+              className="space-y-5"
+            >
+              <header className="space-y-1">
+                <h2 id="reset-student-password-title" className="text-lg font-semibold">Cấp lại mật khẩu?</h2>
+                <p id="reset-student-password-description" className="text-sm text-muted-foreground">
+                  Mật khẩu của {studentToResetPassword.name} sẽ được đặt lại và các phiên đăng nhập hiện tại sẽ kết thúc. Học viên cần đổi mật khẩu ở lần đăng nhập tiếp theo.
+                </p>
+              </header>
+              {passwordResetFetcher.data && "error" in passwordResetFetcher.data && (
+                <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                  {passwordResetFetcher.data.error}
+                </p>
+              )}
+              <passwordResetFetcher.Form method="post" className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+                <input type="hidden" name="intent" value="reset-student-password" />
+                <input type="hidden" name="classId" value={selectedClass.id} />
+                <input type="hidden" name="studentId" value={studentToResetPassword.id} />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStudentToResetPassword(null)}
+                  disabled={isResettingPassword}
+                  className="w-full sm:w-auto"
+                >
+                  Hủy
+                </Button>
+                <Button type="submit" disabled={isResettingPassword} className="w-full sm:w-auto">
+                  {isResettingPassword && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+                  {isResettingPassword ? "Đang cấp lại..." : "Cấp lại mật khẩu"}
+                </Button>
+              </passwordResetFetcher.Form>
+            </section>
+          </Overlay>
+        )}
+
+        {passwordResetResult && (
+          <Overlay onClose={() => setPasswordResetResult(null)} className="max-w-md">
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="reset-student-password-result-title"
+              className="space-y-5"
+            >
+              <header className="space-y-1">
+                <h2 id="reset-student-password-result-title" className="text-lg font-semibold">Đã cấp lại mật khẩu</h2>
+                <p className="text-sm text-muted-foreground">{passwordResetResult.studentName}</p>
+              </header>
+              <div role="status" className="space-y-2 rounded-md border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-950 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100">
+                <p>
+                  <span className="font-medium">Mật khẩu tạm thời: </span>
+                  <strong className="select-all font-mono tabular-nums">{passwordResetResult.initialPassword}</strong>
+                </p>
+                <p className="text-xs">
+                  {!passwordResetResult.studentIsActivated
+                    ? "Tài khoản chưa được kích hoạt; học viên chỉ đăng nhập được sau khi quản trị viên kích hoạt."
+                    : !passwordResetResult.studentIsActive
+                      ? "Tài khoản đang bị khóa; quản trị viên cần mở khóa trước khi học viên có thể đăng nhập."
+                      : "Học viên sẽ cần đổi mật khẩu sau khi đăng nhập."}
+                </p>
+              </div>
+              <div className="flex justify-end border-t pt-4">
+                <Button type="button" onClick={() => setPasswordResetResult(null)} className="w-full sm:w-auto">
+                  Đóng
+                </Button>
+              </div>
+            </section>
+          </Overlay>
+        )}
 
         {showCompleteDialog && selectedClass && (
           <Overlay onClose={() => setShowCompleteDialog(false)} className="max-w-6xl">
@@ -1089,15 +1174,8 @@ export default function TeacherClassesPage() {
                     </p>
                   ) : (
                     <>
-                      {classView === "active" && (
-                        <p className="mb-3 text-xs text-muted-foreground">
-                          Có thể lưu điểm trước; điểm này sẽ được điền sẵn khi kết thúc khóa. Để trống điểm rồi lưu để xóa.
-                        </p>
-                      )}
                       <ul className="divide-y rounded-md border">
                         {selectedClass.enrollments.map(({ user: student }) => {
-                          const savedScore = provisionalScoreByStudent.get(student.id);
-                          const scoreValue = scoreDraft[student.id] ?? String(savedScore ?? "");
                           return (
                             <li key={student.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-3">
                               <div className="min-w-0">
@@ -1106,37 +1184,21 @@ export default function TeacherClassesPage() {
                               </div>
                               <div className="flex w-full items-center gap-2 sm:w-auto">
                                 {classView === "active" && (
-                                  <>
-                                    <label className="min-w-0 flex-1 space-y-1 sm:w-36 sm:flex-none">
-                                      <span className="text-xs text-muted-foreground">Điểm cuối khóa</span>
-                                      <input
-                                        aria-label={`Điểm cuối khóa của ${student.name}`}
-                                        type="text"
-                                        inputMode="decimal"
-                                        placeholder="0–10"
-                                        value={scoreValue}
-                                        onChange={(event) => {
-                                          const score = event.currentTarget.value;
-                                          setScoreDraft((current) => ({
-                                            ...current,
-                                            [student.id]: score,
-                                          }));
-                                        }}
-                                        disabled={isSavingScore || isCompleting}
-                                        className="h-9 w-full rounded-md border border-input bg-background px-2.5 text-sm tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                      />
-                                    </label>
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => saveStudentScore(student.id)}
-                                      disabled={isSavingScore || isCompleting}
-                                      className="shrink-0"
-                                    >
-                                      {isSavingScore ? "Đang lưu..." : "Lưu điểm"}
-                                    </Button>
-                                  </>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      passwordResetFetcher.reset();
+                                      setPasswordResetResult(null);
+                                      setStudentToResetPassword({ id: student.id, name: student.name });
+                                    }}
+                                    disabled={isResettingPassword || isCompleting}
+                                    className="flex-1 sm:flex-none"
+                                  >
+                                    <LockKeyhole className="mr-1.5 h-4 w-4" />
+                                    Cấp lại mật khẩu
+                                  </Button>
                                 )}
                                 <span className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${!student.isActivated ? "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200" : student.isActive ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" : "bg-muted text-muted-foreground"}`}>
                                   {!student.isActivated ? "Chưa kích hoạt" : student.isActive ? "Đang học" : "Đã khóa"}
