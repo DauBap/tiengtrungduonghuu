@@ -1170,10 +1170,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
 }
 
-function translationQuestionWeight(value: unknown): number {
-  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : 1;
-}
-
 export async function action({ request }: ActionFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
   const form = await request.formData();
@@ -1246,12 +1242,11 @@ export async function action({ request }: ActionFunctionArgs) {
     return { error: "Hãy chọn Đúng hoặc Sai cho từng câu." };
   }
 
-  const totalWeight = validAnswerRecords.reduce((sum, record) => sum + translationQuestionWeight(record.maxScore), 0);
-  const correctWeight = validAnswerRecords.reduce((sum, record) => {
-    const weight = translationQuestionWeight(record.maxScore);
-    return sum + (gradeByQuestionId.get(String(record.questionId)) ? weight : 0);
-  }, 0);
-  const score = Math.round((correctWeight / totalWeight) * maxScore * 10) / 10;
+  const correctCount = validAnswerRecords.reduce(
+    (count, record) => count + (gradeByQuestionId.get(String(record.questionId)) ? 1 : 0),
+    0,
+  );
+  const score = Math.round((correctCount / validAnswerRecords.length) * maxScore * 10) / 10;
   const gradedAnswers = validAnswerRecords.map((record) => {
     const questionId = String(record.questionId);
     return {
@@ -1628,19 +1623,15 @@ export default function TeacherIndex() {
       typeof item.questionId === "string"
       && typeof translationQuestionGrades[item.questionId] === "boolean"
     );
-  const expectedTranslationScore = translationQuestionsFullyGraded && selectedTranslationSubmission
-    ? (() => {
-        const totalWeight = selectedTranslationAnswers.reduce((sum, item) =>
-          sum + translationQuestionWeight(item.maxScore), 0);
-        const correctWeight = selectedTranslationAnswers.reduce((sum, item) =>
-          sum + (item.questionId && translationQuestionGrades[item.questionId]
-            ? translationQuestionWeight(item.maxScore)
-            : 0), 0);
-        return Math.round((correctWeight / totalWeight) * (selectedTranslationSubmission.maxScore || 10) * 10) / 10;
-      })()
-    : null;
-  const expectedTranslationPercentage = expectedTranslationScore !== null && selectedTranslationSubmission
-    ? Math.round((expectedTranslationScore / (selectedTranslationSubmission.maxScore || 10)) * 100)
+  const gradedTranslationQuestionCount = selectedTranslationAnswers.filter((item) =>
+    typeof item.questionId === "string"
+    && typeof translationQuestionGrades[item.questionId] === "boolean"
+  ).length;
+  const correctTranslationQuestionCount = selectedTranslationAnswers.filter((item) =>
+    typeof item.questionId === "string" && translationQuestionGrades[item.questionId] === true
+  ).length;
+  const expectedTranslationPercentage = selectedTranslationAnswers.length > 0
+    ? Math.round((correctTranslationQuestionCount / selectedTranslationAnswers.length) * 100)
     : null;
   useEffect(() => {
     if (!selectedTranslationSubmissionId || !selectedTranslationSubmission) {
@@ -4207,11 +4198,9 @@ export default function TeacherIndex() {
                             <XCircle className="mr-1.5 h-4 w-4" aria-hidden="true" />
                             Sai
                           </Button>
-                          {grade !== null && (
-                            <span className="text-xs text-muted-foreground">
-                              Tối đa {translationQuestionWeight(item.maxScore)} điểm
-                            </span>
-                          )}
+                          <span className="text-xs text-muted-foreground">
+                            {typeof grade === "boolean" ? `Đã chấm: ${grade ? "Đúng" : "Sai"}` : "Chưa chấm"}
+                          </span>
                         </div>
                         <label htmlFor={`translation-comment-${questionId || index}`} className="text-xs font-medium">
                           Đáp án/Nhận xét <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
@@ -4271,9 +4260,10 @@ export default function TeacherIndex() {
                   )}
                 <div className="flex flex-wrap items-center justify-between gap-3 border-t p-4 sm:px-5">
                   <p className="text-sm text-muted-foreground" aria-live="polite">
-                    Điểm dự kiến: {expectedTranslationPercentage === null
-                      ? `${Object.values(translationQuestionGrades).filter((grade) => typeof grade === "boolean").length}/${selectedTranslationAnswers.length} câu đã chấm`
-                      : `${expectedTranslationPercentage}%`}
+                    Điểm dự kiến: {correctTranslationQuestionCount}/{selectedTranslationAnswers.length} câu đúng
+                    {expectedTranslationPercentage !== null && ` · ${expectedTranslationPercentage}%`}
+                    {gradedTranslationQuestionCount < selectedTranslationAnswers.length
+                      && ` · Đã chấm ${gradedTranslationQuestionCount}/${selectedTranslationAnswers.length} câu`}
                   </p>
                   <div className="flex gap-2">
                     <Button type="button" variant="outline" onClick={() => {
