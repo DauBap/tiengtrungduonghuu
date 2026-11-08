@@ -1287,6 +1287,7 @@ export default function TeacherIndex() {
   const [pendingReviewClassId, setPendingReviewClassId] = useState<string | null>(null);
   const [unsavedReviewCloseTarget, setUnsavedReviewCloseTarget] = useState<"queue" | "progress" | null>(null);
   const [dirtyReviewAttemptIds, setDirtyReviewAttemptIds] = useState<Set<string>>(() => new Set());
+  const [reviewGradeOverrides, setReviewGradeOverrides] = useState<Record<string, boolean>>({});
   const [pendingGradingTab, setPendingGradingTab] = useState<"grammar" | "translation">("grammar");
   const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
   const [workbookGradingAttemptId, setWorkbookGradingAttemptId] = useState<string | null>(null);
@@ -1309,6 +1310,10 @@ export default function TeacherIndex() {
   const closePendingReviewModalAndDiscard = () => {
     setUnsavedReviewCloseTarget(null);
     setPendingReviewClassId(null);
+    const attemptPrefixes = pendingClassReviews.map((attempt) => `${attempt.id}:`);
+    setReviewGradeOverrides((current) => Object.fromEntries(
+      Object.entries(current).filter(([key]) => !attemptPrefixes.some((prefix) => key.startsWith(prefix))),
+    ));
     setDirtyReviewAttemptIds((current) => {
       const next = new Set(current);
       for (const attempt of pendingClassReviews) next.delete(attempt.id);
@@ -1338,6 +1343,9 @@ export default function TeacherIndex() {
     ) return;
     const attemptId = result.attemptId;
     handledReviewGradingAttemptId.current = attemptId;
+    setReviewGradeOverrides((current) => Object.fromEntries(
+      Object.entries(current).filter(([key]) => !key.startsWith(`${attemptId}:`)),
+    ));
     setDirtyReviewAttemptIds((current) => {
       if (!current.has(attemptId)) return current;
       const next = new Set(current);
@@ -1451,6 +1459,10 @@ export default function TeacherIndex() {
   const closeReviewProgressAndDiscard = () => {
     setUnsavedReviewCloseTarget(null);
     setSelectedReviewProgress(null);
+    const attemptPrefixes = (selectedReviewAttempts ?? []).map((attempt) => `${attempt.id}:`);
+    setReviewGradeOverrides((current) => Object.fromEntries(
+      Object.entries(current).filter(([key]) => !attemptPrefixes.some((prefix) => key.startsWith(prefix))),
+    ));
     setDirtyReviewAttemptIds((current) => {
       const next = new Set(current);
       for (const attempt of selectedReviewAttempts ?? []) next.delete(attempt.id);
@@ -3043,7 +3055,7 @@ export default function TeacherIndex() {
 
         {selectedReviewProgress && (
           <div
-            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-5"
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
             role="presentation"
             onClick={(event) => {
               if (event.target === event.currentTarget && reviewGradingFetcher.state === "idle") {
@@ -3055,15 +3067,16 @@ export default function TeacherIndex() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="review-progress-title"
-              className="flex max-h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-2xl"
+              className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
             >
-              <header className="flex shrink-0 items-start justify-between gap-4 border-b px-4 py-3.5 sm:px-6">
+              <header className="flex shrink-0 items-start justify-between gap-3 border-b p-4 sm:p-5">
                 <div className="min-w-0">
-                  <h2 id="review-progress-title" className="break-words text-lg font-semibold leading-tight">{selectedReviewProgress.reviewTitle}</h2>
-                  <p className="mt-1.5 break-words text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">{selectedReviewProgress.studentName}</span>
-                    {" · "}
-                    {selectedReviewProgressData?.selectedClass?.name ?? "Tiến độ ôn tập"}
+                  <h2 id="review-progress-title" className="text-lg font-semibold">Chấm bài ôn tập</h2>
+                  <p className="mt-1 break-words text-sm font-medium text-primary">
+                    {selectedReviewProgress.reviewTitle} · {selectedReviewProgressData?.selectedClass?.name ?? "Tiến độ ôn tập"}
+                  </p>
+                  <p className="mt-1 break-words text-sm text-muted-foreground">
+                    {selectedReviewProgress.studentName}
                   </p>
                 </div>
                 <button
@@ -3071,14 +3084,14 @@ export default function TeacherIndex() {
                   aria-label="Đóng tiến độ ôn tập"
                   disabled={reviewGradingFetcher.state !== "idle"}
                   onClick={closeReviewProgress}
-                  className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                  className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </header>
-              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4 sm:px-6 sm:py-5">
+              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
                 {reviewGradingFetcher.data?.error && (
-                  <p role="alert" className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-3.5 py-3 text-sm text-destructive">
+                  <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
                     {reviewGradingFetcher.data.error}
                   </p>
                 )}
@@ -3096,27 +3109,32 @@ export default function TeacherIndex() {
                     Học viên chưa có lượt làm bài ôn tập này.
                   </p>
                 ) : (
-                    <ol className="space-y-5">
-                      {selectedReviewAttempts.map((attempt, index) => (
-                        <li key={attempt.id} className="overflow-hidden rounded-xl border bg-card">
+                  <ol className="space-y-6">
+                    {selectedReviewAttempts.map((attempt, index) => {
+                      const attemptGrades = attempt.answers.map((answer) => ({
+                        answer,
+                        correct: reviewGradeOverrides[`${attempt.id}:${answer.questionId}`] ?? answer.correct ?? true,
+                      }));
+                      const gradedCount = attemptGrades.filter(({ correct }) => correct !== null).length;
+                      const correctCount = attemptGrades.filter(({ correct }) => correct === true).length;
+                      const expectedPercentage = attemptGrades.length > 0 && gradedCount === attemptGrades.length
+                        ? Math.round((correctCount / attemptGrades.length) * 100)
+                        : null;
+
+                      return (
+                        <li key={attempt.id} className="space-y-3">
                           <reviewGradingFetcher.Form
                             method="post"
                             action={`/teacher/courses/${selectedReviewProgressData.course.id}/progress/reviews/${selectedReviewProgress.reviewId}?classId=${encodeURIComponent(selectedReviewProgress.classId)}`}
                           >
-                            {attempt.status !== "RETURNED" && (
-                              <>
-                                <input type="hidden" name="classId" value={selectedReviewProgress.classId} />
-                                <input type="hidden" name="attemptId" value={attempt.id} />
-                              </>
-                            )}
-                            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b bg-muted/30 px-4 py-3.5 sm:px-5">
-                              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b pb-2">
+                              <div className="flex flex-wrap items-baseline gap-2">
                                 <h3 className="font-semibold">Lượt làm {selectedReviewAttempts.length - index}</h3>
                                 <time className="text-xs text-muted-foreground" dateTime={attempt.date}>
                                   {new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(attempt.date))}
                                 </time>
                               </div>
-                              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                              <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
                                 attempt.status === "RETURNED"
                                   ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
                                   : attempt.status === "GRADED"
@@ -3128,113 +3146,125 @@ export default function TeacherIndex() {
                                   : attempt.status === "GRADED" ? "Đã chấm · chờ trả" : "Chờ chấm"}
                               </span>
                             </div>
-                            <ol className="divide-y">
-                              {attempt.answers.map((answer, answerIndex) => (
-                                <li key={`${attempt.id}-${answerIndex}`} className="space-y-3.5 px-4 py-4 sm:px-5">
-                                  <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
-                                    <div className="flex min-w-0 flex-1 items-start gap-2.5">
-                                      <span className="mt-px shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Câu {answerIndex + 1}</span>
-                                      <p className="min-w-0 break-words text-sm font-semibold leading-5">{answer.prompt}</p>
+                            {attempt.status !== "RETURNED" && (
+                              <>
+                                <input type="hidden" name="classId" value={selectedReviewProgress.classId} />
+                                <input type="hidden" name="attemptId" value={attempt.id} />
+                              </>
+                            )}
+                            <div className="space-y-3">
+                              {attemptGrades.map(({ answer, correct }, answerIndex) => (
+                                <article key={`${attempt.id}-${answerIndex}`} className="space-y-3 rounded-lg border p-3 sm:p-4">
+                                  <div className="flex flex-wrap items-start gap-2">
+                                    <span className="mt-0.5 font-mono text-xs text-muted-foreground">{answerIndex + 1}.</span>
+                                    <div className="min-w-0 flex-1 space-y-2">
+                                      <p className="whitespace-pre-wrap text-sm font-medium">{answer.prompt}</p>
+                                      <p className="whitespace-pre-wrap text-sm">
+                                        <span className="text-muted-foreground">Học viên trả lời: </span>
+                                        {answer.answer || <em className="text-muted-foreground">bỏ trống</em>}
+                                      </p>
+                                      <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                                        <span className="font-medium text-foreground">Đáp án chuẩn: </span>{answer.correctAnswer}
+                                      </p>
                                     </div>
-                                    {attempt.status === "RETURNED" ? (
-                                      <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
-                                        answer.correct
-                                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
-                                          : answer.answer
-                                            ? "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-200"
-                                            : "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
-                                      }`}>
-                                        {answer.correct ? "Đúng" : "Chưa đúng"}
-                                      </span>
-                                    ) : (
-                                      <fieldset
-                                        aria-label={`Chấm câu ${answerIndex + 1}`}
-                                        className="flex shrink-0 items-center gap-1.5"
+                                  </div>
+                                  {attempt.status === "RETURNED" ? (
+                                    <div className="space-y-2 border-t pt-3">
+                                      <p className="text-xs font-medium text-muted-foreground">
+                                        Kết quả: <span className="text-foreground">{correct ? "Đúng" : "Chưa đúng"}</span>
+                                      </p>
+                                      {answer.feedback && (
+                                        <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                                          <span className="font-medium text-foreground">Nhận xét: </span>{answer.feedback}
+                                        </p>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-2 border-t pt-3">
+                                      <input
+                                        type="hidden"
+                                        name={`grade-${answer.questionId}`}
+                                        value={correct === null ? "" : correct ? "correct" : "incorrect"}
+                                      />
+                                      <div className="flex gap-2" role="group" aria-label={`Chấm câu ${answerIndex + 1}`}>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          variant={correct === true ? "default" : "outline"}
+                                          onClick={() => {
+                                            setReviewGradeOverrides((current) => ({
+                                              ...current,
+                                              [`${attempt.id}:${answer.questionId}`]: true,
+                                            }));
+                                            markReviewAttemptDirty(attempt.id);
+                                          }}
+                                        >
+                                          <CheckCircle2 className="mr-1.5 h-4 w-4" />Đúng
+                                        </Button>
+                                        <Button
+                                          type="button"
+                                          size="sm"
+                                          variant={correct === false ? "destructive" : "outline"}
+                                          onClick={() => {
+                                            setReviewGradeOverrides((current) => ({
+                                              ...current,
+                                              [`${attempt.id}:${answer.questionId}`]: false,
+                                            }));
+                                            markReviewAttemptDirty(attempt.id);
+                                          }}
+                                        >
+                                          <XCircle className="mr-1.5 h-4 w-4" />Sai
+                                        </Button>
+                                      </div>
+                                      <label
+                                        htmlFor={`review-teacher-feedback-${attempt.id}-${answer.questionId}`}
+                                        className="text-xs font-medium"
                                       >
-                                        <legend className="sr-only">Chấm câu {answerIndex + 1}</legend>
-                                        <label className="cursor-pointer">
-                                          <input
-                                            type="radio"
-                                            name={`grade-${answer.questionId}`}
-                                            value="correct"
-                                            required
-                                            defaultChecked={answer.correct === true}
-                                            onChange={() => markReviewAttemptDirty(attempt.id)}
-                                            className="peer sr-only"
-                                          />
-                                          <span className="flex min-h-9 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted peer-checked:border-emerald-600 peer-checked:bg-emerald-600 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
-                                            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-                                            Đúng
-                                          </span>
-                                        </label>
-                                        <label className="cursor-pointer">
-                                          <input
-                                            type="radio"
-                                            name={`grade-${answer.questionId}`}
-                                            value="incorrect"
-                                            required
-                                            defaultChecked={answer.correct === false}
-                                            onChange={() => markReviewAttemptDirty(attempt.id)}
-                                            className="peer sr-only"
-                                          />
-                                          <span className="flex min-h-9 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted peer-checked:border-rose-600 peer-checked:bg-rose-600 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
-                                            <XCircle className="h-3.5 w-3.5" aria-hidden="true" />
-                                            Sai
-                                          </span>
-                                        </label>
-                                      </fieldset>
-                                    )}
-                                  </div>
-                                  <div className="grid gap-2 sm:grid-cols-2">
-                                    <div className="min-w-0 rounded-md border bg-muted/20 px-3 py-2.5">
-                                      <p className="text-xs font-medium text-muted-foreground">Học viên trả lời</p>
-                                      <p className="mt-1 break-words text-sm font-medium leading-5 text-foreground">{answer.answer || "Chưa trả lời"}</p>
-                                    </div>
-                                    <div className="min-w-0 rounded-md border border-emerald-200 bg-emerald-50/50 px-3 py-2.5 dark:border-emerald-900 dark:bg-emerald-950/20">
-                                      <p className="text-xs font-medium text-emerald-800 dark:text-emerald-200">Đáp án đúng</p>
-                                      <p className="mt-1 break-words text-sm font-medium leading-5 text-emerald-950 dark:text-emerald-100">{answer.correctAnswer}</p>
-                                    </div>
-                                  </div>
-                                  {attempt.status === "RETURNED" && answer.feedback ? (
-                                    <p className="whitespace-pre-wrap text-sm leading-5 text-muted-foreground">
-                                      <span className="font-medium text-foreground">Nhận xét: </span>{answer.feedback}
-                                    </p>
-                                  ) : attempt.status !== "RETURNED" ? (
-                                    <label className="block text-xs font-medium text-muted-foreground">
-                                      Nhận xét <span className="font-normal">(không bắt buộc)</span>
-                                      <textarea
+                                        Đáp án/Nhận xét <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
+                                      </label>
+                                      <Textarea
+                                        id={`review-teacher-feedback-${attempt.id}-${answer.questionId}`}
                                         name={`feedback-${answer.questionId}`}
                                         defaultValue={answer.feedback}
                                         maxLength={2000}
                                         rows={2}
                                         onChange={() => markReviewAttemptDirty(attempt.id)}
-                                        className="mt-1 w-full resize-y rounded-md border bg-background px-3 py-2 text-sm font-normal text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                        placeholder="Nhập nhận xét hoặc đáp án thay thế"
                                       />
-                                    </label>
-                                  ) : null}
-                                </li>
+                                    </div>
+                                  )}
+                                </article>
                               ))}
-                            </ol>
+                              {attempt.answers.length === 0 && (
+                                <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                                  Bài làm không có dữ liệu câu trả lời để chấm.
+                                </p>
+                              )}
+                            </div>
                             {attempt.status !== "RETURNED" && (
-                              <footer className="sticky bottom-0 flex justify-end border-t bg-background/95 px-4 py-3 backdrop-blur-sm sm:px-5">
+                              <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t p-4 sm:px-5">
+                                <p className="text-sm text-muted-foreground">
+                                  Điểm dự kiến: {expectedPercentage === null
+                                    ? `${gradedCount}/${attemptGrades.length} câu đã chấm`
+                                    : `${expectedPercentage}%`}
+                                </p>
                                 <Button
                                   type="submit"
                                   name="intent"
                                   value="return-review-grades"
-                                  disabled={reviewGradingFetcher.state !== "idle"}
-                                  className="min-h-10"
+                                  disabled={reviewGradingFetcher.state !== "idle" || gradedCount !== attemptGrades.length || attemptGrades.length === 0}
                                 >
                                   {reviewGradingFetcher.state !== "idle" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                  Trả kết quả
+                                  {reviewGradingFetcher.state !== "idle" ? "Đang lưu..." : "Trả kết quả"}
                                 </Button>
-                              </footer>
+                              </div>
                             )}
                           </reviewGradingFetcher.Form>
                         </li>
-                      ))}
-                    </ol>
-                  )
-                }
+                      );
+                    })}
+                  </ol>
+                )}
               </div>
             </section>
           </div>
@@ -3546,7 +3576,7 @@ export default function TeacherIndex() {
                   <X className="h-4 w-4" />
                 </button>
               </header>
-              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
                 {reviewGradingFetcher.data?.error && (
                   <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
                     {reviewGradingFetcher.data.error}
@@ -3557,81 +3587,136 @@ export default function TeacherIndex() {
                     Không còn bài ôn tập nào cần xử lý.
                   </p>
                 ) : (
-                  pendingClassReviews.map((attempt) => (
-                    <article key={attempt.id} className="overflow-hidden rounded-lg border">
-                      <div className="flex flex-wrap items-start justify-between gap-2 border-b bg-muted/30 px-3 py-3 sm:px-4">
-                        <div className="min-w-0">
-                          <h3 className="text-sm font-semibold">{attempt.studentName}</h3>
-                          <p className="mt-0.5 text-sm text-muted-foreground">{attempt.reviewSetTitle}</p>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {attempt.status === "GRADED" ? "Đã chấm · chờ trả" : "Chờ chấm"}
-                        </span>
-                      </div>
-                      <reviewGradingFetcher.Form
-                        method="post"
-                        action={`/teacher/courses/${attempt.courseId}/progress/reviews/${attempt.reviewSetId}?classId=${encodeURIComponent(attempt.classId)}`}
-                        className="space-y-3 p-3 sm:p-4"
-                      >
-                        <input type="hidden" name="classId" value={attempt.classId} />
-                        <input type="hidden" name="attemptId" value={attempt.id} />
-                        <ol className="space-y-3">
-                          {attempt.questions.map((question, index) => (
-                            <li key={question.id} className="space-y-2 rounded-md bg-muted/30 p-3">
-                              <div className="flex flex-wrap items-start justify-between gap-3">
-                                <div className="min-w-0 flex-1 space-y-1">
-                                  <p className="text-xs font-medium text-muted-foreground">Câu {index + 1}</p>
-                                  <p className="whitespace-pre-wrap text-sm font-medium">{question.prompt}</p>
-                                  <p className="whitespace-pre-wrap text-sm">
-                                    <span className="text-muted-foreground">Học viên: </span>{question.answer || "Bỏ trống"}
-                                  </p>
-                                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-                                    <span className="font-medium text-foreground">Đáp án tham khảo: </span>{question.correctAnswer}
-                                  </p>
-                                </div>
-                                <label className="flex shrink-0 items-center gap-2 text-sm font-medium">
-                                  Kết quả
-                                  <select
-                                    name={`grade-${question.id}`}
-                                    defaultValue={question.correct === null ? "" : question.correct ? "correct" : "incorrect"}
-                                    aria-label={`Chấm câu ${index + 1}`}
-                                    onChange={() => markReviewAttemptDirty(attempt.id)}
-                                    className="h-9 rounded-md border border-input bg-background px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                  >
-                                    <option value="">Chọn</option>
-                                    <option value="correct">Đúng</option>
-                                    <option value="incorrect">Chưa đúng</option>
-                                  </select>
-                                </label>
-                              </div>
-                              <label className="block text-xs font-medium">
-                                Nhận xét (không bắt buộc)
-                                <textarea
-                                  name={`feedback-${question.id}`}
-                                  defaultValue={question.feedback}
-                                  maxLength={2000}
-                                  rows={2}
-                                  onChange={() => markReviewAttemptDirty(attempt.id)}
-                                  className="mt-1 w-full rounded-md border border-input bg-background px-2.5 py-2 text-sm font-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                />
-                              </label>
-                            </li>
-                          ))}
-                        </ol>
-                        <footer className="flex justify-end border-t pt-3">
-                          <Button
-                            type="submit"
-                            name="intent"
-                            value="return-review-grades"
-                            disabled={reviewGradingFetcher.state !== "idle"}
+                  pendingClassReviews.map((attempt) => {
+                    const attemptGrades = attempt.questions.map((question) => ({
+                      question,
+                      correct: reviewGradeOverrides[`${attempt.id}:${question.id}`] ?? question.correct ?? true,
+                    }));
+                    const gradedCount = attemptGrades.filter(({ correct }) => correct !== null).length;
+                    const correctCount = attemptGrades.filter(({ correct }) => correct === true).length;
+                    const expectedPercentage = attemptGrades.length > 0 && gradedCount === attemptGrades.length
+                      ? Math.round((correctCount / attemptGrades.length) * 100)
+                      : null;
+
+                    return (
+                      <section key={attempt.id} className="space-y-3 border-b pb-4 last:border-b-0">
+                          <div className="flex flex-wrap items-start justify-between gap-2 border-b pb-2">
+                            <div className="min-w-0">
+                              <h3 className="text-sm font-semibold">{attempt.studentName}</h3>
+                              <p className="mt-0.5 text-sm text-muted-foreground">{attempt.reviewSetTitle}</p>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {attempt.status === "GRADED" ? "Đã chấm · chờ trả" : "Chờ chấm"}
+                            </span>
+                          </div>
+                          <reviewGradingFetcher.Form
+                            method="post"
+                            action={`/teacher/courses/${attempt.courseId}/progress/reviews/${attempt.reviewSetId}?classId=${encodeURIComponent(attempt.classId)}`}
+                            className="space-y-3"
                           >
-                            {reviewGradingFetcher.state !== "idle" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Trả kết quả
-                          </Button>
-                        </footer>
-                      </reviewGradingFetcher.Form>
-                    </article>
-                  ))
+                            <input type="hidden" name="classId" value={attempt.classId} />
+                            <input type="hidden" name="attemptId" value={attempt.id} />
+                            <div className="space-y-3">
+                              {attemptGrades.map(({ question, correct }, index) => (
+                                <article key={question.id} className="space-y-3 rounded-lg border p-3 sm:p-4">
+                                  <div className="flex flex-wrap items-start gap-2">
+                                    <span className="mt-0.5 font-mono text-xs text-muted-foreground">{index + 1}.</span>
+                                    <div className="min-w-0 flex-1 space-y-2">
+                                      <p className="whitespace-pre-wrap text-sm font-medium">{question.prompt}</p>
+                                      <p className="whitespace-pre-wrap text-sm">
+                                        <span className="text-muted-foreground">Học viên trả lời: </span>
+                                        {question.answer || <em className="text-muted-foreground">bỏ trống</em>}
+                                      </p>
+                                      <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                                        <span className="font-medium text-foreground">Đáp án chuẩn: </span>{question.correctAnswer}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="space-y-2 border-t pt-3">
+                                    <input
+                                      type="hidden"
+                                      name={`grade-${question.id}`}
+                                      value={correct === null ? "" : correct ? "correct" : "incorrect"}
+                                    />
+                                    <div className="flex gap-2" role="group" aria-label={`Chấm câu ${index + 1}`}>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant={correct === true ? "default" : "outline"}
+                                        onClick={() => {
+                                          setReviewGradeOverrides((current) => ({
+                                            ...current,
+                                            [`${attempt.id}:${question.id}`]: true,
+                                          }));
+                                          markReviewAttemptDirty(attempt.id);
+                                        }}
+                                      >
+                                        <CheckCircle2 className="mr-1.5 h-4 w-4" />Đúng
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant={correct === false ? "destructive" : "outline"}
+                                        onClick={() => {
+                                          setReviewGradeOverrides((current) => ({
+                                            ...current,
+                                            [`${attempt.id}:${question.id}`]: false,
+                                          }));
+                                          markReviewAttemptDirty(attempt.id);
+                                        }}
+                                      >
+                                        <XCircle className="mr-1.5 h-4 w-4" />Sai
+                                      </Button>
+                                      {question.correct !== null && (
+                                        <span className="self-center text-xs text-muted-foreground">
+                                          Đã chấm trước: {question.correct ? "Đúng" : "Sai"}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <label
+                                      htmlFor={`pending-review-feedback-${attempt.id}-${question.id}`}
+                                      className="text-xs font-medium"
+                                    >
+                                      Đáp án/Nhận xét <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
+                                    </label>
+                                    <Textarea
+                                      id={`pending-review-feedback-${attempt.id}-${question.id}`}
+                                      name={`feedback-${question.id}`}
+                                      defaultValue={question.feedback}
+                                      maxLength={2000}
+                                      rows={2}
+                                      onChange={() => markReviewAttemptDirty(attempt.id)}
+                                      placeholder="Nhập nhận xét hoặc đáp án thay thế"
+                                    />
+                                  </div>
+                                </article>
+                              ))}
+                              {attempt.questions.length === 0 && (
+                                <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                                  Bài ôn tập không có câu hỏi để chấm.
+                                </p>
+                              )}
+                            </div>
+                            <footer className="flex flex-wrap items-center justify-between gap-3 border-t p-4 sm:px-5">
+                              <p className="text-sm text-muted-foreground">
+                                Điểm dự kiến: {expectedPercentage === null
+                                  ? `${gradedCount}/${attemptGrades.length} câu đã chấm`
+                                  : `${expectedPercentage}%`}
+                              </p>
+                              <Button
+                                type="submit"
+                                name="intent"
+                                value="return-review-grades"
+                                disabled={reviewGradingFetcher.state !== "idle" || gradedCount !== attemptGrades.length || attemptGrades.length === 0}
+                              >
+                                {reviewGradingFetcher.state !== "idle" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {reviewGradingFetcher.state !== "idle" ? "Đang lưu..." : "Trả kết quả"}
+                              </Button>
+                            </footer>
+                          </reviewGradingFetcher.Form>
+                      </section>
+                    );
+                  })
                 )}
               </div>
             </section>
