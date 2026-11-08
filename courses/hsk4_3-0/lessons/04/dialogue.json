@@ -1,0 +1,134 @@
+{
+  "lesson": 4,
+  "title": "很高兴能帮到你",
+  "title_pinyin": "",
+  "title_vi": "Rất vui vì có thể giúp được bạn",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "陈天中",
+          "zh": "啊，我的手机停机了！怎么办啊？",
+          "pinyin": "a， wǒ de shǒu jī tíng jī le！ zěn me bàn a？",
+          "vi": "Ôi, điện thoại của tôi bị khóa dịch vụ rồi! Làm sao đây?"
+        },
+        {
+          "speaker": "路人",
+          "zh": "你好，你看上去很着急，需要帮忙吗？",
+          "pinyin": "nǐ hǎo， nǐ kàn shàng qù hěn zháo jí， xū yào bāng máng ma？",
+          "vi": "Chào bạn, trông bạn có vẻ rất lo lắng, bạn cần giúp đỡ không?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "我忘了交电话费，手机停机了。我没带现金，手机没有信号，上不了网，买不了地铁票了。",
+          "pinyin": "wǒ wàng le jiāo diàn huà fèi， shǒu jī tíng jī le。 wǒ méi dài xiàn jīn， shǒu jī méi yǒu xìn hào， shàng bù liǎo wǎng， mǎi bù liǎo dì tiě piào le。",
+          "vi": "Tôi quên đóng cước điện thoại nên bị khóa dịch vụ. Tôi không mang tiền mặt, điện thoại không có tín hiệu, không vào mạng được nên không mua được vé tàu điện ngầm."
+        },
+        {
+          "speaker": "路人",
+          "zh": "你要去哪儿？我帮你买张票。",
+          "pinyin": "nǐ yào qù nǎr？ wǒ bāng nǐ mǎi zhāng piào。",
+          "vi": "Bạn muốn đến đâu? Tôi mua giúp bạn một vé."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "太感谢你了，我要去北京大学站。对了，能不能告诉我你的联系方式？我想把钱还给你。",
+          "pinyin": "tài gǎn xiè nǐ le， wǒ yào qù běi jīng dà xué zhàn。 duì le， néng bù néng gào su wǒ nǐ de lián xì fāng shì？ wǒ xiǎng bǎ qián huán gěi nǐ。",
+          "vi": "Cảm ơn bạn nhiều quá, tôi muốn đến ga Đại học Bắc Kinh. À, bạn có thể cho tôi thông tin liên lạc không? Tôi muốn trả lại tiền cho bạn."
+        },
+        {
+          "speaker": "路人",
+          "zh": "别客气，很高兴能帮到你。",
+          "pinyin": "bié kè qi， hěn gāo xìng néng bāng dào nǐ。",
+          "vi": "Đừng khách sáo, rất vui vì có thể giúp được bạn."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "阿姨，您怎么站在这儿不上楼？",
+          "pinyin": "ā yí， nín zěn me zhàn zài zhèr bù shàng lóu？",
+          "vi": "Cô ơi, sao cô đứng đây mà chưa lên nhà ạ?"
+        },
+        {
+          "speaker": "邻居",
+          "zh": "我开车去超市买了不少东西，刚拿过来了一些。我先休息一会儿，再去车里拿剩下的。",
+          "pinyin": "wǒ kāi chē qù chāo shì mǎi le bù shǎo dōng xi， gāng ná guò lái le yī xiē。 wǒ xiān xiū xi yī huìr， zài qù chē lǐ ná shèng xià de。",
+          "vi": "Cô lái xe đi siêu thị mua khá nhiều đồ, vừa mang được một ít sang đây. Cô nghỉ một lát rồi ra xe lấy nốt chỗ còn lại."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我正好要上楼，我帮您提上去吧。",
+          "pinyin": "wǒ zhèng hǎo yào shàng lóu， wǒ bāng nín tí shàng qù ba。",
+          "vi": "Đúng lúc cháu cũng lên nhà, để cháu xách lên giúp cô nhé."
+        },
+        {
+          "speaker": "邻居",
+          "zh": "不用不用，这几个袋子太重了，我自己拿吧。",
+          "pinyin": "bù yòng bù yòng， zhè jǐ gè dài zi tài zhòng le， wǒ zì jǐ ná ba。",
+          "vi": "Không cần đâu, mấy túi này nặng quá, để cô tự mang."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "没事，我提着这些东西就算锻炼身体了，再说邻居之间就是要互相帮助啊。",
+          "pinyin": "méi shì， wǒ tí zhe zhè xiē dōng xi jiù suàn duàn liàn shēn tǐ le， zài shuō lín jū zhī jiān jiù shì yào hù xiāng bāng zhù a。",
+          "vi": "Không sao ạ, cháu xách những đồ này coi như rèn luyện sức khỏe. Hơn nữa, hàng xóm với nhau thì phải giúp đỡ lẫn nhau chứ ạ."
+        },
+        {
+          "speaker": "邻居",
+          "zh": "谢谢家月！那就辛苦你了。",
+          "pinyin": "xiè xiè jiā yuè！ nà jiù xīn kǔ nǐ le。",
+          "vi": "Cảm ơn Gia Nguyệt! Vậy làm phiền cháu nhé."
+        }
+      ]
+    },
+    {
+      "id": "短距离出行的新选择",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "在城市里，人们出行的方式越来越多。短距离出行时，骑自行车往往是人们常见的选择。白家月就很喜欢骑车去学校，她觉得这样既方便，又能锻炼身体，还能保护环境。",
+          "pinyin": "zài chéng shì lǐ， rén men chū xíng de fāng shì yuè lái yuè duō。 duǎn jù lí chū xíng shí， qí zì xíng chē wǎng wǎng shì rén men cháng jiàn de xuǎn zé。 bái jiā yuè jiù hěn xǐ huan qí chē qù xué xiào， tā jué de zhè yàng jì fāng biàn， yòu néng duàn liàn shēn tǐ， hái néng bǎo hù huán jìng。",
+          "vi": "Trong thành phố, mọi người ngày càng có nhiều cách đi lại. Khi đi quãng ngắn, đạp xe thường là lựa chọn phổ biến. Bạch Gia Nguyệt rất thích đạp xe đến trường; cô thấy cách này vừa tiện, vừa rèn luyện sức khỏe, lại bảo vệ môi trường."
+        },
+        {
+          "speaker": "",
+          "zh": "除了骑自行车，人们还会选择骑电动车。电动车速度快，价格不高，充电也很方便，所以越来越流行。陈天中平时也骑自行车，不过为了省力气，他最近打算买一辆电动车。",
+          "pinyin": "chú le qí zì xíng chē， rén men hái huì xuǎn zé qí diàn dòng chē。 diàn dòng chē sù dù kuài， jià gé bù gāo， chōng diàn yě hěn fāng biàn， suǒ yǐ yuè lái yuè liú xíng。 chén tiān zhōng píng shí yě qí zì xíng chē， bù guò wèi le shěng lì qì， tā zuì jìn dǎ suàn mǎi yī liàng diàn dòng chē。",
+          "vi": "Ngoài xe đạp, mọi người còn chọn đi xe điện. Xe điện có tốc độ nhanh, giá không cao, sạc điện cũng thuận tiện nên ngày càng phổ biến. Bình thường Trần Thiên Trung cũng đi xe đạp, nhưng để đỡ tốn sức, gần đây cậu dự định mua một chiếc xe điện."
+        }
+      ]
+    },
+    {
+      "id": "地铁站里的贴心服务",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "在中国，乘客可以在不少地铁站里直接扫码购买食物和饮料，有的地铁站还提供免费借雨伞、发雨衣等服务。",
+          "pinyin": "zài zhōng guó， chéng kè kě yǐ zài bù shǎo dì tiě zhàn lǐ zhí jiē sǎo mǎ gòu mǎi shí wù hé yǐn liào， yǒu de dì tiě zhàn hái tí gōng miǎn fèi jiè yǔ sǎn、 fā yǔ yī děng fú wù。",
+          "vi": "Ở Trung Quốc, tại nhiều ga tàu điện ngầm, hành khách có thể quét mã mua đồ ăn và thức uống trực tiếp; một số ga còn có dịch vụ cho mượn ô miễn phí, phát áo mưa, v.v."
+        },
+        {
+          "speaker": "",
+          "zh": "有些地铁站附近公司比较多，工作日站里还有早餐车，没来得及吃早饭的人在这里就能买到热包子和牛奶等，省了不少时间。有的地铁站里甚至还有鲜花店，乘客下班时可以顺便买花送给家人。",
+          "pinyin": "yǒu xiē dì tiě zhàn fù jìn gōng sī bǐ jiào duō， gōng zuò rì zhàn lǐ hái yǒu zǎo cān chē， méi lái de jí chī zǎo fàn de rén zài zhè lǐ jiù néng mǎi dào rè bāo zi hé niú nǎi děng， shěng le bù shǎo shí jiān。 yǒu de dì tiě zhàn lǐ shèn zhì hái yǒu xiān huā diàn， chéng kè xià bān shí kě yǐ shùn biàn mǎi huā sòng gěi jiā rén。",
+          "vi": "Gần một số ga có nhiều công ty nên vào ngày làm việc, trong ga còn có xe bán đồ ăn sáng. Những người chưa kịp ăn sáng có thể mua bánh bao nóng, sữa và các món khác tại đây, tiết kiệm được khá nhiều thời gian. Một số ga thậm chí còn có cửa hàng hoa tươi, hành khách có thể tiện đường mua hoa tặng gia đình khi tan làm."
+        },
+        {
+          "speaker": "",
+          "zh": "这些小小的服务，不仅方便了人们的出行，也让大家的心情变得更加愉快。",
+          "pinyin": "zhè xiē xiǎo xiǎo de fú wù， bù jǐn fāng biàn le rén men de chū xíng， yě ràng dà jiā de xīn qíng biàn de gèng jiā yú kuài。",
+          "vi": "Những dịch vụ nho nhỏ này không chỉ giúp mọi người đi lại thuận tiện hơn mà còn khiến tâm trạng ai cũng vui vẻ hơn."
+        }
+      ]
+    }
+  ]
+}

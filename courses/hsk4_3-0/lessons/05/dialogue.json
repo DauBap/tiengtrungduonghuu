@@ -1,0 +1,140 @@
+{
+  "lesson": 5,
+  "title": "“不怕辣”和“怕不辣”",
+  "title_pinyin": "",
+  "title_vi": "Không sợ cay và sợ không đủ cay",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "家月，你来中国至少两个月了，习惯吃中餐了吗？",
+          "pinyin": "jiā yuè， nǐ lái zhōng guó zhì shǎo liǎng gè yuè le， xí guàn chī zhōng cān le ma？",
+          "vi": "Gia Nguyệt, em đến Trung Quốc ít nhất cũng hai tháng rồi, đã quen ăn món Trung chưa?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "习惯了，而且我很喜欢吃中国菜。",
+          "pinyin": "xí guàn le， ér qiě wǒ hěn xǐ huan chī zhōng guó cài。",
+          "vi": "Em quen rồi, hơn nữa em rất thích món ăn Trung Quốc."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "你还没吃过水煮鱼吧？这是我专门为你做的。",
+          "pinyin": "nǐ hái méi chī guò shuǐ zhǔ yú ba？ zhè shì wǒ zhuān mén wèi nǐ zuò de。",
+          "vi": "Em chưa ăn món cá luộc cay bao giờ nhỉ? Đây là món chị làm riêng cho em đấy."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "看起来不像水煮鱼，更像“油煮鱼”。",
+          "pinyin": "kàn qǐ lái bù xiàng shuǐ zhǔ yú， gèng xiàng “yóu zhǔ yú”。",
+          "vi": "Trông không giống cá luộc bằng nước, mà giống “cá luộc bằng dầu” hơn."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "这道菜是先用水把鱼煮熟，最后再倒上辣椒油，其实只有最上面那一层是油。你尝尝，对你来说辣不辣？",
+          "pinyin": "zhè dào cài shì xiān yòng shuǐ bǎ yú zhǔ shú， zuì hòu zài dào shàng là jiāo yóu， qí shí zhǐ yǒu zuì shàng miàn nà yī céng shì yóu。 nǐ cháng cháng， duì nǐ lái shuō là bù là？",
+          "vi": "Món này trước tiên dùng nước nấu chín cá, cuối cùng mới rưới dầu ớt lên. Thực ra chỉ lớp trên cùng là dầu thôi. Em nếm thử xem, với em có cay không?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "辣是辣，但是非常好吃！",
+          "pinyin": "là shì là， dàn shì fēi cháng hǎo chī！",
+          "vi": "Cay thì có cay, nhưng ngon lắm ạ!"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "那你多吃点儿，不要客气。",
+          "pinyin": "nà nǐ duō chī diǎnr， bù yào kè qi。",
+          "vi": "Vậy em ăn nhiều vào, đừng khách sáo nhé."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "我听李文说，你现在也爱吃辣了？",
+          "pinyin": "wǒ tīng lǐ wén shuō， nǐ xiàn zài yě ài chī là le？",
+          "vi": "Chị nghe Lý Văn nói, bây giờ em cũng thích ăn cay rồi à?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "是的，来中国以后，我越来越喜欢吃辣了。",
+          "pinyin": "shì de， lái zhōng guó yǐ hòu， wǒ yuè lái yuè xǐ huan chī là le。",
+          "vi": "Vâng, từ khi đến Trung Quốc, em càng ngày càng thích ăn cay."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我们以前不太敢吃辣，吃完可能会肚子不舒服，不过现在也慢慢适应了。",
+          "pinyin": "wǒ men yǐ qián bù tài gǎn chī là， chī wán kě néng huì dù zi bù shū fu， bù guò xiàn zài yě màn màn shì yìng le。",
+          "vi": "Trước đây bọn chị không dám ăn cay lắm, ăn xong có thể bị khó chịu ở bụng, nhưng giờ cũng dần quen rồi."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "对，我们现在都不怕辣了。家月，你是“不怕辣”还是“怕不辣”？",
+          "pinyin": "duì， wǒ men xiàn zài dōu bù pà là le。 jiā yuè， nǐ shì “bù pà là” hái shì “pà bù là”？",
+          "vi": "Đúng vậy, bây giờ bọn anh đều không sợ cay nữa. Gia Nguyệt, em là “không sợ cay” hay “sợ không đủ cay”?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "中文真有意思，相同的字，顺序一换，意思就变了。",
+          "pinyin": "zhōng wén zhēn yǒu yì si， xiāng tóng de zì， shùn xù yī huàn， yì si jiù biàn le。",
+          "vi": "Tiếng Trung thật thú vị, cùng những chữ ấy mà đổi thứ tự là ý nghĩa thay đổi."
+        },
+        {
+          "speaker": "李文",
+          "zh": "你的中文水平够高的，这都听懂了！你说得对，“不怕辣”是说不怕吃辣的菜，“怕不辣”是担心菜还不够辣呢。",
+          "pinyin": "nǐ de zhōng wén shuǐ píng gòu gāo de， zhè dōu tīng dǒng le！ nǐ shuō de duì， “bù pà là” shì shuō bù pà chī là de cài， “pà bù là” shì dān xīn cài hái bù gòu là ne。",
+          "vi": "Trình độ tiếng Trung của cậu cao thật, câu này cũng hiểu được! Cậu nói đúng, “không sợ cay” nghĩa là không ngại ăn món cay, còn “sợ không cay” là lo món ăn chưa đủ cay đấy."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我还达不到“怕不辣”的水平，甚至也不能算“不怕辣”，只是喜欢吃辣。",
+          "pinyin": "wǒ hái dá bù dào “pà bù là” de shuǐ píng， shèn zhì yě bù néng suàn “bù pà là”， zhǐ shì xǐ huan chī là。",
+          "vi": "Tớ chưa đạt đến mức “sợ không đủ cay”, thậm chí cũng chưa thể coi là “không sợ cay”, chỉ là thích ăn cay thôi."
+        }
+      ]
+    },
+    {
+      "id": "在餐厅里，白家月、陈天中、李文和安妮聚餐。",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "周末，白家月、陈天中、李文和安妮聚在一起吃午餐。白家月想吃辣的，要了辣子鸡；陈天中爱吃甜的，想尝尝松鼠鳜鱼；李文更喜欢吃咸的，选了红烧羊肉和一道凉菜；安妮听说贵州酸汤很有名，点了酸汤米线。他们边吃边聊，非常愉快。",
+          "pinyin": "zhōu mò， bái jiā yuè、 chén tiān zhōng、 lǐ wén hé ān nī jù zài yī qǐ chī wǔ cān。 bái jiā yuè xiǎng chī là de， yào le là zi jī； chén tiān zhōng ài chī tián de， xiǎng cháng cháng sōng shǔ guì yú； lǐ wén gèng xǐ huan chī xián de， xuǎn le hóng shāo yáng ròu hé yī dào liáng cài； ān nī tīng shuō guì zhōu suān tāng hěn yǒu míng， diǎn le suān tāng mǐ xiàn。 tā men biān chī biān liáo， fēi cháng yú kuài。",
+          "vi": "Cuối tuần, Bạch Gia Nguyệt, Trần Thiên Trung, Lý Văn và An Ni tụ họp ăn trưa. Bạch Gia Nguyệt muốn ăn cay nên gọi gà xào ớt; Trần Thiên Trung thích đồ ngọt, muốn thử cá quế chiên xù sốt chua ngọt tạo hình sóc; Lý Văn thích ăn mặn hơn nên chọn thịt cừu kho và một món nguội; An Ni nghe nói canh chua Quý Châu rất nổi tiếng nên gọi bún canh chua. Họ vừa ăn vừa trò chuyện, rất vui vẻ."
+        },
+        {
+          "speaker": "",
+          "zh": "结账时，李文想请客，但大家觉得还是各付各的更合适。于是，李文付完钱后，大家把钱转给了他，还笑着说下次再一起聚餐。",
+          "pinyin": "jié zhàng shí， lǐ wén xiǎng qǐng kè， dàn dà jiā jué de hái shì gè fù gè de gèng hé shì。 yú shì， lǐ wén fù wán qián hòu， dà jiā bǎ qián zhuǎn gěi le tā， hái xiào zhe shuō xià cì zài yī qǐ jù cān。",
+          "vi": "Khi thanh toán, Lý Văn muốn mời mọi người nhưng ai cũng thấy chia tiền phần mình sẽ hợp lý hơn. Vì vậy, sau khi Lý Văn trả tiền, mọi người chuyển khoản lại cho cậu, còn cười nói lần sau lại cùng nhau ăn uống."
+        }
+      ]
+    },
+    {
+      "id": "中国餐桌上的座位安排",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "今天吃饭的时候，大家坐得比较随意。李文告诉白家月，在中国，正式聚餐和普通聚餐不同，正式聚餐时人们比较重视座位的安排，比如可以按照年龄大小来安排，年龄比较大的客人往往会坐在中间或者面对门口的座位。大家坐下时，主人会请客人先坐。如果聚餐时有老人，年轻人要等老人坐下后再坐。",
+          "pinyin": "jīn tiān chī fàn de shí hòu， dà jiā zuò de bǐ jiào suí yì。 lǐ wén gào su bái jiā yuè， zài zhōng guó， zhèng shì jù cān hé pǔ tōng jù cān bù tóng， zhèng shì jù cān shí rén men bǐ jiào zhòng shì zuò wèi de ān pái， bǐ rú kě yǐ àn zhào nián líng dà xiǎo lái ān pái， nián líng bǐ jiào dà de kè rén wǎng wǎng huì zuò zài zhōng jiàn huò zhě miàn duì mén kǒu de zuò wèi。 dà jiā zuò xià shí， zhǔ rén huì qǐng kè rén xiān zuò。 rú guǒ jù cān shí yǒu lǎo rén， nián qīng rén yào děng lǎo rén zuò xià hòu zài zuò。",
+          "vi": "Bữa ăn hôm nay, mọi người ngồi khá thoải mái. Lý Văn nói với Bạch Gia Nguyệt rằng ở Trung Quốc, bữa tiệc trang trọng khác với bữa ăn thông thường: người ta chú trọng hơn đến việc xếp chỗ ngồi. Chẳng hạn, có thể sắp xếp theo tuổi tác; khách lớn tuổi thường ngồi ở giữa hoặc ở vị trí đối diện cửa ra vào. Khi mọi người ngồi xuống, chủ nhà sẽ mời khách ngồi trước. Nếu có người cao tuổi trong bữa tiệc, người trẻ cần đợi người cao tuổi ngồi rồi mới ngồi."
+        },
+        {
+          "speaker": "",
+          "zh": "白家月听后觉得很有意思，她认为这么做是照顾客人、尊重老人的表现。",
+          "pinyin": "bái jiā yuè tīng hòu jué de hěn yǒu yì si， tā rèn wéi zhè me zuò shì zhào gù kè rén、 zūn zhòng lǎo rén de biǎo xiàn。",
+          "vi": "Nghe xong, Bạch Gia Nguyệt thấy rất thú vị. Cô cho rằng làm như vậy thể hiện sự quan tâm đến khách và tôn trọng người cao tuổi."
+        }
+      ]
+    }
+  ]
+}

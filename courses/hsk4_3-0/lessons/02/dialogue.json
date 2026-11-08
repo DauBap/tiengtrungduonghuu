@@ -1,0 +1,128 @@
+{
+  "lesson": 2,
+  "title": "租到了合适的房子",
+  "title_pinyin": "",
+  "title_vi": "Đã thuê được căn nhà phù hợp",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "房东",
+          "zh": "请进！我给你们介绍一下，这个房子有两个房间，那个大房间出租，房租每月5500元。现在已经收拾好了，想租的话，今天就可以搬进来。",
+          "pinyin": "qǐng jìn！ wǒ gěi nǐ men jiè shào yī xià， zhè ge fáng zi yǒu liǎng gè fáng jiān， nà ge dà fáng jiān chū zū， fáng zū měi yuè wǔ qiān wǔ bǎi yuán。 xiàn zài yǐ jīng shōu shí hǎo le， xiǎng zū de huà， jīn tiān jiù kě yǐ bān jìn lái。",
+          "vi": "Mời vào! Để tôi giới thiệu một chút. Căn nhà này có hai phòng, phòng lớn kia cho thuê, tiền thuê mỗi tháng là 5.500 tệ. Hiện đã dọn dẹp xong rồi, nếu muốn thuê thì hôm nay có thể chuyển vào ngay."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "嗯，这个房间真不小，还挺亮。小区离我们学校也不远。",
+          "pinyin": "ń， zhè ge fáng jiān zhēn bù xiǎo， hái tǐng liàng。 xiǎo qū lí wǒ men xué xiào yě bù yuǎn。",
+          "vi": "Vâng, phòng này rộng thật, lại khá sáng. Khu dân cư cũng không xa trường chúng cháu."
+        },
+        {
+          "speaker": "房东",
+          "zh": "是的，我们小区离地铁站也很近，生活上很方便。如果决定租了，告诉我就是了。",
+          "pinyin": "shì de， wǒ men xiǎo qū lí dì tiě zhàn yě hěn jìn， shēng huó shàng hěn fāng biàn。 rú guǒ jué dìng zū le， gào su wǒ jiù shì le。",
+          "vi": "Đúng vậy, khu chúng tôi cũng rất gần ga tàu điện ngầm, sinh hoạt rất tiện. Nếu quyết định thuê thì cứ báo cho tôi là được."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好的，我们再去看看外面的环境。",
+          "pinyin": "hǎo de， wǒ men zài qù kàn kàn wài miàn de huán jìng。",
+          "vi": "Vâng, chúng cháu đi xem thêm môi trường bên ngoài một chút."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "家月，你看，那边还有个小花园。",
+          "pinyin": "jiā yuè， nǐ kàn， nà biān hái yǒu gè xiǎo huā yuán。",
+          "vi": "Gia Nguyệt, cậu nhìn kìa, bên kia còn có một khu vườn nhỏ."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "嗯，这个小区到处是花，还种了不少树，周围也很安静。",
+          "pinyin": "ń， zhè ge xiǎo qū dào chù shì huā， hái zhòng le bù shǎo shù， zhōu wéi yě hěn ān jìng。",
+          "vi": "Ừ, khu này đâu đâu cũng có hoa, còn trồng khá nhiều cây, xung quanh cũng rất yên tĩnh."
+        },
+        {
+          "speaker": "李文",
+          "zh": "是啊！这个小区的环境真不错，不过我听说，附近有十几家公司，很多刚毕业的学生都租住在这里。周末他们可能会玩到很晚，恐怕会影响你休息。",
+          "pinyin": "shì a！ zhè ge xiǎo qū de huán jìng zhēn bù cuò， bù guò wǒ tīng shuō， fù jìn yǒu shí jǐ jiā gōng sī， hěn duō gāng bì yè de xué shēng dōu zū zhù zài zhè lǐ。 zhōu mò tā men kě néng huì wán dào hěn wǎn， kǒng pà huì yǐng xiǎng nǐ xiū xi。",
+          "vi": "Đúng vậy! Môi trường ở đây thật tốt. Nhưng tớ nghe nói gần đây có hơn chục công ty, nhiều sinh viên mới tốt nghiệp đều thuê nhà ở đây. Cuối tuần họ có thể vui chơi đến rất muộn, e rằng sẽ ảnh hưởng đến việc nghỉ ngơi của cậu."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "没关系，我还想多认识一些朋友，和他们一起玩呢。",
+          "pinyin": "méi guān xì， wǒ hái xiǎng duō rèn shi yī xiē péng you， hé tā men yī qǐ wán ne。",
+          "vi": "Không sao, tớ còn muốn quen thêm nhiều bạn và cùng họ vui chơi nữa."
+        },
+        {
+          "speaker": "李文",
+          "zh": "是呢，大家可以一起热闹热闹。",
+          "pinyin": "shì ne， dà jiā kě yǐ yī qǐ rè nao rè nao。",
+          "vi": "Cũng đúng, mọi người có thể cùng nhau vui vẻ cho náo nhiệt."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "这里房租合适，环境很好，而且房东也热情，所以我决定租这个房子了，明天就入住新家。",
+          "pinyin": "zhè lǐ fáng zū hé shì， huán jìng hěn hǎo， ér qiě fáng dōng yě rè qíng， suǒ yǐ wǒ jué dìng zū zhè ge fáng zi le， míng tiān jiù rù zhù xīn jiā。",
+          "vi": "Tiền thuê ở đây hợp lý, môi trường rất tốt, hơn nữa chủ nhà cũng nhiệt tình, nên tớ quyết định thuê căn nhà này. Ngày mai tớ sẽ chuyển vào nhà mới."
+        }
+      ]
+    },
+    {
+      "id": "搬进新家后，白家月很开心，写了一篇日记。",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "8月25日，晴",
+          "pinyin": "bā yuè èr shí wǔ rì， qíng",
+          "vi": "Ngày 25 tháng 8, trời nắng."
+        },
+        {
+          "speaker": "",
+          "zh": "昨天我顺利租到了合适的房子，今天李文帮我搬家。搬进去的时候，房东又向我介绍了一下房子里的东西，并告诉我这些东西怎么用。",
+          "pinyin": "zuó tiān wǒ shùn lì zū dào le hé shì de fáng zi， jīn tiān lǐ wén bāng wǒ bān jiā。 bān jìn qù de shí hòu， fáng dōng yòu xiàng wǒ jiè shào le yī xià fáng zi lǐ de dōng xi， bìng gào su wǒ zhè xiē dōng xi zěn me yòng。",
+          "vi": "Hôm qua tôi đã thuận lợi thuê được căn nhà phù hợp, hôm nay Lý Văn giúp tôi chuyển nhà. Khi chuyển vào, chủ nhà lại giới thiệu cho tôi các đồ dùng trong nhà và hướng dẫn cách sử dụng."
+        },
+        {
+          "speaker": "",
+          "zh": "我看了一下，客厅里有椅子、沙发，还有一台大电视；厨房里有冰箱和一些做饭用的东西，不过，我平常主要在学校食堂吃，基本上不做饭。我租的房间里，除了一张床以外，还有一台空调、一张书桌和一把椅子。",
+          "pinyin": "wǒ kàn le yī xià， kè tīng lǐ yǒu yǐ zi、 shā fā， hái yǒu yī tái dà diàn shì； chú fáng lǐ yǒu bīng xiāng hé yī xiē zuò fàn yòng de dōng xi， bù guò， wǒ píng cháng zhǔ yào zài xué xiào shí táng chī， jī běn shàng bù zuò fàn。 wǒ zū de fáng jiān lǐ， chú le yī zhāng chuáng yǐ wài， hái yǒu yī tái kōng tiáo、 yī zhāng shū zhuō hé yī bǎ yǐ zi。",
+          "vi": "Tôi xem qua thì thấy phòng khách có ghế, ghế sô pha và một chiếc ti vi lớn; bếp có tủ lạnh và một số dụng cụ nấu ăn. Tuy nhiên, bình thường tôi chủ yếu ăn ở nhà ăn của trường, hầu như không nấu cơm. Trong phòng tôi thuê, ngoài một chiếc giường còn có một máy điều hòa, một bàn học và một chiếc ghế."
+        },
+        {
+          "speaker": "",
+          "zh": "看完整个房子后，我准备再去买几条毛巾，其他东西还不需要。",
+          "pinyin": "kàn wán zhěng gè fáng zi hòu， wǒ zhǔn bèi zài qù mǎi jǐ tiáo máo jīn， qí tā dōng xi hái bù xū yào。",
+          "vi": "Sau khi xem hết căn nhà, tôi định đi mua thêm vài chiếc khăn mặt, những đồ khác thì chưa cần."
+        }
+      ]
+    },
+    {
+      "id": "怎样租到合适的房子",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "在李文的帮助下，白家月租到了合适的房子。对白家月来说，这次租房并不容易。根据李文的建议，她先在租房网站和App上查看有关信息，查找合适的房子，接着又去看了看房子，同时了解房子周围的环境。她看了好几个房子，才找到一个位置、环境和价格都合适的，最后顺利租到了理想的房子。",
+          "pinyin": "zài lǐ wén de bāng zhù xià， bái jiā yuè zū dào le hé shì de fáng zi。 duì bái jiā yuè lái shuō， zhè cì zū fáng bìng bù róng yì。 gēn jù lǐ wén de jiàn yì， tā xiān zài zū fáng wǎng zhàn hé A p p shàng chá kàn yǒu guān xìn xī， chá zhǎo hé shì de fáng zi， jiē zhe yòu qù kàn le kàn fáng zi， tóng shí liǎo jiě fáng zi zhōu wéi de huán jìng。 tā kàn le hǎo jǐ gè fáng zi， cái zhǎo dào yī gè wèi zhì、 huán jìng hé jià gé dōu hé shì de， zuì hòu shùn lì zū dào le lǐ xiǎng de fáng zi。",
+          "vi": "Nhờ sự giúp đỡ của Lý Văn, Bạch Gia Nguyệt đã thuê được căn nhà phù hợp. Với cô, lần thuê nhà này không hề dễ dàng. Theo gợi ý của Lý Văn, trước tiên cô xem thông tin trên các trang web và ứng dụng thuê nhà để tìm nhà phù hợp, tiếp đó đi xem nhà, đồng thời tìm hiểu môi trường xung quanh. Cô xem mấy căn mới tìm được một căn phù hợp cả về vị trí, môi trường lẫn giá cả, cuối cùng thuận lợi thuê được căn nhà lý tưởng."
+        },
+        {
+          "speaker": "",
+          "zh": "租房的时候，李文告诉白家月，在中国，由于很多刚工作的年轻人工资还不太高，所以他们一开始也不买房，都选择租房。工作几年后，不少人就会买房，因为大家一直觉得，有房才有家，有自己的房子会更有安全感。",
+          "pinyin": "zū fáng de shí hòu， lǐ wén gào su bái jiā yuè， zài zhōng guó， yóu yú hěn duō gāng gōng zuò de nián qīng rén gōng zī hái bù tài gāo， suǒ yǐ tā men yī kāi shǐ yě bù mǎi fáng， dōu xuǎn zé zū fáng。 gōng zuò jǐ nián hòu， bù shǎo rén jiù huì mǎi fáng， yīn wèi dà jiā yī zhí jué de， yǒu fáng cái yǒu jiā， yǒu zì jǐ de fáng zi huì gèng yǒu ān quán gǎn。",
+          "vi": "Khi thuê nhà, Lý Văn nói với Bạch Gia Nguyệt rằng ở Trung Quốc, do lương của nhiều người trẻ mới đi làm còn chưa cao nên ban đầu họ không mua nhà mà chọn thuê nhà. Sau vài năm làm việc, không ít người sẽ mua nhà, vì mọi người vẫn luôn cho rằng có nhà mới có tổ ấm, sở hữu nhà riêng sẽ mang lại cảm giác an toàn hơn."
+        }
+      ]
+    }
+  ]
+}

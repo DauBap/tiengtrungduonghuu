@@ -1,0 +1,182 @@
+{
+  "lesson": 10,
+  "title": "南方不懂北方的冷",
+  "title_pinyin": "",
+  "title_vi": "Miền Nam không hiểu cái lạnh miền Bắc",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "刘明",
+          "zh": "你看，这个小伙子从广州去哈尔滨出差，没想到哈尔滨的气温降到了零下二十几度，把他冻坏了。",
+          "pinyin": "nǐ kàn， zhè ge xiǎo huǒ zi cóng guǎng zhōu qù hā ěr bīn chū chāi， méi xiǎng dào hā ěr bīn de qì wēn jiàng dào le líng xià èr shí jǐ dù， bǎ tā dòng huài le。",
+          "vi": "Em xem, chàng trai này từ Quảng Châu đến Cáp Nhĩ Tân công tác, không ngờ nhiệt độ ở đó xuống âm hơn hai mươi độ, khiến cậu ấy rét cóng."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "他一定后悔自己穿少了吧？",
+          "pinyin": "tā yī dìng hòu huǐ zì jǐ chuān shǎo le ba？",
+          "vi": "Chắc cậu ấy hối hận vì mặc quá ít nhỉ?"
+        },
+        {
+          "speaker": "刘明",
+          "zh": "是啊，这就叫南方不懂北方的冷。",
+          "pinyin": "shì a， zhè jiù jiào nán fāng bù dǒng běi fāng de lěng。",
+          "vi": "Đúng vậy, thế mới gọi là miền Nam không hiểu cái lạnh miền Bắc."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "就是呢，冬天北方和南方的温度差别还是很大的。",
+          "pinyin": "jiù shì ne， dōng tiān běi fāng hé nán fāng de wēn dù chā bié hái shì hěn dà de。",
+          "vi": "Đúng thế, vào mùa đông, nhiệt độ miền Bắc và miền Nam vẫn chênh lệch rất lớn."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "所以冬天来北方，尤其是东北，一定要提前查好目的地的天气，看看下不下雪，气温怎么样。",
+          "pinyin": "suǒ yǐ dōng tiān lái běi fāng， yóu qí shì dōng běi， yī dìng yào tí qián chá hǎo mù dì dì de tiān qì， kàn kàn xià bù xià xuě， qì wēn zěn me yàng。",
+          "vi": "Vì vậy, mùa đông đến miền Bắc, đặc biệt là vùng Đông Bắc, nhất định phải xem trước thời tiết nơi đến, xem có tuyết rơi không, nhiệt độ thế nào."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "对。更重要的是，说什么也得穿上厚一点儿的衣服。",
+          "pinyin": "duì。 gèng zhòng yào de shì， shuō shén me yě děi chuān shàng hòu yī diǎnr de yī fu。",
+          "vi": "Đúng. Quan trọng hơn là dù thế nào cũng phải mặc quần áo dày hơn một chút."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一飞",
+          "zh": "寒假你们打算做什么呢？",
+          "pinyin": "hán jià nǐ men dǎ suàn zuò shén me ne？",
+          "vi": "Kỳ nghỉ đông các em định làm gì?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我们刚刚还说呢，家月春节时要去广州，我计划去哈尔滨。",
+          "pinyin": "wǒ men gāng gāng hái shuō ne， jiā yuè chūn jié shí yào qù guǎng zhōu， wǒ jì huà qù hā ěr bīn。",
+          "vi": "Chúng em vừa nói đến chuyện đó. Dịp Tết, Gia Nguyệt sẽ đi Quảng Châu, còn em định đi Cáp Nhĩ Tân."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "那时候广州暖和，但哈尔滨特别冷，气温一般都低于零下十摄氏度甚至零下二十摄氏度，这么低的温度你受不了吧？",
+          "pinyin": "nà shí hòu guǎng zhōu nuǎn huo， dàn hā ěr bīn tè bié lěng， qì wēn yī bān dōu dī yú líng xià shí shè shì dù shèn zhì líng xià èr shí shè shì dù， zhè me dī de wēn dù nǐ shòu bù liǎo ba？",
+          "vi": "Khi đó Quảng Châu ấm áp, nhưng Cáp Nhĩ Tân rất lạnh, nhiệt độ thường dưới âm mười độ C, thậm chí âm hai mươi độ C. Nhiệt độ thấp thế các em chịu không nổi đâu nhỉ?"
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "没问题，受得了，我有的是厚衣服。我去哈尔滨主要是想看雪，听说春节时那里会举办很多活动。",
+          "pinyin": "méi wèn tí， shòu de liǎo， wǒ yǒu de shì hòu yī fu。 wǒ qù hā ěr bīn zhǔ yào shì xiǎng kàn xuě， tīng shuō chūn jié shí nà lǐ huì jǔ bàn hěn duō huó dòng。",
+          "vi": "Không sao, em chịu được, em có rất nhiều quần áo dày. Em đến Cáp Nhĩ Tân chủ yếu để ngắm tuyết, nghe nói dịp Tết ở đó sẽ tổ chức nhiều hoạt động."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我想在广州过年，那里冬天比较暖和。而且我喜欢看花，听说广州的鲜花市场很有名，里面有各种植物。",
+          "pinyin": "wǒ xiǎng zài guǎng zhōu guò nián， nà lǐ dōng tiān bǐ jiào nuǎn huo。 ér qiě wǒ xǐ huan kàn huā， tīng shuō guǎng zhōu de xiān huā shì chǎng hěn yǒu míng， lǐ miàn yǒu gè zhǒng zhí wù。",
+          "vi": "Em muốn đón Tết ở Quảng Châu, mùa đông ở đó khá ấm. Hơn nữa em thích ngắm hoa, nghe nói chợ hoa tươi Quảng Châu rất nổi tiếng, bên trong có đủ loại cây cối."
+        },
+        {
+          "speaker": "王一飞",
+          "zh": "真不错！听你们这么一说，我也想外出旅游了。",
+          "pinyin": "zhēn bù cuò！ tīng nǐ men zhè me yī shuō， wǒ yě xiǎng wài chū lǚ yóu le。",
+          "vi": "Hay thật! Nghe các em nói vậy, cô cũng muốn đi du lịch rồi."
+        }
+      ]
+    },
+    {
+      "id": "广州与哈尔滨的不同",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "广州和哈尔滨，一个在南方，一个在北方，两个城市之间的距离有三千多公里，气候也大不相同。广州基本上没有冬天，而哈尔滨的冬天一般会从十月开始，到第二年的三四月才结束。广州四季开满鲜花，所以又叫“花城”；哈尔滨冬天冰雪多，所以也叫“冰城”。",
+          "pinyin": "guǎng zhōu hé hā ěr bīn， yī gè zài nán fāng， yī gè zài běi fāng， liǎng gè chéng shì zhī jiān de jù lí yǒu sān qiān duō gōng lǐ， qì hòu yě dà bù xiāng tóng。 guǎng zhōu jī běn shàng méi yǒu dōng tiān， ér hā ěr bīn de dōng tiān yī bān huì cóng shí yuè kāi shǐ， dào dì èr nián de sān sì yuè cái jié shù。 guǎng zhōu sì jì kāi mǎn xiān huā， suǒ yǐ yòu jiào “huā chéng”； hā ěr bīn dōng tiān bīng xuě duō， suǒ yǐ yě jiào “bīng chéng”。",
+          "vi": "Quảng Châu và Cáp Nhĩ Tân, một thành phố ở miền Nam, một ở miền Bắc, cách nhau hơn ba nghìn ki lô mét, khí hậu cũng rất khác nhau. Quảng Châu về cơ bản không có mùa đông, còn mùa đông ở Cáp Nhĩ Tân thường bắt đầu từ tháng Mười, đến tháng Ba hoặc tháng Tư năm sau mới kết thúc. Quảng Châu bốn mùa hoa tươi nở rộ nên còn được gọi là “Thành phố hoa”; Cáp Nhĩ Tân mùa đông có nhiều băng tuyết nên còn gọi là “Thành phố băng”."
+        },
+        {
+          "speaker": "",
+          "zh": "此外，两地的方言也不一样。哈尔滨方言和普通话听起来比较像，而广州方言和普通话差别较大。如果广州人和哈尔滨人都只使用自己的方言，那么交流就很困难，甚至还可能引起误会。其实，中国很多地方都有自己的方言，所以，为了顺利交流，中国人从小都要学习普通话。",
+          "pinyin": "cǐ wài， liǎng dì de fāng yán yě bù yī yàng。 hā ěr bīn fāng yán hé pǔ tōng huà tīng qǐ lái bǐ jiào xiàng， ér guǎng zhōu fāng yán hé pǔ tōng huà chā bié jiào dà。 rú guǒ guǎng zhōu rén hé hā ěr bīn rén dōu zhǐ shǐ yòng zì jǐ de fāng yán， nà me jiāo liú jiù hěn kùn nán， shèn zhì hái kě néng yǐn qǐ wù huì。 qí shí， zhōng guó hěn duō dì fāng dōu yǒu zì jǐ de fāng yán， suǒ yǐ， wèi le shùn lì jiāo liú， zhōng guó rén cóng xiǎo dōu yào xué xí pǔ tōng huà。",
+          "vi": "Ngoài ra, phương ngữ hai nơi cũng khác nhau. Phương ngữ Cáp Nhĩ Tân nghe khá giống tiếng Phổ thông, còn phương ngữ Quảng Châu khác tiếng Phổ thông khá nhiều. Nếu người Quảng Châu và người Cáp Nhĩ Tân đều chỉ dùng phương ngữ của mình thì giao tiếp sẽ rất khó khăn, thậm chí có thể gây hiểu lầm. Thực ra, nhiều địa phương ở Trung Quốc đều có phương ngữ riêng, vì vậy, để giao tiếp thuận lợi, người Trung Quốc đều phải học tiếng Phổ thông từ nhỏ."
+        }
+      ]
+    },
+    {
+      "id": "“世界环境日”那天，刘小雪学校学生会发布了一份活动发起书。",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "亲爱的同学们：",
+          "pinyin": "qīn ài de tóng xué men：",
+          "vi": "Các bạn học sinh thân mến,"
+        },
+        {
+          "speaker": "",
+          "zh": "今年的“世界环境日”，我们再次开展“绿色生活”活动，希望同学们做到：",
+          "pinyin": "jīn nián de “shì jiè huán jìng rì”， wǒ men zài cì kāi zhǎn “lǜ sè shēng huó” huó dòng， xī wàng tóng xué men zuò dào：",
+          "vi": "Nhân Ngày Môi trường Thế giới năm nay, chúng ta tiếp tục triển khai hoạt động “Sống xanh”, mong các bạn thực hiện những điều sau:"
+        },
+        {
+          "speaker": "",
+          "zh": "一、绿色出行",
+          "pinyin": "yī、 lǜ sè chū xíng",
+          "vi": "Một, đi lại thân thiện với môi trường"
+        },
+        {
+          "speaker": "",
+          "zh": "绿色一小步，环保一大步。根据距离选择绿色交通方式。距离短时可以走路或者骑自行车，距离长时多乘坐公交车或者地铁。",
+          "pinyin": "lǜ sè yī xiǎo bù， huán bǎo yī dà bù。 gēn jù jù lí xuǎn zé lǜ sè jiāo tōng fāng shì。 jù lí duǎn shí kě yǐ zǒu lù huò zhě qí zì xíng chē， jù lí cháng shí duō chéng zuò gōng jiāo chē huò zhě dì tiě。",
+          "vi": "Một bước nhỏ trong đi lại xanh là một bước lớn trong bảo vệ môi trường. Hãy lựa chọn phương tiện xanh theo khoảng cách. Quãng đường ngắn có thể đi bộ hoặc xe đạp; quãng đường dài hãy tăng cường đi xe buýt hoặc tàu điện ngầm."
+        },
+        {
+          "speaker": "",
+          "zh": "二、拒绝浪费",
+          "pinyin": "èr、 jù jué làng fèi",
+          "vi": "Hai, nói không với lãng phí"
+        },
+        {
+          "speaker": "",
+          "zh": "节约资源，坚持一水多用、人走灯关、餐餐都“光盘”。",
+          "pinyin": "jié yuē zī yuán， jiān chí yī shuǐ duō yòng、 rén zǒu dēng guān、 cān cān dōu “guāng pán”。",
+          "vi": "Tiết kiệm tài nguyên, kiên trì dùng nước cho nhiều mục đích, ra khỏi phòng thì tắt đèn, mỗi bữa đều ăn hết thức ăn trong đĩa."
+        },
+        {
+          "speaker": "",
+          "zh": "三、垃圾分类",
+          "pinyin": "sān、 lā jī fēn lèi",
+          "vi": "Ba, phân loại rác"
+        },
+        {
+          "speaker": "",
+          "zh": "积极参加校园、小区环保活动，学习垃圾分类知识，从小事做起，做好垃圾分类。",
+          "pinyin": "jī jí cān jiā xiào yuán、 xiǎo qū huán bǎo huó dòng， xué xí lā jī fēn lèi zhī shi， cóng xiǎo shì zuò qǐ， zuò hǎo lā jī fēn lèi。",
+          "vi": "Tích cực tham gia các hoạt động bảo vệ môi trường trong trường và khu dân cư, học kiến thức phân loại rác, bắt đầu từ những việc nhỏ và thực hiện tốt việc phân loại rác."
+        },
+        {
+          "speaker": "",
+          "zh": "保护环境是每一个人的责任。同学们，让我们共同努力，让绿色生活成为我们的日常习惯！",
+          "pinyin": "bǎo hù huán jìng shì měi yī gè rén de zé rèn。 tóng xué men， ràng wǒ men gòng tóng nǔ lì， ràng lǜ sè shēng huó chéng wéi wǒ men de rì cháng xí guàn！",
+          "vi": "Bảo vệ môi trường là trách nhiệm của mỗi người. Các bạn học sinh, hãy cùng nỗ lực để lối sống xanh trở thành thói quen hằng ngày của chúng ta!"
+        },
+        {
+          "speaker": "",
+          "zh": "校学生会",
+          "pinyin": "xiào xué shēng huì",
+          "vi": "Hội học sinh nhà trường"
+        },
+        {
+          "speaker": "",
+          "zh": "2026年6月5日",
+          "pinyin": "èr líng èr liù nián liù yuè wǔ rì",
+          "vi": "Ngày 5 tháng 6 năm 2026"
+        }
+      ]
+    }
+  ]
+}

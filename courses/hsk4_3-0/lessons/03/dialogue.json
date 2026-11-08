@@ -1,0 +1,128 @@
+{
+  "lesson": 3,
+  "title": "手机扫一下",
+  "title_pinyin": "",
+  "title_vi": "Dùng điện thoại quét một cái",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "陈天中",
+          "zh": "请问，花园小区怎么走？",
+          "pinyin": "qǐng wèn， huā yuán xiǎo qū zěn me zǒu？",
+          "vi": "Xin hỏi, đến khu dân cư Hoa Viên thì đi thế nào?"
+        },
+        {
+          "speaker": "同学",
+          "zh": "你往前走，到十字路口不要过马路，直接右转就到小区门口了。正好我也去那边，一起走吧。",
+          "pinyin": "nǐ wǎng qián zǒu， dào shí zì lù kǒu bù yào guò mǎ lù， zhí jiē yòu zhuǎn jiù dào xiǎo qū mén kǒu le。 zhèng hǎo wǒ yě qù nà biān， yī qǐ zǒu ba。",
+          "vi": "Bạn đi về phía trước, đến ngã tư thì đừng sang đường, rẽ phải là đến cổng khu dân cư. Đúng lúc mình cũng đến đó, cùng đi nhé."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "好的。我刚来中国，不熟悉路。北京真是太大了。",
+          "pinyin": "hǎo de。 wǒ gāng lái zhōng guó， bù shú xī lù。 běi jīng zhēn shì tài dà le。",
+          "vi": "Được. Mình mới đến Trung Quốc nên chưa quen đường. Bắc Kinh thật là rộng quá."
+        },
+        {
+          "speaker": "同学",
+          "zh": "北京大是大，不过这边的路基本上都是正南正北、正东正西的，很好找。你也可以用手机地图，很容易就能找到目的地。",
+          "pinyin": "běi jīng dà shì dà， bù guò zhè biān de lù jī běn shàng dōu shì zhèng nán zhèng běi、 zhèng dōng zhèng xī de， hěn hǎo zhǎo。 nǐ yě kě yǐ yòng shǒu jī dì tú， hěn róng yì jiù néng zhǎo dào mù dì dì。",
+          "vi": "Bắc Kinh đúng là rộng, nhưng đường sá bên này về cơ bản đều theo hướng chính nam – chính bắc, chính đông – chính tây nên rất dễ tìm. Bạn cũng có thể dùng bản đồ trên điện thoại, sẽ dễ dàng tìm được điểm đến."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "嗯，不过很多中文地名我还不认识。",
+          "pinyin": "ń， bù guò hěn duō zhōng wén dì míng wǒ hái bù rèn shi。",
+          "vi": "Ừ, nhưng mình vẫn chưa đọc được nhiều địa danh bằng tiếng Trung."
+        },
+        {
+          "speaker": "同学",
+          "zh": "没关系，你很快就会熟悉的。",
+          "pinyin": "méi guān xì， nǐ hěn kuài jiù huì shú xī de。",
+          "vi": "Không sao, bạn sẽ nhanh chóng quen thôi."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "陈天中",
+          "zh": "前两天和李文喝咖啡时，他帮我下载了微信和支付宝，教我认识里边的汉字，还教我用手机进行支付。",
+          "pinyin": "qián liǎng tiān hé lǐ wén hē kā fēi shí， tā bāng wǒ xià zài le wēi xìn hé zhī fù bǎo， jiāo wǒ rèn shi lǐ biān de hàn zì， hái jiāo wǒ yòng shǒu jī jìn xíng zhī fù。",
+          "vi": "Mấy hôm trước, khi uống cà phê với Lý Văn, cậu ấy giúp tớ tải WeChat và Alipay, dạy tớ đọc các chữ Hán trong ứng dụng, còn dạy tớ dùng điện thoại để thanh toán."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "他也教了我怎么用这两个软件。",
+          "pinyin": "tā yě jiāo le wǒ zěn me yòng zhè liǎng gè ruǎn jiàn。",
+          "vi": "Cậu ấy cũng dạy tớ cách dùng hai phần mềm này."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "现在我不仅会扫码结账，还会用手机在网上购物了。昨天我就在网上订了一台电脑，今天下午一点送到。",
+          "pinyin": "xiàn zài wǒ bù jǐn huì sǎo mǎ jié zhàng， hái huì yòng shǒu jī zài wǎng shàng gòu wù le。 zuó tiān wǒ jiù zài wǎng shàng dìng le yī tái diàn nǎo， jīn tiān xià wǔ yī diǎn sòng dào。",
+          "vi": "Bây giờ tớ không chỉ biết quét mã thanh toán mà còn biết mua hàng trên mạng bằng điện thoại. Hôm qua tớ vừa đặt một chiếc máy tính trên mạng, chiều nay một giờ sẽ giao đến."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "学会了这些，我们在中国生活真是方便了不少。",
+          "pinyin": "xué huì le zhè xiē， wǒ men zài zhōng guó shēng huó zhēn shì fāng biàn le bù shǎo。",
+          "vi": "Học được những điều này, cuộc sống của chúng mình ở Trung Quốc thuận tiện hơn nhiều thật."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "对。快递员要到了，我得马上回去！家月，明天见！",
+          "pinyin": "duì。 kuài dì yuán yào dào le， wǒ děi mǎ shàng huí qù！ jiā yuè， míng tiān jiàn！",
+          "vi": "Đúng vậy. Nhân viên giao hàng sắp đến rồi, tớ phải về ngay! Gia Nguyệt, mai gặp nhé!"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好的，天中，再见。",
+          "pinyin": "hǎo de， tiān zhōng， zài jiàn。",
+          "vi": "Được, Thiên Trung, tạm biệt."
+        }
+      ]
+    },
+    {
+      "id": "生活新体验",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "白家月和陈天中刚到北京时就发现，中国人在饭馆或超市结账时，几乎都用手机支付，只有他们用现金结账。",
+          "pinyin": "bái jiā yuè hé chén tiān zhōng gāng dào běi jīng shí jiù fā xiàn， zhōng guó rén zài fàn guǎn huò chāo shì jié zhàng shí， jī hū dōu yòng shǒu jī zhī fù， zhǐ yǒu tā men yòng xiàn jīn jié zhàng。",
+          "vi": "Khi mới đến Bắc Kinh, Bạch Gia Nguyệt và Trần Thiên Trung đã nhận thấy người Trung Quốc hầu như đều dùng điện thoại để thanh toán ở nhà hàng hoặc siêu thị, chỉ có họ dùng tiền mặt."
+        },
+        {
+          "speaker": "",
+          "zh": "在李文的帮助下，白家月和陈天中也都学会了用手机支付、网购、寄快递等等。在中国网购，不仅选择多、价格不高，而且送货很快，很多留学生甚至改变了自己的购物习惯。不过，由于网购太方便了，动动手指就能买到想要的东西，他们也开始担心自己在网购时会乱花钱。怎么才能管住自己不乱花钱呢？",
+          "pinyin": "zài lǐ wén de bāng zhù xià， bái jiā yuè hé chén tiān zhōng yě dōu xué huì le yòng shǒu jī zhī fù、 wǎng gòu、 jì kuài dì děng děng。 zài zhōng guó wǎng gòu， bù jǐn xuǎn zé duō、 jià gé bù gāo， ér qiě sòng huò hěn kuài， hěn duō liú xué shēng shèn zhì gǎi biàn le zì jǐ de gòu wù xí guàn。 bù guò， yóu yú wǎng gòu tài fāng biàn le， dòng dòng shǒu zhǐ jiù néng mǎi dào xiǎng yào de dōng xi， tā men yě kāi shǐ dān xīn zì jǐ zài wǎng gòu shí huì luàn huā qián。 zěn me cái néng guǎn zhù zì jǐ bù luàn huā qián ne？",
+          "vi": "Nhờ Lý Văn giúp đỡ, Bạch Gia Nguyệt và Trần Thiên Trung cũng đã học được cách thanh toán bằng điện thoại, mua hàng trên mạng, gửi hàng chuyển phát nhanh, v.v. Mua hàng trực tuyến ở Trung Quốc không chỉ có nhiều lựa chọn, giá không cao mà còn giao hàng rất nhanh, khiến nhiều du học sinh thậm chí thay đổi thói quen mua sắm. Tuy nhiên, do mua hàng quá tiện, chỉ cần động ngón tay là có thể mua được thứ mình muốn, họ cũng bắt đầu lo mình sẽ tiêu tiền bừa bãi khi mua sắm trực tuyến. Làm sao mới có thể tự kiềm chế để không tiêu tiền bừa bãi?"
+        }
+      ]
+    },
+    {
+      "id": "用手机时如何保护个人信息",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "网上购物或者订票时，我们经常需要提供姓名、手机号、身份证号等个人信息。在提供这些信息时，我们也会担心：我的个人信息能否得到保护？于是，有人在网上说出了自己的担心，很快就有人给出了一些建议。比如，别把密码随便告诉别人，不在网上发自己的车票、机票信息……",
+          "pinyin": "wǎng shàng gòu wù huò zhě dìng piào shí， wǒ men jīng cháng xū yào tí gōng xìng míng、 shǒu jī hào、 shēn fèn zhèng hào děng gè rén xìn xī。 zài tí gōng zhè xiē xìn xī shí， wǒ men yě huì dān xīn： wǒ de gè rén xìn xī néng fǒu dé dào bǎo hù？ yú shì， yǒu rén zài wǎng shàng shuō chū le zì jǐ de dān xīn， hěn kuài jiù yǒu rén gěi chū le yī xiē jiàn yì。 bǐ rú， bié bǎ mì mǎ suí biàn gào su bié rén， bù zài wǎng shàng fā zì jǐ de chē piào、 jī piào xìn xī … …",
+          "vi": "Khi mua hàng hoặc đặt vé trên mạng, chúng ta thường cần cung cấp thông tin cá nhân như họ tên, số điện thoại, số căn cước. Khi cung cấp những thông tin này, chúng ta cũng lo lắng: thông tin cá nhân của mình có được bảo vệ hay không? Vì vậy, có người chia sẻ nỗi lo trên mạng và nhanh chóng nhận được một số lời khuyên. Chẳng hạn, đừng tùy tiện nói mật khẩu cho người khác, đừng đăng thông tin vé tàu, vé máy bay của mình lên mạng…"
+        },
+        {
+          "speaker": "",
+          "zh": "现在，很多国家也通过技术、法律等手段来保证个人信息安全。比如中国的网络安全法、个人信息保护法等就很好地保护了人们的个人信息。",
+          "pinyin": "xiàn zài， hěn duō guó jiā yě tōng guò jì shù、 fǎ lǜ děng shǒu duàn lái bǎo zhèng gè rén xìn xī ān quán。 bǐ rú zhōng guó de wǎng luò ān quán fǎ、 gè rén xìn xī bǎo hù fǎ děng jiù hěn hǎo de bǎo hù le rén men de gè rén xìn xī。",
+          "vi": "Hiện nay, nhiều quốc gia cũng sử dụng các biện pháp như công nghệ và pháp luật để bảo đảm an toàn thông tin cá nhân. Chẳng hạn, Luật An ninh mạng và Luật Bảo vệ thông tin cá nhân của Trung Quốc đã bảo vệ tốt thông tin cá nhân của người dân."
+        }
+      ]
+    }
+  ]
+}

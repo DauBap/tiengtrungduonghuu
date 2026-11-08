@@ -1,0 +1,128 @@
+{
+  "lesson": 1,
+  "title": "我们来中国学习了",
+  "title_pinyin": "",
+  "title_vi": "Chúng tôi đã đến Trung Quốc học tập",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "老师",
+          "zh": "你们好，欢迎来到中国留学！请把护照、签证和入学通知书给我。",
+          "pinyin": "nǐ men hǎo， huān yíng lái dào zhōng guó liú xué！ qǐng bǎ hù zhào、 qiān zhèng hé rù xué tōng zhī shū gěi wǒ。",
+          "vi": "Chào các em, chào mừng các em đến Trung Quốc du học! Hãy đưa cho cô hộ chiếu, thị thực và giấy báo nhập học."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好的。这是我们的证件和材料。",
+          "pinyin": "hǎo de。 zhè shì wǒ men de zhèng jiàn hé cái liào。",
+          "vi": "Vâng ạ. Đây là giấy tờ và hồ sơ của chúng em."
+        },
+        {
+          "speaker": "",
+          "zh": "（几分钟后。）",
+          "pinyin": "（jǐ fēn zhōng hòu。）",
+          "vi": "Vài phút sau."
+        },
+        {
+          "speaker": "老师",
+          "zh": "办好了，这是你们的学生证，下周一开始上课。先试听两周，然后在网上选课。",
+          "pinyin": "bàn hǎo le， zhè shì nǐ men de xué shēng zhèng， xià zhōu yī kāi shǐ shàng kè。 xiān shì tīng liǎng zhōu， rán hòu zài wǎng shàng xuǎn kè。",
+          "vi": "Xong rồi, đây là thẻ sinh viên của các em. Thứ Hai tuần sau bắt đầu học. Trước tiên các em học thử hai tuần, sau đó đăng ký môn học trên mạng."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "谢谢老师。",
+          "pinyin": "xiè xiè lǎo shī。",
+          "vi": "Em cảm ơn cô."
+        },
+        {
+          "speaker": "老师",
+          "zh": "不客气，你们以后有任何问题都可以来找我。",
+          "pinyin": "bù kè qi， nǐ men yǐ hòu yǒu rèn hé wèn tí dōu kě yǐ lái zhǎo wǒ。",
+          "vi": "Không có gì. Sau này nếu có bất kỳ vấn đề gì, các em đều có thể đến gặp cô."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "陈天中",
+          "zh": "你看，咱们的校园真大！有图书馆、体育馆、超市，还有好几个食堂。",
+          "pinyin": "nǐ kàn， zán men de xiào yuán zhēn dà！ yǒu tú shū guǎn、 tǐ yù guǎn、 chāo shì， hái yǒu hǎo jǐ gè shí táng。",
+          "vi": "Cậu xem, trường mình rộng thật! Có thư viện, nhà thi đấu, siêu thị, còn có mấy nhà ăn nữa."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "是啊，我觉得学校就像一座小城市，什么都有，方便极了。",
+          "pinyin": "shì a， wǒ jué de xué xiào jiù xiàng yī zuò xiǎo chéng shì， shén me dōu yǒu， fāng biàn jí le。",
+          "vi": "Đúng vậy, tớ thấy trường giống như một thành phố nhỏ, cái gì cũng có, tiện vô cùng."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "刚才老师说，咱们可以申请奖学金，你了解过吗？",
+          "pinyin": "gāng cái lǎo shī shuō， zán men kě yǐ shēn qǐng jiǎng xué jīn， nǐ liǎo jiě guò ma？",
+          "vi": "Vừa rồi giáo viên nói chúng mình có thể xin học bổng, cậu đã tìm hiểu chưa?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我听说过一点儿，好像成绩好、表现好的学生都有机会获得奖学金。",
+          "pinyin": "wǒ tīng shuō guò yī diǎnr， hǎo xiàng chéng jì hǎo、 biǎo xiàn hǎo de xué shēng dōu yǒu jī huì huò dé jiǎng xué jīn。",
+          "vi": "Tớ có nghe qua một chút. Hình như những sinh viên có thành tích học tập tốt, thể hiện tốt đều có cơ hội nhận học bổng."
+        },
+        {
+          "speaker": "陈天中",
+          "zh": "那太好了，要是申请到奖学金，就能减轻不少经济压力。",
+          "pinyin": "nà tài hǎo le， yào shì shēn qǐng dào jiǎng xué jīn， jiù néng jiǎn qīng bù shǎo jīng jì yā lì。",
+          "vi": "Thế thì tốt quá! Nếu xin được học bổng thì sẽ giảm được khá nhiều áp lực tài chính."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "没错，我们一起加油吧！",
+          "pinyin": "méi cuò， wǒ men yī qǐ jiā yóu ba！",
+          "vi": "Đúng thế, chúng mình cùng cố gắng nhé!"
+        }
+      ]
+    },
+    {
+      "id": "外国学生在中国大学的学习和生活",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "随着中国的发展，越来越多的外国学生来到中国的大学学习。他们可以先上一年的中文课程，然后根据自己的兴趣和需要选择专业。除了读本科课程，他们还可以申请读硕士研究生或者博士研究生。",
+          "pinyin": "suí zhe zhōng guó de fā zhǎn， yuè lái yuè duō de wài guó xué shēng lái dào zhōng guó de dà xué xué xí。 tā men kě yǐ xiān shàng yī nián de zhōng wén kè chéng， rán hòu gēn jù zì jǐ de xìng qù hé xū yào xuǎn zé zhuān yè。 chú le dú běn kē kè chéng， tā men hái kě yǐ shēn qǐng dú shuò shì yán jiū shēng huò zhě bó shì yán jiū shēng。",
+          "vi": "Cùng với sự phát triển của Trung Quốc, ngày càng nhiều sinh viên nước ngoài đến học tại các trường đại học Trung Quốc. Họ có thể học một năm tiếng Trung trước, sau đó lựa chọn chuyên ngành theo sở thích và nhu cầu của mình. Ngoài chương trình đại học, họ còn có thể đăng ký học thạc sĩ hoặc tiến sĩ."
+        },
+        {
+          "speaker": "",
+          "zh": "在大学里，外国学生可以和中国学生一起学习、做研究、参加校园活动。通过这些交流，外国学生能更快地适应中国的大学生活。",
+          "pinyin": "zài dà xué lǐ， wài guó xué shēng kě yǐ hé zhōng guó xué shēng yī qǐ xué xí、 zuò yán jiū、 cān jiā xiào yuán huó dòng。 tōng guò zhè xiē jiāo liú， wài guó xué shēng néng gèng kuài de shì yìng zhōng guó de dà xué shēng huó。",
+          "vi": "Ở trường đại học, sinh viên nước ngoài có thể cùng sinh viên Trung Quốc học tập, nghiên cứu và tham gia các hoạt động trong trường. Thông qua những hoạt động giao lưu này, sinh viên nước ngoài có thể thích nghi nhanh hơn với cuộc sống đại học tại Trung Quốc."
+        }
+      ]
+    },
+    {
+      "id": "专业选择与职业发展",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "很多外国学生来中国学习以前，就已经想好了自己的发展方向。有人对经济感兴趣，希望将来在国际公司工作；有人喜欢学医，打算回国后当一名医生；还有人对教育有热情，想要成为一名教师。",
+          "pinyin": "hěn duō wài guó xué shēng lái zhōng guó xué xí yǐ qián， jiù yǐ jīng xiǎng hǎo le zì jǐ de fā zhǎn fāng xiàng。 yǒu rén duì jīng jì gǎn xìng qù， xī wàng jiāng lái zài guó jì gōng sī gōng zuò； yǒu rén xǐ huan xué yī， dǎ suàn huí guó hòu dāng yī míng yī shēng； hái yǒu rén duì jiào yù yǒu rè qíng， xiǎng yào chéng wéi yī míng jiào shī。",
+          "vi": "Nhiều sinh viên nước ngoài đã xác định hướng phát triển của mình trước khi đến Trung Quốc học tập. Có người quan tâm đến kinh tế, hy vọng sau này làm việc tại công ty quốc tế; có người thích học y, dự định trở về nước làm bác sĩ; cũng có người tâm huyết với giáo dục, muốn trở thành giáo viên."
+        },
+        {
+          "speaker": "",
+          "zh": "陈天中想选择跟经济有关的专业，希望通过学习，了解更多国际贸易方面的知识。安妮以后想做一名中文老师，所以要选择国际中文教育专业。对他们来说，来到中国留学，一方面是为了学习语言和知识，另一方面也是为将来的工作和生活做准备。",
+          "pinyin": "chén tiān zhōng xiǎng xuǎn zé gēn jīng jì yǒu guān de zhuān yè， xī wàng tōng guò xué xí， liǎo jiě gèng duō guó jì mào yì fāng miàn de zhī shi。 ān nī yǐ hòu xiǎng zuò yī míng zhōng wén lǎo shī， suǒ yǐ yào xuǎn zé guó jì zhōng wén jiào yù zhuān yè。 duì tā men lái shuō， lái dào zhōng guó liú xué， yī fāng miàn shì wèi le xué xí yǔ yán hé zhī shi， lìng yī fāng miàn yě shì wèi jiāng lái de gōng zuò hé shēng huó zuò zhǔn bèi。",
+          "vi": "Trần Thiên Trung muốn chọn chuyên ngành liên quan đến kinh tế, hy vọng thông qua việc học sẽ hiểu thêm kiến thức về thương mại quốc tế. An Ni muốn trở thành giáo viên tiếng Trung nên sẽ chọn chuyên ngành Giáo dục tiếng Trung quốc tế. Đối với họ, đến Trung Quốc du học một mặt là để học ngôn ngữ và kiến thức, mặt khác cũng là chuẩn bị cho công việc và cuộc sống trong tương lai."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,152 @@
+{
+  "lesson": 6,
+  "title": "我陪你去看病",
+  "title_pinyin": "",
+  "title_vi": "Tớ đi khám bệnh cùng cậu",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "白家月",
+          "zh": "喂，李文，我身体不舒服。",
+          "pinyin": "wèi， lǐ wén， wǒ shēn tǐ bù shū fu。",
+          "vi": "A lô, Lý Văn, tớ thấy không khỏe."
+        },
+        {
+          "speaker": "李文",
+          "zh": "你怎么了？听你的声音，好像感冒了。",
+          "pinyin": "nǐ zěn me le？ tīng nǐ de shēng yīn， hǎo xiàng gǎn mào le。",
+          "vi": "Cậu sao thế? Nghe giọng cậu hình như bị cảm rồi."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "对，我还发烧，一直咳嗽，咳得很厉害。",
+          "pinyin": "duì， wǒ hái fā shāo， yī zhí ké sou， ké de hěn lì hai。",
+          "vi": "Đúng vậy, tớ còn sốt, ho liên tục, ho rất dữ."
+        },
+        {
+          "speaker": "李文",
+          "zh": "那挺严重的，最好赶快去医院检查一下。",
+          "pinyin": "nà tǐng yán zhòng de， zuì hǎo gǎn kuài qù yī yuàn jiǎn chá yī xià。",
+          "vi": "Thế thì khá nghiêm trọng đấy, tốt nhất cậu nên mau đến bệnh viện kiểm tra."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "我也这么想，不过我来中国后还没去过医院，不知道怎么在中国的医院看病。",
+          "pinyin": "wǒ yě zhè me xiǎng， bù guò wǒ lái zhōng guó hòu hái méi qù guò yī yuàn， bù zhī dào zěn me zài zhōng guó de yī yuàn kàn bìng。",
+          "vi": "Tớ cũng nghĩ vậy, nhưng từ khi đến Trung Quốc tớ chưa đi bệnh viện lần nào, không biết khám bệnh ở bệnh viện Trung Quốc như thế nào."
+        },
+        {
+          "speaker": "李文",
+          "zh": "没关系，我陪你一起去，还能帮你翻译。你在家等一下，我现在就去接你。",
+          "pinyin": "méi guān xì， wǒ péi nǐ yī qǐ qù， hái néng bāng nǐ fān yì。 nǐ zài jiā děng yī xià， wǒ xiàn zài jiù qù jiē nǐ。",
+          "vi": "Không sao, tớ đi cùng cậu, còn có thể giúp cậu phiên dịch. Cậu chờ ở nhà một lát, bây giờ tớ đến đón cậu."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "太好了！有你陪着，我就放心多了。",
+          "pinyin": "tài hǎo le！ yǒu nǐ péi zhe， wǒ jiù fàng xīn duō le。",
+          "vi": "Tốt quá! Có cậu đi cùng, tớ yên tâm hơn nhiều."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "护士，您好，我的这位外国朋友生病了，第一次来这里看病，需要怎么做？",
+          "pinyin": "hù shì， nín hǎo， wǒ de zhè wèi wài guó péng you shēng bìng le， dì yī cì lái zhè lǐ kàn bìng， xū yào zěn me zuò？",
+          "vi": "Chào chị y tá, người bạn nước ngoài này của tôi bị ốm, lần đầu đến đây khám bệnh thì cần làm thế nào ạ?"
+        },
+        {
+          "speaker": "护士",
+          "zh": "请在这张表上写上病人的姓名、性别、国籍、年龄、电话号码和家庭地址。",
+          "pinyin": "qǐng zài zhè zhāng biǎo shàng xiě shàng bìng rén de xìng míng、 xìng bié、 guó jí、 nián líng、 diàn huà hào mǎ hé jiā tíng dì zhǐ。",
+          "vi": "Vui lòng điền họ tên, giới tính, quốc tịch, tuổi, số điện thoại và địa chỉ nhà của bệnh nhân vào tờ khai này."
+        },
+        {
+          "speaker": "李文",
+          "zh": "我写好了，您看看，这样可以吗？",
+          "pinyin": "wǒ xiě hǎo le， nín kàn kàn， zhè yàng kě yǐ ma？",
+          "vi": "Tôi điền xong rồi, chị xem giúp, như vậy được chưa ạ?"
+        },
+        {
+          "speaker": "护士",
+          "zh": "没问题，您拿着病人的护照去挂号吧。",
+          "pinyin": "méi wèn tí， nín ná zhe bìng rén de hù zhào qù guà hào ba。",
+          "vi": "Được rồi, anh mang hộ chiếu của bệnh nhân đi đăng ký khám nhé."
+        },
+        {
+          "speaker": "李文",
+          "zh": "家月，我去排队挂号，你先在大厅休息，别着急。",
+          "pinyin": "jiā yuè， wǒ qù pái duì guà hào， nǐ xiān zài dà tīng xiū xi， bié zháo jí。",
+          "vi": "Gia Nguyệt, tớ đi xếp hàng đăng ký khám, cậu cứ nghỉ ở sảnh trước, đừng lo."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好的，真是太谢谢你了！",
+          "pinyin": "hǎo de， zhēn shì tài xiè xiè nǐ le！",
+          "vi": "Được, cảm ơn cậu nhiều lắm!"
+        },
+        {
+          "speaker": "李文",
+          "zh": "你跟我有什么好客气的。",
+          "pinyin": "nǐ gēn wǒ yǒu shén me hǎo kè qi de。",
+          "vi": "Giữa cậu với tớ còn khách sáo gì nữa."
+        }
+      ]
+    },
+    {
+      "id": "一次看病的经历",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "下午白家月去看病了，她告诉医生，自己平时身体不错，偶尔才会生一次病。这次她病得很厉害，头也一直疼，身上一点儿力气都没有。医生给她做了检查，检查结果出来后，发现她得了比较严重的流行性感冒。",
+          "pinyin": "xià wǔ bái jiā yuè qù kàn bìng le， tā gào su yī shēng， zì jǐ píng shí shēn tǐ bù cuò， ǒu ěr cái huì shēng yī cì bìng。 zhè cì tā bìng de hěn lì hai， tóu yě yī zhí téng， shēn shàng yī diǎnr lì qì dōu méi yǒu。 yī shēng gěi tā zuò le jiǎn chá， jiǎn chá jié guǒ chū lái hòu， fā xiàn tā dé le bǐ jiào yán zhòng de liú xíng xìng gǎn mào。",
+          "vi": "Buổi chiều, Bạch Gia Nguyệt đi khám bệnh. Cô nói với bác sĩ rằng bình thường sức khỏe mình khá tốt, thỉnh thoảng mới ốm một lần. Lần này cô bị bệnh rất nặng, đầu đau liên tục, toàn thân chẳng còn chút sức lực. Bác sĩ khám cho cô; sau khi có kết quả, phát hiện cô bị cúm khá nặng."
+        },
+        {
+          "speaker": "",
+          "zh": "医生告诉她，现在需要把体温降下来，光吃药恐怕不够，打针会更有效。医生还让她回家以后按时吃药，多喝水，多休息。",
+          "pinyin": "yī shēng gào su tā， xiàn zài xū yào bǎ tǐ wēn jiàng xià lái， guāng chī yào kǒng pà bù gòu， dǎ zhēn huì gèng yǒu xiào。 yī shēng hái ràng tā huí jiā yǐ hòu àn shí chī yào， duō hē shuǐ， duō xiū xi。",
+          "vi": "Bác sĩ nói hiện cần hạ thân nhiệt xuống, chỉ uống thuốc e rằng không đủ, tiêm sẽ hiệu quả hơn. Bác sĩ còn dặn cô về nhà uống thuốc đúng giờ, uống nhiều nước và nghỉ ngơi nhiều."
+        },
+        {
+          "speaker": "",
+          "zh": "晚上，白家月睡觉时出了一身汗。第二天醒来时，她感觉头不那么疼了，体温也低了一些，身体不那么难受了。",
+          "pinyin": "wǎn shàng， bái jiā yuè shuì jiào shí chū le yī shēn hàn。 dì èr tiān xǐng lái shí， tā gǎn jué tóu bù nà me téng le， tǐ wēn yě dī le yī xiē， shēn tǐ bù nà me nán shòu le。",
+          "vi": "Buổi tối, khi ngủ, Bạch Gia Nguyệt toát mồ hôi khắp người. Sáng hôm sau tỉnh dậy, cô cảm thấy đầu bớt đau, thân nhiệt cũng hạ xuống một chút, cơ thể không còn khó chịu như trước."
+        }
+      ]
+    },
+    {
+      "id": "怎么在中国看病",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "外国人第一次在中国看病，可能会担心语言不通，或者觉得看病的过程和自己的国家不同。其实，这些问题都有办法解决。",
+          "pinyin": "wài guó rén dì yī cì zài zhōng guó kàn bìng， kě néng huì dān xīn yǔ yán bù tōng， huò zhě jué de kàn bìng de guò chéng hé zì jǐ de guó jiā bù tóng。 qí shí， zhè xiē wèn tí dōu yǒu bàn fǎ jiě jué。",
+          "vi": "Người nước ngoài lần đầu khám bệnh ở Trung Quốc có thể lo bất đồng ngôn ngữ, hoặc thấy quy trình khám khác với nước mình. Thực ra, những vấn đề này đều có cách giải quyết."
+        },
+        {
+          "speaker": "",
+          "zh": "有的医院有国际部，那里的医生一般会说英文，交流比较方便，但是国际部的收费比较高。如果没有特别需要，可以选择普通部，用简单的中文和医生交流。",
+          "pinyin": "yǒu de yī yuàn yǒu guó jì bù， nà lǐ de yī shēng yī bān huì shuō yīng wén， jiāo liú bǐ jiào fāng biàn， dàn shì guó jì bù de shōu fèi bǐ jiào gāo。 rú guǒ méi yǒu tè bié xū yào， kě yǐ xuǎn zé pǔ tōng bù， yòng jiǎn dān de zhōng wén hé yī shēng jiāo liú。",
+          "vi": "Một số bệnh viện có khoa quốc tế, bác sĩ ở đó thường nói được tiếng Anh nên giao tiếp thuận tiện hơn, nhưng chi phí khá cao. Nếu không có nhu cầu đặc biệt, bạn có thể chọn khoa khám thông thường, dùng tiếng Trung đơn giản để trao đổi với bác sĩ."
+        },
+        {
+          "speaker": "",
+          "zh": "在中国看病要先挂号，然后再去找医生。医生会问病人的情况，有时还会做一些检查，好给出合适的治疗方法。只要按照医生说的一步一步来，一般都可以顺利得到治疗。",
+          "pinyin": "zài zhōng guó kàn bìng yào xiān guà hào， rán hòu zài qù zhǎo yī shēng。 yī shēng huì wèn bìng rén de qíng kuàng， yǒu shí hái huì zuò yī xiē jiǎn chá， hǎo gěi chū hé shì de zhì liáo fāng fǎ。 zhǐ yào àn zhào yī shēng shuō de yī bù yī bù lái， yī bān dōu kě yǐ shùn lì dé dào zhì liáo。",
+          "vi": "Ở Trung Quốc, trước tiên cần đăng ký khám rồi mới đến gặp bác sĩ. Bác sĩ sẽ hỏi về tình trạng của bệnh nhân, đôi khi còn làm một số xét nghiệm để đưa ra phương pháp điều trị phù hợp. Chỉ cần làm từng bước theo hướng dẫn của bác sĩ, nhìn chung bạn đều có thể thuận lợi được điều trị."
+        }
+      ]
+    }
+  ]
+}

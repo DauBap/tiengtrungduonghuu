@@ -1,0 +1,122 @@
+{
+  "lesson": 7,
+  "title": "在工作中学习",
+  "title_pinyin": "",
+  "title_vi": "Học hỏi trong công việc",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "同事",
+          "zh": "经理，打扰您一下。市场调查的计划书我昨天发到您邮箱了。在内容方面，您觉得有需要的吗？",
+          "pinyin": "jīng lǐ， dǎ rǎo nín yī xià。 shì chǎng diào chá de jì huà shū wǒ zuó tiān fā dào nín yóu xiāng le。 zài nèi róng fāng miàn， nín jué de yǒu xū yào de ma？",
+          "vi": "Thưa quản lý, xin làm phiền chị một chút. Hôm qua tôi đã gửi bản kế hoạch khảo sát thị trường vào email của chị. Về nội dung, chị thấy có gì cần thêm không?"
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我看过了，写得不错，就是调查的地点只有超市，不太够。",
+          "pinyin": "wǒ kàn guò le， xiě de bù cuò， jiù shì diào chá de dì diǎn zhǐ yǒu chāo shì， bù tài gòu。",
+          "vi": "Tôi xem rồi, viết khá tốt, chỉ có điều địa điểm khảo sát mới có siêu thị thì chưa đủ."
+        },
+        {
+          "speaker": "同事",
+          "zh": "好的，那我再加一些网店。",
+          "pinyin": "hǎo de， nà wǒ zài jiā yī xiē wǎng diàn。",
+          "vi": "Vâng, vậy tôi sẽ bổ sung một số cửa hàng trực tuyến."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "行。做调查的时候要细心，注意了解客户真正的想法。",
+          "pinyin": "xíng。 zuò diào chá de shí hòu yào xì xīn， zhù yì liǎo jiě kè hù zhēn zhèng de xiǎng fǎ。",
+          "vi": "Được. Khi khảo sát phải cẩn thận, chú ý tìm hiểu suy nghĩ thực sự của khách hàng."
+        },
+        {
+          "speaker": "同事",
+          "zh": "明白了，我会认真准备，按时完成任务。",
+          "pinyin": "míng bai le， wǒ huì rèn zhēn zhǔn bèi， àn shí wán chéng rèn wù。",
+          "vi": "Tôi hiểu rồi, tôi sẽ chuẩn bị nghiêm túc và hoàn thành nhiệm vụ đúng hạn."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "嗯，如果遇到什么问题，及时跟我联系。",
+          "pinyin": "ń， rú guǒ yù dào shén me wèn tí， jí shí gēn wǒ lián xì。",
+          "vi": "Ừ, nếu gặp vấn đề gì thì liên hệ ngay với tôi."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "同事",
+          "zh": "杨哥，经理让我下周去上海出差，做市场调查，你有这方面的经验吗？",
+          "pinyin": "yáng gē， jīng lǐ ràng wǒ xià zhōu qù shàng hǎi chū chāi， zuò shì chǎng diào chá， nǐ yǒu zhè fāng miàn de jīng yàn ma？",
+          "vi": "Anh Dương, quản lý bảo em tuần sau đến Thượng Hải công tác để khảo sát thị trường. Anh có kinh nghiệm về việc này không?"
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "你要去几天？主要调查什么内容？",
+          "pinyin": "nǐ yào qù jǐ tiān？ zhǔ yào diào chá shén me nèi róng？",
+          "vi": "Em đi mấy ngày? Chủ yếu khảo sát nội dung gì?"
+        },
+        {
+          "speaker": "同事",
+          "zh": "去四天，打算采访一些客户，了解他们对新产品的看法。",
+          "pinyin": "qù sì tiān， dǎ suàn cǎi fǎng yī xiē kè hù， liǎo jiě tā men duì xīn chǎn pǐn de kàn fǎ。",
+          "vi": "Em đi bốn ngày, dự định phỏng vấn một số khách hàng để tìm hiểu ý kiến của họ về sản phẩm mới."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "那你要提前准备好问题，便于和客户交流。",
+          "pinyin": "nà nǐ yào tí qián zhǔn bèi hǎo wèn tí， biàn yú hé kè hù jiāo liú。",
+          "vi": "Vậy em cần chuẩn bị sẵn câu hỏi để tiện trao đổi với khách hàng."
+        },
+        {
+          "speaker": "同事",
+          "zh": "好的，我已经准备了一些问题。",
+          "pinyin": "hǎo de， wǒ yǐ jīng zhǔn bèi le yī xiē wèn tí。",
+          "vi": "Vâng, em đã chuẩn bị một số câu hỏi rồi."
+        },
+        {
+          "speaker": "杨同乐",
+          "zh": "很好。既然出差时间不长，就要安排好时间，多获得有用的信息。",
+          "pinyin": "hěn hǎo。 jì rán chū chāi shí jiān bù cháng， jiù yào ān pái hǎo shí jiān， duō huò dé yǒu yòng de xìn xī。",
+          "vi": "Tốt lắm. Vì thời gian công tác không dài nên phải sắp xếp thời gian hợp lý, thu thập thêm nhiều thông tin hữu ích."
+        }
+      ]
+    },
+    {
+      "id": "不同客户，不同方法",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "前段时间，杨同乐的同事谈成了一笔不错的生意。刚开始，这位同事也遇到了一些困难。拿和客户交流来说，虽然她能把产品的优缺点说得很清楚，但实际效果并不理想。杨同乐告诉她，这是因为她介绍的方式都一样。其实，不同年龄、不同性别的客户对产品的关注点是不一样的。于是，这位同事又认真地进行了几次市场调查，了解不同客户的想法。后来她在面对不同客户时，能根据他们的情况介绍产品，效果一下就好了很多。",
+          "pinyin": "qián duàn shí jiān， yáng tóng lè de tóng shì tán chéng le yī bǐ bù cuò de shēng yì。 gāng kāi shǐ， zhè wèi tóng shì yě yù dào le yī xiē kùn nán。 ná hé kè hù jiāo liú lái shuō， suī rán tā néng bǎ chǎn pǐn de yōu quē diǎn shuō de hěn qīng chu， dàn shí jì xiào guǒ bìng bù lǐ xiǎng。 yáng tóng lè gào su tā， zhè shì yīn wèi tā jiè shào de fāng shì dōu yī yàng。 qí shí， bù tóng nián líng、 bù tóng xìng bié de kè hù duì chǎn pǐn de guān zhù diǎn shì bù yī yàng de。 yú shì， zhè wèi tóng shì yòu rèn zhēn de jìn xíng le jǐ cì shì chǎng diào chá， liǎo jiě bù tóng kè hù de xiǎng fǎ。 hòu lái tā zài miàn duì bù tóng kè hù shí， néng gēn jù tā men de qíng kuàng jiè shào chǎn pǐn， xiào guǒ yī xià jiù hǎo le hěn duō。",
+          "vi": "Thời gian trước, đồng nghiệp của Dương Đồng Lạc đã chốt được một thương vụ khá tốt. Ban đầu, người đồng nghiệp này cũng gặp một số khó khăn. Lấy việc trao đổi với khách hàng làm ví dụ: tuy cô trình bày ưu, nhược điểm của sản phẩm rất rõ, nhưng hiệu quả thực tế chưa như mong muốn. Dương Đồng Lạc nói với cô rằng đó là vì cách giới thiệu của cô lúc nào cũng giống nhau. Thực ra, khách hàng ở độ tuổi và giới tính khác nhau sẽ quan tâm đến những điểm khác nhau của sản phẩm. Vì thế, cô lại nghiêm túc thực hiện vài đợt khảo sát thị trường để tìm hiểu suy nghĩ của từng nhóm khách hàng. Sau này, khi gặp các khách hàng khác nhau, cô có thể giới thiệu sản phẩm theo tình hình của họ, hiệu quả lập tức tốt hơn nhiều."
+        }
+      ]
+    },
+    {
+      "id": "工作的选择与发展",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "有的年轻人经常换工作，总觉得下一份工作会更好。但是，适应新工作往往需要比较长的时间。如果总是换工作，不但很难积累经验，还可能会使自己的发展受到影响。",
+          "pinyin": "yǒu de nián qīng rén jīng cháng huàn gōng zuò， zǒng jué de xià yī fèn gōng zuò huì gèng hǎo。 dàn shì， shì yìng xīn gōng zuò wǎng wǎng xū yào bǐ jiào cháng de shí jiān。 rú guǒ zǒng shì huàn gōng zuò， bù dàn hěn nán jī lěi jīng yàn， hái kě néng huì shǐ zì jǐ de fā zhǎn shòu dào yǐng xiǎng。",
+          "vi": "Một số bạn trẻ thường xuyên đổi việc, luôn cảm thấy công việc tiếp theo sẽ tốt hơn. Tuy nhiên, việc thích nghi với công việc mới thường cần khá nhiều thời gian. Nếu cứ đổi việc, không những khó tích lũy kinh nghiệm mà sự phát triển của bản thân còn có thể bị ảnh hưởng."
+        },
+        {
+          "speaker": "",
+          "zh": "我认为，年轻人刚进入社会时，不能只关心工资的高低，更要重视学习。比如，学习课本中没有的专业知识，了解公司的管理方式，学会和同事有效交流，等等。只有把这些基础打好，提高工作能力，今后才会有更好的发展机会。",
+          "pinyin": "wǒ rèn wéi， nián qīng rén gāng jìn rù shè huì shí， bù néng zhǐ guān xīn gōng zī de gāo dī， gèng yào zhòng shì xué xí。 bǐ rú， xué xí kè běn zhōng méi yǒu de zhuān yè zhī shi， liǎo jiě gōng sī de guǎn lǐ fāng shì， xué huì hé tóng shì yǒu xiào jiāo liú， děng děng。 zhǐ yǒu bǎ zhè xiē jī chǔ dǎ hǎo， tí gāo gōng zuò néng lì， jīn hòu cái huì yǒu gèng hǎo de fā zhǎn jī huì。",
+          "vi": "Theo tôi, khi mới bước vào xã hội, người trẻ không nên chỉ quan tâm đến mức lương cao hay thấp mà càng cần coi trọng việc học hỏi. Chẳng hạn, học những kiến thức chuyên môn không có trong sách giáo khoa, tìm hiểu cách quản lý của công ty, học cách trao đổi hiệu quả với đồng nghiệp, v.v. Chỉ khi xây dựng vững những nền tảng này và nâng cao năng lực làm việc, sau này mới có cơ hội phát triển tốt hơn."
+        }
+      ]
+    }
+  ]
+}

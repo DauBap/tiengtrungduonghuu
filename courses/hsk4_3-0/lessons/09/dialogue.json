@@ -1,0 +1,128 @@
+{
+  "lesson": 9,
+  "title": "遇见你，刚刚好",
+  "title_pinyin": "",
+  "title_vi": "Gặp được bạn, thật đúng lúc",
+  "dialogs": [
+    {
+      "id": "课文一",
+      "id_vi": "Bài khóa 1",
+      "lines": [
+        {
+          "speaker": "李文",
+          "zh": "家月，给你的，祝你生日快乐！",
+          "pinyin": "jiā yuè， gěi nǐ de， zhù nǐ shēng rì kuài lè！",
+          "vi": "Gia Nguyệt, quà cho cậu này, chúc cậu sinh nhật vui vẻ!"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "啊，好漂亮的花！还有巧克力！你怎么知道我喜欢这个巧克力？",
+          "pinyin": "a， hǎo piào liàng de huā！ hái yǒu qiǎo kè lì！ nǐ zěn me zhī dào wǒ xǐ huan zhè ge qiǎo kè lì？",
+          "vi": "Ôi, hoa đẹp quá! Còn có sô cô la nữa! Sao cậu biết tớ thích loại sô cô la này?"
+        },
+        {
+          "speaker": "李文",
+          "zh": "上次咱们去超市，看你拿起来看了看又放下了，我就记住了。",
+          "pinyin": "shàng cì zán men qù chāo shì， kàn nǐ ná qǐ lái kàn le kàn yòu fàng xià le， wǒ jiù jì zhù le。",
+          "vi": "Lần trước chúng mình đi siêu thị, thấy cậu cầm lên xem rồi lại đặt xuống, tớ liền ghi nhớ."
+        },
+        {
+          "speaker": "白家月",
+          "zh": "好感动！我不说你也懂我在想什么，你真是细心又浪漫。其实刚认识不久，你的幽默与耐心就很吸引我，不过我当时也只把你当普通朋友。如果你没有一直找我聊天儿，我们可能就错过了。",
+          "pinyin": "hǎo gǎn dòng！ wǒ bù shuō nǐ yě dǒng wǒ zài xiǎng shén me， nǐ zhēn shì xì xīn yòu làng màn。 qí shí gāng rèn shi bù jiǔ， nǐ de yōu mò yǔ nài xīn jiù hěn xī yǐn wǒ， bù guò wǒ dāng shí yě zhǐ bǎ nǐ dāng pǔ tōng péng you。 rú guǒ nǐ méi yǒu yī zhí zhǎo wǒ liáo tiānr， wǒ men kě néng jiù cuò guò le。",
+          "vi": "Cảm động quá! Tớ không nói mà cậu cũng hiểu tớ đang nghĩ gì, cậu thật tinh tế và lãng mạn. Thực ra, khi mới quen chưa lâu, sự hài hước và kiên nhẫn của cậu đã rất thu hút tớ, nhưng khi đó tớ chỉ coi cậu là bạn bình thường. Nếu cậu không liên tục tìm tớ trò chuyện, có lẽ chúng mình đã bỏ lỡ nhau rồi."
+        },
+        {
+          "speaker": "李文",
+          "zh": "我终于遇见了对的人，哪能错过呢？",
+          "pinyin": "wǒ zhōng yú yù jiàn le duì de rén， nǎ néng cuò guò ne？",
+          "vi": "Cuối cùng tớ cũng gặp đúng người, sao có thể bỏ lỡ được chứ?"
+        },
+        {
+          "speaker": "白家月",
+          "zh": "遇见你，我也觉得很幸运。",
+          "pinyin": "yù jiàn nǐ， wǒ yě jué de hěn xìng yùn。",
+          "vi": "Gặp được cậu, tớ cũng cảm thấy rất may mắn."
+        }
+      ]
+    },
+    {
+      "id": "课文二",
+      "id_vi": "Bài khóa 2",
+      "lines": [
+        {
+          "speaker": "王一雪",
+          "zh": "看到一飞和同乐结婚后这么幸福，我这个介绍人也特别开心。",
+          "pinyin": "kàn dào yī fēi hé tóng lè jié hūn hòu zhè me xìng fú， wǒ zhè ge jiè shào rén yě tè bié kāi xīn。",
+          "vi": "Thấy Nhất Phi và Đồng Lạc hạnh phúc như vậy sau khi kết hôn, người mai mối như em cũng vui lắm."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "是啊，同乐是你的好朋友，一飞是你妹妹，你都很了解。",
+          "pinyin": "shì a， tóng lè shì nǐ de hǎo péng you， yī fēi shì nǐ mèi mèi， nǐ dōu hěn liǎo jiě。",
+          "vi": "Đúng vậy, Đồng Lạc là bạn thân của em, Nhất Phi là em gái em, em đều hiểu rõ cả hai."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "嗯，他们尽管性格不同，但是有很多共同爱好。特别是同乐人好，性格也好，很有责任感。",
+          "pinyin": "ń， tā men jǐn guǎn xìng gé bù tóng， dàn shì yǒu hěn duō gòng tóng ài hào。 tè bié shì tóng lè rén hǎo， xìng gé yě hǎo， hěn yǒu zé rèn gǎn。",
+          "vi": "Vâng, tuy tính cách khác nhau nhưng họ có nhiều sở thích chung. Đặc biệt Đồng Lạc là người tốt, tính tình tốt, rất có trách nhiệm."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "是的，一飞也算在对的时间遇到了对的人。后边的路还很长，希望他们能一直相互理解、相互支持。",
+          "pinyin": "shì de， yī fēi yě suàn zài duì de shí jiān yù dào le duì de rén。 hòu biān de lù hái hěn cháng， xī wàng tā men néng yī zhí xiāng hù lǐ jiě、 xiāng hù zhī chí。",
+          "vi": "Đúng thế, Nhất Phi cũng xem như đã gặp đúng người vào đúng thời điểm. Chặng đường phía trước còn dài, hy vọng họ luôn thấu hiểu và ủng hộ lẫn nhau."
+        },
+        {
+          "speaker": "王一雪",
+          "zh": "我了解同乐，更了解一飞，相信他们会一直走下去的。",
+          "pinyin": "wǒ liǎo jiě tóng lè， gèng liǎo jiě yī fēi， xiāng xìn tā men huì yī zhí zǒu xià qù de。",
+          "vi": "Em hiểu Đồng Lạc, càng hiểu Nhất Phi hơn, em tin họ sẽ luôn đồng hành cùng nhau."
+        },
+        {
+          "speaker": "刘明",
+          "zh": "祝他们越来越幸福。",
+          "pinyin": "zhù tā men yuè lái yuè xìng fú。",
+          "vi": "Chúc họ ngày càng hạnh phúc."
+        }
+      ]
+    },
+    {
+      "id": "杨同乐的双份幸运",
+      "id_vi": "Bài khóa 3",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "王一雪比杨同乐更早进入公司。杨同乐刚来不久，王一雪对他印象就非常好：人很实在，性格阳光，工作负责，表现积极……后来他们一起出了次差，此次出差，让两人熟悉了起来，从此成了好朋友。一次聊天儿时，王一雪了解到杨同乐还没女朋友，正好自己的妹妹王一飞也没有男朋友，于是王一雪就把王一飞介绍给了他。",
+          "pinyin": "wáng yī xuě bǐ yáng tóng lè gèng zǎo jìn rù gōng sī。 yáng tóng lè gāng lái bù jiǔ， wáng yī xuě duì tā yìn xiàng jiù fēi cháng hǎo： rén hěn shí zai， xìng gé yáng guāng， gōng zuò fù zé， biǎo xiàn jī jí … … hòu lái tā men yī qǐ chū le cì chāi， cǐ cì chū chāi， ràng liǎng rén shú xī le qǐ lái， cóng cǐ chéng le hǎo péng you。 yī cì liáo tiānr shí， wáng yī xuě liǎo jiě dào yáng tóng lè hái méi nǚ péng you， zhèng hǎo zì jǐ de mèi mèi wáng yī fēi yě méi yǒu nán péng you， yú shì wáng yī xuě jiù bǎ wáng yī fēi jiè shào gěi le tā。",
+          "vi": "Vương Nhất Tuyết vào công ty sớm hơn Dương Đồng Lạc. Dương Đồng Lạc mới đến chưa lâu, cô đã có ấn tượng rất tốt về anh: chân thành, tính cách lạc quan, làm việc có trách nhiệm, tích cực… Sau đó họ cùng đi công tác một lần; chuyến đi này khiến hai người thân thiết hơn và từ đó trở thành bạn tốt. Trong một lần trò chuyện, Vương Nhất Tuyết biết Dương Đồng Lạc chưa có bạn gái. Đúng lúc em gái cô là Vương Nhất Phi cũng chưa có bạn trai, vì vậy cô đã giới thiệu Nhất Phi cho anh."
+        },
+        {
+          "speaker": "",
+          "zh": "杨同乐和王一飞认识后，很聊得来，两人之间慢慢产生了爱情，最后成了夫妻。杨同乐说自己很幸运，和王一雪这份同事间的友情，给他带来了美好的爱情。",
+          "pinyin": "yáng tóng lè hé wáng yī fēi rèn shi hòu， hěn liáo de lái， liǎng rén zhī jiān màn màn chǎn shēng le ài qíng， zuì hòu chéng le fū qī。 yáng tóng lè shuō zì jǐ hěn xìng yùn， hé wáng yī xuě zhè fèn tóng shì jiān de yǒu qíng， gěi tā dài lái le měi hǎo de ài qíng。",
+          "vi": "Sau khi quen nhau, Dương Đồng Lạc và Vương Nhất Phi nói chuyện rất hợp, tình yêu dần nảy nở giữa hai người, cuối cùng họ trở thành vợ chồng. Dương Đồng Lạc nói mình rất may mắn: tình bạn đồng nghiệp với Vương Nhất Tuyết đã mang đến cho anh một tình yêu đẹp."
+        }
+      ]
+    },
+    {
+      "id": "爱更需要经营",
+      "id_vi": "Bài khóa 4",
+      "lines": [
+        {
+          "speaker": "",
+          "zh": "李文在校园里遇见白家月，从此，他们的人生变得更加精彩；王一飞和杨同乐通过王一雪介绍认识后，感情越来越深，最后两人幸福地走到了一起。",
+          "pinyin": "lǐ wén zài xiào yuán lǐ yù jiàn bái jiā yuè， cóng cǐ， tā men de rén shēng biàn de gèng jiā jīng cǎi； wáng yī fēi hé yáng tóng lè tōng guò wáng yī xuě jiè shào rèn shi hòu， gǎn qíng yuè lái yuè shēn， zuì hòu liǎng rén xìng fú de zǒu dào le yī qǐ。",
+          "vi": "Lý Văn gặp Bạch Gia Nguyệt trong trường, từ đó cuộc sống của họ trở nên tươi đẹp hơn; Vương Nhất Phi và Dương Đồng Lạc quen nhau qua sự giới thiệu của Vương Nhất Tuyết, tình cảm ngày càng sâu đậm, cuối cùng hai người hạnh phúc đến bên nhau."
+        },
+        {
+          "speaker": "",
+          "zh": "在我看来，遇见爱情的方式并不重要，重要的是在合适的时间遇到了合适的人。遇见你，刚刚好。不过美好的遇见只是爱的开始，爱更需要经营。在一段感情中，两个人要多关注对方的感受，尤其是结婚后，更要共同经营好家庭，日子才能越过越好。爱，从来都是相互尊重、理解与支持，不是吗？",
+          "pinyin": "zài wǒ kàn lái， yù jiàn ài qíng de fāng shì bìng bù zhòng yào， zhòng yào de shì zài hé shì de shí jiān yù dào le hé shì de rén。 yù jiàn nǐ， gāng gāng hǎo。 bù guò měi hǎo de yù jiàn zhǐ shì ài de kāi shǐ， ài gèng xū yào jīng yíng。 zài yī duàn gǎn qíng zhōng， liǎng gè rén yào duō guān zhù duì fāng de gǎn shòu， yóu qí shì jié hūn hòu， gèng yào gòng tóng jīng yíng hǎo jiā tíng， rì zi cái néng yuè guò yuè hǎo。 ài， cóng lái dōu shì xiāng hù zūn zhòng、 lǐ jiě yǔ zhī chí， bù shì ma？",
+          "vi": "Theo tôi, cách gặp được tình yêu không quan trọng; điều quan trọng là gặp đúng người vào thời điểm phù hợp. Gặp được bạn, thật đúng lúc. Nhưng một cuộc gặp đẹp chỉ là khởi đầu của tình yêu; tình yêu càng cần được vun đắp. Trong một mối quan hệ, cả hai cần quan tâm nhiều hơn đến cảm xúc của đối phương, nhất là sau khi kết hôn, càng phải cùng nhau xây dựng gia đình thì cuộc sống mới ngày một tốt đẹp hơn. Tình yêu vốn luôn là sự tôn trọng, thấu hiểu và ủng hộ lẫn nhau, phải không?"
+        }
+      ]
+    }
+  ]
+}
