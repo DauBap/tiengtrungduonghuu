@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useFetcher } from "react-router";
 import { cn } from "~/lib/utils";
-import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, School, ListChecks, FileCheck2, CalendarDays, Volume2, ClipboardCheck, Brush, GraduationCap, ClipboardList } from "lucide-react";
+import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, School, ListChecks, FileCheck2, CalendarDays, Volume2, ClipboardCheck, Brush, GraduationCap, ClipboardList, ChevronDown } from "lucide-react";
 import type { UserRole, SessionUser } from "~/lib/session.server";
 import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -60,8 +60,28 @@ export function AppSidebar({ user }: { user: SessionUser }) {
   const reviewCountFetcher = useFetcher<{ count: number }>();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navItems = ROLE_NAV[user.role];
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => Object.fromEntries(
+    navItems
+      .filter((item) => item.children)
+      .map((item) => [
+        item.href,
+        location.pathname.startsWith(item.href)
+          || item.children?.some((child) => location.pathname.startsWith(child.href)) === true,
+      ]),
+  ));
   const initials = user.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) ?? "U";
   const pendingReviewCount = reviewCountFetcher.data?.count ?? 0;
+
+  useEffect(() => {
+    const activeGroup = navItems.find((item) =>
+      item.children
+      && (location.pathname.startsWith(item.href)
+        || item.children.some((child) => location.pathname.startsWith(child.href)))
+    );
+    if (activeGroup) {
+      setExpandedGroups((current) => ({ ...current, [activeGroup.href]: true }));
+    }
+  }, [location.pathname, navItems]);
 
   useEffect(() => {
     if (user.role !== "student") return;
@@ -104,37 +124,60 @@ export function AppSidebar({ user }: { user: SessionUser }) {
         {navItems.map((item) => {
           const isActive = item.href === `/${user.role}` ? location.pathname === item.href : location.pathname.startsWith(item.href);
           const isChildActive = item.children?.some((child) => location.pathname.startsWith(child.href)) ?? false;
+          const isExpanded = item.children
+            ? expandedGroups[item.href] ?? (isActive || isChildActive)
+            : false;
           const Icon = item.icon;
           return (
             <div key={item.href}>
-              <Link to={item.href} onClick={() => setMobileOpen(false)}
-                className={cn("flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  // Sidebar đã là nền đỏ nên item active phải nổi bằng lớp sáng,
-                  // không dùng bg-primary (cùng tông đỏ → chìm hẳn vào nền).
-                  // Chữ dùng text-sidebar (không phải text-primary): ở dark mode
-                  // primary bị sáng lên nên trên viên pill trắng chỉ còn 3.5:1.
-                  isActive ? "bg-sidebar-foreground text-sidebar shadow-sm" : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground"
-                )}>
-                <Icon className="h-4 w-4 shrink-0" />
-                <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                {user.role === "student"
-                  && item.href === "/student/assignments"
-                  && pendingReviewCount > 0 && (
-                    <span
-                      aria-label={`${pendingReviewCount} bài đang chờ chấm`}
-                      className={cn(
-                        "inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums",
-                        isActive
-                          ? "bg-sidebar text-sidebar-foreground"
-                          : "bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-100",
-                      )}
-                    >
-                      {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
-                    </span>
+              <div className="flex items-center gap-1">
+                <Link
+                  to={item.href}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    if (item.children) setExpandedGroups((current) => ({ ...current, [item.href]: true }));
+                  }}
+                  className={cn("flex min-w-0 flex-1 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    // Sidebar đã là nền đỏ nên item active phải nổi bằng lớp sáng,
+                    // không dùng bg-primary (cùng tông đỏ → chìm hẳn vào nền).
+                    // Chữ dùng text-sidebar (không phải text-primary): ở dark mode
+                    // primary bị sáng lên nên trên viên pill trắng chỉ còn 3.5:1.
+                    isActive ? "bg-sidebar-foreground text-sidebar shadow-sm" : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground"
                   )}
-              </Link>
-              {item.children && (isActive || isChildActive) && (
-                <div className="ml-3 mt-1 space-y-1 border-l border-sidebar-border pl-3">
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  {user.role === "student"
+                    && item.href === "/student/assignments"
+                    && pendingReviewCount > 0 && (
+                      <span
+                        aria-label={`${pendingReviewCount} bài đang chờ chấm`}
+                        className={cn(
+                          "inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums",
+                          isActive
+                            ? "bg-sidebar text-sidebar-foreground"
+                            : "bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-100",
+                        )}
+                      >
+                        {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
+                      </span>
+                    )}
+                </Link>
+                {item.children && (
+                  <button
+                    type="button"
+                    aria-label={`${isExpanded ? "Thu gọn" : "Mở"} mục con: ${item.label}`}
+                    aria-expanded={isExpanded}
+                    aria-controls={`sidebar-submenu-${item.href.replaceAll("/", "-")}`}
+                    onClick={() => setExpandedGroups((current) => ({ ...current, [item.href]: !isExpanded }))}
+                    className="flex h-10 w-9 shrink-0 items-center justify-center rounded-lg text-sidebar-muted-foreground transition-colors hover:bg-sidebar-muted hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-foreground"
+                  >
+                    <ChevronDown className={cn("h-4 w-4 transition-transform", !isExpanded && "-rotate-90")} />
+                  </button>
+                )}
+              </div>
+              {item.children && isExpanded && (
+                <div id={`sidebar-submenu-${item.href.replaceAll("/", "-")}`} className="ml-3 mt-1 space-y-1 border-l border-sidebar-border pl-3">
                   {item.children.map((child) => {
                     const isChildSelected = location.pathname.startsWith(child.href);
                     const ChildIcon = child.icon;

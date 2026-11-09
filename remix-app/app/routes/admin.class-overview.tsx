@@ -1,14 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import type { LoaderFunctionArgs } from "react-router";
 import { Link, useLoaderData } from "react-router";
-import { ArrowUpRight, CheckCircle2, Circle, Search, Video, X } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, ChevronDown, Circle, Clock3, Search, Video, X } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Overlay } from "~/components/common/overlay";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { formatSchedule } from "~/lib/schedule-utils";
+import { formatSchedule, type ScheduleSlot } from "~/lib/schedule-utils";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
+
+const WEEKDAYS = [
+  { value: 1, label: "T2" },
+  { value: 2, label: "T3" },
+  { value: 3, label: "T4" },
+  { value: 4, label: "T5" },
+  { value: 5, label: "T6" },
+  { value: 6, label: "T7" },
+  { value: 0, label: "CN" },
+] as const;
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
@@ -104,11 +114,35 @@ function getTrackedAttendanceSessionCount(
   return sessions.filter((session) => session.records.some(({ status }) => status !== null)).length;
 }
 
+function getScheduleSlots(schedule: unknown): ScheduleSlot[] {
+  if (!Array.isArray(schedule)) return [];
+  return schedule.flatMap((slot): ScheduleSlot[] => {
+    if (typeof slot !== "object" || slot === null || Array.isArray(slot)) return [];
+    const record = slot as Record<string, unknown>;
+    if (!Array.isArray(record.days) || typeof record.startTime !== "string" || typeof record.endTime !== "string") {
+      return [];
+    }
+    return [{
+      days: record.days.filter((day): day is number => Number.isInteger(day) && day >= 0 && day <= 6),
+      startTime: record.startTime,
+      endTime: record.endTime,
+    }];
+  });
+}
+
+function getTimeInMinutes(value: string) {
+  const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(value);
+  return match ? Number(match[1]) * 60 + Number(match[2]) : null;
+}
+
 export default function AdminClassOverview() {
   const { user, classes, hskCounts } = useLoaderData<typeof loader>();
   const [query, setQuery] = useState("");
   const [selectedHsk, setSelectedHsk] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState("");
+  const [selectedDays, setSelectedDays] = useState<number[]>([]);
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [selectedRecordClassId, setSelectedRecordClassId] = useState<string | null>(null);
   const [showClassRecordings, setShowClassRecordings] = useState(false);
   const [classPage, setClassPage] = useState(1);
@@ -126,7 +160,14 @@ export default function AdminClassOverview() {
     return Array.from(counts.values())
       .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, "vi"));
   }, [classes, selectedHsk]);
-  const hasActiveFilters = Boolean(query.trim() || selectedHsk || selectedTeacher);
+  const hasActiveFilters = Boolean(
+    query.trim() || selectedHsk || selectedTeacher || selectedDays.length || startTime || endTime,
+  );
+  const startTimeMinutes = startTime ? getTimeInMinutes(startTime) : null;
+  const endTimeMinutes = endTime ? getTimeInMinutes(endTime) : null;
+  const hasInvalidTimeRange = startTimeMinutes != null
+    && endTimeMinutes != null
+    && endTimeMinutes < startTimeMinutes;
   function changeSelectedHsk(nextHsk: string) {
     setSelectedHsk(nextHsk);
     setClassPage(1);
@@ -145,13 +186,24 @@ export default function AdminClassOverview() {
         const matchesHsk = !selectedHsk || String(classroom.course.hskLevel) === selectedHsk;
         const matchesTeacher = !selectedTeacher || (classroom.teacher?.id ?? "unassigned") === selectedTeacher;
         const searchText = `${classroom.name} ${classroom.course.code} ${classroom.course.title} ${classroom.teacher?.name ?? ""}`.toLocaleLowerCase("vi");
-        return matchesHsk && matchesTeacher && (!normalizedQuery || searchText.includes(normalizedQuery));
+        const hasScheduleFilter = selectedDays.length > 0 || Boolean(startTime || endTime);
+        const matchesSchedule = !hasScheduleFilter || (!hasInvalidTimeRange && getScheduleSlots(classroom.schedule).some((slot) => {
+          const slotStartMinutes = getTimeInMinutes(slot.startTime);
+          const matchesDay = selectedDays.length === 0 || slot.days.some((day) => selectedDays.includes(day));
+          const matchesStartTime = (!startTime || (slotStartMinutes != null && startTimeMinutes != null && slotStartMinutes >= startTimeMinutes))
+            && (!endTime || (slotStartMinutes != null && endTimeMinutes != null && slotStartMinutes <= endTimeMinutes));
+          return matchesDay && matchesStartTime;
+        }));
+        return matchesHsk
+          && matchesTeacher
+          && (!normalizedQuery || searchText.includes(normalizedQuery))
+          && matchesSchedule;
       })
       .sort((left, right) => (
         getTrackedAttendanceSessionCount(right.attendanceSessions)
         - getTrackedAttendanceSessionCount(left.attendanceSessions)
       ));
-  }, [classes, query, selectedHsk, selectedTeacher]);
+  }, [classes, query, selectedHsk, selectedTeacher, selectedDays, startTime, endTime, hasInvalidTimeRange, startTimeMinutes, endTimeMinutes]);
   const classPageCount = Math.max(1, Math.ceil(filteredClasses.length / classesPerPage));
   const currentClassPage = Math.min(classPage, classPageCount);
   const pageClasses = filteredClasses.slice(
@@ -225,11 +277,16 @@ export default function AdminClassOverview() {
                 onClick={() => changeSelectedHsk(selectedHsk === String(hskLevel) ? "" : String(hskLevel))}
                 aria-pressed={selectedHsk === String(hskLevel)}
                 className={`flex min-h-16 items-center justify-between rounded-lg border px-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  selectedHsk === String(hskLevel) ? "border-primary bg-primary/5" : "bg-card hover:bg-muted/40"
+                  selectedHsk === String(hskLevel)
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "bg-card hover:bg-muted/40"
                 }`}
               >
                 <span className="text-sm font-medium">HSK {hskLevel}</span>
-                <span className="text-xl font-semibold tabular-nums">{count}<span className="ml-1 text-xs font-normal text-muted-foreground">lớp</span></span>
+                <span className="text-xl font-semibold tabular-nums">
+                  {count}
+                  <span className={`ml-1 text-xs font-normal ${selectedHsk === String(hskLevel) ? "text-primary-foreground/75" : "text-muted-foreground"}`}>lớp</span>
+                </span>
               </button>
             ))}
           </div>
@@ -241,71 +298,134 @@ export default function AdminClassOverview() {
               <h2 id="active-classes-heading" className="text-base font-semibold">Lớp đang học</h2>
               <p className="mt-1 text-sm text-muted-foreground">Video chỉ hiển thị với học viên thuộc lớp đó.</p>
             </div>
-            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-              <label className="relative sm:w-64">
-                <span className="sr-only">Tìm lớp, khóa học hoặc giáo viên</span>
-                <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={query}
-                  onChange={(event) => {
-                    setQuery(event.currentTarget.value);
-                    setClassPage(1);
-                  }}
-                  placeholder="Tìm lớp, giáo viên..."
-                  className="pl-9"
-                />
-              </label>
-              <label>
-                <span className="sr-only">Lọc theo HSK</span>
-                <select
-                  value={selectedHsk}
-                  onChange={(event) => {
-                    changeSelectedHsk(event.currentTarget.value);
-                  }}
-                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-32"
-                >
-                  <option value="">Tất cả HSK</option>
-                  {[...new Set(classes.map(({ course }) => course.hskLevel))].sort().map((hsk) => (
-                    <option key={hsk} value={hsk}>HSK {hsk}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                <span className="sr-only">Lọc theo giáo viên</span>
-                <select
-                  value={selectedTeacher}
-                  onChange={(event) => {
-                    setSelectedTeacher(event.currentTarget.value);
-                    setClassPage(1);
-                  }}
-                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-52"
-                >
-                  <option value="">Tất cả giáo viên</option>
-                  {teacherCounts.map((teacher) => (
-                    <option key={teacher.id} value={teacher.id}>
-                      {teacher.name} ({teacher.count} lớp)
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
           </div>
-          <div className="flex min-h-8 flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground" aria-live="polite">
-            <span>{filteredClasses.length} / {classes.length} lớp</span>
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={() => {
-                  setQuery("");
-                  setSelectedHsk("");
-                  setSelectedTeacher("");
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3">
+            <label className="relative min-w-[14rem] flex-1">
+              <span className="sr-only">Tìm lớp, khóa học hoặc giáo viên</span>
+              <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.currentTarget.value);
                   setClassPage(1);
                 }}
-                className="font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                placeholder="Tìm lớp, giáo viên..."
+                className="pl-9"
+              />
+            </label>
+            <label>
+              <span className="sr-only">Lọc theo giáo viên</span>
+              <select
+                value={selectedTeacher}
+                onChange={(event) => {
+                  setSelectedTeacher(event.currentTarget.value);
+                  setClassPage(1);
+                }}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-48"
               >
-                Xóa bộ lọc
-              </button>
-            )}
+                <option value="">Tất cả giáo viên</option>
+                {teacherCounts.map((teacher) => (
+                  <option key={teacher.id} value={teacher.id}>
+                    {teacher.name} ({teacher.count} lớp)
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="flex h-10 items-center gap-1 rounded-md border border-input bg-background px-1.5" role="group" aria-label="Lọc lớp theo thứ trong tuần">
+              <span className="px-1 text-xs text-muted-foreground">Thứ</span>
+              {WEEKDAYS.map(({ value, label }) => {
+                const selected = selectedDays.includes(value);
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-label={`Thứ ${label}`}
+                    aria-pressed={selected}
+                    onClick={() => {
+                      setSelectedDays((current) => selected
+                        ? current.filter((day) => day !== value)
+                        : [...current, value]);
+                      setClassPage(1);
+                    }}
+                    className={`h-7 min-w-8 rounded px-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      selected
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <details className="group relative">
+              <summary className="flex h-10 cursor-pointer list-none items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+                <Clock3 aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
+                <span>
+                  {startTime || endTime
+                    ? `${startTime || "00:00"}–${endTime || "23:59"}`
+                    : "Khung giờ"}
+                </span>
+                <ChevronDown aria-hidden="true" className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
+              </summary>
+              <div className="absolute right-0 z-30 mt-2 w-72 rounded-lg border bg-popover p-3 text-popover-foreground shadow-lg">
+                <p className="text-sm font-medium">Giờ bắt đầu của lớp</p>
+                <p className="mt-1 text-xs text-muted-foreground">Lọc lớp có giờ bắt đầu trong khoảng này.</p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <label className="space-y-1">
+                    <span className="text-xs text-muted-foreground">Từ</span>
+                    <input
+                      type="time"
+                      value={startTime}
+                      max={endTime || undefined}
+                      onChange={(event) => {
+                        setStartTime(event.currentTarget.value);
+                        setClassPage(1);
+                      }}
+                      aria-label="Giờ bắt đầu từ"
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-xs text-muted-foreground">Đến</span>
+                    <input
+                      type="time"
+                      value={endTime}
+                      min={startTime || undefined}
+                      onChange={(event) => {
+                        setEndTime(event.currentTarget.value);
+                        setClassPage(1);
+                      }}
+                      aria-label="Giờ bắt đầu đến"
+                      aria-invalid={hasInvalidTimeRange}
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    />
+                  </label>
+                </div>
+                {hasInvalidTimeRange && (
+                  <p role="alert" className="mt-2 text-xs text-destructive">Giờ kết thúc cần bằng hoặc sau giờ bắt đầu.</p>
+                )}
+              </div>
+            </details>
+            <button
+              type="button"
+              disabled={!hasActiveFilters}
+              onClick={() => {
+                setQuery("");
+                setSelectedHsk("");
+                setSelectedTeacher("");
+                setSelectedDays([]);
+                setStartTime("");
+                setEndTime("");
+                setClassPage(1);
+              }}
+              className="ml-auto whitespace-nowrap px-2 py-2 text-sm font-medium text-primary underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:text-muted-foreground disabled:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Xóa bộ lọc
+            </button>
+          </div>
+          <div className="flex min-h-6 items-center justify-between gap-2 text-sm text-muted-foreground" aria-live="polite">
+            <span>{filteredClasses.length} / {classes.length} lớp</span>
           </div>
 
           {filteredClasses.length === 0 ? (
