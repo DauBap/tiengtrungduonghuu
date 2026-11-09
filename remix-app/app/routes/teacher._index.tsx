@@ -1666,7 +1666,8 @@ export default function TeacherIndex() {
     ) return;
     handledTranslationGradeSubmissionId.current = null;
     setSelectedTranslationSubmissionId(result.nextSubmissionId ?? null);
-  }, [TranslationGradeFetcher.data, TranslationGradeFetcher.state]);
+    revalidator.revalidate();
+  }, [TranslationGradeFetcher.data, TranslationGradeFetcher.state, revalidator]);
   const isModalOpen = Boolean(
     selectedStudentId
     || selectedActivityReview
@@ -1783,13 +1784,6 @@ export default function TeacherIndex() {
     setWorkbookGradingAttemptId(null);
     revalidator.revalidate();
   }, [workbookGradeSubmitFetcher.data, workbookGradeSubmitFetcher.state, workbookGradingAttemptId, revalidator]);
-
-  useEffect(() => {
-    if (TranslationGradeFetcher.state === "idle" && TranslationGradeFetcher.data?.success) {
-      setSelectedTranslationSubmissionId(null);
-      revalidator.revalidate();
-    }
-  }, [TranslationGradeFetcher.data, TranslationGradeFetcher.state, revalidator]);
 
   const reminderRows = selectedClass && selectedLesson
     ? selectedClass.activityData.flatMap((student) => {
