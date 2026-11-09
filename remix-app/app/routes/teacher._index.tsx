@@ -41,6 +41,7 @@ import {
   type GrammarQuestionType,
   type TeacherGrammarGrade,
 } from "~/lib/grammar";
+import { suggestTranslationAnswerCorrect } from "~/lib/translation-answer";
 import { aggregatePhoneticsSections, getBestPhoneticsSectionAttempts, type PhoneticsReviewResult } from "~/lib/phonetics";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
@@ -1640,9 +1641,17 @@ export default function TeacherIndex() {
     }
     setTranslationQuestionGrades(Object.fromEntries(
       selectedTranslationAnswers.flatMap((item) =>
-        typeof item.questionId === "string" && typeof item.teacherCorrect === "boolean"
-          ? [[item.questionId, item.teacherCorrect]]
-          : [],
+        typeof item.questionId !== "string"
+          ? []
+          : [[
+              item.questionId,
+              typeof item.teacherCorrect === "boolean"
+                ? item.teacherCorrect
+                : suggestTranslationAnswerCorrect(
+                    typeof item.answer === "string" ? item.answer : "",
+                    typeof item.sampleAnswer === "string" ? item.sampleAnswer : "",
+                  ),
+            ]],
       ),
     ));
   }, [selectedTranslationSubmissionId, selectedTranslationSubmission?.answers]);
@@ -4146,9 +4155,16 @@ export default function TeacherIndex() {
               </header>
 
               <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
+                <p className="text-sm text-muted-foreground">
+                  Gợi ý tự chấm dựa trên đáp án mẫu; hãy kiểm tra nội dung trước khi lưu. Bạn có thể đổi lựa chọn Đúng/Sai.
+                </p>
                 {selectedTranslationAnswers.map((item, index) => {
                   const questionId = item.questionId ?? "";
                   const grade = questionId ? translationQuestionGrades[questionId] : null;
+                  const autoCorrect = suggestTranslationAnswerCorrect(
+                    typeof item.answer === "string" ? item.answer : "",
+                    typeof item.sampleAnswer === "string" ? item.sampleAnswer : "",
+                  );
                   return (
                     <article key={questionId || index} className="space-y-3 rounded-lg border p-4">
                       <div className="flex items-start gap-2">
@@ -4199,7 +4215,7 @@ export default function TeacherIndex() {
                             Sai
                           </Button>
                           <span className="text-xs text-muted-foreground">
-                            {typeof grade === "boolean" ? `Đã chấm: ${grade ? "Đúng" : "Sai"}` : "Chưa chấm"}
+                            Gợi ý tự chấm: {autoCorrect === null ? "Chưa đủ dữ liệu" : autoCorrect ? "Đúng" : "Sai"}
                           </span>
                         </div>
                         <label htmlFor={`translation-comment-${questionId || index}`} className="text-xs font-medium">
@@ -4263,7 +4279,7 @@ export default function TeacherIndex() {
                     Điểm dự kiến: {correctTranslationQuestionCount}/{selectedTranslationAnswers.length} câu đúng
                     {expectedTranslationPercentage !== null && ` · ${expectedTranslationPercentage}%`}
                     {gradedTranslationQuestionCount < selectedTranslationAnswers.length
-                      && ` · Đã chấm ${gradedTranslationQuestionCount}/${selectedTranslationAnswers.length} câu`}
+                      && ` · Đã chọn ${gradedTranslationQuestionCount}/${selectedTranslationAnswers.length} câu`}
                   </p>
                   <div className="flex gap-2">
                     <Button type="button" variant="outline" onClick={() => {
