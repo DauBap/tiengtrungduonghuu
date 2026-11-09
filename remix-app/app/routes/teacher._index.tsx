@@ -2525,7 +2525,9 @@ export default function TeacherIndex() {
                                           const displayedPercent = result?.status === "completed"
                                             ? result.score
                                             : result?.status === "partial"
-                                              ? activity.tab === "PHONETICS" ? result.score : result.percent
+                                              ? activity.tab === "PHONETICS" || activity.tab === "VOCABULARY_TEST"
+                                                ? result.score
+                                                : result.percent
                                               : null;
                                           const progressStatus = displayedPercent == null
                                             ? result?.status
