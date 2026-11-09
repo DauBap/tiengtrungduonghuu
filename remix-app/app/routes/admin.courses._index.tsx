@@ -39,7 +39,15 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 type CourseRow = Awaited<ReturnType<typeof getAllCourses>>[number];
+type CourseVersion = "2.0" | "3.0";
 type ModalMode = "delete" | null;
+
+const COURSE_VERSIONS: CourseVersion[] = ["2.0", "3.0"];
+
+function getCourseVersion(course: Pick<CourseRow, "code">): CourseVersion | null {
+  const suffix = course.code.match(/-(2\.0|3\.0)$/)?.[1];
+  return suffix === "2.0" || suffix === "3.0" ? suffix : null;
+}
 
 function formatDate(d: Date | string) {
   return new Date(d).toLocaleDateString("vi-VN", { year: "numeric", month: "short", day: "numeric" });
@@ -49,10 +57,20 @@ export default function AdminCourses() {
   const { user, courses } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const [search, setSearch] = useState("");
+  const [versionFilter, setVersionFilter] = useState<CourseVersion>("3.0");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [hskFilter, setHskFilter] = useState("ALL");
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [courseToDelete, setCourseToDelete] = useState<CourseRow | null>(null);
+
+  const versionCounts = useMemo(() => {
+    const counts: Record<CourseVersion, number> = { "2.0": 0, "3.0": 0 };
+    for (const course of courses) {
+      const version = getCourseVersion(course);
+      if (version) counts[version] += 1;
+    }
+    return counts;
+  }, [courses]);
 
   const isDeleting = navigation.state === "submitting"
     && navigation.formData?.get("intent") === "delete-course";
@@ -69,6 +87,7 @@ export default function AdminCourses() {
 
   const filtered = useMemo(() =>
     courses.filter((c) => {
+      if (getCourseVersion(c) !== versionFilter) return false;
       if (statusFilter !== "ALL" && c.status !== statusFilter) return false;
       if (hskFilter !== "ALL" && c.hskLevel !== Number(hskFilter)) return false;
       if (search) {
@@ -77,7 +96,7 @@ export default function AdminCourses() {
       }
       return true;
     }),
-    [courses, search, statusFilter, hskFilter]
+    [courses, search, versionFilter, statusFilter, hskFilter]
   );
 
   return (
@@ -91,6 +110,31 @@ export default function AdminCourses() {
           <Button asChild>
             <Link to="/admin/courses/new"><Plus className="h-4 w-4 mr-1.5" />Tạo khóa học</Link>
           </Button>
+        </div>
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-medium">Phiên bản chương trình</p>
+          <div className="inline-flex w-fit items-center gap-1 rounded-lg border bg-muted/40 p-1" role="group" aria-label="Chọn phiên bản khóa học">
+            {COURSE_VERSIONS.map((version) => {
+              const isSelected = versionFilter === version;
+              return (
+                <Button
+                  key={version}
+                  type="button"
+                  size="sm"
+                  variant={isSelected ? "default" : "ghost"}
+                  aria-pressed={isSelected}
+                  onClick={() => setVersionFilter(version)}
+                  className="gap-2"
+                >
+                  <span>HSK {version}</span>
+                  <span className={isSelected ? "rounded-full bg-primary-foreground/15 px-1.5 py-0.5 text-xs" : "rounded-full bg-background px-1.5 py-0.5 text-xs text-muted-foreground"}>
+                    {versionCounts[version]}
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
