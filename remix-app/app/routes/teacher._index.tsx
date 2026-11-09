@@ -1381,6 +1381,7 @@ export default function TeacherIndex() {
   const [workbookGradingAttemptId, setWorkbookGradingAttemptId] = useState<string | null>(null);
   const [selectedTranslationSubmissionId, setSelectedTranslationSubmissionId] = useState<string | null>(initialTranslationSubmission?.id ?? null);
   const [translationQuestionGrades, setTranslationQuestionGrades] = useState<Record<string, boolean | null>>({});
+  const translationGradingContentRef = useRef<HTMLDivElement>(null);
   const [gradingQueue, setGradingQueue] = useState<{ courseId: string; attempt: PendingGrammarAttempt }[]>([]);
   const [gradingQueueIndex, setGradingQueueIndex] = useState<number | null>(null);
   const [gradingComplete, setGradingComplete] = useState(false);
@@ -1655,6 +1656,11 @@ export default function TeacherIndex() {
       ),
     ));
   }, [selectedTranslationSubmissionId, selectedTranslationSubmission?.answers]);
+  useEffect(() => {
+    if (selectedTranslationSubmissionId) {
+      translationGradingContentRef.current?.scrollTo({ top: 0 });
+    }
+  }, [selectedTranslationSubmissionId]);
   useEffect(() => {
     const result = TranslationGradeFetcher.data;
     const submittedId = handledTranslationGradeSubmissionId.current;
@@ -4150,7 +4156,7 @@ export default function TeacherIndex() {
                 </button>
               </header>
 
-              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
+              <div ref={translationGradingContentRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
                 <p className="text-sm text-muted-foreground">
                   Gợi ý tự chấm dựa trên đáp án mẫu; hãy kiểm tra nội dung trước khi lưu. Bạn có thể đổi lựa chọn Đúng/Sai.
                 </p>
