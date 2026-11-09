@@ -76,6 +76,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
             title: true,
             lesson: true,
             date: true,
+            createdAt: true,
             recordingUrl: true,
             courseLesson: { select: { order: true, title: true } },
             records: { select: { studentId: true, status: true } },
@@ -211,6 +212,13 @@ export default function AdminClassOverview() {
     currentClassPage * classesPerPage,
   );
   const selectedRecordClass = classes.find(({ id }) => id === selectedRecordClassId) ?? null;
+  const selectedClassRecordings = useMemo(
+    () => [...(selectedRecordClass?.attendanceSessions ?? [])].sort(
+      (left, right) => right.date.getTime() - left.date.getTime()
+        || right.createdAt.getTime() - left.createdAt.getTime(),
+    ),
+    [selectedRecordClass?.attendanceSessions],
+  );
   const selectedClassScoresByStudent = new Map(
     selectedRecordClass?.studentScores.map((score) => [score.studentId, score]) ?? [],
   );
@@ -658,11 +666,11 @@ export default function AdminClassOverview() {
                   </Button>
                 </header>
                 <div className="max-h-[65vh] overflow-y-auto rounded-lg border">
-                  {selectedRecordClass.attendanceSessions.length === 0 ? (
+                  {selectedClassRecordings.length === 0 ? (
                     <p className="px-4 py-8 text-center text-sm text-muted-foreground">Lớp chưa có buổi học.</p>
                   ) : (
                     <ul className="divide-y">
-                      {selectedRecordClass.attendanceSessions.map((session) => {
+                      {selectedClassRecordings.map((session) => {
                         const recordUrl = getSafeRecordUrl(session.recordingUrl);
                         return (
                           <li key={session.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
