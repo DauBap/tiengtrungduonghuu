@@ -87,6 +87,28 @@ type SentenceRow = {
 };
 /** Ba chế độ modal dùng chung cho cả từ vựng và câu */
 type VocabModalMode = "create" | "edit" | "delete" | null;
+type LessonSettingsTab =
+  | "vocabulary"
+  | "flashcard"
+  | "listening"
+  | "lesson"
+  | "phonetics"
+  | "grammar"
+  | "translation"
+  | "workbook"
+  | "review";
+
+const LESSON_SETTINGS_TABS = [
+  { id: "vocabulary", label: "Từ vựng", icon: BookOpen },
+  { id: "flashcard", label: "Flashcard", icon: Layers },
+  { id: "listening", label: "Nghe câu", icon: Headphones },
+  { id: "lesson", label: "Bài khóa", icon: BookOpen },
+  { id: "phonetics", label: "Ngữ âm", icon: AudioLines },
+  { id: "grammar", label: "Ngữ pháp", icon: GraduationCap },
+  { id: "translation", label: "Luyện dịch", icon: Languages },
+  { id: "workbook", label: "Sách bài tập", icon: BookMarked },
+  { id: "review", label: "Ôn từ vựng", icon: ClipboardCheck },
+] as const;
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
@@ -106,15 +128,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 function isHttpOrLocalPath(value: string) {
   return /^https?:\/\/.+/i.test(value) || (value.startsWith("/") && !value.startsWith("//"));
-}
-
-function getAudioFileName(audioUrl: string) {
-  try {
-    const fileName = new URL(audioUrl, "http://localhost").pathname.split("/").pop();
-    return fileName ? decodeURIComponent(fileName) : audioUrl;
-  } catch {
-    return audioUrl;
-  }
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -436,9 +449,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
       translation,
     );
     const audioUrl = String(form.get("audioUrl") ?? "").trim();
-    const uploadedFile = form.get("audioFile");
-    const uploadedAudioFile =
-      uploadedFile instanceof File && uploadedFile.name ? uploadedFile : null;
     const note = String(form.get("note") ?? "").trim();
     const wordTypes = parseWordTypes(form.getAll("wordTypes"));
 
@@ -446,26 +456,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!pinyin) return { error: "Vui lòng nhập pinyin", field: "pinyin" };
     if (!translation)
       return { error: "Vui lòng nhập nghĩa tiếng Việt", field: "translation" };
-    if (
-      uploadedAudioFile &&
-      (!uploadedAudioFile.type.startsWith("audio/") || uploadedAudioFile.size === 0)
-    ) {
-      return {
-        error: "Vui lòng chọn file audio hợp lệ",
-        field: "audioUrl",
-      };
-    }
-    if (!uploadedAudioFile && audioUrl && !isHttpOrLocalPath(audioUrl)) {
+    if (audioUrl && !isHttpOrLocalPath(audioUrl)) {
       return {
         error: "Link audio phải là URL http(s) hoặc đường dẫn trong site",
         field: "audioUrl",
       };
     }
 
-    const uploadedAudioUrl = await saveUploadedAsset(uploadedAudioFile, {
-      kind: "vocab-audio",
-      lessonId,
-    });
     const data = {
       chinese,
       chineseAlternatives,
@@ -474,7 +471,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       translation,
       translationAlternatives,
       wordTypes,
-      audioUrl: uploadedAudioUrl || audioUrl || null,
+      audioUrl: audioUrl || null,
       note: note || null,
     };
 
@@ -694,10 +691,6 @@ function VocabModal({
     success?: boolean;
   }>();
   const isLoading = fetcher.state !== "idle";
-  const [audioUrl, setAudioUrl] = useState(vocab?.audioUrl ?? "");
-  const [uploadedAudioFile, setUploadedAudioFile] = useState<File | null>(null);
-  const [uploadedAudioPreviewUrl, setUploadedAudioPreviewUrl] = useState<string | null>(null);
-  const audioFileInputRef = useRef<HTMLInputElement>(null);
 
   // Đóng modal sau khi action thành công. Phải nằm trong effect, không gọi
   // onClose() giữa lúc render (setState của cha) — và component được mount lại
@@ -705,17 +698,6 @@ function VocabModal({
   useEffect(() => {
     if (fetcher.state === "idle" && fetcher.data?.success) onClose();
   }, [fetcher.state, fetcher.data, onClose]);
-
-  useEffect(() => {
-    if (!uploadedAudioFile) {
-      setUploadedAudioPreviewUrl(null);
-      return;
-    }
-
-    const previewUrl = URL.createObjectURL(uploadedAudioFile);
-    setUploadedAudioPreviewUrl(previewUrl);
-    return () => URL.revokeObjectURL(previewUrl);
-  }, [uploadedAudioFile]);
 
   if (!mode) return null;
 
@@ -764,17 +746,9 @@ function VocabModal({
   }
 
   const isEdit = mode === "edit";
-  const audioPreviewSrc = uploadedAudioPreviewUrl ?? audioUrl;
-  const audioFileName =
-    uploadedAudioFile?.name ?? (audioUrl ? getAudioFileName(audioUrl) : null);
   return (
     <Overlay onClose={onClose}>
-      <fetcher.Form
-        method="post"
-        encType="multipart/form-data"
-        noValidate
-        className="space-y-4"
-      >
+      <fetcher.Form method="post" noValidate className="space-y-4">
         <div className="flex items-start justify-between">
           <h2 className="text-lg font-bold">
             {isEdit ? "Chỉnh sửa từ vựng" : "Thêm từ vựng"}
@@ -933,74 +907,12 @@ function VocabModal({
           <Input
             id="audioUrl"
             name="audioUrl"
-            value={audioUrl}
-            onChange={(event) => setAudioUrl(event.target.value)}
+            defaultValue={vocab?.audioUrl ?? ""}
             placeholder="https://..."
             aria-invalid={fetcher.data?.field === "audioUrl" || undefined}
           />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="vocab-audio-file">
-            Tải file audio{" "}
-            <span className="text-muted-foreground font-normal text-xs">
-              (tùy chọn)
-            </span>
-          </Label>
-          <div className="flex flex-wrap items-center gap-2">
-            <Input
-              ref={audioFileInputRef}
-              id="vocab-audio-file"
-              name="audioFile"
-              type="file"
-              accept="audio/*"
-              className="peer sr-only"
-              aria-invalid={fetcher.data?.field === "audioUrl" || undefined}
-              onChange={(event) =>
-                setUploadedAudioFile(event.currentTarget.files?.[0] ?? null)
-              }
-            />
-            <Label
-              htmlFor="vocab-audio-file"
-              className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2"
-            >
-              <AudioLines className="h-4 w-4" />
-              Chọn file audio
-            </Label>
-            {uploadedAudioFile && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setUploadedAudioFile(null);
-                  if (audioFileInputRef.current) audioFileInputRef.current.value = "";
-                }}
-                disabled={isLoading}
-              >
-                Bỏ file mới
-              </Button>
-            )}
-          </div>
-          <div className="space-y-2 rounded-md border border-border bg-muted/30 p-3">
-            <p className="truncate text-sm font-medium" title={audioFileName ?? undefined}>
-              {audioFileName ?? "Chưa có file audio"}
-            </p>
-            {audioPreviewSrc ? (
-              <audio
-                controls
-                preload="metadata"
-                src={audioPreviewSrc}
-                className="h-10 w-full"
-              />
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Chọn file hoặc nhập link audio để nghe thử.
-              </p>
-            )}
-          </div>
           <p className="text-xs text-muted-foreground">
-            File mới sẽ thay thế link audio khi lưu. Nếu chưa có audio, học viên
-            dùng giọng đọc tự động.
+            Để trống thì dùng giọng đọc tự động của trình duyệt.
           </p>
         </div>
         <div className="flex justify-end gap-2 pt-2">
@@ -1758,6 +1670,9 @@ export default function AdminLessonDetail() {
   const { user, lesson, lessonNumber, phoneticsSections } =
     useLoaderData<typeof loader>();
   const moveFetcher = useFetcher();
+  const [activeSettingsTab, setActiveSettingsTab] =
+    useState<LessonSettingsTab>("vocabulary");
+  const lessonSettingsTabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const phoneticsFetcher = useFetcher<{
     phoneticsError?: string;
     phoneticsSaved?: boolean;
@@ -1850,6 +1765,41 @@ export default function AdminLessonDetail() {
     (count, section) => count + section.questions.length,
     0,
   );
+  const lessonSettingsTabCounts: Partial<Record<LessonSettingsTab, number>> = {
+    vocabulary: lesson.content.length,
+    flashcard: Number(Boolean(flashcardBlock)),
+    listening: lesson.sentences.length,
+    lesson: lesson.audioScripts.length,
+    phonetics: phoneticsSectionCount,
+    grammar: lesson.grammarSections.length,
+    workbook: Number(Boolean(workbookBlock)),
+    review: lesson.content.length,
+  };
+
+  const handleSettingsTabKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) => {
+    let nextIndex = index;
+    if (event.key === "ArrowRight") {
+      nextIndex = (index + 1) % LESSON_SETTINGS_TABS.length;
+    } else if (event.key === "ArrowLeft") {
+      nextIndex =
+        (index - 1 + LESSON_SETTINGS_TABS.length) %
+        LESSON_SETTINGS_TABS.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = LESSON_SETTINGS_TABS.length - 1;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    const nextTab = LESSON_SETTINGS_TABS[nextIndex];
+    setActiveSettingsTab(nextTab.id);
+    lessonSettingsTabRefs.current[nextIndex]?.focus();
+  };
 
   return (
     <>
@@ -1876,6 +1826,64 @@ export default function AdminLessonDetail() {
             </p>
           </div>
 
+          <div className="-mx-1 overflow-x-auto px-1">
+            <div
+              role="tablist"
+              aria-label="Nhóm cài đặt bài học"
+              className="flex min-w-max border-b"
+            >
+              {LESSON_SETTINGS_TABS.map((tab, index) => {
+                const isActive = activeSettingsTab === tab.id;
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    ref={(element) => {
+                      lessonSettingsTabRefs.current[index] = element;
+                    }}
+                    id={`lesson-settings-tab-${tab.id}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls={`lesson-settings-panel-${tab.id}`}
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => setActiveSettingsTab(tab.id)}
+                    onKeyDown={(event) =>
+                      handleSettingsTabKeyDown(event, index)
+                    }
+                    className={`inline-flex min-h-11 items-center gap-2 border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                      isActive
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span>{tab.label}</span>
+                    {lessonSettingsTabCounts[tab.id] !== undefined && (
+                      <span
+                        className={`rounded-full px-1.5 py-0.5 text-xs tabular-nums ${
+                          isActive
+                            ? "bg-primary/10 text-primary"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {lessonSettingsTabCounts[tab.id]}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div
+            id="lesson-settings-panel-vocabulary"
+            role="tabpanel"
+            aria-labelledby="lesson-settings-tab-vocabulary"
+            tabIndex={0}
+            hidden={activeSettingsTab !== "vocabulary"}
+            className="space-y-6"
+          >
           {/* Từ vựng */}
           <Card>
             <CardHeader className="pb-3">
@@ -2016,7 +2024,16 @@ export default function AdminLessonDetail() {
               )}
             </CardContent>
           </Card>
+          </div>
 
+          <div
+            id="lesson-settings-panel-flashcard"
+            role="tabpanel"
+            aria-labelledby="lesson-settings-tab-flashcard"
+            tabIndex={0}
+            hidden={activeSettingsTab !== "flashcard"}
+            className="space-y-6"
+          >
           {/* Flashcard */}
           <Card>
             <CardHeader className="pb-3">
@@ -2087,7 +2104,16 @@ export default function AdminLessonDetail() {
               )}
             </CardContent>
           </Card>
+          </div>
 
+          <div
+            id="lesson-settings-panel-listening"
+            role="tabpanel"
+            aria-labelledby="lesson-settings-tab-listening"
+            tabIndex={0}
+            hidden={activeSettingsTab !== "listening"}
+            className="space-y-6"
+          >
           {/* Nghe câu */}
           <Card>
             <CardHeader className="pb-3">
@@ -2268,7 +2294,16 @@ export default function AdminLessonDetail() {
               </div>
             </CardContent>
           </Card>
+          </div>
 
+          <div
+            id="lesson-settings-panel-lesson"
+            role="tabpanel"
+            aria-labelledby="lesson-settings-tab-lesson"
+            tabIndex={0}
+            hidden={activeSettingsTab !== "lesson"}
+            className="space-y-6"
+          >
           {/* Bài khóa */}
           <Card>
             <CardHeader className="pb-3">
@@ -2347,7 +2382,16 @@ export default function AdminLessonDetail() {
               )}
             </CardContent>
           </Card>
+          </div>
 
+          <div
+            id="lesson-settings-panel-phonetics"
+            role="tabpanel"
+            aria-labelledby="lesson-settings-tab-phonetics"
+            tabIndex={0}
+            hidden={activeSettingsTab !== "phonetics"}
+            className="space-y-6"
+          >
           {/* Ngữ âm */}
           <Card>
             <CardHeader className="pb-3">
@@ -3054,7 +3098,16 @@ export default function AdminLessonDetail() {
               )}
             </CardContent>
           </Card>
+          </div>
 
+          <div
+            id="lesson-settings-panel-grammar"
+            role="tabpanel"
+            aria-labelledby="lesson-settings-tab-grammar"
+            tabIndex={0}
+            hidden={activeSettingsTab !== "grammar"}
+            className="space-y-6"
+          >
           {/* Ngữ pháp */}
           <Card>
             <CardHeader className="pb-3">
@@ -3118,7 +3171,16 @@ export default function AdminLessonDetail() {
               )}
             </CardContent>
           </Card>
+          </div>
 
+          <div
+            id="lesson-settings-panel-translation"
+            role="tabpanel"
+            aria-labelledby="lesson-settings-tab-translation"
+            tabIndex={0}
+            hidden={activeSettingsTab !== "translation"}
+            className="space-y-6"
+          >
           {/* Luyện dịch */}
           <Card>
             <CardHeader className="pb-3">
@@ -3141,7 +3203,16 @@ export default function AdminLessonDetail() {
               </div>
             </CardHeader>
           </Card>
+          </div>
 
+          <div
+            id="lesson-settings-panel-workbook"
+            role="tabpanel"
+            aria-labelledby="lesson-settings-tab-workbook"
+            tabIndex={0}
+            hidden={activeSettingsTab !== "workbook"}
+            className="space-y-6"
+          >
           {/* Sách bài tập */}
           <Card>
             <CardHeader className="pb-3">
@@ -3209,7 +3280,16 @@ export default function AdminLessonDetail() {
               )}
             </CardContent>
           </Card>
+          </div>
 
+          <div
+            id="lesson-settings-panel-review"
+            role="tabpanel"
+            aria-labelledby="lesson-settings-tab-review"
+            tabIndex={0}
+            hidden={activeSettingsTab !== "review"}
+            className="space-y-6"
+          >
           {/* Quiz sinh trực tiếp từ từ vựng của bài */}
           <Card>
             <CardHeader className="pb-3">
@@ -3264,6 +3344,7 @@ export default function AdminLessonDetail() {
               )}
             </CardContent>
           </Card>
+          </div>
         </div>
       </AppShell>
       {/* `key` ép remount mỗi lần mở modal → fetcher mới, không giữ data lần trước */}
