@@ -142,9 +142,14 @@ export const workbookConfigSchema = z.object({
           acceptedAnswers: z.array(z.string()).default([]),
         }).refine((question) => question.kind === "input" || question.options.length > 0, {
           message: "Câu trắc nghiệm cần có ít nhất một đáp án",
-        }).refine((question) => !question.gradable || Boolean(question.correctAnswer.trim()), {
+        }).refine(
+          (question) => !question.gradable
+            || Boolean(question.correctAnswer.trim())
+            || (question.kind === "input" && question.teacherReview),
+          {
           message: "Câu có chấm điểm phải có đáp án đúng",
-        })
+          }
+        )
       ).default([]),
     })
   ).default([]),
