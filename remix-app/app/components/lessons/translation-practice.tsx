@@ -11,6 +11,7 @@ export interface TranslationQuestion {
   sourceLanguage: string;
   targetLanguage: string;
   sampleAnswer: string;
+  acceptedAnswers: string[];
   hint: string;
   maxScore: number;
   order: number;
@@ -43,9 +44,16 @@ export function TranslationPractice({
   const [missingQuestionIds, setMissingQuestionIds] = useState<string[]>([]);
   const [validationMessage, setValidationMessage] = useState("");
   const answers = Array.isArray(submission?.answers)
-    ? (submission.answers as { questionId: string; answer: string; teacherComment?: string }[])
+    ? (submission.answers as {
+        questionId: string;
+        answer: string;
+        sampleAnswer?: string;
+        acceptedAnswers?: string[];
+        teacherComment?: string;
+      }[])
     : [];
   const answersByQuestion = new Map(answers.map((item) => [item.questionId, item.answer]));
+  const submissionAnswersByQuestion = new Map(answers.map((item) => [item.questionId, item]));
   const commentsByQuestion = new Map<string, string>();
   answers.forEach((item) => commentsByQuestion.set(item.questionId, item.teacherComment ?? ""));
 
@@ -159,6 +167,26 @@ export function TranslationPractice({
                 {commentsByQuestion.get(question.id)}
               </div>
             )}
+            {submission?.status === "GRADED" && (() => {
+              const gradedAnswer = submissionAnswersByQuestion.get(question.id);
+              const sampleAnswer = gradedAnswer?.sampleAnswer || question.sampleAnswer;
+              const acceptedAnswers = gradedAnswer?.acceptedAnswers?.length
+                ? gradedAnswer.acceptedAnswers
+                : question.acceptedAnswers;
+              return (
+                <div className="mt-3 space-y-1 text-sm">
+                  <p className="whitespace-pre-wrap">
+                    <span className="font-medium">Đáp án mẫu: </span>{sampleAnswer}
+                  </p>
+                  {acceptedAnswers.length > 0 && (
+                    <p className="whitespace-pre-wrap">
+                      <span className="font-medium">Đáp án khác được chấp nhận: </span>
+                      {acceptedAnswers.join(" · ")}
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
           </section>
         ))}
 

@@ -12,6 +12,13 @@ test("translation suggestions still require the same words and accents", () => {
   assert.equal(suggestTranslationAnswerCorrect("Toi thich hoc tieng Trung", "Tôi thích học tiếng Trung"), false);
 });
 
+test("translation suggestions accept configured alternative answers", () => {
+  assert.equal(
+    suggestTranslationAnswerCorrect("Tôi yêu thích học tiếng Trung!", "Tôi thích học tiếng Trung", ["Tôi yêu thích học tiếng Trung"]),
+    true,
+  );
+});
+
 test("translation suggestions are unavailable when either answer is blank", () => {
   assert.equal(suggestTranslationAnswerCorrect("", "Tôi thích học tiếng Trung"), null);
   assert.equal(suggestTranslationAnswerCorrect("Tôi thích học tiếng Trung", "   "), null);

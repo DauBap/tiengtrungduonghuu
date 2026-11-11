@@ -802,6 +802,7 @@ model TranslationQuestion {
   sourceLanguage String   @default("VI")
   targetLanguage String   @default("ZH")
   sampleAnswer   String
+  acceptedAnswers String[] @default([])
   hint           String   @default("")
   maxScore       Int      @default(10)
   order          Int      @default(0)

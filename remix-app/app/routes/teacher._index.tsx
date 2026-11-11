@@ -230,6 +230,45 @@ export async function loader({ request }: LoaderFunctionArgs) {
         })
       : Promise.resolve(null),
   ]);
+  const allTranslationSubmissions = [
+    ...translationSubmissions,
+    ...(initialTranslationSubmission ? [initialTranslationSubmission] : []),
+  ];
+  const translationQuestionIds = [...new Set(allTranslationSubmissions.flatMap((submission) => (
+    Array.isArray(submission.answers)
+      ? submission.answers.flatMap((answer) => (
+          isRecord(answer) && typeof answer.questionId === "string" ? [answer.questionId] : []
+        ))
+      : []
+  )))];
+  const currentAcceptedAnswers = translationQuestionIds.length > 0
+    ? await prisma.translationQuestion.findMany({
+        where: { id: { in: translationQuestionIds } },
+        select: { id: true, acceptedAnswers: true },
+      })
+    : [];
+  const acceptedAnswersByQuestionId = new Map(
+    currentAcceptedAnswers.map((question) => [question.id, question.acceptedAnswers]),
+  );
+  const includeAcceptedAnswers = <T extends { answers: unknown }>(submission: T) => ({
+    ...submission,
+    answers: Array.isArray(submission.answers)
+      ? submission.answers.map((answer) => {
+          if (!isRecord(answer)) return answer;
+          const savedAcceptedAnswers = Array.isArray(answer.acceptedAnswers)
+            ? answer.acceptedAnswers.filter((item): item is string => typeof item === "string")
+            : [];
+          const acceptedAnswers = savedAcceptedAnswers.length > 0
+            ? savedAcceptedAnswers
+            : acceptedAnswersByQuestionId.get(String(answer.questionId)) ?? [];
+          return { ...answer, acceptedAnswers };
+        })
+      : submission.answers,
+  });
+  const submissionsWithAcceptedAnswers = translationSubmissions.map(includeAcceptedAnswers);
+  const initialSubmissionWithAcceptedAnswers = initialTranslationSubmission
+    ? includeAcceptedAnswers(initialTranslationSubmission)
+    : null;
   let initialWorkbookTargetUrl: string | null = null;
   if (initialWorkbookAttemptId) {
     const candidate = await prisma.lessonTabAttempt.findFirst({
@@ -1027,7 +1066,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       suggestedLessonId: latestProgress?.lessonId ?? lessons[0]?.id ?? null,
       overallPercent,
       pendingGrammarAttempts,
-      pendingTranslationSubmissions: translationSubmissions.filter((submission) =>
+      pendingTranslationSubmissions: submissionsWithAcceptedAnswers.filter((submission) =>
         submission.status === "SUBMITTED"
         && submission.lesson.courseId === cls.courseId
         && cls.enrollments.some((enrollment) => enrollment.userId === submission.student.id)
@@ -1166,8 +1205,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     initialWorkbookAttemptId,
     initialWorkbookTargetUrl,
     initialTranslationSubmissionId,
-    initialTranslationSubmission,
-    translationSubmissions,
+    initialTranslationSubmission: initialSubmissionWithAcceptedAnswers,
+    translationSubmissions: submissionsWithAcceptedAnswers,
   };
 }
 
@@ -1258,6 +1297,9 @@ export async function action({ request }: ActionFunctionArgs) {
       answer: typeof record.answer === "string" ? record.answer : "",
       teacherComment: String(form.get(`translation-comment-${questionId}`) ?? "").trim(),
       teacherCorrect: gradeByQuestionId.get(questionId) === true,
+      acceptedAnswers: Array.isArray(record.acceptedAnswers)
+        ? record.acceptedAnswers.filter((answer): answer is string => typeof answer === "string")
+        : [],
     };
   });
 
@@ -1611,6 +1653,7 @@ export default function TeacherIndex() {
         questionId?: string;
         prompt?: string;
         sampleAnswer?: string;
+        acceptedAnswers?: string[];
         maxScore?: number;
         answer?: string;
         teacherComment?: string;
@@ -1651,6 +1694,7 @@ export default function TeacherIndex() {
                 : suggestTranslationAnswerCorrect(
                     typeof item.answer === "string" ? item.answer : "",
                     typeof item.sampleAnswer === "string" ? item.sampleAnswer : "",
+                    item.acceptedAnswers ?? [],
                   ),
             ]],
       ),
@@ -4158,7 +4202,7 @@ export default function TeacherIndex() {
 
               <div ref={translationGradingContentRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
                 <p className="text-sm text-muted-foreground">
-                  Gợi ý tự chấm dựa trên đáp án mẫu; hãy kiểm tra nội dung trước khi lưu. Bạn có thể đổi lựa chọn Đúng/Sai.
+                  Gợi ý tự chấm dựa trên đáp án mẫu và đáp án khác được chấp nhận; hãy kiểm tra trước khi lưu. Bạn có thể đổi lựa chọn Đúng/Sai.
                 </p>
                 {selectedTranslationAnswers.map((item, index) => {
                   const questionId = item.questionId ?? "";
@@ -4166,6 +4210,7 @@ export default function TeacherIndex() {
                   const autoCorrect = suggestTranslationAnswerCorrect(
                     typeof item.answer === "string" ? item.answer : "",
                     typeof item.sampleAnswer === "string" ? item.sampleAnswer : "",
+                    item.acceptedAnswers ?? [],
                   );
                   return (
                     <article key={questionId || index} className="space-y-3 rounded-lg border p-4">
@@ -4188,6 +4233,12 @@ export default function TeacherIndex() {
                             <p className="content-text mt-2 whitespace-pre-wrap text-sm">
                               <span className="text-muted-foreground">Đáp án chuẩn: </span>
                               <span className="font-medium">{item.sampleAnswer}</span>
+                            </p>
+                          )}
+                          {item.acceptedAnswers && item.acceptedAnswers.length > 0 && (
+                            <p className="content-text mt-2 whitespace-pre-wrap text-sm">
+                              <span className="text-muted-foreground">Đáp án khác được chấp nhận: </span>
+                              <span className="font-medium">{item.acceptedAnswers.join(" · ")}</span>
                             </p>
                           )}
                         </div>

@@ -7,6 +7,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { ArrowLeft, Languages, Plus, Trash2 } from "lucide-react";
+import { parseAnswerVariants } from "~/lib/listening-answer";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
@@ -31,10 +32,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const prompt = String(form.get("prompt") ?? "").trim();
     const sampleAnswer = String(form.get("sampleAnswer") ?? "").trim();
     if (!prompt || !sampleAnswer) return { error: "Nhập đề bài và đáp án mẫu." };
+    const acceptedAnswers = parseAnswerVariants(
+      String(form.get("acceptedAnswers") ?? ""),
+      sampleAnswer,
+    );
     const maxScore = Math.max(1, Math.min(100, Number(form.get("maxScore") || 10)));
     const data = {
       prompt,
       sampleAnswer,
+      acceptedAnswers,
       hint: String(form.get("hint") ?? "").trim(),
       sourceLanguage: String(form.get("sourceLanguage") ?? "VI").trim() || "VI",
       targetLanguage: String(form.get("targetLanguage") ?? "ZH").trim() || "ZH",
@@ -89,6 +95,13 @@ export default function TranslationAdmin() {
             <label className="mb-1.5 block text-sm font-medium">Đáp án mẫu</label>
             <Textarea name="sampleAnswer" required placeholder="Dịch sang tiếng Trung..." />
           </div>
+          <div className="space-y-1.5 md:col-span-12">
+            <label className="block text-sm font-medium">
+              Đáp án khác được chấp nhận <span className="font-normal text-muted-foreground">(mỗi đáp án một dòng)</span>
+            </label>
+            <Textarea name="acceptedAnswers" rows={2} placeholder="Nhập đáp án thay thế nếu có..." />
+            <p className="text-xs text-muted-foreground">Dùng để giáo viên tham khảo khi chấm và hiển thị khi trả bài.</p>
+          </div>
           <Input name="hint" placeholder="Gợi ý (tuỳ chọn)" className="md:col-span-5" />
           <Input name="sourceLanguage" defaultValue="VI" aria-label="Ngôn ngữ đề" className="md:col-span-2" />
           <Input name="targetLanguage" defaultValue="ZH" aria-label="Ngôn ngữ đáp án" className="md:col-span-2" />
@@ -114,6 +127,17 @@ export default function TranslationAdmin() {
               <div className="grid gap-3 md:grid-cols-2">
                 <Textarea name="prompt" defaultValue={question.prompt} required />
                 <Textarea name="sampleAnswer" defaultValue={question.sampleAnswer} required />
+                <div className="space-y-1.5 md:col-span-2">
+                  <label className="block text-sm font-medium">
+                    Đáp án khác được chấp nhận <span className="font-normal text-muted-foreground">(mỗi đáp án một dòng)</span>
+                  </label>
+                  <Textarea
+                    name="acceptedAnswers"
+                    defaultValue={question.acceptedAnswers.join("\n")}
+                    rows={2}
+                    placeholder="Nhập đáp án thay thế nếu có..."
+                  />
+                </div>
                 <Input name="hint" defaultValue={question.hint} placeholder="Gợi ý" />
                 <div className="grid grid-cols-3 gap-2">
                   <Input name="sourceLanguage" defaultValue={question.sourceLanguage} aria-label="Ngôn ngữ đề" />

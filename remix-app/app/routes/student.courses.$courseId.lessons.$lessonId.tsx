@@ -754,7 +754,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const questions = await prisma.translationQuestion.findMany({
       where: { lessonId: params.lessonId! },
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-      select: { id: true, prompt: true, sampleAnswer: true, maxScore: true },
+      select: { id: true, prompt: true, sampleAnswer: true, acceptedAnswers: true, maxScore: true },
     });
     if (questions.length === 0) {
       return { intent, translationError: "Bài học chưa có câu hỏi luyện dịch." };
@@ -764,6 +764,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       questionId: question.id,
       prompt: question.prompt,
       sampleAnswer: question.sampleAnswer,
+      acceptedAnswers: question.acceptedAnswers,
       maxScore: question.maxScore,
       answer: String(form.get(`translation-${question.id}`) ?? "").trim(),
     }));

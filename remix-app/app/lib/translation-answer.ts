@@ -7,9 +7,15 @@ function normalizeTranslationAnswer(value: string) {
     .trim();
 }
 
-export function suggestTranslationAnswerCorrect(answer: string, sampleAnswer: string): boolean | null {
+export function suggestTranslationAnswerCorrect(
+  answer: string,
+  sampleAnswer: string,
+  acceptedAnswers: readonly string[] = [],
+): boolean | null {
   const normalizedAnswer = normalizeTranslationAnswer(answer);
-  const normalizedSample = normalizeTranslationAnswer(sampleAnswer);
-  if (!normalizedAnswer || !normalizedSample) return null;
-  return normalizedAnswer === normalizedSample;
+  const expectedAnswers = [sampleAnswer, ...acceptedAnswers]
+    .map(normalizeTranslationAnswer)
+    .filter(Boolean);
+  if (!normalizedAnswer || expectedAnswers.length === 0) return null;
+  return expectedAnswers.includes(normalizedAnswer);
 }
