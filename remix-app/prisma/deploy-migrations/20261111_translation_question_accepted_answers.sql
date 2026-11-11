@@ -1,0 +1,2 @@
+ALTER TABLE "TranslationQuestion"
+ADD COLUMN IF NOT EXISTS "acceptedAnswers" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];
