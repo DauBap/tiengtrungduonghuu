@@ -9,8 +9,7 @@
  * nằm trong bundle. Mất mạng thì hiện thông báo lỗi thay vì khung trắng.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
-import { ChevronDown, ChevronUp, PenLine, Redo2, RotateCcw, Trash2, Undo2, X } from "lucide-react";
+import { ChevronDown, ChevronUp, PenLine, RotateCcw, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Overlay } from "~/components/common/overlay";
 // Type-only irt: bị xóa hoàn toàn khi build nên không kéo thư viện vào bundle server.
@@ -18,7 +17,7 @@ import type HanziWriterInstance from "hanzi-writer";
 
 /** Chỉ chữ Hán mới có dữ liệu nét; bỏ chữ Latin, số và dấu câu lẫn trong từ. */
 const HAN_CHAR = /\p{Script=Han}/u;
-const INK_COLOR = "#1f2937";
+const HINT_STROKE_COLOR = "#00000069";
 
 export function splitHanCharacters(text: string): string[] {
   return [...text].filter((char) => HAN_CHAR.test(char));
@@ -32,186 +31,354 @@ interface StrokeOrderDialogProps {
   onClose: () => void;
 }
 
-type HandwritingCommand = { id: number; action: "undo" | "redo" | "clear" };
+type WritingProgress = {
+  characterIndex: number;
+  strokeNumber: number;
+  strokeCount: number;
+  complete: boolean;
+};
 
-function HandwritingCanvas({
+function GuidedHandwriting({
   characters,
   characterSize,
   frameHeight,
-  command,
-  onHistoryChange,
 }: {
   characters: string[];
   characterSize: number;
   frameHeight: number;
-  command: HandwritingCommand;
-  onHistoryChange: (canUndo: boolean, canRedo: boolean) => void;
 }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const outlineRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const undoStackRef = useRef<ImageData[]>([]);
-  const redoStackRef = useRef<ImageData[]>([]);
-
-  const reportHistory = useCallback(() => {
-    onHistoryChange(undoStackRef.current.length > 1, redoStackRef.current.length > 0);
-  }, [onHistoryChange]);
-
-  const restoreImage = (image: ImageData) => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.putImageData(image, 0, 0);
-  };
-
-  useEffect(() => {
-    if (command.id === 0) return;
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
-
-    if (command.action === "clear") {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      undoStackRef.current = [context.getImageData(0, 0, canvas.width, canvas.height)];
-      redoStackRef.current = [];
-    } else if (command.action === "undo" && undoStackRef.current.length > 1) {
-      redoStackRef.current.push(undoStackRef.current.pop()!);
-      restoreImage(undoStackRef.current[undoStackRef.current.length - 1]);
-    } else if (command.action === "redo" && redoStackRef.current.length > 0) {
-      const image = redoStackRef.current.pop()!;
-      undoStackRef.current.push(image);
-      restoreImage(image);
-    }
-    reportHistory();
-  }, [command, reportHistory]);
-
-  const getPosition = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    const canvas = event.currentTarget;
-    const bounds = canvas.getBoundingClientRect();
-    return { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
-  };
-
-  const startDrawing = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (event.button !== 0 && event.pointerType === "mouse") return;
-    const canvas = event.currentTarget;
-    const context = canvas.getContext("2d");
-    if (!context) return;
-    canvas.setPointerCapture(event.pointerId);
-    const { x, y } = getPosition(event);
-    context.beginPath();
-    context.arc(x, y, context.lineWidth / 2, 0, Math.PI * 2);
-    context.fillStyle = INK_COLOR;
-    context.fill();
-    context.beginPath();
-    context.moveTo(x, y);
-  };
-
-  const draw = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    const canvas = event.currentTarget;
-    if (!canvas.hasPointerCapture(event.pointerId)) return;
-    const context = canvas.getContext("2d");
-    if (!context) return;
-    const { x, y } = getPosition(event);
-    context.lineTo(x, y);
-    context.stroke();
-  };
-
-  const stopDrawing = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    const canvas = event.currentTarget;
-    if (!canvas.hasPointerCapture(event.pointerId)) return;
-    canvas.releasePointerCapture(event.pointerId);
-    const context = canvas.getContext("2d");
-    context?.closePath();
-    if (context) {
-      undoStackRef.current.push(context.getImageData(0, 0, canvas.width, canvas.height));
-      redoStackRef.current = [];
-      reportHistory();
-    }
-  };
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
-
-    const resizeCanvas = () => {
-      const bounds = canvas.getBoundingClientRect();
-      if (bounds.width === 0 || bounds.height === 0) return;
-      const pixelRatio = window.devicePixelRatio || 1;
-      canvas.width = Math.round(bounds.width * pixelRatio);
-      canvas.height = Math.round(bounds.height * pixelRatio);
-      context.setTransform(canvas.width / bounds.width, 0, 0, canvas.height / bounds.height, 0, 0);
-      context.strokeStyle = INK_COLOR;
-      context.lineWidth = 4;
-      context.lineCap = "round";
-      context.lineJoin = "round";
-      undoStackRef.current = [context.getImageData(0, 0, canvas.width, canvas.height)];
-      redoStackRef.current = [];
-      reportHistory();
-    };
-
-    const observer = new ResizeObserver(resizeCanvas);
-    observer.observe(canvas);
-    resizeCanvas();
-    return () => observer.disconnect();
-  }, [reportHistory]);
+  const containerRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const writersRef = useRef<HanziWriterInstance[]>([]);
+  const hintPathRef = useRef<SVGPathElement | null>(null);
+  const hintFillRef = useRef<SVGPathElement | null>(null);
+  const resetQuizRef = useRef<() => void>(() => {});
+  const loadFailedRef = useRef(false);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [retryKey, setRetryKey] = useState(0);
+  const [strokeGuides, setStrokeGuides] = useState<Array<Array<{ path: string; medianPath: string }>>>([]);
+  const [activeStrokeIndex, setActiveStrokeIndex] = useState<number | null>(null);
+  const [progress, setProgress] = useState<WritingProgress>({
+    characterIndex: 0,
+    strokeNumber: 1,
+    strokeCount: 0,
+    complete: false,
+  });
 
   useEffect(() => {
     let cancelled = false;
+    const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const reducedMotionRef = { current: motionPreference.matches };
+    const updateMotionPreference = () => {
+      reducedMotionRef.current = motionPreference.matches;
+    };
+    motionPreference.addEventListener("change", updateMotionPreference);
+    loadFailedRef.current = false;
+    setStatus("loading");
+    setProgress({ characterIndex: 0, strokeNumber: 1, strokeCount: 0, complete: false });
+    setStrokeGuides([]);
+    setActiveStrokeIndex(null);
+
     void import("hanzi-writer").then(({ default: HanziWriter }) => {
       if (cancelled) return;
+      const writers: HanziWriterInstance[] = [];
       characters.forEach((character, index) => {
-        const element = outlineRefs.current[index];
+        const element = containerRefs.current[index];
         if (!element) return;
         element.innerHTML = "";
-        HanziWriter.create(element, character, {
+        const onLoadCharDataError = () => {
+          if (!cancelled) {
+            loadFailedRef.current = true;
+            setStatus("error");
+          }
+        };
+        writers.push(HanziWriter.create(element, character, {
           width: characterSize,
           height: characterSize,
           padding: 8,
           showCharacter: false,
           showOutline: true,
-          outlineColor: "#e5e7eb",
-          strokeColor: INK_COLOR,
+          outlineColor: "#cbd5e1",
+          strokeColor: "#0f172a",
+          drawingColor: "#030303",
+          drawingWidth: 6,
+          markStrokeCorrectAfterMisses: false,
+          showHintAfterMisses: false,
+          acceptBackwardsStrokes: false,
+          onLoadCharDataError,
+        }));
+      });
+      writersRef.current = writers;
+
+      const flashStroke = (strokeNum: number) => {
+        setActiveStrokeIndex(strokeNum);
+      };
+
+      const startQuiz = (characterIndex: number) => {
+        if (cancelled) return;
+        const writer = writers[characterIndex];
+        if (!writer) {
+          setProgress((current) => ({ ...current, complete: true }));
+          return;
+        }
+
+        setStatus("loading");
+        void (async () => {
+          try {
+            await writer.quiz({
+              markStrokeCorrectAfterMisses: false,
+              showHintAfterMisses: false,
+              acceptBackwardsStrokes: false,
+              onCorrectStroke: ({ strokeNum, strokesRemaining }) => {
+                if (cancelled) return;
+                setProgress({
+                  characterIndex,
+                  strokeNumber: strokeNum + 2,
+                  strokeCount: strokeNum + strokesRemaining + 1,
+                  complete: false,
+                });
+                setStatus("ready");
+                if (strokesRemaining > 0) {
+                  flashStroke(strokeNum + 1);
+                } else {
+                  setActiveStrokeIndex(null);
+                }
+              },
+              onComplete: () => {
+                if (cancelled) return;
+                if (characterIndex + 1 < writers.length) {
+                  setProgress({
+                    characterIndex: characterIndex + 1,
+                    strokeNumber: 1,
+                    strokeCount: 0,
+                    complete: false,
+                  });
+                  startQuiz(characterIndex + 1);
+                } else {
+                  setActiveStrokeIndex(null);
+                  setProgress((current) => ({ ...current, complete: true }));
+                }
+              },
+            });
+            if (!cancelled && !loadFailedRef.current) {
+              flashStroke(0);
+              setStatus("ready");
+            }
+          } catch {
+            if (!cancelled) {
+              loadFailedRef.current = true;
+              setStatus("error");
+            }
+          }
+        })();
+      };
+      resetQuizRef.current = () => {
+        setActiveStrokeIndex(null);
+        setStatus("loading");
+        void Promise.all(writers.map((writer, index) => writer.setCharacter(characters[index])))
+          .then(() => {
+            if (cancelled) return;
+            setProgress({ characterIndex: 0, strokeNumber: 1, strokeCount: 0, complete: false });
+            startQuiz(0);
+          })
+          .catch(() => {
+            if (!cancelled) setStatus("error");
+          });
+      };
+
+      if (writers.length === 0) {
+        setStatus("error");
+        return;
+      }
+      void Promise.all(writers.map((writer) => writer.getCharacterData()))
+        .then((characterData) => {
+          if (cancelled || loadFailedRef.current) return;
+          setStrokeGuides(characterData.map((data) => data.strokes.map((stroke) => ({
+            path: stroke.path,
+            medianPath: stroke.points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" "),
+          }))));
+          startQuiz(0);
+        })
+        .catch(() => {
+          if (!cancelled) {
+            loadFailedRef.current = true;
+            setStatus("error");
+          }
         });
-      });
     }).catch(() => {
-      if (cancelled) return;
-      outlineRefs.current.forEach((element, index) => {
-        if (!element) return;
-        element.textContent = characters[index] ?? "";
-        element.className = "content-text hanzi-display text-7xl text-muted-foreground/20";
-      });
+      if (!cancelled) setStatus("error");
     });
 
     return () => {
       cancelled = true;
-      outlineRefs.current.forEach((element) => {
+      writersRef.current.forEach((writer) => writer.cancelQuiz());
+      writersRef.current = [];
+      resetQuizRef.current = () => {};
+      motionPreference.removeEventListener("change", updateMotionPreference);
+      containerRefs.current.forEach((element) => {
         if (element) element.innerHTML = "";
       });
     };
-  }, [characterSize, characters]);
+  }, [characters, characterSize, retryKey]);
+
+  useEffect(() => {
+    const guide = activeStrokeIndex === null
+      ? undefined
+      : strokeGuides[progress.characterIndex]?.[activeStrokeIndex];
+    const path = hintPathRef.current;
+    if (!guide || !path) return;
+
+    const length = path.getTotalLength();
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const duration = (length + 600) / (3 * (reducedMotion ? 0.35 : 0.5));
+    path.style.strokeDasharray = `${length}px`;
+    path.style.strokeDashoffset = `${length}px`;
+
+    if (typeof path.animate !== "function") {
+      path.style.strokeDashoffset = "0px";
+      return;
+    }
+
+    let disposed = false;
+    let pauseTimer: ReturnType<typeof setTimeout> | null = null;
+    let animation: Animation | null = null;
+    let blinkAnimation: Animation | null = null;
+    const playStroke = () => {
+      if (disposed) return;
+      path.style.strokeDashoffset = `${length}px`;
+      animation = path.animate(
+        [{ strokeDashoffset: `${length}px` }, { strokeDashoffset: "0px" }],
+        { duration, easing: "linear", fill: "forwards" },
+      );
+      animation.onfinish = () => {
+        const fill = hintFillRef.current;
+        if (disposed || !fill) return;
+        blinkAnimation = fill.animate(
+          [
+            { opacity: 1 },
+            { opacity: reducedMotion ? 0.6 : 0.15 },
+            { opacity: 1 },
+          ],
+          {
+            duration: reducedMotion ? 1000 : 500,
+            easing: "ease-in-out",
+            iterations: 2,
+          },
+        );
+        blinkAnimation.onfinish = () => {
+          if (!disposed) pauseTimer = setTimeout(playStroke, 300);
+        };
+      };
+    };
+    playStroke();
+
+    return () => {
+      disposed = true;
+      animation?.cancel();
+      blinkAnimation?.cancel();
+      if (pauseTimer !== null) clearTimeout(pauseTimer);
+    };
+  }, [activeStrokeIndex, characterSize, progress.characterIndex, strokeGuides]);
+
+  const retryLoading = () => {
+    setProgress({ characterIndex: 0, strokeNumber: 1, strokeCount: 0, complete: false });
+    setRetryKey((key) => key + 1);
+  };
 
   return (
-    <div className="relative w-full overflow-hidden rounded-xl border bg-muted/20 p-3" style={{ height: frameHeight }}>
-      <div aria-hidden className="pointer-events-none flex h-full flex-wrap items-center justify-center gap-2">
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs text-muted-foreground">
+          Viết theo nét mờ đúng thứ tự; nét đúng sẽ chuyển sang màu đen đậm.
+        </p>
+        {status === "error" ? (
+          <Button type="button" variant="outline" size="sm" onClick={retryLoading}>
+            <RotateCcw className="mr-1.5 h-4 w-4" />
+            Thử tải lại
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => resetQuizRef.current()}
+            disabled={status === "loading"}
+          >
+            <RotateCcw className="mr-1.5 h-4 w-4" />
+            Làm lại từ đầu
+          </Button>
+        )}
+      </div>
+      <div
+        className="flex w-full flex-wrap items-center justify-center gap-2 overflow-hidden rounded-xl border bg-muted/20 p-3"
+        style={{ minHeight: frameHeight }}
+        aria-label="Vùng luyện viết chữ Hán theo thứ tự nét"
+      >
         {characters.map((character, index) => (
           <div
             key={`${character}-${index}`}
-            ref={(element) => { outlineRefs.current[index] = element; }}
-            className="rounded-lg bg-background"
-            style={{ width: characterSize, height: characterSize }}
-          />
+            className="relative rounded-lg bg-background transition-opacity duration-200"
+            style={{
+              width: characterSize,
+              height: characterSize,
+              opacity: index > progress.characterIndex ? 0.45 : 1,
+            }}
+          >
+            <div
+              ref={(element) => { containerRefs.current[index] = element; }}
+              className="absolute inset-0"
+              style={{
+                pointerEvents: index === progress.characterIndex && status === "ready" && !progress.complete ? "auto" : "none",
+              }}
+              aria-label={`Chữ ${character}, vùng luyện viết`}
+            />
+            {activeStrokeIndex !== null && index === progress.characterIndex && strokeGuides[index]?.[activeStrokeIndex] && (
+              <svg
+                className="pointer-events-none absolute inset-0 h-full w-full"
+                viewBox={`0 0 ${characterSize} ${characterSize}`}
+                aria-hidden="true"
+              >
+                <defs>
+                  <mask
+                    id={`stroke-hint-mask-${index}`}
+                    maskUnits="userSpaceOnUse"
+                    x="0"
+                    y="-124"
+                    width="1024"
+                    height="1024"
+                  >
+                    <path
+                      ref={hintPathRef}
+                      d={strokeGuides[index][activeStrokeIndex].medianPath}
+                      fill="none"
+                      stroke="#fff"
+                      strokeWidth="240"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </mask>
+                </defs>
+                <g transform={`translate(8 ${characterSize - 124 * ((characterSize - 16) / 1024) - 8}) scale(${(characterSize - 16) / 1024} ${-((characterSize - 16) / 1024)})`}>
+                  <path
+                    ref={hintFillRef}
+                    d={strokeGuides[index][activeStrokeIndex].path}
+                    fill={HINT_STROKE_COLOR}
+                    mask={`url(#stroke-hint-mask-${index})`}
+                  />
+                </g>
+              </svg>
+            )}
+          </div>
         ))}
       </div>
-      <canvas
-        ref={canvasRef}
-        aria-label="Vùng luyện viết chữ Hán"
-        className="absolute inset-0 h-full w-full touch-none"
-        onPointerDown={startDrawing}
-        onPointerMove={draw}
-        onPointerUp={stopDrawing}
-        onPointerCancel={stopDrawing}
-      />
+      <p className="min-h-5 text-center text-sm font-medium" aria-live="polite" aria-atomic="true">
+        {status === "loading"
+          ? "Đang tải dữ liệu nét chữ..."
+          : status === "error"
+            ? "Không tải được dữ liệu nét chữ. Hãy kiểm tra kết nối mạng rồi thử lại."
+            : progress.complete
+              ? "Hoàn thành! Bạn đã viết đúng thứ tự tất cả các nét."
+              : `Chữ ${progress.characterIndex + 1}/${characters.length} · Nét ${progress.strokeNumber}${progress.strokeCount ? `/${progress.strokeCount}` : ""}`}
+      </p>
     </div>
   );
 }
@@ -235,18 +402,7 @@ export function StrokeOrderDialog({ chinese, pinyin, translation, showPinyin = t
   const runRef = useRef(0);
 
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [handwritingKey, setHandwritingKey] = useState(0);
   const [showHandwriting, setShowHandwriting] = useState(false);
-  const [historyAvailability, setHistoryAvailability] = useState({ canUndo: false, canRedo: false });
-  const [handwritingCommand, setHandwritingCommand] = useState<HandwritingCommand>({ id: 0, action: "clear" });
-  const updateHandwritingHistory = useCallback((canUndo: boolean, canRedo: boolean) => {
-    setHistoryAvailability({ canUndo, canRedo });
-  }, []);
-
-  const performHandwritingCommand = (action: HandwritingCommand["action"]) => {
-    if (action === "clear") setHistoryAvailability({ canUndo: false, canRedo: false });
-    setHandwritingCommand((command) => ({ id: command.id + 1, action }));
-  };
 
   useEffect(() => {
     const frame = strokeFrameRef.current;
@@ -392,53 +548,12 @@ export function StrokeOrderDialog({ chinese, pinyin, translation, showPinyin = t
               : <ChevronDown className="ml-1.5 h-4 w-4" />}
           </Button>
           {showHandwriting && (
-            <section className="mt-3 space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-xs text-muted-foreground">Viết theo nét mờ bằng ngón tay, bút cảm ứng hoặc chuột.</p>
-                <div className="flex shrink-0 items-center gap-1">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    title="Hoàn tác"
-                    aria-label="Hoàn tác nét vẽ"
-                    disabled={!historyAvailability.canUndo}
-                    onClick={() => performHandwritingCommand("undo")}
-                  >
-                    <Undo2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    title="Làm lại"
-                    aria-label="Làm lại nét vẽ"
-                    disabled={!historyAvailability.canRedo}
-                    onClick={() => performHandwritingCommand("redo")}
-                  >
-                    <Redo2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    title="Xóa nét"
-                    aria-label="Xóa tất cả nét vẽ"
-                    onClick={() => performHandwritingCommand("clear")}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              <div key={handwritingKey} className="w-full">
-                <HandwritingCanvas
-                  characters={handwritingChars}
-                  characterSize={size}
-                  frameHeight={strokeFrameHeight}
-                  command={handwritingCommand}
-                  onHistoryChange={updateHandwritingHistory}
-                />
-              </div>
+            <section className="mt-3">
+              <GuidedHandwriting
+                characters={handwritingChars}
+                characterSize={size}
+                frameHeight={strokeFrameHeight}
+              />
             </section>
           )}
         </div>
