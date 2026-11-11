@@ -370,15 +370,15 @@ function GuidedHandwriting({
           </div>
         ))}
       </div>
-      <p className="min-h-5 text-center text-sm font-medium" aria-live="polite" aria-atomic="true">
-        {status === "loading"
-          ? "Đang tải dữ liệu nét chữ..."
-          : status === "error"
-            ? "Không tải được dữ liệu nét chữ. Hãy kiểm tra kết nối mạng rồi thử lại."
-            : progress.complete
-              ? "Hoàn thành! Bạn đã viết đúng thứ tự tất cả các nét."
-              : `Chữ ${progress.characterIndex + 1}/${characters.length} · Nét ${progress.strokeNumber}${progress.strokeCount ? `/${progress.strokeCount}` : ""}`}
-      </p>
+      {(status === "loading" || status === "error" || progress.complete) && (
+        <p className="text-center text-sm font-medium" aria-live="polite" aria-atomic="true">
+          {status === "loading"
+            ? "Đang tải dữ liệu nét chữ..."
+            : status === "error"
+              ? "Không tải được dữ liệu nét chữ. Hãy kiểm tra kết nối mạng rồi thử lại."
+              : "Hoàn thành! Bạn đã viết đúng thứ tự tất cả các nét."}
+        </p>
+      )}
     </div>
   );
 }
