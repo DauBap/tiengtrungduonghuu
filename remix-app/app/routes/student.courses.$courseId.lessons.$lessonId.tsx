@@ -2890,7 +2890,7 @@ export default function LessonDetail() {
                 </div>
               )}
 
-              {showPinyinInActiveTab && !isRecording && bestPronunciationAssessment && (
+              {!isRecording && bestPronunciationAssessment && (
                 <div className="mt-4 space-y-3 rounded-lg border p-3 text-sm">
                   <div className="text-xs font-bold uppercase text-muted-foreground">
                     Kết quả tốt nhất · {new Date(bestPronunciationAssessment.createdAt).toLocaleString("vi-VN")}
