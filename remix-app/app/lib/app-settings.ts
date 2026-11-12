@@ -15,7 +15,6 @@ export type ThemePreference = "light" | "dark" | "system";
 export interface AppSettings {
   showPinyin: boolean;
   showPinyinByTab: Record<string, boolean>;
-  showTranslationByTab: Record<string, boolean>;
   speechEngine: SpeechEngine;
   themePreference: ThemePreference;
 }
@@ -25,7 +24,6 @@ const STORAGE_KEY = "chinese-study-settings";
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   showPinyin: true,
   showPinyinByTab: {},
-  showTranslationByTab: {},
   speechEngine: "edge",
   themePreference: "system",
 };
@@ -47,15 +45,9 @@ function parseSettings(raw: string | null): AppSettings {
           Object.entries(saved.showPinyinByTab).filter((entry): entry is [string, boolean] => typeof entry[1] === "boolean")
         )
       : {};
-    const showTranslationByTab = saved.showTranslationByTab && typeof saved.showTranslationByTab === "object"
-      ? Object.fromEntries(
-          Object.entries(saved.showTranslationByTab).filter((entry): entry is [string, boolean] => typeof entry[1] === "boolean")
-        )
-      : {};
     return {
       showPinyin: typeof saved.showPinyin === "boolean" ? saved.showPinyin : true,
       showPinyinByTab,
-      showTranslationByTab,
       speechEngine: saved.speechEngine === "local" ? "local" : "edge",
       themePreference: saved.themePreference === "light" || saved.themePreference === "dark"
         ? saved.themePreference

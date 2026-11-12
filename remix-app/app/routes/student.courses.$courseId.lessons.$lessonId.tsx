@@ -34,7 +34,7 @@ import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
-import { ArrowLeft, BookOpen, PartyPopper, X, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2, MessageSquareText, Loader2, Repeat2 } from "lucide-react";
+import { ArrowLeft, BookOpen, PartyPopper, X, XCircle, RefreshCw, CheckCircle2, Lightbulb, Volume2, MessageSquareText, Loader2, Repeat2, Eye, EyeOff } from "lucide-react";
 import { prisma } from "~/lib/prisma.server";
 import { createVocabularyTest, gradeVocabularyTest } from "~/lib/vocabulary-test";
 import { answerVariants, bestAnswerMatchPercent, isAnswerCorrectForAny } from "~/lib/listening-answer";
@@ -51,9 +51,11 @@ import { isLessonTabKey, openLessonTab, recordLessonTabAttempt } from "~/lib/les
 import type { LessonTab as ProgressTab } from "~/lib/lesson-tab-progress";
 import { getGrammarActivityProgress, type GrammarAttemptProgress, type GrammarQuestionGroup } from "~/lib/lesson-progress-summary";
 import {
+  comparePronunciationTextParts,
   comparePronunciationPinyin,
   chooseClosestRecognitionCandidate,
   computePronunciationScore,
+  groupPronunciationTextMismatches,
   mergeRecognitionTranscript,
   toPinyinText,
 } from "~/lib/pronunciation";
@@ -1676,7 +1678,6 @@ export default function LessonDetail() {
   const translationFetcher = useFetcher<{ intent?: string; success?: boolean; translationError?: string }>();
   const [activeTab, setActiveTab] = useState<LessonTab>(() => reviewFocus?.tab ?? "FLASHCARD");
   const showPinyinInActiveTab = settings.showPinyinByTab[activeTab] ?? false;
-  const showTranslationInActiveTab = settings.showTranslationByTab[activeTab] ?? true;
   const [lessonAudioPlaybackRate, setLessonAudioPlaybackRate] = useState<LessonAudioPlaybackRate>(1);
   const lessonAudioRef = useRef<HTMLAudioElement>(null);
   const [tabProgressStates, setTabProgressStates] = useState(
@@ -1735,8 +1736,9 @@ export default function LessonDetail() {
     const [showAnswerReview, setShowAnswerReview] = useState(() => reviewFocus?.tab === "WORKBOOK");
     useModalScrollLock(showAnswerReview);
   const [showScript, setShowScript] = useState(true);
-  const [showLessonPinyin, setShowLessonPinyin] = useState(false);
-    const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
+    const [showLessonPinyin, setShowLessonPinyin] = useState(false);
+    const [showLessonTranslation, setShowLessonTranslation] = useState(false);
+      const [selectedScriptId, setSelectedScriptId] = useState<string | null>(null);
   const [autoReplayLessonAudio, setAutoReplayLessonAudio] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isPreparingRecording, setIsPreparingRecording] = useState(false);
@@ -2620,6 +2622,18 @@ export default function LessonDetail() {
         ? pinyinComparison.slice(0, lastRecognizedPinyinIndex + 1)
         : pinyinComparison;
       const hasCurrentTranscript = !isRecording && Boolean(recognizedTranscript.trim());
+      const comparisonTranscript = hasCurrentTranscript
+        ? recognizedTranscript
+        : bestPronunciationAssessment?.transcript ?? "";
+      const currentTranscriptMatchesBest = hasCurrentTranscript
+        && bestPronunciationAssessment?.transcript
+        && toPinyinText(bestPronunciationAssessment.transcript) === toPinyinText(recognizedTranscript);
+      const textComparisonParts = comparePronunciationTextParts(
+        scriptSpeakers.map((speaker) => speaker.chinese),
+        comparisonTranscript,
+      );
+      const textComparison = textComparisonParts.flatMap((part) => part.comparison);
+      const textMismatches = groupPronunciationTextMismatches(textComparison);
       const displayedScore = isRecording
         ? null
         : hasCurrentTranscript ? phoneticScore : bestPronunciationAssessment?.score ?? null;
@@ -2757,16 +2771,39 @@ export default function LessonDetail() {
               <section className="rounded-xl border bg-background p-4">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm font-bold uppercase tracking-wide text-primary">Script</span>
-                  <div className="flex items-center gap-2">
-                    {showPinyinInActiveTab && scriptSpeakers.some((speaker) => speaker.pinyin.trim()) && (
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    {scriptSpeakers.some((speaker) => speaker.pinyin.trim()) && (
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
+                        className="hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
                         aria-pressed={showLessonPinyin}
+                        aria-label={showLessonPinyin ? "Ẩn pinyin" : "Hiện pinyin"}
+                        title={showLessonPinyin ? "Ẩn pinyin" : "Hiện pinyin"}
                         onClick={() => setShowLessonPinyin((visible) => !visible)}
                       >
-                        {showLessonPinyin ? "Ẩn pinyin" : "Hiện pinyin"}
+                        <span className="font-semibold">拼音</span>
+                        {showLessonPinyin
+                          ? <Eye className="h-4 w-4" aria-hidden="true" />
+                          : <EyeOff className="h-4 w-4" aria-hidden="true" />}
+                      </Button>
+                    )}
+                    {scriptSpeakers.some((speaker) => speaker.translation.trim()) && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
+                        aria-pressed={showLessonTranslation}
+                        aria-label={showLessonTranslation ? "Ẩn tiếng Việt" : "Hiện tiếng Việt"}
+                        title={showLessonTranslation ? "Ẩn tiếng Việt" : "Hiện tiếng Việt"}
+                        onClick={() => setShowLessonTranslation((visible) => !visible)}
+                      >
+                        <span className="font-semibold">VN</span>
+                        {showLessonTranslation
+                          ? <Eye className="h-4 w-4" aria-hidden="true" />
+                          : <EyeOff className="h-4 w-4" aria-hidden="true" />}
                       </Button>
                     )}
                     <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary">
@@ -2785,10 +2822,10 @@ export default function LessonDetail() {
                         </div>
                         <div className="mt-2 space-y-2 text-base">
                           <p className="content-text hanzi-display !text-[26px] font-medium leading-relaxed text-foreground">{speaker.chinese}</p>
-                          {showPinyinInActiveTab && showLessonPinyin && speaker.pinyin.trim() && (
+                          {showLessonPinyin && speaker.pinyin.trim() && (
                             <p className="content-text pinyin-text !text-[24px] leading-relaxed text-muted-foreground">{speaker.pinyin}</p>
                           )}
-                          {showTranslationInActiveTab && speaker.translation.trim() && (
+                          {showLessonTranslation && speaker.translation.trim() && (
                             <p className="content-text !text-[24px] leading-relaxed text-muted-foreground">{speaker.translation}</p>
                           )}
                         </div>
@@ -2891,7 +2928,7 @@ export default function LessonDetail() {
                 </div>
               )}
 
-              {!isRecording && bestPronunciationAssessment && (
+              {!isRecording && bestPronunciationAssessment && !currentTranscriptMatchesBest && (
                 <div className="mt-4 space-y-3 rounded-lg border p-3 text-sm">
                   <div className="text-xs font-bold uppercase text-muted-foreground">
                     Kết quả tốt nhất · {new Date(bestPronunciationAssessment.createdAt).toLocaleString("vi-VN")}
@@ -2916,14 +2953,49 @@ export default function LessonDetail() {
                 </div>
               )}
 
-              {showPinyinInActiveTab && recognizedTranscript && !isRecording && (
-                <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
-                  <div className="font-medium text-foreground">Phiên âm nhận diện (Pinyin):</div>
-                  <p className="mt-1 text-muted-foreground">{toPinyinText(recognizedTranscript)}</p>
-                </div>
+              {showScript && !isRecording && /\p{Script=Han}/u.test(comparisonTranscript) && (
+                <section className="mt-4 space-y-4 rounded-lg border bg-muted/20 p-4" aria-live="polite" aria-label="So sánh nội dung bài đọc">
+                  <div>
+                    <h3 className="font-semibold text-foreground">Văn bản chuẩn</h3>
+                    <div className="mt-1 whitespace-pre-wrap break-words text-base leading-relaxed">
+                      {textComparisonParts.map((part, partIndex) => (
+                        <span key={`comparison-script-${partIndex}`}>
+                          {partIndex > 0 && "\n"}
+                          {part.comparison.map((item, index) => (
+                            <span
+                              key={`script-character-${partIndex}-${index}`}
+                              className={item.status === "incorrect" || item.status === "missing"
+                                ? "rounded-sm bg-destructive/10 font-semibold text-destructive"
+                                : undefined}
+                            >
+                              {item.scriptCharacter}
+                            </span>
+                          ))}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-foreground">Bạn đọc</h3>
+                    <p className="mt-1 whitespace-pre-wrap break-words text-base leading-relaxed">
+                      {textComparison.map((item, index) => (
+                        <span
+                          key={`spoken-character-${index}`}
+                          className={item.status === "incorrect" || item.status === "extra"
+                            ? "rounded-sm bg-destructive/10 font-semibold text-destructive"
+                            : undefined}
+                        >
+                          {item.spokenCharacter}
+                        </span>
+                      ))}
+                    </p>
+                  </div>
+
+                </section>
               )}
 
-              {showPinyinInActiveTab && showScript && recognizedTranscript && visiblePinyinComparison.length > 0 && (
+              {showScript && recognizedTranscript && visiblePinyinComparison.length > 0 && (
                 <div
                   className="mt-4 space-y-3 rounded-lg border p-4"
                   aria-live="polite"
@@ -2946,7 +3018,7 @@ export default function LessonDetail() {
                       </div>
                     </div>
                     <div className="mt-3">
-                      <p className="font-medium text-foreground">Bạn đọc (Pinyin)</p>
+                      <p className="font-medium text-foreground">Phiên âm nhận diện (Pinyin)</p>
                       <div className="mt-1 whitespace-pre-wrap break-words text-base leading-relaxed text-foreground">
                         {visiblePinyinComparison.map((item, index) => item.spokenPinyin && (
                           <span
@@ -2964,6 +3036,33 @@ export default function LessonDetail() {
                   <p className="text-xs text-muted-foreground">
                     Phần đỏ là âm tiết khác, thiếu hoặc đọc thừa. Điểm hiện tại so khớp âm tiết, chưa chấm thanh điệu hay chất lượng phát âm.
                   </p>
+                  {showScript && textMismatches.length > 0 && (
+                    <div className="border-t pt-3">
+                      <h3 className="text-sm font-bold uppercase tracking-wide text-foreground">Từ đọc chưa đúng</h3>
+                      <div className="mt-2 overflow-x-auto">
+                        <table className="w-full min-w-[22rem] border-collapse text-left text-sm">
+                          <thead>
+                            <tr className="border-b text-muted-foreground">
+                              <th scope="col" className="px-3 py-2 font-medium">Bạn đọc sai</th>
+                              <th scope="col" className="px-3 py-2 font-medium">Chữ đúng</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {textMismatches.map((mismatch, index) => (
+                              <tr key={`text-mismatch-${index}`} className="border-b last:border-0">
+                                <td className="px-3 py-2 font-medium text-destructive">
+                                  {mismatch.spokenText || "Bỏ sót"}
+                                </td>
+                                <td className="px-3 py-2 font-medium text-foreground">
+                                  {mismatch.scriptText || "Không có trong bài"}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -3073,6 +3172,10 @@ export default function LessonDetail() {
               activeTab={activeTab}
               progressStates={tabProgressStates}
               onTabChange={(tab) => {
+                if (tab === "LESSON") {
+                  setShowLessonPinyin(false);
+                  setShowLessonTranslation(false);
+                }
                 setActiveTab(tab);
                 setShowAnswerReview(false);
                 const progressKey = tab === "TEST" ? "VOCABULARY_TEST" : tab;
@@ -3096,8 +3199,7 @@ export default function LessonDetail() {
             <div className="mx-auto flex max-w-6xl justify-end">
               <SettingsMenu
                 align="right"
-                pinyinTabKey={activeTab}
-                translationTabKey={activeTab === "LESSON" ? activeTab : undefined}
+                pinyinTabKey={activeTab === "LESSON" ? undefined : activeTab}
               />
             </div>
 

@@ -7,6 +7,7 @@ import {
   chooseClosestRecognitionCandidate,
   comparePronunciationPinyin,
   computePronunciationScore,
+  groupPronunciationTextMismatches,
   mergeRecognitionTranscript,
   toPinyinText,
 } from "./pronunciation";
@@ -153,4 +154,23 @@ test("keeps text comparisons grouped by script part, including extra recognized 
       },
     ],
   );
+});
+
+test("groups adjacent text mismatches into phrase-level details", () => {
+  const comparison = comparePronunciationText(
+    "你很少生病，是不是喜欢运动？",
+    "我很少生病，是不是游泳？",
+  );
+  assert.deepEqual(groupPronunciationTextMismatches(comparison), [
+    { scriptText: "你", spokenText: "我" },
+    { scriptText: "喜欢运动", spokenText: "游泳" },
+  ]);
+});
+
+test("shows missing and extra text in mismatch details", () => {
+  const comparison = comparePronunciationText("我每天早上要出去跑步。", "我今天早上出去跑步。");
+  assert.deepEqual(groupPronunciationTextMismatches(comparison), [
+    { scriptText: "每", spokenText: "今" },
+    { scriptText: "要", spokenText: "" },
+  ]);
 });

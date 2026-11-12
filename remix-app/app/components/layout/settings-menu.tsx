@@ -16,14 +16,12 @@ export function SettingsMenu({
   triggerClassName,
   triggerLabel,
   pinyinTabKey,
-  translationTabKey,
 }: {
   align?: "left" | "right";
   side?: "top" | "bottom";
   triggerClassName?: string;
   triggerLabel?: string;
   pinyinTabKey?: string;
-  translationTabKey?: string;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -58,14 +56,6 @@ export function SettingsMenu({
       [pinyinTabKey]: show,
     });
   };
-  const setTabTranslation = (show: boolean) => {
-    if (!translationTabKey) return;
-    updateAppSetting("showTranslationByTab", {
-      ...settings.showTranslationByTab,
-      [translationTabKey]: show,
-    });
-  };
-
   return (
     <div ref={rootRef} className="relative">
       <button
@@ -103,19 +93,6 @@ export function SettingsMenu({
                 checked={settings.showPinyinByTab[pinyinTabKey] ?? false}
                 onCheckedChange={setTabPinyin}
                 aria-label="Hiện phiên âm trong tab này"
-              />
-            </div>
-          )}
-          {translationTabKey && (
-            <div className="flex items-center justify-between gap-3 border-t px-2 py-3">
-              <span className="min-w-0">
-                <span className="block text-sm font-medium">Tiếng Việt</span>
-                <span className="block text-xs text-muted-foreground">Hiện bản dịch trong tab bài khóa</span>
-              </span>
-              <Switch
-                checked={settings.showTranslationByTab[translationTabKey] ?? true}
-                onCheckedChange={setTabTranslation}
-                aria-label="Hiện bản dịch tiếng Việt trong tab bài khóa"
               />
             </div>
           )}

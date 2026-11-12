@@ -262,9 +262,36 @@ export interface PronunciationTextComparison {
   status: "correct" | "incorrect" | "missing" | "extra";
 }
 
+export interface PronunciationTextMismatch {
+  scriptText: string;
+  spokenText: string;
+}
+
 export interface PronunciationTextPartComparison {
   scriptText: string;
   comparison: PronunciationTextComparison[];
+}
+
+export function groupPronunciationTextMismatches(
+  comparison: readonly PronunciationTextComparison[],
+): PronunciationTextMismatch[] {
+  const mismatches: PronunciationTextMismatch[] = [];
+  let current: PronunciationTextMismatch | null = null;
+
+  for (const item of comparison) {
+    if (item.status === "correct") {
+      if (current) mismatches.push(current);
+      current = null;
+      continue;
+    }
+
+    current ??= { scriptText: "", spokenText: "" };
+    current.scriptText += item.scriptCharacter ?? "";
+    current.spokenText += item.spokenCharacter ?? "";
+  }
+
+  if (current) mismatches.push(current);
+  return mismatches;
 }
 
 export function comparePronunciationText(
