@@ -1676,6 +1676,7 @@ export default function LessonDetail() {
   const translationFetcher = useFetcher<{ intent?: string; success?: boolean; translationError?: string }>();
   const [activeTab, setActiveTab] = useState<LessonTab>(() => reviewFocus?.tab ?? "FLASHCARD");
   const showPinyinInActiveTab = settings.showPinyinByTab[activeTab] ?? false;
+  const showTranslationInActiveTab = settings.showTranslationByTab[activeTab] ?? true;
   const [lessonAudioPlaybackRate, setLessonAudioPlaybackRate] = useState<LessonAudioPlaybackRate>(1);
   const lessonAudioRef = useRef<HTMLAudioElement>(null);
   const [tabProgressStates, setTabProgressStates] = useState(
@@ -2787,7 +2788,7 @@ export default function LessonDetail() {
                           {showPinyinInActiveTab && showLessonPinyin && speaker.pinyin.trim() && (
                             <p className="content-text pinyin-text !text-[24px] leading-relaxed text-muted-foreground">{speaker.pinyin}</p>
                           )}
-                          {speaker.translation.trim() && (
+                          {showTranslationInActiveTab && speaker.translation.trim() && (
                             <p className="content-text !text-[24px] leading-relaxed text-muted-foreground">{speaker.translation}</p>
                           )}
                         </div>
@@ -3093,7 +3094,11 @@ export default function LessonDetail() {
             />
 
             <div className="mx-auto flex max-w-6xl justify-end">
-              <SettingsMenu align="right" pinyinTabKey={activeTab} />
+              <SettingsMenu
+                align="right"
+                pinyinTabKey={activeTab}
+                translationTabKey={activeTab === "LESSON" ? activeTab : undefined}
+              />
             </div>
 
             {activeTabComment && (
