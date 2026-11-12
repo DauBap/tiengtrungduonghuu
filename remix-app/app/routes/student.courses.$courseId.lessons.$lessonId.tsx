@@ -25,7 +25,11 @@ import {
 import { LessonTabs, type LessonTab, type LessonTabProgressState } from "~/components/lessons/lesson-tabs";
 import { LessonTabEmpty } from "~/components/lessons/lesson-tab-empty";
 import { VocabularyTable } from "~/components/lessons/vocabulary-table";
-import { GrammarSection, type GrammarPracticeSummary } from "~/components/lessons/grammar-section";
+import {
+  GrammarSection,
+  type GrammarPracticeSummary,
+  type GrammarSectionData,
+} from "~/components/lessons/grammar-section";
 import { WorkbookListeningTest } from "~/components/lessons/workbook-listening-test";
 import { VocabularyTest } from "~/components/lessons/vocabulary-test";
 import { PhoneticsPractice, type PhoneticsSectionScore } from "~/components/lessons/phonetics-practice";
@@ -80,6 +84,123 @@ const FEEDBACK_TAB_LABELS: Record<string, string> = {
 };
 
 const PRONUNCIATION_TRANSCRIPTION_TIMEOUT_MS = 300_000;
+const CONSOLIDATED_GRAMMAR_COURSES = new Set(["HSK2-2.0", "HSK3-2.0", "HSK4-2.0", "HSK5-2.0"]);
+
+function fullGrammarPracticeId(lessonId: string) {
+  return `full-grammar:${lessonId}`;
+}
+
+function prepareStudentGrammarSections(
+  courseCode: string,
+  lessonId: string,
+  sections: GrammarSectionData[],
+) {
+  const redactQuestions = (section: GrammarSectionData): GrammarSectionData => ({
+    ...section,
+    questions: section.questions.map((question) => ({
+      ...question,
+      answer: "",
+      acceptedAnswers: [],
+      hint: null,
+    })),
+  });
+  const existingSections = sections.map(redactQuestions);
+  if (!CONSOLIDATED_GRAMMAR_COURSES.has(courseCode)) return existingSections;
+
+  const sectionsWithQuestions = sections.filter((section) => section.questions.length > 0);
+  if (sectionsWithQuestions.length === 0) return existingSections;
+
+  const questionTypeOrder: Record<GrammarQuestionType, number> = {
+    SINGLE_CHOICE: 0,
+    ARRANGE: 1,
+    FILL: 2,
+  };
+  const practiceSourceSectionIdsByType: Partial<Record<GrammarQuestionType, string[]>> = {};
+  for (const type of Object.keys(questionTypeOrder) as GrammarQuestionType[]) {
+    practiceSourceSectionIdsByType[type] = sectionsWithQuestions
+      .filter((section) => section.questions.some((question) => question.type === type))
+      .map((section) => section.id);
+  }
+
+  const questions = sectionsWithQuestions
+    .flatMap((section) => section.questions.map((question) => ({
+      question,
+      sectionOrder: section.order ?? 0,
+    })))
+    .sort((a, b) => (
+      questionTypeOrder[a.question.type] - questionTypeOrder[b.question.type]
+      || a.sectionOrder - b.sectionOrder
+      || (a.question.order ?? 0) - (b.question.order ?? 0)
+    ))
+    .map(({ question }) => ({
+      ...question,
+      answer: "",
+      acceptedAnswers: [],
+      hint: null,
+    }));
+
+  const fullPracticeSection: GrammarSectionData & {
+    fullLessonPractice: true;
+    practiceSourceSectionIdsByType: Partial<Record<GrammarQuestionType, string[]>>;
+  } = {
+    id: fullGrammarPracticeId(lessonId),
+    title: "Luyện tập tổng hợp theo bài",
+    explanation: null,
+    formula: null,
+    examples: null,
+    note: null,
+    order: Math.max(0, ...sections.map((section) => section.order ?? 0)) + 1,
+    questions,
+    fullLessonPractice: true,
+    practiceSourceSectionIdsByType,
+  };
+
+  return [
+    ...existingSections.map((section) => ({ ...section, questions: [] })),
+    fullPracticeSection,
+  ];
+}
+
+function getFullPracticeAttempts(
+  section: GrammarSectionData,
+  attemptsBySection: Record<string, Partial<Record<GrammarQuestionType, GrammarPracticeSummary>>>,
+) {
+  const summaries: Partial<Record<GrammarQuestionType, GrammarPracticeSummary>> = {};
+  for (const type of ["SINGLE_CHOICE", "ARRANGE", "FILL"] as const) {
+    const sourceSectionIds = section.practiceSourceSectionIdsByType?.[type] ?? [];
+    const attempts = sourceSectionIds
+      .map((sectionId) => attemptsBySection[sectionId]?.[type])
+      .filter((attempt): attempt is GrammarPracticeSummary => Boolean(attempt));
+    if (attempts.some((attempt) => attempt.pendingReview)) {
+      summaries[type] = {
+        score: null,
+        correctCount: null,
+        totalCount: null,
+        passed: null,
+        pendingReview: true,
+      };
+      continue;
+    }
+    if (sourceSectionIds.length === 0 || attempts.length !== sourceSectionIds.length) continue;
+
+    const correctCount = attempts.every((attempt) => attempt.correctCount != null)
+      ? attempts.reduce((sum, attempt) => sum + (attempt.correctCount ?? 0), 0)
+      : null;
+    const totalCount = attempts.every((attempt) => attempt.totalCount != null)
+      ? attempts.reduce((sum, attempt) => sum + (attempt.totalCount ?? 0), 0)
+      : null;
+    summaries[type] = {
+      score: correctCount != null && totalCount
+        ? Math.round((correctCount / totalCount) * 10_000) / 100
+        : null,
+      correctCount,
+      totalCount,
+      passed: attempts.every((attempt) => attempt.passed === true),
+      pendingReview: false,
+    };
+  }
+  return summaries;
+}
 
 interface AnswerReviewResult {
   id: string;
@@ -555,10 +676,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       ...script,
       audioUrl: versionAudioUrl(script.audioUrl),
     })),
-    grammarSections: lesson.grammarSections.map((section) => ({
-      ...section,
-      questions: section.questions.map((question) => ({ ...question, answer: "", acceptedAnswers: [], hint: null })),
-    })),
+    grammarSections: prepareStudentGrammarSections(
+      lesson.course.code,
+      lesson.id,
+      lesson.grammarSections,
+    ),
     learningBlocks: lesson.learningBlocks.map((block) => ({
       ...block,
       config: block.type === "WORKBOOK" ? makeStudentWorkbookConfig(block.config) : block.config,
@@ -808,23 +930,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return { intent, success: true as const, submissionId: submission.id };
   }
 
-  if (intent === "submit-grammar-attempt" && String(form.get("questionType") ?? "") === "FILL") {
-    const sectionId = String(form.get("sectionId") ?? "");
-    const attempts = await prisma.lessonTabAttempt.findMany({
-      where: { userId: user.id, lessonId: params.lessonId!, tab: "GRAMMAR", mode: "FILL" },
-      select: { details: true },
-    });
-    const hasPendingFill = attempts.some((attempt) => {
-      const details = isRecord(attempt.details) ? attempt.details : {};
-      return details.sectionId === sectionId
-        && details.reviewPending === true
-        && !hasTeacherGrade(details);
-    });
-    if (hasPendingFill) {
-      return { grammarError: "Lượt Dịch câu đang chờ giáo viên chấm. Bạn có thể luyện lại sau khi có kết quả." as const };
-    }
-  }
-
   if (intent === "save-pronunciation-score") {
     const scriptId = String(form.get("lessonAudioScriptId") ?? "");
     const transcript = String(form.get("transcript") ?? "").trim();
@@ -951,6 +1056,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   if (intent === "submit-grammar-attempt") {
     const sectionId = String(form.get("sectionId") ?? "");
+    const fullLessonPractice = String(form.get("fullLessonPractice") ?? "") === "true";
     const questionType = parseGrammarQuestionType(form.get("questionType"));
     let submittedAnswers: unknown;
     try {
@@ -966,26 +1072,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
       select: { userId: true },
     });
     if (!enrollment) return { grammarError: "Bạn không thuộc khóa học này." as const };
-
-    const section = await prisma.grammarSection.findFirst({
-      where: {
-        id: sectionId,
-        lessonId: params.lessonId!,
-        lesson: { courseId: params.courseId! },
-      },
-      select: {
-        id: true,
-        title: true,
-        questions: {
-          where: { type: questionType },
-          orderBy: { order: "asc" },
-          select: { id: true, type: true, prompt: true, options: true, answer: true, acceptedAnswers: true, hint: true },
-        },
-      },
-    });
-    if (!section || section.questions.length === 0) {
-      return { grammarError: "Không tìm thấy câu hỏi của dạng luyện tập này." as const };
-    }
 
     const answerMap = new Map<string, string | string[]>();
     for (const entry of submittedAnswers) {
@@ -1003,7 +1089,105 @@ export async function action({ request, params }: ActionFunctionArgs) {
       answerMap.set(questionId, response as string | string[]);
     }
 
-    const questions = section.questions;
+    if (answerMap.size === 0) {
+      return { grammarError: "Không tìm thấy câu hỏi của dạng luyện tập này." as const };
+    }
+
+    type SubmittedGrammarQuestion = {
+      id: string;
+      type: GrammarQuestionType;
+      prompt: string;
+      options: string[];
+      answer: string;
+      acceptedAnswers: string[];
+      hint: string | null;
+      sourceSectionId: string;
+      sourceSectionTitle: string;
+    };
+
+    let questions: SubmittedGrammarQuestion[];
+    if (fullLessonPractice) {
+      if (sectionId !== fullGrammarPracticeId(params.lessonId!)) {
+        return { grammarError: "Bộ luyện tập theo bài không hợp lệ." as const };
+      }
+      const lesson = await prisma.lesson.findFirst({
+        where: {
+          id: params.lessonId!,
+          courseId: params.courseId!,
+          course: { code: { in: [...CONSOLIDATED_GRAMMAR_COURSES] } },
+        },
+        select: { id: true },
+      });
+      if (!lesson) return { grammarError: "Không tìm thấy bộ luyện tập theo bài." as const };
+
+      const sourceQuestions = await prisma.grammarQuestion.findMany({
+        where: {
+          type: questionType,
+          section: { lessonId: lesson.id },
+        },
+        select: {
+          id: true,
+          type: true,
+          prompt: true,
+          options: true,
+          answer: true,
+          acceptedAnswers: true,
+          hint: true,
+          sectionId: true,
+          section: { select: { title: true } },
+        },
+      });
+      if (sourceQuestions.length !== answerMap.size) {
+        return { grammarError: "Danh sách câu hỏi của bộ luyện tập đã thay đổi. Hãy tải lại trang." as const };
+      }
+      const sourceQuestionsById = new Map(sourceQuestions.map((question) => [question.id, question]));
+      if ([...answerMap.keys()].some((questionId) => !sourceQuestionsById.has(questionId))) {
+        return { grammarError: "Câu hỏi không thuộc bài học này." as const };
+      }
+      questions = [...answerMap.keys()].map((questionId) => {
+        const question = sourceQuestionsById.get(questionId)!;
+        return {
+          ...question,
+          sourceSectionId: question.sectionId,
+          sourceSectionTitle: question.section.title,
+        };
+      });
+    } else {
+      const section = await prisma.grammarSection.findFirst({
+        where: {
+          id: sectionId,
+          lessonId: params.lessonId!,
+          lesson: { courseId: params.courseId! },
+        },
+        select: {
+          id: true,
+          title: true,
+          questions: {
+            where: { type: questionType },
+            orderBy: { order: "asc" },
+            select: {
+              id: true,
+              type: true,
+              prompt: true,
+              options: true,
+              answer: true,
+              acceptedAnswers: true,
+              hint: true,
+              sectionId: true,
+            },
+          },
+        },
+      });
+      if (!section || section.questions.length === 0) {
+        return { grammarError: "Không tìm thấy câu hỏi của dạng luyện tập này." as const };
+      }
+      questions = section.questions.map((question) => ({
+        ...question,
+        sourceSectionId: section.id,
+        sourceSectionTitle: section.title,
+      }));
+    }
+
     if (answerMap.size !== questions.length || questions.some((question) => !answerMap.has(question.id))) {
       return { grammarError: "Vui lòng trả lời đầy đủ các câu hỏi trong tab này." as const };
     }
@@ -1048,6 +1232,41 @@ export async function action({ request, params }: ActionFunctionArgs) {
       });
     }
 
+    const resultsBySection = new Map<string, {
+      sectionTitle: string;
+      results: typeof results;
+    }>();
+    for (const [index, question] of questions.entries()) {
+      const group = resultsBySection.get(question.sourceSectionId) ?? {
+        sectionTitle: question.sourceSectionTitle,
+        results: [],
+      };
+      group.results.push(results[index]);
+      resultsBySection.set(question.sourceSectionId, group);
+    }
+
+    if (reviewPending) {
+      const sourceSectionIds = new Set(resultsBySection.keys());
+      const pendingAttempts = await prisma.lessonTabAttempt.findMany({
+        where: { userId: user.id, lessonId: params.lessonId!, tab: "GRAMMAR", mode: "FILL" },
+        select: { details: true },
+      });
+      const hasPendingFill = pendingAttempts.some((attempt) => {
+        const details = isRecord(attempt.details) ? attempt.details : {};
+        const teacherGrading = details.teacherGrading;
+        const hasGrade = typeof teacherGrading === "object"
+          && teacherGrading !== null
+          && !Array.isArray(teacherGrading);
+        return typeof details.sectionId === "string"
+          && sourceSectionIds.has(details.sectionId)
+          && details.reviewPending === true
+          && !hasGrade;
+      });
+      if (hasPendingFill) {
+        return { grammarError: "Lượt Dịch câu trong bài đang chờ giáo viên chấm. Hãy đợi có kết quả trước khi làm lại." as const };
+      }
+    }
+
     const correctCount = results.filter((result) => result.correct).length;
     const totalCount = results.length;
     const score = Math.round((correctCount / totalCount) * 10000) / 100;
@@ -1081,47 +1300,58 @@ export async function action({ request, params }: ActionFunctionArgs) {
           && (typeof teacherGrading !== "object" || teacherGrading === null || Array.isArray(teacherGrading)),
       }];
     });
-    grammarAttempts.push({
-      sectionId: section.id,
+    grammarAttempts.push(...[...resultsBySection.keys()].map((sourceSectionId) => ({
+      sectionId: sourceSectionId,
       questionType,
       completedAt,
       reviewPending,
-    });
+    })));
     const grammarProgress = getGrammarActivityProgress(grammarGroups, grammarAttempts);
-    const savedAttempt = await recordLessonTabAttempt(prisma, {
-      userId: user.id,
-      lessonId: params.lessonId!,
-      tab: "GRAMMAR",
-      mode: questionType,
-      score: reviewPending ? null : score,
-      correctCount: reviewPending ? null : correctCount,
-      totalCount: reviewPending ? null : totalCount,
-      passed: reviewPending ? null : correctCount === totalCount,
-      needsReview: reviewPending,
-      progress: {
-        percent: grammarProgress.percent,
-        completed: grammarProgress.completed,
-      },
-      completedAt,
-      details: {
-        sectionId: section.id,
-        sectionTitle: section.title,
-        questionType,
-        reviewPending,
-        results,
-      },
-    });
-    if (reviewPending) {
-      await notifyAssignedTeacherOfPendingWork({
-        studentId: user.id,
-        courseId: params.courseId!,
-        attemptId: savedAttempt.attempt.id,
+    const savedAttempts = [];
+    for (const [sourceSectionId, group] of resultsBySection) {
+      const groupCorrectCount = group.results.filter((result) => result.correct).length;
+      const groupTotalCount = group.results.length;
+      const groupScore = Math.round((groupCorrectCount / groupTotalCount) * 10000) / 100;
+      const savedAttempt = await recordLessonTabAttempt(prisma, {
+        userId: user.id,
         lessonId: params.lessonId!,
-        kind: "GRAMMAR_GRADING_REQUEST",
-        studentName: user.name,
-        sectionTitle: section.title,
-        targetUrl: `/teacher?gradeAttemptId=${encodeURIComponent(savedAttempt.attempt.id)}`,
+        tab: "GRAMMAR",
+        mode: questionType,
+        score: reviewPending ? null : groupScore,
+        correctCount: reviewPending ? null : groupCorrectCount,
+        totalCount: reviewPending ? null : groupTotalCount,
+        passed: reviewPending ? null : groupCorrectCount === groupTotalCount,
+        needsReview: reviewPending,
+        progress: {
+          percent: grammarProgress.percent,
+          completed: grammarProgress.completed,
+          score: reviewPending ? null : score,
+        },
+        completedAt,
+        details: {
+          sectionId: sourceSectionId,
+          sectionTitle: group.sectionTitle,
+          questionType,
+          reviewPending,
+          results: group.results,
+        },
       });
+      savedAttempts.push(savedAttempt);
+    }
+    if (reviewPending) {
+      for (const savedAttempt of savedAttempts) {
+        const details = isRecord(savedAttempt.attempt.details) ? savedAttempt.attempt.details : {};
+        await notifyAssignedTeacherOfPendingWork({
+          studentId: user.id,
+          courseId: params.courseId!,
+          attemptId: savedAttempt.attempt.id,
+          lessonId: params.lessonId!,
+          kind: "GRAMMAR_GRADING_REQUEST",
+          studentName: user.name,
+          sectionTitle: typeof details.sectionTitle === "string" ? details.sectionTitle : "Luyện tập ngữ pháp",
+          targetUrl: `/teacher?gradeAttemptId=${encodeURIComponent(savedAttempt.attempt.id)}`,
+        });
+      }
     }
 
     return {
@@ -1967,22 +2197,36 @@ export default function LessonDetail() {
       if (lesson.grammarSections.length === 0) return <LessonTabEmpty tab="GRAMMAR" />;
       return (
         <div className="space-y-4 max-w-6xl mx-auto">
-          {lesson.grammarSections.map((section, index) => (
-            <GrammarSection
-              key={section.id}
-              section={section}
-              number={index + 1}
-              latestAttempts={grammarAttemptsBySection[section.id] ?? {}}
-              answerReviewGroups={(answerReviewGroups.GRAMMAR ?? []).filter((group) =>
-                group.targetKey.startsWith(`${section.id}:`)
-              )}
-              initialReviewQuestionType={reviewFocus?.tab === "GRAMMAR"
-                && reviewFocus.targetKey.startsWith(`${section.id}:`)
-                && reviewFocus.questionType === "FILL"
-                ? "FILL"
-                : undefined}
-            />
-          ))}
+          {lesson.grammarSections.map((section, index) => {
+            const sourceSectionIdsByType = section.practiceSourceSectionIdsByType;
+            const latestAttempts = section.fullLessonPractice
+              ? getFullPracticeAttempts(section, grammarAttemptsBySection)
+              : grammarAttemptsBySection[section.id] ?? {};
+            const reviewGroups = (answerReviewGroups.GRAMMAR ?? []).filter((group) => (
+              section.fullLessonPractice
+                ? Object.entries(sourceSectionIdsByType ?? {}).some(([type, sectionIds]) => (
+                    sectionIds?.some((sectionId) => group.targetKey === `${sectionId}:${type}`)
+                  ))
+                : group.targetKey.startsWith(`${section.id}:`)
+            ));
+            const showFillReview = reviewFocus?.tab === "GRAMMAR"
+              && reviewFocus.questionType === "FILL"
+              && (section.fullLessonPractice
+                ? sourceSectionIdsByType?.FILL?.some((sectionId) =>
+                    reviewFocus.targetKey.startsWith(`${sectionId}:`))
+                : reviewFocus.targetKey.startsWith(`${section.id}:`));
+
+            return (
+              <GrammarSection
+                key={section.id}
+                section={section}
+                number={index + 1}
+                latestAttempts={latestAttempts}
+                answerReviewGroups={reviewGroups}
+                initialReviewQuestionType={showFillReview ? "FILL" : undefined}
+              />
+            );
+          })}
         </div>
       );
     }
@@ -2674,7 +2918,12 @@ export default function LessonDetail() {
             </div>
 
             <div className="space-y-5 p-6">
-            <div className="grid gap-4 lg:grid-cols-[minmax(280px,0.95fr)_minmax(420px,1.05fr)]">
+            <div className={cn(
+              "grid gap-4",
+              scriptSpeakers.length > 0
+                ? "lg:grid-cols-[minmax(280px,0.95fr)_minmax(420px,1.05fr)]"
+                : "grid-cols-1",
+            )}>
               <section className="self-start rounded-xl border bg-muted/20 p-4 lg:sticky lg:top-20">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="text-sm font-bold uppercase tracking-wide text-primary">File nghe</span>
@@ -2748,7 +2997,7 @@ export default function LessonDetail() {
                       </div>
                     </div>
                   )}
-                  <div className="mt-4 border-t pt-4">
+                  {scriptSpeakers.length > 0 && <div className="mt-4 border-t pt-4">
                     <Button
                       type="button"
                       variant="outline"
@@ -2764,11 +3013,11 @@ export default function LessonDetail() {
                         ? "Dùng khi file nghe không phát được."
                         : "Nghe nội dung bài khóa bằng giọng máy."}
                     </p>
-                  </div>
+                  </div>}
                 </div>
               </section>
 
-              <section className="rounded-xl border bg-background p-4">
+              {scriptSpeakers.length > 0 && <section className="rounded-xl border bg-background p-4">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm font-bold uppercase tracking-wide text-primary">Script</span>
                   <div className="flex flex-wrap items-center justify-end gap-2">
@@ -2837,10 +3086,10 @@ export default function LessonDetail() {
                     {showScript ? "Chưa có script" : "Script đã được ẩn theo cài đặt của giáo viên."}
                   </div>
                 )}
-              </section>
+              </section>}
             </div>
 
-            {inAppBrowser ? (
+            {scriptSpeakers.length > 0 && (inAppBrowser ? (
               <OpenInBrowserNotice info={inAppBrowser} />
             ) : (
             <section className="rounded-xl border bg-muted/20 p-4">
@@ -3097,7 +3346,7 @@ export default function LessonDetail() {
               )}
 
             </section>
-            )}
+            ))}
             </div>
           </div>
         </div>

@@ -42,16 +42,23 @@ interface DialogueFile {
   }>;
 }
 
-function dialogAudioUrl(hskLevel: number, lessonOrder: number, dialogIndex: number): string | null {
-  const suffix = DIALOG_AUDIO_SUFFIX[dialogIndex];
+function dialogAudioUrl(
+  courseFolder: string,
+  hskLevel: number,
+  lessonOrder: number,
+  dialogIndex: number,
+): string | null {
+  const hsk = `hsk${hskLevel}`;
+  const isLegacy20Course = courseFolder === `${hsk}_2-0`;
+  const suffix = isLegacy20Course ? dialogIndex + 1 : DIALOG_AUDIO_SUFFIX[dialogIndex];
   if (suffix == null) return null;
 
-  const hsk = `hsk${hskLevel}`;
+  const audioFolder = isLegacy20Course ? `${hsk}_2-0` : hsk;
   const name = `${String(lessonOrder).padStart(2, "0")}-${suffix}.mp3`;
-  const onDisk = path.join(PROJECT_ROOT, "public", "audio", "lessons", hsk, name);
+  const onDisk = path.join(PROJECT_ROOT, "public", "audio", "lessons", audioFolder, name);
   if (!fs.existsSync(onDisk)) return null;
 
-  return `/audio/lessons/${hsk}/${name}`;
+  return `/audio/lessons/${audioFolder}/${name}`;
 }
 
 async function ensureListeningBlock(lessonId: string, sentenceIds: string[]) {
@@ -186,7 +193,9 @@ async function migrateCourseListening(folder: string) {
 
       const legacySentences = readLegacyListeningPractice(courseDir, lessonNumber);
       const sentences = (legacySentences ?? dialogue.dialogs.flatMap((dialog, dialogIndex) => {
-        const dialogAudio = dialog.lines.length === 1 ? dialogAudioUrl(meta.hskLevel, lessonNumber, dialogIndex) : null;
+        const dialogAudio = dialog.lines.length === 1
+          ? dialogAudioUrl(folder, meta.hskLevel, lessonNumber, dialogIndex)
+          : null;
 
         return dialog.lines.map((line) => ({
           chinese: line.zh.trim(),

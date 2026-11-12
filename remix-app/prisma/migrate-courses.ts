@@ -130,16 +130,23 @@ function toWordTypes(adj: number | number[] | null | undefined): WordType[] {
  * Kiểm tra sự tồn tại thật thay vì tin quy ước — thiếu file thì để null để
  * player không hiện thanh audio 404.
  */
-function dialogAudioUrl(hskLevel: number, lessonOrder: number, dialogIndex: number): string | null {
-  const suffix = DIALOG_AUDIO_SUFFIX[dialogIndex];
+function dialogAudioUrl(
+  courseFolder: string,
+  hskLevel: number,
+  lessonOrder: number,
+  dialogIndex: number,
+): string | null {
+  const hsk = `hsk${hskLevel}`;
+  const isLegacy20Course = courseFolder === `${hsk}_2-0`;
+  const suffix = isLegacy20Course ? dialogIndex + 1 : DIALOG_AUDIO_SUFFIX[dialogIndex];
   if (suffix == null) return null;
 
-  const hsk = `hsk${hskLevel}`;
+  const audioFolder = isLegacy20Course ? `${hsk}_2-0` : hsk;
   const name = `${String(lessonOrder).padStart(2, "0")}-${suffix}.mp3`;
-  const onDisk = path.join(PUBLIC_DIR, "audio", "lessons", hsk, name);
+  const onDisk = path.join(PUBLIC_DIR, "audio", "lessons", audioFolder, name);
   if (!fs.existsSync(onDisk)) return null;
 
-  return `/audio/lessons/${hsk}/${name}`;
+  return `/audio/lessons/${audioFolder}/${name}`;
 }
 
 // ─── Migration ───────────────────────────────────────────────────────────────
@@ -190,7 +197,7 @@ async function migrateLesson(
       dialogue.dialogs.forEach((d, i) => {
         stats.audioScripts++;
         stats.speakers += d.lines.length;
-        if (!dialogAudioUrl(hskLevel, order, i)) {
+        if (!dialogAudioUrl(courseFolder, hskLevel, order, i)) {
           stats.missingAudio.push(`${courseFolder}/bài ${order}/${d.id}`);
         }
       });
@@ -230,7 +237,7 @@ async function migrateLesson(
   if (fs.existsSync(dialoguePath)) {
     const dialogue = readJson<DialogueFile>(dialoguePath);
     for (const [i, dialog] of dialogue.dialogs.entries()) {
-      const audioUrl = dialogAudioUrl(hskLevel, order, i);
+      const audioUrl = dialogAudioUrl(courseFolder, hskLevel, order, i);
       if (!audioUrl) stats.missingAudio.push(`${courseFolder}/bài ${order}/${dialog.id}`);
 
       await prisma.lessonAudioScript.create({

@@ -14,6 +14,7 @@ import {
 
 export interface GrammarPracticeQuestion {
   id: string;
+  order?: number;
   type: GrammarQuestionType;
   prompt: string;
   options: string[];
@@ -31,7 +32,17 @@ interface QuestionState {
 
 const EMPTY: QuestionState = { text: "", picked: [] };
 
-export function GrammarPractice({ questions, sectionId, previewOnly = false }: { questions: GrammarPracticeQuestion[]; sectionId: string; previewOnly?: boolean }) {
+export function GrammarPractice({
+  questions,
+  sectionId,
+  fullLessonPractice = false,
+  previewOnly = false,
+}: {
+  questions: GrammarPracticeQuestion[];
+  sectionId: string;
+  fullLessonPractice?: boolean;
+  previewOnly?: boolean;
+}) {
   const fetcher = useFetcher<{
     intent?: string;
     success?: boolean;
@@ -82,6 +93,7 @@ export function GrammarPractice({ questions, sectionId, previewOnly = false }: {
     fetcher.submit({
       intent: "submit-grammar-attempt",
       sectionId,
+      fullLessonPractice: String(fullLessonPractice),
       questionType,
       answers: JSON.stringify(questions.map((item) => {
         const itemState = states[item.id] ?? EMPTY;

@@ -330,14 +330,18 @@ function convertQuestion(
 
 function audioUrlFor(courseFolder: keyof typeof COURSE_MAP, lessonOrder: number): string | undefined {
   const level = COURSE_MAP[courseFolder].level;
-  const fileName = level === 1
-    ? `bai${lessonOrder}.mp3`
-    : level === 2
-      ? `第${String(lessonOrder).padStart(2, "0")}课.mp3`
-      : `第${lessonOrder}课.mp3`;
-  const filePath = path.join(PUBLIC_DIR, "audio", "workbooks", `hsk${level}`, fileName);
+  const isHsk3Legacy20 = courseFolder === "hsk3_2-0";
+  const audioFolder = isHsk3Legacy20 ? "hsk3_2-0" : `hsk${level}`;
+  const fileName = isHsk3Legacy20
+    ? `${String(lessonOrder).padStart(2, "0")}.mp3`
+    : level === 1
+      ? `bai${lessonOrder}.mp3`
+      : level === 2
+        ? `第${String(lessonOrder).padStart(2, "0")}课.mp3`
+        : `第${lessonOrder}课.mp3`;
+  const filePath = path.join(PUBLIC_DIR, "audio", "workbooks", audioFolder, fileName);
   if (!fs.existsSync(filePath)) return undefined;
-  return `/audio/workbooks/hsk${level}/${encodeURIComponent(fileName)}`;
+  return `/audio/workbooks/${audioFolder}/${encodeURIComponent(fileName)}`;
 }
 
 function convertWorkbook(

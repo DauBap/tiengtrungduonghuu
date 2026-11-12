@@ -1,0 +1,1983 @@
+{
+  "lessons": [
+    {
+      "order": 1,
+      "title": "Bài 1",
+      "singleChoice": [
+        {
+          "prompt": "我坐公共汽车去___。",
+          "options": [
+            "上班",
+            "运动",
+            "踢足球"
+          ],
+          "answer": "上班"
+        },
+        {
+          "prompt": "你每天怎么去___？",
+          "options": [
+            "打篮球",
+            "上班",
+            "公共汽车"
+          ],
+          "answer": "上班"
+        },
+        {
+          "prompt": "坐___去公司很快。",
+          "options": [
+            "公共汽车",
+            "上班",
+            "运动"
+          ],
+          "answer": "公共汽车"
+        },
+        {
+          "prompt": "爸爸每天___点上班？",
+          "options": [
+            "几",
+            "多",
+            "怎么"
+          ],
+          "answer": "几"
+        },
+        {
+          "prompt": "我坐公共汽车___。",
+          "options": [
+            "上班",
+            "运动",
+            "踢足球"
+          ],
+          "answer": "上班"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "坐",
+            "公共汽车",
+            "去",
+            "公司",
+            "。"
+          ],
+          "answer": "我坐公共汽车去公司。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "你",
+            "怎么",
+            "去",
+            "上班",
+            "？"
+          ],
+          "answer": "你怎么去上班？"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "每天",
+            "坐",
+            "公共汽车",
+            "上班",
+            "。"
+          ],
+          "answer": "我每天坐公共汽车上班。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他",
+            "去",
+            "上班",
+            "了",
+            "。"
+          ],
+          "answer": "他去上班了。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我们",
+            "坐",
+            "公共汽车",
+            "去",
+            "上班",
+            "。"
+          ],
+          "answer": "我们坐公共汽车去上班。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Hôm nay tôi đi làm.",
+          "answer": "今天我上班。"
+        },
+        {
+          "prompt": "Bạn đi làm bằng xe buýt phải không?",
+          "answer": "你坐公共汽车上班吗？"
+        },
+        {
+          "prompt": "Bố tôi đi làm lúc 8 giờ.",
+          "answer": "我爸爸八点上班。"
+        },
+        {
+          "prompt": "Tôi và anh ấy cùng đi làm.",
+          "answer": "我和他一起上班。"
+        },
+        {
+          "prompt": "Cô ấy không đi làm hôm nay.",
+          "answer": "她今天不上班。"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "title": "Bài 2",
+      "singleChoice": [
+        {
+          "prompt": "你喜欢什么___？",
+          "options": [
+            "运动",
+            "踢足球",
+            "打篮球"
+          ],
+          "answer": "运动"
+        },
+        {
+          "prompt": "下午我们___足球吧。",
+          "options": [
+            "打",
+            "踢",
+            "做"
+          ],
+          "answer": "踢"
+        },
+        {
+          "prompt": "他们在___篮球。",
+          "options": [
+            "踢",
+            "打",
+            "坐"
+          ],
+          "answer": "打"
+        },
+        {
+          "prompt": "我不喜欢___运动。",
+          "options": [
+            "踢",
+            "打",
+            "做"
+          ],
+          "answer": "做"
+        },
+        {
+          "prompt": "你___踢足球吗？",
+          "options": [
+            "会",
+            "是",
+            "在"
+          ],
+          "answer": "会"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "下午",
+            "我们",
+            "去",
+            "打篮球",
+            "吧",
+            "。"
+          ],
+          "answer": "下午我们去打篮球吧。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "不",
+            "喜欢",
+            "踢足球",
+            "。"
+          ],
+          "answer": "我不喜欢踢足球。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他",
+            "很",
+            "喜欢",
+            "打篮球",
+            "。"
+          ],
+          "answer": "他很喜欢打篮球。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "你",
+            "会",
+            "踢足球",
+            "吗",
+            "？"
+          ],
+          "answer": "你会踢足球吗？"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他们",
+            "在",
+            "操场",
+            "打篮球",
+            "。"
+          ],
+          "answer": "他们在操场打篮球。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Tôi rất thích vận động.",
+          "answer": "我很喜欢运动。"
+        },
+        {
+          "prompt": "Chiều nay chúng tôi đá bóng.",
+          "answer": "下午我们踢足球。"
+        },
+        {
+          "prompt": "Anh trai tôi chơi bóng rổ rất giỏi.",
+          "answer": "我哥哥打篮球很好。"
+        },
+        {
+          "prompt": "Bạn có thích vận động không?",
+          "answer": "你喜欢运动吗？"
+        },
+        {
+          "prompt": "Họ đang chơi bóng rổ ở trường.",
+          "answer": "他们在学校打篮球。"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "title": "左边那个红色的是我的。",
+      "singleChoice": [
+        {
+          "prompt": "左边那个___的是我的。 (Cái màu đỏ...)",
+          "options": [
+            "红色",
+            "颜色",
+            "粉色"
+          ],
+          "answer": "红色"
+        },
+        {
+          "prompt": "你喜欢什么___？",
+          "options": [
+            "红色",
+            "颜色",
+            "粉色"
+          ],
+          "answer": "颜色"
+        },
+        {
+          "prompt": "这个___的杯子是谁的？",
+          "options": [
+            "颜色",
+            "红色",
+            "粉色"
+          ],
+          "answer": "粉色"
+        },
+        {
+          "prompt": "那个红色的___我的。",
+          "options": [
+            "是",
+            "有",
+            "在"
+          ],
+          "answer": "是"
+        },
+        {
+          "prompt": "我的___是红色的。",
+          "options": [
+            "颜色",
+            "手表",
+            "报纸"
+          ],
+          "answer": "手表"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "左边",
+            "的",
+            "报纸",
+            "是",
+            "我",
+            "的",
+            "。"
+          ],
+          "answer": "左边的报纸是我的。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "右边",
+            "的",
+            "手表",
+            "是",
+            "我",
+            "的",
+            "。"
+          ],
+          "answer": "右边的手表是我的。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "房间",
+            "旁边",
+            "的",
+            "是",
+            "教室",
+            "。"
+          ],
+          "answer": "房间旁边的是教室。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "的",
+            "报纸",
+            "在",
+            "桌子",
+            "上",
+            "。"
+          ],
+          "answer": "我的报纸在桌子上。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "这个",
+            "手表",
+            "是",
+            "谁",
+            "的",
+            "？"
+          ],
+          "answer": "这个手表是谁的？"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Phòng của tôi ở bên cạnh.",
+          "answer": "我的房间在旁边。"
+        },
+        {
+          "prompt": "Cái đồng hồ đeo tay màu đỏ này rất đẹp.",
+          "answer": "这个红色的手表很漂亮。"
+        },
+        {
+          "prompt": "Bên phải là phòng học của tôi.",
+          "answer": "右边是我的教室。"
+        },
+        {
+          "prompt": "Căn phòng này to quá! (Dùng 多+adj)",
+          "answer": "这个房间多大？"
+        },
+        {
+          "prompt": "Cái cốc màu hồng kia là của tôi.",
+          "answer": "那个粉色的是我的杯子。"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "title": "这个工作是他帮我介绍的。",
+      "singleChoice": [
+        {
+          "prompt": "这个工作是他___我介绍的。",
+          "options": [
+            "帮",
+            "认识",
+            "送"
+          ],
+          "answer": "帮"
+        },
+        {
+          "prompt": "我___他。",
+          "options": [
+            "认识",
+            "介绍",
+            "帮"
+          ],
+          "answer": "认识"
+        },
+        {
+          "prompt": "这个工作是你___时候介绍的？",
+          "options": [
+            "什么",
+            "怎么",
+            "哪"
+          ],
+          "answer": "什么"
+        },
+        {
+          "prompt": "他___我介绍了一个工作。",
+          "options": [
+            "给",
+            "送",
+            "让"
+          ],
+          "answer": "给"
+        },
+        {
+          "prompt": "我___认识他了。",
+          "options": [
+            "非常",
+            "已经",
+            "帮"
+          ],
+          "answer": "已经"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "谢谢",
+            "你",
+            "的",
+            "帮忙",
+            "。"
+          ],
+          "answer": "谢谢你的帮忙。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "送",
+            "给",
+            "他",
+            "一本书",
+            "。"
+          ],
+          "answer": "我送给他一本书。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "她",
+            "非常",
+            "漂亮",
+            "。"
+          ],
+          "answer": "她非常漂亮。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "送",
+            "他",
+            "一个",
+            "杯子",
+            "。"
+          ],
+          "answer": "我送他一个杯子。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他",
+            "很",
+            "高兴",
+            "帮忙",
+            "我",
+            "。"
+          ],
+          "answer": "他很高兴帮忙我。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Tôi đang học đại học.",
+          "answer": "我在上大学。"
+        },
+        {
+          "prompt": "Anh ấy giới thiệu cho tôi một công việc.",
+          "answer": "他帮我介绍了一个工作。"
+        },
+        {
+          "prompt": "Đây là quà sinh nhật tôi tặng bạn.",
+          "answer": "这是我送你的生日礼物。"
+        },
+        {
+          "prompt": "Mẹ bảo tôi về nhà. (Dùng 让)",
+          "answer": "妈妈让我回家。"
+        },
+        {
+          "prompt": "Tôi đã quen cô ấy rồi.",
+          "answer": "我已经认识她了。"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "title": "就买这件吧。",
+      "singleChoice": [
+        {
+          "prompt": "这件衣服太___了，不买。",
+          "options": [
+            "贵",
+            "便宜",
+            "穿"
+          ],
+          "answer": "贵"
+        },
+        {
+          "prompt": "这件衣服很___，买这件吧。",
+          "options": [
+            "贵",
+            "便宜",
+            "买"
+          ],
+          "answer": "便宜"
+        },
+        {
+          "prompt": "你喜欢___买吧。",
+          "options": [
+            "就",
+            "都",
+            "很"
+          ],
+          "answer": "就"
+        },
+        {
+          "prompt": "你去不去___店？",
+          "options": [
+            "商店",
+            "衣服",
+            "穿"
+          ],
+          "answer": "商店"
+        },
+        {
+          "prompt": "这件衣服你___不穿？",
+          "options": [
+            "穿",
+            "买",
+            "贵"
+          ],
+          "answer": "穿"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "去",
+            "商店",
+            "买",
+            "衣服",
+            "。"
+          ],
+          "answer": "我去商店买衣服。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "妈妈",
+            "在",
+            "做饭",
+            "。"
+          ],
+          "answer": "妈妈在做饭。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "就",
+            "买",
+            "这件",
+            "吧",
+            "。"
+          ],
+          "answer": "我就买这件吧。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "你",
+            "穿",
+            "这",
+            "件",
+            "衣服",
+            "吗",
+            "？"
+          ],
+          "answer": "你穿这件衣服吗？"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "这件",
+            "衣服",
+            "很",
+            "便宜",
+            "。"
+          ],
+          "answer": "这件衣服很便宜。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Bên ngoài có một con cá.",
+          "answer": "外面有一条鱼。"
+        },
+        {
+          "prompt": "Bạn uống cà phê không?",
+          "answer": "你喝咖啡吗？"
+        },
+        {
+          "prompt": "Mẹ tôi đang nấu cơm.",
+          "answer": "我妈妈在做饭。"
+        },
+        {
+          "prompt": "Quần áo này rẻ quá, mua cái này đi.",
+          "answer": "这件衣服很便宜，就买这件吧。"
+        },
+        {
+          "prompt": "Bên ngoài trời lạnh quá, tôi không ra ngoài đâu. (Dùng 外面)",
+          "answer": "外面太冷了，我不出去。"
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "title": "你怎么不吃了？",
+      "singleChoice": [
+        {
+          "prompt": "你怎么不___了？",
+          "options": [
+            "吃",
+            "喝",
+            "买"
+          ],
+          "answer": "吃"
+        },
+        {
+          "prompt": "我不想吃___了。",
+          "options": [
+            "羊肉",
+            "鸡蛋",
+            "公斤"
+          ],
+          "answer": "羊肉"
+        },
+        {
+          "prompt": "我想吃___。",
+          "options": [
+            "面条",
+            "鸡蛋",
+            "羊肉"
+          ],
+          "answer": "面条"
+        },
+        {
+          "prompt": "妈妈买了___个鸡蛋。",
+          "options": [
+            "几",
+            "多",
+            "公斤"
+          ],
+          "answer": "几"
+        },
+        {
+          "prompt": "我不吃___了。",
+          "options": [
+            "米饭",
+            "公斤",
+            "鸡蛋"
+          ],
+          "answer": "米饭"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "因为",
+            "下雨",
+            "，",
+            "所以",
+            "我",
+            "不去",
+            "。"
+          ],
+          "answer": "因为下雨，所以我不去。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他",
+            "经常",
+            "骑",
+            "自行车",
+            "。"
+          ],
+          "answer": "他经常骑自行车。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "因为",
+            "我",
+            "累",
+            "了",
+            "，",
+            "所以",
+            "想",
+            "休息",
+            "。"
+          ],
+          "answer": "因为我累了，所以想休息。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "骑",
+            "自行车",
+            "去",
+            "学校",
+            "。"
+          ],
+          "answer": "我骑自行车去学校。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他",
+            "经常",
+            "去",
+            "商店",
+            "买",
+            "东西",
+            "。"
+          ],
+          "answer": "他经常去商店买东西。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Thịt cừu này bao nhiêu kg?",
+          "answer": "这个羊肉多少公斤？"
+        },
+        {
+          "prompt": "Tàu hỏa sắp đến rồi.",
+          "answer": "火车快到了。"
+        },
+        {
+          "prompt": "Tôi đi taxi về nhà.",
+          "answer": "我坐出租车回家。"
+        },
+        {
+          "prompt": "Bạn ăn mì hay ăn cơm? (Dùng 还是)",
+          "answer": "你吃面条还是米饭？"
+        },
+        {
+          "prompt": "Vì hôm nay trời lạnh nên tôi không đi.",
+          "answer": "因为今天很冷，所以我不去。"
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "title": "你家离公司远吗？",
+      "singleChoice": [
+        {
+          "prompt": "你家___公司远吗？",
+          "options": [
+            "离",
+            "到",
+            "在"
+          ],
+          "answer": "离"
+        },
+        {
+          "prompt": "我家离公司很___。",
+          "options": [
+            "远",
+            "近",
+            "快"
+          ],
+          "answer": "远"
+        },
+        {
+          "prompt": "公司离机场很___。",
+          "options": [
+            "远",
+            "近",
+            "慢"
+          ],
+          "answer": "近"
+        },
+        {
+          "prompt": "我家离公司不___。",
+          "options": [
+            "远",
+            "近",
+            "有"
+          ],
+          "answer": "远"
+        },
+        {
+          "prompt": "你家离___远吗？",
+          "options": [
+            "公司",
+            "机场",
+            "教室"
+          ],
+          "answer": "机场"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "去",
+            "机场",
+            "。"
+          ],
+          "answer": "我去机场。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "路上",
+            "有",
+            "很多",
+            "车",
+            "。"
+          ],
+          "answer": "路上有很多车。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "教室",
+            "在",
+            "二楼",
+            "。"
+          ],
+          "answer": "教室在二楼。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "到",
+            "学校",
+            "了",
+            "。"
+          ],
+          "answer": "我到学校了。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "路上",
+            "我",
+            "看见",
+            "朋友",
+            "了",
+            "。"
+          ],
+          "answer": "路上我看见朋友了。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Ngày mai tôi phải thi.",
+          "answer": "明天我考试。"
+        },
+        {
+          "prompt": "Kỳ thi này rất khó.",
+          "answer": "这个考试很难。"
+        },
+        {
+          "prompt": "Anh ấy vẫn đang làm việc. (Dùng 还)",
+          "answer": "他还在工作。"
+        },
+        {
+          "prompt": "Nhà tôi cách trường học không xa lắm.",
+          "answer": "我家离学校不太远。"
+        },
+        {
+          "prompt": "Từ nhà tôi đến công ty đi xe buýt mất 1 tiếng. (Dùng 到/就)",
+          "answer": "从我家到公司坐公共汽车一个小时就到。"
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "title": "让我想想再告诉你。",
+      "singleChoice": [
+        {
+          "prompt": "让我___再告诉你。",
+          "options": [
+            "想",
+            "找",
+            "等"
+          ],
+          "answer": "想"
+        },
+        {
+          "prompt": "我___你一件事。",
+          "options": [
+            "告诉",
+            "想",
+            "找"
+          ],
+          "answer": "告诉"
+        },
+        {
+          "prompt": "你在___什么？",
+          "options": [
+            "找",
+            "想",
+            "等"
+          ],
+          "answer": "找"
+        },
+        {
+          "prompt": "请___我一下。",
+          "options": [
+            "等",
+            "找",
+            "想"
+          ],
+          "answer": "等"
+        },
+        {
+          "prompt": "我想想___告诉你。",
+          "options": [
+            "再",
+            "在",
+            "都"
+          ],
+          "answer": "再"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "有",
+            "一件",
+            "事情",
+            "。"
+          ],
+          "answer": "我有一件事情。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "让",
+            "我",
+            "想",
+            "想",
+            "。"
+          ],
+          "answer": "让我想想。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "找",
+            "服务员",
+            "。"
+          ],
+          "answer": "我找服务员。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "明天",
+            "再",
+            "来",
+            "。"
+          ],
+          "answer": "我明天再来。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他",
+            "没",
+            "告诉",
+            "我",
+            "。"
+          ],
+          "answer": "他没告诉我。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Nhân viên bán hàng ở cửa hàng.",
+          "answer": "售货员在商店。"
+        },
+        {
+          "prompt": "Bác sĩ ở bệnh viện.",
+          "answer": "医生在医院。"
+        },
+        {
+          "prompt": "Bạn bảo anh ấy đợi tôi.",
+          "answer": "你让他等我。"
+        },
+        {
+          "prompt": "Việc này hơi khó chịu một chút. (Dùng 有点儿)",
+          "answer": "这件事情有点儿难。"
+        },
+        {
+          "prompt": "Để tôi nghĩ đã rồi nói cho bạn.",
+          "answer": "让我想想再告诉你。"
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "title": "题太多，我没做完。",
+      "singleChoice": [
+        {
+          "prompt": "这些___太多，我没做完。",
+          "options": [
+            "题",
+            "做",
+            "完"
+          ],
+          "answer": "题"
+        },
+        {
+          "prompt": "我___完了作业。",
+          "options": [
+            "做",
+            "完",
+            "题"
+          ],
+          "answer": "做"
+        },
+        {
+          "prompt": "我___做完作业。",
+          "options": [
+            "没",
+            "不",
+            "是"
+          ],
+          "answer": "没"
+        },
+        {
+          "prompt": "从家___学校很近。",
+          "options": [
+            "到",
+            "去",
+            "在"
+          ],
+          "answer": "到"
+        },
+        {
+          "prompt": "这本书我___看完了。",
+          "options": [
+            "都",
+            "也",
+            "还"
+          ],
+          "answer": "都"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "希望",
+            "你",
+            "来",
+            "我",
+            "家",
+            "。"
+          ],
+          "answer": "我希望你来我家。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "不",
+            "懂",
+            "这个",
+            "问题",
+            "。"
+          ],
+          "answer": "我不懂这个问题。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我们",
+            "班",
+            "有",
+            "二十",
+            "人",
+            "。"
+          ],
+          "answer": "我们班有二十人。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "这个",
+            "问题",
+            "很",
+            "难",
+            "。"
+          ],
+          "answer": "这个问题很难。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "懂",
+            "这个",
+            "问题",
+            "了",
+            "。"
+          ],
+          "answer": "我懂这个问题了。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Hoan nghênh bạn đến nhà tôi.",
+          "answer": "欢迎你来我家。"
+        },
+        {
+          "prompt": "Cô ấy nhảy múa rất đẹp.",
+          "answer": "她跳舞很好看。"
+        },
+        {
+          "prompt": "Tôi nhìn thấy anh ấy rồi. (Dùng 看见)",
+          "answer": "我看见他了。"
+        },
+        {
+          "prompt": "Tôi làm xong bài tập rồi. (Dùng 做完)",
+          "answer": "我做完作业了。"
+        },
+        {
+          "prompt": "Từ sáng đến tối tôi đều học tiếng Trung. (Dùng 从...到...)",
+          "answer": "从早上到晚上我都在学习汉语。"
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "title": "别找了，手机在桌子上呢。",
+      "singleChoice": [
+        {
+          "prompt": "我的___在桌子上。",
+          "options": [
+            "手机",
+            "电脑",
+            "电视"
+          ],
+          "answer": "手机"
+        },
+        {
+          "prompt": "我在用___。",
+          "options": [
+            "电脑",
+            "洗衣机",
+            "照相机"
+          ],
+          "answer": "电脑"
+        },
+        {
+          "prompt": "妈妈在洗衣服，用___。",
+          "options": [
+            "洗衣机",
+            "电脑",
+            "电视"
+          ],
+          "answer": "洗衣机"
+        },
+        {
+          "prompt": "这个___很贵。",
+          "options": [
+            "照相机",
+            "手机",
+            "电脑"
+          ],
+          "answer": "照相机"
+        },
+        {
+          "prompt": "我在看___。",
+          "options": [
+            "电视",
+            "洗衣机",
+            "照相机"
+          ],
+          "answer": "电视"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他",
+            "正在",
+            "睡觉",
+            "。"
+          ],
+          "answer": "他正在睡觉。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "谢谢",
+            "你",
+            "的",
+            "帮助",
+            "。"
+          ],
+          "answer": "谢谢你的帮助。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "在",
+            "看",
+            "电视",
+            "。"
+          ],
+          "answer": "我在看电视。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他",
+            "帮助",
+            "我",
+            "了",
+            "。"
+          ],
+          "answer": "他帮助我了。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "你",
+            "早点儿",
+            "睡觉",
+            "吧",
+            "。"
+          ],
+          "answer": "你早点儿睡觉吧。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Mắt của cô ấy rất đẹp.",
+          "answer": "她的眼睛很漂亮。"
+        },
+        {
+          "prompt": "Đừng tìm nữa, điện thoại ở trên bàn.",
+          "answer": "别找了，手机在桌子上呢。"
+        },
+        {
+          "prompt": "Tôi đang làm việc. (Dùng 正在...呢)",
+          "answer": "我正在工作呢。"
+        },
+        {
+          "prompt": "Anh ấy đang xem TV.",
+          "answer": "他正在看电视。"
+        },
+        {
+          "prompt": "Bạn giúp đỡ tôi nhé.",
+          "answer": "你帮助我吧。"
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "title": "他比我大三岁。",
+      "singleChoice": [
+        {
+          "prompt": "他___我大三岁。",
+          "options": [
+            "比",
+            "跟",
+            "和"
+          ],
+          "answer": "比"
+        },
+        {
+          "prompt": "你今年几___了？",
+          "options": [
+            "岁",
+            "大",
+            "比"
+          ],
+          "answer": "岁"
+        },
+        {
+          "prompt": "他喜欢___。",
+          "options": [
+            "唱歌",
+            "说话",
+            "水果"
+          ],
+          "answer": "唱歌"
+        },
+        {
+          "prompt": "他们在___。",
+          "options": [
+            "唱歌",
+            "说话",
+            "水果"
+          ],
+          "answer": "说话"
+        },
+        {
+          "prompt": "我___他大。",
+          "options": [
+            "比",
+            "和",
+            "跟"
+          ],
+          "answer": "比"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "明天",
+            "可能",
+            "会",
+            "下雨",
+            "。"
+          ],
+          "answer": "明天可能会下雨。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "喜欢",
+            "吃",
+            "水果",
+            "。"
+          ],
+          "answer": "我喜欢吃水果。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "西瓜",
+            "很",
+            "甜",
+            "。"
+          ],
+          "answer": "西瓜很甜。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "买",
+            "了",
+            "三斤",
+            "苹果",
+            "。"
+          ],
+          "answer": "我买了三斤苹果。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他",
+            "明天",
+            "可能",
+            "不",
+            "来",
+            "。"
+          ],
+          "answer": "他明天可能不来。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Hôm nay âm 10 độ.",
+          "answer": "今天零下十度。"
+        },
+        {
+          "prompt": "Tôi và anh ấy cao bằng nhau. (Dùng 和...一样)",
+          "answer": "我和他一样高。"
+        },
+        {
+          "prompt": "Dưa hấu này to hơn quả táo.",
+          "answer": "这个西瓜比苹果大。"
+        },
+        {
+          "prompt": "Cô ấy hát hay hơn tôi.",
+          "answer": "她唱歌比我好。"
+        },
+        {
+          "prompt": "Có thể ngày mai có tuyết.",
+          "answer": "明天可能会下雪。"
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "title": "你穿得太少了。",
+      "singleChoice": [
+        {
+          "prompt": "你穿得太___了。",
+          "options": [
+            "少",
+            "冷",
+            "慢"
+          ],
+          "answer": "少"
+        },
+        {
+          "prompt": "今天很___，多穿点衣服。",
+          "options": [
+            "冷",
+            "热",
+            "快"
+          ],
+          "answer": "冷"
+        },
+        {
+          "prompt": "今天很___，少穿点衣服。",
+          "options": [
+            "冷",
+            "热",
+            "慢"
+          ],
+          "answer": "热"
+        },
+        {
+          "prompt": "他跑得很___。",
+          "options": [
+            "快",
+            "慢",
+            "累"
+          ],
+          "answer": "快"
+        },
+        {
+          "prompt": "你走得太___了，快点儿。",
+          "options": [
+            "快",
+            "慢",
+            "累"
+          ],
+          "answer": "慢"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "想",
+            "休息",
+            "。"
+          ],
+          "answer": "我想休息。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "今天",
+            "我",
+            "很",
+            "累",
+            "。"
+          ],
+          "answer": "今天我很累。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "妻子",
+            "是",
+            "老师",
+            "。"
+          ],
+          "answer": "我妻子是老师。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "今天",
+            "下雪",
+            "了",
+            "。"
+          ],
+          "answer": "今天下雪了。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他",
+            "不",
+            "累",
+            "。"
+          ],
+          "answer": "他不累。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Công viên rất đẹp.",
+          "answer": "公园很漂亮。"
+        },
+        {
+          "prompt": "Điện thoại công cộng ở đâu?",
+          "answer": "公共电话在哪儿？"
+        },
+        {
+          "prompt": "Hôm nay tôi mệt quá, tôi muốn nghỉ ngơi.",
+          "answer": "今天我很累，我想休息。"
+        },
+        {
+          "prompt": "Anh ấy chạy rất nhanh.",
+          "answer": "他跑得很快。"
+        },
+        {
+          "prompt": "Tuyết rơi rồi, trời lạnh quá! (Dùng 下雪)",
+          "answer": "下雪了，太冷了！"
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "title": "门开着呢。",
+      "singleChoice": [
+        {
+          "prompt": "___开着呢。",
+          "options": [
+            "门",
+            "关",
+            "站"
+          ],
+          "answer": "门"
+        },
+        {
+          "prompt": "请___上门。",
+          "options": [
+            "关",
+            "开",
+            "坐"
+          ],
+          "answer": "关"
+        },
+        {
+          "prompt": "请___下。",
+          "options": [
+            "坐",
+            "站",
+            "拿"
+          ],
+          "answer": "坐"
+        },
+        {
+          "prompt": "他___在门口。",
+          "options": [
+            "站",
+            "坐",
+            "走"
+          ],
+          "answer": "站"
+        },
+        {
+          "prompt": "他___着一个杯子。",
+          "options": [
+            "拿",
+            "坐",
+            "笑"
+          ],
+          "answer": "拿"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "一直",
+            "往",
+            "前",
+            "走",
+            "。"
+          ],
+          "answer": "一直往前走。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "她",
+            "笑",
+            "了",
+            "。"
+          ],
+          "answer": "她笑了。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "往",
+            "左边",
+            "走",
+            "。"
+          ],
+          "answer": "往左边走。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "一直",
+            "走",
+            "。"
+          ],
+          "answer": "我一直走。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他",
+            "笑",
+            "着",
+            "说",
+            "。"
+          ],
+          "answer": "他笑着说。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Ngã tư ở phía trước.",
+          "answer": "路口在前面。"
+        },
+        {
+          "prompt": "Vé xem phim ở đâu?",
+          "answer": "电影票在哪儿？"
+        },
+        {
+          "prompt": "Cửa đóng rồi, bạn đừng vào.",
+          "answer": "门关了，你不要进去。"
+        },
+        {
+          "prompt": "Anh ấy đứng ở ngã tư.",
+          "answer": "他站在路口。"
+        },
+        {
+          "prompt": "Đừng cười, nghiêm túc một chút. (Dùng 不要)",
+          "answer": "不要笑，认真一点儿。"
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "title": "你看过这个电影吗？",
+      "singleChoice": [
+        {
+          "prompt": "你看___这个电影吗？",
+          "options": [
+            "过",
+            "次",
+            "意思"
+          ],
+          "answer": "过"
+        },
+        {
+          "prompt": "我去过一___北京。",
+          "options": [
+            "过",
+            "次",
+            "意思"
+          ],
+          "answer": "次"
+        },
+        {
+          "prompt": "这个电影很___。",
+          "options": [
+            "有意思",
+            "意思",
+            "过"
+          ],
+          "answer": "有意思"
+        },
+        {
+          "prompt": "这个字是什么___？",
+          "options": [
+            "有意思",
+            "意思",
+            "次"
+          ],
+          "answer": "意思"
+        },
+        {
+          "prompt": "我没看___这个电影。",
+          "options": [
+            "过",
+            "次",
+            "意思"
+          ],
+          "answer": "过"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "但是",
+            "下雨",
+            "了",
+            "，",
+            "我",
+            "想",
+            "去",
+            "。"
+          ],
+          "answer": "但是下雨了，我想去。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "听说",
+            "这个",
+            "电影",
+            "很",
+            "好看",
+            "。"
+          ],
+          "answer": "我听说这个电影很好看。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "今天",
+            "是",
+            "晴天",
+            "。"
+          ],
+          "answer": "今天是晴天。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "今天",
+            "是",
+            "阴天",
+            "。"
+          ],
+          "answer": "今天是阴天。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "听说",
+            "他",
+            "去",
+            "中国",
+            "了",
+            "。"
+          ],
+          "answer": "我听说他去中国了。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Hôm nay trời mưa.",
+          "answer": "今天下雨。"
+        },
+        {
+          "prompt": "Hôm nay có tuyết rơi.",
+          "answer": "今天下雪。"
+        },
+        {
+          "prompt": "Tôi đã từng đến Vạn Lý Trường Thành 2 lần.",
+          "answer": "我去过两次长城。"
+        },
+        {
+          "prompt": "Tuy trời nắng nhưng rất lạnh. (Dùng 虽然...但是...)",
+          "answer": "虽然是晴天，但是很冷。"
+        },
+        {
+          "prompt": "Tôi nghe nói anh ấy là bác sĩ.",
+          "answer": "我听说他是医生。"
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "title": "新年就要到了。",
+      "singleChoice": [
+        {
+          "prompt": "___就要到了。",
+          "options": [
+            "新年",
+            "更",
+            "大家"
+          ],
+          "answer": "新年"
+        },
+        {
+          "prompt": "天___冷了。",
+          "options": [
+            "更",
+            "快要",
+            "大家"
+          ],
+          "answer": "更"
+        },
+        {
+          "prompt": "___都很高兴。",
+          "options": [
+            "大家",
+            "更",
+            "快要"
+          ],
+          "answer": "大家"
+        },
+        {
+          "prompt": "新年___到了。",
+          "options": [
+            "快要",
+            "更",
+            "大家"
+          ],
+          "answer": "快要"
+        },
+        {
+          "prompt": "今天比昨天___冷。",
+          "options": [
+            "更",
+            "快要",
+            "大家"
+          ],
+          "answer": "更"
+        }
+      ],
+      "arrange": [
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "谢谢",
+            "大家",
+            "的",
+            "帮助",
+            "。"
+          ],
+          "answer": "谢谢大家的帮助。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "想",
+            "买",
+            "飞机票",
+            "。"
+          ],
+          "answer": "我想买飞机票。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "他",
+            "买",
+            "了",
+            "火车票",
+            "。"
+          ],
+          "answer": "他买了火车票。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "大家",
+            "帮助",
+            "我",
+            "了",
+            "。"
+          ],
+          "answer": "大家帮助我了。"
+        },
+        {
+          "prompt": "Sắp xếp các từ thành câu đúng.",
+          "tokens": [
+            "我",
+            "买",
+            "飞机票",
+            "去",
+            "北京",
+            "。"
+          ],
+          "answer": "我买飞机票去北京。"
+        }
+      ],
+      "fill": [
+        {
+          "prompt": "Vé vào cửa ở đâu?",
+          "answer": "门票在哪儿？"
+        },
+        {
+          "prompt": "Cửa hàng này có nhiều khách hàng.",
+          "answer": "这个商店有很多顾客。"
+        },
+        {
+          "prompt": "Hàng hóa của cửa hàng này rất tốt.",
+          "answer": "这个商店的商品很好。"
+        },
+        {
+          "prompt": "Năm mới sắp đến rồi, mọi người đều rất vui.",
+          "answer": "新年快要到了，大家都很高兴。"
+        },
+        {
+          "prompt": "Chúng tôi sắp đi rồi. (Dùng 就要...了)",
+          "answer": "我们就要走了。"
+        }
+      ]
+    }
+  ]
+}

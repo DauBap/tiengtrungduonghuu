@@ -18,8 +18,11 @@ const PRACTICE_TABS: Array<{
 
 export interface GrammarSectionData extends Record<GrammarFieldKey, string | null> {
   id: string;
+  order?: number;
   title: string;
   questions: GrammarPracticeQuestion[];
+  fullLessonPractice?: boolean;
+  practiceSourceSectionIdsByType?: Partial<Record<GrammarQuestionType, string[]>>;
 }
 
 export interface GrammarPracticeSummary {
@@ -89,8 +92,32 @@ export function GrammarSection({
     if (selected) setActiveType(selected.type);
     setPracticing(true);
   };
-  const activeReviewGroup = showAnswersFor
-    ? answerReviewGroups.find((group) => group.targetKey === `${section.id}:${showAnswersFor}`)
+  const activeReviewGroups = showAnswersFor
+    ? answerReviewGroups.filter((group) => {
+        const sourceSectionIds = section.fullLessonPractice
+          ? section.practiceSourceSectionIdsByType?.[showAnswersFor] ?? []
+          : [section.id];
+        return sourceSectionIds.some((sectionId) => group.targetKey === `${sectionId}:${showAnswersFor}`);
+      })
+    : [];
+  const activeReviewGroup = activeReviewGroups.length > 0
+    ? {
+        targetKey: `${section.id}:${showAnswersFor}`,
+        score: activeReviewGroups.every((group) => group.correctCount != null && group.totalCount != null)
+          ? Math.round(
+              activeReviewGroups.reduce((sum, group) => sum + (group.correctCount ?? 0), 0)
+              / activeReviewGroups.reduce((sum, group) => sum + (group.totalCount ?? 0), 0)
+              * 10_000,
+            ) / 100
+          : null,
+        correctCount: activeReviewGroups.every((group) => group.correctCount != null)
+          ? activeReviewGroups.reduce((sum, group) => sum + (group.correctCount ?? 0), 0)
+          : null,
+        totalCount: activeReviewGroups.every((group) => group.totalCount != null)
+          ? activeReviewGroups.reduce((sum, group) => sum + (group.totalCount ?? 0), 0)
+          : null,
+        results: activeReviewGroups.flatMap((group) => group.results),
+      }
     : null;
   const activeReviewLabel = PRACTICE_TABS.find((tab) => tab.type === showAnswersFor)?.label;
 
@@ -110,7 +137,9 @@ export function GrammarSection({
           <BookOpen className="h-4 w-4" />
         </span>
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase text-muted-foreground">Ngữ pháp {number}</p>
+          <p className="text-[11px] font-semibold uppercase text-muted-foreground">
+            {section.fullLessonPractice ? "Luyện tập theo bài" : `Ngữ pháp ${number}`}
+          </p>
           <h3 className="mt-1 text-lg font-bold leading-snug">{section.title}</h3>
         </div>
       </header>
@@ -348,7 +377,12 @@ export function GrammarSection({
                     aria-labelledby={tabId}
                     hidden={activeType !== tab.type}
                   >
-                      <GrammarPractice questions={questions} sectionId={section.id} previewOnly={previewOnly} />
+                      <GrammarPractice
+                        questions={questions}
+                        sectionId={section.id}
+                        fullLessonPractice={section.fullLessonPractice}
+                        previewOnly={previewOnly}
+                      />
                   </section>
                 );
               })}
