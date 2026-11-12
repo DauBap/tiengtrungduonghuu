@@ -2896,11 +2896,16 @@ export default function LessonDetail() {
                     Kết quả tốt nhất · {new Date(bestPronunciationAssessment.createdAt).toLocaleString("vi-VN")}
                   </div>
                   <div>
-                    <div className="font-medium text-foreground">Script đã đọc</div>
+                    <div className="font-medium text-foreground">Script chuẩn</div>
                     <p className="mt-1 text-muted-foreground">{bestPronunciationAssessment.scriptText || "—"}</p>
+                    {bestPronunciationAssessment.scriptText && (
+                      <p className="mt-1 content-text pinyin-text text-primary">
+                        {toPinyinText(bestPronunciationAssessment.scriptText)}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <div className="font-medium text-foreground">Bạn đã đọc</div>
+                    <div className="font-medium text-foreground">Bạn đã đọc (Pinyin)</div>
                     <p className="mt-1 text-muted-foreground">
                       {bestPronunciationAssessment.transcript
                         ? toPinyinText(bestPronunciationAssessment.transcript)
