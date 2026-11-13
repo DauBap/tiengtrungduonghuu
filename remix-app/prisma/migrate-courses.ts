@@ -96,7 +96,14 @@ interface VocabFile {
   label?: string;
   title: string;
   short_vi: string;
-  data: Array<{ pos: number; hanzi: string; pinyin: string; vi: string; adj: number | number[] | null }>;
+  data: Array<{
+    pos: number;
+    hanzi: string;
+    pinyin: string;
+    vi: string;
+    adj: number | number[] | null;
+    note?: string | null;
+  }>;
 }
 
 interface DialogueFile {
@@ -224,6 +231,7 @@ async function migrateLesson(
         pinyin: v.pinyin.trim(),
         translation: v.vi.trim(),
         wordTypes: toWordTypes(v.adj),
+        note: v.note?.trim() || null,
         order: v.pos,
       },
       select: { id: true },

@@ -1,0 +1,42 @@
+{
+  "courseCode": "HSK3-2.0",
+  "lessons": [
+    {
+      "id": 19,
+      "title": "你没看出来吗？",
+      "data": [
+        { "pos": 1, "hanzi": "耳朵", "pinyin": "ěrduo", "adj": 2, "vi": "tai" },
+        { "pos": 2, "hanzi": "脸", "pinyin": "liǎn", "adj": 2, "vi": "khuôn mặt" },
+        { "pos": 3, "hanzi": "短", "pinyin": "duǎn", "adj": 6, "vi": "ngắn" },
+        { "pos": 4, "hanzi": "马", "pinyin": "mǎ", "adj": 2, "vi": "con ngựa" },
+        { "pos": 5, "hanzi": "张", "pinyin": "zhāng", "adj": 8, "vi": "tờ, bức (lượng từ)" },
+        { "pos": 6, "hanzi": "位", "pinyin": "wèi", "adj": 8, "vi": "vị (lượng từ kính ngữ cho người)" },
+        { "pos": 7, "hanzi": "蓝", "pinyin": "lán", "adj": 6, "vi": "màu xanh dương" },
+        { "pos": 8, "hanzi": "秋（天）", "pinyin": "qiūtiān", "adj": 2, "vi": "mùa thu" },
+        { "pos": 9, "hanzi": "过", "pinyin": "guò", "adj": 4, "vi": "trải qua, ăn (sinh nhật)" },
+        { "pos": 10, "hanzi": "鸟", "pinyin": "niǎo", "adj": 2, "vi": "con chim" },
+        { "pos": 11, "hanzi": "哭", "pinyin": "kū", "adj": 4, "vi": "khóc" },
+        { "pos": 12, "hanzi": "黄河", "pinyin": "Huánghé", "adj": 3, "vi": "sông Hoàng Hà", "note": "Danh từ riêng" },
+        { "pos": 13, "hanzi": "船", "pinyin": "chuán", "adj": 2, "vi": "con thuyền" },
+        { "pos": 14, "hanzi": "经过", "pinyin": "jīngguò", "adj": 4, "vi": "đi ngang qua" }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "我被他影响了",
+      "data": [
+        { "pos": 1, "hanzi": "东", "pinyin": "dōng", "adj": 2, "vi": "phía Đông" },
+        { "pos": 2, "hanzi": "信用卡", "pinyin": "xìnyòngkǎ", "adj": 2, "vi": "thẻ tín dụng" },
+        { "pos": 3, "hanzi": "关心", "pinyin": "guānxīn", "adj": 4, "vi": "quan tâm" },
+        { "pos": 4, "hanzi": "只有……才……", "pinyin": "zhǐyǒu... cái...", "adj": 10, "vi": "chỉ có... mới..." },
+        { "pos": 5, "hanzi": "成绩", "pinyin": "chéngjì", "adj": 2, "vi": "thành tích" },
+        { "pos": 6, "hanzi": "碗", "pinyin": "wǎn", "adj": 2, "vi": "cái bát" },
+        { "pos": 7, "hanzi": "分", "pinyin": "fēn", "adj": 4, "vi": "phân biệt" },
+        { "pos": 8, "hanzi": "解决", "pinyin": "jiějué", "adj": 4, "vi": "giải quyết" },
+        { "pos": 9, "hanzi": "试", "pinyin": "shì", "adj": 4, "vi": "thử" },
+        { "pos": 10, "hanzi": "真正", "pinyin": "zhēnzhèng", "adj": [6, 7], "vi": "thực sự" },
+        { "pos": 11, "hanzi": "多么", "pinyin": "duōme", "adj": 7, "vi": "biết bao, biết nhường nào" }
+      ]
+    }
+  ]
+}
