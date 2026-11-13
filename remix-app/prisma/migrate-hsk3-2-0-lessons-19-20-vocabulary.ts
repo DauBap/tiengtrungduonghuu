@@ -8,6 +8,7 @@ import { Prisma, PrismaClient, type WordType } from "@prisma/client";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseFlashcardConfig } from "../app/lib/learning-blocks";
 
 const APPLY = process.argv.includes("--apply");
 const COURSE_CODE = "HSK3-2.0";
@@ -68,6 +69,7 @@ interface VocabularyJob {
   lessonNumber: number;
   records: Prisma.VocabItemCreateManyInput[];
   needsCreate: boolean;
+  hasFlashcardBlock: boolean;
 }
 
 function readSource(
@@ -146,6 +148,7 @@ async function main() {
         content: {
           orderBy: { order: "asc" },
           select: {
+            id: true,
             chinese: true,
             pinyin: true,
             translation: true,
@@ -153,6 +156,10 @@ async function main() {
             note: true,
             order: true,
           },
+        },
+        learningBlocks: {
+          where: { type: "FLASHCARD" },
+          select: { id: true, config: true },
         },
       },
     });
@@ -181,27 +188,88 @@ async function main() {
         `Bài ${target.number} đã có ${existing.length} mục từ vựng khác nguồn; không ghi đè dữ liệu hiện có.`,
       );
     }
+    if (lesson.learningBlocks.length > 1) {
+      throw new Error(`Bài ${target.number} có nhiều hơn một block Flashcard.`);
+    }
 
     jobs.push({
       lessonId: lesson.id,
       lessonNumber: target.number,
       records: records.map((record) => ({ ...record, lessonId: lesson.id })),
       needsCreate: existing.length === 0,
+      hasFlashcardBlock: lesson.learningBlocks.length === 1,
     });
   }
 
   const pending = jobs.filter((job) => job.needsCreate);
   console.log(`\n=== Import từ vựng HSK3 2.0 ${APPLY ? "(APPLY)" : "(DRY RUN)"} ===`);
   for (const job of jobs) {
-    console.log(`  Bài ${job.lessonNumber}: ${job.records.length} từ${job.needsCreate ? " (sẽ thêm)" : " (đã khớp)"}`);
+    const vocabStatus = job.needsCreate ? "sẽ thêm từ vựng" : "từ vựng đã khớp";
+    const flashcardStatus = job.hasFlashcardBlock ? "đã có Flashcard" : "sẽ tạo Flashcard";
+    console.log(`  Bài ${job.lessonNumber}: ${job.records.length} từ (${vocabStatus}; ${flashcardStatus})`);
   }
   console.log(`  Bài cần thêm: ${pending.length}`);
 
-  if (APPLY && pending.length > 0) {
-    await prisma.$transaction(pending.map((job) =>
-      prisma.vocabItem.createMany({ data: job.records }),
-    ));
-    console.log("Đã import từ vựng bài 19–20.");
+  if (APPLY) {
+    await prisma.$transaction(async (transaction) => {
+      for (const job of pending) {
+        await transaction.vocabItem.createMany({ data: job.records });
+      }
+
+      for (const job of jobs) {
+        const vocabItems = await transaction.vocabItem.findMany({
+          where: { lessonId: job.lessonId },
+          orderBy: { order: "asc" },
+          select: { id: true },
+        });
+        if (vocabItems.length !== job.records.length) {
+          throw new Error(`Số từ vựng bài ${job.lessonNumber} không khớp với nguồn import.`);
+        }
+
+        const flashcardBlock = await transaction.learningBlock.findUnique({
+          where: { lessonId_type: { lessonId: job.lessonId, type: "FLASHCARD" } },
+          select: { id: true, config: true },
+        });
+        const vocabItemIds = vocabItems.map((item) => item.id);
+
+        if (!flashcardBlock) {
+          await transaction.learningBlock.create({
+            data: {
+              lessonId: job.lessonId,
+              type: "FLASHCARD",
+              title: "Flashcard từ vựng",
+              description: "Lật thẻ để ghi nhớ từ vựng của bài",
+              order: 1,
+              required: true,
+              config: {
+                vocabItemIds,
+                frontSide: "chinese",
+                showPinyinOnFront: false,
+                shuffle: false,
+                autoSpeak: false,
+              },
+            },
+          });
+          continue;
+        }
+
+        const parsedConfig = parseFlashcardConfig(flashcardBlock.config);
+        if (!parsedConfig.ok) {
+          throw new Error(`Config Flashcard bài ${job.lessonNumber} không hợp lệ: ${parsedConfig.error}`);
+        }
+        const sameVocabulary = parsedConfig.data.vocabItemIds.length === vocabItemIds.length
+          && parsedConfig.data.vocabItemIds.every((id, index) => id === vocabItemIds[index]);
+        if (!sameVocabulary) {
+          await transaction.learningBlock.update({
+            where: { id: flashcardBlock.id },
+            data: {
+              config: { ...parsedConfig.data, vocabItemIds } satisfies Prisma.InputJsonObject,
+            },
+          });
+        }
+      }
+    });
+    console.log("Đã đồng bộ từ vựng và block Flashcard bài 19–20.");
   } else if (!APPLY) {
     console.log("Chưa ghi dữ liệu. Chạy lại với --apply để lưu.");
   }
