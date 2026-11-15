@@ -7,7 +7,6 @@ import { AudioSeekBar } from "~/components/audio/audio-seek-bar";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 import { isHorizontalWorkbookChoice, type WorkbookConfig } from "~/lib/learning-blocks";
-import { usePinyinVisibility } from "~/components/lessons/lesson-pinyin-visibility";
 import { answerVariants, isAnswerCorrectForAny } from "~/lib/listening-answer";
 
 interface QuestionOption {
@@ -77,8 +76,7 @@ export function WorkbookListeningTest({
   submissionError?: string | null;
   previewOnly?: boolean;
 }) {
-  const pinyinVisible = usePinyinVisibility();
-  const showPinyin = config.showPinyin && pinyinVisible;
+  const showPinyin = config.showPinyin;
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState<0.8 | 1 | 1.5>(1);
   const [currentTime, setCurrentTime] = useState(0);
