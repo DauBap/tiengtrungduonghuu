@@ -2,7 +2,11 @@ import type { LoaderFunctionArgs } from "react-router";
 import { useLoaderData, Link } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import { requireRole } from "~/lib/session.server";
-import { getEnrolledCoursesWithClass, getStudentDashboardStats } from "~/lib/db.server";
+import {
+  computeTrackedCourseProgress,
+  getEnrolledCoursesWithClass,
+  getStudentDashboardStats,
+} from "~/lib/db.server";
 import { formatSchedule, formatNextClass, getNextClassTime } from "~/lib/schedule-utils";
 import { AppShell } from "~/components/layout/app-shell";
 import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
@@ -34,7 +38,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     await getStudentDashboardStats(user.id, myCourses.map((c) => c.id));
 
   const courseIds = myCourses.map((course) => course.id);
-  const [courseEnrollments, studySessions] = courseIds.length > 0
+  const [courseEnrollments, studySessions, courseLessons] = courseIds.length > 0
     ? await Promise.all([
         prisma.enrollment.findMany({
           where: {
@@ -54,8 +58,35 @@ export async function loader({ request }: LoaderFunctionArgs) {
           _sum: { totalSeconds: true },
           _count: { _all: true },
         }),
+        prisma.lesson.findMany({
+          where: { courseId: { in: courseIds } },
+          select: { id: true, courseId: true },
+        }),
       ])
-    : [[], []];
+    : [[], [], []];
+
+  const studentIds = [...new Set(courseEnrollments.map((enrollment) => enrollment.userId))];
+  const leaderboardProgress = studentIds.length > 0
+    ? await prisma.lessonTabProgress.findMany({
+        where: {
+          userId: { in: studentIds },
+          lesson: { courseId: { in: courseIds } },
+        },
+        select: {
+          userId: true,
+          lessonId: true,
+          tab: true,
+          completed: true,
+          lesson: { select: { courseId: true } },
+          attempts: {
+            where: { tab: "VOCABULARY_TEST" },
+            orderBy: { completedAt: "desc" },
+            take: 1,
+            select: { passed: true },
+          },
+        },
+      })
+    : [];
 
   const attendanceByStatus = await prisma.attendanceRecord.groupBy({
     by: ["status"],
@@ -85,6 +116,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
     });
   }
 
+  const lessonIdsByCourse = new Map<string, string[]>();
+  for (const lesson of courseLessons) {
+    const lessonIds = lessonIdsByCourse.get(lesson.courseId) ?? [];
+    lessonIds.push(lesson.id);
+    lessonIdsByCourse.set(lesson.courseId, lessonIds);
+  }
+
+  const progressByEnrollment = new Map<string, typeof leaderboardProgress>();
+  for (const progress of leaderboardProgress) {
+    const key = `${progress.lesson.courseId}:${progress.userId}`;
+    const rows = progressByEnrollment.get(key) ?? [];
+    rows.push(progress);
+    progressByEnrollment.set(key, rows);
+  }
+
   const classLeaderboards = myCourses.flatMap((course) => {
     const enrollmentsByClass = new Map<string, typeof courseEnrollments>();
     for (const enrollment of courseEnrollments) {
@@ -104,10 +150,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
         .map((enrollment) => ({
           userId: enrollment.userId,
           name: enrollment.user.name || "Học viên",
+          progressPercent: computeTrackedCourseProgress(
+            lessonIdsByCourse.get(course.id) ?? [],
+            progressByEnrollment.get(`${course.id}:${enrollment.userId}`) ?? [],
+          ),
           ...(studyByEnrollment.get(`${course.id}:${enrollment.userId}`) ?? { totalSeconds: 0, visitCount: 0 }),
         }))
         .sort((left, right) =>
-          right.totalSeconds - left.totalSeconds
+          right.progressPercent - left.progressPercent
+          || right.totalSeconds - left.totalSeconds
           || right.visitCount - left.visitCount
           || left.name.localeCompare(right.name, "vi")
         ),
@@ -446,27 +497,27 @@ export default function StudentIndex() {
                             <div>
                               <h3 className="text-sm font-semibold">{selectedLeaderboard.className}</h3>
                               <p className="text-xs text-muted-foreground">{selectedLeaderboard.title} · {selectedLeaderboard.code}</p>
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                Xếp theo tiến độ khóa học; nếu bằng nhau, ưu tiên thời gian học rồi lượt vào.
+                              </p>
                             </div>
                             <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">
                               {selectedLeaderboard.students.length} học viên
                             </span>
                           </div>
                           <div className="max-h-[min(30rem,65vh)] overflow-auto">
-                            <table className="w-full min-w-[480px] text-xs">
+                            <table className="w-full min-w-[520px] text-xs">
                               <thead>
                                 <tr className="sticky top-0 border-b bg-background text-left text-muted-foreground">
                                   <th scope="col" className="px-2 py-2 font-medium">#</th>
                                   <th scope="col" className="px-2 py-2 font-medium">Học viên</th>
+                                  <th scope="col" className="w-[30%] px-2 py-2 font-medium">Tiến độ</th>
                                   <th scope="col" className="w-[40%] px-2 py-2 font-medium">Thời gian học</th>
                                   <th scope="col" className="px-2 py-2 text-right font-medium">Lượt vào</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {selectedLeaderboard.students.map((student, index) => {
-                                  const maxStudySeconds = selectedLeaderboard.students[0]?.totalSeconds ?? 0;
-                                  const studyPercent = maxStudySeconds > 0
-                                    ? Math.round((student.totalSeconds / maxStudySeconds) * 100)
-                                    : 0;
                                   const rankTone = index === 0
                                     ? "bg-amber-100 text-amber-800"
                                     : index === 1
@@ -483,17 +534,20 @@ export default function StudentIndex() {
                                       </td>
                                       <td className="px-2 py-2 font-medium">{student.name}</td>
                                       <td className="px-2 py-2">
-                                        <span className="whitespace-nowrap tabular-nums">{formatStudyTime(student.totalSeconds)}</span>
+                                        <span className="whitespace-nowrap tabular-nums">{student.progressPercent}%</span>
                                         <div
                                           className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted"
                                           role="progressbar"
-                                          aria-label={`Thời gian học của ${student.name} so với người học nhiều nhất`}
+                                          aria-label={`Tiến độ khóa học của ${student.name}`}
                                           aria-valuemin={0}
                                           aria-valuemax={100}
-                                          aria-valuenow={studyPercent}
+                                          aria-valuenow={student.progressPercent}
                                         >
-                                          <div className="h-full rounded-full bg-primary" style={{ width: `${studyPercent}%` }} />
+                                          <div className="h-full rounded-full bg-primary" style={{ width: `${student.progressPercent}%` }} />
                                         </div>
+                                      </td>
+                                      <td className="px-2 py-2">
+                                        <span className="whitespace-nowrap tabular-nums">{formatStudyTime(student.totalSeconds)}</span>
                                       </td>
                                       <td className="px-2 py-2 text-right tabular-nums">{student.visitCount}</td>
                                     </tr>
