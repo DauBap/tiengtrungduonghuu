@@ -65,29 +65,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
       ])
     : [[], [], []];
 
-  const studentIds = [...new Set(courseEnrollments.map((enrollment) => enrollment.userId))];
-  const leaderboardProgress = studentIds.length > 0
-    ? await prisma.lessonTabProgress.findMany({
-        where: {
-          userId: { in: studentIds },
-          lesson: { courseId: { in: courseIds } },
-        },
-        select: {
-          userId: true,
-          lessonId: true,
-          tab: true,
-          completed: true,
-          lesson: { select: { courseId: true } },
-          attempts: {
-            where: { tab: "VOCABULARY_TEST" },
-            orderBy: { completedAt: "desc" },
-            take: 1,
-            select: { passed: true },
-          },
-        },
-      })
-    : [];
-
   const attendanceByStatus = await prisma.attendanceRecord.groupBy({
     by: ["status"],
     where: {
@@ -123,12 +100,55 @@ export async function loader({ request }: LoaderFunctionArgs) {
     lessonIdsByCourse.set(lesson.courseId, lessonIds);
   }
 
-  const progressByEnrollment = new Map<string, typeof leaderboardProgress>();
-  for (const progress of leaderboardProgress) {
-    const key = `${progress.lesson.courseId}:${progress.userId}`;
-    const rows = progressByEnrollment.get(key) ?? [];
-    rows.push(progress);
-    progressByEnrollment.set(key, rows);
+  type LeaderboardProgressRow = {
+    lessonId: string;
+    tab: string;
+    completed: boolean;
+    attempts: { passed: boolean | null }[];
+  };
+  const progressByEnrollment = new Map<string, LeaderboardProgressRow[]>();
+  const progressBatchSize = 100;
+  for (const courseId of new Set(courseIds)) {
+    const lessonIds = lessonIdsByCourse.get(courseId) ?? [];
+    if (lessonIds.length === 0) continue;
+
+    const studentIds = [...new Set(
+      courseEnrollments
+        .filter((enrollment) => enrollment.courseId === courseId)
+        .map((enrollment) => enrollment.userId),
+    )];
+    for (let offset = 0; offset < studentIds.length; offset += progressBatchSize) {
+      const progressRows = await prisma.lessonTabProgress.findMany({
+        where: {
+          userId: { in: studentIds.slice(offset, offset + progressBatchSize) },
+          lessonId: { in: lessonIds },
+        },
+        select: {
+          userId: true,
+          lessonId: true,
+          tab: true,
+          completed: true,
+          attempts: {
+            where: { tab: "VOCABULARY_TEST" },
+            orderBy: { completedAt: "desc" },
+            take: 1,
+            select: { passed: true },
+          },
+        },
+      });
+
+      for (const progress of progressRows) {
+        const key = `${courseId}:${progress.userId}`;
+        const rows = progressByEnrollment.get(key) ?? [];
+        rows.push({
+          lessonId: progress.lessonId,
+          tab: progress.tab,
+          completed: progress.completed,
+          attempts: progress.attempts,
+        });
+        progressByEnrollment.set(key, rows);
+      }
+    }
   }
 
   const classLeaderboards = myCourses.flatMap((course) => {
