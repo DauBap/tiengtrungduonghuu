@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { useFetcher, useLoaderData } from "react-router";
+import { toast } from "sonner";
 import { ClipboardCheck, LoaderCircle, Plus, Search, Trash2, Users } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
@@ -595,8 +596,10 @@ export default function TeacherAttendance() {
       && result.sessionId === selectedAttendanceSession?.id
     ) {
       setFeedback("Đã lưu điểm danh, bài tập và thông tin buổi học.");
+      toast.success("Đã lưu điểm danh thành công.");
     } else if (saveAttendanceFetcher.data && !saveAttendanceFetcher.data.success) {
       setFeedback(saveAttendanceFetcher.data.error);
+      toast.error(saveAttendanceFetcher.data.error);
     }
   }, [saveAttendanceFetcher.data, selectedClass?.id, selectedAttendanceSession?.id]);
 
@@ -724,6 +727,22 @@ export default function TeacherAttendance() {
 
   function saveAttendance() {
     if (!selectedClass || !selectedAttendanceSession) return;
+    const studentMissingAbsenceReason = selectedClass.students.find((student) => {
+      const record = attendance[student.id] ?? selectedAttendanceSession.records[student.id];
+      return record?.status === "absent" && !record.absenceReason;
+    });
+    if (studentMissingAbsenceReason) {
+      setFilter("absent");
+      setSearch("");
+      const error = `Vui lòng chọn loại vắng cho ${studentMissingAbsenceReason.name} trước khi lưu.`;
+      setFeedback(error);
+      toast.error(error);
+      window.requestAnimationFrame(() => {
+        document.getElementById(`absence-reason-${studentMissingAbsenceReason.id}`)?.focus();
+      });
+      return;
+    }
+
     const records = selectedClass.students.map((student) => ({
       studentId: student.id,
       ...(attendance[student.id] ?? createEmptyAttendanceRecord()),
@@ -1149,7 +1168,11 @@ export default function TeacherAttendance() {
                                 value={absenceReason ?? ""}
                                 onChange={(event) => changeAbsenceReason(student.id, event.currentTarget.value)}
                                 disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
-                                className={`h-10 min-w-0 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                                aria-invalid={!absenceReason}
+                                aria-describedby={!absenceReason ? `absence-reason-error-${student.id}` : undefined}
+                                className={`h-10 min-w-0 w-full rounded-md border bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                                  absenceReason ? "border-input" : "border-destructive"
+                                } ${
                                   absenceReason ? "text-foreground" : "text-muted-foreground"
                                 }`}
                               >
@@ -1157,6 +1180,15 @@ export default function TeacherAttendance() {
                                 <option value="excused">Có phép</option>
                                 <option value="unexcused">Không phép</option>
                               </select>
+                              {!absenceReason && (
+                                <p
+                                  id={`absence-reason-error-${student.id}`}
+                                  role="alert"
+                                  className="col-span-2 text-xs text-destructive"
+                                >
+                                  Vui lòng chọn loại vắng.
+                                </p>
+                              )}
                             </>
                           )}
                         </div>
