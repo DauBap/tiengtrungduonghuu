@@ -7,6 +7,7 @@ import { getAllCourses } from "~/lib/db.server";
 import { prisma } from "~/lib/prisma.server";
 import { AppShell } from "~/components/layout/app-shell";
 import { CourseStatusBadge } from "~/components/courses/course-status-badge";
+import { removeCourseDocumentAsset } from "~/lib/storage.server";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
@@ -31,7 +32,12 @@ export async function action({ request }: ActionFunctionArgs) {
     const courseId = String(form.get("courseId") ?? "");
     if (!courseId) return { error: "Thiếu khóa học cần xóa." };
 
+    const documents = await prisma.courseDocument.findMany({
+      where: { courseId },
+      select: { fileUrl: true },
+    });
     await prisma.course.delete({ where: { id: courseId } });
+    await Promise.all(documents.map(({ fileUrl }) => removeCourseDocumentAsset(fileUrl)));
     return redirect("/admin/courses");
   }
 

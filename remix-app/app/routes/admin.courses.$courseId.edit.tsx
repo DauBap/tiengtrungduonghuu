@@ -12,7 +12,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { CourseStatusBadge } from "~/components/courses/course-status-badge";
-import { ArrowLeft, Save, ListOrdered } from "lucide-react";
+import { ArrowLeft, Save, ListOrdered, FolderOpen } from "lucide-react";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
@@ -186,6 +186,11 @@ export default function EditCourse() {
             <Button asChild variant="outline">
               <Link to={`/admin/courses/${course.id}/lessons`}>
                 <ListOrdered className="h-4 w-4 mr-1.5" />Quản lý bài học
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="ml-2">
+              <Link to={`/admin/courses/${course.id}/documents`}>
+                <FolderOpen className="h-4 w-4 mr-1.5" />Quản lý tài liệu
               </Link>
             </Button>
           </CardContent>

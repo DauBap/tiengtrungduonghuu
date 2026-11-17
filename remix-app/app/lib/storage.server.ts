@@ -3,6 +3,7 @@ import { link, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/prom
 import path from "node:path";
 import { Readable } from "node:stream";
 import { createReadStream } from "node:fs";
+import { COURSE_DOCUMENT_MAX_BYTES } from "~/lib/course-documents";
 
 export type AssetKind = "workbook-image" | "lesson-audio" | "vocab-audio";
 
@@ -12,6 +13,94 @@ export interface SaveAssetOptions {
   sectionId?: string;
   questionId?: string;
   speakerId?: string;
+}
+
+const courseDocumentMimeTypes: Record<string, string> = {
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".gif": "image/gif",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".pdf": "application/pdf",
+  ".png": "image/png",
+  ".ppt": "application/vnd.ms-powerpoint",
+  ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  ".webp": "image/webp",
+  ".xls": "application/vnd.ms-excel",
+  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+};
+
+export type CourseDocumentFileValidation =
+  | { ok: true; fileName: string; extension: string; mimeType: string }
+  | { ok: false; error: string };
+
+export function validateCourseDocumentFile(file: File | null): CourseDocumentFileValidation {
+  if (!file || !file.name) return { ok: false, error: "Vui lòng chọn tệp tài liệu." };
+  if (file.size === 0) return { ok: false, error: "Tệp đang trống, vui lòng chọn tệp khác." };
+  if (file.size > COURSE_DOCUMENT_MAX_BYTES) {
+    return { ok: false, error: "Tệp vượt quá giới hạn 25 MB." };
+  }
+
+  const sourceName = file.name.replace(/\\/g, "/").split("/").pop()?.trim() ?? "";
+  const sourceExtension = path.extname(sourceName).toLowerCase();
+  const mimeType = courseDocumentMimeTypes[sourceExtension];
+  if (!mimeType) {
+    return { ok: false, error: "Chỉ nhận PDF, Word, Excel, PowerPoint và ảnh JPG, PNG, GIF, WEBP." };
+  }
+
+  const suppliedMimeType = file.type.toLowerCase();
+  if (suppliedMimeType && suppliedMimeType !== "application/octet-stream" && suppliedMimeType !== mimeType) {
+    return { ok: false, error: "Định dạng tệp không khớp với phần mở rộng." };
+  }
+
+  const baseName = path.basename(sourceName, path.extname(sourceName))
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .slice(0, 180);
+  return {
+    ok: true,
+    fileName: `${baseName || "Tai lieu"}${sourceExtension}`,
+    extension: sourceExtension,
+    mimeType,
+  };
+}
+
+export async function saveCourseDocumentAsset(
+  file: File,
+  validation: Extract<CourseDocumentFileValidation, { ok: true }>,
+  courseId: string,
+) {
+  if (!/^[A-Za-z0-9_-]+$/.test(courseId)) {
+    throw new Error("Mã khóa học không hợp lệ");
+  }
+
+  const fileName = `${randomUUID()}${validation.extension}`;
+  const relativePath = path.join("courses", courseId, "documents", fileName);
+  const destination = path.resolve(getUploadsDirectory(), relativePath);
+  await mkdir(path.dirname(destination), { recursive: true, mode: 0o750 });
+  await writeFile(destination, Buffer.from(await file.arrayBuffer()), { mode: 0o640, flag: "wx" });
+
+  return {
+    fileName: validation.fileName,
+    fileUrl: `${uploadsPrefix}/${relativePath.split(path.sep).join("/")}`,
+    fileSize: file.size,
+    mimeType: validation.mimeType,
+  };
+}
+
+export async function removeCourseDocumentAsset(storedUrl: string) {
+  const filePath = safeStoredPath(storedUrl);
+  const relativePath = path.relative(getUploadsDirectory(), filePath);
+  const segments = relativePath.split(path.sep);
+  const isLegacyCourseDocument = segments.length === 2 && segments[0] === "course-documents";
+  const isCourseDocument =
+    segments.length === 4 &&
+    segments[0] === "courses" &&
+    /^[A-Za-z0-9_-]+$/.test(segments[1]) &&
+    segments[2] === "documents";
+  if (!isLegacyCourseDocument && !isCourseDocument) {
+    throw new Error("Đường dẫn tài liệu khóa học không hợp lệ");
+  }
+  await rm(filePath, { force: true });
 }
 
 const uploadsPrefix = "/uploads";
@@ -87,6 +176,8 @@ function mimeType(filePath: string) {
   const extension = path.extname(filePath).toLowerCase();
   const types: Record<string, string> = {
     ".aac": "audio/aac",
+    ".doc": "application/msword",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ".gif": "image/gif",
     ".jpeg": "image/jpeg",
     ".jpg": "image/jpeg",
@@ -94,8 +185,13 @@ function mimeType(filePath: string) {
     ".mp3": "audio/mpeg",
     ".ogg": "audio/ogg",
     ".png": "image/png",
+    ".pdf": "application/pdf",
+    ".ppt": "application/vnd.ms-powerpoint",
+    ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     ".svg": "image/svg+xml",
     ".wav": "audio/wav",
+    ".xls": "application/vnd.ms-excel",
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     ".webp": "image/webp",
   };
   return types[extension] ?? "application/octet-stream";
@@ -190,7 +286,7 @@ export async function saveUploadedAsset(
 export async function serveStoredAsset(
   request: Request,
   storedUrl: string,
-  options: { cacheControl?: string } = {},
+  options: { cacheControl?: string; contentType?: string } = {},
 ) {
   let filePath = safeStoredPath(storedUrl);
   let fileStat;
@@ -224,7 +320,7 @@ export async function serveStoredAsset(
   const headers = new Headers({
     "Accept-Ranges": "bytes",
     "Cache-Control": options.cacheControl ?? "public, max-age=31536000, immutable",
-    "Content-Type": mimeType(filePath),
+    "Content-Type": options.contentType ?? mimeType(filePath),
     "Content-Security-Policy": "default-src 'none'; sandbox",
     "X-Content-Type-Options": "nosniff",
   });

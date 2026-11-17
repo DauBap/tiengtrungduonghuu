@@ -3,7 +3,76 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { saveUploadedAsset, serveStoredAsset } from "./storage.server";
+import {
+  removeCourseDocumentAsset,
+  saveCourseDocumentAsset,
+  saveUploadedAsset,
+  serveStoredAsset,
+  validateCourseDocumentFile,
+} from "./storage.server";
+import { COURSE_DOCUMENT_MAX_BYTES } from "./course-documents";
+
+test("validates course document formats, MIME types, and the 25 MB limit", () => {
+  assert.deepEqual(
+    validateCourseDocumentFile(new File(["pdf"], "Tài liệu.PDF", { type: "application/pdf" })),
+    {
+      ok: true,
+      fileName: "Tài liệu.pdf",
+      extension: ".pdf",
+      mimeType: "application/pdf",
+    },
+  );
+  assert.equal(
+    validateCourseDocumentFile(new File(["x"], "notes.exe", { type: "application/octet-stream" })).ok,
+    false,
+  );
+  assert.equal(
+    validateCourseDocumentFile(new File(["x"], "notes.pdf", { type: "image/png" })).ok,
+    false,
+  );
+  assert.equal(
+    validateCourseDocumentFile(new File([new Uint8Array(COURSE_DOCUMENT_MAX_BYTES + 1)], "large.pdf", { type: "application/pdf" })).ok,
+    false,
+  );
+});
+
+test("stores, serves, and removes course documents from private upload storage", async (t) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "course-documents-"));
+  const previousDirectory = process.env.UPLOADS_DIR;
+  process.env.UPLOADS_DIR = directory;
+  t.after(async () => {
+    if (previousDirectory === undefined) delete process.env.UPLOADS_DIR;
+    else process.env.UPLOADS_DIR = previousDirectory;
+    await rm(directory, { recursive: true, force: true });
+  });
+
+  const file = new File(["pdf-content"], "lesson.pdf", { type: "application/pdf" });
+  const validation = validateCourseDocumentFile(file);
+  assert.equal(validation.ok, true);
+  if (!validation.ok) return;
+
+  const asset = await saveCourseDocumentAsset(file, validation, "course-123");
+  assert.match(asset.fileUrl, /^\/uploads\/courses\/course-123\/documents\/[0-9a-f-]+\.pdf$/);
+  const response = await serveStoredAsset(new Request("http://localhost"), asset.fileUrl, {
+    cacheControl: "private, no-store",
+    contentType: asset.mimeType,
+  });
+  assert.equal(response.headers.get("Content-Type"), "application/pdf");
+  assert.equal(response.headers.get("Cache-Control"), "private, no-store");
+  assert.equal(await response.text(), "pdf-content");
+
+  await removeCourseDocumentAsset(asset.fileUrl);
+  await assert.rejects(
+    serveStoredAsset(new Request("http://localhost"), asset.fileUrl),
+    (error: unknown) => error instanceof Response && error.status === 404,
+  );
+  await assert.rejects(removeCourseDocumentAsset("/uploads/audio/lesson.mp3"), /không hợp lệ/);
+  await removeCourseDocumentAsset("/uploads/course-documents/legacy.pdf");
+  await assert.rejects(
+    saveCourseDocumentAsset(file, validation, "../outside"),
+    /Mã khóa học không hợp lệ/,
+  );
+});
 
 test("saves local uploads and serves byte ranges for audio", async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "local-assets-"));

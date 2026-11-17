@@ -12,7 +12,8 @@ import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
-import { ArrowLeft, ArrowUpRight, BookOpen, Layers, FileCheck2, ListChecks, Search, X, ClipboardCheck, Award, CheckCircle2, Video } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, BookOpen, Layers, FileCheck2, ListChecks, Search, X, ClipboardCheck, Award, CheckCircle2, Video, FolderOpen, FileText, Download } from "lucide-react";
+import { formatCourseDocumentSize } from "~/lib/course-documents";
 import type { ProgressStatus } from "~/types/progress";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
 import {
@@ -36,7 +37,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   if (!course) throw new Response("Không tìm thấy", { status: 404 });
   if (!enrolled) throw new Response("Không có quyền truy cập", { status: 403 });
 
-  const [lessons, reviewSets, tabProgressRows, grammarAttempts, grammarQuestionRows, enrollment] = await Promise.all([
+  const [lessons, reviewSets, tabProgressRows, grammarAttempts, grammarQuestionRows, enrollment, courseDocuments] = await Promise.all([
     getLessonSummariesByCourse(course.id),
     getCourseReviewSetSummaries(course.id),
     prisma.lessonTabProgress.findMany({
@@ -95,6 +96,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
           },
         },
       },
+    }),
+    prisma.courseDocument.findMany({
+      where: { courseId: course.id },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, fileName: true, fileSize: true, mimeType: true, createdAt: true },
     }),
   ]);
   const classFinalResult = enrollment?.class?.finalResults[0] ?? null;
@@ -240,6 +246,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     className: enrollment?.class?.name ?? null,
     attendanceSessions,
     classFinalResult,
+    courseDocuments,
   };
 }
 
@@ -256,6 +263,7 @@ export default function StudentCourseDetail() {
     className,
     attendanceSessions,
     classFinalResult,
+    courseDocuments,
   } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const [isFinalResultOpen, setIsFinalResultOpen] = useState(false);
@@ -263,11 +271,14 @@ export default function StudentCourseDetail() {
   const finalResultCloseRef = useRef<HTMLButtonElement>(null);
   const recordingsDialogRef = useRef<HTMLDialogElement>(null);
   const recordingsCloseRef = useRef<HTMLButtonElement>(null);
+  const documentsDialogRef = useRef<HTMLDialogElement>(null);
+  const documentsCloseRef = useRef<HTMLButtonElement>(null);
   const [isRecordingsOpen, setIsRecordingsOpen] = useState(false);
+  const [isDocumentsOpen, setIsDocumentsOpen] = useState(false);
   const [combinedMode, setCombinedMode] = useState<"study" | "test" | null>(null);
   const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([]);
   const [lessonSearchQuery, setLessonSearchQuery] = useState("");
-  useModalScrollLock(combinedMode !== null || isFinalResultOpen || isRecordingsOpen);
+  useModalScrollLock(combinedMode !== null || isFinalResultOpen || isRecordingsOpen || isDocumentsOpen);
   useEffect(() => {
     const dialog = recordingsDialogRef.current;
     if (!dialog) return;
@@ -277,6 +288,15 @@ export default function StudentCourseDetail() {
     }
     if (!isRecordingsOpen && dialog.open) dialog.close();
   }, [isRecordingsOpen]);
+  useEffect(() => {
+    const dialog = documentsDialogRef.current;
+    if (!dialog) return;
+    if (isDocumentsOpen && !dialog.open) {
+      dialog.showModal();
+      documentsCloseRef.current?.focus();
+    }
+    if (!isDocumentsOpen && dialog.open) dialog.close();
+  }, [isDocumentsOpen]);
   useEffect(() => {
     if (!isFinalResultOpen) return;
 
@@ -490,10 +510,9 @@ export default function StudentCourseDetail() {
         )}
 
         <div>
-          <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-semibold">Bài học</h2>
-            {(lessonsWithStatus.length > 0 || classId) && (
-              <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
                 {classId && (
                   <Button
                     type="button"
@@ -505,6 +524,15 @@ export default function StudentCourseDetail() {
                     <Video aria-hidden="true" className="mr-1.5 h-4 w-4" />Bản ghi buổi học
                   </Button>
                 )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsDocumentsOpen(true)}
+                  className="hover:border-primary hover:bg-primary hover:text-primary-foreground"
+                >
+                  <FolderOpen aria-hidden="true" className="mr-1.5 h-4 w-4" />Kho tài liệu
+                </Button>
                 {lessonsWithStatus.length > 0 && (
                   <>
                     <Button
@@ -526,7 +554,6 @@ export default function StudentCourseDetail() {
                   </>
                 )}
               </div>
-            )}
           </div>
           {orderedCourseItems.length === 0
             ? <EmptyState title="Chưa có bài học" message="Khóa học này chưa có bài học nào." />
@@ -666,6 +693,69 @@ export default function StudentCourseDetail() {
             </section>
           </dialog>
         )}
+
+        <dialog
+          ref={documentsDialogRef}
+          aria-labelledby="student-course-documents-heading"
+          onClose={() => setIsDocumentsOpen(false)}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setIsDocumentsOpen(false);
+          }}
+          className="fixed left-1/2 top-1/2 m-0 max-h-[85vh] w-[calc(100%-1rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border bg-background p-0 text-foreground shadow-xl backdrop:bg-black/50"
+        >
+          <section className="flex max-h-[85vh] flex-col">
+            <header className="flex items-start justify-between gap-4 border-b bg-muted/30 px-4 py-4 sm:px-6">
+              <div>
+                <h2 id="student-course-documents-heading" className="font-semibold">Kho tài liệu</h2>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  {course.title} · {courseDocuments.length} tài liệu
+                </p>
+              </div>
+              <Button
+                ref={documentsCloseRef}
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Đóng kho tài liệu"
+                onClick={() => setIsDocumentsOpen(false)}
+                className="h-8 w-8 shrink-0"
+              >
+                <X aria-hidden="true" className="h-4 w-4" />
+              </Button>
+            </header>
+            {courseDocuments.length === 0 ? (
+              <div className="px-5 py-10 text-center">
+                <FileText aria-hidden="true" className="mx-auto h-7 w-7 text-muted-foreground" />
+                <p className="mt-3 text-sm font-medium">Chưa có tài liệu</p>
+                <p className="mt-1 text-sm text-muted-foreground">Tài liệu của khóa học sẽ xuất hiện tại đây khi được tải lên.</p>
+              </div>
+            ) : (
+              <ul className="divide-y overflow-y-auto">
+                {courseDocuments.map((document) => (
+                  <li key={document.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <FileText aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+                      <div className="min-w-0">
+                        <h3 className="break-all text-sm font-medium">{document.fileName}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {formatCourseDocumentSize(document.fileSize)} · {document.createdAt.toLocaleDateString("vi-VN")}
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={`/student/courses/${course.id}/documents/${document.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      Mở tài liệu<Download aria-hidden="true" className="h-4 w-4" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </dialog>
 
         {combinedMode !== null && (
           <div

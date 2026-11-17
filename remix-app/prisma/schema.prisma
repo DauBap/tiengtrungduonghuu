@@ -84,6 +84,21 @@ model Course {
   mockExams       MockExam[]
   examAccessRules ExamAccessRule[]
   reviewSets      CourseReviewSet[]
+  documents       CourseDocument[]
+}
+
+model CourseDocument {
+  id        String   @id @default(cuid())
+  courseId  String
+  fileName  String
+  fileUrl   String
+  fileSize  Int
+  mimeType  String
+  createdAt DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId, createdAt])
 }
 
 enum ReviewDirection {

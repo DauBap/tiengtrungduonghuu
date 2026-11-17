@@ -62,6 +62,8 @@ Ubuntu dùng user systemd timer `tiengtrung-auto-pull-build.timer` để kiểm 
 
 Migration production được quản lý bằng các file SQL có phiên bản trong `remix-app/prisma/deploy-migrations/`. Khi có migration chưa áp dụng, deploy gọi script backup PostgreSQL hiện có trước; sau đó áp dụng từng migration trong transaction và ghi checksum vào bảng `_AppSchemaMigration`. Nếu backup, migration hoặc build thất bại, deploy dừng trước khi restart app. Không tự chạy `prisma db push` trên production. Các file lịch sử trong `prisma/migrations/` không thuộc runner này.
 
+Tài liệu khóa học được lưu trong `UPLOADS_DIR/courses/<courseId>/documents/`, metadata nằm trong PostgreSQL; chỉ học viên đã ghi danh trong khóa mới tải được. Admin có thể tải PDF, Word, Excel, PowerPoint và ảnh (JPG, PNG, GIF, WEBP), tối đa 25 MB mỗi tệp, từ trang chỉnh sửa khóa học.
+
 Migration `20261108_requeue_legacy_review_attempts.sql` đưa các lượt Ôn tập cũ do app tự chấm (đã trả kết quả, chưa có giáo viên chấm và chưa có dữ liệu chấm tay) về trạng thái **Chờ chấm**. Migration giữ nguyên câu trả lời và thời gian nộp, xóa điểm/tỷ lệ tự động; lượt đã được giáo viên chấm được giữ nguyên.
 
 Các migration `20261108_class_student_score_*.sql` tạo và mở rộng dữ liệu điểm, nhận xét cùng phân loại cuối khóa của học viên. Migration thêm giá trị enum được tách riêng để tương thích với giao dịch deploy.
