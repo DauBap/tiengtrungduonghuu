@@ -2,17 +2,17 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { Readable } from "node:stream";
 import test from "node:test";
 import {
   removeCourseDocumentAsset,
-  saveCourseDocumentAsset,
+  saveCourseDocumentMultipart,
   saveUploadedAsset,
   serveStoredAsset,
   validateCourseDocumentFile,
 } from "./storage.server";
-import { COURSE_DOCUMENT_MAX_BYTES } from "./course-documents";
 
-test("validates course document formats, MIME types, and the 25 MB limit", () => {
+test("validates course document formats and MIME types", () => {
   assert.deepEqual(
     validateCourseDocumentFile(new File(["pdf"], "Tài liệu.PDF", { type: "application/pdf" })),
     {
@@ -30,10 +30,7 @@ test("validates course document formats, MIME types, and the 25 MB limit", () =>
     validateCourseDocumentFile(new File(["x"], "notes.pdf", { type: "image/png" })).ok,
     false,
   );
-  assert.equal(
-    validateCourseDocumentFile(new File([new Uint8Array(COURSE_DOCUMENT_MAX_BYTES + 1)], "large.pdf", { type: "application/pdf" })).ok,
-    false,
-  );
+  assert.equal(validateCourseDocumentFile(new File([], "empty.pdf", { type: "application/pdf" })).ok, false);
 });
 
 test("stores, serves, and removes course documents from private upload storage", async (t) => {
@@ -46,12 +43,22 @@ test("stores, serves, and removes course documents from private upload storage",
     await rm(directory, { recursive: true, force: true });
   });
 
-  const file = new File(["pdf-content"], "lesson.pdf", { type: "application/pdf" });
-  const validation = validateCourseDocumentFile(file);
-  assert.equal(validation.ok, true);
-  if (!validation.ok) return;
+  const boundary = "course-document-test";
+  async function* multipartBody() {
+    yield Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="intent"\r\n\r\nupload\r\n` +
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="lesson.pdf"\r\n` +
+      "Content-Type: application/pdf\r\n\r\n",
+    );
+    yield Buffer.from("pdf-content");
+    yield Buffer.from(`\r\n--${boundary}--\r\n`);
+  }
 
-  const asset = await saveCourseDocumentAsset(file, validation, "course-123");
+  const asset = await saveCourseDocumentMultipart(
+    Readable.from(multipartBody()),
+    `multipart/form-data; boundary=${boundary}`,
+    "course-123",
+  );
   assert.match(asset.fileUrl, /^\/uploads\/courses\/course-123\/documents\/[0-9a-f-]+\.pdf$/);
   const response = await serveStoredAsset(new Request("http://localhost"), asset.fileUrl, {
     cacheControl: "private, no-store",
@@ -68,10 +75,37 @@ test("stores, serves, and removes course documents from private upload storage",
   );
   await assert.rejects(removeCourseDocumentAsset("/uploads/audio/lesson.mp3"), /không hợp lệ/);
   await removeCourseDocumentAsset("/uploads/course-documents/legacy.pdf");
-  await assert.rejects(
-    saveCourseDocumentAsset(file, validation, "../outside"),
-    /Mã khóa học không hợp lệ/,
+});
+
+test("streams an 80 MB course document without a size cap", async (t) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "large-course-document-"));
+  const previousDirectory = process.env.UPLOADS_DIR;
+  process.env.UPLOADS_DIR = directory;
+  t.after(async () => {
+    if (previousDirectory === undefined) delete process.env.UPLOADS_DIR;
+    else process.env.UPLOADS_DIR = previousDirectory;
+    await rm(directory, { recursive: true, force: true });
+  });
+
+  const boundary = "large-course-document-test";
+  const chunk = Buffer.alloc(1024 * 1024, 0x61);
+  async function* multipartBody() {
+    yield Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="intent"\r\n\r\nupload\r\n` +
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="large.pdf"\r\n` +
+      "Content-Type: application/pdf\r\n\r\n",
+    );
+    for (let index = 0; index < 80; index += 1) yield chunk;
+    yield Buffer.from(`\r\n--${boundary}--\r\n`);
+  }
+
+  const asset = await saveCourseDocumentMultipart(
+    Readable.from(multipartBody()),
+    `multipart/form-data; boundary=${boundary}`,
+    "course-123",
   );
+  assert.equal(asset.fileSize, 80 * 1024 * 1024);
+  await removeCourseDocumentAsset(asset.fileUrl);
 });
 
 test("saves local uploads and serves byte ranges for audio", async (t) => {

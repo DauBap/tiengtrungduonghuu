@@ -1,9 +1,11 @@
+import Busboy from "busboy";
 import { randomUUID } from "node:crypto";
+import { createReadStream, createWriteStream } from "node:fs";
 import { link, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
-import { createReadStream } from "node:fs";
-import { COURSE_DOCUMENT_MAX_BYTES } from "~/lib/course-documents";
+import type { ReadableStream as NodeReadableStream } from "node:stream/web";
+import { pipeline } from "node:stream/promises";
 
 export type AssetKind = "workbook-image" | "lesson-audio" | "vocab-audio";
 
@@ -34,22 +36,32 @@ export type CourseDocumentFileValidation =
   | { ok: true; fileName: string; extension: string; mimeType: string }
   | { ok: false; error: string };
 
-export function validateCourseDocumentFile(file: File | null): CourseDocumentFileValidation {
-  if (!file || !file.name) return { ok: false, error: "Vui lòng chọn tệp tài liệu." };
-  if (file.size === 0) return { ok: false, error: "Tệp đang trống, vui lòng chọn tệp khác." };
-  if (file.size > COURSE_DOCUMENT_MAX_BYTES) {
-    return { ok: false, error: "Tệp vượt quá giới hạn 25 MB." };
+export class CourseDocumentUploadError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "CourseDocumentUploadError";
   }
+}
 
-  const sourceName = file.name.replace(/\\/g, "/").split("/").pop()?.trim() ?? "";
+export function validateCourseDocumentFileInfo(
+  fileName: string | undefined,
+  suppliedMimeType: string | undefined,
+): CourseDocumentFileValidation {
+  if (!fileName) return { ok: false, error: "Vui lòng chọn tệp tài liệu." };
+
+  const sourceName = fileName.replace(/\\/g, "/").split("/").pop()?.trim() ?? "";
   const sourceExtension = path.extname(sourceName).toLowerCase();
   const mimeType = courseDocumentMimeTypes[sourceExtension];
   if (!mimeType) {
     return { ok: false, error: "Chỉ nhận PDF, Word, Excel, PowerPoint và ảnh JPG, PNG, GIF, WEBP." };
   }
 
-  const suppliedMimeType = file.type.toLowerCase();
-  if (suppliedMimeType && suppliedMimeType !== "application/octet-stream" && suppliedMimeType !== mimeType) {
+  const normalizedMimeType = suppliedMimeType?.toLowerCase() ?? "";
+  if (
+    normalizedMimeType &&
+    normalizedMimeType !== "application/octet-stream" &&
+    normalizedMimeType !== mimeType
+  ) {
     return { ok: false, error: "Định dạng tệp không khớp với phần mở rộng." };
   }
 
@@ -64,8 +76,14 @@ export function validateCourseDocumentFile(file: File | null): CourseDocumentFil
   };
 }
 
+export function validateCourseDocumentFile(file: File | null): CourseDocumentFileValidation {
+  if (!file || !file.name) return { ok: false, error: "Vui lòng chọn tệp tài liệu." };
+  if (file.size === 0) return { ok: false, error: "Tệp đang trống, vui lòng chọn tệp khác." };
+  return validateCourseDocumentFileInfo(file.name, file.type);
+}
+
 export async function saveCourseDocumentAsset(
-  file: File,
+  fileStream: Readable,
   validation: Extract<CourseDocumentFileValidation, { ok: true }>,
   courseId: string,
 ) {
@@ -77,14 +95,117 @@ export async function saveCourseDocumentAsset(
   const relativePath = path.join("courses", courseId, "documents", fileName);
   const destination = path.resolve(getUploadsDirectory(), relativePath);
   await mkdir(path.dirname(destination), { recursive: true, mode: 0o750 });
-  await writeFile(destination, Buffer.from(await file.arrayBuffer()), { mode: 0o640, flag: "wx" });
+  let keepFile = false;
+  try {
+    await pipeline(fileStream, createWriteStream(destination, { mode: 0o640, flags: "wx" }));
+    const fileSize = (await stat(destination)).size;
+    if (fileSize === 0) throw new CourseDocumentUploadError("Tệp đang trống, vui lòng chọn tệp khác.");
+    keepFile = true;
 
-  return {
-    fileName: validation.fileName,
-    fileUrl: `${uploadsPrefix}/${relativePath.split(path.sep).join("/")}`,
-    fileSize: file.size,
-    mimeType: validation.mimeType,
-  };
+    return {
+      fileName: validation.fileName,
+      fileUrl: `${uploadsPrefix}/${relativePath.split(path.sep).join("/")}`,
+      fileSize,
+      mimeType: validation.mimeType,
+    };
+  } finally {
+    if (!keepFile) await rm(destination, { force: true });
+  }
+}
+
+export async function saveCourseDocumentMultipart(
+  body: Readable,
+  contentType: string,
+  courseId: string,
+  signal?: AbortSignal,
+) {
+  let parser: ReturnType<typeof Busboy>;
+  try {
+    parser = Busboy({
+      headers: { "content-type": contentType },
+      defParamCharset: "utf8",
+      limits: { files: 1, fields: 1, parts: 3 },
+    });
+  } catch {
+    throw new CourseDocumentUploadError("Yêu cầu tải lên không hợp lệ.");
+  }
+
+  let intent = "";
+  let fileCount = 0;
+  let validationError = "";
+  const assetPromises: Promise<Awaited<ReturnType<typeof saveCourseDocumentAsset>>>[] = [];
+
+  parser.on("field", (name, value, info) => {
+    if (name !== "intent" || info.valueTruncated) {
+      validationError ||= "Yêu cầu tải lên không hợp lệ.";
+      return;
+    }
+    intent = value;
+  });
+  parser.on("fieldsLimit", () => {
+    validationError ||= "Yêu cầu tải lên không hợp lệ.";
+  });
+  parser.on("filesLimit", () => {
+    validationError ||= "Chỉ được tải lên một tệp mỗi lần.";
+  });
+  parser.on("partsLimit", () => {
+    validationError ||= "Yêu cầu tải lên không hợp lệ.";
+  });
+  parser.on("file", (fieldName, fileStream, info) => {
+    fileCount += 1;
+    if (intent !== "upload" || fieldName !== "file" || fileCount !== 1) {
+      validationError ||= "Yêu cầu tải lên không hợp lệ.";
+      fileStream.resume();
+      return;
+    }
+
+    const validation = validateCourseDocumentFileInfo(info.filename, info.mimeType);
+    if (!validation.ok) {
+      validationError ||= validation.error;
+      fileStream.resume();
+      return;
+    }
+
+    const assetPromise = saveCourseDocumentAsset(fileStream, validation, courseId);
+    assetPromises.push(assetPromise);
+    void assetPromise.catch(() => undefined);
+  });
+
+  try {
+    if (signal) await pipeline(body, parser, { signal });
+    else await pipeline(body, parser);
+  } catch (error) {
+    const assetPromise = assetPromises[0];
+    const savedAsset = assetPromise ? await assetPromise.catch(() => null) : null;
+    if (savedAsset) await removeCourseDocumentAsset(savedAsset.fileUrl);
+    if (error instanceof Error && error.name === "AbortError") throw error;
+    throw new CourseDocumentUploadError("Không thể đọc dữ liệu tải lên.");
+  }
+
+  const assetPromise = assetPromises[0];
+  if (assetPromise) {
+    const asset = await assetPromise;
+    if (validationError) {
+      await removeCourseDocumentAsset(asset.fileUrl);
+      throw new CourseDocumentUploadError(validationError);
+    }
+    return asset;
+  }
+
+  throw new CourseDocumentUploadError(
+    validationError || (fileCount === 0 ? "Vui lòng chọn tệp tài liệu." : "Tệp tải lên không hợp lệ."),
+  );
+}
+
+export async function saveCourseDocumentUpload(request: Request, courseId: string) {
+  if (!request.body) throw new CourseDocumentUploadError("Vui lòng chọn tệp tài liệu.");
+  const contentType = request.headers.get("content-type") ?? "";
+  return saveCourseDocumentMultipart(
+    Readable.fromWeb(request.body as NodeReadableStream<Uint8Array>),
+    contentType,
+    courseId,
+    request.signal,
+  );
 }
 
 export async function removeCourseDocumentAsset(storedUrl: string) {

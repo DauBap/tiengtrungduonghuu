@@ -30,6 +30,7 @@
     "@react-router/serve": "^7.6.0",
     "@vercel/blob": "^2.8.0",
     "bcryptjs": "^3.0.3",
+    "busboy": "^1.6.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cookie": "^1.0.2",
@@ -49,6 +50,7 @@
   "devDependencies": {
     "@react-router/dev": "^7.6.0",
     "@types/bcryptjs": "^2.4.6",
+    "@types/busboy": "^1.5.5",
     "@types/cookie": "^1.0.0",
     "@types/node": "^22",
     "@types/react": "^19",

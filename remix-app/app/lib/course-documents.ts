@@ -1,4 +1,3 @@
-export const COURSE_DOCUMENT_MAX_BYTES = 25 * 1024 * 1024;
 export const COURSE_DOCUMENT_ACCEPT =
   ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp";
 

@@ -246,7 +246,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     className: enrollment?.class?.name ?? null,
     attendanceSessions,
     classFinalResult,
-    courseDocuments,
+    courseDocuments: courseDocuments.map((document) => ({
+      ...document,
+      fileSize: Number(document.fileSize),
+    })),
   };
 }
 

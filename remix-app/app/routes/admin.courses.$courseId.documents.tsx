@@ -1,25 +1,23 @@
+import { useState } from "react";
+import type { FormEvent } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import { Form, Link, redirect, useActionData, useLoaderData, useNavigation } from "react-router";
+import { Form, Link, redirect, useActionData, useLoaderData, useNavigation, useRevalidator } from "react-router";
 import { ArrowLeft, FileText, Trash2, Upload } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
   COURSE_DOCUMENT_ACCEPT,
-  COURSE_DOCUMENT_MAX_BYTES,
   formatCourseDocumentSize,
 } from "~/lib/course-documents";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 import {
+  CourseDocumentUploadError,
   removeCourseDocumentAsset,
-  saveCourseDocumentAsset,
-  validateCourseDocumentFile,
+  saveCourseDocumentUpload,
 } from "~/lib/storage.server";
-
-const MAX_MULTIPART_OVERHEAD_BYTES = 1024 * 1024;
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
@@ -36,7 +34,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     }),
   ]);
   if (!course) throw new Response("Không tìm thấy khóa học", { status: 404 });
-  return { user, course, documents };
+  return {
+    user,
+    course,
+    documents: documents.map((document) => ({ ...document, fileSize: Number(document.fileSize) })),
+  };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -48,9 +50,36 @@ export async function action({ request, params }: ActionFunctionArgs) {
   });
   if (!course) throw new Response("Không tìm thấy khóa học", { status: 404 });
 
-  const contentLength = Number(request.headers.get("content-length") ?? 0);
-  if (contentLength > COURSE_DOCUMENT_MAX_BYTES + MAX_MULTIPART_OVERHEAD_BYTES) {
-    return { error: "Tệp vượt quá giới hạn 25 MB." };
+  const isProgressUpload = request.headers.get("X-Course-Document-Upload") === "1";
+  const contentType = request.headers.get("content-type") ?? "";
+  if (contentType.toLowerCase().startsWith("multipart/form-data")) {
+    let asset: Awaited<ReturnType<typeof saveCourseDocumentUpload>>;
+    try {
+      asset = await saveCourseDocumentUpload(request, course.id);
+    } catch (error) {
+      if (!(error instanceof CourseDocumentUploadError)) throw error;
+      if (isProgressUpload) {
+        return Response.json({ error: error.message }, { status: 400 });
+      }
+      return { error: error.message };
+    }
+
+    let documentCreated = false;
+    try {
+      await prisma.courseDocument.create({
+        data: {
+          courseId,
+          ...asset,
+          fileSize: BigInt(asset.fileSize),
+        },
+      });
+      documentCreated = true;
+    } finally {
+      if (!documentCreated) await removeCourseDocumentAsset(asset.fileUrl);
+    }
+
+    if (isProgressUpload) return Response.json({ success: true });
+    return redirect(`/admin/courses/${courseId}/documents`);
   }
 
   const form = await request.formData();
@@ -69,36 +98,108 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return redirect(`/admin/courses/${courseId}/documents`);
   }
 
-  if (intent !== "upload") return { error: "Thao tác không hợp lệ." };
+  return { error: intent === "upload" ? "Yêu cầu tải lên không hợp lệ." : "Thao tác không hợp lệ." };
+}
 
-  const entry = form.get("file");
-  if (!(entry instanceof File)) return { error: "Vui lòng chọn tệp tài liệu." };
-  const file = entry;
-  const validation = validateCourseDocumentFile(file);
-  if (!validation.ok) return { error: validation.error };
-
-  const asset = await saveCourseDocumentAsset(file, validation, course.id);
-  let documentCreated = false;
+function parseUploadResponse(responseText: string) {
+  let response: unknown;
   try {
-    await prisma.courseDocument.create({
-      data: {
-        courseId,
-        ...asset,
-      },
-    });
-    documentCreated = true;
-  } finally {
-    if (!documentCreated) await removeCourseDocumentAsset(asset.fileUrl);
+    response = JSON.parse(responseText);
+  } catch {
+    return null;
   }
-
-  return redirect(`/admin/courses/${courseId}/documents`);
+  if (!response || typeof response !== "object") return null;
+  const data = response as Record<string, unknown>;
+  return {
+    success: data.success === true,
+    error: typeof data.error === "string" ? data.error : undefined,
+  };
 }
 
 export default function CourseDocumentsAdmin() {
   const { user, course, documents } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
+  const revalidator = useRevalidator();
   const isSubmitting = navigation.state === "submitting";
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [uploadPercent, setUploadPercent] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const isBusy = isSubmitting || isUploading;
+
+  function handleUpload(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const file = formData.get("file");
+    if (!(file instanceof File) || !file.name || file.size === 0) {
+      setUploadError("Vui lòng chọn tệp tài liệu.");
+      return;
+    }
+
+    setUploadError(null);
+    setUploadSuccess(false);
+    setIsUploading(true);
+    setIsSaving(false);
+    setUploadPercent(0);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", form.action);
+    xhr.setRequestHeader("X-Course-Document-Upload", "1");
+    xhr.upload.addEventListener("progress", (progressEvent) => {
+      if (progressEvent.lengthComputable) {
+        setUploadPercent(Math.min(100, Math.round((progressEvent.loaded / progressEvent.total) * 100)));
+      }
+    });
+    xhr.upload.addEventListener("load", () => {
+      setUploadPercent(100);
+      setIsSaving(true);
+    });
+    xhr.addEventListener("load", () => {
+      setIsUploading(false);
+      setIsSaving(false);
+      const response = parseUploadResponse(xhr.responseText);
+      if (xhr.status < 200 || xhr.status >= 300) {
+        setUploadPercent(null);
+        setUploadError(response?.error ?? `Tải lên thất bại (HTTP ${xhr.status}). Vui lòng thử lại.`);
+        return;
+      }
+      if (!response?.success) {
+        setUploadPercent(null);
+        setUploadError(response?.error ?? "Máy chủ chưa xác nhận lưu tài liệu. Vui lòng tải lại trang và thử lại.");
+        return;
+      }
+
+      setUploadPercent(null);
+      setSelectedFile(null);
+      setUploadSuccess(true);
+      form.reset();
+      revalidator.revalidate();
+    });
+    xhr.addEventListener("error", () => {
+      setIsUploading(false);
+      setIsSaving(false);
+      setUploadPercent(null);
+      setUploadError("Mất kết nối trong khi tải lên. Hãy kiểm tra mạng rồi thử lại.");
+    });
+    xhr.addEventListener("abort", () => {
+      setIsUploading(false);
+      setIsSaving(false);
+      setUploadPercent(null);
+      setUploadError("Tải lên đã bị hủy. Hãy thử lại.");
+    });
+    try {
+      xhr.send(formData);
+    } catch {
+      setIsUploading(false);
+      setIsSaving(false);
+      setUploadPercent(null);
+      setUploadError("Không thể bắt đầu tải lên. Hãy thử lại.");
+    }
+  }
 
   return (
     <AppShell user={user}>
@@ -121,31 +222,99 @@ export default function CourseDocumentsAdmin() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Form method="post" encType="multipart/form-data" className="space-y-4">
+              <form method="post" encType="multipart/form-data" onSubmit={handleUpload} className="space-y-4">
               <input type="hidden" name="intent" value="upload" />
               <div className="space-y-2">
                 <Label htmlFor="course-document-file">Tệp tài liệu</Label>
-                <Input
-                  id="course-document-file"
-                  name="file"
-                  type="file"
-                  accept={COURSE_DOCUMENT_ACCEPT}
-                  required
-                  disabled={isSubmitting}
-                  aria-describedby="course-document-file-help"
-                />
+                <div
+                  className={`relative overflow-hidden rounded-lg border border-dashed bg-background transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ${
+                    isBusy
+                      ? "cursor-not-allowed border-input opacity-60"
+                      : "cursor-pointer border-input hover:border-primary/60 hover:bg-muted/30"
+                  }`}
+                >
+                  <input
+                    id="course-document-file"
+                    name="file"
+                    type="file"
+                    accept={COURSE_DOCUMENT_ACCEPT}
+                    required
+                    disabled={isBusy}
+                    aria-describedby="course-document-file-help"
+                    className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+                    onChange={(event) => {
+                      setSelectedFile(event.currentTarget.files?.[0] ?? null);
+                      setUploadError(null);
+                      setUploadSuccess(false);
+                    }}
+                  />
+                  <div className="pointer-events-none flex min-h-[5.25rem] items-center gap-3 px-4 py-3 sm:gap-4">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Upload aria-hidden="true" className="h-5 w-5" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium" title={selectedFile?.name}>
+                        {selectedFile?.name ?? "Chọn tệp tài liệu"}
+                      </span>
+                      <span className="mt-1 block text-xs text-muted-foreground">
+                        {selectedFile
+                          ? `${formatCourseDocumentSize(selectedFile.size)} · Nhấn để thay đổi`
+                          : "Nhấn để duyệt tệp từ thiết bị"}
+                      </span>
+                    </span>
+                    <span className="inline-flex h-9 shrink-0 items-center rounded-md border bg-background px-3 text-sm font-medium text-foreground shadow-sm">
+                      Chọn tệp
+                    </span>
+                  </div>
+                </div>
                 <p id="course-document-file-help" className="text-xs text-muted-foreground">
-                  PDF, Word, Excel, PowerPoint hoặc ảnh JPG, PNG, GIF, WEBP · tối đa 25 MB mỗi tệp.
+                  PDF, Word, Excel, PowerPoint hoặc ảnh JPG, PNG, GIF, WEBP · thời gian tải tùy dung lượng và mạng.
                 </p>
               </div>
-              {actionData?.error && (
-                <p role="alert" className="text-sm text-destructive">{actionData.error}</p>
+              {isUploading && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-3 text-sm" role="status" aria-live="polite">
+                    <span>{isSaving ? "Đang lưu tệp trên máy chủ..." : "Đang tải tệp lên..."}</span>
+                    {uploadPercent !== null && <span className="tabular-nums">{uploadPercent}%</span>}
+                  </div>
+                  {uploadPercent !== null && (
+                    <div
+                      role="progressbar"
+                      aria-label="Tiến trình tải tài liệu lên"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={uploadPercent}
+                      className="h-2 overflow-hidden rounded-full bg-muted"
+                    >
+                      <div
+                        className="h-full origin-left rounded-full bg-primary"
+                        style={{ transform: `scaleX(${uploadPercent / 100})` }}
+                      />
+                    </div>
+                  )}
+                </div>
               )}
-              <Button type="submit" disabled={isSubmitting}>
+              {(uploadError || actionData?.error) && (
+                <p role="alert" className="text-sm text-destructive">{uploadError ?? actionData?.error}</p>
+              )}
+              {uploadSuccess && (
+                <p role="status" className="text-sm text-green-700 dark:text-green-400">
+                  Tải tài liệu thành công.
+                </p>
+              )}
+              <Button type="submit" disabled={isBusy}>
                 <Upload aria-hidden="true" className="mr-1.5 h-4 w-4" />
-                {isSubmitting ? "Đang tải lên..." : "Tải tài liệu lên"}
+                {isUploading
+                  ? isSaving
+                    ? "Đang lưu..."
+                    : uploadPercent === null
+                      ? "Đang tải lên..."
+                      : `Đang tải lên ${uploadPercent}%`
+                  : isSubmitting
+                    ? "Đang xử lý..."
+                    : "Tải tài liệu lên"}
               </Button>
-            </Form>
+            </form>
           </CardContent>
         </Card>
 

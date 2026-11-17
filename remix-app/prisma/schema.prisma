@@ -92,7 +92,7 @@ model CourseDocument {
   courseId  String
   fileName  String
   fileUrl   String
-  fileSize  Int
+  fileSize  BigInt
   mimeType  String
   createdAt DateTime @default(now())
 
