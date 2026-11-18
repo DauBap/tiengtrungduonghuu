@@ -114,6 +114,7 @@ function parseUploadResponse(responseText: string) {
   const data = response as Record<string, unknown>;
   return {
     success: data.success === true,
+    hasSuccess: Object.hasOwn(data, "success"),
     error: typeof data.error === "string" ? data.error : undefined,
   };
 }
@@ -165,14 +166,27 @@ export default function CourseDocumentsAdmin() {
       setIsUploading(false);
       setIsSaving(false);
       const response = parseUploadResponse(xhr.responseText);
+      const uploadUrl = new URL(form.action, window.location.href);
+      const responseUrl = new URL(xhr.responseURL || form.action, window.location.href);
+      const stayedOnUploadRoute =
+        responseUrl.origin === uploadUrl.origin && responseUrl.pathname === uploadUrl.pathname;
       if (xhr.status < 200 || xhr.status >= 300) {
         setUploadPercent(null);
         setUploadError(response?.error ?? `Tải lên thất bại (HTTP ${xhr.status}). Vui lòng thử lại.`);
         return;
       }
-      if (!response?.success) {
+      if (response?.error || (response?.hasSuccess && !response.success)) {
         setUploadPercent(null);
-        setUploadError(response?.error ?? "Máy chủ chưa xác nhận lưu tài liệu. Vui lòng tải lại trang và thử lại.");
+        setUploadError(response.error ?? "Máy chủ từ chối lưu tài liệu. Vui lòng kiểm tra lại tệp.");
+        return;
+      }
+      if (!response?.success && !stayedOnUploadRoute) {
+        setUploadPercent(null);
+        setUploadError(
+          responseUrl.pathname === "/login"
+            ? "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại rồi kiểm tra danh sách tài liệu."
+            : "Máy chủ chưa xác nhận lưu tài liệu. Vui lòng tải lại trang và thử lại.",
+        );
         return;
       }
 
