@@ -490,7 +490,13 @@ export async function action({ request }: ActionFunctionArgs) {
             status,
             teacherId: user.id,
           },
-          update: { sessionNumber: currentNumber, status, teacherId: user.id },
+          update: {
+            sessionNumber: currentNumber,
+            status,
+            teacherId: user.id,
+            adminAction: null,
+            adminActionReason: null,
+          },
         })
       ));
       return { success: true as const };
@@ -818,8 +824,11 @@ export default function TeacherAttendance() {
       && currentReview.sessionType === result.sessionType
     ) {
       setPendingReview(null);
-      setFeedback("Đã lưu đánh giá học viên.");
-      toast.success("Đã lưu đánh giá học viên.");
+      const feedback = currentReview.sessionType === "MIDTERM"
+        ? "Đã gửi đánh giá giữa kỳ cho quản trị viên."
+        : "Đã lưu đánh giá học viên.";
+      setFeedback(feedback);
+      toast.success(feedback);
       reviewFetcher.reset();
     }
   }, [reviewFetcher.data, reviewFetcher.state, pendingReview]);
@@ -1506,7 +1515,10 @@ export default function TeacherAttendance() {
                   {selectedClass?.name} · {pendingReview.sessionTitle} · buổi {pendingReview.sessionNumber}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Chọn trạng thái cho tất cả {pendingReview.students.length} học viên để lưu đánh giá.
+                  Chọn trạng thái cho tất cả {pendingReview.students.length} học viên
+                  {pendingReview.sessionType === "MIDTERM"
+                    ? " để gửi đánh giá cho quản trị viên."
+                    : " để lưu đánh giá."}
                 </p>
               </header>
 
@@ -1565,7 +1577,9 @@ export default function TeacherAttendance() {
                   disabled={!reviewReady || isSavingReview}
                   className="w-full sm:w-auto"
                 >
-                  {isSavingReview ? "Đang lưu đánh giá..." : "Lưu đánh giá"}
+                  {isSavingReview
+                    ? pendingReview.sessionType === "MIDTERM" ? "Đang gửi đánh giá..." : "Đang lưu đánh giá..."
+                    : pendingReview.sessionType === "MIDTERM" ? "Gửi đánh giá cho quản trị viên" : "Lưu đánh giá"}
                 </Button>
               </footer>
             </section>

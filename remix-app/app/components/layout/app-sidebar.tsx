@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useFetcher } from "react-router";
 import { cn } from "~/lib/utils";
-import { LayoutDashboard, BookOpen, TrendingUp, User, LogOut, Menu, X, School, ListChecks, FileCheck2, CalendarDays, Volume2, ClipboardCheck, Brush, GraduationCap, ClipboardList, ChevronDown } from "lucide-react";
+import { LayoutDashboard, BookOpen, User, Users, LogOut, Menu, X, School, ListChecks, FileCheck2, CalendarDays, Volume2, ClipboardCheck, Brush, GraduationCap, ClipboardList, ChevronDown, Gamepad2 } from "lucide-react";
 import type { UserRole, SessionUser } from "~/lib/session.server";
 import { Button } from "~/components/ui/button";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -17,22 +17,52 @@ interface NavItem {
 const ROLE_NAV: Record<UserRole, NavItem[]> = {
   admin: [
     { label: "Bảng điều khiển", href: "/admin", icon: LayoutDashboard },
-    { label: "Dữ liệu Thần Bút", href: "/admin/shen-bi-data", icon: Brush },
     {
-      label: "Lớp học",
+      label: "Quản lý trò chơi",
+      href: "/admin/shen-bi-data",
+      icon: Gamepad2,
+      children: [
+        { label: "Dữ liệu Thần Bút", href: "/admin/shen-bi-data", icon: Brush },
+      ],
+    },
+    {
+      label: "Quản lý lớp học",
       href: "/admin/classes",
       icon: School,
       children: [
-        { label: "Tổng quan lớp học", href: "/admin/class-overview", icon: ClipboardList },
+        { label: "Danh sách lớp", href: "/admin/classes", icon: School },
+        { label: "Tổng quan lớp", href: "/admin/class-overview", icon: ClipboardList },
         { label: "Điểm danh", href: "/admin/attendance", icon: ClipboardCheck },
-        { label: "Đánh giá học viên", href: "/admin/student-reviews", icon: ClipboardCheck },
-        { label: "Kết quả cuối khóa", href: "/admin/class-final-results", icon: TrendingUp },
       ],
     },
-    { label: "Lịch giáo viên", href: "/admin/teachers", icon: GraduationCap },
-    { label: "Khóa học", href: "/admin/courses", icon: BookOpen },
-    { label: "Bài thi", href: "/admin/exams", icon: FileCheck2 },
-    { label: "Kho câu hỏi", href: "/admin/question-bank", icon: ListChecks },
+    {
+      label: "Quản lý học sinh",
+      href: "/admin/midterm-reviews",
+      icon: Users,
+      children: [
+        { label: "Đánh giá giữa kỳ", href: "/admin/midterm-reviews", icon: ClipboardCheck },
+        { label: "Đánh giá cuối kỳ", href: "/admin/class-final-results", icon: ClipboardCheck },
+        { label: "Lịch sử đánh giá học viên", href: "/admin/student-reviews", icon: ClipboardList },
+      ],
+    },
+    {
+      label: "Lịch & phân công",
+      href: "/admin/teachers",
+      icon: GraduationCap,
+      children: [
+        { label: "Lịch giáo viên", href: "/admin/teachers", icon: CalendarDays },
+      ],
+    },
+    {
+      label: "Nội dung & kiểm tra",
+      href: "/admin/courses",
+      icon: BookOpen,
+      children: [
+        { label: "Khóa học", href: "/admin/courses", icon: BookOpen },
+        { label: "Bài thi", href: "/admin/exams", icon: FileCheck2 },
+        { label: "Kho câu hỏi", href: "/admin/question-bank", icon: ListChecks },
+      ],
+    },
     { label: "Audio AI", href: "/admin/speech-audio", icon: Volume2 },
     { label: "Tài khoản", href: "/admin/accounts", icon: User },
   ],
@@ -80,7 +110,9 @@ export function AppSidebar({ user }: { user: SessionUser }) {
         || item.children.some((child) => location.pathname.startsWith(child.href)))
     );
     if (activeGroup) {
-      setExpandedGroups((current) => ({ ...current, [activeGroup.href]: true }));
+      setExpandedGroups((current) => Object.fromEntries(
+        Object.keys(current).map((href) => [href, href === activeGroup.href]),
+      ));
     }
   }, [location.pathname, navItems]);
 
@@ -121,85 +153,95 @@ export function AppSidebar({ user }: { user: SessionUser }) {
       </div>
 
       {/* overflow-y-auto: menu admin dài, cần cuộn được trên màn hình thấp */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+      <nav className="sidebar-scrollbar flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {navItems.map((item) => {
-          const isActive = item.href === `/${user.role}` ? location.pathname === item.href : location.pathname.startsWith(item.href);
           const isChildActive = item.children?.some((child) => location.pathname.startsWith(child.href)) ?? false;
+          const isActive = item.href === `/${user.role}`
+            ? location.pathname === item.href
+            : location.pathname.startsWith(item.href) || isChildActive;
           const isExpanded = item.children
             ? expandedGroups[item.href] ?? (isActive || isChildActive)
             : false;
           const Icon = item.icon;
           return (
             <div key={item.href}>
-              <div className="flex items-center gap-1">
-                <Link
-                  to={item.href}
-                  onClick={() => {
-                    setMobileOpen(false);
-                    if (item.children) setExpandedGroups((current) => ({ ...current, [item.href]: true }));
-                  }}
-                  className={cn("flex min-w-0 flex-1 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                    // Sidebar đã là nền đỏ nên item active phải nổi bằng lớp sáng,
-                    // không dùng bg-primary (cùng tông đỏ → chìm hẳn vào nền).
-                    // Chữ dùng text-sidebar (không phải text-primary): ở dark mode
-                    // primary bị sáng lên nên trên viên pill trắng chỉ còn 3.5:1.
-                    isActive ? "bg-sidebar-foreground text-sidebar shadow-sm" : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground"
+              {item.children ? (
+                <button
+                  type="button"
+                  aria-expanded={isExpanded}
+                  aria-controls={`sidebar-submenu-${item.href.replaceAll("/", "-")}`}
+                  onClick={() => setExpandedGroups((current) => Object.fromEntries(
+                    Object.keys(current).map((href) => [href, href === item.href && !isExpanded]),
+                  ))}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-sidebar-muted-foreground transition-colors hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-foreground",
                   )}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
                   <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                  {user.role === "student"
-                    && item.href === "/student/assignments"
-                    && pendingReviewCount > 0 && (
-                      <span
-                        aria-label={`${pendingReviewCount} bài đang chờ chấm`}
-                        className={cn(
-                          "inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums",
-                          isActive
-                            ? "bg-sidebar text-sidebar-foreground"
-                            : "bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-100",
-                        )}
-                      >
-                        {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
-                      </span>
-                    )}
+                  <ChevronDown className={cn("sidebar-submenu-chevron h-4 w-4 shrink-0", !isExpanded && "-rotate-90")} />
+                </button>
+              ) : (
+                <Link
+                  to={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-sidebar-foreground text-sidebar shadow-sm"
+                      : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground",
+                  )}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  {user.role === "student" && item.href === "/student/assignments" && pendingReviewCount > 0 && (
+                    <span
+                      aria-label={`${pendingReviewCount} bài đang chờ chấm`}
+                      className={cn(
+                        "inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums",
+                        isActive
+                          ? "bg-sidebar text-sidebar-foreground"
+                          : "bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-100",
+                      )}
+                    >
+                      {pendingReviewCount > 99 ? "99+" : pendingReviewCount}
+                    </span>
+                  )}
                 </Link>
-                {item.children && (
-                  <button
-                    type="button"
-                    aria-label={`${isExpanded ? "Thu gọn" : "Mở"} mục con: ${item.label}`}
-                    aria-expanded={isExpanded}
-                    aria-controls={`sidebar-submenu-${item.href.replaceAll("/", "-")}`}
-                    onClick={() => setExpandedGroups((current) => ({ ...current, [item.href]: !isExpanded }))}
-                    className="flex h-10 w-9 shrink-0 items-center justify-center rounded-lg text-sidebar-muted-foreground transition-colors hover:bg-sidebar-muted hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-foreground"
-                  >
-                    <ChevronDown className={cn("h-4 w-4 transition-transform", !isExpanded && "-rotate-90")} />
-                  </button>
-                )}
-              </div>
-              {item.children && isExpanded && (
-                <div id={`sidebar-submenu-${item.href.replaceAll("/", "-")}`} className="ml-3 mt-1 space-y-1 border-l border-sidebar-border pl-3">
-                  {item.children.map((child) => {
-                    const isChildSelected = location.pathname.startsWith(child.href);
-                    const ChildIcon = child.icon;
-                    return (
-                      <Link
-                        key={child.href}
-                        to={child.href}
-                        onClick={() => setMobileOpen(false)}
-                        aria-current={isChildSelected ? "page" : undefined}
-                        className={cn(
-                          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                          isChildSelected
-                            ? "bg-sidebar-foreground text-sidebar shadow-sm"
-                            : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground",
-                        )}
-                      >
-                        <ChildIcon className="h-4 w-4 shrink-0" />
-                        <span className="min-w-0 truncate">{child.label}</span>
-                      </Link>
-                    );
-                  })}
+              )}
+              {item.children && (
+                <div
+                  id={`sidebar-submenu-${item.href.replaceAll("/", "-")}`}
+                  className="sidebar-submenu"
+                  data-open={isExpanded}
+                  aria-hidden={!isExpanded}
+                >
+                  <div className="sidebar-submenu-content">
+                    <div className="ml-3 mt-1 space-y-1 border-l border-sidebar-border pl-3">
+                      {item.children.map((child) => {
+                        const isChildSelected = location.pathname.startsWith(child.href);
+                        const ChildIcon = child.icon;
+                        return (
+                          <Link
+                            key={child.href}
+                            to={child.href}
+                            onClick={() => setMobileOpen(false)}
+                            aria-current={isChildSelected ? "page" : undefined}
+                            tabIndex={isExpanded ? undefined : -1}
+                            className={cn(
+                              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                              isChildSelected
+                                ? "bg-sidebar-foreground text-sidebar shadow-sm"
+                                : "text-sidebar-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground",
+                            )}
+                          >
+                            <ChildIcon className="h-4 w-4 shrink-0" />
+                            <span className="min-w-0 truncate">{child.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

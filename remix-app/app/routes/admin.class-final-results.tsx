@@ -1,169 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { useFetcher, useLoaderData } from "react-router";
-import { Check, ChevronDown, Search, SkipForward, X } from "lucide-react";
+import { Check, Search, SkipForward, X } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Overlay } from "~/components/common/overlay";
+import { StudentInfoModal } from "~/components/common/student-info-modal";
+import { normalizeFilterSearch, SearchableDropdown } from "~/components/common/searchable-dropdown";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
+import { resolveFinalEvaluationStatus } from "~/lib/student-review-status";
 
 type ClassFinalResultAdminAction = "PROCESSED" | "SKIPPED";
 type ResultStatusTab = "pending" | "processed" | "skipped";
 type StudentReviewStatus = "CAN_ADVANCE" | "CANNOT_ADVANCE" | "DROPPED_OUT";
-
-interface FilterOption {
-  value: string;
-  label: string;
-}
-
-function normalizeFilterSearch(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/gi, "d")
-    .toLocaleLowerCase("vi")
-    .trim();
-}
-
-function SearchableDropdown({
-  id,
-  label,
-  placeholder,
-  searchPlaceholder,
-  options,
-  value,
-  onChange,
-  className,
-}: {
-  id: string;
-  label: string;
-  placeholder: string;
-  searchPlaceholder: string;
-  options: FilterOption[];
-  value: string;
-  onChange: (value: string) => void;
-  className: string;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [activeIndex, setActiveIndex] = useState(0);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const selectedLabel = options.find((option) => option.value === value)?.label;
-  const filteredOptions = options.filter((option) =>
-    normalizeFilterSearch(option.label).includes(normalizeFilterSearch(query))
-  );
-  const listboxId = `${id}-options`;
-
-  useEffect(() => {
-    if (isOpen) searchInputRef.current?.focus();
-  }, [isOpen]);
-
-  function closeDropdown() {
-    setIsOpen(false);
-    setQuery("");
-    setActiveIndex(0);
-  }
-
-  return (
-    <div
-      className={`relative ${className}`}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) closeDropdown();
-      }}
-    >
-      <button
-        id={id}
-        type="button"
-        aria-label={label}
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        aria-controls={isOpen ? listboxId : undefined}
-        onClick={() => {
-          setIsOpen((open) => !open);
-          setQuery("");
-          setActiveIndex(0);
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") closeDropdown();
-        }}
-        className="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <span className={selectedLabel ? "truncate" : "truncate text-muted-foreground"}>
-          {selectedLabel ?? placeholder}
-        </span>
-        <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground" />
-      </button>
-      {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-full min-w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
-          <div className="relative p-1">
-            <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              ref={searchInputRef}
-              role="combobox"
-              aria-label={searchPlaceholder.replace(/\.\.\.$/, "")}
-              aria-autocomplete="list"
-              aria-expanded="true"
-              aria-controls={listboxId}
-              aria-activedescendant={filteredOptions[activeIndex] ? `${id}-option-${activeIndex}` : undefined}
-              autoComplete="off"
-              value={query}
-              onChange={(event) => {
-                setQuery(event.currentTarget.value);
-                setActiveIndex(0);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Escape") {
-                  event.preventDefault();
-                  closeDropdown();
-                } else if (event.key === "ArrowDown" && filteredOptions.length > 0) {
-                  event.preventDefault();
-                  setActiveIndex((index) => (index + 1) % filteredOptions.length);
-                } else if (event.key === "ArrowUp" && filteredOptions.length > 0) {
-                  event.preventDefault();
-                  setActiveIndex((index) => (index - 1 + filteredOptions.length) % filteredOptions.length);
-                } else if (event.key === "Enter" && filteredOptions[activeIndex]) {
-                  event.preventDefault();
-                  onChange(filteredOptions[activeIndex].value);
-                  closeDropdown();
-                }
-              }}
-              placeholder={searchPlaceholder}
-              className="h-9 pl-8"
-            />
-          </div>
-          <div id={listboxId} role="listbox" aria-label={label} className="max-h-56 overflow-y-auto">
-            {filteredOptions.length === 0 ? (
-              <p className="px-3 py-2 text-sm text-muted-foreground">Không tìm thấy lựa chọn phù hợp.</p>
-            ) : filteredOptions.map((option, index) => (
-              <button
-                key={option.value || "all"}
-                id={`${id}-option-${index}`}
-                type="button"
-                role="option"
-                aria-selected={option.value === value}
-                onMouseDown={(event) => event.preventDefault()}
-                onMouseEnter={() => setActiveIndex(index)}
-                onClick={() => {
-                  onChange(option.value);
-                  closeDropdown();
-                }}
-                className={`flex min-h-9 w-full items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  index === activeIndex ? "bg-accent text-accent-foreground" : "hover:bg-muted"
-                }`}
-              >
-                <span className="min-w-0 truncate">{option.label}</span>
-                {option.value === value && <Check aria-hidden="true" className="h-4 w-4 shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 function isClassFinalResultAdminAction(value: string): value is ClassFinalResultAdminAction {
   return value === "PROCESSED" || value === "SKIPPED";
@@ -174,8 +26,10 @@ function getStudentFinalReviewStatus(
   studentId: string,
   legacyDecision: string | null,
 ) {
-  return classroom.studentClassReviews.find((review) => review.studentId === studentId)?.status
-    ?? legacyDecision;
+  return resolveFinalEvaluationStatus(
+    classroom.studentClassReviews.find((review) => review.studentId === studentId)?.status,
+    legacyDecision,
+  );
 }
 
 function getStudentFinalReviewLabel(status: string | null) {
@@ -318,7 +172,7 @@ export default function AdminClassFinalResults() {
     ];
   }, [classes]);
   const filteredResults = useMemo(() => {
-    const normalizedStudentQuery = query.trim().toLocaleLowerCase("vi");
+    const normalizedStudentQuery = normalizeFilterSearch(query);
     return classes
       .flatMap((classroom) => {
         const matchesClass = !classFilter || classroom.id === classFilter;
@@ -327,7 +181,12 @@ export default function AdminClassFinalResults() {
         if (!matchesClass || !matchesHsk || !matchesTeacher) return [];
         return classroom.finalResults
           .filter((result) => {
-            return (!normalizedStudentQuery || result.student.name.toLocaleLowerCase("vi").includes(normalizedStudentQuery))
+            const studentSearchText = normalizeFilterSearch([
+              result.student.name,
+              result.student.phone ?? "",
+              result.student.email ?? "",
+            ].join(" "));
+            return (!normalizedStudentQuery || studentSearchText.includes(normalizedStudentQuery))
               && (!selectedDecision || getStudentFinalReviewStatus(classroom, result.student.id, result.decision) === selectedDecision);
           })
           .map((result) => ({ classroom, result }));
@@ -405,111 +264,105 @@ export default function AdminClassFinalResults() {
     <AppShell user={user}>
       <div className="mx-auto max-w-7xl space-y-4">
         <header>
-          <h1 className="text-2xl font-bold tracking-tight">Kết quả cuối khóa</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Đánh giá cuối kỳ</h1>
           <p className="mt-1 text-sm text-muted-foreground">Điểm, chuyên cần, nhận xét và kết quả do giáo viên ghi nhận.</p>
         </header>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
-            <SearchableDropdown
-              id="class-filter"
-              label="Lọc theo lớp"
-              placeholder="Tất cả lớp"
-              searchPlaceholder="Tìm lớp..."
-              options={classOptions}
-              value={classFilter}
-              onChange={(value) => {
-                setClassFilter(value);
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-6">
+          <label>
+            <span className="sr-only">Tìm học viên</span>
+            <div className="relative">
+              <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.currentTarget.value);
+                  setPage(1);
+                }}
+                placeholder="Tên, SĐT hoặc email"
+                className="pl-9"
+              />
+            </div>
+          </label>
+          <SearchableDropdown
+            id="final-class-filter"
+            label="Lọc theo lớp"
+            placeholder="Tất cả lớp"
+            searchPlaceholder="Tìm lớp..."
+            options={classOptions}
+            value={classFilter}
+            onChange={(value) => {
+              setClassFilter(value);
+              setPage(1);
+            }}
+            className="w-full"
+          />
+          <SearchableDropdown
+            id="final-teacher-filter"
+            label="Lọc theo giáo viên"
+            placeholder="Tất cả giáo viên"
+            searchPlaceholder="Tìm giáo viên..."
+            options={teacherOptions}
+            value={teacherFilter}
+            onChange={(value) => {
+              setTeacherFilter(value);
+              setPage(1);
+            }}
+            className="w-full"
+          />
+          <label>
+            <span className="sr-only">Lọc theo khóa học</span>
+            <select
+              value={selectedHsk}
+              onChange={(event) => {
+                setSelectedHsk(event.currentTarget.value);
                 setPage(1);
               }}
-              className="w-full sm:w-56"
-            />
-            <SearchableDropdown
-              id="teacher-filter"
-              label="Lọc theo giáo viên"
-              placeholder="Tất cả giáo viên"
-              searchPlaceholder="Tìm giáo viên..."
-              options={teacherOptions}
-              value={teacherFilter}
-              onChange={(value) => {
-                setTeacherFilter(value);
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">Tất cả khóa học</option>
+              {hskLevels.map((hsk) => <option key={hsk} value={hsk}>HSK {hsk}</option>)}
+            </select>
+          </label>
+          <label>
+            <span className="sr-only">Lọc theo đánh giá của giáo viên</span>
+            <select
+              value={selectedDecision}
+              onChange={(event) => {
+                setSelectedDecision(event.currentTarget.value);
                 setPage(1);
               }}
-              className="w-full sm:w-52"
-            />
-            <label>
-              <span className="sr-only">Lọc theo khóa học</span>
-              <select
-                value={selectedHsk}
-                onChange={(event) => {
-                  setSelectedHsk(event.currentTarget.value);
-                  setPage(1);
-                }}
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-36"
-              >
-                <option value="">Tất cả khóa học</option>
-                {hskLevels.map((hsk) => <option key={hsk} value={hsk}>HSK {hsk}</option>)}
-              </select>
-            </label>
-            <label>
-              <span className="sr-only">Lọc theo kết quả</span>
-              <select
-                value={selectedDecision}
-                onChange={(event) => {
-                  setSelectedDecision(event.currentTarget.value);
-                  setPage(1);
-                }}
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-56"
-              >
-                <option value="">Tất cả trạng thái</option>
-                <optgroup label="Đánh giá hiện tại">
-                  <option value="CAN_ADVANCE">Có khả năng học lên</option>
-                  <option value="CANNOT_ADVANCE">Không có khả năng học lên</option>
-                  <option value="DROPPED_OUT">Bỏ học</option>
-                </optgroup>
-                <optgroup label="Dữ liệu lịch sử">
-                  <option value="PROMOTE">Học lên (trước đây)</option>
-                  <option value="ELIGIBLE_NOT_ENROLLED">Đủ điều kiện, chưa đăng ký (trước đây)</option>
-                  <option value="REPEAT">Không đủ học lực (trước đây)</option>
-                </optgroup>
-              </select>
-            </label>
-            <label>
-              <span className="sr-only">Tìm theo tên học viên</span>
-              <div className="relative">
-                <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={query}
-                  onChange={(event) => {
-                    setQuery(event.currentTarget.value);
-                    setPage(1);
-                  }}
-                  placeholder="Tìm học viên..."
-                  className="pl-9 sm:w-56"
-                />
-              </div>
-            </label>
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={() => {
-                  setQuery("");
-                  setClassFilter("");
-                  setTeacherFilter("");
-                  setSelectedHsk("");
-                  setSelectedDecision("");
-                  setPage(1);
-                }}
-                className="h-10 px-2 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                Xóa bộ lọc
-              </button>
-            )}
-          </div>
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">Tất cả đánh giá</option>
+              <optgroup label="Đánh giá hiện tại">
+                <option value="CAN_ADVANCE">Có khả năng học lên</option>
+                <option value="CANNOT_ADVANCE">Không có khả năng học lên</option>
+                <option value="DROPPED_OUT">Bỏ học</option>
+              </optgroup>
+              <optgroup label="Dữ liệu lịch sử">
+                <option value="PROMOTE">Học lên (trước đây)</option>
+                <option value="ELIGIBLE_NOT_ENROLLED">Đủ điều kiện, chưa đăng ký (trước đây)</option>
+                <option value="REPEAT">Không đủ học lực (trước đây)</option>
+              </optgroup>
+            </select>
+          </label>
+          {hasActiveFilters && (
+            <Button type="button" variant="ghost" onClick={() => {
+              setQuery("");
+              setClassFilter("");
+              setTeacherFilter("");
+              setSelectedHsk("");
+              setSelectedDecision("");
+              setPage(1);
+            }} className="h-10 justify-start px-2">
+              Xóa bộ lọc
+            </Button>
+          )}
         </div>
         <p className="text-sm text-muted-foreground" aria-live="polite">
           {hasActiveFilters ? `${filteredResults.length} / ${classes.reduce((total, classroom) => total + classroom.finalResults.length, 0)} học viên` : `${filteredResults.length} học viên`}
         </p>
-        <div className="flex flex-wrap gap-2 border-b" aria-label="Trạng thái xử lý kết quả">
+        <div className="flex flex-wrap gap-2 border-b" aria-label="Trạng thái xử lý đánh giá">
           <button
             type="button"
             aria-pressed={statusTab === "pending"}
@@ -548,7 +401,7 @@ export default function AdminClassFinalResults() {
           ))}
         </div>
         {classes.length === 0 ? (
-          <p className="rounded-lg border border-dashed px-4 py-6 text-sm text-muted-foreground">
+          <p className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
             Chưa có lớp nào kết thúc với kết quả cuối khóa.
           </p>
         ) : filteredResults.length === 0 ? (
@@ -571,19 +424,19 @@ export default function AdminClassFinalResults() {
               </p>
             )}
             <div className="overflow-auto rounded-lg border bg-card">
-              <table className={`w-full ${statusTab === "pending" ? "min-w-[1280px]" : "min-w-[1240px]"} border-collapse text-left`}>
+              <table className="w-full min-w-[1280px] border-collapse text-left">
                 <thead className="sticky top-0 z-10 bg-muted/90">
                   <tr className="border-b">
-                    <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Tên học viên</th>
+                    <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Học viên</th>
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Lớp</th>
-                    <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">GV</th>
+                    <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Giáo viên</th>
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Khóa học</th>
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Điểm</th>
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Chuyên cần</th>
-                    <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Trạng thái cuối kỳ</th>
+                    <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Đánh giá của giáo viên</th>
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Nhận xét học sinh</th>
                     {statusTab !== "pending" && (
-                      <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Ghi chú</th>
+                      <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Ghi chú admin</th>
                     )}
                     {statusTab === "pending" && (
                       <th scope="col" className="whitespace-nowrap px-3 py-2.5 text-xs font-semibold text-muted-foreground">Hành động</th>
@@ -607,6 +460,9 @@ export default function AdminClassFinalResults() {
                         >
                           {result.student.name}
                         </button>
+                        <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
+                          {result.student.phone || result.student.email || "Chưa có thông tin liên hệ"}
+                        </span>
                       </th>
                       <td className="whitespace-nowrap border-r px-3 py-3 text-sm">{classroom.name}</td>
                       <td className="whitespace-nowrap border-r px-3 py-3 text-sm">{classroom.teacher?.name ?? "Chưa phân công"}</td>
@@ -728,21 +584,21 @@ export default function AdminClassFinalResults() {
           <section role="dialog" aria-modal="true" aria-labelledby="admin-action-dialog-title" className="space-y-5">
             <header>
               <h2 id="admin-action-dialog-title" className="text-lg font-semibold">
-                {pendingAdminAction.adminAction === "PROCESSED" ? "Đánh dấu đã xử lý" : "Bỏ qua kết quả"}
+                {pendingAdminAction.adminAction === "PROCESSED" ? "Đánh dấu đã xử lý" : "Bỏ qua đánh giá"}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 {pendingActionStudent.student.name} · {pendingActionClass.name}
               </p>
             </header>
             <label htmlFor="admin-action-reason" className="block space-y-2 text-sm font-medium">
-              Lý do <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
+              Ghi chú <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
               <Textarea
                 id="admin-action-reason"
                 value={adminActionReason}
                 onChange={(event) => setAdminActionReason(event.currentTarget.value)}
                 maxLength={2000}
                 rows={4}
-                placeholder="Nhập lý do để tiện theo dõi..."
+                placeholder="Nhập ghi chú để tiện theo dõi..."
                 disabled={actionFetcher.state !== "idle"}
               />
               <span className="block text-right text-xs font-normal text-muted-foreground">
@@ -791,59 +647,17 @@ export default function AdminClassFinalResults() {
         </Overlay>
       )}
       {selectedClass && selectedStudent && (
-        <Overlay className="max-w-md" onClose={() => {
-          setSelectedStudentId(null);
-          setSelectedClassId(null);
-        }}>
-          <section role="dialog" aria-modal="true" aria-labelledby="student-details-title" className="space-y-5">
-            <header className="flex items-start justify-between gap-4">
-              <div>
-                <h2 id="student-details-title" className="text-lg font-semibold">{selectedStudent.student.name}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Thông tin học viên</p>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  setSelectedStudentId(null);
-                  setSelectedClassId(null);
-                }}
-                aria-label="Đóng thông tin học viên"
-              >
-                <X aria-hidden="true" className="h-4 w-4" />
-              </Button>
-            </header>
-            <dl className="grid gap-4 text-sm">
-              <div>
-                <dt className="text-muted-foreground">Họ tên</dt>
-                <dd className="mt-1 font-medium">{selectedStudent.student.name}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Lớp học</dt>
-                <dd className="mt-1 font-medium">{selectedClass.name}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Giáo viên chủ nhiệm</dt>
-                <dd className="mt-1 font-medium">{selectedClass.teacher?.name ?? "Chưa phân công"}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Số điện thoại</dt>
-                <dd className="mt-1 font-medium">{selectedStudent.student.phone || "Chưa cập nhật"}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Email</dt>
-                <dd className="mt-1 break-all font-medium">{selectedStudent.student.email || "Chưa cập nhật"}</dd>
-              </div>
-            </dl>
-            <div className="flex justify-end border-t pt-3">
-              <Button type="button" variant="outline" onClick={() => {
-                setSelectedStudentId(null);
-                setSelectedClassId(null);
-              }}>Đóng</Button>
-            </div>
-          </section>
-        </Overlay>
+        <StudentInfoModal
+          student={selectedStudent.student}
+          classInfo={{
+            name: selectedClass.name,
+            teacherName: selectedClass.teacher?.name ?? null,
+          }}
+          onClose={() => {
+            setSelectedStudentId(null);
+            setSelectedClassId(null);
+          }}
+        />
       )}
     </AppShell>
   );

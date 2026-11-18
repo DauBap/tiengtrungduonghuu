@@ -9,11 +9,10 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Badge } from "~/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Overlay } from "~/components/common/overlay";
 import {
-  School, Plus, Pencil, Trash2, X, Search, Loader2, Users, UserCheck, Check, ChevronDown, Save,
-  UserPlus, UserMinus, Clock,
+  School, Plus, Pencil, Trash2, X, Search, Loader2, Users, UserCheck, Check, ChevronDown,
+  ChevronLeft, ChevronRight, Save, UserPlus, UserMinus, Clock,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { toast } from "sonner";
@@ -54,6 +53,15 @@ function formatSchedule(slots: ScheduleSlot[]): string {
   return slots
     .map((s) => `${s.days.map((d) => DAY_LABELS[d]).join("-")} ${s.startTime}–${s.endTime}`)
     .join(", ");
+}
+
+function getPaginationItems(totalPages: number, currentPage: number): Array<number | "ellipsis"> {
+  if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
+  if (currentPage <= 3) return [1, 2, 3, 4, "ellipsis", totalPages];
+  if (currentPage >= totalPages - 2) {
+    return [1, "ellipsis", totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+  }
+  return [1, "ellipsis", currentPage - 1, currentPage, currentPage + 1, "ellipsis", totalPages];
 }
 
 // ─── Loader ──────────────────────────────────────────────────────────────────
@@ -878,12 +886,21 @@ export default function AdminClasses() {
   const [modal, setModal] = useState<ModalMode>(null);
   const [selectedClass, setSelectedClass] = useState<ClassRow | null>(null);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const normalizedSearch = search.trim().toLocaleLowerCase("vi");
   const filteredClasses = classes.filter((cls: ClassRow) =>
     [cls.name, cls.course.title, cls.course.code, cls.teacher?.name]
       .some((value) => value?.toLocaleLowerCase("vi").includes(normalizedSearch))
   );
+  const totalPages = Math.max(1, Math.ceil(filteredClasses.length / pageSize));
+  const pageStart = (currentPage - 1) * pageSize;
+  const visibleClasses = filteredClasses.slice(pageStart, pageStart + pageSize);
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
 
   const openModal = (mode: ModalMode, cls: ClassRow | null = null) => {
     setSelectedClass(cls);
@@ -898,10 +915,10 @@ export default function AdminClasses() {
   return (
     <>
       <AppShell user={user}>
-        <div className="space-y-6 max-w-4xl">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto max-w-screen-2xl space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Lớp học</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Lớp học</h1>
               <p className="text-muted-foreground text-sm mt-1">
                 Tạo lớp, gán giáo viên và học sinh để kiểm soát quyền truy cập khóa học.
               </p>
@@ -923,90 +940,186 @@ export default function AdminClasses() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-3">
-              <div className="relative max-w-md">
-                <Search
-                  aria-hidden="true"
-                  className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                  aria-label="Tìm lớp học"
-                  placeholder="Tìm theo tên lớp, khóa học hoặc giáo viên..."
-                  className="pl-10 pr-10"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                />
-                {search && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Xóa tìm kiếm"
-                    className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2"
-                    onClick={() => setSearch("")}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
+            <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+              <div className="flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                <div className="relative w-full sm:max-w-md">
+                  <Search
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  />
+                  <Input
+                    aria-label="Tìm lớp học"
+                    placeholder="Tìm lớp, khóa học hoặc giáo viên..."
+                    className="pl-10 pr-10"
+                    value={search}
+                    onChange={(event) => {
+                      setSearch(event.target.value);
+                      setCurrentPage(1);
+                    }}
+                  />
+                  {search && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Xóa tìm kiếm"
+                      className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2"
+                      onClick={() => {
+                        setSearch("");
+                        setCurrentPage(1);
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                <p className="shrink-0 text-sm text-muted-foreground" aria-live="polite">
+                  {filteredClasses.length === 0
+                    ? "Không có lớp phù hợp"
+                    : `Hiển thị ${pageStart + 1}–${Math.min(pageStart + pageSize, filteredClasses.length)} / ${filteredClasses.length} lớp`}
+                </p>
               </div>
+
               {filteredClasses.length === 0 ? (
-                <div className="rounded-lg border border-dashed p-8 text-center">
-                  <p className="font-medium">Không tìm thấy lớp học phù hợp</p>
+                <div className="px-6 py-16 text-center">
+                  <Search className="mx-auto mb-3 h-8 w-8 text-muted-foreground/60" aria-hidden="true" />
+                  <p className="font-semibold">Không tìm thấy lớp học phù hợp</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Thử tên lớp, khóa học hoặc tên giáo viên khác.
                   </p>
                 </div>
-              ) : filteredClasses.map((cls: ClassRow) => {
-                const schedule = parseSchedule(cls.schedule);
-                return (
-                  <Card key={cls.id}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <CardTitle className="text-base">{cls.name}</CardTitle>
-                            <Badge variant="outline" className="text-xs">
-                              HSK{cls.course.hskLevel} · {cls.course.code}
-                            </Badge>
+              ) : (
+                <>
+                  <ul aria-label="Danh sách lớp học" className="divide-y">
+                    {visibleClasses.map((cls: ClassRow) => {
+                      const schedule = parseSchedule(cls.schedule);
+                      const isFull = cls.enrollments.length >= cls.maxStudents;
+                      return (
+                        <li
+                          key={cls.id}
+                          className="grid gap-x-4 gap-y-3 px-4 py-4 transition-colors hover:bg-muted/30 sm:px-5 xl:grid-cols-[minmax(200px,1.25fr)_minmax(125px,.8fr)_minmax(150px,.75fr)_minmax(200px,1.1fr)_auto] xl:items-center"
+                        >
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h2 className="break-words text-sm font-semibold leading-5">{cls.name}</h2>
+                              <Badge variant="outline" className="shrink-0 text-[11px] font-medium">
+                                HSK{cls.course.hskLevel} · {cls.course.code}
+                              </Badge>
+                            </div>
+                            <p className="mt-1 break-words text-sm text-muted-foreground">{cls.course.title}</p>
                           </div>
-                          <p className="text-sm text-muted-foreground truncate">{cls.course.title}</p>
-                        </div>
-                        <div className="flex gap-1.5 shrink-0">
-                          <Button size="sm" variant="outline" onClick={() => openModal("members", cls)}>
-                            <Users className="h-4 w-4 mr-1.5" />Thành viên
-                          </Button>
-                          <Button size="icon" variant="ghost" onClick={() => openModal("edit", cls)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => openModal("delete", cls)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                        <span className="flex items-center gap-1.5">
-                          <UserCheck className="h-4 w-4" />
-                          {cls.teacher ? cls.teacher.name : <span className="italic">Chưa phân công giáo viên</span>}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <Users className="h-4 w-4" />
-                          {cls.enrollments.length}/{cls.maxStudents} học sinh
-                        </span>
-                        {schedule.length > 0 && (
-                          <span className="flex items-center gap-1.5">
-                            <Clock className="h-4 w-4" />
-                            {formatSchedule(schedule)}
+
+                          <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+                            <UserCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
+                            <span className={cn("break-words", !cls.teacher && "italic")}>
+                              {cls.teacher ? cls.teacher.name : "Chưa phân công giáo viên"}
+                            </span>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                            <Users className="h-4 w-4 shrink-0" aria-hidden="true" />
+                            <span className="whitespace-nowrap tabular-nums">
+                              {cls.enrollments.length}/{cls.maxStudents} học sinh
+                            </span>
+                            {isFull && (
+                              <span className="whitespace-nowrap rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning">
+                                Đã đầy
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex min-w-0 items-start gap-2 text-sm text-muted-foreground">
+                            <Clock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                            <span className={cn("break-words", schedule.length === 0 && "italic")}>
+                              {schedule.length > 0 ? formatSchedule(schedule) : "Chưa có lịch học"}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 border-t pt-3 sm:justify-end xl:border-0 xl:pt-0">
+                            <Button size="sm" variant="outline" onClick={() => openModal("members", cls)}>
+                              <Users className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                              Thành viên
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              aria-label={`Sửa lớp ${cls.name}`}
+                              title="Sửa lớp"
+                              onClick={() => openModal("edit", cls)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              aria-label={`Xóa lớp ${cls.name}`}
+                              title="Xóa lớp"
+                              className="hover:bg-destructive/10 hover:text-destructive"
+                              onClick={() => openModal("delete", cls)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+
+                  {filteredClasses.length > pageSize && (
+                    <nav
+                      aria-label="Phân trang danh sách lớp"
+                      className="flex flex-col gap-3 border-t px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                    >
+                      <p className="text-sm text-muted-foreground">
+                        10 lớp mỗi trang
+                      </p>
+                      <div className="flex flex-wrap items-center gap-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          aria-label="Trang trước"
+                          disabled={currentPage === 1}
+                          onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                        >
+                          <ChevronLeft className="h-4 w-4 sm:mr-1" aria-hidden="true" />
+                          <span className="hidden sm:inline">Trước</span>
+                        </Button>
+                        {getPaginationItems(totalPages, currentPage).map((item, index) => item === "ellipsis" ? (
+                          <span key={`ellipsis-${index}`} className="px-1.5 text-sm text-muted-foreground" aria-hidden="true">
+                            …
                           </span>
-                        )}
+                        ) : (
+                          <Button
+                            key={item}
+                            type="button"
+                            variant={item === currentPage ? "default" : "ghost"}
+                            size="sm"
+                            aria-label={`Trang ${item}`}
+                            aria-current={item === currentPage ? "page" : undefined}
+                            onClick={() => setCurrentPage(item)}
+                            className="min-w-9 px-2"
+                          >
+                            {item}
+                          </Button>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          aria-label="Trang sau"
+                          disabled={currentPage === totalPages}
+                          onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                        >
+                          <span className="hidden sm:inline">Sau</span>
+                          <ChevronRight className="h-4 w-4 sm:ml-1" aria-hidden="true" />
+                        </Button>
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                    </nav>
+                  )}
+                </>
+              )}
+            </section>
           )}
         </div>
       </AppShell>

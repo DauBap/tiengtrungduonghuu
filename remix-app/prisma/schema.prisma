@@ -607,6 +607,11 @@ enum StudentClassReviewStatus {
   DROPPED_OUT
 }
 
+enum StudentClassReviewAdminAction {
+  PROCESSED
+  SKIPPED
+}
+
 enum ClassFinalResultAdminAction {
   PROCESSED
   SKIPPED
@@ -677,6 +682,8 @@ model StudentClassReview {
   sessionNumber Int
   status        StudentClassReviewStatus
   teacherId     String?
+  adminAction        StudentClassReviewAdminAction?
+  adminActionReason  String?
   createdAt     DateTime                 @default(now())
   updatedAt     DateTime                 @updatedAt
 
