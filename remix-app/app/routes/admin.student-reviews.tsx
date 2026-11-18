@@ -52,7 +52,7 @@ type StudentProgressData = {
 };
 
 type HskCell = {
-  status: "IN_PROGRESS" | "COMPLETED" | "NONE";
+  status: "IN_PROGRESS" | "COMPLETED" | "DROPPED_OUT" | "NONE";
   selectedClass: ClassHistoryEntry | null;
 };
 
@@ -65,7 +65,7 @@ type ClassHistoryEntry = {
   finalResult: ProgressFinalResult | null;
 };
 
-type TransitionStatus = "ENROLLED" | "CAN_CONTINUE" | "STOPPED" | "UNKNOWN";
+type TransitionStatus = "ENROLLED" | "CAN_CONTINUE" | "STOPPED" | "DROPPED_OUT" | "UNKNOWN";
 type SelectedStudentInfo =
   | { kind: "student"; student: StudentProgressData }
   | { kind: "class"; student: StudentProgressData; hskLevel: number; history: ClassHistoryEntry };
@@ -129,11 +129,16 @@ function getStudentHskProgress(student: StudentProgressData) {
     const selectedClass = inProgressEntries[inProgressEntries.length - 1]
       ?? completedEntries[completedEntries.length - 1]
       ?? null;
+    const evaluationStatus = selectedClass
+      ? resolveFinalEvaluationStatus(selectedClass.finalReviewStatus, selectedClass.legacyDecision)
+      : null;
 
     return {
-      status: selectedClass
-        ? selectedClass.classroom.completedAt === null ? "IN_PROGRESS" : "COMPLETED"
-        : "NONE",
+      status: evaluationStatus === "DROPPED_OUT"
+        ? "DROPPED_OUT"
+        : selectedClass
+          ? selectedClass.classroom.completedAt === null ? "IN_PROGRESS" : "COMPLETED"
+          : "NONE",
       selectedClass,
     };
   });
@@ -147,16 +152,16 @@ function getStudentHskProgress(student: StudentProgressData) {
       return "ENROLLED";
     }
 
-    if (previousClass.classroom.completedAt === null) return "UNKNOWN";
-
     const status = resolveFinalEvaluationStatus(
       previousClass.finalReviewStatus,
       previousClass.legacyDecision,
     );
+    if (status === "DROPPED_OUT") return "DROPPED_OUT";
+    if (previousClass.classroom.completedAt === null) return "UNKNOWN";
     if (status === "CAN_ADVANCE" || status === "PROMOTE" || status === "ELIGIBLE_NOT_ENROLLED") {
       return "CAN_CONTINUE";
     }
-    if (status === "CANNOT_ADVANCE" || status === "DROPPED_OUT" || status === "REPEAT") {
+    if (status === "CANNOT_ADVANCE" || status === "REPEAT") {
       return "STOPPED";
     }
     return "UNKNOWN";
@@ -173,6 +178,8 @@ function getTransitionDescription(status: TransitionStatus, hskLevel: number, pr
       return `Đánh giá cuối kỳ cho phép học lên HSK ${hskLevel + 1}, chưa ghi danh`;
     case "STOPPED":
       return `Đánh giá cuối kỳ cho biết không học tiếp sau HSK ${hskLevel}`;
+    case "DROPPED_OUT":
+      return `Đánh giá cuối kỳ ghi nhận học viên đã bỏ học sau HSK ${hskLevel}`;
     default:
       if (previousLevel.status === "NONE") return `Chưa có dữ liệu học HSK ${hskLevel}`;
       if (previousLevel.status === "IN_PROGRESS") {
@@ -375,6 +382,12 @@ export default function AdminStudentReviews() {
             </span>
             Đánh giá không học tiếp
           </span>
+          <span className="inline-flex items-center gap-2">
+            <span className="inline-flex rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-800 dark:bg-rose-950/50 dark:text-rose-200">
+              Bỏ học
+            </span>
+            Đánh giá ghi nhận bỏ học
+          </span>
         </div>
 
         {students.length === 0 ? (
@@ -450,10 +463,10 @@ export default function AdminStudentReviews() {
                                   {status === "CAN_CONTINUE" && (
                                     <span aria-hidden="true" className="h-1 w-full rounded-full bg-amber-400" />
                                   )}
-                                  {status === "STOPPED" && (
+                                  {(status === "STOPPED" || status === "DROPPED_OUT") && (
                                     <span aria-hidden="true" className="h-1 w-full rounded-full bg-muted" />
                                   )}
-                                  {status === "STOPPED" && (
+                                  {(status === "STOPPED" || status === "DROPPED_OUT") && (
                                     <span aria-hidden="true" className="absolute left-1/2 h-6 w-0.5 -translate-x-1/2 rotate-45 bg-rose-500" />
                                   )}
                                 </div>
@@ -476,12 +489,16 @@ export default function AdminStudentReviews() {
                                     history: level.selectedClass!,
                                   })}
                                   className={`${
-                                    level.status === "IN_PROGRESS"
+                                    level.status === "DROPPED_OUT"
+                                      ? "bg-rose-100 text-rose-800 hover:bg-rose-200 dark:bg-rose-950/50 dark:text-rose-200 dark:hover:bg-rose-900/60"
+                                      : level.status === "IN_PROGRESS"
                                       ? "bg-sky-100 text-sky-800 hover:bg-sky-200 dark:bg-sky-950/50 dark:text-sky-200 dark:hover:bg-sky-900/60"
                                       : "bg-emerald-100 text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:hover:bg-emerald-900/60"
                                   } inline-flex cursor-pointer rounded-full px-2.5 py-1 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
                                 >
-                                  {level.status === "IN_PROGRESS" ? "Đang học" : "Đã xong"}
+                                  {level.status === "DROPPED_OUT"
+                                    ? "Bỏ học"
+                                    : level.status === "IN_PROGRESS" ? "Đang học" : "Đã xong"}
                                 </button>
                               </div>
                             )}
