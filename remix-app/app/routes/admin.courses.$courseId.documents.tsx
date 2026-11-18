@@ -50,7 +50,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
   });
   if (!course) throw new Response("Không tìm thấy khóa học", { status: 404 });
 
-  const isProgressUpload = request.headers.get("X-Course-Document-Upload") === "1";
+  const isProgressUpload =
+    request.headers.get("X-Course-Document-Upload") === "1" ||
+    request.headers.get("accept")?.toLowerCase().includes("application/json") === true;
   const contentType = request.headers.get("content-type") ?? "";
   if (contentType.toLowerCase().startsWith("multipart/form-data")) {
     let asset: Awaited<ReturnType<typeof saveCourseDocumentUpload>>;
@@ -149,6 +151,7 @@ export default function CourseDocumentsAdmin() {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", form.action);
     xhr.setRequestHeader("X-Course-Document-Upload", "1");
+    xhr.setRequestHeader("Accept", "application/json");
     xhr.upload.addEventListener("progress", (progressEvent) => {
       if (progressEvent.lengthComputable) {
         setUploadPercent(Math.min(100, Math.round((progressEvent.loaded / progressEvent.total) * 100)));
