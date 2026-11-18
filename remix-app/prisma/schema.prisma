@@ -36,6 +36,8 @@ model User {
   taughtClasses                      Class[]                      @relation("ClassTeacher")
   classFinalResults                  ClassFinalResult[]
   classStudentScores                 ClassStudentScore[]
+  studentClassReviews                StudentClassReview[]         @relation("StudentClassReviewStudent")
+  classReviewsGiven                  StudentClassReview[]         @relation("StudentClassReviewTeacher")
   courseStudySessions                CourseStudySession[]
   pronunciationAssessments           PronunciationAssessment[]
   courseReviewAttempts               CourseReviewAttempt[]
@@ -529,17 +531,19 @@ model TestQuestion {
 /// Lớp học: gắn một khóa học với một giáo viên và nhiều học sinh.
 /// Teacher/student chỉ thấy courses mà họ có lớp trong đó.
 model Class {
-  id          String    @id @default(cuid())
-  name        String
-  courseId    String
-  teacherId   String?
-  maxStudents Int       @default(6)
+  id                   String    @id @default(cuid())
+  name                 String
+  courseId             String
+  teacherId            String?
+  maxStudents          Int       @default(6)
   /// Lịch học dạng JSON: [{ days: [1,3,5], startTime: "20:00", endTime: "22:00" }]
   /// days: 0=CN, 1=T2, 2=T3, 3=T4, 4=T5, 5=T6, 6=T7
-  schedule    Json      @default("[]")
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  schedule             Json      @default("[]")
+  midtermReviewSession Int?      @map("midterm_review_session")
+  finalReviewSession   Int?      @map("final_review_session")
+  completedAt          DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   course                      Course                       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   teacher                     User?                        @relation("ClassTeacher", fields: [teacherId], references: [id], onDelete: SetNull)
@@ -548,6 +552,7 @@ model Class {
   attendanceSessions          AttendanceSession[]
   finalResults                ClassFinalResult[]
   studentScores               ClassStudentScore[]
+  studentClassReviews         StudentClassReview[]
   attendanceAbsenceDismissals AttendanceAbsenceDismissal[]
 
   @@index([courseId])
@@ -591,6 +596,17 @@ enum ClassPromotionDecision {
   REPEAT
 }
 
+enum ClassReviewSessionType {
+  MIDTERM
+  FINAL
+}
+
+enum StudentClassReviewStatus {
+  CAN_ADVANCE
+  CANNOT_ADVANCE
+  DROPPED_OUT
+}
+
 enum ClassFinalResultAdminAction {
   PROCESSED
   SKIPPED
@@ -623,7 +639,7 @@ model ClassFinalResult {
   comment           String
   attendedSessions  Int
   totalSessions     Int
-  decision          ClassPromotionDecision
+  decision          ClassPromotionDecision?
   adminAction       ClassFinalResultAdminAction?
   adminActionReason String?
   createdAt         DateTime                     @default(now())
@@ -651,6 +667,27 @@ model ClassStudentScore {
 
   @@unique([classId, studentId])
   @@index([studentId])
+}
+
+model StudentClassReview {
+  id            String                   @id @default(cuid())
+  classId       String
+  studentId     String
+  sessionType   ClassReviewSessionType
+  sessionNumber Int
+  status        StudentClassReviewStatus
+  teacherId     String?
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+
+  classroom Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student   User  @relation("StudentClassReviewStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  teacher   User? @relation("StudentClassReviewTeacher", fields: [teacherId], references: [id], onDelete: SetNull)
+
+  @@unique([classId, studentId, sessionType])
+  @@index([studentId, sessionType])
+  @@index([classId, sessionType, sessionNumber])
+  @@map("student_class_reviews")
 }
 
 model AttendanceRecord {

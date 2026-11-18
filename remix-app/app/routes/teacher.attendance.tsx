@@ -4,6 +4,7 @@ import { useFetcher, useLoaderData } from "react-router";
 import { toast } from "sonner";
 import { ClipboardCheck, LoaderCircle, Plus, Search, Trash2, Users } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
+import { Overlay } from "~/components/common/overlay";
 import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
 import { Button } from "~/components/ui/button";
 import { getStudentsAbsentForThreeConsecutiveSessions } from "~/lib/attendance-streak";
@@ -19,6 +20,8 @@ type AttendanceStatus = "present" | "late" | "absent";
 type AbsenceReason = "excused" | "unexcused";
 type AttendanceFilter = "all" | "unmarked" | AttendanceStatus;
 type AttendanceTask = "recording" | "hanzi" | "duet" | "lessonLink";
+type ReviewSessionType = "MIDTERM" | "FINAL";
+type StudentReviewStatus = "CAN_ADVANCE" | "CANNOT_ADVANCE" | "DROPPED_OUT";
 
 interface AttendanceStudent {
   id: string;
@@ -35,6 +38,8 @@ interface AttendanceClass {
   id: string;
   name: string;
   course: string;
+  midtermReviewSession: number | null;
+  finalReviewSession: number | null;
   courseLessons: { id: string; order: number; title: string }[];
   sessions: AttendanceSession[];
   students: AttendanceStudent[];
@@ -49,6 +54,16 @@ interface AttendanceSession {
   recordingUrl: string | null;
   date: string;
   records: Record<string, AttendanceRecord>;
+}
+
+interface ReviewPrompt {
+  classId: string;
+  sessionId: string;
+  sessionNumber: number;
+  sessionType: ReviewSessionType;
+  sessionTitle: string;
+  students: AttendanceStudent[];
+  statuses: Record<string, StudentReviewStatus | "">;
 }
 
 const TOTAL_TAB_ID = "attendance-total";
@@ -130,6 +145,20 @@ function createEmptyAttendanceRecord(): AttendanceRecord {
   };
 }
 
+function getAttendanceSessionNumber(
+  sessions: { id: string; title: string }[],
+  sessionId: string,
+): number | null {
+  const index = sessions.findIndex((session) => session.id === sessionId);
+  if (index < 0) return null;
+  const number = Number(sessions[index].title.match(/\d+$/)?.[0] ?? 0);
+  return Number.isSafeInteger(number) && number > 0 ? number : index + 1;
+}
+
+function isStudentReviewStatus(value: unknown): value is StudentReviewStatus {
+  return value === "CAN_ADVANCE" || value === "CANNOT_ADVANCE" || value === "DROPPED_OUT";
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
   const classes = await prisma.class.findMany({
@@ -137,6 +166,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     select: {
       id: true,
       name: true,
+      midtermReviewSession: true,
+      finalReviewSession: true,
       course: {
         select: {
           title: true,
@@ -219,6 +250,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
       id: classroom.id,
       name: classroom.name,
       course: classroom.course.title,
+      midtermReviewSession: classroom.midtermReviewSession,
+      finalReviewSession: classroom.finalReviewSession,
       courseLessons: classroom.course.lessons,
       students: classroom.enrollments.map(({ user: student }) => ({ id: student.id, name: student.name })),
       sessions: classroom.attendanceSessions.map((session) => ({
@@ -336,10 +369,141 @@ export async function action({ request }: ActionFunctionArgs) {
   const session = sessionId
     ? await prisma.attendanceSession.findFirst({
         where: { id: sessionId, class: { is: { teacherId: user.id, completedAt: null } } },
-        select: { id: true, classId: true, class: { select: { courseId: true } } },
+        select: {
+          id: true,
+          classId: true,
+          title: true,
+          class: {
+            select: {
+              courseId: true,
+              midtermReviewSession: true,
+              finalReviewSession: true,
+              attendanceSessions: {
+                orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+                select: { id: true, title: true },
+              },
+            },
+          },
+        },
       })
     : null;
   if (!session) return { success: false as const, error: "Không tìm thấy buổi học hoặc bạn không có quyền sửa buổi này." };
+
+  if (intent === "save-session-review") {
+    const sessionType = String(form.get("sessionType") ?? "");
+    if (sessionType !== "MIDTERM" && sessionType !== "FINAL") {
+      return { success: false as const, error: "Loại đánh giá không hợp lệ." };
+    }
+    const sessionNumber = getAttendanceSessionNumber(session.class.attendanceSessions, session.id);
+    const configuredSessionNumber = sessionType === "MIDTERM"
+      ? session.class.midtermReviewSession
+      : session.class.finalReviewSession;
+    if (sessionNumber === null || configuredSessionNumber !== sessionNumber) {
+      return { success: false as const, error: "Buổi này không còn là mốc đánh giá đã cấu hình. Hãy tải lại trang." };
+    }
+
+    let parsedReviews: unknown;
+    try {
+      parsedReviews = JSON.parse(String(form.get("reviews") ?? ""));
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        return { success: false as const, error: "Danh sách đánh giá không hợp lệ." };
+      }
+      throw error;
+    }
+    if (!Array.isArray(parsedReviews)) {
+      return { success: false as const, error: "Danh sách đánh giá không hợp lệ." };
+    }
+    const reviews: { studentId: string; status: StudentReviewStatus }[] = [];
+    for (const value of parsedReviews) {
+      if (!isRecord(value) || typeof value.studentId !== "string" || !value.studentId || !isStudentReviewStatus(value.status)) {
+        return { success: false as const, error: "Mỗi học viên cần có một trạng thái đánh giá." };
+      }
+      reviews.push({ studentId: value.studentId, status: value.status });
+    }
+    if (new Set(reviews.map(({ studentId }) => studentId)).size !== reviews.length) {
+      return { success: false as const, error: "Danh sách đánh giá có học viên bị trùng." };
+    }
+
+    const savedReview = await prisma.$transaction(async (tx) => {
+      const currentSession = await tx.attendanceSession.findFirst({
+        where: { id: session.id, class: { is: { teacherId: user.id, completedAt: null } } },
+        select: {
+          id: true,
+          classId: true,
+          title: true,
+          class: {
+            select: {
+              midtermReviewSession: true,
+              finalReviewSession: true,
+              attendanceSessions: {
+                orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+                select: { id: true, title: true },
+              },
+            },
+          },
+        },
+      });
+      if (!currentSession) {
+        return { success: false as const, error: "Không tìm thấy buổi học hoặc lớp đã kết thúc." };
+      }
+      const currentNumber = getAttendanceSessionNumber(currentSession.class.attendanceSessions, currentSession.id);
+      const expectedNumber = sessionType === "MIDTERM"
+        ? currentSession.class.midtermReviewSession
+        : currentSession.class.finalReviewSession;
+      if (currentNumber !== expectedNumber) {
+        return { success: false as const, error: "Mốc đánh giá của lớp vừa thay đổi. Hãy tải lại trang." };
+      }
+      if (currentNumber === null) {
+        return { success: false as const, error: "Không xác định được số buổi đánh giá. Hãy tải lại trang." };
+      }
+
+      const enrolledStudents = await tx.enrollment.findMany({
+        where: {
+          classId: currentSession.classId,
+          user: { is: { role: "student", isActive: true, deletedAt: null } },
+        },
+        select: { userId: true },
+      });
+      const enrolledIds = new Set(enrolledStudents.map(({ userId }) => userId));
+      if (
+        reviews.length !== enrolledIds.size
+        || reviews.some(({ studentId }) => !enrolledIds.has(studentId))
+      ) {
+        return { success: false as const, error: "Danh sách đánh giá không khớp với học viên hiện tại của lớp. Hãy tải lại trang." };
+      }
+
+      await Promise.all(reviews.map(({ studentId, status }) =>
+        tx.studentClassReview.upsert({
+          where: {
+            classId_studentId_sessionType: {
+              classId: currentSession.classId,
+              studentId,
+              sessionType,
+            },
+          },
+          create: {
+            classId: currentSession.classId,
+            studentId,
+            sessionType,
+            sessionNumber: currentNumber,
+            status,
+            teacherId: user.id,
+          },
+          update: { sessionNumber: currentNumber, status, teacherId: user.id },
+        })
+      ));
+      return { success: true as const };
+    });
+    if (!savedReview.success) return { ...savedReview, classId: session.classId };
+    return {
+      success: true as const,
+      intent,
+      classId: session.classId,
+      sessionId: session.id,
+      sessionType,
+    };
+  }
 
   if (intent === "delete-session") {
     await prisma.attendanceSession.delete({ where: { id: session.id } });
@@ -421,7 +585,7 @@ export async function action({ request }: ActionFunctionArgs) {
         classId: session.classId,
         user: { is: { role: "student", isActive: true, deletedAt: null } },
       },
-      select: { userId: true },
+      select: { userId: true, user: { select: { name: true } } },
     });
     const submittedStudentIds = new Set(records.map((record) => record.studentId));
     if (
@@ -451,7 +615,35 @@ export async function action({ request }: ActionFunctionArgs) {
         },
       })),
     ]);
-    return { success: true as const, intent, sessionId, classId: session.classId };
+    const sessionNumber = getAttendanceSessionNumber(session.class.attendanceSessions, session.id);
+    const reviewSessionType: ReviewSessionType | null = sessionNumber === session.class.midtermReviewSession
+      ? "MIDTERM"
+      : sessionNumber === session.class.finalReviewSession
+        ? "FINAL"
+        : null;
+    let reviewPrompt: ReviewPrompt | null = null;
+    if (reviewSessionType && sessionNumber !== null) {
+      const existingReviews = await prisma.studentClassReview.findMany({
+        where: { classId: session.classId, sessionType: reviewSessionType },
+        select: { studentId: true, status: true },
+      });
+      const existingStatuses = new Map(existingReviews.map(({ studentId, status }) => [studentId, status]));
+      if (enrolledStudents.some(({ userId }) => !existingStatuses.has(userId))) {
+        reviewPrompt = {
+          classId: session.classId,
+          sessionId: session.id,
+          sessionNumber,
+          sessionType: reviewSessionType,
+          sessionTitle: session.title,
+          students: enrolledStudents.map(({ userId, user: student }) => ({ id: userId, name: student.name })),
+          statuses: Object.fromEntries(enrolledStudents.map(({ userId }) => [
+            userId,
+            existingStatuses.get(userId) ?? "",
+          ])),
+        };
+      }
+    }
+    return { success: true as const, intent, sessionId, classId: session.classId, reviewPrompt };
   }
 
   return { success: false as const, error: "Thao tác điểm danh không hợp lệ." };
@@ -462,6 +654,7 @@ export default function TeacherAttendance() {
   const addSessionFetcher = useFetcher<typeof action>();
   const deleteSessionFetcher = useFetcher<typeof action>();
   const saveAttendanceFetcher = useFetcher<typeof action>();
+  const reviewFetcher = useFetcher<typeof action>();
   const firstClassId = classes[0]?.id ?? "";
   const [classId, setClassId] = useState(firstClassId);
   const [sessionsByClass, setSessionsByClass] = useState<Record<string, AttendanceSession[]>>(() =>
@@ -478,6 +671,8 @@ export default function TeacherAttendance() {
   const [search, setSearch] = useState("");
   const [feedback, setFeedback] = useState("");
   const [pendingDeleteSession, setPendingDeleteSession] = useState<AttendanceSession | null>(null);
+  const [pendingReview, setPendingReview] = useState<ReviewPrompt | null>(null);
+  const [reviewStatuses, setReviewStatuses] = useState<Record<string, StudentReviewStatus | "">>({});
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
   const selectedClass = classes.find((item) => item.id === classId) ?? classes[0] ?? null;
   const attendanceSessions = selectedClass ? sessionsByClass[selectedClass.id] ?? selectedClass.sessions : [];
@@ -597,11 +792,37 @@ export default function TeacherAttendance() {
     ) {
       setFeedback("Đã lưu điểm danh, bài tập và thông tin buổi học.");
       toast.success("Đã lưu điểm danh thành công.");
+      if (result.reviewPrompt) {
+        setPendingReview(result.reviewPrompt);
+        setReviewStatuses(result.reviewPrompt.statuses);
+      }
     } else if (saveAttendanceFetcher.data && !saveAttendanceFetcher.data.success) {
       setFeedback(saveAttendanceFetcher.data.error);
       toast.error(saveAttendanceFetcher.data.error);
     }
   }, [saveAttendanceFetcher.data, selectedClass?.id, selectedAttendanceSession?.id]);
+
+  useEffect(() => {
+    const result = reviewFetcher.data;
+    if (reviewFetcher.state !== "idle" || !result) return;
+    if (!result.success) {
+      setFeedback(result.error);
+      return;
+    }
+    const currentReview = pendingReview;
+    if (
+      result.intent === "save-session-review"
+      && currentReview
+      && currentReview.classId === result.classId
+      && currentReview.sessionId === result.sessionId
+      && currentReview.sessionType === result.sessionType
+    ) {
+      setPendingReview(null);
+      setFeedback("Đã lưu đánh giá học viên.");
+      toast.success("Đã lưu đánh giá học viên.");
+      reviewFetcher.reset();
+    }
+  }, [reviewFetcher.data, reviewFetcher.state, pendingReview]);
 
   useEffect(() => {
     const dialog = deleteDialogRef.current;
@@ -616,6 +837,7 @@ export default function TeacherAttendance() {
     const nextClass = classes.find((item) => item.id === nextClassId);
     if (!nextClass) return;
     setClassId(nextClass.id);
+    setPendingReview(null);
     const nextSessions = sessionsByClass[nextClass.id] ?? nextClass.sessions;
     if (!sessionsByClass[nextClass.id]) {
       setSessionsByClass((current) => ({ ...current, [nextClass.id]: nextSessions }));
@@ -723,6 +945,26 @@ export default function TeacherAttendance() {
       };
     });
     setFeedback("Có thay đổi chưa lưu.");
+  }
+
+  const reviewReady = Boolean(pendingReview?.students.length)
+    && Boolean(pendingReview?.students.every((student) => isStudentReviewStatus(reviewStatuses[student.id])));
+  const isSavingReview = reviewFetcher.state !== "idle";
+
+  function saveSessionReview() {
+    if (!pendingReview || !reviewReady) return;
+    reviewFetcher.submit(
+      {
+        intent: "save-session-review",
+        sessionId: pendingReview.sessionId,
+        sessionType: pendingReview.sessionType,
+        reviews: JSON.stringify(pendingReview.students.map((student) => ({
+          studentId: student.id,
+          status: reviewStatuses[student.id],
+        }))),
+      },
+      { method: "post" },
+    );
   }
 
   function saveAttendance() {
@@ -1247,6 +1489,88 @@ export default function TeacherAttendance() {
             )}
           </footer>
         </section>
+
+        {pendingReview && (
+          <Overlay
+            onClose={() => {
+              if (!isSavingReview) setPendingReview(null);
+            }}
+            className="max-w-3xl"
+          >
+            <section aria-labelledby="student-review-title" className="space-y-5">
+              <header className="space-y-1">
+                <h2 id="student-review-title" className="text-xl font-semibold">
+                  Đánh giá {pendingReview.sessionType === "MIDTERM" ? "giữa kỳ" : "cuối kỳ"}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {selectedClass?.name} · {pendingReview.sessionTitle} · buổi {pendingReview.sessionNumber}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Chọn trạng thái cho tất cả {pendingReview.students.length} học viên để lưu đánh giá.
+                </p>
+              </header>
+
+              {reviewFetcher.data && !reviewFetcher.data.success && (
+                <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                  {reviewFetcher.data.error}
+                </p>
+              )}
+
+              <div className="max-h-[55vh] space-y-3 overflow-y-auto pr-1">
+                {pendingReview.students.map((student) => (
+                  <fieldset key={student.id} className="space-y-2 rounded-lg border p-3 sm:p-4">
+                    <legend className="px-1 text-sm font-semibold">{student.name}</legend>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {([
+                        ["CAN_ADVANCE", "Có khả năng học lên"],
+                        ["CANNOT_ADVANCE", "Không có khả năng học lên"],
+                        ["DROPPED_OUT", "Bỏ học"],
+                      ] as const).map(([status, label]) => (
+                        <label
+                          key={status}
+                          className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm ${
+                            reviewStatuses[student.id] === status ? "border-primary bg-primary/5" : "hover:bg-muted/50"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name={`student-review-${student.id}`}
+                            value={status}
+                            checked={reviewStatuses[student.id] === status}
+                            onChange={() => setReviewStatuses((current) => ({ ...current, [student.id]: status }))}
+                            disabled={isSavingReview}
+                            className="accent-primary"
+                          />
+                          <span>{label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                ))}
+              </div>
+
+              <footer className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setPendingReview(null)}
+                  disabled={isSavingReview}
+                  className="w-full sm:w-auto"
+                >
+                  Để sau
+                </Button>
+                <Button
+                  type="button"
+                  onClick={saveSessionReview}
+                  disabled={!reviewReady || isSavingReview}
+                  className="w-full sm:w-auto"
+                >
+                  {isSavingReview ? "Đang lưu đánh giá..." : "Lưu đánh giá"}
+                </Button>
+              </footer>
+            </section>
+          </Overlay>
+        )}
 
         <dialog
           ref={deleteDialogRef}

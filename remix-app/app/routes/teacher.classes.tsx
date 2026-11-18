@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { useFetcher, useLoaderData } from "react-router";
 import { Prisma } from "@prisma/client";
@@ -37,34 +37,28 @@ type ActionResult =
       initialPassword: string;
     }
   | { success: true; kind: "evaluation-saved"; classId: string }
-  | { success: true; kind: "outcome-saved"; classId: string; studentId: string; decision: PromotionDecision }
   | { success: true; kind: "completed"; classId: string };
 
-type PromotionDecision = "PROMOTE" | "ELIGIBLE_NOT_ENROLLED" | "REPEAT";
-type CompletionDraft = { score: string; comment: string; decision: PromotionDecision | "" };
-type PromotionColumn = {
-  decision: PromotionDecision;
-  title: string;
-  className: string;
-};
+type LegacyPromotionDecision = "PROMOTE" | "ELIGIBLE_NOT_ENROLLED" | "REPEAT";
+type ReviewStatus = "CAN_ADVANCE" | "CANNOT_ADVANCE" | "DROPPED_OUT";
+type CompletionDraft = { score: string; comment: string; status: ReviewStatus | "" };
 
-const promotionColumns: PromotionColumn[] = [
-  { decision: "PROMOTE", title: "Học lên", className: "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200" },
-  { decision: "ELIGIBLE_NOT_ENROLLED", title: "Đủ điều kiện, chưa đăng ký", className: "bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200" },
-  { decision: "REPEAT", title: "Không đủ học lực", className: "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200" },
+const reviewStatusOptions: { value: ReviewStatus; label: string; className: string }[] = [
+  { value: "CAN_ADVANCE", label: "Có khả năng học lên", className: "accent-emerald-600" },
+  { value: "CANNOT_ADVANCE", label: "Không có khả năng học lên", className: "accent-amber-600" },
+  { value: "DROPPED_OUT", label: "Bỏ học", className: "accent-rose-600" },
 ];
 
-function isPromotionDecision(value: unknown): value is PromotionDecision {
-  return value === "PROMOTE" || value === "ELIGIBLE_NOT_ENROLLED" || value === "REPEAT";
+function isReviewStatus(value: unknown): value is ReviewStatus {
+  return value === "CAN_ADVANCE" || value === "CANNOT_ADVANCE" || value === "DROPPED_OUT";
 }
 
-function getPromotionDecisionLabel(decision: PromotionDecision) {
-  return promotionColumns.find((column) => column.decision === decision)?.title ?? "Chưa phân loại";
-}
-
-function getSuggestedPromotionDecision(score: number, attendancePercentage: number, enrolledInHigherHsk: boolean): PromotionDecision {
-  if (score < 6.5 || attendancePercentage < 80) return "REPEAT";
-  return enrolledInHigherHsk ? "PROMOTE" : "ELIGIBLE_NOT_ENROLLED";
+function getReviewStatusLabel(status: ReviewStatus | null, legacyDecision: LegacyPromotionDecision | null) {
+  if (status) return reviewStatusOptions.find((option) => option.value === status)?.label ?? "—";
+  if (legacyDecision === "PROMOTE") return "Học lên (trước đây)";
+  if (legacyDecision === "ELIGIBLE_NOT_ENROLLED") return "Đủ điều kiện, chưa đăng ký (trước đây)";
+  if (legacyDecision === "REPEAT") return "Không đủ học lực (trước đây)";
+  return "—";
 }
 
 function parseStudentDetails(form: FormData) {
@@ -106,6 +100,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       name: true,
       maxStudents: true,
       completedAt: true,
+      finalReviewSession: true,
       course: { select: { id: true, code: true, title: true, hskLevel: true } },
       enrollments: {
         where: { user: { is: { role: "student", deletedAt: null } } },
@@ -143,7 +138,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
           student: { select: { name: true } },
         },
       },
-      studentScores: { select: { studentId: true, score: true, comment: true, decision: true } },
+      studentClassReviews: {
+        where: { sessionType: "FINAL" },
+        select: { studentId: true, sessionNumber: true, status: true },
+      },
+      studentScores: { select: { studentId: true, score: true, comment: true } },
     },
     orderBy: [{ course: { order: "asc" } }, { name: "asc" }],
   });
@@ -156,49 +155,6 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
   const intent = String(form.get("intent") ?? "");
   const classId = String(form.get("classId") ?? "").trim();
   if (!classId) return { error: "Vui lòng chọn lớp học." };
-  if (intent === "save-completion-outcome") {
-    const studentId = String(form.get("studentId") ?? "").trim();
-    const decision = String(form.get("decision") ?? "");
-    if (!studentId || studentId.length > 100 || !isPromotionDecision(decision)) {
-      return { error: "Phân loại kết quả không hợp lệ. Hãy thử lại.", classId };
-    }
-
-    try {
-      return await prisma.$transaction(async (tx) => {
-        const classroom = await tx.class.findFirst({
-          where: {
-            id: classId,
-            teacherId: user.id,
-            completedAt: null,
-            enrollments: {
-              some: {
-                userId: studentId,
-                user: { is: { role: "student", deletedAt: null } },
-              },
-            },
-          },
-          select: { id: true },
-        });
-        if (!classroom) {
-          return { error: "Không tìm thấy học viên trong lớp đang dạy hoặc lớp đã kết thúc.", classId };
-        }
-
-        const update = await tx.classStudentScore.updateMany({
-          where: { classId: classroom.id, studentId },
-          data: { decision },
-        });
-        if (update.count !== 1) {
-          return { error: "Chưa tìm thấy điểm đã lưu cho học viên. Hãy quay lại lưu đánh giá trước.", classId };
-        }
-        return { success: true as const, kind: "outcome-saved" as const, classId, studentId, decision };
-      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
-    } catch (error) {
-      if (getKnownRequestError(error) === "P2034") {
-        return { error: "Lớp vừa thay đổi. Vui lòng tải lại trang và thử lại.", classId };
-      }
-      throw error;
-    }
-  }
   if (intent === "save-completion-evaluation") {
     const rawEvaluations = String(form.get("evaluations") ?? "");
     let parsedEvaluations: unknown;
@@ -344,7 +300,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
       return { error: "Lớp cần có học viên và kết quả cuối khóa trước khi kết thúc.", classId };
     }
 
-    const results: { studentId: string; score: number; comment: string; decision: PromotionDecision }[] = [];
+    const results: { studentId: string; score: number; comment: string; status: ReviewStatus }[] = [];
     for (const value of parsedResults) {
       if (!value || typeof value !== "object" || Array.isArray(value)) {
         return { error: "Có kết quả học viên không hợp lệ.", classId };
@@ -364,15 +320,15 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
         || score > 10
         || comment.length === 0
         || comment.length > 2000
-        || !isPromotionDecision(record.decision)
+        || !isReviewStatus(record.status)
       ) {
-        return { error: "Mỗi học viên cần có điểm từ 0 đến 10, nhận xét và lựa chọn kết quả.", classId };
+        return { error: "Mỗi học viên cần có điểm từ 0 đến 10, nhận xét và trạng thái đánh giá.", classId };
       }
       results.push({
         studentId: record.studentId,
         score,
         comment,
-        decision: record.decision,
+        status: record.status,
       });
     }
     if (new Set(results.map(({ studentId }) => studentId)).size !== results.length) {
@@ -384,12 +340,21 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
         where: { id: classId, teacherId: user.id, completedAt: null },
         select: {
           id: true,
+          finalReviewSession: true,
           enrollments: {
             where: { user: { is: { role: "student", deletedAt: null } } },
             select: { userId: true },
           },
+          studentClassReviews: {
+            where: { sessionType: "FINAL" },
+            select: { studentId: true, sessionNumber: true },
+          },
           attendanceSessions: {
+            orderBy: [{ date: "asc" }, { createdAt: "asc" }],
             select: {
+              id: true,
+              title: true,
+              createdAt: true,
               records: {
                 select: { studentId: true, status: true },
               },
@@ -425,7 +390,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
         return { error: "Lớp vừa được kết thúc ở nơi khác. Hãy tải lại trang.", classId };
       }
       await tx.classFinalResult.createMany({
-        data: results.map(({ studentId, score, comment, decision }) => {
+        data: results.map(({ studentId, score, comment }) => {
           const attendance = getClassAttendanceSummary(attendanceByStudent.get(studentId) ?? []);
           return {
             classId: classroom.id,
@@ -434,10 +399,42 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
             comment,
             attendedSessions: attendance.attendedSessions,
             totalSessions: attendance.totalSessions,
-            decision,
+            decision: null,
           };
         }),
       });
+      const lastAttendanceSessionNumber = classroom.attendanceSessions.reduce((highest, session, index) => {
+        const number = Number(session.title.match(/\d+$/)?.[0] ?? 0);
+        return Math.max(highest, Number.isSafeInteger(number) && number > 0 ? number : index + 1);
+      }, 0);
+      const reviewSessionNumber = lastAttendanceSessionNumber || classroom.finalReviewSession || 1;
+      const existingReviewSessionByStudent = new Map(
+        classroom.studentClassReviews.map(({ studentId, sessionNumber }) => [studentId, sessionNumber]),
+      );
+      await Promise.all(results.map(({ studentId, status }) =>
+        tx.studentClassReview.upsert({
+          where: {
+            classId_studentId_sessionType: {
+              classId: classroom.id,
+              studentId,
+              sessionType: "FINAL",
+            },
+          },
+          create: {
+            classId: classroom.id,
+            studentId,
+            sessionType: "FINAL",
+            sessionNumber: existingReviewSessionByStudent.get(studentId) ?? reviewSessionNumber,
+            status,
+            teacherId: user.id,
+          },
+          update: {
+            sessionNumber: existingReviewSessionByStudent.get(studentId) ?? reviewSessionNumber,
+            status,
+            teacherId: user.id,
+          },
+        })
+      ));
       await tx.classStudentScore.deleteMany({ where: { classId: classroom.id } });
       return { success: true as const, kind: "completed" as const, classId };
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
@@ -572,12 +569,8 @@ export default function TeacherClassesPage() {
   const [classView, setClassView] = useState<"active" | "completed">("active");
   const [optimisticallyCompletedClassIds, setOptimisticallyCompletedClassIds] = useState<string[]>([]);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
-  const [completionStep, setCompletionStep] = useState<"evaluation" | "outcomes">("evaluation");
+  const [completionStep, setCompletionStep] = useState<"evaluation" | "review">("evaluation");
   const [completionDraft, setCompletionDraft] = useState<Record<string, CompletionDraft>>({});
-  const [draggedStudentId, setDraggedStudentId] = useState<string | null>(null);
-  const [dragOverDecision, setDragOverDecision] = useState<PromotionDecision | null>(null);
-  const [savingOutcomeStudentId, setSavingOutcomeStudentId] = useState<string | null>(null);
-  const previousOutcomeRef = useRef<{ classId: string; studentId: string; decision: CompletionDraft["decision"] } | null>(null);
   const [studentToResetPassword, setStudentToResetPassword] = useState<{ id: string; name: string } | null>(null);
   const [passwordResetResult, setPasswordResetResult] = useState<Extract<ActionResult, { kind: "password-reset" }> | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "existing" | null>(null);
@@ -587,7 +580,6 @@ export default function TeacherClassesPage() {
   const createFetcher = useFetcher<typeof action>();
   const existingFetcher = useFetcher<typeof action>();
   const evaluationFetcher = useFetcher<typeof action>();
-  const outcomeFetcher = useFetcher<typeof action>();
   const completeFetcher = useFetcher<typeof action>();
   const passwordResetFetcher = useFetcher<typeof action>();
   const searchFetcher = useFetcher<{ query: string; students: { id: string; name: string; email: string }[] }>();
@@ -604,7 +596,6 @@ export default function TeacherClassesPage() {
   const existingBusy = existingFetcher.state !== "idle";
   const isCompleting = completeFetcher.state !== "idle";
   const isSavingEvaluation = evaluationFetcher.state !== "idle";
-  const isSavingOutcome = outcomeFetcher.state !== "idle";
   const isResettingPassword = passwordResetFetcher.state !== "idle";
   const provisionalScoreByStudent = new Map(
     (selectedClass?.studentScores ?? []).map((score) => [score.studentId, score]),
@@ -660,34 +651,10 @@ export default function TeacherClassesPage() {
     const result = evaluationFetcher.data;
     if (evaluationFetcher.state !== "idle" || !result || "error" in result) return;
     if (result.kind === "evaluation-saved" && result.classId === selectedClass?.id) {
-      setCompletionStep("outcomes");
+      setCompletionStep("review");
       evaluationFetcher.reset();
     }
   }, [evaluationFetcher.data, evaluationFetcher.state, selectedClass?.id]);
-
-  useEffect(() => {
-    const result = outcomeFetcher.data;
-    if (outcomeFetcher.state !== "idle" || !result) return;
-    if ("error" in result) {
-      const previous = previousOutcomeRef.current;
-      if (previous && previous.classId === selectedClass?.id) {
-        setCompletionDraft((current) => ({
-          ...current,
-          [previous.studentId]: {
-            ...(current[previous.studentId] ?? { score: "", comment: "", decision: "" }),
-            decision: previous.decision,
-          },
-        }));
-      }
-      previousOutcomeRef.current = null;
-      setSavingOutcomeStudentId(null);
-      return;
-    }
-    if (result.kind === "outcome-saved") {
-      previousOutcomeRef.current = null;
-      setSavingOutcomeStudentId(null);
-    }
-  }, [outcomeFetcher.data, outcomeFetcher.state, selectedClass?.id]);
 
   useEffect(() => {
     const result = passwordResetFetcher.data;
@@ -699,13 +666,13 @@ export default function TeacherClassesPage() {
   }, [passwordResetFetcher.data, passwordResetFetcher.state]);
 
   useEffect(() => {
-    if (!showCompleteDialog || isCompleting || isSavingEvaluation || isSavingOutcome) return;
+    if (!showCompleteDialog || isCompleting || isSavingEvaluation) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setShowCompleteDialog(false);
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [showCompleteDialog, isCompleting, isSavingEvaluation, isSavingOutcome]);
+  }, [showCompleteDialog, isCompleting, isSavingEvaluation]);
 
   useEffect(() => {
     const query = normalizedStudentQuery;
@@ -751,86 +718,32 @@ export default function TeacherClassesPage() {
   const completeSelectedClass = () => {
     if (!selectedClass) return;
     evaluationFetcher.reset();
-    outcomeFetcher.reset();
     completeFetcher.reset();
-    previousOutcomeRef.current = null;
     setCompletionDraft(Object.fromEntries(selectedClass.enrollments.map(({ user: student }) => {
       const savedEvaluation = provisionalScoreByStudent.get(student.id);
-      const attendance = getClassAttendanceSummary(
-        selectedClass.attendanceSessions.map((session) =>
-          session.records.find((record) => record.studentId === student.id)?.status ?? null
-        ),
-      );
-      const suggestedDecision = getSuggestedPromotionDecision(
-        savedEvaluation?.score ?? Number.NEGATIVE_INFINITY,
-        attendance.percentage,
-        student.enrollments.some(({ course }) => course.hskLevel > selectedClass.course.hskLevel),
-      );
+      const savedReview = selectedClass.studentClassReviews.find((review) => review.studentId === student.id);
       return [
         student.id,
         {
           score: String(savedEvaluation?.score ?? ""),
           comment: savedEvaluation?.comment ?? "",
-          decision: isPromotionDecision(savedEvaluation?.decision) ? savedEvaluation.decision : suggestedDecision,
+          status: isReviewStatus(savedReview?.status) ? savedReview.status : "",
         },
       ];
     })));
     setCompletionStep("evaluation");
     setShowCompleteDialog(true);
   };
-  const moveStudentToOutcome = (studentId: string, decision: PromotionDecision) => {
-    if (!selectedClass || isSavingOutcome) return;
-    const currentDecision = completionDraft[studentId]?.decision ?? "";
-    if (currentDecision === decision) return;
-    previousOutcomeRef.current = { classId: selectedClass.id, studentId, decision: currentDecision };
-    setSavingOutcomeStudentId(studentId);
-    setCompletionDraft((current) => ({
-      ...current,
-      [studentId]: {
-        ...(current[studentId] ?? { score: "", comment: "", decision: "" }),
-        decision,
-      },
-    }));
-    outcomeFetcher.reset();
-    outcomeFetcher.submit(
-      {
-        intent: "save-completion-outcome",
-        classId: selectedClass.id,
-        studentId,
-        decision,
-      },
-      { method: "post" },
-    );
-  };
   const saveCompletionEvaluation = () => {
     if (!selectedClass || !completionEvaluationIsReady) return;
-    const updatedDraft = { ...completionDraft };
-    for (const { user: student } of selectedClass.enrollments) {
-      const savedDecision = provisionalScoreByStudent.get(student.id)?.decision;
-      if (isPromotionDecision(savedDecision)) continue;
-      const attendance = getClassAttendanceSummary(
-        selectedClass.attendanceSessions.map((session) =>
-          session.records.find((record) => record.studentId === student.id)?.status ?? null
-        ),
-      );
-      updatedDraft[student.id] = {
-        ...updatedDraft[student.id],
-        decision: getSuggestedPromotionDecision(
-          parseScore(updatedDraft[student.id]?.score ?? ""),
-          attendance.percentage,
-          student.enrollments.some(({ course }) => course.hskLevel > selectedClass.course.hskLevel),
-        ),
-      };
-    }
-    setCompletionDraft(updatedDraft);
     evaluationFetcher.submit(
       {
         intent: "save-completion-evaluation",
         classId: selectedClass.id,
         evaluations: JSON.stringify(selectedClass.enrollments.map(({ user: student }) => ({
           studentId: student.id,
-          score: parseScore(updatedDraft[student.id]?.score ?? ""),
-          comment: updatedDraft[student.id]?.comment ?? "",
+          score: parseScore(completionDraft[student.id]?.score ?? ""),
+          comment: completionDraft[student.id]?.comment ?? "",
         }))),
       },
       { method: "post" },
@@ -846,7 +759,7 @@ export default function TeacherClassesPage() {
           studentId: student.id,
           score: parseScore(completionDraft[student.id]?.score ?? ""),
           comment: completionDraft[student.id]?.comment,
-          decision: completionDraft[student.id]?.decision,
+          status: completionDraft[student.id]?.status,
         }))),
       },
       { method: "post" },
@@ -866,8 +779,7 @@ export default function TeacherClassesPage() {
     });
   const completionIsReady = completionEvaluationIsReady
     && Boolean(selectedClass?.enrollments.every(({ user: student }) => {
-      const decision = completionDraft[student.id]?.decision;
-      return isPromotionDecision(decision);
+      return isReviewStatus(completionDraft[student.id]?.status);
     }));
 
   return (
@@ -999,7 +911,7 @@ export default function TeacherClassesPage() {
                                 session.records.find((record) => record.studentId === student.id)?.status ?? null
                               ),
                             );
-                            const draft = completionDraft[student.id] ?? { score: "", comment: "", decision: "" };
+                            const draft = completionDraft[student.id] ?? { score: "", comment: "", status: "" };
                             return (
                               <tr key={student.id}>
                                 <th scope="row" className="px-3 py-3 text-sm font-medium">{student.name}</th>
@@ -1072,16 +984,18 @@ export default function TeacherClassesPage() {
                       className="w-full sm:w-auto"
                     >
                       {isSavingEvaluation && <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />}
-                      {isSavingEvaluation ? "Đang lưu đánh giá..." : "Tiếp tục chọn kết quả"}
+                      {isSavingEvaluation ? "Đang lưu đánh giá..." : "Tiếp tục chọn trạng thái"}
                     </Button>
                   </div>
                 </>
               ) : (
                 <>
                   <header className="space-y-1">
-                    <h2 id="complete-class-title" className="text-xl font-semibold">Kết quả cuối khóa · {selectedClass.name}</h2>
+                    <h2 id="complete-class-title" className="text-xl font-semibold">Trạng thái cuối kỳ · {selectedClass.name}</h2>
                     <p id="complete-class-description" className="text-sm text-muted-foreground">
-                      Gợi ý theo điểm từ 6,5 và chuyên cần từ 80%; có thể kéo học viên sang nhóm khác. Lựa chọn được lưu ngay.
+                      {selectedClass.finalReviewSession
+                        ? `Đánh giá cuối kỳ được cấu hình tại buổi ${selectedClass.finalReviewSession}. Chọn trạng thái cho từng học viên trước khi kết thúc khóa.`
+                        : "Chọn trạng thái cho từng học viên trước khi kết thúc khóa. Mốc buổi được ghi nhận theo buổi học cuối cùng."}
                     </p>
                   </header>
                   {completeFetcher.data && "error" in completeFetcher.data && (
@@ -1089,87 +1003,43 @@ export default function TeacherClassesPage() {
                       {completeFetcher.data.error}
                     </p>
                   )}
-                  {outcomeFetcher.data && "error" in outcomeFetcher.data && (
-                    <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-                      {outcomeFetcher.data.error}
-                    </p>
-                  )}
-                  <div className="grid gap-3 md:grid-cols-3">
-                    {promotionColumns.map((column) => {
-                      const students = selectedClass.enrollments.filter(({ user: student }) =>
-                        completionDraft[student.id]?.decision === column.decision
-                      );
-                      const isDropTarget = dragOverDecision === column.decision;
+                  <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
+                    Đã chọn {selectedClass.enrollments.filter(({ user: student }) =>
+                      isReviewStatus(completionDraft[student.id]?.status)
+                    ).length}/{selectedClass.enrollments.length} trạng thái
+                  </p>
+                  <div className="max-h-[55vh] space-y-3 overflow-y-auto pr-1">
+                    {selectedClass.enrollments.map(({ user: student }) => {
+                      const status = completionDraft[student.id]?.status ?? "";
                       return (
-                        <section
-                          key={column.decision}
-                          aria-labelledby={`promotion-column-${column.decision}`}
-                          onDragOver={(event) => {
-                            event.preventDefault();
-                            if (!isSavingOutcome) setDragOverDecision(column.decision);
-                          }}
-                          onDragLeave={(event) => {
-                            if (event.currentTarget === event.target) setDragOverDecision(null);
-                          }}
-                          onDrop={(event) => {
-                            event.preventDefault();
-                            const studentId = event.dataTransfer.getData("text/plain");
-                            if (studentId) moveStudentToOutcome(studentId, column.decision);
-                            setDraggedStudentId(null);
-                            setDragOverDecision(null);
-                          }}
-                          className={`flex min-h-64 flex-col overflow-hidden rounded-lg border transition-colors ${isDropTarget ? "border-primary bg-primary/5" : "border-border bg-background"}`}
-                        >
-                          <header className="flex items-center justify-between gap-2 border-b px-3 py-2.5">
-                            <h3 id={`promotion-column-${column.decision}`} className={`rounded-full px-2 py-1 text-xs font-medium ${column.className}`}>
-                              {column.title}
-                            </h3>
-                            <span className="text-sm font-semibold tabular-nums" aria-label={`${students.length} học viên`}>
-                              {students.length}
-                            </span>
-                          </header>
-                          <ul className="max-h-[42vh] min-h-44 flex-1 space-y-2 overflow-y-auto p-2" aria-label={column.title}>
-                            {students.map(({ user: student }) => {
-                              const draft = completionDraft[student.id] ?? { score: "", comment: "", decision: "" };
-                              const attendance = getClassAttendanceSummary(
-                                selectedClass.attendanceSessions.map((session) =>
-                                  session.records.find((record) => record.studentId === student.id)?.status ?? null
-                                ),
-                              );
-                              return (
-                                <li
-                                  key={student.id}
-                                  draggable={!isSavingOutcome}
-                                  onDragStart={(event) => {
-                                    event.dataTransfer.effectAllowed = "move";
-                                    event.dataTransfer.setData("text/plain", student.id);
-                                    setDraggedStudentId(student.id);
-                                  }}
-                                  onDragEnd={() => {
-                                    setDraggedStudentId(null);
-                                    setDragOverDecision(null);
-                                  }}
-                                  className={`rounded-md border bg-card p-3 shadow-sm ${draggedStudentId === student.id ? "opacity-50" : ""} ${isSavingOutcome ? "cursor-wait" : "cursor-grab active:cursor-grabbing"}`}
-                                >
-                                  <div className="flex items-start justify-between gap-2">
-                                    <p className="min-w-0 break-words text-sm font-medium">{student.name}</p>
-                                    <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                                      {isSavingOutcome && savingOutcomeStudentId === student.id && <Loader2 aria-label="Đang lưu" className="h-4 w-4 animate-spin" />}
-                                    </span>
-                                  </div>
-                                  <p className="mt-1 text-xs text-muted-foreground">
-                                    Điểm {draft.score || "—"} · Chuyên cần {attendance.percentage}%
-                                  </p>
-                                </li>
-                              );
-                            })}
-                            {students.length === 0 && (
-                              <li className="px-2 py-6 text-center text-xs text-muted-foreground">
-                                Chưa có học viên
-                              </li>
-                            )}
-                          </ul>
-                        </section>
+                        <fieldset key={student.id} className="rounded-lg border bg-background p-4">
+                          <legend className="px-1 text-sm font-semibold">{student.name}</legend>
+                          <div className="grid gap-2 sm:grid-cols-3">
+                            {reviewStatusOptions.map((option) => (
+                              <label
+                                key={option.value}
+                                className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors ${status === option.value ? "border-primary bg-primary/5 font-medium" : "border-border hover:bg-muted/50"}`}
+                              >
+                                <input
+                                  type="radio"
+                                  name={`final-review-${student.id}`}
+                                  value={option.value}
+                                  checked={status === option.value}
+                                  onChange={() => setCompletionDraft((current) => ({
+                                    ...current,
+                                    [student.id]: {
+                                      ...(current[student.id] ?? { score: "", comment: "", status: "" }),
+                                      status: option.value,
+                                    },
+                                  }))}
+                                  disabled={isCompleting}
+                                  className={`h-4 w-4 shrink-0 ${option.className}`}
+                                />
+                                <span>{option.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </fieldset>
                       );
                     })}
                   </div>
@@ -1190,7 +1060,7 @@ export default function TeacherClassesPage() {
                         completeFetcher.reset();
                         setCompletionStep("evaluation");
                       }}
-                      disabled={isCompleting || isSavingOutcome}
+                      disabled={isCompleting}
                       className="w-full sm:w-auto"
                     >
                       Quay lại
@@ -1198,7 +1068,7 @@ export default function TeacherClassesPage() {
                     <Button
                       type="button"
                       onClick={confirmCompleteClass}
-                      disabled={isCompleting || isSavingOutcome || !completionIsReady}
+                      disabled={isCompleting || !completionIsReady}
                       className="w-full sm:w-auto"
                     >
                       {isCompleting && <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />}
@@ -1307,7 +1177,7 @@ export default function TeacherClassesPage() {
                               <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Học viên</th>
                               <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Điểm</th>
                               <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Chuyên cần</th>
-                              <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Kết quả</th>
+                              <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Trạng thái cuối kỳ</th>
                               <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-muted-foreground">Nhận xét</th>
                             </tr>
                           </thead>
@@ -1325,7 +1195,10 @@ export default function TeacherClassesPage() {
                                       ({result.attendedSessions}/{result.totalSessions})
                                     </span>
                                   </td>
-                                  <td className="px-4 py-3 text-sm">{getPromotionDecisionLabel(result.decision)}</td>
+                                  <td className="px-4 py-3 text-sm">{getReviewStatusLabel(
+                                    selectedClass.studentClassReviews.find((review) => review.studentId === result.studentId)?.status ?? null,
+                                    result.decision,
+                                  )}</td>
                                   <td className="max-w-sm whitespace-pre-wrap px-4 py-3 text-sm text-muted-foreground">{result.comment}</td>
                                 </tr>
                               );

@@ -20,6 +20,26 @@ const WEEKDAYS = [
   { value: 0, label: "CN" },
 ] as const;
 
+function getStudentReviewLabel(status: string) {
+  if (status === "CAN_ADVANCE") return "Có khả năng học lên";
+  if (status === "CANNOT_ADVANCE") return "Không có khả năng học lên";
+  if (status === "DROPPED_OUT") return "Bỏ học";
+  return "Chưa xác định";
+}
+
+function getStudentReviewTone(status: string) {
+  if (status === "CAN_ADVANCE") return "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200";
+  if (status === "CANNOT_ADVANCE") return "bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200";
+  return "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200";
+}
+
+function getLegacyPromotionLabel(decision: string | null | undefined) {
+  if (decision === "PROMOTE") return "Học lên (trước đây)";
+  if (decision === "ELIGIBLE_NOT_ENROLLED") return "Đủ điều kiện, chưa đăng ký (trước đây)";
+  if (decision === "REPEAT") return "Không đủ học lực (trước đây)";
+  return "—";
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
   const [classes, hskLevels] = await Promise.all([
@@ -83,6 +103,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
           },
         },
         studentScores: { select: { studentId: true, score: true, decision: true } },
+        studentClassReviews: {
+          select: { studentId: true, sessionType: true, sessionNumber: true, status: true },
+        },
       },
       orderBy: [{ course: { order: "asc" } }, { name: "asc" }],
     }),
@@ -222,6 +245,15 @@ export default function AdminClassOverview() {
   const selectedClassScoresByStudent = new Map(
     selectedRecordClass?.studentScores.map((score) => [score.studentId, score]) ?? [],
   );
+  const selectedClassReviewsByStudent = new Map<
+    string,
+    Array<(typeof classes)[number]["studentClassReviews"][number]>
+  >();
+  for (const review of selectedRecordClass?.studentClassReviews ?? []) {
+    const reviews = selectedClassReviewsByStudent.get(review.studentId) ?? [];
+    reviews.push(review);
+    selectedClassReviewsByStudent.set(review.studentId, reviews);
+  }
   const selectedClassHigherHskStudents = new Set(
     selectedRecordClass?.enrollments
       .filter(({ user: student }) => student.enrollments.some(
@@ -233,7 +265,8 @@ export default function AdminClassOverview() {
     (session) => session.records.some(({ status }) => status !== null),
   ) ?? [];
   const selectedClassHasFinalScores = selectedClassScoresByStudent.size > 0;
-  const selectedClassHasOutcomeDecisions = selectedRecordClass?.studentScores.some(({ decision }) => decision !== null) ?? false;
+  const selectedClassHasOutcomeDecisions = (selectedRecordClass?.studentScores.some(({ decision }) => decision !== null) ?? false)
+    || (selectedRecordClass?.studentClassReviews.length ?? 0) > 0;
   const selectedClassHasHigherHskRegistrations = selectedClassHigherHskStudents.size > 0;
   const selectedClassDynamicColumnCount = Number(selectedClassHasFinalScores)
     + Number(selectedClassHasOutcomeDecisions)
@@ -569,7 +602,7 @@ export default function AdminClassOverview() {
                         <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Học viên</th>
                         <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Vắng / tổng buổi</th>
                         {selectedClassHasFinalScores && <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Điểm cuối khóa</th>}
-                        {selectedClassHasOutcomeDecisions && <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Kết quả dự kiến</th>}
+                        {selectedClassHasOutcomeDecisions && <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Đánh giá học viên</th>}
                         {selectedClassHasHigherHskRegistrations && <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Đăng ký khóa sau</th>}
                         <th scope="col" className="px-3 py-2.5 text-xs font-semibold text-muted-foreground">Trạng thái</th>
                       </tr>
@@ -581,6 +614,7 @@ export default function AdminClassOverview() {
                         ), 0);
                         const isRegisteredForHigherHsk = selectedClassHigherHskStudents.has(student.id);
                         const savedScore = selectedClassScoresByStudent.get(student.id);
+                        const studentReviews = selectedClassReviewsByStudent.get(student.id) ?? [];
                         const status = !student.isActive
                           ? { label: "Đã khóa", className: "bg-muted text-muted-foreground" }
                           : !student.isActivated
@@ -596,13 +630,22 @@ export default function AdminClassOverview() {
                             )}
                             {selectedClassHasOutcomeDecisions && (
                               <td className="px-3 py-2.5 text-sm">
-                                {savedScore?.decision === "PROMOTE"
-                                  ? "Học lên"
-                                  : savedScore?.decision === "ELIGIBLE_NOT_ENROLLED"
-                                    ? "Đủ điều kiện, chưa đăng ký"
-                                    : savedScore?.decision === "REPEAT"
-                                      ? "Không đủ học lực"
-                                      : "—"}
+                                {studentReviews.length > 0 ? (
+                                  <div className="space-y-1.5">
+                                    {studentReviews.map((review) => (
+                                      <p key={`${review.studentId}:${review.sessionType}`} className="flex flex-wrap items-center gap-1.5">
+                                        <span className="text-xs text-muted-foreground">
+                                          {review.sessionType === "MIDTERM" ? "Giữa kỳ" : "Cuối kỳ"} · Buổi {review.sessionNumber}
+                                        </span>
+                                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStudentReviewTone(review.status)}`}>
+                                          {getStudentReviewLabel(review.status)}
+                                        </span>
+                                      </p>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  getLegacyPromotionLabel(savedScore?.decision)
+                                )}
                               </td>
                             )}
                             {selectedClassHasHigherHskRegistrations && (

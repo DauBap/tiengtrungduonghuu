@@ -12,6 +12,7 @@ import { requireRole } from "~/lib/session.server";
 
 type ClassFinalResultAdminAction = "PROCESSED" | "SKIPPED";
 type ResultStatusTab = "pending" | "processed" | "skipped";
+type StudentReviewStatus = "CAN_ADVANCE" | "CANNOT_ADVANCE" | "DROPPED_OUT";
 
 interface FilterOption {
   value: string;
@@ -168,6 +169,38 @@ function isClassFinalResultAdminAction(value: string): value is ClassFinalResult
   return value === "PROCESSED" || value === "SKIPPED";
 }
 
+function getStudentFinalReviewStatus(
+  classroom: { studentClassReviews: { studentId: string; status: StudentReviewStatus }[] },
+  studentId: string,
+  legacyDecision: string | null,
+) {
+  return classroom.studentClassReviews.find((review) => review.studentId === studentId)?.status
+    ?? legacyDecision;
+}
+
+function getStudentFinalReviewLabel(status: string | null) {
+  if (status === "CAN_ADVANCE") return "Có khả năng học lên";
+  if (status === "CANNOT_ADVANCE") return "Không có khả năng học lên";
+  if (status === "DROPPED_OUT") return "Bỏ học";
+  if (status === "PROMOTE") return "Học lên (trước đây)";
+  if (status === "ELIGIBLE_NOT_ENROLLED") return "Đủ điều kiện, chưa đăng ký (trước đây)";
+  if (status === "REPEAT") return "Không đủ học lực (trước đây)";
+  return "Chưa có trạng thái";
+}
+
+function getStudentFinalReviewTone(status: string | null) {
+  if (status === "CAN_ADVANCE" || status === "PROMOTE") {
+    return "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200";
+  }
+  if (status === "CANNOT_ADVANCE" || status === "ELIGIBLE_NOT_ENROLLED") {
+    return "bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200";
+  }
+  if (status === "DROPPED_OUT" || status === "REPEAT") {
+    return "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200";
+  }
+  return "bg-muted text-muted-foreground";
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
   const classes = await prisma.class.findMany({
@@ -179,6 +212,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
       completedAt: true,
       course: { select: { hskLevel: true, code: true } },
       teacher: { select: { id: true, name: true } },
+      studentClassReviews: {
+        where: { sessionType: "FINAL" },
+        select: { studentId: true, status: true },
+      },
       finalResults: {
         orderBy: { student: { name: "asc" } },
         select: {
@@ -291,7 +328,7 @@ export default function AdminClassFinalResults() {
         return classroom.finalResults
           .filter((result) => {
             return (!normalizedStudentQuery || result.student.name.toLocaleLowerCase("vi").includes(normalizedStudentQuery))
-              && (!selectedDecision || result.decision === selectedDecision);
+              && (!selectedDecision || getStudentFinalReviewStatus(classroom, result.student.id, result.decision) === selectedDecision);
           })
           .map((result) => ({ classroom, result }));
       })
@@ -423,10 +460,17 @@ export default function AdminClassFinalResults() {
                 }}
                 className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-56"
               >
-                <option value="">Tất cả kết quả</option>
-                <option value="PROMOTE">Học lên</option>
-                <option value="ELIGIBLE_NOT_ENROLLED">Đủ điều kiện, chưa đăng ký</option>
-                <option value="REPEAT">Không đủ học lực</option>
+                <option value="">Tất cả trạng thái</option>
+                <optgroup label="Đánh giá hiện tại">
+                  <option value="CAN_ADVANCE">Có khả năng học lên</option>
+                  <option value="CANNOT_ADVANCE">Không có khả năng học lên</option>
+                  <option value="DROPPED_OUT">Bỏ học</option>
+                </optgroup>
+                <optgroup label="Dữ liệu lịch sử">
+                  <option value="PROMOTE">Học lên (trước đây)</option>
+                  <option value="ELIGIBLE_NOT_ENROLLED">Đủ điều kiện, chưa đăng ký (trước đây)</option>
+                  <option value="REPEAT">Không đủ học lực (trước đây)</option>
+                </optgroup>
               </select>
             </label>
             <label>
@@ -536,7 +580,7 @@ export default function AdminClassFinalResults() {
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Khóa học</th>
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Điểm</th>
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Chuyên cần</th>
-                    <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Kết quả</th>
+                    <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Trạng thái cuối kỳ</th>
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Nhận xét học sinh</th>
                     {statusTab !== "pending" && (
                       <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Ghi chú</th>
@@ -547,7 +591,9 @@ export default function AdminClassFinalResults() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {pageResults.map(({ classroom, result }) => (
+                  {pageResults.map(({ classroom, result }) => {
+                    const finalReviewStatus = getStudentFinalReviewStatus(classroom, result.student.id, result.decision);
+                    return (
                     <tr key={`${classroom.id}:${result.student.id}`} className="hover:bg-muted/20">
                       <th scope="row" className="border-r px-3 py-3 text-sm font-medium">
                         <button
@@ -573,18 +619,8 @@ export default function AdminClassFinalResults() {
                         </span>
                       </td>
                       <td className="border-r px-3 py-3 text-sm">
-                        <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                          result.decision === "PROMOTE"
-                            ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
-                            : result.decision === "ELIGIBLE_NOT_ENROLLED"
-                              ? "bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
-                              : "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200"
-                        }`}>
-                          {result.decision === "PROMOTE"
-                            ? "Học lên"
-                            : result.decision === "ELIGIBLE_NOT_ENROLLED"
-                              ? "Đủ điều kiện, chưa đăng ký"
-                              : "Không đủ học lực"}
+                        <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getStudentFinalReviewTone(finalReviewStatus)}`}>
+                          {getStudentFinalReviewLabel(finalReviewStatus)}
                         </span>
                       </td>
                       <td className="max-w-md border-r px-3 py-3 text-sm text-muted-foreground">
@@ -640,7 +676,8 @@ export default function AdminClassFinalResults() {
                       </td>
                       )}
                     </tr>
-                  ))}
+                  );
+                  })}
                 </tbody>
               </table>
             </div>

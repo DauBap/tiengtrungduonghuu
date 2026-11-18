@@ -60,6 +60,8 @@ export default [
     route("classes", "routes/admin.classes.tsx"),
     route("class-overview", "routes/admin.class-overview.tsx"),
     route("class-final-results", "routes/admin.class-final-results.tsx"),
+    route("student-reviews", "routes/admin.student-reviews.tsx"),
+    route("student-reviews/:studentId", "routes/admin.student-reviews.$studentId.tsx"),
     route("schedule", "routes/admin.schedule.tsx"),
     route("tuition", "routes/admin.tuition.tsx"),
     route("attendance", "routes/admin.attendance.tsx"),

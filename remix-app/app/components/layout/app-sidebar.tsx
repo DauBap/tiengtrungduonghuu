@@ -25,6 +25,7 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
       children: [
         { label: "Tổng quan lớp học", href: "/admin/class-overview", icon: ClipboardList },
         { label: "Điểm danh", href: "/admin/attendance", icon: ClipboardCheck },
+        { label: "Đánh giá học viên", href: "/admin/student-reviews", icon: ClipboardCheck },
         { label: "Kết quả cuối khóa", href: "/admin/class-final-results", icon: TrendingUp },
       ],
     },

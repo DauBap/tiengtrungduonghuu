@@ -95,18 +95,39 @@ export async function action({ request }: ActionFunctionArgs) {
     const teacherId = String(form.get("teacherId") ?? "").trim() || null;
     const maxStudents = Math.max(1, parseInt(String(form.get("maxStudents") ?? "6"), 10) || 6);
     const scheduleRaw = String(form.get("schedule") ?? "[]");
+    const midtermReviewSession = parseReviewSession(form.get("midtermReviewSession"));
+    const finalReviewSession = parseReviewSession(form.get("finalReviewSession"));
     let schedule: ScheduleSlot[] = [];
     try { schedule = JSON.parse(scheduleRaw); } catch { schedule = []; }
 
     if (!name) return { error: "Vui lòng nhập tên lớp", field: "name" };
+    if (midtermReviewSession === undefined || finalReviewSession === undefined) {
+      return { error: "Số buổi đánh giá phải là số nguyên dương hoặc để trống." };
+    }
+    if (midtermReviewSession !== null && midtermReviewSession === finalReviewSession) {
+      return { error: "Buổi đánh giá giữa kỳ và cuối kỳ phải khác nhau." };
+    }
 
     if (intent === "create-class") {
       const courseId = String(form.get("courseId") ?? "").trim();
       if (!courseId) return { error: "Vui lòng chọn khóa học", field: "courseId" };
-      await prisma.class.create({ data: { name, courseId, teacherId, maxStudents, schedule: schedule as object[] } });
+      await prisma.class.create({
+        data: {
+          name,
+          courseId,
+          teacherId,
+          maxStudents,
+          schedule: schedule as object[],
+          midtermReviewSession,
+          finalReviewSession,
+        },
+      });
     } else {
       const classId = String(form.get("classId"));
-      await prisma.class.update({ where: { id: classId }, data: { name, teacherId, maxStudents, schedule: schedule as object[] } });
+      await prisma.class.update({
+        where: { id: classId },
+        data: { name, teacherId, maxStudents, schedule: schedule as object[], midtermReviewSession, finalReviewSession },
+      });
     }
     return { success: true };
   }
@@ -200,6 +221,24 @@ function normalizeSearchText(value: string) {
     .trim();
 }
 
+function getDefaultReviewSessions(hskLevel: number): { midterm: number; final: number } | null {
+  switch (hskLevel) {
+    case 1: return { midterm: 12, final: 24 };
+    case 2: return { midterm: 10, final: 20 };
+    case 3: return { midterm: 16, final: 32 };
+    default: return null;
+  }
+}
+
+function parseReviewSession(value: FormDataEntryValue | null): number | null | undefined {
+  const raw = String(value ?? "").trim();
+  if (!raw) return null;
+  const session = Number(raw);
+  return Number.isSafeInteger(session) && session > 0 && session <= 2_147_483_647
+    ? session
+    : undefined;
+}
+
 function SearchableSelect({
   id,
   name,
@@ -208,6 +247,7 @@ function SearchableSelect({
   placeholder,
   searchPlaceholder,
   emptyMessage,
+  onValueChange,
 }: {
   id: string;
   name: string;
@@ -216,6 +256,7 @@ function SearchableSelect({
   placeholder: string;
   searchPlaceholder: string;
   emptyMessage: string;
+  onValueChange?: (value: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const initialOption = options.find((option) => option.value === defaultValue);
@@ -234,6 +275,7 @@ function SearchableSelect({
     setInputValue(option.displayLabel ?? option.label);
     setQuery("");
     setIsOpen(false);
+    onValueChange?.(option.value);
   };
 
   return (
@@ -453,6 +495,12 @@ function ClassFormModal({
   const isLoading = fetcher.state !== "idle";
   const isEdit = mode === "edit";
   const defaultSchedule = parseSchedule(cls?.schedule);
+  const [midtermReviewSession, setMidtermReviewSession] = useState(
+    cls?.midtermReviewSession == null ? "" : String(cls.midtermReviewSession),
+  );
+  const [finalReviewSession, setFinalReviewSession] = useState(
+    cls?.finalReviewSession == null ? "" : String(cls.finalReviewSession),
+  );
   const courseOptions: SearchableOption[] = [
     { value: "", label: "— Chọn khóa học —", searchText: "chọn khóa học" },
     ...courses.map((course) => ({
@@ -511,9 +559,53 @@ function ClassFormModal({
               placeholder="Tìm theo tên hoặc mã khóa học..."
               searchPlaceholder="Tìm khóa học"
               emptyMessage="Không tìm thấy khóa học phù hợp."
+              onValueChange={(courseId) => {
+                const course = courses.find((item) => item.id === courseId);
+                const defaults = course ? getDefaultReviewSessions(course.hskLevel) : null;
+                setMidtermReviewSession(defaults ? String(defaults.midterm) : "");
+                setFinalReviewSession(defaults ? String(defaults.final) : "");
+              }}
             />
           </div>
         )}
+
+        <fieldset className="space-y-3 rounded-lg border p-4">
+          <legend className="px-1 text-sm font-semibold">Mốc đánh giá theo buổi học</legend>
+          <p className="text-xs text-muted-foreground">
+            {isEdit ? `Mặc định theo HSK${cls?.course.hskLevel ?? "—"}; có thể chỉnh riêng cho lớp này.` : "Chọn khóa học để tự điền mốc mặc định theo cấp độ HSK; bạn có thể chỉnh lại."}
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="midtermReviewSession">Đánh giá giữa kỳ · buổi</Label>
+              <Input
+                id="midtermReviewSession"
+                name="midtermReviewSession"
+                type="number"
+                min={1}
+                step={1}
+                value={midtermReviewSession}
+                onChange={(event) => setMidtermReviewSession(event.currentTarget.value)}
+                placeholder="Để trống nếu không dùng"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="finalReviewSession">Đánh giá cuối kỳ · buổi</Label>
+              <Input
+                id="finalReviewSession"
+                name="finalReviewSession"
+                type="number"
+                min={1}
+                step={1}
+                value={finalReviewSession}
+                onChange={(event) => setFinalReviewSession(event.currentTarget.value)}
+                placeholder="Để trống để đánh giá khi kết thúc khóa"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Để trống mốc cuối kỳ sẽ dùng quy trình đánh giá khi giáo viên kết thúc khóa học.
+          </p>
+        </fieldset>
 
         {/* Giáo viên */}
         <div className="space-y-2">
