@@ -78,6 +78,7 @@ export function GrammarSection({
 }) {
   const [practicing, setPracticing] = useState(false);
   const [activeType, setActiveType] = useState<GrammarQuestionType>("SINGLE_CHOICE");
+  const [practiceRunIds, setPracticeRunIds] = useState<Partial<Record<GrammarQuestionType, number>>>({});
   const [showAnswersFor, setShowAnswersFor] = useState<GrammarQuestionType | null>(null);
   const hasQuestions = section.questions.length > 0;
   const questionsByType: Record<GrammarQuestionType, GrammarPracticeQuestion[]> = {
@@ -90,11 +91,19 @@ export function GrammarSection({
   const unattemptedPracticeTabs = availablePracticeTabs.filter((tab) => !latestAttempts[tab.type]);
   const isPracticeLocked = (type: GrammarQuestionType) => Boolean(latestAttempts[type]?.pendingReview);
 
-  const openPractice = (type?: GrammarQuestionType) => {
+  const openPractice = (type?: GrammarQuestionType, restart = false) => {
     const selected = type
       ? availablePracticeTabs.find((tab) => tab.type === type && !isPracticeLocked(tab.type))
       : availablePracticeTabs.find((tab) => !isPracticeLocked(tab.type));
-    if (selected) setActiveType(selected.type);
+    if (selected) {
+      setActiveType(selected.type);
+      if (restart) {
+        setPracticeRunIds((current) => ({
+          ...current,
+          [selected.type]: (current[selected.type] ?? 0) + 1,
+        }));
+      }
+    }
     setPracticing(true);
   };
   const activeReviewGroups = showAnswersFor
@@ -247,8 +256,13 @@ export function GrammarSection({
                           {answersVisible ? "Ẩn đáp án" : "Xem chi tiết"}
                         </Button>
                       )}
-                      <Button type="button" size="sm" variant="outline" onClick={() => openPractice(tab.type)}>
-                        {previewOnly ? "Xem câu hỏi" : result ? "Làm lại" : "Luyện tập"}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openPractice(tab.type, Boolean(result))}
+                      >
+                        {previewOnly ? "Xem câu hỏi" : result ? "Làm lại bài" : "Luyện tập"}
                       </Button>
                     </div>
                   )}
@@ -390,13 +404,14 @@ export function GrammarSection({
                     hidden={activeType !== tab.type}
                   >
                       <GrammarPractice
+                        key={`${tab.type}-${practiceRunIds[tab.type] ?? 0}`}
                         questions={questions}
                         sectionId={section.id}
                         fullLessonPractice={section.fullLessonPractice}
                         previewOnly={previewOnly}
                         draftScope={draftScope}
-                        initialDraftData={assessmentDrafts[draftKey]}
-                        hasSavedDraft={draftKey in assessmentDrafts}
+                        initialDraftData={practiceRunIds[tab.type] ? undefined : assessmentDrafts[draftKey]}
+                        hasSavedDraft={!practiceRunIds[tab.type] && draftKey in assessmentDrafts}
                         draftEnabled={!isPracticeLocked(tab.type)}
                       />
                   </section>

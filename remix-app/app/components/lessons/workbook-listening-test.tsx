@@ -106,13 +106,13 @@ export function WorkbookListeningTest({
   const [audioError, setAudioError] = useState<string | null>(null);
   const isAwaitingTeacherReview = (savedResult?.pendingReviewCount ?? 0) > 0;
   const [answers, setAnswers] = useState<Record<string, string>>(() =>
-    isAwaitingTeacherReview
+    savedResult
       ? Object.fromEntries((savedResult?.answers ?? []).map((answer) => [answer.id, answer.given]))
       : initialAnswers
   );
   const [audioPlayCount, setAudioPlayCount] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(config.timeLimit ? config.timeLimit * 60 : 0);
-  const [isSubmitted, setIsSubmitted] = useState(isAwaitingTeacherReview);
+  const [isSubmitted, setIsSubmitted] = useState(isAwaitingTeacherReview || savedResult !== null);
   const draft = useAssessmentDraft<{ answers: Record<string, string> }>({
     scope: draftScope,
     initialData: { answers: initialAnswers },
@@ -128,6 +128,21 @@ export function WorkbookListeningTest({
     onSubmitAttempt(answers);
   };
   submitAttemptRef.current = submitAttempt;
+
+  const startRetaking = () => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setAudioPlayCount(0);
+    setTimeRemaining(config.timeLimit ? config.timeLimit * 60 : 0);
+    setAnswers({});
+    setIsSubmitted(false);
+    draft.clear();
+  };
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.playbackRate = speed;
@@ -456,11 +471,7 @@ export function WorkbookListeningTest({
         {!previewOnly && !isSubmitted
           ? <Button type="button" onClick={submitAttempt} disabled={isSaving || draft.isSaving}>Nộp bài</Button>
           : savedResult && savedResult.pendingReviewCount === 0 && !isSaving
-            ? <Button type="button" variant="outline" onClick={() => {
-                setAnswers({});
-                setIsSubmitted(false);
-                draft.clear();
-            }} disabled={draft.isSaving}>Làm lại</Button>
+            ? <Button type="button" variant="outline" onClick={startRetaking} disabled={draft.isSaving}>Làm lại bài</Button>
             : null}
       </Card>
     </div>

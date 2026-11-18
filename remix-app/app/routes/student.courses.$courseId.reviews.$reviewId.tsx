@@ -318,16 +318,24 @@ export default function StudentCourseReviewPage() {
         {canStartAttempt && !started && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">{savedDraft !== null ? "Tiếp tục ôn tập" : "Bắt đầu luyện tập"}</CardTitle>
+              <CardTitle className="text-lg">
+                {savedDraft !== null
+                  ? "Tiếp tục ôn tập"
+                  : latestAttempt?.status === "RETURNED" ? "Làm lại bài ôn tập" : "Bắt đầu luyện tập"}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
                 {savedDraft !== null
                   ? "Câu trả lời đã lưu từ lần trước. Bạn có thể tiếp tục từ câu đang làm."
-                  : "Bộ ôn tập gồm các câu dịch và sắp xếp câu. Sau khi nộp, giáo viên sẽ chấm từng câu và trả kết quả cho bạn."}
+                  : latestAttempt?.status === "RETURNED"
+                    ? "Giáo viên đã chấm và trả kết quả. Bạn có thể làm lại rồi gửi một lượt mới để giáo viên chấm."
+                    : "Bộ ôn tập gồm các câu dịch và sắp xếp câu. Sau khi nộp, giáo viên sẽ chấm từng câu và trả kết quả cho bạn."}
               </p>
               <Button type="button" className="w-full" onClick={() => setStarted(true)}>
-                {savedDraft !== null ? "Tiếp tục làm bài" : "Bắt đầu ôn tập"}
+                {savedDraft !== null
+                  ? "Tiếp tục làm bài"
+                  : latestAttempt?.status === "RETURNED" ? "Làm lại bài" : "Bắt đầu ôn tập"}
               </Button>
             </CardContent>
           </Card>

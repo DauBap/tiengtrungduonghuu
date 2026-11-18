@@ -1,5 +1,5 @@
 import { useFetcher } from "react-router";
-import { CheckCircle2, Clock3, Languages, Send } from "lucide-react";
+import { CheckCircle2, Clock3, Languages, RotateCcw, Send } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
@@ -52,6 +52,9 @@ export function TranslationPractice({
   const fetcher = useFetcher();
   const [missingQuestionIds, setMissingQuestionIds] = useState<string[]>([]);
   const [validationMessage, setValidationMessage] = useState("");
+  const [isRetaking, setIsRetaking] = useState(
+    () => submission?.status === "GRADED" && hasSavedDraft,
+  );
   const answers = Array.isArray(submission?.answers)
     ? (submission.answers as {
         questionId: string;
@@ -66,6 +69,7 @@ export function TranslationPractice({
   const commentsByQuestion = new Map<string, string>();
   answers.forEach((item) => commentsByQuestion.set(item.questionId, item.teacherComment ?? ""));
   const canDraft = !submission || submission.status === "GRADED";
+  const canEdit = !submission || (submission.status === "GRADED" && isRetaking);
   const savedAnswers = initialDraftData && typeof initialDraftData === "object" && !Array.isArray(initialDraftData)
     ? (initialDraftData as Record<string, unknown>).answers
     : null;
@@ -73,9 +77,9 @@ export function TranslationPractice({
     const savedAnswer = savedAnswers && typeof savedAnswers === "object" && !Array.isArray(savedAnswers)
       ? (savedAnswers as Record<string, unknown>)[question.id]
       : undefined;
-    return [question.id, canDraft && typeof savedAnswer === "string"
+    return [question.id, canEdit && typeof savedAnswer === "string"
       ? savedAnswer
-      : answersByQuestion.get(question.id) ?? ""];
+      : canEdit ? "" : answersByQuestion.get(question.id) ?? ""];
   }));
   const [draftAnswers, setDraftAnswers] = useState<Record<string, string>>(initialAnswers);
   const draft = useAssessmentDraft<{ answers: Record<string, string> }>({
@@ -115,6 +119,14 @@ export function TranslationPractice({
 
     setMissingQuestionIds([]);
     setValidationMessage("");
+  };
+
+  const startRetaking = () => {
+    setIsRetaking(true);
+    setDraftAnswers(Object.fromEntries(questions.map((question) => [question.id, ""])));
+    setMissingQuestionIds([]);
+    setValidationMessage("");
+    draft.clear();
   };
 
   return (
@@ -173,7 +185,7 @@ export function TranslationPractice({
             <Textarea
               name={`translation-${question.id}`}
               value={draftAnswers[question.id] ?? ""}
-              readOnly={submission?.status === "SUBMITTED" || submission?.status === "GRADED"}
+              readOnly={!canEdit || fetcher.state !== "idle"}
               onChange={(event) => {
                 const nextAnswers = { ...draftAnswers, [question.id]: event.target.value };
                 setDraftAnswers(nextAnswers);
@@ -230,7 +242,7 @@ export function TranslationPractice({
 
         {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
-        {!submission || submission.status === "GRADED" ? (
+        {canEdit ? (
           <Button
             type="submit"
             disabled={isSaving || fetcher.state !== "idle" || draft.isSaving}
@@ -241,12 +253,17 @@ export function TranslationPractice({
               ? "Đang nộp..."
               : draft.isSaving ? "Đang lưu câu trả lời..." : "Nộp bài luyện dịch"}
           </Button>
-        ) : (
+        ) : submission?.status === "GRADED" ? (
+          <Button type="button" variant="outline" onClick={startRetaking}>
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Làm lại bài
+          </Button>
+        ) : submission?.status === "SUBMITTED" ? (
           <div className="flex items-center gap-2 text-sm font-medium text-amber-700">
             <Clock3 className="h-4 w-4" />
             Đã nộp bài, bài làm đang chờ giáo viên chấm.
           </div>
-        )}
+        ) : null}
       </fetcher.Form>
 
       {submission?.status === "GRADED" && (
