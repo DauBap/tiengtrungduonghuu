@@ -13,7 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { Overlay } from "~/components/common/overlay";
-import { ArrowLeft, Plus, Pencil, Trash2, X, BookOpen, Loader2, Settings2, ClipboardCheck, GripVertical, FileCheck2, TriangleAlert } from "lucide-react";
+import { CourseDocumentsModal } from "~/components/courses/course-documents-modal";
+import { ArrowLeft, Plus, Pencil, Trash2, X, BookOpen, Loader2, Settings2, ClipboardCheck, GripVertical, FileCheck2, TriangleAlert, FolderOpen } from "lucide-react";
 
 type LessonRow = {
   id: string;
@@ -52,7 +53,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const course = await getCourseById(params.courseId!);
   if (!course) throw new Response("Không tìm thấy khóa học", { status: 404 });
   const lessons = await getLessonsForAdmin(course.id);
-  const [reviewSets, mockExams] = await Promise.all([
+  const [reviewSets, mockExams, documents] = await Promise.all([
     prisma.courseReviewSet.findMany({
       where: { courseId: course.id },
       include: { _count: { select: { questions: true } } },
@@ -66,6 +67,11 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         _count: { select: { attempts: true } },
       },
     }),
+    prisma.courseDocument.findMany({
+      where: { courseId: course.id },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, fileName: true, fileSize: true, createdAt: true },
+    }),
   ]);
   return {
     user,
@@ -78,6 +84,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       questionCount: exam.sections.reduce((count, section) => count + section._count.questions, 0),
       sections: undefined,
     })),
+    documents: documents.map((document) => ({ ...document, fileSize: Number(document.fileSize) })),
   };
 }
 
@@ -391,11 +398,12 @@ function MockExamModal({
 }
 
 export default function AdminCourseLessons() {
-  const { user, course, lessons, reviewSets, mockExams } = useLoaderData<typeof loader>();
+  const { user, course, lessons, reviewSets, mockExams, documents } = useLoaderData<typeof loader>();
   const moveFetcher = useFetcher();
   const reviewDeleteFetcher = useFetcher<{ error?: string; success?: boolean; deletedReviewId?: string; reviewId?: string }>();
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [showMockExamModal, setShowMockExamModal] = useState(false);
+  const [showDocumentsModal, setShowDocumentsModal] = useState(false);
   const [editingMockExam, setEditingMockExam] = useState<MockExamRow | null>(null);
   const mockExamDeleteFetcher = useFetcher<{ error?: string; success?: boolean; deletedMockExamId?: string; mockExamId?: string }>();
   const [deleteConfirmation, setDeleteConfirmation] = useState<DeleteConfirmation>(null);
@@ -467,10 +475,15 @@ export default function AdminCourseLessons() {
                 <p className="text-muted-foreground text-sm mt-1">{course.code} - {course.title}</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" onClick={() => setShowMockExamModal(true)}>
+                <Button variant="outline" className="hover:border-primary hover:bg-primary hover:text-primary-foreground" onClick={() => setShowMockExamModal(true)}>
                   <FileCheck2 className="h-4 w-4 mr-1.5" />Tạo bài thi thử
                 </Button>
-                <Button onClick={() => open("create")}><Plus className="h-4 w-4 mr-1.5" />Thêm bài học</Button>
+                <Button variant="outline" className="hover:border-primary hover:bg-primary hover:text-primary-foreground" onClick={() => setShowDocumentsModal(true)}>
+                  <FolderOpen className="h-4 w-4 mr-1.5" />Quản lý tài liệu
+                </Button>
+                <Button variant="outline" className="hover:border-primary hover:bg-primary hover:text-primary-foreground" onClick={() => open("create")}>
+                  <Plus className="h-4 w-4 mr-1.5" />Thêm bài học
+                </Button>
               </div>
             </div>
           </div>
@@ -647,6 +660,13 @@ export default function AdminCourseLessons() {
         onClose={close}
       />
       {showMockExamModal && <MockExamModal course={course} onClose={() => setShowMockExamModal(false)} />}
+      {showDocumentsModal && (
+        <CourseDocumentsModal
+          course={course}
+          documents={documents}
+          onClose={() => setShowDocumentsModal(false)}
+        />
+      )}
       {editingMockExam && (
         <MockExamModal
           key={`edit-mock-exam-${editingMockExam.id}`}

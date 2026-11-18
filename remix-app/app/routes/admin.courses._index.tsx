@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
-import { useLoaderData, Link, Form, useNavigation, redirect } from "react-router";
+import { useLoaderData, Link, Form, useNavigation, useFetcher, redirect } from "react-router";
 import { toast } from "sonner";
 import { requireRole } from "~/lib/session.server";
 import { getAllCourses } from "~/lib/db.server";
@@ -10,6 +10,8 @@ import { CourseStatusBadge } from "~/components/courses/course-status-badge";
 import { removeCourseDocumentAsset } from "~/lib/storage.server";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { EmptyState } from "~/components/common/empty-state";
@@ -41,6 +43,50 @@ export async function action({ request }: ActionFunctionArgs) {
     return redirect("/admin/courses");
   }
 
+  if (intent === "update-course") {
+    const courseId = String(form.get("courseId") ?? "");
+    const code = String(form.get("code") ?? "").trim();
+    const title = String(form.get("title") ?? "").trim();
+    const hskLevel = Number(form.get("hskLevel"));
+    const status = String(form.get("status") ?? "");
+    const order = Number(form.get("order"));
+
+    if (!courseId || !code || !title) {
+      return { error: "Vui lòng nhập mã và tên khóa học." };
+    }
+    if (!Number.isInteger(hskLevel) || hskLevel < 1 || hskLevel > 6) {
+      return { error: "Cấp độ HSK không hợp lệ." };
+    }
+    if (!["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status)) {
+      return { error: "Trạng thái khóa học không hợp lệ." };
+    }
+    if (!Number.isInteger(order) || order < 0) {
+      return { error: "Thứ tự phải là số nguyên không âm." };
+    }
+
+    const [course, duplicate] = await Promise.all([
+      prisma.course.findUnique({ where: { id: courseId }, select: { id: true } }),
+      prisma.course.findFirst({ where: { code, id: { not: courseId } }, select: { id: true } }),
+    ]);
+    if (!course) return { error: "Không tìm thấy khóa học. Hãy tải lại trang." };
+    if (duplicate) return { error: "Mã khóa học đã được sử dụng." };
+
+    await prisma.course.update({
+      where: { id: courseId },
+      data: {
+        code,
+        title,
+        description: String(form.get("description") ?? "").trim() || null,
+        hskLevel,
+        status: status as "DRAFT" | "PUBLISHED" | "ARCHIVED",
+        order,
+        thumbnail: String(form.get("thumbnail") ?? "").trim() || null,
+      },
+    });
+
+    return { success: true };
+  }
+
   return null;
 }
 
@@ -68,6 +114,10 @@ export default function AdminCourses() {
   const [hskFilter, setHskFilter] = useState("ALL");
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [courseToDelete, setCourseToDelete] = useState<CourseRow | null>(null);
+  const [courseToEdit, setCourseToEdit] = useState<CourseRow | null>(null);
+  const [editStatus, setEditStatus] = useState<CourseRow["status"]>("DRAFT");
+  const [editHskLevel, setEditHskLevel] = useState("1");
+  const editFetcher = useFetcher<typeof action>();
 
   const versionCounts = useMemo(() => {
     const counts: Record<CourseVersion, number> = { "2.0": 0, "3.0": 0 };
@@ -90,6 +140,27 @@ export default function AdminCourses() {
     setCourseToDelete(null);
     setModalMode(null);
   };
+
+  const openEdit = (course: CourseRow) => {
+    editFetcher.reset();
+    setCourseToEdit(course);
+    setEditStatus(course.status);
+    setEditHskLevel(String(course.hskLevel));
+  };
+
+  const closeEdit = () => {
+    if (editFetcher.state !== "idle") return;
+    setCourseToEdit(null);
+    editFetcher.reset();
+  };
+
+  useEffect(() => {
+    if (editFetcher.state !== "idle" || !editFetcher.data || !("success" in editFetcher.data)) return;
+    if (!editFetcher.data.success) return;
+    toast.success("Đã cập nhật khóa học.");
+    setCourseToEdit(null);
+    editFetcher.reset();
+  }, [editFetcher.state, editFetcher.data]);
 
   const filtered = useMemo(() =>
     courses.filter((c) => {
@@ -199,8 +270,8 @@ export default function AdminCourses() {
                             <ListOrdered className="h-4 w-4 mr-1.5" />Bài học
                           </Link>
                         </Button>
-                        <Button asChild variant="ghost" size="icon" title="Sửa khóa học">
-                          <Link to={`/admin/courses/${course.id}/edit`}><Pencil className="h-4 w-4" /></Link>
+                        <Button type="button" variant="ghost" size="icon" title="Sửa khóa học" aria-label={`Sửa khóa học ${course.title}`} onClick={() => openEdit(course)}>
+                          <Pencil className="h-4 w-4" />
                         </Button>
                         <Button type="button" variant="ghost" size="icon" title="Xóa khóa học"
                           className="hover:text-destructive hover:bg-destructive/10 transition-transform duration-200 hover:scale-110"
@@ -251,6 +322,88 @@ export default function AdminCourses() {
                 </Button>
               </div>
             </Form>
+          </div>
+        </Overlay>
+      )}
+
+      {courseToEdit && (
+        <Overlay onClose={closeEdit} closeOnEscape closeOnBackdrop className="max-w-2xl">
+          <div role="dialog" aria-modal="true" aria-labelledby="edit-course-title" className="space-y-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <h2 id="edit-course-title" className="text-xl font-semibold tracking-tight">Sửa khóa học</h2>
+                <p className="text-sm text-muted-foreground">{courseToEdit.code} · HSK {courseToEdit.hskLevel}</p>
+              </div>
+              <button
+                type="button"
+                onClick={closeEdit}
+                disabled={editFetcher.state !== "idle"}
+                aria-label="Đóng"
+                className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {editFetcher.data && "error" in editFetcher.data && (
+              <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                {editFetcher.data.error}
+              </p>
+            )}
+
+            <editFetcher.Form method="post" className="space-y-4">
+              <input type="hidden" name="intent" value="update-course" />
+              <input type="hidden" name="courseId" value={courseToEdit.id} />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-course-code">Mã khóa học</Label>
+                  <Input id="edit-course-code" name="code" defaultValue={courseToEdit.code} autoFocus required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-course-title-input">Tên khóa học</Label>
+                  <Input id="edit-course-title-input" name="title" defaultValue={courseToEdit.title} required />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-course-description">Mô tả</Label>
+                <Textarea id="edit-course-description" name="description" defaultValue={courseToEdit.description ?? ""} rows={3} />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-course-hsk">Cấp độ HSK</Label>
+                  <Select value={editHskLevel} onValueChange={setEditHskLevel} name="hskLevel">
+                    <SelectTrigger id="edit-course-hsk"><SelectValue /></SelectTrigger>
+                    <SelectContent>{[1, 2, 3, 4, 5, 6].map((level) => <SelectItem key={level} value={String(level)}>HSK {level}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-course-status">Trạng thái</Label>
+                  <Select value={editStatus} onValueChange={(value) => setEditStatus(value as CourseRow["status"])} name="status">
+                    <SelectTrigger id="edit-course-status"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="DRAFT">Nháp</SelectItem>
+                      <SelectItem value="PUBLISHED">Đã xuất bản</SelectItem>
+                      <SelectItem value="ARCHIVED">Đã lưu trữ</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-course-order">Thứ tự</Label>
+                  <Input id="edit-course-order" name="order" type="number" min={0} defaultValue={courseToEdit.order} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-course-thumbnail">URL ảnh đại diện (tùy chọn)</Label>
+                <Input id="edit-course-thumbnail" name="thumbnail" defaultValue={courseToEdit.thumbnail ?? ""} />
+              </div>
+              <div className="flex flex-col-reverse justify-end gap-2 border-t pt-4 sm:flex-row">
+                <Button type="button" variant="outline" onClick={closeEdit} disabled={editFetcher.state !== "idle"}>Hủy</Button>
+                <Button type="submit" disabled={editFetcher.state !== "idle"}>
+                  {editFetcher.state !== "idle" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Pencil className="mr-1.5 h-4 w-4" />}
+                  {editFetcher.state !== "idle" ? "Đang lưu..." : "Lưu thay đổi"}
+                </Button>
+              </div>
+            </editFetcher.Form>
           </div>
         </Overlay>
       )}
