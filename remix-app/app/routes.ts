@@ -96,6 +96,7 @@ export default [
 
   // Student
   route("student", "routes/student._index.tsx"),
+  route("student/assessment-drafts", "routes/student.assessment-drafts.tsx"),
   route("student/shen-bi", "routes/student.shen-bi.tsx"),
   route("student/schedule", "routes/student.schedule.tsx"),
   route("student/classes/:classId/recordings", "routes/student.classes.$classId.recordings.tsx"),
