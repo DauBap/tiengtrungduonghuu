@@ -221,7 +221,19 @@ function normalizeSearchText(value: string) {
     .trim();
 }
 
-function getDefaultReviewSessions(hskLevel: number): { midterm: number; final: number } | null {
+function getDefaultReviewSessions(
+  hskLevel: number,
+  courseCode: string,
+): { midterm: number; final: number | null } | null {
+  if (courseCode.endsWith("-3.0")) {
+    switch (hskLevel) {
+      case 1: return { midterm: 24, final: null };
+      case 2: return { midterm: 20, final: null };
+      case 3: return { midterm: 32, final: null };
+      default: return null;
+    }
+  }
+
   switch (hskLevel) {
     case 1: return { midterm: 12, final: 24 };
     case 2: return { midterm: 10, final: 20 };
@@ -561,9 +573,9 @@ function ClassFormModal({
               emptyMessage="Không tìm thấy khóa học phù hợp."
               onValueChange={(courseId) => {
                 const course = courses.find((item) => item.id === courseId);
-                const defaults = course ? getDefaultReviewSessions(course.hskLevel) : null;
+                const defaults = course ? getDefaultReviewSessions(course.hskLevel, course.code) : null;
                 setMidtermReviewSession(defaults ? String(defaults.midterm) : "");
-                setFinalReviewSession(defaults ? String(defaults.final) : "");
+                setFinalReviewSession(defaults?.final == null ? "" : String(defaults.final));
               }}
             />
           </div>
