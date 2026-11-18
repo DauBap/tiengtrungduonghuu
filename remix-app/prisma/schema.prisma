@@ -39,6 +39,7 @@ model User {
   courseStudySessions                CourseStudySession[]
   pronunciationAssessments           PronunciationAssessment[]
   courseReviewAttempts               CourseReviewAttempt[]
+  assessmentDrafts                   AssessmentDraft[]
   gradedCourseReviewAttempts         CourseReviewAttempt[]        @relation("CourseReviewGradedBy")
   lessonTabProgresses                LessonTabProgress[]
   lessonTabAttempts                  LessonTabAttempt[]
@@ -173,6 +174,20 @@ model CourseReviewAttempt {
   @@index([reviewSetId, userId, completedAt])
   @@index([reviewSetId, status, completedAt])
   @@index([userId, completedAt])
+}
+
+model AssessmentDraft {
+  id        String   @id @default(cuid())
+  userId    String
+  scope     String
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scope])
+  @@index([userId, updatedAt])
 }
 
 enum CourseStatus {

@@ -6,6 +6,7 @@ import { parseFlashcardConfig, parseListeningConfig, type LearningBlockType } fr
 import { LessonTabEmpty } from "../lesson-tab-empty";
 import type { ProgressStatus } from "~/types/progress";
 import type { ListeningAnswerResult } from "./listening-block";
+import { getAssessmentDraftScopeKey } from "~/lib/assessment-drafts";
 
 /** Block đã được loader resolve sẵn từ vựng — component không tự query */
 export interface ResolvedBlock {
@@ -65,12 +66,14 @@ export function BlockRenderer({
   status,
   courseId,
   lessonId,
+  assessmentDrafts = {},
   previewOnly = false,
 }: {
   block: ResolvedBlock;
   status: ProgressStatus;
   courseId: string;
   lessonId: string;
+  assessmentDrafts?: Record<string, unknown>;
   previewOnly?: boolean;
 }) {
   const fetcher = useFetcher<{
@@ -163,6 +166,13 @@ export function BlockRenderer({
       .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
 
     if (items.length === 0) return <LessonTabEmpty tab="LISTENING" />;
+    const draftScope = {
+      kind: "lesson-tab" as const,
+      lessonId,
+      tab: "LISTENING" as const,
+      activityId: block.id,
+    };
+    const draftKey = getAssessmentDraftScopeKey(draftScope);
 
     return (
       <BlockShell {...shellProps} showSettings>
@@ -181,6 +191,9 @@ export function BlockRenderer({
             : null}
           submissionError={fetcher.data?.listeningError ?? null}
           onComplete={submitListeningAttempt}
+          draftScope={draftScope}
+          initialDraftData={assessmentDrafts[draftKey]}
+          hasSavedDraft={draftKey in assessmentDrafts}
           previewOnly={previewOnly}
         />
       </BlockShell>

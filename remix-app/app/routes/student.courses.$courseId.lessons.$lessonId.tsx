@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useFetcher, Link, redirect } from "react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import { requireEnrolledLesson } from "~/lib/student-course-access.server";
 import {
@@ -31,7 +31,11 @@ import {
   type GrammarSectionData,
 } from "~/components/lessons/grammar-section";
 import { WorkbookListeningTest } from "~/components/lessons/workbook-listening-test";
-import { VocabularyTest } from "~/components/lessons/vocabulary-test";
+import {
+  VocabularyTest,
+  parseVocabularyTestDraft,
+  type VocabularyTestDraft,
+} from "~/components/lessons/vocabulary-test";
 import { PhoneticsPractice, type PhoneticsSectionScore } from "~/components/lessons/phonetics-practice";
 import { TranslationPractice } from "~/components/lessons/translation-practice";
 import { Button } from "~/components/ui/button";
@@ -70,6 +74,14 @@ const LESSON_AUDIO_PLAYBACK_RATES = [0.8, 1, 1.5] as const;
 type LessonAudioPlaybackRate = (typeof LESSON_AUDIO_PLAYBACK_RATES)[number];
 import { getVocabularyAudioUrl } from "~/lib/vocabulary-audio";
 import { notifyAssignedTeacherOfPendingWork } from "~/lib/grading-notifications.server";
+import {
+  getAssessmentDraftScopeKey,
+  type AssessmentDraftData,
+  type AssessmentDraftScope,
+} from "~/lib/assessment-drafts";
+import { deleteAssessmentDraft } from "~/lib/assessment-drafts.server";
+import { useAssessmentDraft } from "~/hooks/use-assessment-draft";
+import { AssessmentDraftStatus } from "~/components/lessons/assessment-draft-status";
 
 const FEEDBACK_TAB_LABELS: Record<string, string> = {
   FLASHCARD: "Flashcard",
@@ -378,6 +390,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     phoneticsAttempts,
     translationQuestions,
     latestTranslationSubmission,
+    lessonTabDraftRows,
   ] = await Promise.all([
     prisma.lesson.count({
       where: { courseId: lesson.courseId, order: { lte: lesson.order } },
@@ -464,6 +477,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       where: { studentId: user.id, lessonId: lesson.id },
       orderBy: { submittedAt: "desc" },
       include: { teacher: { select: { name: true } } },
+    }),
+    prisma.assessmentDraft.findMany({
+      where: { userId: user.id, scope: { startsWith: `lesson-tab:${lesson.id}:` } },
+      select: { scope: true, data: true },
     }),
   ]);
   const reviewableTabs = ["VOCABULARY_TEST", "PHONETICS", "GRAMMAR", "WORKBOOK"] as const;
@@ -695,6 +712,58 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   };
   const passScore = lesson.test?.passScore ?? 50;
   const timeLimitMinutes = lesson.test ? lesson.test.timeLimitMinutes : 30;
+  const lessonTabDraftScopes: AssessmentDraftScope[] = [];
+  if (timeLimitMinutes === null) {
+    lessonTabDraftScopes.push({ kind: "lesson-tab", lessonId: lesson.id, tab: "VOCABULARY_TEST" });
+  }
+  for (const section of studentLesson.grammarSections) {
+    const questionTypes = new Set(section.questions.map((question) => question.type));
+    for (const tab of questionTypes) {
+      lessonTabDraftScopes.push({
+        kind: "lesson-tab",
+        lessonId: lesson.id,
+        tab: "GRAMMAR",
+        activityId: `${section.id}:${tab}`,
+      });
+    }
+  }
+  for (const block of blocks) {
+    if (block.type === "LISTENING" && parseListeningConfig(block.config).ok) {
+      lessonTabDraftScopes.push({
+        kind: "lesson-tab",
+        lessonId: lesson.id,
+        tab: "LISTENING",
+        activityId: block.id,
+      });
+    } else if (block.type === "WORKBOOK") {
+      const parsed = parseWorkbookConfig(block.config);
+      if (parsed.ok && parsed.data.timeLimit === 0) {
+        lessonTabDraftScopes.push({
+          kind: "lesson-tab",
+          lessonId: lesson.id,
+          tab: "WORKBOOK",
+          activityId: block.id,
+        });
+      }
+    }
+  }
+  for (const section of phonetics?.config.sections ?? []) {
+    lessonTabDraftScopes.push({
+      kind: "lesson-tab",
+      lessonId: lesson.id,
+      tab: "PHONETICS",
+      activityId: String(section.id),
+    });
+  }
+  if (translationQuestions.length > 0) {
+    lessonTabDraftScopes.push({ kind: "lesson-tab", lessonId: lesson.id, tab: "TRANSLATION" });
+  }
+  const validDraftKeys = new Set(lessonTabDraftScopes.map(getAssessmentDraftScopeKey));
+  const assessmentDrafts = Object.fromEntries(
+    lessonTabDraftRows
+      .filter((draft) => validDraftKeys.has(draft.scope))
+      .map((draft) => [draft.scope, draft.data]),
+  );
   const teacherTabComments = teacherTabFeedback.map((item) => ({
     tab: item.tab,
     feedback: item.feedback[0]
@@ -737,6 +806,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       workbook: latestWorkbookAttempt,
     },
     workbookSubmissions,
+    assessmentDrafts,
     pronunciationAssessments: pronunciationAssessments
       .filter((assessment) => assessment.scriptText?.trim() && assessment.transcript?.trim())
       .map((assessment) => ({ ...assessment, createdAt: assessment.createdAt.toISOString() })),
@@ -916,6 +986,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
       passed: null,
       completedAt: new Date(),
       details: { submissionId: submission.id, status: "SUBMITTED", totalQuestions: questions.length },
+    });
+    await deleteAssessmentDraft(user.id, {
+      kind: "lesson-tab",
+      lessonId: params.lessonId!,
+      tab: "TRANSLATION",
     });
     await notifyAssignedTeacherOfPendingWork({
       studentId: user.id,
@@ -1338,6 +1413,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
       });
       savedAttempts.push(savedAttempt);
     }
+    await deleteAssessmentDraft(user.id, {
+      kind: "lesson-tab",
+      lessonId: params.lessonId!,
+      tab: "GRAMMAR",
+      activityId: `${sectionId}:${questionType}`,
+    });
     if (reviewPending) {
       for (const savedAttempt of savedAttempts) {
         const details = isRecord(savedAttempt.attempt.details) ? savedAttempt.attempt.details : {};
@@ -1476,6 +1557,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
     });
     await markBlockCompleted(user.id, block.id);
     await syncLearningCompleted(user.id, params.lessonId!);
+    await deleteAssessmentDraft(user.id, {
+      kind: "lesson-tab",
+      lessonId: params.lessonId!,
+      tab: "LISTENING",
+      activityId: block.id,
+    });
 
     return {
       success: true as const,
@@ -1568,6 +1655,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
       },
     });
 
+    await deleteAssessmentDraft(user.id, {
+      kind: "lesson-tab",
+      lessonId: params.lessonId!,
+      tab: "PHONETICS",
+      activityId: String(sectionId),
+    });
     return {
       success: true as const,
       intent: "submit-phonetics-attempt" as const,
@@ -1718,6 +1811,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
         results: savedResults,
       },
     });
+    await deleteAssessmentDraft(user.id, {
+      kind: "lesson-tab",
+      lessonId: params.lessonId!,
+      tab: "WORKBOOK",
+      activityId: block.id,
+    });
     if (pendingReviewCount > 0) {
       await notifyAssignedTeacherOfPendingWork({
         studentId: user.id,
@@ -1793,6 +1892,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
       },
     });
 
+    await deleteAssessmentDraft(user.id, {
+      kind: "lesson-tab",
+      lessonId,
+      tab: "VOCABULARY_TEST",
+    });
     return { testResult };
   }
 
@@ -1866,7 +1970,7 @@ function AnswerReviewDetails({ groups }: { groups: AnswerReviewGroup[] }) {
 }
 
 export default function LessonDetail() {
-  const { user, lesson, lessonNumber, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, lessonTabProgress, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewGroups, reviewFocus, phonetics, phoneticsSectionScores, workbookSubmissions, translationQuestions, latestTranslationSubmission } = useLoaderData<typeof loader>();
+  const { user, lesson, lessonNumber, blocks, blockStatuses, vocabularyQuestionSets, passScore, timeLimitMinutes, lessonStatus, teacherTabComments, lessonTabProgress, pronunciationAssessments, grammarAttemptsBySection, latestTabScores, answerReviewGroups, reviewFocus, phonetics, phoneticsSectionScores, workbookSubmissions, translationQuestions, latestTranslationSubmission, assessmentDrafts } = useLoaderData<typeof loader>();
   const settings = useAppSettings();
   const testFetcher = useFetcher<{ testResult?: { percentage: number; earnedPoints: number; totalPoints: number; correctCount: number; blankCount: number; passed: boolean; passScore: number; questionCount: number; results: { id: string; prompt: string; lessonPinyin: string; typeLabel: string; points: number; correct: boolean; given: string; correctAnswer: string; hint: string | null }[] }; testError?: string; error?: string }>();
   const workbookFetcher = useFetcher<{
@@ -2119,6 +2223,27 @@ export default function LessonDetail() {
   // Khi nộp bài xong, tự giữ kết quả trong fetcher.data
   const testResult = testFetcher.data && "testResult" in testFetcher.data ? testFetcher.data.testResult : null;
   const testError = testFetcher.data && "testError" in testFetcher.data ? testFetcher.data.testError : null;
+  const vocabularyDraftScope: AssessmentDraftScope = {
+    kind: "lesson-tab",
+    lessonId: lesson.id,
+    tab: "VOCABULARY_TEST",
+  };
+  const vocabularyDraftKey = getAssessmentDraftScopeKey(vocabularyDraftScope);
+  const initialVocabularyDraft = parseVocabularyTestDraft(assessmentDrafts[vocabularyDraftKey]);
+  const vocabularyDraft = useAssessmentDraft<AssessmentDraftData>({
+    scope: vocabularyDraftScope,
+    initialData: initialVocabularyDraft ?? {},
+    initialSaved: initialVocabularyDraft !== null,
+    enabled: timeLimitMinutes === null && !testResult,
+  });
+  const saveVocabularyDraft = useCallback(
+    (draft: VocabularyTestDraft) => vocabularyDraft.update(draft),
+    [vocabularyDraft.update],
+  );
+  const clearVocabularyDraft = useCallback(
+    () => vocabularyDraft.clear(),
+    [vocabularyDraft.clear],
+  );
   const pronunciationSaveError = pronunciationFetcher.data?.error ?? null;
   const isSubmittingPronunciation = pronunciationFetcher.state !== "idle";
   const isTranscribingPronunciation = transcriptionFetcher.state !== "idle";
@@ -2149,6 +2274,8 @@ export default function LessonDetail() {
       return (
         <PhoneticsPractice
           config={phonetics.config as PhoneticsConfig}
+          lessonId={lesson.id}
+          assessmentDrafts={assessmentDrafts}
           savedScores={phoneticsSectionScores}
           reviewGroups={answerReviewGroups.PHONETICS ?? []}
           submissionResult={
@@ -2221,9 +2348,11 @@ export default function LessonDetail() {
                 key={section.id}
                 section={section}
                 number={index + 1}
+                lessonId={lesson.id}
                 latestAttempts={latestAttempts}
                 answerReviewGroups={reviewGroups}
                 initialReviewQuestionType={showFillReview ? "FILL" : undefined}
+                assessmentDrafts={assessmentDrafts}
               />
             );
           })}
@@ -2232,12 +2361,21 @@ export default function LessonDetail() {
     }
 
     if (activeTab === "TRANSLATION") {
+      const translationScope: AssessmentDraftScope = {
+        kind: "lesson-tab",
+        lessonId: lesson.id,
+        tab: "TRANSLATION",
+      };
+      const translationDraftKey = getAssessmentDraftScopeKey(translationScope);
       return (
         <TranslationPractice
           questions={translationQuestions}
           submission={latestTranslationSubmission}
           error={translationFetcher.data?.translationError ?? null}
           isSaving={translationFetcher.state !== "idle"}
+          draftScope={translationScope}
+          initialDraftData={assessmentDrafts[translationDraftKey]}
+          hasSavedDraft={translationDraftKey in assessmentDrafts}
         />
       );
     }
@@ -2247,11 +2385,26 @@ export default function LessonDetail() {
       const workbookBlock = blocks.find((b) => b.type === "WORKBOOK");
       if (!workbookBlock) return <LessonTabEmpty tab="WORKBOOK" />;
       if (!workbookBlock.config) return <LessonTabEmpty tab="WORKBOOK" />;
+      const workbookConfig = workbookBlock.config as WorkbookConfig;
+      const workbookDraftScope: AssessmentDraftScope | null = workbookConfig.timeLimit === 0
+        ? {
+            kind: "lesson-tab",
+            lessonId: lesson.id,
+            tab: "WORKBOOK",
+            activityId: workbookBlock.id,
+          }
+        : null;
+      const workbookDraftKey = workbookDraftScope
+        ? getAssessmentDraftScopeKey(workbookDraftScope)
+        : null;
       return (
         <WorkbookListeningTest
-          config={workbookBlock.config as WorkbookConfig}
+          config={workbookConfig}
           blockTitle={workbookBlock.title}
           isSaving={workbookFetcher.state !== "idle"}
+          draftScope={workbookDraftScope}
+          initialDraftData={workbookDraftKey ? assessmentDrafts[workbookDraftKey] : undefined}
+          hasSavedDraft={Boolean(workbookDraftKey && workbookDraftKey in assessmentDrafts)}
           savedResult={workbookFetcher.state !== "idle"
             ? null
             : isWorkbookSubmissionResponse(workbookFetcher.data)
@@ -2382,10 +2535,19 @@ export default function LessonDetail() {
               )}
               <testFetcher.Form method="post">
                 <input type="hidden" name="intent" value="submit-test" />
+                <AssessmentDraftStatus
+                  isSaving={vocabularyDraft.isSaving}
+                  hasSaved={vocabularyDraft.hasSaved}
+                  error={vocabularyDraft.error}
+                />
                 <VocabularyTest
                   questionSets={vocabularyQuestionSets}
                   timeLimitMinutes={timeLimitMinutes}
                   isSubmitting={isSubmittingTest}
+                  initialDraft={initialVocabularyDraft}
+                  onDraftChange={saveVocabularyDraft}
+                  onClearDraft={clearVocabularyDraft}
+                  draftSaving={vocabularyDraft.isSaving}
                 />
               </testFetcher.Form>
             </CardContent>
@@ -3363,6 +3525,7 @@ export default function LessonDetail() {
       status={blockStatuses[blockIndex]}
       courseId={lesson.courseId}
       lessonId={lesson.id}
+      assessmentDrafts={assessmentDrafts}
     />;
   };
 

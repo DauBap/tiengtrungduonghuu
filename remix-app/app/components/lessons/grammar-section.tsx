@@ -5,6 +5,7 @@ import { GRAMMAR_FIELDS, type GrammarFieldKey, type GrammarQuestionType } from "
 import { cn } from "~/lib/utils";
 import { BookOpen, CheckCircle2, ChevronDown, Languages, ListChecks, ListOrdered, X } from "lucide-react";
 import { Overlay } from "~/components/common/overlay";
+import { getAssessmentDraftScopeKey, type AssessmentDraftScope } from "~/lib/assessment-drafts";
 
 const PRACTICE_TABS: Array<{
   type: GrammarQuestionType;
@@ -63,13 +64,17 @@ export function GrammarSection({
   answerReviewGroups = [],
   initialReviewQuestionType,
   previewOnly = false,
+  lessonId,
+  assessmentDrafts = {},
 }: {
   section: GrammarSectionData;
   number: number;
+  lessonId: string;
   latestAttempts: Partial<Record<GrammarQuestionType, GrammarPracticeSummary>>;
   answerReviewGroups?: GrammarAnswerReviewGroup[];
   initialReviewQuestionType?: GrammarQuestionType;
   previewOnly?: boolean;
+  assessmentDrafts?: Record<string, unknown>;
 }) {
   const [practicing, setPracticing] = useState(false);
   const [activeType, setActiveType] = useState<GrammarQuestionType>("SINGLE_CHOICE");
@@ -369,6 +374,13 @@ export function GrammarSection({
               {availablePracticeTabs.map((tab) => {
                 const tabId = `grammar-practice-tab-${section.id}-${tab.type}`;
                 const questions = questionsByType[tab.type];
+                const draftScope: AssessmentDraftScope = {
+                  kind: "lesson-tab",
+                  lessonId,
+                  tab: "GRAMMAR",
+                  activityId: `${section.id}:${tab.type}`,
+                };
+                const draftKey = getAssessmentDraftScopeKey(draftScope);
                 return (
                   <section
                     key={tab.type}
@@ -382,6 +394,10 @@ export function GrammarSection({
                         sectionId={section.id}
                         fullLessonPractice={section.fullLessonPractice}
                         previewOnly={previewOnly}
+                        draftScope={draftScope}
+                        initialDraftData={assessmentDrafts[draftKey]}
+                        hasSavedDraft={draftKey in assessmentDrafts}
+                        draftEnabled={!isPracticeLocked(tab.type)}
                       />
                   </section>
                 );

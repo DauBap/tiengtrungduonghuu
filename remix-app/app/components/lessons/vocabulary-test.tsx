@@ -5,15 +5,59 @@ import type { VocabularyTestQuestion } from "~/lib/vocabulary-test";
 import { ChevronLeft, ChevronRight, RotateCcw, Send, Timer } from "lucide-react";
 import { usePinyinVisibility } from "~/components/lessons/lesson-pinyin-visibility";
 
-type QuizDirection = "zh2vi" | "vi2zh" | "mixed";
+export type QuizDirection = "zh2vi" | "vi2zh" | "mixed";
 type QuestionDirection = Exclude<QuizDirection, "mixed">;
-type DisplayMode = "paged" | "scroll";
+export type DisplayMode = "paged" | "scroll";
 
-interface ActiveQuestion extends VocabularyTestQuestion {
+export interface ActiveQuestion extends VocabularyTestQuestion {
   direction: QuestionDirection;
   prompt: string;
   promptDetail: string | null;
   options: string[];
+}
+
+export interface VocabularyTestDraft {
+  direction: QuizDirection;
+  displayMode: DisplayMode;
+  started: boolean;
+  runQuestions: { id: string; direction: QuestionDirection }[];
+  index: number;
+  pageIndex: number;
+  answers: Record<string, string>;
+}
+
+export function parseVocabularyTestDraft(value: unknown): VocabularyTestDraft | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  if (
+    record.started !== true
+    || !["zh2vi", "vi2zh", "mixed"].includes(String(record.direction))
+    || !["paged", "scroll"].includes(String(record.displayMode))
+    || !Array.isArray(record.runQuestions)
+    || typeof record.answers !== "object"
+    || record.answers === null
+    || Array.isArray(record.answers)
+  ) return null;
+  const runQuestions = record.runQuestions.flatMap((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const question = item as Record<string, unknown>;
+    if (typeof question.id !== "string" || (question.direction !== "zh2vi" && question.direction !== "vi2zh")) return [];
+    const direction: QuestionDirection = question.direction;
+    return [{ id: question.id, direction }];
+  });
+  const answers = Object.fromEntries(
+    Object.entries(record.answers).filter((entry): entry is [string, string] => typeof entry[1] === "string"),
+  );
+  if (runQuestions.length === 0) return null;
+  return {
+    direction: record.direction as QuizDirection,
+    displayMode: record.displayMode as DisplayMode,
+    started: true,
+    runQuestions,
+    index: Number.isInteger(record.index) ? Number(record.index) : 0,
+    pageIndex: Number.isInteger(record.pageIndex) ? Number(record.pageIndex) : 0,
+    answers,
+  };
 }
 
 const DIRECTIONS: Array<{ id: QuizDirection; label: string }> = [
@@ -34,6 +78,10 @@ export function VocabularyTest({
   previewOnly = false,
   fixedDirection,
   pageSize,
+  initialDraft,
+  onDraftChange,
+  onClearDraft,
+  draftSaving = false,
 }: {
   questionSets: { sameWordType: VocabularyTestQuestion[]; random: VocabularyTestQuestion[] };
   timeLimitMinutes: number | null;
@@ -41,21 +89,69 @@ export function VocabularyTest({
   previewOnly?: boolean;
   fixedDirection?: QuestionDirection;
   pageSize?: number;
+  initialDraft?: VocabularyTestDraft | null;
+  onDraftChange?: (draft: VocabularyTestDraft) => void;
+  onClearDraft?: () => void;
+  draftSaving?: boolean;
 }) {
   const showPinyin = usePinyinVisibility();
   const questions = questionSets.sameWordType;
-  const [direction, setDirection] = useState<QuizDirection>(fixedDirection ?? "mixed");
-  const [displayMode, setDisplayMode] = useState<DisplayMode>("paged");
-  const [startedAt, setStartedAt] = useState<number | null>(null);
-  const [runQuestions, setRunQuestions] = useState<ActiveQuestion[]>([]);
-  const [index, setIndex] = useState(0);
-  const [pageIndex, setPageIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [direction, setDirection] = useState<QuizDirection>(initialDraft?.direction ?? fixedDirection ?? "mixed");
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(initialDraft?.displayMode ?? "paged");
+  const [startedAt, setStartedAt] = useState<number | null>(() =>
+    initialDraft?.started && timeLimitMinutes === null ? Date.now() : null
+  );
+  const [runQuestions, setRunQuestions] = useState<ActiveQuestion[]>(() => {
+    if (!initialDraft?.started || timeLimitMinutes !== null) return [];
+    const questionsById = new Map(questions.map((question) => [question.id, question]));
+    return initialDraft.runQuestions.flatMap(({ id, direction: questionDirection }) => {
+      const question = questionsById.get(id);
+      if (!question) return [];
+      return [{
+        ...question,
+        direction: questionDirection,
+        prompt: questionDirection === "zh2vi" ? question.chinese : question.translation,
+        promptDetail: questionDirection === "zh2vi" ? question.pinyin : null,
+        options: questionDirection === "zh2vi" ? question.translationOptions : question.chineseOptions,
+      }];
+    });
+  });
+  const [index, setIndex] = useState(() =>
+    Math.max(0, Math.min(initialDraft?.index ?? 0, Math.max(questions.length - 1, 0)))
+  );
+  const [pageIndex, setPageIndex] = useState(() => Math.max(0, initialDraft?.pageIndex ?? 0));
+  const [answers, setAnswers] = useState<Record<string, string>>(() => {
+    if (!initialDraft?.answers || timeLimitMinutes !== null) return {};
+    const validQuestionIds = new Set(questions.map((question) => question.id));
+    return Object.fromEntries(
+      Object.entries(initialDraft.answers).filter(([questionId, answer]) =>
+        validQuestionIds.has(questionId) && typeof answer === "string"
+      ),
+    );
+  });
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
-  const started = startedAt !== null;
+  const didMount = useRef(false);
+  const started = startedAt !== null && runQuestions.length > 0;
   const effectiveDirection = fixedDirection ?? direction;
   const answeredCount = runQuestions.filter((item) => Boolean(answers[item.id])).length;
+
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      return;
+    }
+    if (startedAt === null || timeLimitMinutes !== null || runQuestions.length === 0) return;
+    onDraftChange?.({
+      direction,
+      displayMode,
+      started: true,
+      runQuestions: runQuestions.map(({ id, direction: questionDirection }) => ({ id, direction: questionDirection })),
+      index,
+      pageIndex,
+      answers,
+    });
+  }, [answers, direction, displayMode, index, onDraftChange, pageIndex, runQuestions, startedAt, timeLimitMinutes]);
 
   useEffect(() => {
     if (startedAt === null || timeLimitMinutes === null) return;
@@ -97,6 +193,7 @@ export function VocabularyTest({
   };
 
   const restart = () => {
+    onClearDraft?.();
     setRunQuestions([]);
     setAnswers({});
     setIndex(0);
@@ -348,10 +445,17 @@ export function VocabularyTest({
       )}
 
       <div className="flex flex-wrap justify-between gap-2 border-t pt-3">
-        <Button type="button" variant="outline" size="sm" onClick={restart} disabled={isSubmitting}>
+        <Button type="button" variant="outline" size="sm" onClick={restart} disabled={isSubmitting || draftSaving}>
           <RotateCcw className="mr-1.5 h-4 w-4" />Cài đặt lại
         </Button>
-        <Button ref={submitRef} type="submit" name="intent" value="submit-test" size="sm" disabled={isSubmitting}>
+        <Button
+          ref={submitRef}
+          type="submit"
+          name="intent"
+          value="submit-test"
+          size="sm"
+          disabled={isSubmitting || draftSaving}
+        >
           <Send className="mr-1.5 h-4 w-4" />Nộp bài
         </Button>
       </div>

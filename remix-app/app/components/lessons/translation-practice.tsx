@@ -4,6 +4,9 @@ import { useState, type FormEvent } from "react";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { Badge } from "~/components/ui/badge";
+import type { AssessmentDraftScope } from "~/lib/assessment-drafts";
+import { useAssessmentDraft } from "~/hooks/use-assessment-draft";
+import { AssessmentDraftStatus } from "~/components/lessons/assessment-draft-status";
 
 export interface TranslationQuestion {
   id: string;
@@ -34,11 +37,17 @@ export function TranslationPractice({
   submission,
   error,
   isSaving,
+  draftScope = null,
+  initialDraftData,
+  hasSavedDraft = false,
 }: {
   questions: TranslationQuestion[];
   submission: TranslationSubmission | null;
   error?: string | null;
   isSaving: boolean;
+  draftScope?: AssessmentDraftScope | null;
+  initialDraftData?: unknown;
+  hasSavedDraft?: boolean;
 }) {
   const fetcher = useFetcher();
   const [missingQuestionIds, setMissingQuestionIds] = useState<string[]>([]);
@@ -56,6 +65,25 @@ export function TranslationPractice({
   const submissionAnswersByQuestion = new Map(answers.map((item) => [item.questionId, item]));
   const commentsByQuestion = new Map<string, string>();
   answers.forEach((item) => commentsByQuestion.set(item.questionId, item.teacherComment ?? ""));
+  const canDraft = !submission || submission.status === "GRADED";
+  const savedAnswers = initialDraftData && typeof initialDraftData === "object" && !Array.isArray(initialDraftData)
+    ? (initialDraftData as Record<string, unknown>).answers
+    : null;
+  const initialAnswers = Object.fromEntries(questions.map((question) => {
+    const savedAnswer = savedAnswers && typeof savedAnswers === "object" && !Array.isArray(savedAnswers)
+      ? (savedAnswers as Record<string, unknown>)[question.id]
+      : undefined;
+    return [question.id, canDraft && typeof savedAnswer === "string"
+      ? savedAnswer
+      : answersByQuestion.get(question.id) ?? ""];
+  }));
+  const [draftAnswers, setDraftAnswers] = useState<Record<string, string>>(initialAnswers);
+  const draft = useAssessmentDraft<{ answers: Record<string, string> }>({
+    scope: draftScope,
+    initialData: { answers: initialAnswers },
+    initialSaved: hasSavedDraft && canDraft,
+    enabled: canDraft,
+  });
 
   if (questions.length === 0) {
     return (
@@ -113,6 +141,13 @@ export function TranslationPractice({
 
       <fetcher.Form method="post" className="space-y-4" onSubmit={handleSubmit} noValidate>
         <input type="hidden" name="intent" value="submit-translation" />
+        {canDraft && (
+          <AssessmentDraftStatus
+            isSaving={draft.isSaving}
+            hasSaved={draft.hasSaved}
+            error={draft.error}
+          />
+        )}
         {validationMessage && (
           <div
             role="alert"
@@ -137,9 +172,12 @@ export function TranslationPractice({
             </div>
             <Textarea
               name={`translation-${question.id}`}
-              defaultValue={submission ? answersByQuestion.get(question.id) ?? "" : ""}
+              value={draftAnswers[question.id] ?? ""}
               readOnly={submission?.status === "SUBMITTED" || submission?.status === "GRADED"}
               onChange={(event) => {
+                const nextAnswers = { ...draftAnswers, [question.id]: event.target.value };
+                setDraftAnswers(nextAnswers);
+                draft.update({ answers: nextAnswers });
                 if (event.currentTarget.value.trim()) {
                   const remainingIds = missingQuestionIds.filter((id) => id !== question.id);
                   setMissingQuestionIds(remainingIds);
@@ -193,9 +231,15 @@ export function TranslationPractice({
         {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
         {!submission || submission.status === "GRADED" ? (
-          <Button type="submit" disabled={isSaving || fetcher.state !== "idle"} className="w-full sm:w-auto">
+          <Button
+            type="submit"
+            disabled={isSaving || fetcher.state !== "idle" || draft.isSaving}
+            className="w-full sm:w-auto"
+          >
             <Send className="mr-2 h-4 w-4" />
-            {isSaving || fetcher.state !== "idle" ? "Đang nộp..." : "Nộp bài luyện dịch"}
+            {isSaving || fetcher.state !== "idle"
+              ? "Đang nộp..."
+              : draft.isSaving ? "Đang lưu câu trả lời..." : "Nộp bài luyện dịch"}
           </Button>
         ) : (
           <div className="flex items-center gap-2 text-sm font-medium text-amber-700">

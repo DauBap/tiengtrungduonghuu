@@ -6,9 +6,13 @@ import { prisma } from "~/lib/prisma.server";
 import { getLessonProgress, upsertLessonProgress, computeLessonStatus } from "~/lib/db.server";
 import { gradeLessonTest, parseTestResponses } from "~/lib/lesson-test";
 import { GRAMMAR_QUESTION_META, grammarAnswerText, shuffledTokens } from "~/lib/grammar";
+import { getAssessmentDraft } from "~/lib/assessment-drafts.server";
+import type { LessonTestDraft, LessonTestAnswer } from "~/components/lessons/lesson-test";
+import { useAssessmentDraft } from "~/hooks/use-assessment-draft";
 import { AppShell } from "~/components/layout/app-shell";
 import { LockedContent } from "~/components/lessons/locked-content";
 import { LessonTest, type LessonTestQuestion } from "~/components/lessons/lesson-test";
+import { AssessmentDraftStatus } from "~/components/lessons/assessment-draft-status";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Progress } from "~/components/ui/progress";
@@ -34,7 +38,12 @@ interface QuestionResult {
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
   const lesson = await requireEnrolledLesson(user.id, params.courseId!, params.lessonId!);
-  const progress = await getLessonProgress(user.id, lesson.id);
+  const canSaveDraft = lesson.test?.timeLimitMinutes === null;
+  const draftScope = { kind: "lesson-test", lessonId: lesson.id } as const;
+  const [progress, savedDraft] = await Promise.all([
+    getLessonProgress(user.id, lesson.id),
+    canSaveDraft ? getAssessmentDraft(user.id, draftScope) : Promise.resolve(null),
+  ]);
   const lessonStatus = computeLessonStatus(progress);
 
   // `select` tường minh, KHÔNG `include: { questions: true }` — `answer` và
@@ -54,7 +63,40 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     options: q.type === "ARRANGE" ? shuffledTokens(q.options) : q.options,
   }));
 
-  return { user, lesson, lessonStatus, questions, passScore: lesson.test?.passScore ?? 50 };
+  const questionIds = new Set(questions.map((question) => question.id));
+  const rawData = savedDraft?.data;
+  const rawAnswers = typeof rawData === "object" && rawData !== null && !Array.isArray(rawData)
+    ? rawData.answers
+    : null;
+  const answers: Record<string, LessonTestAnswer> = {};
+  if (typeof rawAnswers === "object" && rawAnswers !== null && !Array.isArray(rawAnswers)) {
+    for (const [questionId, rawAnswer] of Object.entries(rawAnswers)) {
+      if (!questionIds.has(questionId) || typeof rawAnswer !== "object" || rawAnswer === null || Array.isArray(rawAnswer)) continue;
+      const answer = rawAnswer as Record<string, unknown>;
+      answers[questionId] = {
+        text: typeof answer.text === "string" ? answer.text : "",
+        picked: Array.isArray(answer.picked)
+          ? answer.picked.filter((token): token is string => typeof token === "string")
+          : [],
+      };
+    }
+  }
+  const currentIndex = typeof rawData === "object" && rawData !== null && !Array.isArray(rawData)
+    && Number.isInteger(rawData.currentIndex)
+    ? Number(rawData.currentIndex)
+    : 0;
+  const initialDraft: LessonTestDraft = { answers, currentIndex };
+
+  return {
+    user,
+    lesson,
+    lessonStatus,
+    questions,
+    passScore: lesson.test?.passScore ?? 50,
+    canSaveDraft,
+    initialDraft,
+    hasSavedDraft: savedDraft !== null,
+  };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -64,9 +106,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   const test = await prisma.test.findUnique({
     where: { lessonId },
-    select: { id: true, passScore: true },
+    select: { id: true, passScore: true, timeLimitMinutes: true },
   });
   if (!test) throw new Response("Không tìm thấy bài kiểm tra", { status: 404 });
+  const form = await request.formData();
+  if (form.get("intent") !== "submit") {
+    return { error: "Thao tác bài kiểm tra không hợp lệ." as const };
+  }
 
   // Đọc lại câu hỏi KÈM `answer` từ DB. Client chỉ gửi câu trả lời, không bao
   // giờ gửi điểm hay đáp án lên — chấm điểm chỉ xảy ra ở đây.
@@ -81,13 +127,17 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return { error: "Bài kiểm tra này chưa có câu hỏi nào." as const };
   }
 
-  const form = await request.formData();
   const responses = parseTestResponses(form, questions.map((q) => q.id));
   const grade = gradeLessonTest(questions, responses, test.passScore);
 
   // Chỉ đạt điểm sàn mới tính hoàn thành; chưa đạt thì học viên làm lại được
   if (grade.passed) {
     await upsertLessonProgress(user.id, lessonId, { testCompleted: true });
+  }
+  if (test.timeLimitMinutes === null) {
+    await prisma.assessmentDraft.deleteMany({
+      where: { userId: user.id, scope: `lesson-test:${lessonId}` },
+    });
   }
 
   const results: QuestionResult[] = questions.map((q) => {
@@ -121,9 +171,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function TestPage() {
-  const { user, lesson, lessonStatus, questions, passScore } = useLoaderData<typeof loader>();
+  const { user, lesson, lessonStatus, questions, passScore, canSaveDraft, initialDraft, hasSavedDraft } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const result = actionData && "result" in actionData ? actionData.result : null;
+  const draft = useAssessmentDraft<LessonTestDraft>({
+    scope: { kind: "lesson-test", lessonId: lesson.id },
+    initialData: initialDraft,
+    initialSaved: hasSavedDraft,
+    enabled: canSaveDraft && !result,
+  });
 
   const backToLesson = (
     <Button asChild variant="ghost" size="sm" className="mb-2">
@@ -323,8 +379,19 @@ export default function TestPage() {
                 {actionData.error}
               </div>
             )}
+            <div className="mb-3">
+              <AssessmentDraftStatus
+                isSaving={draft.isSaving}
+                hasSaved={draft.hasSaved}
+                error={draft.error}
+              />
+            </div>
             <Form method="post">
-              <LessonTest questions={questions} />
+              <LessonTest
+                questions={questions}
+                initialDraft={initialDraft}
+                onDraftChange={draft.update}
+              />
             </Form>
           </CardContent>
         </Card>

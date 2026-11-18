@@ -12,6 +12,9 @@ import type { AudioPreloadSession } from "~/lib/audio-preload";
 import type { ListeningConfig } from "~/lib/learning-blocks";
 import { getListeningGrade } from "~/lib/listening-score";
 import { usePinyinVisibility } from "~/components/lessons/lesson-pinyin-visibility";
+import type { AssessmentDraftScope } from "~/lib/assessment-drafts";
+import { useAssessmentDraft } from "~/hooks/use-assessment-draft";
+import { AssessmentDraftStatus } from "~/components/lessons/assessment-draft-status";
 
 const playbackRates = [0.8, 1, 1.5] as const;
 type PlaybackRate = (typeof playbackRates)[number];
@@ -51,6 +54,9 @@ interface ListeningBlockProps {
   } | null;
   submissionError?: string | null;
   previewOnly?: boolean;
+  draftScope?: AssessmentDraftScope | null;
+  initialDraftData?: unknown;
+  hasSavedDraft?: boolean;
 }
 
 /** Trộn mảng, không đụng vào mảng gốc */
@@ -76,22 +82,67 @@ export function ListeningBlock({
   savedResult = null,
   submissionError = null,
   previewOnly = false,
+  draftScope = null,
+  initialDraftData,
+  hasSavedDraft = false,
 }: ListeningBlockProps) {
   const showPinyin = usePinyinVisibility();
+  const validQuestionIds = new Set(questions.map((question) => question.id));
+  const savedDraftRecord = initialDraftData && typeof initialDraftData === "object" && !Array.isArray(initialDraftData)
+    ? initialDraftData as Record<string, unknown>
+    : null;
+  const savedAnswers = savedDraftRecord?.answers;
+  const initialAnswers = savedAnswers && typeof savedAnswers === "object" && !Array.isArray(savedAnswers)
+    ? Object.fromEntries(
+        Object.entries(savedAnswers).filter((entry): entry is [string, string] =>
+          validQuestionIds.has(entry[0]) && typeof entry[1] === "string"
+        ),
+      )
+    : {};
+  const initialOrder = Array.isArray(savedDraftRecord?.order)
+    ? [...new Set(savedDraftRecord.order.filter((id): id is string =>
+        typeof id === "string" && validQuestionIds.has(id)
+      ))]
+    : [];
+  const [restoredOrder] = useState(initialOrder);
+  const initialIndex = Number.isInteger(savedDraftRecord?.currentIndex)
+    ? Math.max(0, Math.min(Number(savedDraftRecord?.currentIndex), Math.max(questions.length - 1, 0)))
+    : 0;
   const [round, setRound] = useState(0);
   const items = useMemo(
-    () => (config.shuffle ? shuffled(questions) : questions),
+    () => {
+      if (round === 0 && restoredOrder.length > 0) {
+        const questionsById = new Map(questions.map((item) => [item.id, item]));
+        const restoredItems = restoredOrder.flatMap((id) => {
+          const item = questionsById.get(id);
+          return item ? [item] : [];
+        });
+        const restoredIds = new Set(restoredItems.map((item) => item.id));
+        return [...restoredItems, ...questions.filter((item) => !restoredIds.has(item.id))];
+      }
+      return config.shuffle ? shuffled(questions) : questions;
+    },
     // round đổi → trộn lại khi học viên làm lại từ đầu
-    [questions, config.shuffle, round]
+    [questions, config.shuffle, round, restoredOrder]
   );
 
-  const [index, setIndex] = useState(0);
-  const [answersByQuestion, setAnswersByQuestion] = useState<Record<string, string>>({});
+  const [index, setIndex] = useState(initialIndex);
+  const [answersByQuestion, setAnswersByQuestion] = useState<Record<string, string>>(initialAnswers);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [replaysByQuestion, setReplaysByQuestion] = useState<Record<string, number>>({});
   const [speechReady, setSpeechReady] = useState(false);
   const [playbackRate, setPlaybackRate] = useState<PlaybackRate>(1);
   const [playbackState, setPlaybackState] = useState<SpeechPlaybackState>("idle");
+  const draft = useAssessmentDraft<{
+    answers: Record<string, string>;
+    currentIndex: number;
+    order: string[];
+  }>({
+    scope: draftScope,
+    initialData: { answers: initialAnswers, currentIndex: initialIndex, order: initialOrder },
+    initialSaved: hasSavedDraft,
+    enabled: !previewOnly && !isSubmitting && !hasSubmitted,
+  });
   const inputRef = useRef<HTMLInputElement>(null);
   const isComposingRef = useRef(false);
   const audioPreloadRef = useRef<AudioPreloadSession | null>(null);
@@ -145,21 +196,25 @@ export function ListeningBlock({
   const next = useCallback(() => {
     if (isLast || isSubmitting) return;
     stopSpeaking();
-    setIndex((current) => current + 1);
-  }, [isLast, isSubmitting]);
+    const nextIndex = index + 1;
+    setIndex(nextIndex);
+    draft.update({ answers: answersByQuestion, currentIndex: nextIndex, order: items.map((item) => item.id) });
+  }, [answersByQuestion, draft.update, index, isLast, isSubmitting, items]);
 
   const previous = useCallback(() => {
     if (index === 0 || isSubmitting) return;
     stopSpeaking();
-    setIndex((current) => current - 1);
-  }, [index, isSubmitting]);
+    const previousIndex = index - 1;
+    setIndex(previousIndex);
+    draft.update({ answers: answersByQuestion, currentIndex: previousIndex, order: items.map((item) => item.id) });
+  }, [answersByQuestion, draft.update, index, isSubmitting, items]);
 
   const submitAttempt = useCallback(() => {
-    if (hasSubmitted || isSubmitting) return;
+    if (hasSubmitted || isSubmitting || draft.isSaving) return;
     stopSpeaking();
     setHasSubmitted(true);
     onComplete(items.map((item) => ({ questionId: item.id, answer: (answersByQuestion[item.id] ?? "").trim() })));
-  }, [answersByQuestion, hasSubmitted, isSubmitting, items, onComplete]);
+  }, [answersByQuestion, draft.isSaving, hasSubmitted, isSubmitting, items, onComplete]);
 
   const restart = () => {
     stopSpeaking();
@@ -168,6 +223,7 @@ export function ListeningBlock({
     setHasSubmitted(false);
     setReplaysByQuestion({});
     setRound((r) => r + 1);
+    draft.clear();
   };
 
   useEffect(() => {
@@ -225,6 +281,13 @@ export function ListeningBlock({
 
   return (
     <div className="space-y-5">
+      {!previewOnly && !hasSubmitted && (
+        <AssessmentDraftStatus
+          isSaving={draft.isSaving}
+          hasSaved={draft.hasSaved}
+          error={draft.error}
+        />
+      )}
       {hasSubmitted ? (
         <>
           {isSubmitting ? (
@@ -424,7 +487,13 @@ export function ListeningBlock({
             value={answer}
             onChange={(event) => {
               if (!question) return;
-              setAnswersByQuestion((previousAnswers) => ({ ...previousAnswers, [question.id]: event.target.value }));
+              const nextAnswers = { ...answersByQuestion, [question.id]: event.target.value };
+              setAnswersByQuestion(nextAnswers);
+              draft.update({
+                answers: nextAnswers,
+                currentIndex: index,
+                order: items.map((item) => item.id),
+              });
             }}
             disabled={previewOnly}
             placeholder={config.answerMode === "pinyin" ? "Nhập pinyin vừa nghe…" : "Nhập câu tiếng Trung vừa nghe…"}
@@ -451,7 +520,7 @@ export function ListeningBlock({
             {isLast ? previewOnly ? (
               <span className="px-3 text-sm text-muted-foreground">Câu cuối</span>
             ) : (
-              <Button type="submit" size="lg" disabled={isSubmitting} className="min-h-11 px-5 transition-colors duration-150">
+              <Button type="submit" size="lg" disabled={isSubmitting || draft.isSaving} className="min-h-11 px-5 transition-colors duration-150">
                 <Send className="mr-1.5 h-4 w-4" />Nộp bài
               </Button>
             ) : (

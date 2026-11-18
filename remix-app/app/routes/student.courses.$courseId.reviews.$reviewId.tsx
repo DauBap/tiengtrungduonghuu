@@ -10,6 +10,10 @@ import { getCourseById, getCourseReviewSetById, isEnrolled } from "~/lib/db.serv
 import { requireRole } from "~/lib/session.server";
 import { isReviewAnswerCorrect } from "~/lib/review-answer";
 import { prisma } from "~/lib/prisma.server";
+import { getAssessmentDraft, deleteAssessmentDraft } from "~/lib/assessment-drafts.server";
+import type { AssessmentDraftData } from "~/lib/assessment-drafts";
+import { useAssessmentDraft } from "~/hooks/use-assessment-draft";
+import { AssessmentDraftStatus } from "~/components/lessons/assessment-draft-status";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
@@ -37,6 +41,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       returnedAt: true,
     },
   });
+  const savedDraft = await getAssessmentDraft(user.id, { kind: "course-review", reviewSetId: reviewSet.id });
   const submittedAnswers = isRecord(attempt?.answers) ? attempt.answers : {};
   const gradesByQuestion = new Map<string, Record<string, unknown>>();
   if (Array.isArray(attempt?.grades)) {
@@ -76,6 +81,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       percentage: attempt.percentage,
       results: returnedResults,
     } : null,
+    savedDraft: savedDraft?.data ?? null,
     reviewSet: {
       id: reviewSet.id,
       title: reviewSet.title,
@@ -175,6 +181,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       },
     });
   });
+  await deleteAssessmentDraft(user.id, { kind: "course-review", reviewSetId: reviewSet.id });
 
   return { ok: true };
 }
@@ -184,11 +191,8 @@ function isQuestionCorrect(question: { answer: string; acceptedAnswers?: string[
 }
 
 export default function StudentCourseReviewPage() {
-  const { user, course, reviewSet, latestAttempt } = useLoaderData<typeof loader>();
+  const { user, course, reviewSet, latestAttempt, savedDraft } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
-  const [started, setStarted] = useState(false);
-  const [index, setIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
 
   const orderedQuestions = useMemo(
@@ -196,18 +200,47 @@ export default function StudentCourseReviewPage() {
     [reviewSet.questions]
   );
 
+  const savedDraftRecord = isRecord(savedDraft) ? savedDraft : null;
+  const savedAnswers = savedDraftRecord && isStringRecord(savedDraftRecord.answers)
+    ? savedDraftRecord.answers
+    : {};
+  const draftAnswers = Object.fromEntries(orderedQuestions.map((question) => [
+    question.id,
+    savedAnswers[question.id] ?? "",
+  ]));
+  const initialIndex = Math.max(
+    0,
+    Math.min(
+      savedDraftRecord && Number.isInteger(savedDraftRecord.currentIndex)
+        ? Number(savedDraftRecord.currentIndex)
+        : 0,
+      Math.max(orderedQuestions.length - 1, 0),
+    ),
+  );
+  const hasPendingAttempt = latestAttempt?.status === "SUBMITTED" || latestAttempt?.status === "GRADED";
+  const draft = useAssessmentDraft<AssessmentDraftData>({
+    scope: { kind: "course-review", reviewSetId: reviewSet.id },
+    initialData: { answers: draftAnswers, currentIndex: initialIndex },
+    initialSaved: savedDraft !== null,
+    enabled: !hasPendingAttempt && !submitted,
+  });
+  const [started, setStarted] = useState(() => savedDraft !== null);
+  const [index, setIndex] = useState(initialIndex);
+  const [answers, setAnswers] = useState<Record<string, string>>(draftAnswers);
+
   useEffect(() => {
     if (fetcher.data?.ok === false) setSubmitted(false);
   }, [fetcher.data]);
 
   const currentQuestion = orderedQuestions[index];
-  const hasPendingAttempt = latestAttempt?.status === "SUBMITTED" || latestAttempt?.status === "GRADED";
   const waitingForTeacher = submitted || hasPendingAttempt;
   const awaitingReturn = latestAttempt?.status === "GRADED";
   const canStartAttempt = !waitingForTeacher;
 
   const setAnswer = (questionId: string, value: string) => {
-    setAnswers((previous) => ({ ...previous, [questionId]: value }));
+    const nextAnswers = { ...answers, [questionId]: value };
+    setAnswers(nextAnswers);
+    draft.update({ answers: nextAnswers, currentIndex: index });
   };
 
   if (orderedQuestions.length === 0) {
@@ -225,7 +258,9 @@ export default function StudentCourseReviewPage() {
 
   const next = () => {
     if (index < orderedQuestions.length - 1) {
-      setIndex((value) => value + 1);
+      const nextIndex = index + 1;
+      setIndex(nextIndex);
+      draft.update({ answers, currentIndex: nextIndex });
       return;
     }
     fetcher.submit(
@@ -283,13 +318,17 @@ export default function StudentCourseReviewPage() {
         {canStartAttempt && !started && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Bắt đầu luyện tập</CardTitle>
+              <CardTitle className="text-lg">{savedDraft !== null ? "Tiếp tục ôn tập" : "Bắt đầu luyện tập"}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Bộ ôn tập gồm các câu dịch và sắp xếp câu. Sau khi nộp, giáo viên sẽ chấm từng câu và trả kết quả cho bạn.
+                {savedDraft !== null
+                  ? "Câu trả lời đã lưu từ lần trước. Bạn có thể tiếp tục từ câu đang làm."
+                  : "Bộ ôn tập gồm các câu dịch và sắp xếp câu. Sau khi nộp, giáo viên sẽ chấm từng câu và trả kết quả cho bạn."}
               </p>
-              <Button type="button" className="w-full" onClick={() => setStarted(true)}>Bắt đầu ôn tập</Button>
+              <Button type="button" className="w-full" onClick={() => setStarted(true)}>
+                {savedDraft !== null ? "Tiếp tục làm bài" : "Bắt đầu ôn tập"}
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -305,6 +344,11 @@ export default function StudentCourseReviewPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-5">
+              <AssessmentDraftStatus
+                isSaving={draft.isSaving}
+                hasSaved={draft.hasSaved}
+                error={draft.error}
+              />
               <div className="rounded-lg border bg-muted/30 p-4">
                 <p className="text-sm text-muted-foreground">Câu hỏi</p>
                 {currentQuestion.type === "REORDER" ? (
@@ -333,10 +377,18 @@ export default function StudentCourseReviewPage() {
               </label>
 
               <div className="flex items-center justify-between gap-3">
-                <Button type="button" variant="outline" disabled={index === 0} onClick={() => setIndex((value) => Math.max(0, value - 1))}>
+                <Button type="button" variant="outline" disabled={index === 0} onClick={() => {
+                  const previousIndex = Math.max(0, index - 1);
+                  setIndex(previousIndex);
+                  draft.update({ answers, currentIndex: previousIndex });
+                }}>
                   Câu trước
                 </Button>
-                <Button type="button" onClick={next}>
+                <Button
+                  type="button"
+                  onClick={next}
+                  disabled={index === orderedQuestions.length - 1 && draft.isSaving}
+                >
                   {index === orderedQuestions.length - 1 ? "Nộp bài" : "Câu tiếp theo"}
                 </Button>
               </div>

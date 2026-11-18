@@ -6,6 +6,9 @@ import { cn } from "~/lib/utils";
 import type { PhoneticsConfig, PhoneticsItem, PhoneticsSection } from "~/lib/learning-blocks";
 import { TONES, isPhoneticsAnswerCorrect, type PhoneticsAnswer } from "~/lib/phonetics";
 import { usePinyinVisibility } from "~/components/lessons/lesson-pinyin-visibility";
+import { getAssessmentDraftScopeKey, type AssessmentDraftScope } from "~/lib/assessment-drafts";
+import { useAssessmentDraft } from "~/hooks/use-assessment-draft";
+import { AssessmentDraftStatus } from "~/components/lessons/assessment-draft-status";
 
 const playbackRates = [0.8, 1, 1.5] as const;
 
@@ -40,6 +43,8 @@ interface PhoneticsPracticeProps {
   isSaving: boolean;
   submissionError: string | null;
   onSubmitSection: (sectionId: number, answers: { itemId: number; answer: string }[]) => void;
+  lessonId: string;
+  assessmentDrafts: Record<string, unknown>;
   previewOnly?: boolean;
 }
 
@@ -141,6 +146,9 @@ function PhoneticsSectionCard({
   isSaving,
   onSubmit,
   previewOnly,
+  draftScope,
+  initialDraftData,
+  hasSavedDraft,
 }: {
   section: PhoneticsSection;
   number: number;
@@ -149,9 +157,35 @@ function PhoneticsSectionCard({
   isSaving: boolean;
   onSubmit: (answers: { itemId: number; answer: string }[]) => void;
   previewOnly: boolean;
+  draftScope: AssessmentDraftScope;
+  initialDraftData: unknown;
+  hasSavedDraft: boolean;
 }) {
-  const [answers, setAnswers] = useState<Record<number, PhoneticsAnswer>>({});
+  const savedAnswers = initialDraftData && typeof initialDraftData === "object" && !Array.isArray(initialDraftData)
+    ? (initialDraftData as Record<string, unknown>).answers
+    : null;
+  const answersFromDraft: Record<number, PhoneticsAnswer> = {};
+  const validItemIds = new Set(section.items.map((item) => item.id));
+  if (savedAnswers && typeof savedAnswers === "object" && !Array.isArray(savedAnswers)) {
+    for (const [rawId, rawAnswer] of Object.entries(savedAnswers)) {
+      const itemId = Number(rawId);
+      if (!validItemIds.has(itemId)) continue;
+      const item = section.items.find((question) => question.id === itemId);
+      if (item?.type === "tone" && typeof rawAnswer === "number" && TONES.some((tone) => tone === rawAnswer)) {
+        answersFromDraft[itemId] = rawAnswer;
+      } else if (item && item.type !== "tone" && typeof rawAnswer === "string" && rawAnswer.length <= 20) {
+        answersFromDraft[itemId] = rawAnswer;
+      }
+    }
+  }
+  const [answers, setAnswers] = useState<Record<number, PhoneticsAnswer>>(answersFromDraft);
   const [checked, setChecked] = useState(false);
+  const draft = useAssessmentDraft<{ answers: Record<number, PhoneticsAnswer> }>({
+    scope: draftScope,
+    initialData: { answers: answersFromDraft },
+    initialSaved: hasSavedDraft,
+    enabled: !previewOnly && !isSaving,
+  });
   const showPinyin = usePinyinVisibility();
   const [showReview, setShowReview] = useState(false);
   const [playbackRate, setPlaybackRate] = useState<(typeof playbackRates)[number]>(1);
@@ -176,6 +210,7 @@ function PhoneticsSectionCard({
   const reset = () => {
     setAnswers({});
     setChecked(false);
+    draft.clear();
   };
 
   const submit = () => {
@@ -229,6 +264,14 @@ function PhoneticsSectionCard({
           </div>
         )}
       </div>
+
+      {!previewOnly && !checked && (
+        <AssessmentDraftStatus
+          isSaving={draft.isSaving}
+          hasSaved={draft.hasSaved}
+          error={draft.error}
+        />
+      )}
 
       {showReview && reviewGroup && (
         <div
@@ -359,19 +402,21 @@ function PhoneticsSectionCard({
             checked={!previewOnly && checked}
             disabled={previewOnly || isSaving}
             onChange={(value) => {
-              setAnswers((previous) => ({ ...previous, [item.id]: value }));
+              const nextAnswers = { ...answers, [item.id]: value };
+              setAnswers(nextAnswers);
               setChecked(false);
+              draft.update({ answers: nextAnswers });
             }}
           />
         ))}
       </div>
 
       {!previewOnly && <div className="mt-4 flex flex-wrap gap-2">
-        <Button type="button" size="sm" onClick={submit} disabled={isSaving || answeredCount === 0}>
+        <Button type="button" size="sm" onClick={submit} disabled={isSaving || draft.isSaving || answeredCount === 0}>
           <Check className="mr-1.5 h-4 w-4" />
           {isSaving ? "Đang lưu…" : "Kiểm tra và lưu điểm"}
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={reset} disabled={isSaving}>
+        <Button type="button" variant="outline" size="sm" onClick={reset} disabled={isSaving || draft.isSaving}>
           <RotateCcw className="mr-1.5 h-4 w-4" />
           Làm lại
         </Button>
@@ -413,6 +458,8 @@ export function PhoneticsPractice({
   isSaving,
   submissionError,
   onSubmitSection,
+  lessonId,
+  assessmentDrafts,
   previewOnly = false,
 }: PhoneticsPracticeProps) {
   return (
@@ -429,20 +476,34 @@ export function PhoneticsPractice({
       )}
 
       {config.sections.map((section, index) => (
-        <PhoneticsSectionCard
-          key={section.id}
-          section={section}
-          number={index + 1}
-          savedScore={savedScores[section.id] ?? null}
-          reviewGroup={
-            submissionResult?.targetKey === String(section.id)
-              ? submissionResult
-              : reviewGroups.find((group) => group.targetKey === String(section.id)) ?? null
-          }
-          isSaving={isSaving}
-          previewOnly={previewOnly}
-          onSubmit={(answers) => onSubmitSection(section.id, answers)}
-        />
+        (() => {
+          const draftScope: AssessmentDraftScope = {
+            kind: "lesson-tab",
+            lessonId,
+            tab: "PHONETICS",
+            activityId: String(section.id),
+          };
+          const draftKey = getAssessmentDraftScopeKey(draftScope);
+          return (
+            <PhoneticsSectionCard
+              key={section.id}
+              section={section}
+              number={index + 1}
+              savedScore={savedScores[section.id] ?? null}
+              reviewGroup={
+                submissionResult?.targetKey === String(section.id)
+                  ? submissionResult
+                  : reviewGroups.find((group) => group.targetKey === String(section.id)) ?? null
+              }
+              isSaving={isSaving}
+              previewOnly={previewOnly}
+              draftScope={draftScope}
+              initialDraftData={assessmentDrafts[draftKey]}
+              hasSavedDraft={draftKey in assessmentDrafts}
+              onSubmit={(answers) => onSubmitSection(section.id, answers)}
+            />
+          );
+        })()
       ))}
     </section>
   );

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFetcher } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -11,6 +11,9 @@ import { cn } from "~/lib/utils";
 import {
   CheckCircle2, XCircle, ArrowRight, ArrowLeft, Lightbulb, Eraser,
 } from "lucide-react";
+import type { AssessmentDraftScope } from "~/lib/assessment-drafts";
+import { useAssessmentDraft } from "~/hooks/use-assessment-draft";
+import { AssessmentDraftStatus } from "~/components/lessons/assessment-draft-status";
 
 export interface GrammarPracticeQuestion {
   id: string;
@@ -23,25 +26,59 @@ export interface GrammarPracticeQuestion {
 }
 
 /** Trạng thái làm bài của một câu; giữ theo id nên quay lại câu cũ vẫn thấy. */
-interface QuestionState {
+export interface GrammarQuestionState {
   /** Chuỗi đã chọn/nhập (SINGLE_CHOICE, FILL) */
   text: string;
   /** Các từ đã ghép, theo thứ tự học viên bấm (ARRANGE) */
   picked: string[];
 }
 
-const EMPTY: QuestionState = { text: "", picked: [] };
+export interface GrammarPracticeDraft {
+  answers: Record<string, GrammarQuestionState>;
+  currentIndex: number;
+}
+
+const EMPTY: GrammarQuestionState = { text: "", picked: [] };
+
+function parseGrammarPracticeDraft(value: unknown, questions: GrammarPracticeQuestion[]): GrammarPracticeDraft | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  if (!record.answers || typeof record.answers !== "object" || Array.isArray(record.answers)) return null;
+
+  const validQuestionIds = new Set(questions.map((question) => question.id));
+  const answers: Record<string, GrammarQuestionState> = {};
+  for (const [questionId, rawState] of Object.entries(record.answers)) {
+    if (!validQuestionIds.has(questionId) || !rawState || typeof rawState !== "object" || Array.isArray(rawState)) continue;
+    const state = rawState as Record<string, unknown>;
+    answers[questionId] = {
+      text: typeof state.text === "string" ? state.text : "",
+      picked: Array.isArray(state.picked) ? state.picked.filter((token): token is string => typeof token === "string") : [],
+    };
+  }
+  const currentIndex = Number.isInteger(record.currentIndex)
+    ? Math.max(0, Math.min(Number(record.currentIndex), Math.max(questions.length - 1, 0)))
+    : 0;
+  return { answers, currentIndex };
+}
 
 export function GrammarPractice({
   questions,
   sectionId,
   fullLessonPractice = false,
   previewOnly = false,
+  draftScope = null,
+  initialDraftData,
+  hasSavedDraft = false,
+  draftEnabled = true,
 }: {
   questions: GrammarPracticeQuestion[];
   sectionId: string;
   fullLessonPractice?: boolean;
   previewOnly?: boolean;
+  draftScope?: AssessmentDraftScope | null;
+  initialDraftData?: unknown;
+  hasSavedDraft?: boolean;
+  draftEnabled?: boolean;
 }) {
   const fetcher = useFetcher<{
     intent?: string;
@@ -53,12 +90,32 @@ export function GrammarPractice({
     grammarError?: string;
     results?: { id: string; prompt: string; given: string; correctAnswer: string; correct: boolean; hint: string | null }[];
   }>();
-  const [index, setIndex] = useState(0);
-  const [states, setStates] = useState<Record<string, QuestionState>>({});
+  const initialDraft = parseGrammarPracticeDraft(initialDraftData, questions);
+  const [index, setIndex] = useState(initialDraft?.currentIndex ?? 0);
+  const [states, setStates] = useState<Record<string, GrammarQuestionState>>(initialDraft?.answers ?? {});
   const [submitted, setSubmitted] = useState(false);
+  const didMount = useRef(false);
+  const submissionSucceeded = submitted
+    && fetcher.data?.intent === "submit-grammar-attempt"
+    && fetcher.data.success === true;
+  const draft = useAssessmentDraft<GrammarPracticeDraft>({
+    scope: draftScope,
+    initialData: initialDraft ?? { answers: {}, currentIndex: 0 },
+    initialSaved: hasSavedDraft,
+    enabled: !previewOnly && draftEnabled && !submissionSucceeded,
+  });
+
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      return;
+    }
+    draft.update({ answers: states, currentIndex: index });
+  }, [draft.update, index, states]);
 
   const question = questions[index];
   const state = states[question?.id ?? ""] ?? EMPTY;
+  const savedResult = submissionSucceeded ? fetcher.data : null;
 
   // Trộn một lần cho mỗi câu mỗi lượt, không trộn lại sau từng lần render
   const tokens = useMemo(
@@ -71,12 +128,9 @@ export function GrammarPractice({
     return <p className="text-sm text-muted-foreground text-center py-6">Phần này chưa có câu hỏi nào.</p>;
   }
 
-  const update = (patch: Partial<QuestionState>) =>
+  const update = (patch: Partial<GrammarQuestionState>) =>
     setStates((prev) => ({ ...prev, [question.id]: { ...(prev[question.id] ?? EMPTY), ...patch } }));
 
-  const savedResult = submitted && fetcher.data?.intent === "submit-grammar-attempt" && fetcher.data.success
-    ? fetcher.data
-    : null;
   const locked = previewOnly || Boolean(savedResult) || fetcher.state !== "idle";
   const isLast = index === questions.length - 1;
   const doneCount = questions.filter((item) => {
@@ -88,7 +142,7 @@ export function GrammarPractice({
   const questionType = questions[0]?.type;
 
   const submitAttempt = () => {
-    if (!questionType || doneCount !== questions.length || fetcher.state !== "idle") return;
+    if (!questionType || doneCount !== questions.length || fetcher.state !== "idle" || draft.isSaving) return;
     setSubmitted(true);
     fetcher.submit({
       intent: "submit-grammar-attempt",
@@ -123,6 +177,13 @@ export function GrammarPractice({
 
   return (
     <div className="space-y-4">
+      {!previewOnly && !submissionSucceeded && (
+        <AssessmentDraftStatus
+          isSaving={draft.isSaving}
+          hasSaved={draft.hasSaved}
+          error={draft.error}
+        />
+      )}
       <div className="flex items-center gap-3">
         <Progress value={(doneCount / questions.length) * 100} className="h-1.5 flex-1" />
         <span className="text-xs font-medium text-muted-foreground tabular-nums shrink-0">
@@ -259,7 +320,7 @@ export function GrammarPractice({
           type="button"
           size="sm"
           onClick={submitAttempt}
-          disabled={doneCount !== questions.length || fetcher.state !== "idle" || Boolean(savedResult)}
+          disabled={doneCount !== questions.length || fetcher.state !== "idle" || draft.isSaving || Boolean(savedResult)}
         >
           {fetcher.state !== "idle" ? "Đang nộp..." : savedResult ? "Đã nộp kết quả" : submitted && fetcher.data?.grammarError ? "Thử nộp lại" : "Nộp kết quả"}
         </Button>}

@@ -8,6 +8,9 @@ import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 import { isHorizontalWorkbookChoice, type WorkbookConfig } from "~/lib/learning-blocks";
 import { answerVariants, isAnswerCorrectForAny } from "~/lib/listening-answer";
+import type { AssessmentDraftScope } from "~/lib/assessment-drafts";
+import { useAssessmentDraft } from "~/hooks/use-assessment-draft";
+import { AssessmentDraftStatus } from "~/components/lessons/assessment-draft-status";
 
 interface QuestionOption {
   id: string;
@@ -60,6 +63,9 @@ export function WorkbookListeningTest({
   savedResult = null,
   submissionError = null,
   previewOnly = false,
+  draftScope = null,
+  initialDraftData,
+  hasSavedDraft = false,
 }: {
   config: WorkbookConfig;
   blockTitle: string;
@@ -75,8 +81,24 @@ export function WorkbookListeningTest({
   } | null;
   submissionError?: string | null;
   previewOnly?: boolean;
+  draftScope?: AssessmentDraftScope | null;
+  initialDraftData?: unknown;
+  hasSavedDraft?: boolean;
 }) {
   const showPinyin = config.showPinyin;
+  const validQuestionIds = new Set((config.sections as Section[]).flatMap((section) =>
+    section.questions.map((question) => question.id)
+  ));
+  const savedAnswers = initialDraftData && typeof initialDraftData === "object" && !Array.isArray(initialDraftData)
+    ? (initialDraftData as Record<string, unknown>).answers
+    : null;
+  const initialAnswers = savedAnswers && typeof savedAnswers === "object" && !Array.isArray(savedAnswers)
+    ? Object.fromEntries(
+        Object.entries(savedAnswers).filter((entry): entry is [string, string] =>
+          validQuestionIds.has(entry[0]) && typeof entry[1] === "string"
+        ),
+      )
+    : {};
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState<0.8 | 1 | 1.5>(1);
   const [currentTime, setCurrentTime] = useState(0);
@@ -86,16 +108,22 @@ export function WorkbookListeningTest({
   const [answers, setAnswers] = useState<Record<string, string>>(() =>
     isAwaitingTeacherReview
       ? Object.fromEntries((savedResult?.answers ?? []).map((answer) => [answer.id, answer.given]))
-      : {}
+      : initialAnswers
   );
   const [audioPlayCount, setAudioPlayCount] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(config.timeLimit ? config.timeLimit * 60 : 0);
   const [isSubmitted, setIsSubmitted] = useState(isAwaitingTeacherReview);
+  const draft = useAssessmentDraft<{ answers: Record<string, string> }>({
+    scope: draftScope,
+    initialData: { answers: initialAnswers },
+    initialSaved: hasSavedDraft && !isAwaitingTeacherReview,
+    enabled: !previewOnly && config.timeLimit === 0 && !isSubmitted && !isSaving,
+  });
   const audioRef = useRef<HTMLAudioElement>(null);
   const submitAttemptRef = useRef<() => void>(() => undefined);
 
   const submitAttempt = () => {
-    if (isSubmitted) return;
+    if (isSubmitted || draft.isSaving) return;
     setIsSubmitted(true);
     onSubmitAttempt(answers);
   };
@@ -155,6 +183,11 @@ export function WorkbookListeningTest({
   }
 
   const questions = sections.flatMap((section) => section.questions);
+  const updateAnswer = (questionId: string, answer: string) => {
+    const nextAnswers = { ...answers, [questionId]: answer };
+    setAnswers(nextAnswers);
+    draft.update({ answers: nextAnswers });
+  };
   const gradableQuestions = questions.filter((question) => question.gradable);
   const reviewResults = new Map((savedResult?.answerReview ?? []).map((result) => [result.id, result]));
   const correctCount = gradableQuestions.filter((question) => {
@@ -166,6 +199,13 @@ export function WorkbookListeningTest({
 
   return (
     <div className="max-w-6xl mx-auto space-y-3">
+      {!previewOnly && !isSubmitted && (
+        <AssessmentDraftStatus
+          isSaving={draft.isSaving}
+          hasSaved={draft.hasSaved}
+          error={draft.error}
+        />
+      )}
       {/* Audio Player Header - Sticky */}
       <Card className="sticky top-0 z-10 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/90">
         <div className="p-4 space-y-4 sm:p-6">
@@ -366,7 +406,7 @@ export function WorkbookListeningTest({
                 key={question.id}
                 question={question}
                 selectedAnswer={answers[question.id]}
-                onAnswer={(optId) => setAnswers((prev) => ({ ...prev, [question.id]: optId }))}
+                onAnswer={(optId) => updateAnswer(question.id, optId)}
                 horizontalChoices={
                   question.kind === "choice"
                   && isHorizontalWorkbookChoice(blockTitle, question.number)
@@ -414,12 +454,13 @@ export function WorkbookListeningTest({
           <p className="text-sm text-muted-foreground">Đã trả lời {Object.values(answers).filter(Boolean).length}/{questions.length} câu</p>
         )}
         {!previewOnly && !isSubmitted
-          ? <Button type="button" onClick={submitAttempt} disabled={isSaving}>Nộp bài</Button>
+          ? <Button type="button" onClick={submitAttempt} disabled={isSaving || draft.isSaving}>Nộp bài</Button>
           : savedResult && savedResult.pendingReviewCount === 0 && !isSaving
             ? <Button type="button" variant="outline" onClick={() => {
                 setAnswers({});
                 setIsSubmitted(false);
-              }}>Làm lại</Button>
+                draft.clear();
+            }} disabled={draft.isSaving}>Làm lại</Button>
             : null}
       </Card>
     </div>

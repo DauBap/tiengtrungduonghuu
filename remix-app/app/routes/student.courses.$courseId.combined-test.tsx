@@ -10,6 +10,11 @@ import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 import { recordLessonTabAttempt } from "~/lib/lesson-tab-progress.server";
 import { ArrowLeft, ClipboardCheck } from "lucide-react";
+import { getAssessmentDraft, deleteAssessmentDraft } from "~/lib/assessment-drafts.server";
+import type { AssessmentDraftData } from "~/lib/assessment-drafts";
+import { useAssessmentDraft } from "~/hooks/use-assessment-draft";
+import { AssessmentDraftStatus } from "~/components/lessons/assessment-draft-status";
+import { parseVocabularyTestDraft, type VocabularyTestDraft } from "~/components/lessons/vocabulary-test";
 
 type CourseLesson = {
   id: string;
@@ -70,6 +75,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     sameWordType: createVocabularyTest(selectedWords, courseLessons.flatMap((lesson) => lesson.content), true),
     random: [],
   };
+  const draftScope = { kind: "combined-test", courseId, lessonIds: lessons.map((lesson) => lesson.id) } as const;
+  const savedDraft = await getAssessmentDraft(user.id, draftScope);
+  const initialDraft = parseVocabularyTestDraft(savedDraft?.data);
 
   return {
     user,
@@ -78,6 +86,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     lessons: lessons.map(({ id, order, title }) => ({ id, order, title })),
     questionSets,
     questionCount: questionSets.sameWordType.length,
+    initialDraft,
+    hasSavedDraft: initialDraft !== null,
+    draftScope,
   };
 }
 
@@ -141,6 +152,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
       },
     });
   }));
+  await deleteAssessmentDraft(user.id, {
+    kind: "combined-test",
+    courseId,
+    lessonIds: lessons.map((lesson) => lesson.id),
+  });
 
   const correctCount = lessonResults.reduce((count, item) => count + item.result.correctCount, 0);
   return {
@@ -159,7 +175,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function CombinedVocabularyTest() {
-  const { user, courseId, courseTitle, lessons, questionSets, questionCount } = useLoaderData<typeof loader>();
+  const { user, courseId, courseTitle, lessons, questionSets, questionCount, initialDraft, hasSavedDraft, draftScope } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   const result = fetcher.data && "lessonResults" in fetcher.data && Array.isArray(fetcher.data.lessonResults)
     ? fetcher.data
@@ -167,6 +183,20 @@ export default function CombinedVocabularyTest() {
   const error = fetcher.data && "error" in fetcher.data ? fetcher.data.error : null;
   const lessonResults = result?.lessonResults ?? [];
   const lessonSummary = lessons.map((lesson) => `Bài ${lesson.order}: ${lesson.title}`).join(" · ");
+  const draft = useAssessmentDraft<VocabularyTestDraft & AssessmentDraftData>({
+    scope: draftScope,
+    initialData: initialDraft ?? {
+      direction: "vi2zh",
+      displayMode: "paged",
+      started: false,
+      runQuestions: [],
+      index: 0,
+      pageIndex: 0,
+      answers: {},
+    },
+    initialSaved: hasSavedDraft,
+    enabled: !result,
+  });
 
   return (
     <AppShell user={user}>
@@ -212,6 +242,13 @@ export default function CombinedVocabularyTest() {
               <p className="text-xs text-muted-foreground">{lessonSummary}</p>
             </CardHeader>
             <CardContent>
+              <div className="mb-3">
+                <AssessmentDraftStatus
+                  isSaving={draft.isSaving}
+                  hasSaved={draft.hasSaved}
+                  error={draft.error}
+                />
+              </div>
               {error && (
                 <div role="alert" className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
                   {error}
@@ -225,6 +262,10 @@ export default function CombinedVocabularyTest() {
                   fixedDirection="vi2zh"
                   pageSize={10}
                   isSubmitting={fetcher.state !== "idle"}
+                  initialDraft={initialDraft}
+                  onDraftChange={draft.update}
+                  onClearDraft={draft.clear}
+                  draftSaving={draft.isSaving}
                 />
               </fetcher.Form>
             </CardContent>

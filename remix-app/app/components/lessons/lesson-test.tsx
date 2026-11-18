@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigation } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -31,25 +31,51 @@ export interface LessonTestQuestion {
 }
 
 /** Câu trả lời đang soạn của một câu; giữ theo id nên quay lại câu cũ vẫn thấy. */
-interface Answer {
+export interface LessonTestAnswer {
   /** Chuỗi đã chọn/nhập (SINGLE_CHOICE, FILL) */
   text: string;
   /** Các từ đã ghép, theo thứ tự học viên bấm (ARRANGE) */
   picked: string[];
 }
 
-const EMPTY: Answer = { text: "", picked: [] };
+const EMPTY: LessonTestAnswer = { text: "", picked: [] };
 
-function hasAnswer(question: LessonTestQuestion, answer: Answer): boolean {
+function hasAnswer(question: LessonTestQuestion, answer: LessonTestAnswer): boolean {
   return question.type === "ARRANGE" ? answer.picked.length > 0 : answer.text.trim().length > 0;
 }
 
-export function LessonTest({ questions, isSubmitting = false }: { questions: LessonTestQuestion[]; isSubmitting?: boolean }) {
+export interface LessonTestDraft {
+  answers: Record<string, LessonTestAnswer>;
+  currentIndex: number;
+}
+
+export function LessonTest({
+  questions,
+  isSubmitting = false,
+  initialDraft,
+  onDraftChange,
+}: {
+  questions: LessonTestQuestion[];
+  isSubmitting?: boolean;
+  initialDraft?: LessonTestDraft;
+  onDraftChange?: (draft: LessonTestDraft) => void;
+}) {
   const navigation = useNavigation();
   const submitting = isSubmitting || navigation.state !== "idle";
 
-  const [index, setIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, Answer>>({});
+  const [index, setIndex] = useState(() =>
+    Math.max(0, Math.min(initialDraft?.currentIndex ?? 0, Math.max(questions.length - 1, 0)))
+  );
+  const [answers, setAnswers] = useState<Record<string, LessonTestAnswer>>(initialDraft?.answers ?? {});
+  const didMount = useRef(false);
+
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      return;
+    }
+    onDraftChange?.({ answers, currentIndex: index });
+  }, [answers, index, onDraftChange]);
 
   const question = questions[index];
   const answer = answers[question?.id ?? ""] ?? EMPTY;
@@ -58,7 +84,7 @@ export function LessonTest({ questions, isSubmitting = false }: { questions: Les
     return <p className="text-sm text-muted-foreground text-center py-6">Bài kiểm tra chưa có câu hỏi nào.</p>;
   }
 
-  const update = (patch: Partial<Answer>) =>
+  const update = (patch: Partial<LessonTestAnswer>) =>
     setAnswers((prev) => ({ ...prev, [question.id]: { ...(prev[question.id] ?? EMPTY), ...patch } }));
 
   const answeredIds = new Set(

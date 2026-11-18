@@ -256,6 +256,7 @@ export default function TeacherLessonPreview() {
                 key={section.id}
                 section={section}
                 number={index + 1}
+                lessonId={lesson.id}
                 latestAttempts={{}}
                 previewOnly
               />
@@ -287,6 +288,8 @@ export default function TeacherLessonPreview() {
             isSaving={false}
             submissionError={null}
             onSubmitSection={() => undefined}
+            lessonId={lesson.id}
+            assessmentDrafts={{}}
             previewOnly
           />
         : <LessonTabEmpty tab="PHONETICS" />;
