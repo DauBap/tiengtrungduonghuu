@@ -12,7 +12,9 @@ import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
-import { ArrowLeft, ArrowUpRight, BookOpen, Layers, FileCheck2, ListChecks, Search, X, ClipboardCheck, Award, CheckCircle2, Video, FolderOpen, FileText, Download } from "lucide-react";
+import { CourseDocumentActions } from "~/components/courses/course-document-actions";
+import { createCourseDocumentOfficeViewerUrl } from "~/lib/course-document-office-viewer.server";
+import { ArrowLeft, ArrowUpRight, BookOpen, Layers, FileCheck2, ListChecks, Search, X, ClipboardCheck, Award, CheckCircle2, Video, FolderOpen, FileText } from "lucide-react";
 import { formatCourseDocumentSize } from "~/lib/course-documents";
 import type { ProgressStatus } from "~/types/progress";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
@@ -249,6 +251,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     courseDocuments: courseDocuments.map((document) => ({
       ...document,
       fileSize: Number(document.fileSize),
+      officeViewerUrl: createCourseDocumentOfficeViewerUrl(
+        request.url,
+        course.id,
+        document.id,
+        document.mimeType,
+        document.fileName,
+      ),
     })),
   };
 }
@@ -745,14 +754,7 @@ export default function StudentCourseDetail() {
                         </p>
                       </div>
                     </div>
-                    <a
-                      href={`/student/courses/${course.id}/documents/${document.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      Mở tài liệu<Download aria-hidden="true" className="h-4 w-4" />
-                    </a>
+                    <CourseDocumentActions courseId={course.id} document={document} />
                   </li>
                 ))}
               </ul>

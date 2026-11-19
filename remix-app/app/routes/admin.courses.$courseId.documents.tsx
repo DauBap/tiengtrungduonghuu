@@ -5,6 +5,8 @@ import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { CourseDocumentUploadForm } from "~/components/courses/course-document-upload-form";
+import { CourseDocumentActions } from "~/components/courses/course-document-actions";
+import { createCourseDocumentOfficeViewerUrl } from "~/lib/course-document-office-viewer.server";
 import { formatCourseDocumentSize } from "~/lib/course-documents";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
@@ -32,7 +34,17 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   return {
     user,
     course,
-    documents: documents.map((document) => ({ ...document, fileSize: Number(document.fileSize) })),
+    documents: documents.map((document) => ({
+      ...document,
+      fileSize: Number(document.fileSize),
+      officeViewerUrl: createCourseDocumentOfficeViewerUrl(
+        request.url,
+        courseId,
+        document.id,
+        document.mimeType,
+        document.fileName,
+      ),
+    })),
   };
 }
 
@@ -152,19 +164,13 @@ export default function CourseDocumentsAdmin() {
                   <div className="flex min-w-0 items-start gap-3">
                     <FileText aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
                     <div className="min-w-0">
-                      <a
-                        href={`/student/courses/${course.id}/documents/${document.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="break-all text-sm font-medium underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        {document.fileName}
-                      </a>
+                      <p className="break-all text-sm font-medium">{document.fileName}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {formatCourseDocumentSize(document.fileSize)} · {document.createdAt.toLocaleDateString("vi-VN")}
                       </p>
                     </div>
                   </div>
+                  <CourseDocumentActions courseId={course.id} document={document} />
                   <Form
                     method="post"
                     onSubmit={(event) => {

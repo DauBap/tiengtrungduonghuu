@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { EmptyState } from "~/components/common/empty-state";
 import { Overlay } from "~/components/common/overlay";
 import { CourseDocumentsModal } from "~/components/courses/course-documents-modal";
+import { createCourseDocumentOfficeViewerUrl } from "~/lib/course-document-office-viewer.server";
 import { ArrowLeft, Plus, Pencil, Trash2, X, BookOpen, Loader2, Settings2, ClipboardCheck, GripVertical, FileCheck2, TriangleAlert, FolderOpen } from "lucide-react";
 
 type LessonRow = {
@@ -70,7 +71,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     prisma.courseDocument.findMany({
       where: { courseId: course.id },
       orderBy: { createdAt: "desc" },
-      select: { id: true, fileName: true, fileSize: true, createdAt: true },
+      select: { id: true, fileName: true, fileSize: true, mimeType: true, createdAt: true },
     }),
   ]);
   return {
@@ -84,7 +85,17 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       questionCount: exam.sections.reduce((count, section) => count + section._count.questions, 0),
       sections: undefined,
     })),
-    documents: documents.map((document) => ({ ...document, fileSize: Number(document.fileSize) })),
+    documents: documents.map((document) => ({
+      ...document,
+      fileSize: Number(document.fileSize),
+      officeViewerUrl: createCourseDocumentOfficeViewerUrl(
+        request.url,
+        course.id,
+        document.id,
+        document.mimeType,
+        document.fileName,
+      ),
+    })),
   };
 }
 

@@ -3,6 +3,7 @@ import { useFetcher, useRevalidator } from "react-router";
 import { toast } from "sonner";
 import { FileText, FolderOpen, Trash2, X } from "lucide-react";
 import { Overlay } from "~/components/common/overlay";
+import { CourseDocumentActions } from "~/components/courses/course-document-actions";
 import { CourseDocumentUploadForm } from "~/components/courses/course-document-upload-form";
 import { Button } from "~/components/ui/button";
 import { formatCourseDocumentSize } from "~/lib/course-documents";
@@ -11,6 +12,8 @@ type CourseDocumentItem = {
   id: string;
   fileName: string;
   fileSize: number;
+  mimeType: string;
+  officeViewerUrl: string | null;
   createdAt: Date | string;
 };
 
@@ -87,21 +90,15 @@ export function CourseDocumentsModal({
           ) : (
             <ul className="max-h-64 divide-y overflow-y-auto rounded-lg border">
               {documents.map((document) => (
-                <li key={document.id} className="flex items-center gap-3 p-3">
+                <li key={document.id} className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center">
                   <FileText aria-hidden="true" className="h-5 w-5 shrink-0 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
-                    <a
-                      href={`/student/courses/${course.id}/documents/${document.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="break-all text-sm font-medium underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      {document.fileName}
-                    </a>
+                    <p className="break-all text-sm font-medium">{document.fileName}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {formatCourseDocumentSize(document.fileSize)} · {new Date(document.createdAt).toLocaleDateString("vi-VN")}
                     </p>
                   </div>
+                  <CourseDocumentActions courseId={course.id} document={document} />
                   <deleteFetcher.Form
                     method="post"
                     action={`/admin/courses/${course.id}/documents?modal=1`}

@@ -111,7 +111,7 @@ export default [
   route("student/courses/:courseId/mock-exams", "routes/student.courses.$courseId.mock-exams._index.tsx"),
   route("student/courses/:courseId/mock-exams/:mockExamId", "routes/student.courses.$courseId.mock-exams.$mockExamId.tsx"),
   route("student/courses/:courseId/mock-exams/:mockExamId/attempts/:attemptId", "routes/student.courses.$courseId.mock-exams.$mockExamId.attempts.$attemptId.tsx"),
-  route("student/courses/:courseId/documents/:documentId", "routes/student.courses.$courseId.documents.$documentId.ts"),
+  route("student/courses/:courseId/documents/:documentId/:fileName?", "routes/student.courses.$courseId.documents.$documentId.ts"),
   route("student/courses/:courseId", "routes/student.courses.$courseId.tsx"),
   route("student/courses/:courseId/reviews/:reviewId", "routes/student.courses.$courseId.reviews.$reviewId.tsx"),
   route(
