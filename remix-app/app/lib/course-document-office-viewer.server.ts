@@ -1,6 +1,10 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 const officeViewerOrigin = "https://view.officeapps.live.com";
+const publicSiteHosts = new Set([
+  "tiengtrungduonghuu.edu.vn",
+  "www.tiengtrungduonghuu.edu.vn",
+]);
 const shareDurationSeconds = 30 * 60;
 const powerpointMimeTypes = new Set([
   "application/vnd.ms-powerpoint",
@@ -29,12 +33,13 @@ export function createCourseDocumentOfficeViewerUrl(
   if (!powerpointMimeTypes.has(mimeType)) return null;
 
   const requestOrigin = new URL(requestUrl);
-  if (requestOrigin.protocol !== "https:") return null;
+  const hostname = requestOrigin.hostname.toLowerCase();
+  if (!publicSiteHosts.has(hostname)) return null;
 
   const expiresAt = Math.floor(Date.now() / 1000) + shareDurationSeconds;
   const sourceUrl = new URL(
     `/student/courses/${encodeURIComponent(courseId)}/documents/${encodeURIComponent(documentId)}/${encodeURIComponent(fileName)}`,
-    requestOrigin.origin,
+    `https://${hostname}`,
   );
   sourceUrl.searchParams.set("shareExpires", String(expiresAt));
   sourceUrl.searchParams.set("shareSignature", createSignature(courseId, documentId, fileName, expiresAt));
