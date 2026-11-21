@@ -520,7 +520,7 @@ export default function AdminStudentReviews() {
               ? {
                   name: selectedInfo.history.classroom.name,
                   teacherName: selectedInfo.history.classroom.teacher?.name ?? null,
-                  courseLabel: `HSK ${selectedInfo.history.classroom.course.hskLevel} · ${selectedInfo.history.classroom.course.code} · ${selectedInfo.history.classroom.course.title}`,
+                  courseLabel: `HSK ${selectedInfo.history.classroom.course.hskLevel} · ${selectedInfo.history.classroom.course.title}`,
                   statusLabel: selectedInfo.history.classroom.completedAt ? "Đã kết thúc" : "Đang học",
                   enrolledAt: selectedInfo.history.enrolledAt,
                   completedAt: selectedInfo.history.classroom.completedAt,

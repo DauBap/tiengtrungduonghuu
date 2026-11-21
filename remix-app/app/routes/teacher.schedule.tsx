@@ -150,7 +150,7 @@ export default function TeacherSchedule() {
                         {dayClasses.map(({ cls, slot }, index) => (
                           <div key={`${cls.id}-${slot.startTime}-${index}`} className="rounded-md bg-muted/60 p-2">
                             <p className="text-sm font-medium leading-tight">{cls.name}</p>
-                            <p className="mt-1 text-xs text-muted-foreground">{cls.course.code} · HSK{cls.course.hskLevel}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">HSK {cls.course.hskLevel}</p>
                             <p className="mt-2 flex items-center gap-1 text-xs text-primary">
                               <Clock className="h-3 w-3 shrink-0" />
                               {slot.startTime} - {slot.endTime}

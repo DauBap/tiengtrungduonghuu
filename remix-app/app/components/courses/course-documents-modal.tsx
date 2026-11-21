@@ -49,7 +49,7 @@ export function CourseDocumentsModal({
             </span>
             <div className="min-w-0 space-y-1">
               <h2 id="course-documents-title" className="text-xl font-semibold tracking-tight">Quản lý tài liệu</h2>
-              <p className="text-sm text-muted-foreground">{course.code} · {course.title}</p>
+              <p className="text-sm text-muted-foreground">{course.title}</p>
             </div>
           </div>
           <button

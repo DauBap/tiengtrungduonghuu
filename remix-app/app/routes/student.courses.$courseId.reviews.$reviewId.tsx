@@ -284,7 +284,6 @@ export default function StudentCourseReviewPage() {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">Ôn tập</span>
-                <span className="text-xs font-mono text-muted-foreground">{course.code}</span>
               </div>
               <h1 className="mt-1 text-2xl font-bold tracking-tight">{reviewSet.title}</h1>
               <p className="mt-1 text-sm text-muted-foreground">{reviewSet.subtitle}</p>

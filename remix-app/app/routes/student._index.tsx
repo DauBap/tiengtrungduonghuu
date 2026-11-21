@@ -349,7 +349,6 @@ export default function StudentIndex() {
                     <div className="flex min-w-0 items-center gap-2">
                       <Clock className="h-3.5 w-3.5 shrink-0 text-primary" />
                       <span className="truncate text-sm font-medium">{enrollment.class?.name}</span>
-                      <span className="text-xs text-muted-foreground">{enrollment.course.code}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {formatSchedule(enrollment.class?.schedule)} <span className="mx-1">·</span>
@@ -516,7 +515,7 @@ export default function StudentIndex() {
                           <div className="mb-2 flex items-center justify-between gap-3">
                             <div>
                               <h3 className="text-sm font-semibold">{selectedLeaderboard.className}</h3>
-                              <p className="text-xs text-muted-foreground">{selectedLeaderboard.title} · {selectedLeaderboard.code}</p>
+                              <p className="text-xs text-muted-foreground">{selectedLeaderboard.title}</p>
                               <p className="mt-1 text-xs text-muted-foreground">
                                 Xếp theo tiến độ khóa học; nếu bằng nhau, ưu tiên thời gian học rồi lượt vào.
                               </p>

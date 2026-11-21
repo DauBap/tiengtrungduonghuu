@@ -313,7 +313,7 @@ export default function AdminCourseMockExamEditor() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1 className="text-2xl font-bold tracking-tight">{mockExam.title}</h1>
-              <p className="mt-1 text-sm text-muted-foreground">{course.code} · {course.title} · {mockExam._count.attempts} lượt làm</p>
+              <p className="mt-1 text-sm text-muted-foreground">{course.title} · {mockExam._count.attempts} lượt làm</p>
             </div>
             <Form method="post">
               <input type="hidden" name="intent" value="exam-publish" />

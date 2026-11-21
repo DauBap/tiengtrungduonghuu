@@ -164,6 +164,7 @@ async function main() {
       name: "Lớp HSK1 Sáng thứ 2",
       courseId: courses["HSK-1"].id,
       teacherId: teacher.id,
+      startDate: new Date(),
       schedule: [
         { days: [1, 3, 5], startTime: "08:00", endTime: "10:00" }
       ],
@@ -179,6 +180,7 @@ async function main() {
       name: "Lớp HSK2 Chiều thứ 4",
       courseId: courses["HSK-2"].id,
       teacherId: teacher.id,
+      startDate: new Date(),
       schedule: [
         { days: [3, 5], startTime: "18:00", endTime: "20:00" }
       ],

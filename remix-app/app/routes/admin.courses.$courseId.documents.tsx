@@ -128,7 +128,7 @@ export default function CourseDocumentsAdmin() {
             </Link>
           </Button>
           <h1 className="text-2xl font-bold tracking-tight">Kho tài liệu khóa học</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{course.code} · {course.title}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{course.title}</p>
         </div>
 
         <Card>

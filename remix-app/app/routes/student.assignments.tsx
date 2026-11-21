@@ -326,7 +326,7 @@ export default function StudentAssignments() {
                         </span>
                       </div>
                       <p className="mt-1 truncate text-sm text-muted-foreground">
-                        {assignment.courseCode} · Bài {assignment.lessonOrder}: {assignment.lessonTitle}
+                        Bài {assignment.lessonOrder}: {assignment.lessonTitle}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {isPending
@@ -392,7 +392,7 @@ export default function StudentAssignments() {
                   {selectedAssignment.title}
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {selectedAssignment.courseCode} · Bài {selectedAssignment.lessonOrder}: {selectedAssignment.lessonTitle}
+                  Bài {selectedAssignment.lessonOrder}: {selectedAssignment.lessonTitle}
                 </p>
               </div>
               <Button

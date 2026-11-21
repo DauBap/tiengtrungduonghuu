@@ -68,6 +68,7 @@ export default [
     route("attendance", "routes/admin.attendance.tsx"),
     route("reports", "routes/admin.reports.tsx"),
     route("notifications", "routes/admin.notifications.tsx"),
+    route("content-corrections", "routes/admin.content-corrections.tsx"),
     route("settings", "routes/admin.settings.tsx"),
   ]),
 
@@ -75,6 +76,7 @@ export default [
   route("teacher", "routes/teacher._index.tsx"),
   route("teacher/classes/search", "routes/teacher.classes.search.ts"),
   route("teacher/classes", "routes/teacher.classes.tsx"),
+  route("teacher/content-corrections", "routes/teacher.content-corrections.tsx"),
   route("teacher/shen-bi", "routes/teacher.shen-bi.tsx"),
   route("teacher/schedule", "routes/teacher.schedule.tsx"),
   route("teacher/courses", "routes/teacher.courses._index.tsx"),

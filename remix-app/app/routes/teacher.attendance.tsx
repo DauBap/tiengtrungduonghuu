@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { useFetcher, useLoaderData } from "react-router";
+import { Prisma } from "@prisma/client";
 import { toast } from "sonner";
 import { ClipboardCheck, LoaderCircle, Plus, Search, Trash2, Users } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
@@ -8,6 +9,7 @@ import { Overlay } from "~/components/common/overlay";
 import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
 import { Button } from "~/components/ui/button";
 import { getStudentsAbsentForThreeConsecutiveSessions } from "~/lib/attendance-streak";
+import { getScheduledSessionAvailability } from "~/lib/schedule-utils";
 import {
   excludeHandledAbsenceAlerts,
   handleConsecutiveAbsenceAlert,
@@ -38,6 +40,8 @@ interface AttendanceClass {
   id: string;
   name: string;
   course: string;
+  startDate: string;
+  schedule: unknown;
   midtermReviewSession: number | null;
   finalReviewSession: number | null;
   courseLessons: { id: string; order: number; title: string }[];
@@ -166,6 +170,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     select: {
       id: true,
       name: true,
+      startDate: true,
+      schedule: true,
       midtermReviewSession: true,
       finalReviewSession: true,
       course: {
@@ -250,6 +256,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
       id: classroom.id,
       name: classroom.name,
       course: classroom.course.title,
+      startDate: classroom.startDate.toISOString().slice(0, 10),
+      schedule: classroom.schedule,
       midtermReviewSession: classroom.midtermReviewSession,
       finalReviewSession: classroom.finalReviewSession,
       courseLessons: classroom.course.lessons,
@@ -303,66 +311,102 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if (intent === "create-session") {
     const classId = String(form.get("classId") ?? "");
-    const classroom = await prisma.class.findFirst({
-      where: { id: classId, teacherId: user.id, completedAt: null },
-      select: { id: true },
-    });
-    if (!classroom) return { success: false as const, error: "Không tìm thấy lớp hoặc bạn không có quyền điểm danh lớp này." };
-    const existing = await prisma.attendanceSession.findMany({
-      where: { classId },
-      select: { title: true },
-    });
-    const nextNumber = existing.reduce((highest, session) => {
-      const number = Number(session.title.match(/\d+$/)?.[0] ?? 0);
-      return Math.max(highest, number);
-    }, 0) + 1;
-    const enrolledStudents = await prisma.enrollment.findMany({
-      where: {
-        classId,
-        user: { is: { role: "student", isActive: true, deletedAt: null } },
-      },
-      select: { userId: true },
-    });
-    const session = await prisma.$transaction(async (tx) => {
-      const createdSession = await tx.attendanceSession.create({
-        data: {
-          classId,
-          title: `Buổi ${nextNumber}`,
-          lesson: "",
-          date: new Date(`${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`),
-        },
-        select: { id: true, title: true, lessonId: true, lesson: true, recordingUrl: true, date: true },
-      });
-      if (enrolledStudents.length > 0) {
-        await tx.attendanceRecord.createMany({
-          data: enrolledStudents.map(({ userId }) => ({
-            sessionId: createdSession.id,
-            studentId: userId,
-            status: "PRESENT",
-          })),
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        const classroom = await tx.class.findFirst({
+          where: { id: classId, teacherId: user.id, completedAt: null },
+          select: { id: true, startDate: true, schedule: true },
         });
-      }
-      return createdSession;
-    });
-    return {
-      success: true as const,
-      intent,
-      classId,
-      session: {
-        ...session,
-        lessonId: session.lessonId,
-        recordingUrl: session.recordingUrl,
-        date: session.date.toISOString().slice(0, 10),
-        records: Object.fromEntries(enrolledStudents.map(({ userId }) => [
-          userId,
-          {
-            status: "present" as const,
-            absenceReason: null,
-            tasks: { recording: false, hanzi: false, duet: false, lessonLink: false },
+        if (!classroom) {
+          return { success: false as const, error: "Không tìm thấy lớp hoặc bạn không có quyền điểm danh lớp này." };
+        }
+
+        const availability = getScheduledSessionAvailability(classroom.schedule, classroom.startDate, new Date());
+        if (!availability.allowed) {
+          const messages = {
+            "no-schedule": "Lớp chưa có lịch học hợp lệ nên chưa thể tạo buổi.",
+            "before-start-date": "Chưa đến ngày bắt đầu của lớp.",
+            "wrong-day": "Hôm nay không có buổi học theo lịch của lớp.",
+            "before-time": "Chỉ có thể tạo buổi khi đã đến giờ học theo lịch.",
+            "after-time": "Khung giờ học hôm nay đã kết thúc, không thể tạo buổi mới.",
+          } as const;
+          return { success: false as const, error: messages[availability.reason] };
+        }
+
+        const sessionDate = parseAttendanceDate(availability.date);
+        if (!sessionDate) {
+          return { success: false as const, error: "Không xác định được ngày học hiện tại. Hãy tải lại trang." };
+        }
+        const existingToday = await tx.attendanceSession.findFirst({
+          where: { classId, date: sessionDate },
+          select: { id: true },
+        });
+        if (existingToday) {
+          return { success: false as const, error: "Buổi học hôm nay đã được tạo rồi." };
+        }
+
+        const existing = await tx.attendanceSession.findMany({
+          where: { classId },
+          select: { title: true },
+        });
+        const nextNumber = existing.reduce((highest, session) => {
+          const number = Number(session.title.match(/\d+$/)?.[0] ?? 0);
+          return Math.max(highest, number);
+        }, 0) + 1;
+        const enrolledStudents = await tx.enrollment.findMany({
+          where: {
+            classId,
+            user: { is: { role: "student", isActive: true, deletedAt: null } },
           },
-        ])),
-      },
-    };
+          select: { userId: true },
+        });
+        const createdSession = await tx.attendanceSession.create({
+          data: {
+            classId,
+            title: `Buổi ${nextNumber}`,
+            lesson: "",
+            date: sessionDate,
+          },
+          select: { id: true, title: true, lessonId: true, lesson: true, recordingUrl: true, date: true },
+        });
+        if (enrolledStudents.length > 0) {
+          await tx.attendanceRecord.createMany({
+            data: enrolledStudents.map(({ userId }) => ({
+              sessionId: createdSession.id,
+              studentId: userId,
+              status: "PRESENT",
+            })),
+          });
+        }
+        return { success: true as const, classId, session: createdSession, enrolledStudents };
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+      if (!result.success) return result;
+      const { classId: createdClassId, session, enrolledStudents } = result;
+      return {
+        success: true as const,
+        intent,
+        classId: createdClassId,
+        session: {
+          ...session,
+          lessonId: session.lessonId,
+          recordingUrl: session.recordingUrl,
+          date: session.date.toISOString().slice(0, 10),
+          records: Object.fromEntries(enrolledStudents.map(({ userId }) => [
+            userId,
+            {
+              status: "present" as const,
+              absenceReason: null,
+              tasks: { recording: false, hanzi: false, duet: false, lessonLink: false },
+            },
+          ])),
+        },
+      };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
+        return { success: false as const, error: "Buổi học hôm nay vừa được tạo. Hãy tải lại trang." };
+      }
+      throw error;
+    }
   }
 
   const sessionId = String(form.get("sessionId") ?? "");
@@ -373,6 +417,7 @@ export async function action({ request }: ActionFunctionArgs) {
           id: true,
           classId: true,
           title: true,
+          date: true,
           class: {
             select: {
               courseId: true,
@@ -545,6 +590,9 @@ export async function action({ request }: ActionFunctionArgs) {
     if (!date) {
       return { success: false as const, error: "Vui lòng chọn ngày học hợp lệ." };
     }
+    if (date.toISOString().slice(0, 10) !== session.date.toISOString().slice(0, 10)) {
+      return { success: false as const, error: "Ngày buổi học được tự động lấy theo lịch và không thể thay đổi." };
+    }
     const rawRecords = String(form.get("records") ?? "");
     let parsedRecords: unknown;
     try {
@@ -679,9 +727,28 @@ export default function TeacherAttendance() {
   const [pendingDeleteSession, setPendingDeleteSession] = useState<AttendanceSession | null>(null);
   const [pendingReview, setPendingReview] = useState<ReviewPrompt | null>(null);
   const [reviewStatuses, setReviewStatuses] = useState<Record<string, StudentReviewStatus | "">>({});
+  const [currentTime, setCurrentTime] = useState(() => new Date());
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
   const selectedClass = classes.find((item) => item.id === classId) ?? classes[0] ?? null;
   const attendanceSessions = selectedClass ? sessionsByClass[selectedClass.id] ?? selectedClass.sessions : [];
+  const sessionAvailability = selectedClass
+    ? getScheduledSessionAvailability(selectedClass.schedule, selectedClass.startDate, currentTime)
+    : null;
+  const sessionAlreadyExistsToday = Boolean(
+    sessionAvailability && attendanceSessions.some(({ date }) => date === sessionAvailability.date),
+  );
+  const canCreateSession = Boolean(sessionAvailability?.allowed && !sessionAlreadyExistsToday);
+  const sessionCreationMessage = sessionAlreadyExistsToday
+    ? "Buổi học hôm nay đã được tạo rồi."
+    : sessionAvailability && !sessionAvailability.allowed
+      ? {
+          "no-schedule": "Lớp chưa có lịch học hợp lệ.",
+          "before-start-date": "Chưa đến ngày bắt đầu của lớp.",
+          "wrong-day": "Hôm nay không có buổi học theo lịch của lớp.",
+          "before-time": "Nút tạo buổi sẽ mở khi đến giờ học theo lịch.",
+          "after-time": "Khung giờ học hôm nay đã kết thúc.",
+        }[sessionAvailability.reason]
+      : "Có thể tạo buổi học trong khung giờ theo lịch.";
   const isTotalView = activeTabId === TOTAL_TAB_ID || attendanceSessions.length === 0;
   const selectedAttendanceSession = attendanceSessions.find((session) => session.id === activeTabId) ?? null;
   const sessionKey = selectedClass && selectedAttendanceSession ? `${selectedClass.id}:${selectedAttendanceSession.id}` : "";
@@ -747,6 +814,11 @@ export default function TeacherAttendance() {
       || (filter === "unmarked" ? status === null : status === filter);
     return matchesSearch && matchesFilter;
   });
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => setCurrentTime(new Date()), 30_000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     const result = addSessionFetcher.data;
@@ -868,7 +940,7 @@ export default function TeacherAttendance() {
     setFeedback("");
   }
 
-  function updateAttendanceSession(field: "lesson" | "lessonId" | "date" | "recordingUrl", value: string) {
+  function updateAttendanceSession(field: "lesson" | "lessonId" | "recordingUrl", value: string) {
     if (!selectedClass || !selectedAttendanceSession) return;
     setSessionsByClass((current) => ({
       ...current,
@@ -1133,14 +1205,17 @@ export default function TeacherAttendance() {
                 variant="default"
                 size="icon"
                 onClick={addAttendanceSession}
-                disabled={addSessionFetcher.state !== "idle" || saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
-                aria-label={addSessionFetcher.state !== "idle" ? "Đang thêm buổi học" : "Thêm buổi học"}
-                title={addSessionFetcher.state !== "idle" ? "Đang thêm buổi học" : "Thêm buổi học"}
+                disabled={!canCreateSession || addSessionFetcher.state !== "idle" || saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
+                aria-label={addSessionFetcher.state !== "idle" ? "Đang thêm buổi học" : "Thêm buổi học theo lịch"}
+                title={addSessionFetcher.state !== "idle" ? "Đang thêm buổi học" : sessionCreationMessage}
               >
                 {addSessionFetcher.state !== "idle"
                   ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" />
                   : <Plus aria-hidden="true" className="h-4 w-4" />}
               </Button>
+              <p className="basis-full px-1 text-xs text-muted-foreground" aria-live="polite">
+                {sessionCreationMessage}
+              </p>
             </div>
 
             {isTotalView ? (
@@ -1182,15 +1257,13 @@ export default function TeacherAttendance() {
                   </select>
                 </div>
                 <div className="flex min-w-0 flex-col gap-1 xl:col-span-2">
-                  <label htmlFor="attendance-date" className="text-sm text-muted-foreground">Ngày</label>
-                  <input
-                    id="attendance-date"
-                    type="date"
-                    value={selectedAttendanceSession.date}
-                    onChange={(event) => updateAttendanceSession("date", event.currentTarget.value)}
-                    disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
-                    className="h-10 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  />
+                  <span className="text-sm text-muted-foreground">Ngày</span>
+                  <p className="flex h-10 w-full min-w-0 items-center rounded-md border border-input bg-muted/40 px-3 text-sm">
+                    {new Date(`${selectedAttendanceSession.date}T00:00:00.000Z`).toLocaleDateString("vi-VN", {
+                      timeZone: "UTC",
+                      dateStyle: "long",
+                    })}
+                  </p>
                 </div>
                 <div className="flex min-w-0 flex-col gap-1 sm:col-span-2 xl:col-span-3">
                   <label htmlFor="attendance-recording-url" className="text-sm text-muted-foreground">Link bản ghi buổi học</label>

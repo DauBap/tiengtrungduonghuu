@@ -61,6 +61,7 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
         { label: "Khóa học", href: "/admin/courses", icon: BookOpen },
         { label: "Bài thi", href: "/admin/exams", icon: FileCheck2 },
         { label: "Kho câu hỏi", href: "/admin/question-bank", icon: ListChecks },
+        { label: "Duyệt góp ý nội dung", href: "/admin/content-corrections", icon: ClipboardList },
       ],
     },
     { label: "Audio AI", href: "/admin/speech-audio", icon: Volume2 },
@@ -72,6 +73,7 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
     { label: "Lịch dạy", href: "/teacher/schedule", icon: CalendarDays },
     { label: "Điểm danh", href: "/teacher/attendance", icon: ClipboardCheck },
     { label: "Khóa học của tôi", href: "/teacher/courses", icon: BookOpen },
+    { label: "Góp ý nội dung", href: "/teacher/content-corrections", icon: ListChecks },
   ],
   student: [
     { label: "Bảng điều khiển", href: "/student", icon: LayoutDashboard },

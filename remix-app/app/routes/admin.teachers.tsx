@@ -421,7 +421,7 @@ function ScheduleClassCard({
         {cls.name}
       </h3>
       <p className="mt-1 break-words text-xs opacity-80">
-        {cls.course.code} · HSK {cls.course.hskLevel}
+        HSK {cls.course.hskLevel}
         {compact && cls._count.enrollments > 0 && ` · ${cls._count.enrollments} học viên`}
       </p>
       {!compact && cls._count.enrollments > 0 && (
@@ -683,7 +683,7 @@ export default function AdminTeachers() {
                     { value: "all", label: "Tất cả khóa học" },
                     ...courses.map((course) => ({
                       value: course.id,
-                      label: `${course.code} · HSK ${course.hskLevel}`,
+                      label: `HSK ${course.hskLevel} · ${course.title}`,
                       searchText: course.title,
                     })),
                   ]}
@@ -858,7 +858,7 @@ export default function AdminTeachers() {
                   <div key={cls.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <p className="font-medium">{cls.name}</p>
-                      <p className="text-sm text-muted-foreground">{cls.course.code} · HSK {cls.course.hskLevel}</p>
+                      <p className="text-sm text-muted-foreground">HSK {cls.course.hskLevel} · {cls.course.title}</p>
                     </div>
                     <div className="sm:w-64">
                       <TeacherAssignment cls={cls} teachers={teachers} />

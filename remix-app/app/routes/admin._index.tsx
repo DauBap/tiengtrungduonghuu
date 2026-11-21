@@ -91,7 +91,7 @@ export default function AdminIndex() {
                     </div>
                     <div>
                       <p className="text-sm font-medium">{course.title}</p>
-                      <p className="text-xs text-muted-foreground">HSK {course.hskLevel} - {course.code}</p>
+                      <p className="text-xs text-muted-foreground">HSK {course.hskLevel}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">

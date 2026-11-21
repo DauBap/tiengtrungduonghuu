@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { LoaderFunctionArgs } from "react-router";
 import { Link, useLoaderData } from "react-router";
-import { ArrowUpRight, CheckCircle2, ChevronDown, Circle, Clock3, Search, Video, X } from "lucide-react";
+import { ArrowUpRight, CalendarDays, CheckCircle2, ChevronDown, Circle, Search, Video, X } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Overlay } from "~/components/common/overlay";
 import { Button } from "~/components/ui/button";
@@ -48,6 +48,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       select: {
         id: true,
         name: true,
+        startDate: true,
         schedule: true,
         course: {
           select: {
@@ -159,6 +160,41 @@ function getTimeInMinutes(value: string) {
   return match ? Number(match[1]) * 60 + Number(match[2]) : null;
 }
 
+function parseDateOnly(value: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  return date.toISOString().slice(0, 10) === value ? date : null;
+}
+
+function hasScheduledSessionInRange(
+  schedule: unknown,
+  classStartDate: Date,
+  rangeStart: Date | null,
+  rangeEnd: Date | null,
+) {
+  const slots = getScheduleSlots(schedule);
+  if (slots.length === 0) return false;
+
+  const classStart = Date.UTC(
+    classStartDate.getUTCFullYear(),
+    classStartDate.getUTCMonth(),
+    classStartDate.getUTCDate(),
+  );
+  const effectiveStart = Math.max(classStart, rangeStart?.getTime() ?? classStart);
+  const effectiveEnd = rangeEnd?.getTime() ?? null;
+  if (effectiveEnd !== null && effectiveEnd < effectiveStart) return false;
+
+  const dayCount = effectiveEnd === null
+    ? 6
+    : Math.min(6, Math.floor((effectiveEnd - effectiveStart) / 86_400_000));
+  const firstDay = new Date(effectiveStart).getUTCDay();
+  return slots.some((slot) => slot.days.some((day) =>
+    (day - firstDay + 7) % 7 <= dayCount
+  ));
+}
+
 export default function AdminClassOverview() {
   const { user, classes, hskCounts } = useLoaderData<typeof loader>();
   const [query, setQuery] = useState("");
@@ -167,6 +203,8 @@ export default function AdminClassOverview() {
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [selectedRecordClassId, setSelectedRecordClassId] = useState<string | null>(null);
   const [showClassRecordings, setShowClassRecordings] = useState(false);
   const [classPage, setClassPage] = useState(1);
@@ -185,8 +223,14 @@ export default function AdminClassOverview() {
       .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, "vi"));
   }, [classes, selectedHsk]);
   const hasActiveFilters = Boolean(
-    query.trim() || selectedHsk || selectedTeacher || selectedDays.length || startTime || endTime,
+    query.trim() || selectedHsk || selectedTeacher || selectedDays.length || startTime || endTime || dateFrom || dateTo,
   );
+  const activeScheduleFilterCount = Number(Boolean(dateFrom || dateTo))
+    + Number(selectedDays.length > 0)
+    + Number(Boolean(startTime || endTime));
+  const rangeStart = dateFrom ? parseDateOnly(dateFrom) : null;
+  const rangeEnd = dateTo ? parseDateOnly(dateTo) : null;
+  const hasInvalidDateRange = Boolean(rangeStart && rangeEnd && rangeEnd < rangeStart);
   const startTimeMinutes = startTime ? getTimeInMinutes(startTime) : null;
   const endTimeMinutes = endTime ? getTimeInMinutes(endTime) : null;
   const hasInvalidTimeRange = startTimeMinutes != null
@@ -210,6 +254,9 @@ export default function AdminClassOverview() {
         const matchesHsk = !selectedHsk || String(classroom.course.hskLevel) === selectedHsk;
         const matchesTeacher = !selectedTeacher || (classroom.teacher?.id ?? "unassigned") === selectedTeacher;
         const searchText = `${classroom.name} ${classroom.course.code} ${classroom.course.title} ${classroom.teacher?.name ?? ""}`.toLocaleLowerCase("vi");
+        const hasDateRange = Boolean(dateFrom || dateTo);
+        const matchesDateRange = !hasDateRange || (!hasInvalidDateRange
+          && hasScheduledSessionInRange(classroom.schedule, classroom.startDate, rangeStart, rangeEnd));
         const hasScheduleFilter = selectedDays.length > 0 || Boolean(startTime || endTime);
         const matchesSchedule = !hasScheduleFilter || (!hasInvalidTimeRange && getScheduleSlots(classroom.schedule).some((slot) => {
           const slotStartMinutes = getTimeInMinutes(slot.startTime);
@@ -221,13 +268,14 @@ export default function AdminClassOverview() {
         return matchesHsk
           && matchesTeacher
           && (!normalizedQuery || searchText.includes(normalizedQuery))
+          && matchesDateRange
           && matchesSchedule;
       })
       .sort((left, right) => (
         getTrackedAttendanceSessionCount(right.attendanceSessions)
         - getTrackedAttendanceSessionCount(left.attendanceSessions)
       ));
-  }, [classes, query, selectedHsk, selectedTeacher, selectedDays, startTime, endTime, hasInvalidTimeRange, startTimeMinutes, endTimeMinutes]);
+  }, [classes, query, selectedHsk, selectedTeacher, selectedDays, startTime, endTime, hasInvalidTimeRange, startTimeMinutes, endTimeMinutes, dateFrom, dateTo, hasInvalidDateRange, rangeStart, rangeEnd]);
   const classPageCount = Math.max(1, Math.ceil(filteredClasses.length / classesPerPage));
   const currentClassPage = Math.min(classPage, classPageCount);
   const pageClasses = filteredClasses.slice(
@@ -372,80 +420,129 @@ export default function AdminClassOverview() {
                 ))}
               </select>
             </label>
-            <div className="flex h-10 items-center gap-1 rounded-md border border-input bg-background px-1.5" role="group" aria-label="Lọc lớp theo thứ trong tuần">
-              <span className="px-1 text-xs text-muted-foreground">Thứ</span>
-              {WEEKDAYS.map(({ value, label }) => {
-                const selected = selectedDays.includes(value);
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-label={`Thứ ${label}`}
-                    aria-pressed={selected}
-                    onClick={() => {
-                      setSelectedDays((current) => selected
-                        ? current.filter((day) => day !== value)
-                        : [...current, value]);
-                      setClassPage(1);
-                    }}
-                    className={`h-7 min-w-8 rounded px-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                      selected
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
             <details className="group relative">
               <summary className="flex h-10 cursor-pointer list-none items-center gap-2 rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-                <Clock3 aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
-                <span>
-                  {startTime || endTime
-                    ? `${startTime || "00:00"}–${endTime || "23:59"}`
-                    : "Khung giờ"}
-                </span>
+                <CalendarDays aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
+                <span>Lịch học</span>
+                {activeScheduleFilterCount > 0 && (
+                  <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/10 px-1.5 text-xs font-semibold tabular-nums text-primary">
+                    {activeScheduleFilterCount}
+                  </span>
+                )}
                 <ChevronDown aria-hidden="true" className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
               </summary>
-              <div className="absolute right-0 z-30 mt-2 w-72 rounded-lg border bg-popover p-3 text-popover-foreground shadow-lg">
-                <p className="text-sm font-medium">Giờ bắt đầu của lớp</p>
-                <p className="mt-1 text-xs text-muted-foreground">Lọc lớp có giờ bắt đầu trong khoảng này.</p>
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <label className="space-y-1">
-                    <span className="text-xs text-muted-foreground">Từ</span>
-                    <input
-                      type="time"
-                      value={startTime}
-                      max={endTime || undefined}
-                      onChange={(event) => {
-                        setStartTime(event.currentTarget.value);
-                        setClassPage(1);
-                      }}
-                      aria-label="Giờ bắt đầu từ"
-                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-xs text-muted-foreground">Đến</span>
-                    <input
-                      type="time"
-                      value={endTime}
-                      min={startTime || undefined}
-                      onChange={(event) => {
-                        setEndTime(event.currentTarget.value);
-                        setClassPage(1);
-                      }}
-                      aria-label="Giờ bắt đầu đến"
-                      aria-invalid={hasInvalidTimeRange}
-                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
-                  </label>
-                </div>
-                {hasInvalidTimeRange && (
-                  <p role="alert" className="mt-2 text-xs text-destructive">Giờ kết thúc cần bằng hoặc sau giờ bắt đầu.</p>
-                )}
+              <div className="absolute right-0 z-30 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:w-96">
+                <section aria-labelledby="schedule-date-filter-heading">
+                  <h3 id="schedule-date-filter-heading" className="text-sm font-medium">Khoảng ngày</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Lọc lớp có buổi học từ ngày bắt đầu của lớp.
+                  </p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <label className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Từ ngày</span>
+                      <input
+                        type="date"
+                        value={dateFrom}
+                        max={dateTo || undefined}
+                        onChange={(event) => {
+                          setDateFrom(event.currentTarget.value);
+                          setClassPage(1);
+                        }}
+                        aria-label="Ngày bắt đầu khoảng lọc"
+                        className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      />
+                    </label>
+                    <label className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Đến ngày</span>
+                      <input
+                        type="date"
+                        value={dateTo}
+                        min={dateFrom || undefined}
+                        onChange={(event) => {
+                          setDateTo(event.currentTarget.value);
+                          setClassPage(1);
+                        }}
+                        aria-label="Ngày kết thúc khoảng lọc"
+                        aria-invalid={hasInvalidDateRange}
+                        className="h-10 w-full rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      />
+                    </label>
+                  </div>
+                  {hasInvalidDateRange && (
+                    <p role="alert" className="mt-2 text-xs text-destructive">
+                      Ngày kết thúc cần bằng hoặc sau ngày bắt đầu.
+                    </p>
+                  )}
+                </section>
+
+                <section aria-labelledby="schedule-weekday-filter-heading" className="mt-4 border-t pt-4">
+                  <h3 id="schedule-weekday-filter-heading" className="text-sm font-medium">Thứ trong tuần</h3>
+                  <div className="mt-2 flex items-center justify-between gap-1" role="group" aria-label="Lọc lớp theo thứ trong tuần">
+                    {WEEKDAYS.map(({ value, label }) => {
+                      const selected = selectedDays.includes(value);
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          aria-label={`Thứ ${label}`}
+                          aria-pressed={selected}
+                          onClick={() => {
+                            setSelectedDays((current) => selected
+                              ? current.filter((day) => day !== value)
+                              : [...current, value]);
+                            setClassPage(1);
+                          }}
+                          className={`h-8 min-w-8 rounded px-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                            selected
+                              ? "bg-primary text-primary-foreground"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <section aria-labelledby="schedule-time-filter-heading" className="mt-4 border-t pt-4">
+                  <h3 id="schedule-time-filter-heading" className="text-sm font-medium">Khung giờ bắt đầu</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">Lọc theo giờ bắt đầu của lớp.</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <label className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Từ</span>
+                      <input
+                        type="time"
+                        value={startTime}
+                        max={endTime || undefined}
+                        onChange={(event) => {
+                          setStartTime(event.currentTarget.value);
+                          setClassPage(1);
+                        }}
+                        aria-label="Giờ bắt đầu từ"
+                        className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      />
+                    </label>
+                    <label className="space-y-1">
+                      <span className="text-xs text-muted-foreground">Đến</span>
+                      <input
+                        type="time"
+                        value={endTime}
+                        min={startTime || undefined}
+                        onChange={(event) => {
+                          setEndTime(event.currentTarget.value);
+                          setClassPage(1);
+                        }}
+                        aria-label="Giờ bắt đầu đến"
+                        aria-invalid={hasInvalidTimeRange}
+                        className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      />
+                    </label>
+                  </div>
+                  {hasInvalidTimeRange && (
+                    <p role="alert" className="mt-2 text-xs text-destructive">Giờ kết thúc cần bằng hoặc sau giờ bắt đầu.</p>
+                  )}
+                </section>
               </div>
             </details>
             <button
@@ -458,6 +555,8 @@ export default function AdminClassOverview() {
                 setSelectedDays([]);
                 setStartTime("");
                 setEndTime("");
+                setDateFrom("");
+                setDateTo("");
                 setClassPage(1);
               }}
               className="ml-auto whitespace-nowrap px-2 py-2 text-sm font-medium text-primary underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:text-muted-foreground disabled:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -489,7 +588,6 @@ export default function AdminClassOverview() {
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="font-semibold">{classroom.name}</h3>
                           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">HSK {classroom.course.hskLevel}</span>
-                          <span className="text-xs text-muted-foreground">{classroom.course.code}</span>
                           <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">Đang học</span>
                         </div>
                         <p className="text-sm text-muted-foreground">
@@ -556,7 +654,7 @@ export default function AdminClassOverview() {
               <div>
                 <h2 id="class-details-dialog-title" className="text-lg font-semibold">{selectedRecordClass.name}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  HSK {selectedRecordClass.course.hskLevel} · {selectedRecordClass.course.code} · {selectedRecordClass.course.title}
+                  HSK {selectedRecordClass.course.hskLevel} · {selectedRecordClass.course.title}
                 </p>
               </div>
               <Button

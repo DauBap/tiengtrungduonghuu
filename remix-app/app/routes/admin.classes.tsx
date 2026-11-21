@@ -11,7 +11,7 @@ import { Label } from "~/components/ui/label";
 import { Badge } from "~/components/ui/badge";
 import { Overlay } from "~/components/common/overlay";
 import {
-  School, Plus, Pencil, Trash2, X, Search, Loader2, Users, UserCheck, Check, ChevronDown,
+  School, Plus, Pencil, Trash2, X, Search, Loader2, Users, UserCheck, Check, ChevronDown, CalendarDays,
   ChevronLeft, ChevronRight, Save, UserPlus, UserMinus, Clock,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -46,6 +46,29 @@ function parseSchedule(raw: unknown): ScheduleSlot[] {
     (s): s is ScheduleSlot =>
       s && Array.isArray(s.days) && typeof s.startTime === "string" && typeof s.endTime === "string"
   );
+}
+
+function isValidSchedule(schedule: ScheduleSlot[]): boolean {
+  const validTime = (time: string) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(time);
+  return schedule.length > 0 && schedule.every((slot) =>
+    slot.days.length > 0
+    && slot.days.every((day) => Number.isInteger(day) && day >= 0 && day <= 6)
+    && validTime(slot.startTime)
+    && validTime(slot.endTime)
+    && slot.startTime < slot.endTime
+  );
+}
+
+function parseDateOnly(value: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  return date.toISOString().slice(0, 10) === value ? date : null;
+}
+
+function formatStartDate(value: Date): string {
+  return value.toLocaleDateString("vi-VN", { timeZone: "UTC" });
 }
 
 function formatSchedule(slots: ScheduleSlot[]): string {
@@ -102,13 +125,21 @@ export async function action({ request }: ActionFunctionArgs) {
     const name = String(form.get("name") ?? "").trim();
     const teacherId = String(form.get("teacherId") ?? "").trim() || null;
     const maxStudents = Math.max(1, parseInt(String(form.get("maxStudents") ?? "6"), 10) || 6);
+    const startDate = parseDateOnly(String(form.get("startDate") ?? "").trim());
     const scheduleRaw = String(form.get("schedule") ?? "[]");
     const midtermReviewSession = parseReviewSession(form.get("midtermReviewSession"));
     const finalReviewSession = parseReviewSession(form.get("finalReviewSession"));
     let schedule: ScheduleSlot[] = [];
-    try { schedule = JSON.parse(scheduleRaw); } catch { schedule = []; }
+    try { schedule = parseSchedule(JSON.parse(scheduleRaw)); } catch { schedule = []; }
 
     if (!name) return { error: "Vui lòng nhập tên lớp", field: "name" };
+    if (!startDate) return { error: "Vui lòng chọn ngày bắt đầu.", field: "startDate" };
+    if (!isValidSchedule(schedule)) {
+      return {
+        error: "Vui lòng thêm ít nhất một khung giờ và chọn ngày học, giờ bắt đầu, giờ kết thúc hợp lệ.",
+        field: "schedule",
+      };
+    }
     if (midtermReviewSession === undefined || finalReviewSession === undefined) {
       return { error: "Số buổi đánh giá phải là số nguyên dương hoặc để trống." };
     }
@@ -124,6 +155,7 @@ export async function action({ request }: ActionFunctionArgs) {
           name,
           courseId,
           teacherId,
+          startDate,
           maxStudents,
           schedule: schedule as object[],
           midtermReviewSession,
@@ -134,7 +166,15 @@ export async function action({ request }: ActionFunctionArgs) {
       const classId = String(form.get("classId"));
       await prisma.class.update({
         where: { id: classId },
-        data: { name, teacherId, maxStudents, schedule: schedule as object[], midtermReviewSession, finalReviewSession },
+        data: {
+          name,
+          teacherId,
+          startDate,
+          maxStudents,
+          schedule: schedule as object[],
+          midtermReviewSession,
+          finalReviewSession,
+        },
       });
     }
     return { success: true };
@@ -395,18 +435,23 @@ function SearchableSelect({
 
 // ─── Schedule Picker ──────────────────────────────────────────────────────────
 
-function SchedulePicker({ defaultValue }: { defaultValue: ScheduleSlot[] }) {
-  const [slots, setSlots] = useState<ScheduleSlot[]>(defaultValue);
+function SchedulePicker({
+  slots,
+  onChange,
+}: {
+  slots: ScheduleSlot[];
+  onChange: (slots: ScheduleSlot[]) => void;
+}) {
 
   const addSlot = () =>
-    setSlots((prev) => [...prev, { days: [1, 3, 5], startTime: "20:00", endTime: "21:30" }]);
+    onChange([...slots, { days: [1, 3, 5], startTime: "20:00", endTime: "21:30" }]);
 
   const removeSlot = (i: number) =>
-    setSlots((prev) => prev.filter((_, idx) => idx !== i));
+    onChange(slots.filter((_, idx) => idx !== i));
 
   const toggleDay = (slotIdx: number, day: number) =>
-    setSlots((prev) =>
-      prev.map((s, i) => {
+    onChange(
+      slots.map((s, i) => {
         if (i !== slotIdx) return s;
         const days = s.days.includes(day) ? s.days.filter((d) => d !== day) : [...s.days, day].sort((a, b) => a - b);
         return { ...s, days };
@@ -414,8 +459,8 @@ function SchedulePicker({ defaultValue }: { defaultValue: ScheduleSlot[] }) {
     );
 
   const updateTime = (slotIdx: number, field: "startTime" | "endTime", value: string) =>
-    setSlots((prev) =>
-      prev.map((s, i) => {
+    onChange(
+      slots.map((s, i) => {
         if (i !== slotIdx) return s;
         if (field === "endTime") return { ...s, endTime: value };
         const endTime = addMinutesToTime(value, DEFAULT_SLOT_DURATION_MINUTES);
@@ -515,6 +560,14 @@ function ClassFormModal({
   const isLoading = fetcher.state !== "idle";
   const isEdit = mode === "edit";
   const defaultSchedule = parseSchedule(cls?.schedule);
+  const [schedule, setSchedule] = useState<ScheduleSlot[]>(defaultSchedule);
+  const [scheduleError, setScheduleError] = useState(false);
+  const [startDateError, setStartDateError] = useState(false);
+  const [startDate, setStartDate] = useState(
+    cls?.startDate
+    ? new Date(cls.startDate).toISOString().slice(0, 10)
+    : "",
+  );
   const [midtermReviewSession, setMidtermReviewSession] = useState(
     cls?.midtermReviewSession == null ? "" : String(cls.midtermReviewSession),
   );
@@ -525,7 +578,7 @@ function ClassFormModal({
     { value: "", label: "— Chọn khóa học —", searchText: "chọn khóa học" },
     ...courses.map((course) => ({
       value: course.id,
-      label: `HSK${course.hskLevel} · ${course.code} · ${course.title}`,
+      label: `HSK${course.hskLevel} · ${course.title}`,
       searchText: `${course.hskLevel} ${course.code} ${course.title}`,
     })),
   ];
@@ -539,12 +592,34 @@ function ClassFormModal({
   ];
 
   useEffect(() => {
-    if (fetcher.state === "idle" && fetcher.data?.success) onClose();
-  }, [fetcher.state, fetcher.data, onClose]);
+    if (fetcher.state !== "idle" || !fetcher.data?.success) return;
+    toast.success(isEdit ? "Đã cập nhật thông tin lớp học." : "Đã tạo lớp học thành công.");
+    onClose();
+  }, [fetcher.state, fetcher.data, isEdit, onClose]);
 
   return (
     <Overlay onClose={onClose}>
-      <fetcher.Form method="post" className="space-y-4">
+      <fetcher.Form
+        method="post"
+        className="space-y-4"
+        noValidate
+        onSubmit={(event) => {
+          const form = event.currentTarget;
+          const missingStartDate = !startDate;
+          const invalidSchedule = !isValidSchedule(schedule);
+          setStartDateError(missingStartDate);
+          setScheduleError(invalidSchedule);
+
+          if (missingStartDate || invalidSchedule) {
+            event.preventDefault();
+            if (missingStartDate) {
+              form.querySelector<HTMLInputElement>("#startDate")?.focus();
+            } else {
+              form.querySelector<HTMLButtonElement>("[data-schedule-picker] button")?.focus();
+            }
+          }
+        }}
+      >
         <div className="flex items-start justify-between">
           <h2 className="text-lg font-bold">{isEdit ? "Sửa lớp học" : "Tạo lớp học mới"}</h2>
           <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground">
@@ -655,10 +730,42 @@ function ClassFormModal({
           />
         </div>
 
-        {/* Lịch học */}
         <div className="space-y-2">
-          <Label>Lịch học <span className="text-muted-foreground font-normal text-xs">(tùy chọn)</span></Label>
-          <SchedulePicker defaultValue={defaultSchedule} />
+          <Label htmlFor="startDate">Ngày bắt đầu <span className="text-destructive">*</span></Label>
+          <Input
+            id="startDate"
+            name="startDate"
+            type="date"
+            aria-invalid={startDateError}
+            aria-describedby={startDateError ? "startDate-error" : undefined}
+            value={startDate}
+            onChange={(event) => {
+              setStartDate(event.currentTarget.value);
+              if (event.currentTarget.value) setStartDateError(false);
+            }}
+          />
+          {startDateError && (
+            <p id="startDate-error" role="alert" className="text-sm text-destructive">
+              Bạn vui lòng chọn ngày bắt đầu cho lớp nhé.
+            </p>
+          )}
+        </div>
+
+        {/* Lịch học */}
+        <div className="space-y-2" data-schedule-picker>
+          <Label>Lịch học <span className="text-destructive">*</span></Label>
+          <SchedulePicker
+            slots={schedule}
+            onChange={(nextSchedule) => {
+              setSchedule(nextSchedule);
+              if (isValidSchedule(nextSchedule)) setScheduleError(false);
+            }}
+          />
+          {scheduleError && (
+            <p role="alert" className="text-sm text-destructive">
+              Vui lòng thêm ít nhất một khung giờ hợp lệ.
+            </p>
+          )}
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
@@ -1003,10 +1110,14 @@ export default function AdminClasses() {
                             <div className="flex flex-wrap items-center gap-2">
                               <h2 className="break-words text-sm font-semibold leading-5">{cls.name}</h2>
                               <Badge variant="outline" className="shrink-0 text-[11px] font-medium">
-                                HSK{cls.course.hskLevel} · {cls.course.code}
+                                HSK{cls.course.hskLevel}
                               </Badge>
                             </div>
                             <p className="mt-1 break-words text-sm text-muted-foreground">{cls.course.title}</p>
+                            <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                              Bắt đầu {formatStartDate(cls.startDate)}
+                            </p>
                           </div>
 
                           <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">

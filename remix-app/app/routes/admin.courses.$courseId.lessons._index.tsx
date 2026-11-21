@@ -359,7 +359,7 @@ function MockExamModal({
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-lg font-bold">{isEdit ? "Sửa thông tin bài thi thử" : "Tạo bài thi thử"}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{course.code} · {course.title}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{course.title}</p>
           </div>
           <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Đóng">
             <X className="h-5 w-5" />
@@ -483,7 +483,7 @@ export default function AdminCourseLessons() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">Bài học</h1>
-                <p className="text-muted-foreground text-sm mt-1">{course.code} - {course.title}</p>
+                <p className="text-muted-foreground text-sm mt-1">{course.title}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button variant="outline" className="hover:border-primary hover:bg-primary hover:text-primary-foreground" onClick={() => setShowMockExamModal(true)}>

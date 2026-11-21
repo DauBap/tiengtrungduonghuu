@@ -164,7 +164,7 @@ export default function AdminStudentReviewDetails() {
                     <div className="flex flex-wrap items-start justify-between gap-3 border-b px-4 py-4">
                       <div>
                         <p className="text-sm font-semibold">
-                          HSK {classroom.course.hskLevel} · {classroom.course.code}
+                          HSK {classroom.course.hskLevel}
                         </p>
                         <p className="mt-0.5 text-sm">{classroom.name}</p>
                         <p className="mt-1 text-xs text-muted-foreground">

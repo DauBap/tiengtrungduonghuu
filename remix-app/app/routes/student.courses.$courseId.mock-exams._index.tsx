@@ -57,7 +57,7 @@ export default function StudentMockExamList() {
           <Button asChild variant="ghost" size="sm" className="mb-2">
             <Link to={`/student/courses/${course.id}`}><ArrowLeft className="mr-1.5 h-4 w-4" />Quay lại khóa học</Link>
           </Button>
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">HSK {course.hskLevel} · {course.code}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary">HSK {course.hskLevel}</p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight">Bài thi thử</h1>
           <p className="mt-1 text-sm text-muted-foreground">{course.title} · Khu vực thi riêng, không ảnh hưởng tiến độ bài học.</p>
         </div>

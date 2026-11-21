@@ -245,7 +245,6 @@ export default function AdminCourses() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Mã</TableHead>
                   <TableHead>Tên</TableHead>
                   <TableHead>HSK</TableHead>
                   <TableHead>Trạng thái</TableHead>
@@ -256,7 +255,6 @@ export default function AdminCourses() {
               <TableBody>
                 {filtered.map((course) => (
                   <TableRow key={course.id}>
-                    <TableCell className="font-mono text-xs font-medium">{course.code}</TableCell>
                     <TableCell className="font-medium">{course.title}</TableCell>
                     <TableCell>
                       <span className="rounded-md bg-primary/10 px-2 py-1 text-xs font-bold text-primary">HSK {course.hskLevel}</span>
@@ -303,7 +301,7 @@ export default function AdminCourses() {
 
             <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive animate-pulse">
               <p>
-                Xóa khóa học <strong>{courseToDelete.title}</strong> (<span className="font-mono">{courseToDelete.code}</span>)?
+                Xóa khóa học <strong>{courseToDelete.title}</strong>?
                 Tất cả bài học, từ vựng, block, tiến độ và dữ liệu liên quan của khóa học này sẽ bị xóa vĩnh viễn.
               </p>
             </div>
@@ -332,7 +330,7 @@ export default function AdminCourses() {
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <h2 id="edit-course-title" className="text-xl font-semibold tracking-tight">Sửa khóa học</h2>
-                <p className="text-sm text-muted-foreground">{courseToEdit.code} · HSK {courseToEdit.hskLevel}</p>
+                <p className="text-sm text-muted-foreground">HSK {courseToEdit.hskLevel}</p>
               </div>
               <button
                 type="button"

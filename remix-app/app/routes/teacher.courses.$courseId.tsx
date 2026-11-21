@@ -58,7 +58,6 @@ export default function TeacherCourseDetail() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">HSK {course.hskLevel}</span>
-                <span className="text-xs font-mono text-muted-foreground">{course.code}</span>
               </div>
               <h1 className="text-2xl font-bold tracking-tight mt-1">{course.title}</h1>
               <p className="text-muted-foreground text-sm mt-1 max-w-2xl">{course.description}</p>

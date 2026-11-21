@@ -8,8 +8,110 @@ export interface ScheduleSlot {
   endTime: string;
 }
 
+export type ScheduledSessionAvailability =
+  | { allowed: true; date: string }
+  | {
+      allowed: false;
+      date: string;
+      reason: "no-schedule" | "before-start-date" | "wrong-day" | "before-time" | "after-time";
+    };
+
 const DAY_NAMES = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 const DAY_NAMES_FULL = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+const WEEKDAY_NUMBERS: Record<string, number> = {
+  Sun: 0,
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6,
+};
+
+function getVietnameseLocalDateTime(now: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    weekday: "short",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  return {
+    date: `${values.year}-${values.month}-${values.day}`,
+    day: WEEKDAY_NUMBERS[values.weekday] ?? -1,
+    minutes: Number(values.hour) * 60 + Number(values.minute),
+  };
+}
+
+function parseTimeMinutes(value: unknown) {
+  if (typeof value !== "string") return null;
+  const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(value);
+  return match ? Number(match[1]) * 60 + Number(match[2]) : null;
+}
+
+export function getScheduledSessionAvailability(
+  schedule: unknown,
+  startDate: Date | string,
+  now: Date = new Date(),
+): ScheduledSessionAvailability {
+  const localNow = getVietnameseLocalDateTime(now);
+  const classStartDate = startDate instanceof Date
+    ? startDate.toISOString().slice(0, 10)
+    : startDate.slice(0, 10);
+  if (!Array.isArray(schedule) || schedule.length === 0) {
+    return { allowed: false, date: localNow.date, reason: "no-schedule" };
+  }
+  if (classStartDate > localNow.date) {
+    return { allowed: false, date: localNow.date, reason: "before-start-date" };
+  }
+
+  const matchingDaySlots = schedule.flatMap((value) => {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) return [];
+    const slot = value as Partial<ScheduleSlot>;
+    if (!Array.isArray(slot.days) || !slot.days.includes(localNow.day)) return [];
+    const startMinutes = parseTimeMinutes(slot.startTime);
+    const endMinutes = parseTimeMinutes(slot.endTime);
+    return startMinutes !== null && endMinutes !== null && endMinutes > startMinutes
+      ? [{ startMinutes, endMinutes }]
+      : [];
+  });
+  if (matchingDaySlots.length === 0) {
+    const hasValidSlot = schedule.some((value) => {
+      if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+      const slot = value as Partial<ScheduleSlot>;
+      const startMinutes = parseTimeMinutes(slot.startTime);
+      const endMinutes = parseTimeMinutes(slot.endTime);
+      return Array.isArray(slot.days)
+        && slot.days.some((day) => Number.isInteger(day) && day >= 0 && day <= 6)
+        && startMinutes !== null
+        && endMinutes !== null
+        && endMinutes > startMinutes;
+    });
+    return {
+      allowed: false,
+      date: localNow.date,
+      reason: hasValidSlot ? "wrong-day" : "no-schedule",
+    };
+  }
+
+  if (matchingDaySlots.some(({ startMinutes, endMinutes }) =>
+    localNow.minutes >= startMinutes && localNow.minutes <= endMinutes
+  )) {
+    return { allowed: true, date: localNow.date };
+  }
+
+  return {
+    allowed: false,
+    date: localNow.date,
+    reason: matchingDaySlots.some(({ startMinutes }) => localNow.minutes < startMinutes)
+      ? "before-time"
+      : "after-time",
+  };
+}
 
 /**
  * Format schedule slots to readable Vietnamese string

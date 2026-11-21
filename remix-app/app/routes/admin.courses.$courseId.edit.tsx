@@ -82,7 +82,7 @@ export default function EditCourse() {
             <h1 className="text-2xl font-bold tracking-tight">Chỉnh sửa khóa học</h1>
             <CourseStatusBadge status={course.status} />
           </div>
-          <p className="text-muted-foreground text-sm mt-1">{course.code} - HSK {course.hskLevel}</p>
+          <p className="text-muted-foreground text-sm mt-1">HSK {course.hskLevel}</p>
         </div>
         <Card>
           <CardHeader>

@@ -1,7 +1,8 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { Link, useLoaderData } from "react-router";
-import { useState } from "react";
-import { ArrowLeft, BookOpen, Eye, Repeat2, Volume2 } from "lucide-react";
+import { Link, useFetcher, useLoaderData } from "react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
+import { ArrowLeft, BookOpen, Eye, PencilLine, Repeat2, Send, Volume2 } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
 import { LessonTabs, type LessonTab } from "~/components/lessons/lesson-tabs";
@@ -18,6 +19,12 @@ import { createVocabularyTest } from "~/lib/vocabulary-test";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 import { speakChinese } from "~/lib/speech";
+import { formatAudioScript, getCorrectionTargetFields, type ContentCorrectionTargetType } from "~/lib/content-corrections";
+import { listLessonCorrectionTargets } from "~/lib/content-corrections.server";
+import { WORD_TYPE_META, isWordType } from "~/lib/word-types";
+import { WordTypeMultiSelect } from "~/components/ui/word-type-multi-select";
+import { AudioScriptCorrectionEditor } from "~/components/ui/audio-script-correction-editor";
+import { GrammarQuestionsCorrectionEditor } from "~/components/ui/grammar-questions-correction-editor";
 
 function makePreviewWorkbookConfig(config: unknown): WorkbookConfig | null {
   const parsed = parseWorkbookConfig(config);
@@ -46,7 +53,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     throw new Response("Không có quyền truy cập", { status: 403 });
   }
 
-  const [lesson, courseWords] = await Promise.all([
+  const [lesson, courseWords, correctionTargets] = await Promise.all([
     prisma.lesson.findFirst({
       where: { id: lessonId, courseId },
       select: {
@@ -120,6 +127,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         wordTypes: true,
       },
     }),
+    prisma.$transaction((tx) => listLessonCorrectionTargets(tx, lessonId)),
   ]);
   if (!lesson) throw new Response("Không tìm thấy bài học", { status: 404 });
   const phonetics = await getPhoneticsConfig(lesson.id);
@@ -208,6 +216,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         speakers: script.showScript ? script.speakers : [],
       })),
     },
+    correctionTargets: correctionTargets ?? [],
     blocks,
     phonetics: safePhonetics,
     availableTypes: [...availableTypes],
@@ -227,8 +236,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 }
 
 export default function TeacherLessonPreview() {
-  const { user, lesson, blocks, phonetics, availableTypes: availableTypeList, hasQuiz, initialTab, vocabularyQuestionSets } = useLoaderData<typeof loader>();
+  const { user, lesson, blocks, phonetics, availableTypes: availableTypeList, hasQuiz, initialTab, vocabularyQuestionSets, correctionTargets } = useLoaderData<typeof loader>();
   const [activeTab, setActiveTab] = useState<LessonTab>(initialTab);
+  const [isCorrectionFormOpen, setIsCorrectionFormOpen] = useState(false);
+  const [selectedCorrectionKey, setSelectedCorrectionKey] = useState("");
+  const [grammarCorrectionTab, setGrammarCorrectionTab] = useState<"content" | "practice">("content");
+  const [reasonError, setReasonError] = useState("");
+  const correctionDialogRef = useRef<HTMLDialogElement>(null);
   const [selectedScriptId, setSelectedScriptId] = useState(lesson.audioScripts[0]?.id ?? "");
   const [showLessonPinyin, setShowLessonPinyin] = useState(true);
   const [autoReplay, setAutoReplay] = useState(false);
@@ -236,6 +250,190 @@ export default function TeacherLessonPreview() {
   const activeBlock = blocks.find((block) => block.type === activeTab);
   const workbookBlock = blocks.find((block) => block.type === "WORKBOOK");
   const selectedScript = lesson.audioScripts.find((script) => script.id === selectedScriptId) ?? lesson.audioScripts[0];
+  const correctionFetcher = useFetcher<{ success?: boolean; error?: string }>();
+  const currentTabTargets = useMemo(() => {
+    const allowedTypes: ContentCorrectionTargetType[] = (() => {
+      switch (activeTab) {
+        case "FLASHCARD":
+          return ["VOCABULARY_ITEM", "SENTENCE_ITEM", "LEARNING_BLOCK"];
+        case "LISTENING":
+        case "WORKBOOK":
+          return ["LEARNING_BLOCK"];
+        case "VOCABULARY":
+        case "TEST":
+          return ["VOCABULARY_ITEM"];
+        case "LESSON":
+          return ["AUDIO_SCRIPT"];
+        case "PHONETICS":
+          return ["PHONETICS_QUESTION"];
+        case "GRAMMAR":
+          return ["GRAMMAR_SECTION"];
+        case "TRANSLATION":
+          return ["TRANSLATION_QUESTION"];
+      }
+    })();
+    const matchingTargets = correctionTargets.filter((target) => allowedTypes.includes(target.type));
+    if (activeTab === "FLASHCARD") {
+      const blockItemIds = new Set([
+        ...(activeBlock?.vocabItems.map((item) => item.id) ?? []),
+        ...(activeBlock?.sentenceItems.map((item) => item.id) ?? []),
+        ...(activeBlock ? [activeBlock.id] : []),
+      ]);
+      return matchingTargets.filter((target) => blockItemIds.has(target.id));
+    }
+    if (activeTab === "LISTENING" || activeTab === "WORKBOOK") {
+      return matchingTargets.filter((target) => target.id === activeBlock?.id);
+    }
+    return matchingTargets;
+  }, [activeBlock, activeTab, correctionTargets]);
+  const selectedCorrection = useMemo(() => {
+    const separator = selectedCorrectionKey.indexOf(":");
+    if (separator < 0) return null;
+    const type = selectedCorrectionKey.slice(0, separator);
+    const id = selectedCorrectionKey.slice(separator + 1);
+    return currentTabTargets.find((target) => target.type === type && target.id === id) ?? null;
+  }, [currentTabTargets, selectedCorrectionKey]);
+
+  useEffect(() => {
+    if (!selectedCorrection && currentTabTargets.length > 0) {
+      setSelectedCorrectionKey(`${currentTabTargets[0].type}:${currentTabTargets[0].id}`);
+    } else if (selectedCorrectionKey && !selectedCorrection) {
+      setSelectedCorrectionKey("");
+    }
+  }, [currentTabTargets, selectedCorrection, selectedCorrectionKey]);
+
+  useEffect(() => {
+    setGrammarCorrectionTab("content");
+  }, [selectedCorrectionKey]);
+
+  useEffect(() => {
+    const dialog = correctionDialogRef.current;
+    if (!dialog) return;
+    if (isCorrectionFormOpen && !dialog.open) dialog.showModal();
+    if (!isCorrectionFormOpen && dialog.open) dialog.close();
+  }, [isCorrectionFormOpen]);
+
+  useEffect(() => {
+    if (!correctionFetcher.data) return;
+    if (correctionFetcher.data.success) {
+      toast.success("Đã gửi góp ý cho quản trị viên duyệt.");
+      setIsCorrectionFormOpen(false);
+    } else if (correctionFetcher.data.error) {
+      toast.error(correctionFetcher.data.error);
+    }
+  }, [correctionFetcher.data]);
+
+  function submitCorrection(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selectedCorrection) return;
+    const formData = new FormData(event.currentTarget);
+    const reason = String(formData.get("reason") ?? "").trim();
+    if (reason.length < 5) {
+      setReasonError("Vui lòng nhập lý do góp ý (ít nhất 5 ký tự).");
+      return;
+    }
+    if (reason.length > 2000) {
+      setReasonError("Lý do góp ý không được vượt quá 2.000 ký tự.");
+      return;
+    }
+    setReasonError("");
+    const proposedData: Record<string, unknown> = {};
+    for (const field of getCorrectionTargetFields(selectedCorrection.type)) {
+      const currentValue = selectedCorrection.data[field];
+      const value = String(formData.get(`field_${field}`) ?? "");
+      if (field === "speakers" || field === "questions") {
+        try {
+          proposedData[field] = JSON.parse(value);
+        } catch {
+          toast.error(field === "speakers" ? "Nội dung bài khóa cần đúng định dạng." : "Câu hỏi luyện tập cần đúng định dạng.");
+          return;
+        }
+      } else if (Array.isArray(currentValue)) {
+        proposedData[field] = field === "wordTypes"
+          ? formData.getAll(`field_${field}`).filter(isWordType)
+          : value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
+      } else if (typeof currentValue === "boolean") {
+        proposedData[field] = value === "true";
+      } else if (field === "answerTone") {
+        proposedData[field] = value.trim() === "" ? null : Number(value);
+      } else if (typeof currentValue === "number") {
+        proposedData[field] = value.trim() === "" ? Number.NaN : Number(value);
+      } else if (typeof currentValue === "object" && currentValue !== null) {
+        try {
+          proposedData[field] = JSON.parse(value);
+        } catch {
+          toast.error(`Trường “${field}” cần là JSON hợp lệ.`);
+          return;
+        }
+      } else if (currentValue === null && value.trim() === "") {
+        proposedData[field] = null;
+      } else {
+        proposedData[field] = value;
+      }
+    }
+    correctionFetcher.submit({
+      courseId: lesson.courseId,
+      lessonId: lesson.id,
+      targetType: selectedCorrection.type,
+      targetId: selectedCorrection.id,
+      reason,
+      proposedData: JSON.stringify(proposedData),
+    }, { method: "post", action: "/teacher/content-corrections" });
+  }
+
+  function correctionFieldLabel(field: string) {
+    const labels: Record<string, string> = {
+      chinese: "Tiếng Trung",
+      chineseAlternatives: "Cách viết tiếng Trung khác (mỗi dòng một cách)",
+      pinyin: "Pinyin",
+      pinyinAlternatives: "Pinyin khác (mỗi dòng một cách)",
+      translation: "Nghĩa tiếng Việt",
+      translationAlternatives: "Nghĩa khác (mỗi dòng một nghĩa)",
+      wordTypes: "Từ loại",
+      speakers: "Toàn bộ script",
+      questions: "Câu hỏi luyện tập",
+      note: "Ghi chú",
+      prompt: "Nội dung câu hỏi",
+      options: "Các lựa chọn (mỗi dòng một lựa chọn)",
+      answer: "Đáp án",
+      acceptedAnswers: "Các đáp án được chấp nhận (mỗi dòng một đáp án)",
+      hint: "Giải thích / gợi ý",
+      title: "Tiêu đề",
+      explanation: "Giải thích",
+      formula: "Công thức",
+      examples: "Ví dụ",
+      given: "Nội dung cho trước",
+      syllable: "Âm tiết",
+      answerTone: "Thanh điệu đáp án (1–5)",
+      full: "Đáp án đầy đủ",
+      audioText: "Nội dung đọc",
+      description: "Mô tả",
+      sampleAnswer: "Đáp án mẫu",
+      isCorrect: "Đây là đáp án đúng",
+      imageUrl: "Đường dẫn hình ảnh",
+      audioUrl: "Đường dẫn âm thanh",
+      points: "Điểm câu hỏi",
+      payload: "Dữ liệu câu hỏi (JSON)",
+    };
+    return labels[field] ?? field;
+  }
+
+  function correctionInputValue(value: unknown) {
+    if (Array.isArray(value)) return value.join("\n");
+    if (typeof value === "object" && value !== null) return JSON.stringify(value, null, 2);
+    return value == null ? "" : String(value);
+  }
+
+  function correctionDisplayValue(field: string, value: unknown) {
+    if (selectedCorrection?.type === "AUDIO_SCRIPT" && field === "speakers") return formatAudioScript(value);
+    if (Array.isArray(value)) {
+      if (value.length === 0) return "—";
+      return value.map((item) => isWordType(item) ? WORD_TYPE_META[item].label : String(item)).join(", ");
+    }
+    if (typeof value === "object" && value !== null) return JSON.stringify(value, null, 2);
+    if (typeof value === "boolean") return value ? "Có" : "Không";
+    return value == null || value === "" ? "—" : String(value);
+  }
 
   const renderActiveTab = () => {
     if (activeTab === "FLASHCARD" || activeTab === "LISTENING") {
@@ -420,6 +618,16 @@ export default function TeacherLessonPreview() {
               Quay lại tiến độ
             </Link>
           </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsCorrectionFormOpen((isOpen) => !isOpen)}
+            disabled={currentTabTargets.length === 0}
+          >
+            <PencilLine className="mr-2 h-4 w-4" aria-hidden="true" />
+            Góp ý tab này
+          </Button>
           <div className="ml-auto flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary">
             <Eye className="h-4 w-4" aria-hidden="true" />
             Chế độ xem trước
@@ -436,9 +644,207 @@ export default function TeacherLessonPreview() {
           Nội dung và cách trình bày giống các tab học viên. Các câu trả lời và thao tác lưu tiến độ đã bị khóa.
         </div>
 
+        <dialog
+          ref={correctionDialogRef}
+          aria-labelledby="content-correction-heading"
+          aria-describedby="content-correction-description"
+          onCancel={(event) => {
+            event.preventDefault();
+            setIsCorrectionFormOpen(false);
+          }}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setIsCorrectionFormOpen(false);
+          }}
+          className="m-auto max-h-[90dvh] w-[calc(100%-1rem)] max-w-6xl overflow-y-auto rounded-xl border bg-background p-0 text-foreground shadow-xl backdrop:bg-black/50 sm:w-[calc(100%-2rem)]"
+        >
+          <section className="space-y-4 p-4 sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="space-y-1">
+                <h2 id="content-correction-heading" className="text-lg font-semibold">Góp ý chỉnh sửa nội dung bài học</h2>
+                <p id="content-correction-description" className="text-sm text-muted-foreground">
+                  Chọn nội dung trong tab đang mở, đề xuất phần sửa và gửi quản trị viên duyệt.
+                </p>
+              </div>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setIsCorrectionFormOpen(false)}>
+                Đóng
+              </Button>
+            </div>
+
+            {currentTabTargets.length === 0 ? (
+              <p className="rounded-md border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+                Tab này chưa có nội dung hỗ trợ góp ý.
+              </p>
+            ) : (
+              <form key={selectedCorrectionKey} noValidate onSubmit={submitCorrection} className="space-y-4">
+                <label className="block space-y-1.5 text-sm font-medium">
+                  Nội dung cần chỉnh sửa
+                  <select
+                    value={selectedCorrectionKey}
+                    onChange={(event) => setSelectedCorrectionKey(event.currentTarget.value)}
+                    required
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 font-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {currentTabTargets.map((target) => (
+                      <option key={`${target.type}:${target.id}`} value={`${target.type}:${target.id}`}>
+                        {target.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                {selectedCorrection && (
+                  <>
+                  {selectedCorrection.type === "GRAMMAR_SECTION" && (
+                    <div role="tablist" aria-label="Nội dung góp ý ngữ pháp" className="flex gap-2 border-b">
+                      <button
+                        type="button"
+                        role="tab"
+                        id="grammar-correction-content-tab"
+                        aria-selected={grammarCorrectionTab === "content"}
+                        aria-controls="grammar-correction-content-panel"
+                        onClick={() => setGrammarCorrectionTab("content")}
+                        className={`border-b-2 px-3 py-2 text-sm font-medium ${grammarCorrectionTab === "content" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                      >
+                        Nội dung ngữ pháp
+                      </button>
+                      <button
+                        type="button"
+                        role="tab"
+                        id="grammar-correction-practice-tab"
+                        aria-selected={grammarCorrectionTab === "practice"}
+                        aria-controls="grammar-correction-practice-panel"
+                        onClick={() => setGrammarCorrectionTab("practice")}
+                        className={`border-b-2 px-3 py-2 text-sm font-medium ${grammarCorrectionTab === "practice" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                      >
+                        Bài luyện tập ({Array.isArray(selectedCorrection.data.questions) ? selectedCorrection.data.questions.length : 0})
+                      </button>
+                    </div>
+                  )}
+                  <div
+                    id="grammar-correction-content-panel"
+                    role={selectedCorrection.type === "GRAMMAR_SECTION" ? "tabpanel" : undefined}
+                    aria-labelledby={selectedCorrection.type === "GRAMMAR_SECTION" ? "grammar-correction-content-tab" : undefined}
+                    hidden={selectedCorrection.type === "GRAMMAR_SECTION" && grammarCorrectionTab !== "content"}
+                    className="rounded-md border"
+                  >
+                    <table className="w-full table-fixed text-left text-sm">
+                      <thead className="bg-muted/50">
+                        <tr>
+                          <th scope="col" className="w-[24%] px-3 py-2.5 font-semibold">Trường dữ liệu</th>
+                          <th scope="col" className="w-[34%] px-3 py-2.5 font-semibold">Hiện tại</th>
+                          <th scope="col" className="w-[42%] px-3 py-2.5 font-semibold">Góp ý</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                    {getCorrectionTargetFields(selectedCorrection.type)
+                      .filter((field) => selectedCorrection.type !== "GRAMMAR_SECTION" || field !== "questions")
+                      .map((field) => {
+                      const value = selectedCorrection.data[field];
+                      return (
+                        <tr key={field} className="align-top">
+                          <th scope="row" className="px-3 py-3 font-medium">{correctionFieldLabel(field)}</th>
+                          <td className="px-3 py-3">
+                            <div className="min-h-10 whitespace-pre-wrap break-words rounded-md bg-muted/40 px-3 py-2 text-sm font-normal text-muted-foreground">
+                              {correctionDisplayValue(field, value)}
+                            </div>
+                          </td>
+                          <td className="px-3 py-3">
+                          {field === "speakers" ? (
+                            <AudioScriptCorrectionEditor name={`field_${field}`} value={value} />
+                          ) : field === "questions" && selectedCorrection.type === "GRAMMAR_SECTION" ? (
+                            <GrammarQuestionsCorrectionEditor name={`field_${field}`} value={value} />
+                          ) : field === "wordTypes" ? (
+                            <WordTypeMultiSelect name={`field_${field}`} value={value} />
+                          ) : typeof value === "boolean" ? (
+                            <select
+                              name={`field_${field}`}
+                              defaultValue={String(value)}
+                              className="h-10 w-full rounded-md border border-input bg-background px-3 font-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              <option value="true">Có</option>
+                              <option value="false">Không</option>
+                            </select>
+                          ) : Array.isArray(value) || (typeof value === "object" && value !== null) ? (
+                            <textarea
+                              name={`field_${field}`}
+                              defaultValue={correctionInputValue(value)}
+                              rows={Array.isArray(value) ? Math.min(5, Math.max(2, value.length + 1)) : 5}
+                              className="w-full rounded-md border border-input bg-background px-3 py-2 font-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            />
+                          ) : (
+                            <input
+                              name={`field_${field}`}
+                              type={typeof value === "number" || field === "answerTone" ? "number" : "text"}
+                              min={field === "answerTone" ? 1 : undefined}
+                              max={field === "answerTone" ? 5 : undefined}
+                              step={field === "points" ? "0.1" : undefined}
+                              defaultValue={correctionInputValue(value)}
+                              className="h-10 w-full rounded-md border border-input bg-background px-3 font-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            />
+                          )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                      </tbody>
+                    </table>
+                  </div>
+                  {selectedCorrection.type === "GRAMMAR_SECTION" && (
+                    <section
+                      id="grammar-correction-practice-panel"
+                      role="tabpanel"
+                      aria-labelledby="grammar-correction-practice-tab"
+                      hidden={grammarCorrectionTab !== "practice"}
+                      className="rounded-md border p-3"
+                    >
+                      <GrammarQuestionsCorrectionEditor name="field_questions" value={selectedCorrection.data.questions} />
+                    </section>
+                  )}
+                  </>
+                )}
+
+                <label className="block space-y-1.5 text-sm font-medium">
+                  Lý do góp ý
+                  <textarea
+                    name="reason"
+                    maxLength={2000}
+                    rows={3}
+                    placeholder="Cho biết nội dung nào chưa chính xác và bạn đề xuất sửa ra sao."
+                    aria-invalid={Boolean(reasonError)}
+                    aria-describedby={reasonError ? "content-correction-reason-error" : "content-correction-reason-help"}
+                    onChange={() => setReasonError("")}
+                    className={`w-full rounded-md border bg-background px-3 py-2 font-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${reasonError ? "border-destructive" : "border-input"}`}
+                  />
+                  {reasonError ? (
+                    <span id="content-correction-reason-error" role="alert" className="block text-sm font-normal text-destructive">
+                      {reasonError}
+                    </span>
+                  ) : (
+                    <span id="content-correction-reason-help" className="block text-xs font-normal text-muted-foreground">
+                      Tối thiểu 5 ký tự.
+                    </span>
+                  )}
+                </label>
+                {correctionFetcher.data?.error && (
+                  <p role="alert" className="text-sm text-destructive">{correctionFetcher.data.error}</p>
+                )}
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={!selectedCorrection || correctionFetcher.state !== "idle"} className="gap-2">
+                    <Send className="h-4 w-4" aria-hidden="true" />
+                    {correctionFetcher.state !== "idle" ? "Đang gửi..." : "Gửi quản trị viên duyệt"}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </section>
+        </dialog>
+
         <LessonTabs
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={(tab) => {
+            setActiveTab(tab);
+            setIsCorrectionFormOpen(false);
+          }}
           availableTypes={availableTypes}
           hasQuiz={hasQuiz}
         />

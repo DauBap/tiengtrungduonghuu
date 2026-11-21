@@ -72,7 +72,6 @@ export function CourseCard({
       </div>
       <CardHeader className={cn("pb-2", compactOnMobile && "max-sm:space-y-1 max-sm:p-3 max-sm:pb-1")}>
         <CardTitle className="text-base font-semibold leading-tight line-clamp-1">{classTitle || course.title}</CardTitle>
-        {!classTitle && <p className="text-xs text-muted-foreground">{course.code}</p>}
       </CardHeader>
       <CardContent className={cn("space-y-3", compactOnMobile && "max-sm:space-y-2 max-sm:p-3 max-sm:pt-0")}>
         {!classTitle && (

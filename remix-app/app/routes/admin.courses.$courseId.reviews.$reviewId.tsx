@@ -78,7 +78,7 @@ export default function AdminReviewEdit() {
             <Link to={`/admin/courses/${course.id}/lessons`}><ArrowLeft className="mr-1.5 h-4 w-4" />Quay lại bài học</Link>
           </Button>
           <h1 className="text-2xl font-bold tracking-tight">Chỉnh sửa bộ ôn tập</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{course.code} · Vị trí {reviewSet.order}</p>
+          <p className="mt-1 text-sm text-muted-foreground">Vị trí {reviewSet.order}</p>
         </div>
 
         <Form method="post" className="space-y-6">
