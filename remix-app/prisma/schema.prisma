@@ -57,6 +57,8 @@ model User {
   attendanceAbsenceDismissals        AttendanceAbsenceDismissal[] @relation("AttendanceAbsenceStudent")
   contentCorrections                 ContentCorrection[]           @relation("ContentCorrectionTeacher")
   reviewedContentCorrections         ContentCorrection[]           @relation("ContentCorrectionReviewer")
+  teacherLeaveRequests               TeacherLeaveRequest[]         @relation("TeacherLeaveRequester")
+  reviewedTeacherLeaveRequests       TeacherLeaveRequest[]         @relation("TeacherLeaveReviewer")
 
   @@index([role, lastSeenAt])
 }
@@ -538,6 +540,7 @@ model Class {
   courseId             String
   teacherId            String?
   startDate            DateTime  @map("start_date") @db.Date
+  scheduleEffectiveFrom DateTime @default(dbgenerated("CURRENT_DATE")) @map("schedule_effective_from") @db.Date
   maxStudents          Int       @default(6)
   /// Lịch học dạng JSON: [{ days: [1,3,5], startTime: "20:00", endTime: "22:00" }]
   /// days: 0=CN, 1=T2, 2=T3, 3=T4, 4=T5, 5=T6, 6=T7
@@ -554,6 +557,7 @@ model Class {
   shenbiAssignments           ShenbiAssignment[]
   attendanceSessions          AttendanceSession[]
   scheduleCancellations       ClassScheduleCancellation[]
+  teacherLeaveRequests        TeacherLeaveRequest[]
   finalResults                ClassFinalResult[]
   studentScores               ClassStudentScore[]
   studentClassReviews         StudentClassReview[]
@@ -622,21 +626,27 @@ enum ClassFinalResultAdminAction {
 }
 
 model AttendanceSession {
-  id           String   @id @default(cuid())
-  classId      String
-  lessonId     String?
-  title        String
-  lesson       String   @default("")
-  recordingUrl String?
-  date         DateTime @db.Date
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                       String   @id @default(cuid())
+  classId                  String
+  lessonId                 String?
+  title                    String
+  lesson                   String   @default("")
+  recordingUrl             String?
+  date                     DateTime @db.Date
+  scheduleStartTime        String?  @map("schedule_start_time")
+  scheduleEndTime          String?  @map("schedule_end_time")
+  isScheduleGenerated      Boolean  @default(false) @map("is_schedule_generated")
+  makeupForLeaveRequestId  String?  @unique(map: "AttendanceSession_makeup_for_leave_request_id_key") @map("makeup_for_leave_request_id")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 
   class             Class                        @relation(fields: [classId], references: [id], onDelete: Cascade)
   courseLesson      Lesson?                      @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  makeupFor         TeacherLeaveRequest?         @relation("LeaveMakeupSession", fields: [makeupForLeaveRequestId], references: [id], onDelete: SetNull)
   records           AttendanceRecord[]
   absenceDismissals AttendanceAbsenceDismissal[]
 
+  @@unique([classId, date, scheduleStartTime, scheduleEndTime], map: "AttendanceSession_class_date_slot_key")
   @@index([classId, date])
 }
 
@@ -644,11 +654,43 @@ model ClassScheduleCancellation {
   id        String   @id @default(cuid())
   classId   String
   date      DateTime @db.Date
+  startTime String?  @map("start_time")
+  endTime   String?  @map("end_time")
   createdAt DateTime @default(now())
 
   classroom Class @relation(fields: [classId], references: [id], onDelete: Cascade)
 
-  @@unique([classId, date])
+  @@index([classId, date])
+}
+
+enum TeacherLeaveRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model TeacherLeaveRequest {
+  id          String                    @id @default(cuid())
+  teacherId   String                    @map("teacher_id")
+  reviewerId  String?                   @map("reviewer_id")
+  classId     String                    @map("class_id")
+  date        DateTime                  @db.Date
+  startTime   String                    @map("start_time")
+  endTime     String                    @map("end_time")
+  reason      String                    @default("")
+  status      TeacherLeaveRequestStatus @default(PENDING)
+  reviewNote  String?                   @map("review_note")
+  reviewedAt  DateTime?                 @map("reviewed_at")
+  createdAt   DateTime                  @default(now()) @map("created_at")
+  updatedAt   DateTime                  @updatedAt @map("updated_at")
+
+  teacher      User              @relation("TeacherLeaveRequester", fields: [teacherId], references: [id], onDelete: Cascade)
+  reviewer     User?             @relation("TeacherLeaveReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  classroom    Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
+  makeupSession AttendanceSession? @relation("LeaveMakeupSession")
+
+  @@index([classId, date, status])
+  @@index([teacherId, createdAt])
 }
 
 model ClassFinalResult {

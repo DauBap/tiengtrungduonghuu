@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useFetcher } from "react-router";
 import { requireRole } from "~/lib/session.server";
+import { getVietnameseDateString } from "~/lib/schedule-utils";
+import { syncScheduledAttendanceSessionsForClass } from "~/lib/scheduled-attendance.server";
 import { getAllClasses } from "~/lib/db.server";
 import { prisma } from "~/lib/prisma.server";
 import { AppShell } from "~/components/layout/app-shell";
@@ -150,32 +152,51 @@ export async function action({ request }: ActionFunctionArgs) {
     if (intent === "create-class") {
       const courseId = String(form.get("courseId") ?? "").trim();
       if (!courseId) return { error: "Vui lòng chọn khóa học", field: "courseId" };
-      await prisma.class.create({
+      const classroom = await prisma.class.create({
         data: {
           name,
           courseId,
           teacherId,
           startDate,
+          scheduleEffectiveFrom: startDate,
           maxStudents,
           schedule: schedule as object[],
           midtermReviewSession,
           finalReviewSession,
         },
+        select: { id: true },
       });
+      await syncScheduledAttendanceSessionsForClass(classroom.id);
     } else {
       const classId = String(form.get("classId"));
+      const existingClass = await prisma.class.findUnique({
+        where: { id: classId },
+        select: { startDate: true, schedule: true, scheduleEffectiveFrom: true },
+      });
+      if (!existingClass) return { error: "Không tìm thấy lớp cần cập nhật." };
+      const scheduleChanged = JSON.stringify(existingClass.schedule) !== JSON.stringify(schedule);
+      const startDateChanged = existingClass.startDate.toISOString().slice(0, 10) !== startDate.toISOString().slice(0, 10);
+      const today = getVietnameseDateString();
+      const effectiveDate = startDate.toISOString().slice(0, 10) > today
+        ? startDate.toISOString().slice(0, 10)
+        : today;
+      const effectiveFrom = scheduleChanged || startDateChanged
+        ? new Date(`${effectiveDate}T00:00:00.000Z`)
+        : existingClass.scheduleEffectiveFrom;
       await prisma.class.update({
         where: { id: classId },
         data: {
           name,
           teacherId,
           startDate,
+          scheduleEffectiveFrom: effectiveFrom,
           maxStudents,
           schedule: schedule as object[],
           midtermReviewSession,
           finalReviewSession,
         },
       });
+      await syncScheduledAttendanceSessionsForClass(classId);
     }
     return { success: true };
   }

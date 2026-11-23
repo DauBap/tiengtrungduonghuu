@@ -1,20 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { useFetcher, useLoaderData } from "react-router";
-import { Prisma } from "@prisma/client";
 import { toast } from "sonner";
-import { ClipboardCheck, LoaderCircle, Plus, Search, Trash2, Users } from "lucide-react";
+import { ClipboardCheck, Search, Trash2, Users } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Overlay } from "~/components/common/overlay";
 import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
 import { Button } from "~/components/ui/button";
 import { getStudentsAbsentForThreeConsecutiveSessions } from "~/lib/attendance-streak";
-import {
-  getMissingScheduledDates,
-  getScheduledDateAvailability,
-  getScheduledSessionAvailability,
-  getScheduledSessionNumber,
-} from "~/lib/schedule-utils";
+import { getVietnameseDateString } from "~/lib/schedule-utils";
 import {
   excludeHandledAbsenceAlerts,
   handleConsecutiveAbsenceAlert,
@@ -45,13 +39,11 @@ interface AttendanceClass {
   id: string;
   name: string;
   course: string;
-  startDate: string;
-  schedule: unknown;
   midtermReviewSession: number | null;
   finalReviewSession: number | null;
   courseLessons: { id: string; order: number; title: string }[];
+  approvedLeaveSlots: ApprovedLeaveSlot[];
   sessions: AttendanceSession[];
-  missedScheduleDates: string[];
   students: AttendanceStudent[];
   consecutiveAbsenceAlerts: ConsecutiveAbsenceAlert[];
 }
@@ -63,7 +55,19 @@ interface AttendanceSession {
   lesson: string;
   recordingUrl: string | null;
   date: string;
+  scheduleStartTime: string | null;
+  scheduleEndTime: string | null;
+  isScheduleGenerated: boolean;
+  isMakeupSession: boolean;
+  hasAttendanceRecords: boolean;
   records: Record<string, AttendanceRecord>;
+}
+
+interface ApprovedLeaveSlot {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
 }
 
 interface ReviewPrompt {
@@ -155,6 +159,15 @@ function createEmptyAttendanceRecord(): AttendanceRecord {
   };
 }
 
+function formatAttendanceSessionDate(date: string) {
+  return new Date(`${date}T00:00:00.000Z`).toLocaleDateString("vi-VN", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "UTC",
+  });
+}
+
 function getAttendanceSessionNumber(
   sessions: { id: string; title: string }[],
   sessionId: string,
@@ -171,17 +184,13 @@ function isStudentReviewStatus(value: unknown): value is StudentReviewStatus {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
+  const today = getVietnameseDateString();
+  const todayDate = new Date(`${today}T00:00:00.000Z`);
   const classes = await prisma.class.findMany({
     where: { teacherId: user.id, completedAt: null },
     select: {
       id: true,
       name: true,
-      startDate: true,
-      schedule: true,
-      scheduleCancellations: {
-        orderBy: { date: "asc" },
-        select: { date: true },
-      },
       midtermReviewSession: true,
       finalReviewSession: true,
       course: {
@@ -196,7 +205,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         select: { user: { select: { id: true, name: true } } },
       },
       attendanceSessions: {
-        orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+        orderBy: [{ date: "asc" }, { scheduleStartTime: "asc" }, { createdAt: "asc" }],
         select: {
           id: true,
           title: true,
@@ -204,6 +213,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
           lesson: true,
           recordingUrl: true,
           date: true,
+          scheduleStartTime: true,
+          scheduleEndTime: true,
+          isScheduleGenerated: true,
+          makeupForLeaveRequestId: true,
           createdAt: true,
           records: {
             select: {
@@ -218,11 +231,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
           },
         },
       },
+      teacherLeaveRequests: {
+        where: { status: "APPROVED", date: { lte: todayDate } },
+        orderBy: [{ date: "asc" }, { startTime: "asc" }],
+        select: { id: true, date: true, startTime: true, endTime: true },
+      },
     },
     orderBy: { name: "asc" },
   });
   const alerts = classes.flatMap((classroom) => {
-    const sessions = classroom.attendanceSessions;
+    const sessions = classroom.attendanceSessions.filter(({ date }) => date.toISOString().slice(0, 10) <= today);
     return sessions.flatMap((session, sessionIndex) => {
       if (sessionIndex < 2) return [];
       const recentSessions = sessions.slice(sessionIndex - 2, sessionIndex + 1);
@@ -262,23 +280,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
   return {
     user,
+    today,
     classes: classes.map((classroom): AttendanceClass => ({
       id: classroom.id,
       name: classroom.name,
       course: classroom.course.title,
-      startDate: classroom.startDate.toISOString().slice(0, 10),
-      schedule: classroom.schedule,
       midtermReviewSession: classroom.midtermReviewSession,
       finalReviewSession: classroom.finalReviewSession,
       courseLessons: classroom.course.lessons,
       students: classroom.enrollments.map(({ user: student }) => ({ id: student.id, name: student.name })),
-      missedScheduleDates: getMissingScheduledDates(
-        classroom.schedule,
-        classroom.startDate,
-        getScheduledSessionAvailability(classroom.schedule, classroom.startDate).date,
-        classroom.attendanceSessions.map(({ date }) => date.toISOString().slice(0, 10)),
-        classroom.scheduleCancellations.map(({ date }) => date.toISOString().slice(0, 10)),
-      ),
+      approvedLeaveSlots: classroom.teacherLeaveRequests.map((leave): ApprovedLeaveSlot => ({
+        id: leave.id,
+        date: leave.date.toISOString().slice(0, 10),
+        startTime: leave.startTime,
+        endTime: leave.endTime,
+      })),
       sessions: classroom.attendanceSessions.map((session) => ({
         id: session.id,
         title: session.title,
@@ -286,6 +302,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
         lesson: session.lesson,
         recordingUrl: session.recordingUrl,
         date: session.date.toISOString().slice(0, 10),
+        scheduleStartTime: session.scheduleStartTime,
+        scheduleEndTime: session.scheduleEndTime,
+        isScheduleGenerated: session.isScheduleGenerated,
+        isMakeupSession: session.makeupForLeaveRequestId !== null,
+        hasAttendanceRecords: session.records.length > 0,
         records: Object.fromEntries(session.records.map((record) => [record.studentId, {
           status: fromDatabaseStatus(record.status),
           absenceReason: fromDatabaseAbsenceReason(record.absenceReason),
@@ -307,6 +328,14 @@ export async function action({ request }: ActionFunctionArgs) {
   const form = await request.formData();
   const intent = String(form.get("intent") ?? "");
 
+  if (intent === "create-session" || intent === "cancel-scheduled-date") {
+    return {
+      success: false as const,
+      intent,
+      error: "Buổi học được tạo tự động theo lịch của lớp; giáo viên không cần thêm buổi thủ công.",
+    };
+  }
+
   if (intent === "dismiss-absence-alert") {
     const classId = String(form.get("classId") ?? "");
     const studentId = String(form.get("studentId") ?? "");
@@ -326,252 +355,6 @@ export async function action({ request }: ActionFunctionArgs) {
     return { success: true as const, intent, studentId };
   }
 
-  if (intent === "create-session") {
-    const classId = String(form.get("classId") ?? "");
-    try {
-      const result = await prisma.$transaction(async (tx) => {
-        const classroom = await tx.class.findFirst({
-          where: { id: classId, teacherId: user.id, completedAt: null },
-          select: {
-            id: true,
-            startDate: true,
-            schedule: true,
-            midtermReviewSession: true,
-            finalReviewSession: true,
-          },
-        });
-        if (!classroom) {
-          return { success: false as const, error: "Không tìm thấy lớp hoặc bạn không có quyền điểm danh lớp này." };
-        }
-
-        const now = new Date();
-        const today = getScheduledSessionAvailability(classroom.schedule, classroom.startDate, now).date;
-        const requestedDate = String(form.get("date") ?? today);
-        const availability = getScheduledDateAvailability(
-          classroom.schedule,
-          classroom.startDate,
-          requestedDate,
-          now,
-        );
-        if (!availability.allowed) {
-          const messages = {
-            "no-schedule": "Lớp chưa có lịch học hợp lệ nên chưa thể tạo buổi.",
-            "before-start-date": "Chưa đến ngày bắt đầu của lớp.",
-            "future-date": "Không thể tạo buổi cho ngày trong tương lai.",
-            "wrong-day": "Ngày đã chọn không nằm trong lịch học của lớp.",
-          } as const;
-          return { success: false as const, error: messages[availability.reason] };
-        }
-
-        const sessionDate = parseAttendanceDate(availability.date);
-        if (!sessionDate) {
-          return { success: false as const, error: "Ngày học không hợp lệ. Hãy tải lại trang." };
-        }
-        const existingSession = await tx.attendanceSession.findFirst({
-          where: { classId, date: sessionDate },
-          select: { id: true },
-        });
-        if (existingSession) {
-          return { success: false as const, error: "Buổi học của ngày này đã được tạo rồi." };
-        }
-
-        const [existingSessions, cancellations] = await Promise.all([
-          tx.attendanceSession.findMany({
-            where: { classId },
-            orderBy: [{ date: "asc" }, { createdAt: "asc" }],
-            select: { id: true, date: true, title: true },
-          }),
-          tx.classScheduleCancellation.findMany({
-            where: { classId },
-            select: { date: true },
-          }),
-        ]);
-        if (cancellations.some(({ date }) => date.toISOString().slice(0, 10) === availability.date)) {
-          return { success: false as const, error: "Ngày này đã được đánh dấu lớp nghỉ." };
-        }
-
-        const missingDates = getMissingScheduledDates(
-          classroom.schedule,
-          classroom.startDate,
-          today,
-          existingSessions.map(({ date }) => date.toISOString().slice(0, 10)),
-          cancellations.map(({ date }) => date.toISOString().slice(0, 10)),
-        );
-        if (availability.date === today && missingDates.length > 0) {
-          return {
-            success: false as const,
-            error: "Hãy xử lý các ngày học chưa ghi nhận trước khi tạo buổi hôm nay.",
-            classId,
-            missedScheduleDates: missingDates,
-          };
-        }
-
-        const nextNumber = getScheduledSessionNumber(
-          existingSessions.map(({ date }) => date.toISOString().slice(0, 10)),
-          availability.date,
-        );
-        const insertionIndex = nextNumber - 1;
-        const shiftedSessions = existingSessions.slice(insertionIndex);
-        if (shiftedSessions.length > 0) {
-          await tx.studentClassReview.updateMany({
-            where: { classId, sessionNumber: { gte: nextNumber } },
-            data: { sessionNumber: { increment: 1 } },
-          });
-          await tx.class.update({
-            where: { id: classId },
-            data: {
-              midtermReviewSession: classroom.midtermReviewSession !== null
-                && classroom.midtermReviewSession >= nextNumber
-                ? { increment: 1 }
-                : undefined,
-              finalReviewSession: classroom.finalReviewSession !== null
-                && classroom.finalReviewSession >= nextNumber
-                ? { increment: 1 }
-                : undefined,
-            },
-          });
-        }
-
-        const renumberedSessions = shiftedSessions.map((session, index) => ({
-          id: session.id,
-          title: `Buổi ${nextNumber + index}`,
-        }));
-        for (const session of renumberedSessions) {
-          await tx.attendanceSession.update({
-            where: { id: session.id },
-            data: { title: session.title },
-          });
-        }
-        const enrolledStudents = await tx.enrollment.findMany({
-          where: {
-            classId,
-            user: { is: { role: "student", isActive: true, deletedAt: null } },
-          },
-          select: { userId: true },
-        });
-        const createdSession = await tx.attendanceSession.create({
-          data: {
-            classId,
-            title: `Buổi ${nextNumber}`,
-            lesson: "",
-            date: sessionDate,
-          },
-          select: { id: true, title: true, lessonId: true, lesson: true, recordingUrl: true, date: true },
-        });
-        if (enrolledStudents.length > 0) {
-          await tx.attendanceRecord.createMany({
-            data: enrolledStudents.map(({ userId }) => ({
-              sessionId: createdSession.id,
-              studentId: userId,
-              status: "PRESENT",
-            })),
-          });
-        }
-        return {
-          success: true as const,
-          classId,
-          missedDate: availability.date,
-          session: createdSession,
-          enrolledStudents,
-          renumberedSessions,
-          reviewSessionConfig: {
-            midtermReviewSession: classroom.midtermReviewSession === null
-              ? null
-              : classroom.midtermReviewSession >= nextNumber
-                ? classroom.midtermReviewSession + 1
-                : classroom.midtermReviewSession,
-            finalReviewSession: classroom.finalReviewSession === null
-              ? null
-              : classroom.finalReviewSession >= nextNumber
-                ? classroom.finalReviewSession + 1
-                : classroom.finalReviewSession,
-          },
-        };
-      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
-      if (!result.success) return { ...result, intent };
-      const { classId: createdClassId, session, enrolledStudents } = result;
-      return {
-        success: true as const,
-        intent,
-        classId: createdClassId,
-        missedDate: result.missedDate,
-        renumberedSessions: result.renumberedSessions,
-        reviewSessionConfig: result.reviewSessionConfig,
-        session: {
-          ...session,
-          lessonId: session.lessonId,
-          recordingUrl: session.recordingUrl,
-          date: session.date.toISOString().slice(0, 10),
-          records: Object.fromEntries(enrolledStudents.map(({ userId }) => [
-            userId,
-            {
-              status: "present" as const,
-              absenceReason: null,
-              tasks: { recording: false, hanzi: false, duet: false, lessonLink: false },
-            },
-          ])),
-        },
-      };
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
-        return { success: false as const, error: "Buổi học vừa được tạo hoặc ngày này vừa được xử lý. Hãy tải lại trang." };
-      }
-      throw error;
-    }
-  }
-
-  if (intent === "cancel-scheduled-date") {
-    const classId = String(form.get("classId") ?? "");
-    const dateValue = String(form.get("date") ?? "");
-    const date = parseAttendanceDate(dateValue);
-    if (!date) return { success: false as const, intent, error: "Ngày học không hợp lệ." };
-
-    try {
-      const result = await prisma.$transaction(async (tx) => {
-        const classroom = await tx.class.findFirst({
-          where: { id: classId, teacherId: user.id, completedAt: null },
-          select: { id: true, startDate: true, schedule: true },
-        });
-        if (!classroom) {
-          return { success: false as const, error: "Không tìm thấy lớp hoặc bạn không có quyền xử lý lịch này." };
-        }
-
-        const availability = getScheduledDateAvailability(classroom.schedule, classroom.startDate, dateValue);
-        if (!availability.allowed) {
-          return { success: false as const, error: "Ngày này không nằm trong lịch học hợp lệ của lớp." };
-        }
-        const today = getScheduledSessionAvailability(classroom.schedule, classroom.startDate).date;
-        if (dateValue >= today) {
-          return { success: false as const, error: "Chỉ có thể đánh dấu nghỉ cho ngày học đã qua." };
-        }
-        const existingSession = await tx.attendanceSession.findFirst({
-          where: { classId, date },
-          select: { id: true },
-        });
-        if (existingSession) {
-          return { success: false as const, error: "Ngày này đã có buổi điểm danh, không thể đánh dấu nghỉ." };
-        }
-        const existingCancellation = await tx.classScheduleCancellation.findUnique({
-          where: { classId_date: { classId, date } },
-          select: { id: true },
-        });
-        if (existingCancellation) {
-          return { success: false as const, error: "Ngày này đã được đánh dấu lớp nghỉ." };
-        }
-
-        await tx.classScheduleCancellation.create({ data: { classId, date } });
-        return { success: true as const, classId, date: dateValue };
-      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
-
-      return { ...result, intent };
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
-        return { success: false as const, intent, error: "Ngày học vừa được xử lý. Hãy tải lại trang." };
-      }
-      throw error;
-    }
-  }
-
   const sessionId = String(form.get("sessionId") ?? "");
   const session = sessionId
     ? await prisma.attendanceSession.findFirst({
@@ -581,15 +364,17 @@ export async function action({ request }: ActionFunctionArgs) {
           classId: true,
           title: true,
           date: true,
+          scheduleStartTime: true,
+          scheduleEndTime: true,
+          isScheduleGenerated: true,
+          makeupForLeaveRequestId: true,
           class: {
             select: {
               courseId: true,
-              startDate: true,
-              schedule: true,
               midtermReviewSession: true,
               finalReviewSession: true,
               attendanceSessions: {
-                orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+                orderBy: [{ date: "asc" }, { scheduleStartTime: "asc" }, { createdAt: "asc" }],
                 select: { id: true, title: true },
               },
             },
@@ -598,6 +383,34 @@ export async function action({ request }: ActionFunctionArgs) {
       })
     : null;
   if (!session) return { success: false as const, error: "Không tìm thấy buổi học hoặc bạn không có quyền sửa buổi này." };
+  if (intent === "save-attendance" && session.date.toISOString().slice(0, 10) > getVietnameseDateString()) {
+    return { success: false as const, error: "Chưa đến ngày học theo lịch của buổi này." };
+  }
+  if (
+    intent === "save-attendance"
+    && session.isScheduleGenerated
+    && session.scheduleStartTime
+    && session.scheduleEndTime
+  ) {
+    const leaveRequest = await prisma.teacherLeaveRequest.findFirst({
+      where: {
+        classId: session.classId,
+        date: session.date,
+        startTime: session.scheduleStartTime,
+        endTime: session.scheduleEndTime,
+        status: { in: ["PENDING", "APPROVED"] },
+      },
+      select: { status: true },
+    });
+    if (leaveRequest) {
+      return {
+        success: false as const,
+        error: leaveRequest.status === "APPROVED"
+          ? "Ca này đã được duyệt nghỉ nên không thể điểm danh."
+          : "Ca này đang chờ admin duyệt nghỉ nên chưa thể điểm danh.",
+      };
+    }
+  }
 
   if (intent === "save-session-review") {
     const sessionType = String(form.get("sessionType") ?? "");
@@ -647,7 +460,7 @@ export async function action({ request }: ActionFunctionArgs) {
               midtermReviewSession: true,
               finalReviewSession: true,
               attendanceSessions: {
-                orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+                orderBy: [{ date: "asc" }, { scheduleStartTime: "asc" }, { createdAt: "asc" }],
                 select: { id: true, title: true },
               },
             },
@@ -735,17 +548,37 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     const deletedDate = session.date.toISOString().slice(0, 10);
-    const today = getScheduledSessionAvailability(session.class.schedule, session.class.startDate).date;
-    const scheduledDate = getScheduledDateAvailability(
-      session.class.schedule,
-      session.class.startDate,
-      deletedDate,
-    );
+    const shouldCancelSchedule = session.isScheduleGenerated;
     const update = await prisma.$transaction(async (tx) => {
       await tx.attendanceSession.delete({ where: { id: session.id } });
+      let hasCancellation = false;
+      if (shouldCancelSchedule) {
+        const existingCancellation = await tx.classScheduleCancellation.findFirst({
+          where: {
+            classId: session.classId,
+            date: session.date,
+            OR: [
+              { startTime: null, endTime: null },
+              { startTime: session.scheduleStartTime, endTime: session.scheduleEndTime },
+            ],
+          },
+          select: { id: true },
+        });
+        if (!existingCancellation) {
+          await tx.classScheduleCancellation.create({
+            data: {
+              classId: session.classId,
+              date: session.date,
+              startTime: session.scheduleStartTime,
+              endTime: session.scheduleEndTime,
+            },
+          });
+        }
+        hasCancellation = true;
+      }
       const remainingSessions = await tx.attendanceSession.findMany({
         where: { classId: session.classId },
-        orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+        orderBy: [{ date: "asc" }, { scheduleStartTime: "asc" }, { createdAt: "asc" }],
         select: { id: true, title: true },
       });
       const renumberedSessions = remainingSessions.map((item, index) => ({
@@ -777,16 +610,7 @@ export async function action({ request }: ActionFunctionArgs) {
             : undefined,
         },
       });
-      const cancellation = await tx.classScheduleCancellation.findUnique({
-        where: {
-          classId_date: {
-            classId: session.classId,
-            date: session.date,
-          },
-        },
-        select: { id: true },
-      });
-      return { renumberedSessions, hasCancellation: Boolean(cancellation) };
+      return { renumberedSessions, hasCancellation };
     });
     return {
       success: true as const,
@@ -794,9 +618,7 @@ export async function action({ request }: ActionFunctionArgs) {
       sessionId,
       classId: session.classId,
       deletedDate,
-      missedDate: scheduledDate.allowed && deletedDate < today && !update.hasCancellation
-        ? deletedDate
-        : null,
+      hasCancellation: update.hasCancellation,
       renumberedSessions: update.renumberedSessions,
     };
   }
@@ -945,9 +767,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function TeacherAttendance() {
   const { user, classes } = useLoaderData<typeof loader>();
-  const addSessionFetcher = useFetcher<typeof action>();
   const deleteSessionFetcher = useFetcher<typeof action>();
-  const scheduleActionFetcher = useFetcher<typeof action>();
   const saveAttendanceFetcher = useFetcher<typeof action>();
   const reviewFetcher = useFetcher<typeof action>();
   const firstClassId = classes[0]?.id ?? "";
@@ -955,50 +775,44 @@ export default function TeacherAttendance() {
   const [sessionsByClass, setSessionsByClass] = useState<Record<string, AttendanceSession[]>>(() =>
     Object.fromEntries(classes.map((classroom) => [classroom.id, classroom.sessions]))
   );
-  const [missedScheduleDatesByClass, setMissedScheduleDatesByClass] = useState<Record<string, string[]>>(() =>
-    Object.fromEntries(classes.map((classroom) => [classroom.id, classroom.missedScheduleDates]))
-  );
   const [attendanceBySession, setAttendanceBySession] = useState<Record<string, Record<string, AttendanceRecord>>>(() =>
     Object.fromEntries(classes.flatMap((classroom) => classroom.sessions.map((session) => [
       `${classroom.id}:${session.id}`,
       session.records,
     ])))
   );
-  const [activeTabId, setActiveTabId] = useState(classes[0]?.sessions[0]?.id ?? TOTAL_TAB_ID);
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+  const today = getVietnameseDateString(currentTime);
+  const lastDisplayedDate = useRef(today);
+  const [activeTabId, setActiveTabId] = useState(
+    classes[0]?.sessions.find((session) => session.date === today)?.id
+      ?? classes[0]?.sessions.find((session) => session.date <= today)?.id
+      ?? TOTAL_TAB_ID,
+  );
   const [filter, setFilter] = useState<AttendanceFilter>("all");
   const [search, setSearch] = useState("");
   const [feedback, setFeedback] = useState("");
   const [pendingDeleteSession, setPendingDeleteSession] = useState<AttendanceSession | null>(null);
-  const [isResolvingScheduleDates, setIsResolvingScheduleDates] = useState(false);
   const [pendingReview, setPendingReview] = useState<ReviewPrompt | null>(null);
   const [reviewStatuses, setReviewStatuses] = useState<Record<string, StudentReviewStatus | "">>({});
-  const [currentTime, setCurrentTime] = useState(() => new Date());
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
   const selectedClass = classes.find((item) => item.id === classId) ?? classes[0] ?? null;
-  const attendanceSessions = selectedClass ? sessionsByClass[selectedClass.id] ?? selectedClass.sessions : [];
-  const sessionAvailability = selectedClass
-    ? getScheduledSessionAvailability(selectedClass.schedule, selectedClass.startDate, currentTime)
-    : null;
-  const sessionAlreadyExistsToday = Boolean(
-    sessionAvailability && attendanceSessions.some(({ date }) => date === sessionAvailability.date),
-  );
-  const canCreateSession = Boolean(sessionAvailability?.allowed && !sessionAlreadyExistsToday);
-  const missedScheduleDates = selectedClass
-    ? missedScheduleDatesByClass[selectedClass.id] ?? selectedClass.missedScheduleDates
-    : [];
-  const canStartSessionFlow = canCreateSession || missedScheduleDates.length > 0;
-  const sessionCreationMessage = missedScheduleDates.length > 0
-    ? `Còn ${missedScheduleDates.length} ngày học chưa được xử lý.`
-    : sessionAlreadyExistsToday
-      ? "Buổi học hôm nay đã được tạo rồi."
-    : sessionAvailability && !sessionAvailability.allowed
-      ? {
-          "no-schedule": "Lớp chưa có lịch học hợp lệ.",
-          "before-start-date": "Chưa đến ngày bắt đầu của lớp.",
-          "future-date": "Không thể tạo buổi cho ngày trong tương lai.",
-          "wrong-day": "Hôm nay không có buổi học theo lịch của lớp.",
-        }[sessionAvailability.reason]
-      : "Có thể tạo buổi học trong ngày học theo lịch.";
+  const allClassSessions = selectedClass ? sessionsByClass[selectedClass.id] ?? selectedClass.sessions : [];
+  const attendanceSessions = allClassSessions.filter((session) => session.date <= today);
+  const attendanceOptions = [
+    ...attendanceSessions.map((session) => ({
+      type: "session" as const,
+      date: session.date,
+      startTime: session.scheduleStartTime ?? "",
+      session,
+    })),
+    ...(selectedClass?.approvedLeaveSlots ?? []).map((leave) => ({
+      type: "approved-leave" as const,
+      date: leave.date,
+      startTime: leave.startTime,
+      leave,
+    })),
+  ].sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
   const isTotalView = activeTabId === TOTAL_TAB_ID || attendanceSessions.length === 0;
   const selectedAttendanceSession = attendanceSessions.find((session) => session.id === activeTabId) ?? null;
   const sessionKey = selectedClass && selectedAttendanceSession ? `${selectedClass.id}:${selectedAttendanceSession.id}` : "";
@@ -1071,86 +885,11 @@ export default function TeacherAttendance() {
   }, []);
 
   useEffect(() => {
-    const result = addSessionFetcher.data;
-    if (
-      !result?.success
-      || result.intent !== "create-session"
-      || !("session" in result)
-      || !result.session
-      || !("renumberedSessions" in result)
-    ) return;
-    const session = result.session;
-    setSessionsByClass((current) => {
-      const titleById = new Map(result.renumberedSessions.map((item) => [item.id, item.title]));
-      const currentSessions = current[result.classId]
-        ?? classes.find((item) => item.id === result.classId)?.sessions
-        ?? [];
-      const nextSessions = currentSessions.map((item) => ({
-        ...item,
-        title: titleById.get(item.id) ?? item.title,
-      }));
-      if (!nextSessions.some((item) => item.id === session.id)) nextSessions.push(session);
-      return {
-        ...current,
-        [result.classId]: nextSessions.sort((left, right) => left.date.localeCompare(right.date)),
-      };
-    });
-    setAttendanceBySession((current) => ({ ...current, [`${result.classId}:${session.id}`]: {} }));
-    setMissedScheduleDatesByClass((current) => ({
-      ...current,
-      [result.classId]: (current[result.classId]
-        ?? classes.find((item) => item.id === result.classId)?.missedScheduleDates
-        ?? []).filter((date) => date !== result.missedDate),
-    }));
-    if (result.classId === classId) setActiveTabId(session.id);
-  }, [addSessionFetcher.data, classId, classes]);
-
-  useEffect(() => {
-    const result = addSessionFetcher.data;
-    if (!result || result.success) return;
-    setFeedback(result.error);
-    if (
-      "intent" in result
-      && result.intent === "create-session"
-      && "classId" in result
-      && "missedScheduleDates" in result
-      && typeof result.classId === "string"
-      && Array.isArray(result.missedScheduleDates)
-    ) {
-      setMissedScheduleDatesByClass((current) => ({
-        ...current,
-        [result.classId]: result.missedScheduleDates,
-      }));
-      setIsResolvingScheduleDates(true);
-    }
-  }, [addSessionFetcher.data]);
-
-  useEffect(() => {
-    const result = scheduleActionFetcher.data;
-    if (scheduleActionFetcher.state !== "idle" || !result) return;
-    if (!result.success) {
-      setFeedback(result.error);
-      toast.error(result.error);
-      return;
-    }
-    if (
-      "intent" in result
-      && result.intent === "cancel-scheduled-date"
-      && "classId" in result
-      && "date" in result
-      && typeof result.classId === "string"
-      && typeof result.date === "string"
-    ) {
-      setMissedScheduleDatesByClass((current) => ({
-        ...current,
-        [result.classId]: (current[result.classId]
-          ?? classes.find((item) => item.id === result.classId)?.missedScheduleDates
-          ?? []).filter((date) => date !== result.date),
-      }));
-      setFeedback("Đã ghi nhận lớp nghỉ vào ngày đã chọn.");
-      toast.success("Đã ghi nhận lớp nghỉ.");
-    }
-  }, [scheduleActionFetcher.data, scheduleActionFetcher.state, classes]);
+    if (lastDisplayedDate.current === today) return;
+    lastDisplayedDate.current = today;
+    const todaySession = attendanceSessions.find((session) => session.date === today);
+    if (todaySession) setActiveTabId(todaySession.id);
+  }, [today, attendanceSessions]);
 
   useEffect(() => {
     if (
@@ -1164,7 +903,6 @@ export default function TeacherAttendance() {
       const deletedId = typeof result.sessionId === "string" ? result.sessionId : "";
       const deletedClassId = typeof result.classId === "string" ? result.classId : "";
       const renumberedSessions = Array.isArray(result.renumberedSessions) ? result.renumberedSessions : [];
-      const missedDate = typeof result.missedDate === "string" ? result.missedDate : null;
       if (!deletedId || !deletedClassId) return;
       setSessionsByClass((current) => {
         const titleById = new Map(renumberedSessions.map((item) => [item.id, item.title]));
@@ -1175,15 +913,6 @@ export default function TeacherAttendance() {
             .map((session) => ({ ...session, title: titleById.get(session.id) ?? session.title })),
         };
       });
-      if (missedDate) {
-        setMissedScheduleDatesByClass((current) => ({
-          ...current,
-          [deletedClassId]: [...new Set([
-            ...(current[deletedClassId] ?? []),
-            missedDate,
-          ])].sort(),
-        }));
-      }
       setAttendanceBySession((current) => {
         const next = { ...current };
         delete next[`${deletedClassId}:${deletedId}`];
@@ -1206,6 +935,16 @@ export default function TeacherAttendance() {
       && result.classId === selectedClass?.id
       && result.sessionId === selectedAttendanceSession?.id
     ) {
+      if (selectedClass && selectedAttendanceSession) {
+        setSessionsByClass((current) => ({
+          ...current,
+          [selectedClass.id]: (current[selectedClass.id] ?? selectedClass.sessions).map((session) =>
+            session.id === selectedAttendanceSession.id
+              ? { ...session, hasAttendanceRecords: true }
+              : session
+          ),
+        }));
+      }
       setFeedback("Đã lưu điểm danh, bài tập và thông tin buổi học.");
       toast.success("Đã lưu điểm danh thành công.");
       if (result.reviewPrompt) {
@@ -1257,47 +996,19 @@ export default function TeacherAttendance() {
     if (!nextClass) return;
     setClassId(nextClass.id);
     setPendingReview(null);
-    const nextSessions = sessionsByClass[nextClass.id] ?? nextClass.sessions;
+    const nextSessions = (sessionsByClass[nextClass.id] ?? nextClass.sessions)
+      .filter((session) => session.date <= today);
     if (!sessionsByClass[nextClass.id]) {
-      setSessionsByClass((current) => ({ ...current, [nextClass.id]: nextSessions }));
+      setSessionsByClass((current) => ({ ...current, [nextClass.id]: nextClass.sessions }));
     }
-    setActiveTabId(nextSessions[0]?.id ?? TOTAL_TAB_ID);
-    setFilter("all");
-    setSearch("");
-    setFeedback("");
-  }
-
-  function addAttendanceSession() {
-    if (!selectedClass) return;
-    if (missedScheduleDates.length > 0) {
-      setIsResolvingScheduleDates(true);
-      return;
-    }
-    if (!sessionAvailability?.allowed || sessionAlreadyExistsToday) return;
-    createAttendanceSession(sessionAvailability.date);
-  }
-
-  function createAttendanceSession(date: string) {
-    if (!selectedClass) return;
-    addSessionFetcher.submit(
-      { intent: "create-session", classId: selectedClass.id, date },
-      { method: "post" },
+    setActiveTabId(
+      nextSessions.find((session) => session.date === today)?.id
+        ?? nextSessions[0]?.id
+        ?? TOTAL_TAB_ID,
     );
     setFilter("all");
     setSearch("");
     setFeedback("");
-  }
-
-  function handleScheduleDate(date: string, intent: "create-session" | "cancel-scheduled-date") {
-    if (!selectedClass) return;
-    if (intent === "create-session") {
-      createAttendanceSession(date);
-      return;
-    }
-    scheduleActionFetcher.submit(
-      { intent, classId: selectedClass.id, date },
-      { method: "post" },
-    );
   }
 
   function updateAttendanceSession(field: "lesson" | "lessonId" | "recordingUrl", value: string) {
@@ -1487,99 +1198,82 @@ export default function TeacherAttendance() {
           </div>
 
           <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-            <div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 p-3 sm:p-4">
-              <div role="tablist" aria-label="Các buổi điểm danh" className="flex flex-wrap items-center gap-2">
-                <button
-                  id="attendance-tab-total"
-                  type="button"
-                  role="tab"
-                  aria-selected={isTotalView}
-                  aria-controls="attendance-session-panel"
-                  disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
-                  onClick={() => {
-                    setActiveTabId(TOTAL_TAB_ID);
+            <div className="flex items-center gap-2 border-b bg-muted/30 p-3 sm:p-4">
+              <button
+                type="button"
+                aria-pressed={isTotalView}
+                disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
+                onClick={() => {
+                  setActiveTabId(TOTAL_TAB_ID);
+                  setFilter("all");
+                  setSearch("");
+                  setFeedback("");
+                }}
+                className={`h-10 shrink-0 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                  isTotalView
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border bg-background text-foreground hover:bg-muted"
+                }`}
+              >
+                Tổng hợp
+              </button>
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <label htmlFor="attendance-session" className="sr-only">Buổi học</label>
+                <select
+                  id="attendance-session"
+                  value={selectedAttendanceSession?.id ?? ""}
+                  onChange={(event) => {
+                    setActiveTabId(event.currentTarget.value || TOTAL_TAB_ID);
                     setFilter("all");
                     setSearch("");
                     setFeedback("");
                   }}
-                  className={`h-10 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                    isTotalView
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-border bg-background text-foreground hover:bg-muted"
-                  }`}
+                  disabled={
+                    attendanceOptions.length === 0
+                    || saveAttendanceFetcher.state !== "idle"
+                    || deleteSessionFetcher.state !== "idle"
+                  }
+                  className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:max-w-sm"
                 >
-                  Tổng
-                </button>
-                {attendanceSessions.map((session) => (
-                  <div
-                    key={session.id}
-                    role="presentation"
-                    className={`inline-flex items-center ${
-                      selectedAttendanceSession?.id === session.id
-                        ? "h-10 gap-1 rounded-md bg-primary px-1"
-                        : ""
-                    }`}
+                  <option value="">Chọn buổi học</option>
+                  {attendanceOptions.map((option) => option.type === "approved-leave" ? (
+                    <option key={`leave-${option.leave.id}`} value={`leave-${option.leave.id}`} disabled>
+                      Ca nghỉ
+                      {" · "}{option.leave.startTime}–{option.leave.endTime}
+                      {" · "}{formatAttendanceSessionDate(option.leave.date)}
+                      {" · Giáo viên nghỉ (đã duyệt)"}
+                    </option>
+                  ) : (
+                    <option key={option.session.id} value={option.session.id}>
+                      {option.session.title}
+                      {option.session.isMakeupSession ? " · Buổi bù" : ""}
+                      {option.session.scheduleStartTime && option.session.scheduleEndTime
+                        ? ` · ${option.session.scheduleStartTime}–${option.session.scheduleEndTime}`
+                        : ""}
+                      {" · "}{formatAttendanceSessionDate(option.session.date)}
+                      {option.session.hasAttendanceRecords ? " · Đã điểm danh" : " · Chưa điểm danh"}
+                    </option>
+                  ))}
+                </select>
+                {selectedAttendanceSession && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={deleteAttendanceSession}
+                    disabled={deleteSessionFetcher.state !== "idle" || saveAttendanceFetcher.state !== "idle"}
+                    aria-label={`Xóa ${selectedAttendanceSession.title}`}
+                    title={`Xóa ${selectedAttendanceSession.title}`}
+                    className="h-10 w-10 shrink-0"
                   >
-                    <button
-                      id={`attendance-tab-${session.id}`}
-                      type="button"
-                      role="tab"
-                      aria-selected={activeTabId === session.id}
-                      aria-controls="attendance-session-panel"
-                      disabled={saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
-                      onClick={() => {
-                        setActiveTabId(session.id);
-                        setFilter("all");
-                        setSearch("");
-                        setFeedback("");
-                      }}
-                      className={`border px-3 text-sm font-medium transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                        activeTabId === session.id
-                          ? selectedAttendanceSession?.id === session.id
-                            ? "h-8 rounded-md border-transparent bg-transparent text-primary-foreground"
-                            : "h-10 rounded-md border-primary bg-primary text-primary-foreground"
-                          : "h-10 rounded-md border-border bg-background text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      {session.lesson.trim() ? `${session.title} - ${session.lesson.trim()}` : session.title}
-                    </button>
-                    {selectedAttendanceSession?.id === session.id && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={deleteAttendanceSession}
-                        disabled={deleteSessionFetcher.state !== "idle" || saveAttendanceFetcher.state !== "idle"}
-                        aria-label={`Xóa ${session.title}`}
-                        title={`Xóa ${session.title}`}
-                        className="h-8 w-8 shrink-0 rounded-full border border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 hover:text-primary-foreground"
-                      >
-                        <Trash2 aria-hidden="true" className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
+                    <Trash2 aria-hidden="true" className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
-              <Button
-                type="button"
-                variant="default"
-                size="icon"
-                onClick={addAttendanceSession}
-                disabled={!canStartSessionFlow || addSessionFetcher.state !== "idle" || scheduleActionFetcher.state !== "idle" || saveAttendanceFetcher.state !== "idle" || deleteSessionFetcher.state !== "idle"}
-                aria-label={missedScheduleDates.length > 0 ? "Xử lý ngày học chưa ghi nhận" : addSessionFetcher.state !== "idle" ? "Đang thêm buổi học" : "Thêm buổi học theo lịch"}
-                title={addSessionFetcher.state !== "idle" ? "Đang thêm buổi học" : sessionCreationMessage}
-              >
-                {addSessionFetcher.state !== "idle"
-                  ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" />
-                  : <Plus aria-hidden="true" className="h-4 w-4" />}
-              </Button>
-              <p className="basis-full px-1 text-xs text-muted-foreground" aria-live="polite">
-                {sessionCreationMessage}
-              </p>
             </div>
 
             {isTotalView ? (
-              <div id="attendance-session-panel" role="tabpanel" aria-labelledby="attendance-tab-total" className="p-4 sm:p-5">
+              <div id="attendance-session-panel" className="p-4 sm:p-5">
                 <div>
                   <h2 className="text-sm font-semibold">Tổng hợp điểm danh</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -1588,7 +1282,7 @@ export default function TeacherAttendance() {
                 </div>
               </div>
             ) : selectedAttendanceSession ? (
-              <div id="attendance-session-panel" role="tabpanel" aria-labelledby={`attendance-tab-${selectedAttendanceSession.id}`} className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-12">
+              <div id="attendance-session-panel" className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-12">
                 <div className="flex min-w-0 flex-col gap-1 xl:col-span-2">
                   <label htmlFor="attendance-lesson" className="text-sm text-muted-foreground">Bài học</label>
                   <input
@@ -1641,8 +1335,8 @@ export default function TeacherAttendance() {
                 </div>
               </div>
             ) : (
-              <div id="attendance-session-panel" role="tabpanel" className="p-5 text-sm text-muted-foreground">
-                Chưa có buổi học. Chọn “Thêm buổi” để tạo buổi điểm danh.
+              <div id="attendance-session-panel" className="p-5 text-sm text-muted-foreground">
+                Chưa có buổi học trong lịch hiện tại.
               </div>
             )}
           </div>
@@ -1916,7 +1610,7 @@ export default function TeacherAttendance() {
             <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
               {feedback || (selectedAttendanceSession
                 ? "Thay đổi sẽ được lưu vào hệ thống khi bạn chọn Lưu điểm danh."
-                : "Chọn một buổi học hoặc thêm buổi mới để bắt đầu điểm danh.")}
+                : "Buổi học theo lịch sẽ xuất hiện khi đến ngày học.")}
             </p>
             {selectedAttendanceSession && (
               <Button
@@ -1931,112 +1625,6 @@ export default function TeacherAttendance() {
             )}
           </footer>
         </section>
-
-        {isResolvingScheduleDates && selectedClass && (
-          <Overlay
-            onClose={() => {
-              if (addSessionFetcher.state === "idle" && scheduleActionFetcher.state === "idle") {
-                setIsResolvingScheduleDates(false);
-              }
-            }}
-            className="max-w-2xl"
-          >
-            <section aria-labelledby="missed-schedule-title" className="space-y-5">
-              <header className="space-y-1">
-                <h2 id="missed-schedule-title" className="text-xl font-semibold">Xử lý ngày học chưa ghi nhận</h2>
-                <p className="text-sm text-muted-foreground">
-                  {selectedClass.name} có {missedScheduleDates.length} ngày theo lịch chưa có buổi điểm danh.
-                  Với mỗi ngày, hãy tạo buổi bù hoặc xác nhận lớp nghỉ. Các buổi sẽ được đánh số theo ngày học.
-                </p>
-              </header>
-
-              {((addSessionFetcher.data && !addSessionFetcher.data.success)
-                || (scheduleActionFetcher.data && !scheduleActionFetcher.data.success)) && (
-                <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-                  {addSessionFetcher.data && !addSessionFetcher.data.success
-                    ? addSessionFetcher.data.error
-                    : scheduleActionFetcher.data && !scheduleActionFetcher.data.success
-                      ? scheduleActionFetcher.data.error
-                      : ""}
-                </p>
-              )}
-
-              {missedScheduleDates.length > 0 ? (
-                <div className="max-h-[55vh] space-y-3 overflow-y-auto pr-1">
-                  {missedScheduleDates.map((date) => (
-                    <article key={date} className="flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
-                      <p className="text-sm font-medium">
-                        {new Date(`${date}T00:00:00.000Z`).toLocaleDateString("vi-VN", {
-                          timeZone: "UTC",
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </p>
-                      <div className="flex flex-col gap-2 sm:flex-row">
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => handleScheduleDate(date, "create-session")}
-                          disabled={addSessionFetcher.state !== "idle" || scheduleActionFetcher.state !== "idle"}
-                          className="w-full sm:w-auto"
-                        >
-                          {addSessionFetcher.state !== "idle" && addSessionFetcher.formData?.get("date") === date
-                            ? "Đang tạo..."
-                            : "Tạo buổi bù"}
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleScheduleDate(date, "cancel-scheduled-date")}
-                          disabled={addSessionFetcher.state !== "idle" || scheduleActionFetcher.state !== "idle"}
-                          className="w-full sm:w-auto"
-                        >
-                          {scheduleActionFetcher.state !== "idle" && scheduleActionFetcher.formData?.get("date") === date
-                            ? "Đang lưu..."
-                            : "Đánh dấu lớp nghỉ"}
-                        </Button>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-lg border border-success/30 bg-success/5 p-4">
-                  <p className="text-sm font-medium">Đã xử lý hết các ngày học còn thiếu.</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {sessionAlreadyExistsToday
-                      ? "Buổi học hôm nay đã được tạo."
-                      : "Bạn có thể tạo buổi học hôm nay nếu lớp có lịch học."}
-                  </p>
-                </div>
-              )}
-
-              <footer className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsResolvingScheduleDates(false)}
-                  disabled={addSessionFetcher.state !== "idle" || scheduleActionFetcher.state !== "idle"}
-                  className="w-full sm:w-auto"
-                >
-                  Đóng
-                </Button>
-                {missedScheduleDates.length === 0 && sessionAvailability?.allowed && !sessionAlreadyExistsToday && (
-                  <Button
-                    type="button"
-                    onClick={() => createAttendanceSession(sessionAvailability.date)}
-                    disabled={addSessionFetcher.state !== "idle"}
-                    className="w-full sm:w-auto"
-                  >
-                    {addSessionFetcher.state !== "idle" ? "Đang tạo..." : "Tạo buổi học hôm nay"}
-                  </Button>
-                )}
-              </footer>
-            </section>
-          </Overlay>
-        )}
 
         {pendingReview && (
           <Overlay
@@ -2144,7 +1732,9 @@ export default function TeacherAttendance() {
               )}
             </p>
             <p id="delete-attendance-description" className="text-sm leading-6 text-muted-foreground">
-              Buổi học cùng toàn bộ trạng thái điểm danh và bài tập đã ghi nhận sẽ bị xóa. Bạn không thể khôi phục dữ liệu này.
+              {pendingDeleteSession?.isScheduleGenerated
+                ? `Buổi cùng toàn bộ dữ liệu điểm danh sẽ bị xóa và ca ${pendingDeleteSession.scheduleStartTime ?? ""}–${pendingDeleteSession.scheduleEndTime ?? ""} sẽ được đánh dấu nghỉ để không tạo lại tự động.`
+                : "Buổi học cùng toàn bộ trạng thái điểm danh và bài tập đã ghi nhận sẽ bị xóa. Bạn không thể khôi phục dữ liệu này."}
             </p>
           </div>
           <div className="flex flex-col-reverse gap-2 border-t bg-muted/30 p-4 sm:flex-row sm:justify-end">

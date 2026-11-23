@@ -5,9 +5,11 @@ import { AppShell } from "~/components/layout/app-shell";
 import { Button } from "~/components/ui/button";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
+import { getVietnameseDateString } from "~/lib/schedule-utils";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["student"]);
+  const attendanceThroughDate = new Date(`${getVietnameseDateString()}T00:00:00.000Z`);
   const classId = params.classId;
   if (!classId) throw new Response("Not Found", { status: 404 });
   const enrollment = await prisma.enrollment.findFirst({
@@ -20,12 +22,15 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
           course: { select: { code: true, title: true } },
           teacher: { select: { name: true } },
           attendanceSessions: {
-            orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+            where: { date: { lte: attendanceThroughDate } },
+            orderBy: [{ date: "desc" }, { scheduleStartTime: "desc" }, { createdAt: "desc" }],
             select: {
               id: true,
               title: true,
               lesson: true,
               date: true,
+              scheduleStartTime: true,
+              scheduleEndTime: true,
               recordingUrl: true,
               courseLesson: { select: { order: true, title: true } },
             },
@@ -86,7 +91,12 @@ export default function StudentClassRecordings() {
                         : session.lesson}
                     </p>
                   )}
-                  <time className="mt-1 block text-sm text-muted-foreground">{session.date.toLocaleDateString("vi-VN")}</time>
+                  <time className="mt-1 block text-sm text-muted-foreground">
+                    {session.date.toLocaleDateString("vi-VN")}
+                    {session.scheduleStartTime && session.scheduleEndTime
+                      ? ` · ${session.scheduleStartTime}–${session.scheduleEndTime}`
+                      : ""}
+                  </time>
                 </div>
                 {session.recordingUrl ? (
                   <a

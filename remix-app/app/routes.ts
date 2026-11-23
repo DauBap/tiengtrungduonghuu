@@ -8,6 +8,7 @@ export default [
   route("api/tts", "routes/api.tts.ts"),
   route("api/notifications", "routes/api.notifications.ts"),
   route("api/presence", "routes/api.presence.ts"),
+  route("api/cron/attendance-sessions", "routes/api.cron.attendance-sessions.ts"),
   route("api/student/review-count", "routes/api.student.review-count.ts"),
   route("api/student/shenbi-attempts", "routes/api.student.shenbi-attempts.ts"),
   route("api/pronunciation-recordings/:assessmentId", "routes/api.pronunciation-recordings.$assessmentId.ts"),
@@ -66,6 +67,8 @@ export default [
     route("schedule", "routes/admin.schedule.tsx"),
     route("tuition", "routes/admin.tuition.tsx"),
     route("attendance", "routes/admin.attendance.tsx"),
+    route("leave-requests", "routes/admin.leave-requests.tsx"),
+    route("grading-overview", "routes/admin.grading-overview.tsx"),
     route("reports", "routes/admin.reports.tsx"),
     route("notifications", "routes/admin.notifications.tsx"),
     route("content-corrections", "routes/admin.content-corrections.tsx"),
@@ -98,6 +101,7 @@ export default [
   route("teacher/courses/:courseId/lessons/:lessonId/students/:studentId/workbook-history/attempts/:attemptId", "routes/teacher.courses.$courseId.lessons.$lessonId.students.$studentId.workbook-history.attempts.$attemptId.tsx"),
   route("teacher/courses/:courseId/students/:studentId", "routes/teacher.courses.$courseId.students.$studentId.tsx"),
   route("teacher/attendance", "routes/teacher.attendance.tsx"),
+  route("teacher/leave-requests", "routes/teacher.leave-requests.tsx"),
 
   // Student
   route("student", "routes/student._index.tsx"),

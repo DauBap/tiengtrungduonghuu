@@ -1,13 +1,56 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  addDaysToDateString,
   getMissingScheduledDates,
+  getScheduledDates,
   getScheduledDateAvailability,
+  getScheduledOccurrences,
+  getScheduledSlotsForDate,
   getScheduledSessionAvailability,
   getScheduledSessionNumber,
+  getVietnameseDateString,
+  isScheduledDate,
 } from "./schedule-utils";
 
 const mondaySchedule = [{ days: [1], startTime: "20:00", endTime: "21:30" }];
+
+test("scheduled date generation includes only configured weekdays in the inclusive range", () => {
+  assert.deepEqual(
+    getScheduledDates(
+      [{ days: [1, 3], startTime: "20:00", endTime: "21:30" }],
+      "2026-11-23",
+      "2026-11-29",
+    ),
+    ["2026-11-23", "2026-11-25"],
+  );
+  assert.equal(isScheduledDate(mondaySchedule, "2026-11-23", "2026-11-30"), true);
+  assert.equal(isScheduledDate(mondaySchedule, "2026-11-24", "2026-11-23"), false);
+  assert.equal(addDaysToDateString("2026-11-30", 30), "2026-12-30");
+  assert.equal(getVietnameseDateString(new Date("2026-11-23T17:05:00.000Z")), "2026-11-24");
+});
+
+test("schedule slots keep separate times on the same weekday", () => {
+  const schedule = [
+    { days: [1], startTime: "08:00", endTime: "09:30" },
+    { days: [1, 3], startTime: "18:00", endTime: "19:30" },
+    { days: [1], startTime: "08:00", endTime: "09:30" },
+  ];
+  assert.deepEqual(
+    getScheduledSlotsForDate(schedule, "2026-11-23"),
+    [
+      { days: [1], startTime: "08:00", endTime: "09:30" },
+      { days: [1, 3], startTime: "18:00", endTime: "19:30" },
+    ],
+  );
+  assert.deepEqual(
+    getScheduledOccurrences(schedule, "2026-11-23", "2026-11-24"),
+    [
+      { date: "2026-11-23", startTime: "08:00", endTime: "09:30" },
+      { date: "2026-11-23", startTime: "18:00", endTime: "19:30" },
+    ],
+  );
+});
 
 test("scheduled sessions can be created any time on the scheduled weekday in Vietnam", () => {
   assert.deepEqual(

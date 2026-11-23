@@ -31,6 +31,11 @@ import {
 } from "~/lib/attendance-streak.server";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
+import { getVietnameseDateString } from "~/lib/schedule-utils";
+import {
+  getClassSessionOrderSnapshot,
+  renumberClassAttendanceSessions,
+} from "~/lib/attendance-session-order.server";
 import { toast } from "sonner";
 
 type AttendanceStatus = "PRESENT" | "LATE" | "ABSENT";
@@ -113,6 +118,7 @@ function normalizeSearchText(value: string) {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
+  const attendanceThroughDate = parseAttendanceDate(getVietnameseDateString())!;
   const url = new URL(request.url);
   const params = url.searchParams;
   const requestedTeacherId = params.get("teacherId") ?? "";
@@ -169,10 +175,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
         completedAt: true,
         course: { select: { title: true } },
         teacher: { select: { id: true, name: true } },
-        _count: { select: { attendanceSessions: true } },
+        _count: {
+          select: {
+            attendanceSessions: { where: { date: { lte: attendanceThroughDate } } },
+          },
+        },
         attendanceSessions: {
-          where: { date: { lte: date } },
-          orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+          where: { date: { lte: attendanceThroughDate } },
+          orderBy: [{ date: "desc" }, { scheduleStartTime: "desc" }, { createdAt: "desc" }],
           take: 3,
           select: {
             id: true,
@@ -251,13 +261,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
     ? []
     : await prisma.attendanceSession.findMany({
         where: { classId: { in: sessionClassIds }, date },
-        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+        orderBy: [{ date: "desc" }, { scheduleStartTime: "desc" }, { createdAt: "desc" }],
         select: {
           id: true,
           classId: true,
           title: true,
           lesson: true,
           date: true,
+          scheduleStartTime: true,
+          scheduleEndTime: true,
           class: { select: { name: true } },
           _count: { select: { records: true } },
         },
@@ -295,6 +307,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
           lesson: true,
           date: true,
           createdAt: true,
+          scheduleStartTime: true,
+          scheduleEndTime: true,
           class: {
             select: {
               name: true,
@@ -328,15 +342,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
           classId: selectedSession.classId,
           OR: [
             { date: { lt: selectedSession.date } },
-            { date: selectedSession.date, createdAt: { lte: selectedSession.createdAt } },
+            { date: selectedSession.date, scheduleStartTime: { lt: selectedSession.scheduleStartTime ?? "" } },
+            {
+              date: selectedSession.date,
+              scheduleStartTime: selectedSession.scheduleStartTime,
+              createdAt: { lte: selectedSession.createdAt },
+            },
           ],
         },
-        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+        orderBy: [{ date: "desc" }, { scheduleStartTime: "desc" }, { createdAt: "desc" }],
         take: 3,
         select: {
           id: true,
           title: true,
           date: true,
+          scheduleStartTime: true,
           createdAt: true,
           records: { select: { studentId: true, status: true, student: { select: { name: true } } } },
         },
@@ -391,12 +411,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
           }),
           prisma.attendanceSession.findMany({
             where: { classId: selectedClass.id },
-            orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+            orderBy: [{ date: "desc" }, { scheduleStartTime: "desc" }, { createdAt: "desc" }],
             take: 3,
             select: {
               id: true,
               title: true,
               date: true,
+              scheduleStartTime: true,
               createdAt: true,
               records: { select: { studentId: true, status: true, student: { select: { name: true } } } },
             },
@@ -693,6 +714,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
       title: session.title,
       lesson: session.lesson,
       date: session.date.toISOString().slice(0, 10),
+      scheduleStartTime: session.scheduleStartTime,
+      scheduleEndTime: session.scheduleEndTime,
       recordCount: session._count.records,
       ...(statsBySessionId.get(session.id) ?? { present: 0, late: 0, absent: 0, unmarked: 0 }),
     })),
@@ -703,6 +726,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
           title: selectedSession.title,
           lesson: selectedSession.lesson,
           date: selectedSession.date.toISOString().slice(0, 10),
+          scheduleStartTime: selectedSession.scheduleStartTime,
+          scheduleEndTime: selectedSession.scheduleEndTime,
           classroom: {
             name: selectedSession.class.name,
             course: selectedSession.class.course.title,
@@ -775,9 +800,19 @@ export async function action({ request }: ActionFunctionArgs) {
     if (!classroom) {
       return { success: false as const, intent, error: "Không tìm thấy lớp đang hoạt động để tạo buổi học." };
     }
+    const existingSession = await prisma.attendanceSession.findFirst({
+      where: { classId, date, scheduleStartTime: null, scheduleEndTime: null },
+      select: { id: true },
+    });
+    if (existingSession) {
+      return {
+        success: false as const,
+        intent,
+        error: "Ngày này đã có buổi học. Hãy chỉnh sửa buổi hiện có để tránh tạo trùng.",
+      };
+    }
 
     const session = await prisma.$transaction(async (tx) => {
-      await tx.classScheduleCancellation.deleteMany({ where: { classId, date } });
       const createdSession = await tx.attendanceSession.create({
         data: { classId, title, lesson, date },
         select: { id: true },
@@ -815,14 +850,66 @@ export async function action({ request }: ActionFunctionArgs) {
     const sessionId = String(form.get("sessionId") ?? "");
     const session = await prisma.attendanceSession.findUnique({
       where: { id: sessionId },
-      select: { id: true, classId: true },
+      select: {
+        id: true,
+        classId: true,
+        date: true,
+        scheduleStartTime: true,
+        scheduleEndTime: true,
+        isScheduleGenerated: true,
+      },
     });
     if (!session) {
       return { success: false as const, intent, error: "Không tìm thấy buổi điểm danh. Hãy tải lại trang." };
     }
 
     if (intent === "delete-session") {
-      await prisma.attendanceSession.delete({ where: { id: session.id } });
+      const deleted = await prisma.$transaction(async (tx) => {
+        const previousOrder = await getClassSessionOrderSnapshot(tx, session.classId);
+        const sessionNumber = previousOrder.sessions.findIndex(({ id }) => id === session.id) + 1;
+        if (sessionNumber === 0) {
+          return { success: false as const, error: "Không xác định được số buổi. Hãy tải lại trang." };
+        }
+        const savedReview = await tx.studentClassReview.findFirst({
+          where: { classId: session.classId, sessionNumber },
+          select: { id: true },
+        });
+        if (
+          savedReview
+          || previousOrder.midtermReviewSession === sessionNumber
+          || previousOrder.finalReviewSession === sessionNumber
+        ) {
+          return { success: false as const, error: "Không thể xóa buổi đã có đánh giá hoặc đang được đặt làm mốc đánh giá." };
+        }
+
+        await tx.attendanceSession.delete({ where: { id: session.id } });
+        if (session.isScheduleGenerated) {
+          const existingCancellation = await tx.classScheduleCancellation.findFirst({
+            where: {
+              classId: session.classId,
+              date: session.date,
+              OR: [
+                { startTime: null, endTime: null },
+                { startTime: session.scheduleStartTime, endTime: session.scheduleEndTime },
+              ],
+            },
+            select: { id: true },
+          });
+          if (!existingCancellation) {
+            await tx.classScheduleCancellation.create({
+              data: {
+                classId: session.classId,
+                date: session.date,
+                startTime: session.scheduleStartTime,
+                endTime: session.scheduleEndTime,
+              },
+            });
+          }
+        }
+        await renumberClassAttendanceSessions(tx, session.classId, previousOrder);
+        return { success: true as const };
+      });
+      if (!deleted.success) return { success: false as const, intent, error: deleted.error };
       return { success: true as const, intent, sessionId };
     }
 
@@ -922,30 +1009,75 @@ export async function action({ request }: ActionFunctionArgs) {
       }
     }
 
-    await prisma.$transaction(async (tx) => {
-      await tx.classScheduleCancellation.deleteMany({ where: { classId: session.classId, date } });
-      await tx.attendanceSession.update({
-        where: { id: session.id },
-        data: { title, lesson, date },
-      });
-      for (const update of recordUpdates) {
-        await tx.attendanceRecord.update({
-          where: { id: update.recordId },
-          data: { status: update.status, absenceReason: update.absenceReason },
-        });
-      }
-      for (const update of taskUpdates) {
-        await tx.attendanceRecord.update({
-          where: { id: update.recordId },
+    const isDateChanged = session.date.toISOString().slice(0, 10) !== date.toISOString().slice(0, 10);
+    try {
+      await prisma.$transaction(async (tx) => {
+        const previousOrder = isDateChanged
+          ? await getClassSessionOrderSnapshot(tx, session.classId)
+          : null;
+        if (session.isScheduleGenerated && isDateChanged) {
+          const existingCancellation = await tx.classScheduleCancellation.findFirst({
+            where: {
+              classId: session.classId,
+              date: session.date,
+              OR: [
+                { startTime: null, endTime: null },
+                { startTime: session.scheduleStartTime, endTime: session.scheduleEndTime },
+              ],
+            },
+            select: { id: true },
+          });
+          if (!existingCancellation) {
+            await tx.classScheduleCancellation.create({
+              data: {
+                classId: session.classId,
+                date: session.date,
+                startTime: session.scheduleStartTime,
+                endTime: session.scheduleEndTime,
+              },
+            });
+          }
+        }
+        await tx.attendanceSession.update({
+          where: { id: session.id },
           data: {
-            recording: update.task === "recording" ? update.completed : undefined,
-            hanzi: update.task === "hanzi" ? update.completed : undefined,
-            duet: update.task === "duet" ? update.completed : undefined,
-            lessonLink: update.task === "lessonLink" ? update.completed : undefined,
+            title,
+            lesson,
+            date,
+            isScheduleGenerated: session.isScheduleGenerated && isDateChanged ? false : undefined,
           },
         });
+        for (const update of recordUpdates) {
+          await tx.attendanceRecord.update({
+            where: { id: update.recordId },
+            data: { status: update.status, absenceReason: update.absenceReason },
+          });
+        }
+        for (const update of taskUpdates) {
+          await tx.attendanceRecord.update({
+            where: { id: update.recordId },
+            data: {
+              recording: update.task === "recording" ? update.completed : undefined,
+              hanzi: update.task === "hanzi" ? update.completed : undefined,
+              duet: update.task === "duet" ? update.completed : undefined,
+              lessonLink: update.task === "lessonLink" ? update.completed : undefined,
+            },
+          });
+        }
+        if (previousOrder) {
+          await renumberClassAttendanceSessions(tx, session.classId, previousOrder);
+        }
+      });
+    } catch (error) {
+      if (
+        error instanceof Error
+        && "code" in error
+        && error.code === "P2002"
+      ) {
+        return { success: false as const, intent, error: "Lớp đã có buổi học trong ngày và khung giờ này. Hãy chọn ngày khác." };
       }
-    });
+      throw error;
+    }
     return {
       success: true as const,
       intent,
@@ -1437,7 +1569,10 @@ function AttendanceSessionTab({
   isSelected: boolean;
 }) {
   const search = new URLSearchParams({ teacherId, classId, sessionId: session.id, date });
-  const label = session.lesson.trim() ? `${session.title} - ${session.lesson.trim()}` : session.title;
+  const sessionTitle = session.scheduleStartTime && session.scheduleEndTime
+    ? `${session.title} · ${session.scheduleStartTime}–${session.scheduleEndTime}`
+    : session.title;
+  const label = session.lesson.trim() ? `${sessionTitle} - ${session.lesson.trim()}` : sessionTitle;
   const markedCount = session.present + session.late + session.absent;
   const needsAttention = session.unmarked > 0;
 
@@ -2370,6 +2505,9 @@ export default function AdminAttendance() {
               <section aria-labelledby="attendance-session-detail-heading" className="space-y-3">
                 <h2 id="attendance-session-detail-heading" className="text-lg font-semibold">
                   Bảng điểm danh · {selectedSession.title}
+                  {selectedSession.scheduleStartTime && selectedSession.scheduleEndTime
+                    ? ` · ${selectedSession.scheduleStartTime}–${selectedSession.scheduleEndTime}`
+                    : ""}
                 </h2>
                 <AttendanceSessionDetails
                   session={selectedSession}

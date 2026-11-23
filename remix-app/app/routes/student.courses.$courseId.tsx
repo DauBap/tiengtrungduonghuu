@@ -85,12 +85,14 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
               },
             },
             attendanceSessions: {
-              orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+              orderBy: [{ date: "desc" }, { scheduleStartTime: "desc" }, { createdAt: "desc" }],
               select: {
                 id: true,
                 title: true,
                 lesson: true,
                 date: true,
+                scheduleStartTime: true,
+                scheduleEndTime: true,
                 recordingUrl: true,
                 courseLesson: { select: { order: true, title: true } },
               },
@@ -683,6 +685,9 @@ export default function StudentCourseDetail() {
                         )}
                         <time className="mt-1 block text-sm text-muted-foreground">
                           {session.date.toLocaleDateString("vi-VN")}
+                          {session.scheduleStartTime && session.scheduleEndTime
+                            ? ` · ${session.scheduleStartTime}–${session.scheduleEndTime}`
+                            : ""}
                         </time>
                       </div>
                       {session.recordingUrl ? (

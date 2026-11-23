@@ -8,6 +8,12 @@ export interface ScheduleSlot {
   endTime: string;
 }
 
+export interface ScheduledOccurrence {
+  date: string;
+  startTime: string;
+  endTime: string;
+}
+
 export type ScheduledSessionAvailability =
   | { allowed: true; date: string }
   | {
@@ -41,6 +47,10 @@ function getVietnameseLocalDateInfo(now: Date) {
     date: `${values.year}-${values.month}-${values.day}`,
     day: WEEKDAY_NUMBERS[values.weekday] ?? -1,
   };
+}
+
+export function getVietnameseDateString(now: Date = new Date()) {
+  return getVietnameseLocalDateInfo(now).date;
 }
 
 function getDateString(value: Date | string) {
@@ -78,6 +88,79 @@ function getValidScheduledSlots(schedule: unknown): ScheduleSlot[] {
 
 function getWeekday(date: string) {
   return new Date(`${date}T00:00:00.000Z`).getUTCDay();
+}
+
+export function addDaysToDateString(value: string, days: number) {
+  const date = getDateString(value);
+  if (!date || !Number.isInteger(days)) return null;
+  const result = new Date(`${date}T00:00:00.000Z`);
+  result.setUTCDate(result.getUTCDate() + days);
+  return result.toISOString().slice(0, 10);
+}
+
+export function getScheduledDates(
+  schedule: unknown,
+  startDate: Date | string,
+  endDate: Date | string,
+) {
+  const firstDate = getDateString(startDate);
+  const lastDate = getDateString(endDate);
+  const validSlots = getValidScheduledSlots(schedule);
+  if (!firstDate || !lastDate || validSlots.length === 0 || firstDate > lastDate) return [];
+
+  const dates: string[] = [];
+  const cursor = new Date(`${firstDate}T00:00:00.000Z`);
+  const last = new Date(`${lastDate}T00:00:00.000Z`);
+  while (cursor <= last) {
+    const date = cursor.toISOString().slice(0, 10);
+    if (validSlots.some((slot) => slot.days.includes(cursor.getUTCDay()))) dates.push(date);
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return dates;
+}
+
+export function getScheduledSlotsForDate(schedule: unknown, date: string): ScheduleSlot[] {
+  const targetDate = getDateString(date);
+  if (!targetDate) return [];
+  const weekday = getWeekday(targetDate);
+  const uniqueSlots = new Map<string, ScheduleSlot>();
+  for (const slot of getValidScheduledSlots(schedule)) {
+    if (slot.days.includes(weekday)) {
+      uniqueSlots.set(`${slot.startTime}-${slot.endTime}`, slot);
+    }
+  }
+  return [...uniqueSlots.values()].sort((left, right) =>
+    left.startTime.localeCompare(right.startTime)
+    || left.endTime.localeCompare(right.endTime),
+  );
+}
+
+export function getScheduledOccurrences(
+  schedule: unknown,
+  startDate: Date | string,
+  endDate: Date | string,
+): ScheduledOccurrence[] {
+  const firstDate = getDateString(startDate);
+  const lastDate = getDateString(endDate);
+  if (!firstDate || !lastDate || firstDate > lastDate) return [];
+  const occurrences: ScheduledOccurrence[] = [];
+  const cursor = new Date(`${firstDate}T00:00:00.000Z`);
+  const last = new Date(`${lastDate}T00:00:00.000Z`);
+  while (cursor <= last) {
+    const date = cursor.toISOString().slice(0, 10);
+    for (const slot of getScheduledSlotsForDate(schedule, date)) {
+      occurrences.push({ date, startTime: slot.startTime, endTime: slot.endTime });
+    }
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return occurrences;
+}
+
+export function isScheduledDate(schedule: unknown, startDate: Date | string, date: string) {
+  const targetDate = getDateString(date);
+  const classStartDate = getDateString(startDate);
+  if (!targetDate || !classStartDate || targetDate < classStartDate) return false;
+  return getValidScheduledSlots(schedule).some((slot) => slot.days.includes(getWeekday(targetDate)));
 }
 
 export function getScheduledDateAvailability(

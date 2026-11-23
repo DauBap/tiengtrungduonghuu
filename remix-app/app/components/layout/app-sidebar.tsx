@@ -33,6 +33,7 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
         { label: "Danh sách lớp", href: "/admin/classes", icon: School },
         { label: "Tổng quan lớp", href: "/admin/class-overview", icon: ClipboardList },
         { label: "Điểm danh", href: "/admin/attendance", icon: ClipboardCheck },
+        { label: "Duyệt yêu cầu nghỉ", href: "/admin/leave-requests", icon: CalendarDays },
       ],
     },
     {
@@ -43,6 +44,7 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
         { label: "Đánh giá giữa kỳ", href: "/admin/midterm-reviews", icon: ClipboardCheck },
         { label: "Đánh giá cuối kỳ", href: "/admin/class-final-results", icon: ClipboardCheck },
         { label: "Lịch sử đánh giá học viên", href: "/admin/student-reviews", icon: ClipboardList },
+        { label: "Bài chưa chấm", href: "/admin/grading-overview", icon: ClipboardList },
       ],
     },
     {
@@ -72,6 +74,7 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
     { label: "Lớp học", href: "/teacher/classes", icon: School },
     { label: "Lịch dạy", href: "/teacher/schedule", icon: CalendarDays },
     { label: "Điểm danh", href: "/teacher/attendance", icon: ClipboardCheck },
+    { label: "Xin nghỉ phép", href: "/teacher/leave-requests", icon: CalendarDays },
     { label: "Khóa học của tôi", href: "/teacher/courses", icon: BookOpen },
     { label: "Góp ý nội dung", href: "/teacher/content-corrections", icon: ListChecks },
   ],

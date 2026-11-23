@@ -6,7 +6,7 @@ import { AppShell } from "~/components/layout/app-shell";
 import { Overlay } from "~/components/common/overlay";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { formatSchedule, type ScheduleSlot } from "~/lib/schedule-utils";
+import { formatSchedule, getVietnameseDateString, type ScheduleSlot } from "~/lib/schedule-utils";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 
@@ -42,6 +42,7 @@ function getLegacyPromotionLabel(decision: string | null | undefined) {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["admin"]);
+  const attendanceThroughDate = new Date(`${getVietnameseDateString()}T00:00:00.000Z`);
   const [classes, hskLevels] = await Promise.all([
     prisma.class.findMany({
       where: { completedAt: null },
@@ -90,13 +91,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
           },
         },
         attendanceSessions: {
-          orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+          where: { date: { lte: attendanceThroughDate } },
+          orderBy: [{ date: "desc" }, { scheduleStartTime: "desc" }, { createdAt: "desc" }],
           select: {
             id: true,
             lessonId: true,
             title: true,
             lesson: true,
             date: true,
+            scheduleStartTime: true,
+            scheduleEndTime: true,
             createdAt: true,
             recordingUrl: true,
             courseLesson: { select: { order: true, title: true } },
@@ -286,6 +290,7 @@ export default function AdminClassOverview() {
   const selectedClassRecordings = useMemo(
     () => [...(selectedRecordClass?.attendanceSessions ?? [])].sort(
       (left, right) => right.date.getTime() - left.date.getTime()
+        || (right.scheduleStartTime ?? "").localeCompare(left.scheduleStartTime ?? "")
         || right.createdAt.getTime() - left.createdAt.getTime(),
     ),
     [selectedRecordClass?.attendanceSessions],
@@ -679,7 +684,12 @@ export default function AdminClassOverview() {
               <div className="rounded-lg bg-muted/50 px-4 py-3">
                 <p className="font-medium">Buổi gần nhất: {selectedClassLatestSession.title}</p>
                 <p className="mt-0.5 text-sm text-muted-foreground">
-                  {selectedClassLatestSession.date.toLocaleDateString("vi-VN")} · {selectedClassLatestSession.records.filter(({ status }) => status !== null).length}/{selectedRecordClass.enrollments.length} học viên đã điểm danh
+                 {selectedClassLatestSession.date.toLocaleDateString("vi-VN")}
+                 {selectedClassLatestSession.scheduleStartTime && selectedClassLatestSession.scheduleEndTime
+                   ? ` · ${selectedClassLatestSession.scheduleStartTime}–${selectedClassLatestSession.scheduleEndTime}`
+                   : ""}
+                 {" · "}
+                 {selectedClassLatestSession.records.filter(({ status }) => status !== null).length}/{selectedRecordClass.enrollments.length} học viên đã điểm danh
                 </p>
               </div>
             ) : (
@@ -819,6 +829,9 @@ export default function AdminClassOverview() {
                               <p className="text-sm font-medium">{session.title}</p>
                               <p className="mt-0.5 text-xs text-muted-foreground">
                                 {session.date.toLocaleDateString("vi-VN")}
+                                {session.scheduleStartTime && session.scheduleEndTime
+                                  ? ` · ${session.scheduleStartTime}–${session.scheduleEndTime}`
+                                  : ""}
                                 {session.courseLesson && ` · Bài ${session.courseLesson.order} · ${session.courseLesson.title}`}
                                 {!session.courseLesson && session.lesson && ` · ${session.lesson}`}
                               </p>

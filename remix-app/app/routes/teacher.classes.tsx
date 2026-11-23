@@ -350,7 +350,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
             select: { studentId: true, sessionNumber: true },
           },
           attendanceSessions: {
-            orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+            orderBy: [{ date: "asc" }, { scheduleStartTime: "asc" }, { createdAt: "asc" }],
             select: {
               id: true,
               title: true,
