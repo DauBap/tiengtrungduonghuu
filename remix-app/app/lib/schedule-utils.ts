@@ -13,7 +13,7 @@ export type ScheduledSessionAvailability =
   | {
       allowed: false;
       date: string;
-      reason: "no-schedule" | "before-start-date" | "wrong-day";
+      reason: "no-schedule" | "before-start-date" | "future-date" | "wrong-day";
     };
 
 const DAY_NAMES = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
@@ -28,7 +28,7 @@ const WEEKDAY_NUMBERS: Record<string, number> = {
   Sat: 6,
 };
 
-function getVietnameseLocalDateTime(now: Date) {
+function getVietnameseLocalDateInfo(now: Date) {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "Asia/Ho_Chi_Minh",
     weekday: "short",
@@ -43,10 +43,69 @@ function getVietnameseLocalDateTime(now: Date) {
   };
 }
 
+function getDateString(value: Date | string) {
+  const date = value instanceof Date ? value.toISOString().slice(0, 10) : value.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const parsed = new Date(`${date}T00:00:00.000Z`);
+  return parsed.toISOString().slice(0, 10) === date ? date : null;
+}
+
 function parseTimeMinutes(value: unknown) {
   if (typeof value !== "string") return null;
   const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(value);
   return match ? Number(match[1]) * 60 + Number(match[2]) : null;
+}
+
+function getValidScheduledSlots(schedule: unknown): ScheduleSlot[] {
+  if (!Array.isArray(schedule)) return [];
+  return schedule.flatMap((value) => {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) return [];
+    const slot = value as Partial<ScheduleSlot>;
+    const startMinutes = parseTimeMinutes(slot.startTime);
+    const endMinutes = parseTimeMinutes(slot.endTime);
+    if (
+      !Array.isArray(slot.days)
+      || !slot.days.some((day) => Number.isInteger(day) && day >= 0 && day <= 6)
+      || startMinutes === null
+      || endMinutes === null
+      || endMinutes <= startMinutes
+    ) {
+      return [];
+    }
+    return [{ days: slot.days, startTime: slot.startTime!, endTime: slot.endTime! }];
+  });
+}
+
+function getWeekday(date: string) {
+  return new Date(`${date}T00:00:00.000Z`).getUTCDay();
+}
+
+export function getScheduledDateAvailability(
+  schedule: unknown,
+  startDate: Date | string,
+  date: string,
+  now: Date = new Date(),
+): ScheduledSessionAvailability {
+  const today = getVietnameseLocalDateInfo(now).date;
+  const targetDate = getDateString(date);
+  const classStartDate = getDateString(startDate);
+  if (!targetDate || !classStartDate) {
+    return { allowed: false, date, reason: "no-schedule" };
+  }
+  const validSlots = getValidScheduledSlots(schedule);
+  if (validSlots.length === 0) {
+    return { allowed: false, date: targetDate, reason: "no-schedule" };
+  }
+  if (targetDate < classStartDate) {
+    return { allowed: false, date: targetDate, reason: "before-start-date" };
+  }
+  if (targetDate > today) {
+    return { allowed: false, date: targetDate, reason: "future-date" };
+  }
+  if (!validSlots.some((slot) => slot.days.includes(getWeekday(targetDate)))) {
+    return { allowed: false, date: targetDate, reason: "wrong-day" };
+  }
+  return { allowed: true, date: targetDate };
 }
 
 export function getScheduledSessionAvailability(
@@ -54,45 +113,46 @@ export function getScheduledSessionAvailability(
   startDate: Date | string,
   now: Date = new Date(),
 ): ScheduledSessionAvailability {
-  const localNow = getVietnameseLocalDateTime(now);
-  const classStartDate = startDate instanceof Date
-    ? startDate.toISOString().slice(0, 10)
-    : startDate.slice(0, 10);
-  if (!Array.isArray(schedule) || schedule.length === 0) {
-    return { allowed: false, date: localNow.date, reason: "no-schedule" };
-  }
-  if (classStartDate > localNow.date) {
-    return { allowed: false, date: localNow.date, reason: "before-start-date" };
-  }
+  const today = getVietnameseLocalDateInfo(now).date;
+  return getScheduledDateAvailability(schedule, startDate, today, now);
+}
 
-  const hasMatchingDaySlot = schedule.some((value) => {
-    if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
-    const slot = value as Partial<ScheduleSlot>;
-    if (!Array.isArray(slot.days) || !slot.days.includes(localNow.day)) return false;
-    const startMinutes = parseTimeMinutes(slot.startTime);
-    const endMinutes = parseTimeMinutes(slot.endTime);
-    return startMinutes !== null && endMinutes !== null && endMinutes > startMinutes;
-  });
-  if (!hasMatchingDaySlot) {
-    const hasValidSlot = schedule.some((value) => {
-      if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
-      const slot = value as Partial<ScheduleSlot>;
-      const startMinutes = parseTimeMinutes(slot.startTime);
-      const endMinutes = parseTimeMinutes(slot.endTime);
-      return Array.isArray(slot.days)
-        && slot.days.some((day) => Number.isInteger(day) && day >= 0 && day <= 6)
-        && startMinutes !== null
-        && endMinutes !== null
-        && endMinutes > startMinutes;
-    });
-    return {
-      allowed: false,
-      date: localNow.date,
-      reason: hasValidSlot ? "wrong-day" : "no-schedule",
-    };
-  }
+export function getMissingScheduledDates(
+  schedule: unknown,
+  startDate: Date | string,
+  throughDate: string,
+  recordedDates: string[],
+  cancelledDates: string[],
+): string[] {
+  const classStartDate = getDateString(startDate);
+  const endDate = getDateString(throughDate);
+  const validSlots = getValidScheduledSlots(schedule);
+  if (!classStartDate || !endDate || validSlots.length === 0 || classStartDate > endDate) return [];
 
-  return { allowed: true, date: localNow.date };
+  const recorded = new Set(recordedDates);
+  const cancelled = new Set(cancelledDates);
+  const missingDates: string[] = [];
+  const cursor = new Date(`${classStartDate}T00:00:00.000Z`);
+  const lastDate = new Date(`${endDate}T00:00:00.000Z`);
+  while (cursor < lastDate) {
+    const date = cursor.toISOString().slice(0, 10);
+    if (
+      validSlots.some((slot) => slot.days.includes(cursor.getUTCDay()))
+      && !recorded.has(date)
+      && !cancelled.has(date)
+    ) {
+      missingDates.push(date);
+    }
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return missingDates;
+}
+
+export function getScheduledSessionNumber(
+  existingDates: string[],
+  sessionDate: string,
+): number {
+  return existingDates.filter((date) => date < sessionDate).length + 1;
 }
 
 /**

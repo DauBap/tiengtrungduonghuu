@@ -777,6 +777,7 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     const session = await prisma.$transaction(async (tx) => {
+      await tx.classScheduleCancellation.deleteMany({ where: { classId, date } });
       const createdSession = await tx.attendanceSession.create({
         data: { classId, title, lesson, date },
         select: { id: true },
@@ -814,7 +815,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const sessionId = String(form.get("sessionId") ?? "");
     const session = await prisma.attendanceSession.findUnique({
       where: { id: sessionId },
-      select: { id: true },
+      select: { id: true, classId: true },
     });
     if (!session) {
       return { success: false as const, intent, error: "Không tìm thấy buổi điểm danh. Hãy tải lại trang." };
@@ -922,6 +923,7 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     await prisma.$transaction(async (tx) => {
+      await tx.classScheduleCancellation.deleteMany({ where: { classId: session.classId, date } });
       await tx.attendanceSession.update({
         where: { id: session.id },
         data: { title, lesson, date },

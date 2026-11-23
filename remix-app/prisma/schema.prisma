@@ -553,6 +553,7 @@ model Class {
   enrollments                 Enrollment[]
   shenbiAssignments           ShenbiAssignment[]
   attendanceSessions          AttendanceSession[]
+  scheduleCancellations       ClassScheduleCancellation[]
   finalResults                ClassFinalResult[]
   studentScores               ClassStudentScore[]
   studentClassReviews         StudentClassReview[]
@@ -637,6 +638,17 @@ model AttendanceSession {
   absenceDismissals AttendanceAbsenceDismissal[]
 
   @@index([classId, date])
+}
+
+model ClassScheduleCancellation {
+  id        String   @id @default(cuid())
+  classId   String
+  date      DateTime @db.Date
+  createdAt DateTime @default(now())
+
+  classroom Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, date])
 }
 
 model ClassFinalResult {
