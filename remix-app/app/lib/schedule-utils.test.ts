@@ -4,18 +4,18 @@ import { getScheduledSessionAvailability } from "./schedule-utils";
 
 const mondaySchedule = [{ days: [1], startTime: "20:00", endTime: "21:30" }];
 
-test("scheduled sessions can only be created during the class time in Vietnam", () => {
+test("scheduled sessions can be created any time on the scheduled weekday in Vietnam", () => {
   assert.deepEqual(
     getScheduledSessionAvailability(mondaySchedule, "2026-11-23", new Date("2026-11-23T13:30:00.000Z")),
     { allowed: true, date: "2026-11-23" },
   );
   assert.deepEqual(
-    getScheduledSessionAvailability(mondaySchedule, "2026-11-23", new Date("2026-11-23T12:59:00.000Z")),
-    { allowed: false, date: "2026-11-23", reason: "before-time" },
+    getScheduledSessionAvailability(mondaySchedule, "2026-11-23", new Date("2026-11-23T00:01:00.000Z")),
+    { allowed: true, date: "2026-11-23" },
   );
   assert.deepEqual(
-    getScheduledSessionAvailability(mondaySchedule, "2026-11-23", new Date("2026-11-23T14:31:00.000Z")),
-    { allowed: false, date: "2026-11-23", reason: "after-time" },
+    getScheduledSessionAvailability(mondaySchedule, "2026-11-23", new Date("2026-11-23T16:30:00.000Z")),
+    { allowed: true, date: "2026-11-23" },
   );
 });
 

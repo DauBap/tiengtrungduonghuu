@@ -13,7 +13,7 @@ export type ScheduledSessionAvailability =
   | {
       allowed: false;
       date: string;
-      reason: "no-schedule" | "before-start-date" | "wrong-day" | "before-time" | "after-time";
+      reason: "no-schedule" | "before-start-date" | "wrong-day";
     };
 
 const DAY_NAMES = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
@@ -35,15 +35,11 @@ function getVietnameseLocalDateTime(now: Date) {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
   }).formatToParts(now);
   const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
   return {
     date: `${values.year}-${values.month}-${values.day}`,
     day: WEEKDAY_NUMBERS[values.weekday] ?? -1,
-    minutes: Number(values.hour) * 60 + Number(values.minute),
   };
 }
 
@@ -69,17 +65,15 @@ export function getScheduledSessionAvailability(
     return { allowed: false, date: localNow.date, reason: "before-start-date" };
   }
 
-  const matchingDaySlots = schedule.flatMap((value) => {
-    if (typeof value !== "object" || value === null || Array.isArray(value)) return [];
+  const hasMatchingDaySlot = schedule.some((value) => {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
     const slot = value as Partial<ScheduleSlot>;
-    if (!Array.isArray(slot.days) || !slot.days.includes(localNow.day)) return [];
+    if (!Array.isArray(slot.days) || !slot.days.includes(localNow.day)) return false;
     const startMinutes = parseTimeMinutes(slot.startTime);
     const endMinutes = parseTimeMinutes(slot.endTime);
-    return startMinutes !== null && endMinutes !== null && endMinutes > startMinutes
-      ? [{ startMinutes, endMinutes }]
-      : [];
+    return startMinutes !== null && endMinutes !== null && endMinutes > startMinutes;
   });
-  if (matchingDaySlots.length === 0) {
+  if (!hasMatchingDaySlot) {
     const hasValidSlot = schedule.some((value) => {
       if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
       const slot = value as Partial<ScheduleSlot>;
@@ -98,19 +92,7 @@ export function getScheduledSessionAvailability(
     };
   }
 
-  if (matchingDaySlots.some(({ startMinutes, endMinutes }) =>
-    localNow.minutes >= startMinutes && localNow.minutes <= endMinutes
-  )) {
-    return { allowed: true, date: localNow.date };
-  }
-
-  return {
-    allowed: false,
-    date: localNow.date,
-    reason: matchingDaySlots.some(({ startMinutes }) => localNow.minutes < startMinutes)
-      ? "before-time"
-      : "after-time",
-  };
+  return { allowed: true, date: localNow.date };
 }
 
 /**

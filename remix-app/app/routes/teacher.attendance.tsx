@@ -327,8 +327,6 @@ export async function action({ request }: ActionFunctionArgs) {
             "no-schedule": "Lớp chưa có lịch học hợp lệ nên chưa thể tạo buổi.",
             "before-start-date": "Chưa đến ngày bắt đầu của lớp.",
             "wrong-day": "Hôm nay không có buổi học theo lịch của lớp.",
-            "before-time": "Chỉ có thể tạo buổi khi đã đến giờ học theo lịch.",
-            "after-time": "Khung giờ học hôm nay đã kết thúc, không thể tạo buổi mới.",
           } as const;
           return { success: false as const, error: messages[availability.reason] };
         }
@@ -745,10 +743,8 @@ export default function TeacherAttendance() {
           "no-schedule": "Lớp chưa có lịch học hợp lệ.",
           "before-start-date": "Chưa đến ngày bắt đầu của lớp.",
           "wrong-day": "Hôm nay không có buổi học theo lịch của lớp.",
-          "before-time": "Nút tạo buổi sẽ mở khi đến giờ học theo lịch.",
-          "after-time": "Khung giờ học hôm nay đã kết thúc.",
         }[sessionAvailability.reason]
-      : "Có thể tạo buổi học trong khung giờ theo lịch.";
+      : "Có thể tạo buổi học trong ngày học theo lịch.";
   const isTotalView = activeTabId === TOTAL_TAB_ID || attendanceSessions.length === 0;
   const selectedAttendanceSession = attendanceSessions.find((session) => session.id === activeTabId) ?? null;
   const sessionKey = selectedClass && selectedAttendanceSession ? `${selectedClass.id}:${selectedAttendanceSession.id}` : "";
