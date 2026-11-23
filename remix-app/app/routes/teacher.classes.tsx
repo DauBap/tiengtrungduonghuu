@@ -13,7 +13,7 @@ import { requireRole } from "~/lib/session.server";
 import { prisma } from "~/lib/prisma.server";
 import { DEFAULT_ACCOUNT_PASSWORD } from "~/lib/account-credentials";
 import { getClassAttendanceSummary, type ClassAttendanceStatus } from "~/lib/class-attendance";
-import { Archive, CheckCircle2, Loader2, LockKeyhole, Plus, UserPlus, Users, X } from "lucide-react";
+import { Archive, CheckCircle2, Loader2, LockKeyhole, Plus, Trash2, UserPlus, Users, X } from "lucide-react";
 import { toast } from "sonner";
 
 type ActionResult =
@@ -36,6 +36,7 @@ type ActionResult =
       studentIsActive: boolean;
       initialPassword: string;
     }
+  | { success: true; kind: "removed"; classId: string; studentId: string; studentName: string }
   | { success: true; kind: "evaluation-saved"; classId: string }
   | { success: true; kind: "completed"; classId: string };
 
@@ -284,6 +285,73 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
     } catch (error) {
       if (getKnownRequestError(error) === "P2034") {
         return { error: "Lớp vừa thay đổi. Vui lòng tải lại trang và thử lại.", classId };
+      }
+      throw error;
+    }
+  }
+  if (intent === "remove-student") {
+    const studentId = String(form.get("studentId") ?? "").trim();
+    if (!studentId || studentId.length > 100) {
+      return { error: "Không tìm thấy học viên cần gỡ khỏi lớp.", classId };
+    }
+    try {
+      return await prisma.$transaction(async (tx) => {
+        const enrollment = await tx.enrollment.findFirst({
+          where: {
+            classId,
+            userId: studentId,
+            class: { teacherId: user.id, completedAt: null },
+            user: { is: { role: "student", deletedAt: null } },
+          },
+          select: {
+            id: true,
+            user: { select: { id: true, name: true } },
+            class: { select: { name: true } },
+          },
+        });
+        if (!enrollment) {
+          return { error: "Không tìm thấy học viên trong lớp đang dạy hoặc lớp đã kết thúc.", classId };
+        }
+        if (!enrollment.class) {
+          return { error: "Không tìm thấy lớp của học viên. Hãy tải lại trang và thử lại.", classId };
+        }
+        const className = enrollment.class.name;
+
+        const update = await tx.enrollment.updateMany({
+          where: { id: enrollment.id, classId },
+          data: { classId: null },
+        });
+        if (update.count !== 1) {
+          return { error: "Lớp vừa thay đổi. Hãy tải lại trang và thử lại.", classId };
+        }
+        const admins = await tx.user.findMany({
+          where: { role: "admin", isActive: true, isActivated: true, deletedAt: null },
+          select: { id: true },
+        });
+        if (admins.length > 0) {
+          await tx.userNotification.createMany({
+            data: admins.map(({ id }) => ({
+              recipientId: id,
+              actorId: user.id,
+              kind: "STUDENT_REMOVED_FROM_CLASS",
+              title: "Giáo viên đã gỡ học viên khỏi lớp",
+              message: `${user.name} đã gỡ học viên ${enrollment.user.name} khỏi lớp ${className}.`,
+              targetUrl: `/admin/attendance?classId=${encodeURIComponent(classId)}`,
+              entityId: enrollment.user.id,
+            })),
+          });
+        }
+        return {
+          success: true as const,
+          kind: "removed" as const,
+          classId,
+          studentId: enrollment.user.id,
+          studentName: enrollment.user.name,
+        };
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    } catch (error) {
+      if (getKnownRequestError(error) === "P2034") {
+        return { error: "Lớp vừa thay đổi. Hãy tải lại trang và thử lại.", classId };
       }
       throw error;
     }
@@ -574,6 +642,9 @@ export default function TeacherClassesPage() {
   const [studentToResetPassword, setStudentToResetPassword] = useState<{ id: string; name: string } | null>(null);
   const [passwordResetResult, setPasswordResetResult] = useState<Extract<ActionResult, { kind: "password-reset" }> | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "existing" | null>(null);
+  const [showMemberManagement, setShowMemberManagement] = useState(false);
+  const [returnToMemberManagement, setReturnToMemberManagement] = useState(false);
+  const [studentToRemove, setStudentToRemove] = useState<{ id: string; name: string } | null>(null);
   const [studentQuery, setStudentQuery] = useState("");
   const [searchedQuery, setSearchedQuery] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<{ id: string; name: string; email: string } | null>(null);
@@ -582,6 +653,7 @@ export default function TeacherClassesPage() {
   const evaluationFetcher = useFetcher<typeof action>();
   const completeFetcher = useFetcher<typeof action>();
   const passwordResetFetcher = useFetcher<typeof action>();
+  const removeStudentFetcher = useFetcher<typeof action>();
   const searchFetcher = useFetcher<{ query: string; students: { id: string; name: string; email: string }[] }>();
   const optimisticallyCompletedClassIdSet = new Set(optimisticallyCompletedClassIds);
   const activeClasses = classes.filter((item) =>
@@ -597,6 +669,7 @@ export default function TeacherClassesPage() {
   const isCompleting = completeFetcher.state !== "idle";
   const isSavingEvaluation = evaluationFetcher.state !== "idle";
   const isResettingPassword = passwordResetFetcher.state !== "idle";
+  const isRemovingStudent = removeStudentFetcher.state !== "idle";
   const provisionalScoreByStudent = new Map(
     (selectedClass?.studentScores ?? []).map((score) => [score.studentId, score]),
   );
@@ -628,8 +701,25 @@ export default function TeacherClassesPage() {
       toast.success(`Đã thêm ${existingFetcher.data.studentName} vào lớp.`);
       existingFetcher.reset();
       setModalMode(null);
+      if (returnToMemberManagement) {
+        setShowMemberManagement(true);
+        setReturnToMemberManagement(false);
+      }
     }
-  }, [modalMode, existingFetcher.state, existingFetcher.data]);
+  }, [modalMode, existingFetcher.state, existingFetcher.data, returnToMemberManagement]);
+
+  useEffect(() => {
+    const result = removeStudentFetcher.data;
+    if (removeStudentFetcher.state !== "idle" || !result || !("kind" in result) || result.kind !== "removed") {
+      if (removeStudentFetcher.state === "idle" && result && "error" in result) {
+        toast.error(result.error);
+      }
+      return;
+    }
+    toast.success(`Đã gỡ ${result.studentName} khỏi lớp.`);
+    setStudentToRemove(null);
+    removeStudentFetcher.reset();
+  }, [removeStudentFetcher.data, removeStudentFetcher.state]);
 
   useEffect(() => {
     const result = completeFetcher.data;
@@ -696,6 +786,8 @@ export default function TeacherClassesPage() {
     setStudentQuery("");
     setSearchedQuery("");
     setSelectedStudent(null);
+    setShowMemberManagement(false);
+    setReturnToMemberManagement(true);
     setModalMode(mode);
   };
   const closeModal = () => {
@@ -708,12 +800,29 @@ export default function TeacherClassesPage() {
     setSearchedQuery("");
     setSelectedStudent(null);
     setModalMode(null);
+    setReturnToMemberManagement(false);
+    setShowMemberManagement(returnToMemberManagement);
+  };
+  const closePasswordResetResult = () => {
+    setPasswordResetResult(null);
+    if (returnToMemberManagement) {
+      setReturnToMemberManagement(false);
+      setShowMemberManagement(true);
+    }
+  };
+  const closeMemberManagement = () => {
+    if (isRemovingStudent) return;
+    setShowMemberManagement(false);
+    setStudentToRemove(null);
+    removeStudentFetcher.reset();
   };
   const changeClassView = (view: "active" | "completed") => {
     const nextClasses = view === "active" ? activeClasses : completedClasses;
     setClassView(view);
     setSelectedClassId(nextClasses[0]?.id ?? "");
     closeModal();
+    setShowMemberManagement(false);
+    setReturnToMemberManagement(false);
   };
   const completeSelectedClass = () => {
     if (!selectedClass) return;
@@ -791,7 +900,16 @@ export default function TeacherClassesPage() {
         </header>
 
         {studentToResetPassword && selectedClass && classView === "active" && (
-          <Overlay onClose={() => setStudentToResetPassword(null)} className="max-w-md">
+          <Overlay
+            onClose={() => {
+              setStudentToResetPassword(null);
+              if (returnToMemberManagement) {
+                setReturnToMemberManagement(false);
+                setShowMemberManagement(true);
+              }
+            }}
+            className="max-w-md"
+          >
             <section
               role="alertdialog"
               aria-modal="true"
@@ -817,7 +935,13 @@ export default function TeacherClassesPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setStudentToResetPassword(null)}
+                  onClick={() => {
+                    setStudentToResetPassword(null);
+                    if (returnToMemberManagement) {
+                      setReturnToMemberManagement(false);
+                      setShowMemberManagement(true);
+                    }
+                  }}
                   disabled={isResettingPassword}
                   className="w-full sm:w-auto"
                 >
@@ -833,7 +957,7 @@ export default function TeacherClassesPage() {
         )}
 
         {passwordResetResult && (
-          <Overlay onClose={() => setPasswordResetResult(null)} className="max-w-md">
+          <Overlay onClose={closePasswordResetResult} className="max-w-md">
             <section
               role="dialog"
               aria-modal="true"
@@ -858,7 +982,7 @@ export default function TeacherClassesPage() {
                 </p>
               </div>
               <div className="flex justify-end border-t pt-4">
-                <Button type="button" onClick={() => setPasswordResetResult(null)} className="w-full sm:w-auto">
+                <Button type="button" onClick={closePasswordResetResult} className="w-full sm:w-auto">
                   Đóng
                 </Button>
               </div>
@@ -1419,72 +1543,187 @@ export default function TeacherClassesPage() {
                     </p>
                   </div>
                   {classView === "active" && (
-                    <div className="flex flex-wrap gap-2 sm:justify-end">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => openModal("existing")}
-                        disabled={selectedClass.enrollments.length >= selectedClass.maxStudents}
-                        className="flex-1 sm:flex-none"
-                      >
-                        <UserPlus className="mr-2 h-4 w-4" />Thêm tài khoản có sẵn
-                      </Button>
-                      <Button
-                        type="button"
-                        onClick={() => openModal("create")}
-                        disabled={selectedClass.enrollments.length >= selectedClass.maxStudents}
-                        className="flex-1 sm:flex-none"
-                      >
-                        <Plus className="mr-2 h-4 w-4" />Tạo tài khoản học viên
-                      </Button>
-                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setStudentToRemove(null);
+                        removeStudentFetcher.reset();
+                        setShowMemberManagement(true);
+                      }}
+                      className="w-full sm:w-auto"
+                    >
+                      <Users className="mr-2 h-4 w-4" />Chỉnh sửa thành viên
+                    </Button>
                   )}
                 </CardHeader>
-                <CardContent>
-                  {selectedClass.enrollments.length === 0 ? (
-                    <p className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
-                      Lớp chưa có học viên. Tạo tài khoản mới hoặc thêm tài khoản có sẵn.
-                    </p>
+                <CardContent className="text-sm text-muted-foreground">
+                  {classView === "active" ? (
+                    "Quản lý danh sách học viên, thêm tài khoản hoặc gỡ học viên khỏi lớp tại đây."
+                  ) : selectedClass.enrollments.length === 0 ? (
+                    "Lớp này không còn học viên."
                   ) : (
-                    <>
-                      <ul className="divide-y rounded-md border">
-                        {selectedClass.enrollments.map(({ user: student }) => {
-                          return (
-                            <li key={student.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-3">
-                              <div className="min-w-0">
-                                <p className="truncate text-sm font-medium">{student.name}</p>
-                                <p className="break-all text-xs text-muted-foreground">{student.email}</p>
-                              </div>
-                              <div className="flex w-full items-center gap-2 sm:w-auto">
-                                {classView === "active" && (
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                      passwordResetFetcher.reset();
-                                      setPasswordResetResult(null);
-                                      setStudentToResetPassword({ id: student.id, name: student.name });
-                                    }}
-                                    disabled={isResettingPassword || isCompleting}
-                                    className="flex-1 sm:flex-none"
-                                  >
-                                    <LockKeyhole className="mr-1.5 h-4 w-4" />
-                                    Cấp lại mật khẩu
-                                  </Button>
-                                )}
-                                <span className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${!student.isActivated ? "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200" : student.isActive ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" : "bg-muted text-muted-foreground"}`}>
-                                  {!student.isActivated ? "Chưa kích hoạt" : student.isActive ? "Đang học" : "Đã khóa"}
-                                </span>
-                              </div>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </>
+                    <ul className="divide-y rounded-md border text-foreground">
+                      {selectedClass.enrollments.map(({ user: student }) => (
+                        <li key={student.id} className="flex flex-col gap-1 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">{student.name}</p>
+                            <p className="break-all text-xs text-muted-foreground">{student.email}</p>
+                          </div>
+                          <span className={`w-fit shrink-0 rounded-full px-2 py-1 text-xs font-medium ${!student.isActivated ? "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200" : student.isActive ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" : "bg-muted text-muted-foreground"}`}>
+                            {!student.isActivated ? "Chưa kích hoạt" : student.isActive ? "Đang học" : "Đã khóa"}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </CardContent>
               </Card>
+            )}
+
+            {showMemberManagement && selectedClass && classView === "active" && (
+              <Overlay
+                onClose={closeMemberManagement}
+                className="max-w-3xl"
+                closeOnEscape={!isRemovingStudent}
+                closeOnBackdrop={!isRemovingStudent}
+              >
+                <section
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="manage-class-members-title"
+                  className="space-y-5"
+                >
+                  <header className="flex items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <h2 id="manage-class-members-title" className="text-lg font-semibold">
+                        Quản lý học viên · {selectedClass.name}
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedClass.enrollments.length}/{selectedClass.maxStudents} học viên. Gỡ khỏi lớp không xóa tài khoản hoặc lịch sử điểm danh.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Đóng quản lý học viên"
+                      disabled={isRemovingStudent}
+                      onClick={closeMemberManagement}
+                    >
+                      <X aria-hidden="true" className="h-4 w-4" />
+                    </Button>
+                  </header>
+
+                  <div className="flex flex-col gap-2 border-b pb-4 sm:flex-row sm:justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => openModal("existing")}
+                      disabled={selectedClass.enrollments.length >= selectedClass.maxStudents || isRemovingStudent}
+                      className="w-full sm:w-auto"
+                    >
+                      <UserPlus className="mr-2 h-4 w-4" />Thêm tài khoản có sẵn
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => openModal("create")}
+                      disabled={selectedClass.enrollments.length >= selectedClass.maxStudents || isRemovingStudent}
+                      className="w-full sm:w-auto"
+                    >
+                      <Plus className="mr-2 h-4 w-4" />Tạo tài khoản học viên
+                    </Button>
+                  </div>
+
+                  {selectedClass.enrollments.length >= selectedClass.maxStudents && (
+                    <p role="status" className="text-sm text-muted-foreground">
+                      Lớp đã đủ số lượng. Gỡ một học viên khỏi lớp trước khi thêm thành viên mới.
+                    </p>
+                  )}
+                  {removeStudentFetcher.data && "error" in removeStudentFetcher.data && (
+                    <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                      {removeStudentFetcher.data.error}
+                    </p>
+                  )}
+
+                  {selectedClass.enrollments.length === 0 ? (
+                    <p className="rounded-md border border-dashed px-3 py-8 text-center text-sm text-muted-foreground">
+                      Lớp chưa có học viên. Thêm tài khoản có sẵn hoặc tạo tài khoản học viên mới.
+                    </p>
+                  ) : (
+                    <ul className="max-h-[55vh] divide-y overflow-y-auto rounded-md border">
+                      {selectedClass.enrollments.map(({ user: student }) => (
+                        <li key={student.id} className="flex flex-col gap-3 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">{student.name}</p>
+                            <p className="break-all text-xs text-muted-foreground">{student.email}</p>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                            {studentToRemove?.id === student.id ? (
+                              <>
+                                <span className="text-sm">Gỡ {student.name} khỏi lớp?</span>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setStudentToRemove(null)}
+                                  disabled={isRemovingStudent}
+                                >
+                                  Hủy
+                                </Button>
+                                <removeStudentFetcher.Form method="post">
+                                  <input type="hidden" name="intent" value="remove-student" />
+                                  <input type="hidden" name="classId" value={selectedClass.id} />
+                                  <input type="hidden" name="studentId" value={student.id} />
+                                  <Button type="submit" size="sm" disabled={isRemovingStudent} variant="destructive">
+                                    {isRemovingStudent && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+                                    {isRemovingStudent ? "Đang gỡ..." : "Xác nhận gỡ"}
+                                  </Button>
+                                </removeStudentFetcher.Form>
+                              </>
+                            ) : (
+                              <>
+                                <span className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${!student.isActivated ? "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200" : student.isActive ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200" : "bg-muted text-muted-foreground"}`}>
+                                  {!student.isActivated ? "Chưa kích hoạt" : student.isActive ? "Đang học" : "Đã khóa"}
+                                </span>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    passwordResetFetcher.reset();
+                                    setPasswordResetResult(null);
+                                    setReturnToMemberManagement(true);
+                                    setShowMemberManagement(false);
+                                    setStudentToResetPassword({ id: student.id, name: student.name });
+                                  }}
+                                  disabled={isResettingPassword || isCompleting || isRemovingStudent}
+                                  className="w-full sm:w-auto"
+                                >
+                                  <LockKeyhole className="mr-1.5 h-4 w-4" />Cấp lại mật khẩu
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    removeStudentFetcher.reset();
+                                    setStudentToRemove({ id: student.id, name: student.name });
+                                  }}
+                                  disabled={isRemovingStudent || isResettingPassword}
+                                  className="w-full text-destructive hover:text-destructive sm:w-auto"
+                                >
+                                  <Trash2 className="mr-1.5 h-4 w-4" />Gỡ khỏi lớp
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              </Overlay>
             )}
           </>
         )}

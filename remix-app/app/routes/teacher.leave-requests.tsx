@@ -13,24 +13,13 @@ import {
   getScheduledSlotsForDate,
   getVietnameseDateString,
 } from "~/lib/schedule-utils";
-import {
-  getClassSessionOrderSnapshot,
-  renumberClassAttendanceSessions,
-} from "~/lib/attendance-session-order.server";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
-
-const TIME_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
 
 function parseDate(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
   const date = new Date(`${value}T00:00:00.000Z`);
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value ? date : null;
-}
-
-function timeToMinutes(value: string) {
-  const [hours, minutes] = value.split(":").map(Number);
-  return hours * 60 + minutes;
 }
 
 function formatDate(value: string | Date) {
@@ -74,7 +63,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
         reviewNote: true,
         createdAt: true,
         classroom: { select: { name: true } },
-        makeupSession: { select: { id: true, date: true, scheduleStartTime: true, scheduleEndTime: true } },
       },
     }),
   ]);
@@ -259,81 +247,6 @@ export async function action({ request }: ActionFunctionArgs) {
     }
   }
 
-  if (intent === "create-makeup") {
-    const leaveRequestId = String(form.get("leaveRequestId") ?? "");
-    const dateValue = String(form.get("date") ?? "");
-    const date = parseDate(dateValue);
-    const startTime = String(form.get("startTime") ?? "");
-    const endTime = String(form.get("endTime") ?? "");
-    const firstAllowedDate = addDaysToDateString(getVietnameseDateString(), 1);
-    if (!date || !firstAllowedDate || dateValue < firstAllowedDate) {
-      return { success: false as const, intent, error: "Buổi bù cần được xếp từ ngày mai trở đi." };
-    }
-    if (
-      !TIME_PATTERN.test(startTime)
-      || !TIME_PATTERN.test(endTime)
-      || timeToMinutes(endTime) <= timeToMinutes(startTime)
-    ) {
-      return { success: false as const, intent, error: "Chọn giờ bắt đầu và kết thúc hợp lệ cho buổi bù." };
-    }
-
-    try {
-      const result = await prisma.$transaction(async (tx) => {
-        const leaveRequest = await tx.teacherLeaveRequest.findFirst({
-          where: {
-            id: leaveRequestId,
-            teacherId: teacher.id,
-            status: "APPROVED",
-            makeupSession: null,
-          },
-          select: { id: true, classId: true },
-        });
-        if (!leaveRequest) {
-          return { success: false as const, error: "Buổi nghỉ không còn khả dụng hoặc đã được xếp lịch bù." };
-        }
-        const existingSessions = await tx.attendanceSession.findMany({
-          where: { classId: leaveRequest.classId, date },
-          select: { id: true, scheduleStartTime: true, scheduleEndTime: true },
-        });
-        const overlapsExistingSession = existingSessions.some((session) =>
-          session.scheduleStartTime !== null
-          && session.scheduleEndTime !== null
-          && timeToMinutes(startTime) < timeToMinutes(session.scheduleEndTime)
-          && timeToMinutes(endTime) > timeToMinutes(session.scheduleStartTime),
-        );
-        if (overlapsExistingSession) {
-          return { success: false as const, error: "Khung giờ bị trùng với buổi học khác của lớp. Chọn thời gian khác." };
-        }
-
-        const previousOrder = await getClassSessionOrderSnapshot(tx, leaveRequest.classId);
-        const session = await tx.attendanceSession.create({
-          data: {
-            classId: leaveRequest.classId,
-            title: "",
-            lesson: "",
-            date,
-            scheduleStartTime: startTime,
-            scheduleEndTime: endTime,
-            makeupForLeaveRequestId: leaveRequest.id,
-          },
-          select: { id: true },
-        });
-        await renumberClassAttendanceSessions(tx, leaveRequest.classId, previousOrder);
-        return { success: true as const, sessionId: session.id };
-      }, { isolationLevel: "Serializable" });
-      return { ...result, intent };
-    } catch (error) {
-      if (
-        error instanceof Error
-        && "code" in error
-        && (error.code === "P2034" || error.code === "P2002")
-      ) {
-        return { success: false as const, intent, error: "Buổi bù vừa được xếp hoặc khung giờ đã có buổi. Tải lại trang rồi thử lại." };
-      }
-      throw error;
-    }
-  }
-
   return { success: false as const, error: "Thao tác xin nghỉ không hợp lệ." };
 }
 
@@ -410,8 +323,6 @@ export default function TeacherLeaveRequests() {
         setSelectedSlots([]);
         setReason("");
         setIsCreateOpen(false);
-      } else if (fetcher.data.intent === "create-makeup") {
-        toast.success("Đã xếp buổi học bù.");
       }
     } else if ("error" in fetcher.data) {
       toast.error(fetcher.data.error);
@@ -426,7 +337,7 @@ export default function TeacherLeaveRequests() {
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Yêu cầu nghỉ</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Theo dõi yêu cầu nghỉ và lịch dạy bù.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Theo dõi trạng thái các yêu cầu nghỉ đã gửi.</p>
           </div>
           <Button type="button" onClick={() => setIsCreateOpen(true)} aria-haspopup="dialog">
             <Plus aria-hidden="true" className="mr-2 h-4 w-4" />
@@ -482,66 +393,12 @@ export default function TeacherLeaveRequests() {
                       <h2 className="font-medium">{item.classroom.name} · {formatDate(item.date)}</h2>
                       <p className="mt-1 text-sm text-muted-foreground">Ca {item.startTime} – {item.endTime}</p>
                       {item.reason && <p className="mt-1 max-w-prose text-sm text-muted-foreground">Lý do: {item.reason}</p>}
-                      {item.makeupSession && (
-                        <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
-                          Đã xếp buổi bù {formatDate(item.makeupSession.date)}
-                          {item.makeupSession.scheduleStartTime
-                            ? ` · ${item.makeupSession.scheduleStartTime} – ${item.makeupSession.scheduleEndTime}`
-                            : ""}
-                        </p>
-                      )}
                     </div>
                     <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
                       <Check aria-hidden="true" className="h-3.5 w-3.5" /> Đã duyệt
                     </span>
                   </div>
 
-                  {!item.makeupSession && (
-                    <fetcher.Form method="post" className="mt-4 grid gap-3 border-t pt-4 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
-                      <input type="hidden" name="intent" value="create-makeup" />
-                      <input type="hidden" name="leaveRequestId" value={item.id} />
-                      <div className="space-y-1">
-                        <label htmlFor={`makeup-date-${item.id}`} className="text-xs font-medium">Ngày bù</label>
-                        <input
-                          id={`makeup-date-${item.id}`}
-                          name="date"
-                          type="date"
-                          min={firstAllowedDate ?? undefined}
-                          defaultValue={firstAllowedDate ?? ""}
-                          required
-                          disabled={isSubmitting}
-                          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label htmlFor={`makeup-start-${item.id}`} className="text-xs font-medium">Bắt đầu</label>
-                        <input
-                          id={`makeup-start-${item.id}`}
-                          name="startTime"
-                          type="time"
-                          defaultValue={item.startTime}
-                          required
-                          disabled={isSubmitting}
-                          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label htmlFor={`makeup-end-${item.id}`} className="text-xs font-medium">Kết thúc</label>
-                        <input
-                          id={`makeup-end-${item.id}`}
-                          name="endTime"
-                          type="time"
-                          defaultValue={item.endTime}
-                          required
-                          disabled={isSubmitting}
-                          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        />
-                      </div>
-                      <Button type="submit" variant="outline" disabled={isSubmitting}>
-                        Xếp buổi bù
-                      </Button>
-                    </fetcher.Form>
-                  )}
                 </article>
               ))
             ) : (

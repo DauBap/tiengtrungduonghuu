@@ -2,13 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { useFetcher, useLoaderData } from "react-router";
 import { toast } from "sonner";
-import { ClipboardCheck, Search, Trash2, Users } from "lucide-react";
+import { CalendarDays, ClipboardCheck, Search, Trash2, Users, X } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Overlay } from "~/components/common/overlay";
 import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
 import { Button } from "~/components/ui/button";
 import { getStudentsAbsentForThreeConsecutiveSessions } from "~/lib/attendance-streak";
-import { getVietnameseDateString } from "~/lib/schedule-utils";
+import {
+  addDaysToDateString,
+  getScheduledSlotsForDate,
+  getVietnameseDateString,
+} from "~/lib/schedule-utils";
+import {
+  getClassSessionOrderSnapshot,
+  renumberClassAttendanceSessions,
+} from "~/lib/attendance-session-order.server";
 import {
   excludeHandledAbsenceAlerts,
   handleConsecutiveAbsenceAlert,
@@ -65,6 +73,8 @@ interface AttendanceSession {
 
 interface ApprovedLeaveSlot {
   id: string;
+  classId: string;
+  className: string;
   date: string;
   startTime: string;
   endTime: string;
@@ -143,6 +153,12 @@ function parseAttendanceDate(value: string): Date | null {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value ? date : null;
 }
 
+function getMinimumMakeupDate(today: string, leaveDate?: string) {
+  const tomorrow = addDaysToDateString(today, 1) ?? today;
+  const dayAfterLeave = leaveDate ? addDaysToDateString(leaveDate, 1) : null;
+  return dayAfterLeave && dayAfterLeave > tomorrow ? dayAfterLeave : tomorrow;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -185,12 +201,12 @@ function isStudentReviewStatus(value: unknown): value is StudentReviewStatus {
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
   const today = getVietnameseDateString();
-  const todayDate = new Date(`${today}T00:00:00.000Z`);
   const classes = await prisma.class.findMany({
     where: { teacherId: user.id, completedAt: null },
     select: {
       id: true,
       name: true,
+      schedule: true,
       midtermReviewSession: true,
       finalReviewSession: true,
       course: {
@@ -232,7 +248,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         },
       },
       teacherLeaveRequests: {
-        where: { status: "APPROVED", date: { lte: todayDate } },
+        where: { status: "APPROVED", makeupSession: null },
         orderBy: [{ date: "asc" }, { startTime: "asc" }],
         select: { id: true, date: true, startTime: true, endTime: true },
       },
@@ -291,6 +307,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
       students: classroom.enrollments.map(({ user: student }) => ({ id: student.id, name: student.name })),
       approvedLeaveSlots: classroom.teacherLeaveRequests.map((leave): ApprovedLeaveSlot => ({
         id: leave.id,
+        classId: classroom.id,
+        className: classroom.name,
         date: leave.date.toISOString().slice(0, 10),
         startTime: leave.startTime,
         endTime: leave.endTime,
@@ -334,6 +352,175 @@ export async function action({ request }: ActionFunctionArgs) {
       intent,
       error: "Buổi học được tạo tự động theo lịch của lớp; giáo viên không cần thêm buổi thủ công.",
     };
+  }
+
+  if (intent === "create-makeup-session") {
+    const leaveRequestId = String(form.get("leaveRequestId") ?? "");
+    const dateValue = String(form.get("date") ?? "");
+    const date = parseAttendanceDate(dateValue);
+    const lessonId = String(form.get("lessonId") ?? "").trim() || null;
+    const rawRecordingUrl = String(form.get("recordingUrl") ?? "").trim();
+    const firstAllowedDate = addDaysToDateString(getVietnameseDateString(), 1);
+    if (!leaveRequestId) {
+      return { success: false as const, intent, error: "Chọn buổi nghỉ cần học bù." };
+    }
+    if (!date || !firstAllowedDate || dateValue < firstAllowedDate) {
+      return { success: false as const, intent, error: "Chọn ngày học bù từ ngày mai trở đi." };
+    }
+    let recordingUrl: string | null = null;
+    if (rawRecordingUrl) {
+      try {
+        const parsedUrl = new URL(rawRecordingUrl);
+        if (
+          (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:")
+          || rawRecordingUrl.length > 2048
+        ) {
+          return {
+            success: false as const,
+            intent,
+            error: "Link bản ghi cần là URL HTTP hoặc HTTPS và tối đa 2048 ký tự.",
+          };
+        }
+        recordingUrl = parsedUrl.toString();
+      } catch {
+        return { success: false as const, intent, error: "Vui lòng nhập URL bản ghi hợp lệ." };
+      }
+    }
+
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        const leaveRequest = await tx.teacherLeaveRequest.findFirst({
+          where: {
+            id: leaveRequestId,
+            status: "APPROVED",
+            makeupSession: null,
+            classroom: { is: { teacherId: user.id, completedAt: null } },
+          },
+          select: {
+            id: true,
+            date: true,
+            startTime: true,
+            endTime: true,
+            classId: true,
+            classroom: { select: { schedule: true, courseId: true } },
+          },
+        });
+        if (!leaveRequest) {
+          return {
+            success: false as const,
+            error: "Buổi nghỉ không còn khả dụng hoặc không thuộc lớp bạn phụ trách. Tải lại trang để chọn lại.",
+          };
+        }
+        if (dateValue <= leaveRequest.date.toISOString().slice(0, 10)) {
+          return { success: false as const, error: "Ngày học bù phải sau ngày nghỉ đã được duyệt." };
+        }
+        const courseLesson = lessonId
+          ? await tx.lesson.findFirst({
+              where: { id: lessonId, courseId: leaveRequest.classroom.courseId },
+              select: { id: true, title: true },
+            })
+          : null;
+        if (lessonId && !courseLesson) {
+          return { success: false as const, error: "Bài học không thuộc khóa học của lớp này. Hãy chọn lại bài học." };
+        }
+        if ((courseLesson?.title.length ?? 0) > 120) {
+          return { success: false as const, error: "Tên bài học trong khóa học vượt quá 120 ký tự." };
+        }
+        const lesson = courseLesson?.title ?? "";
+
+        const toMinutes = (time: string) => {
+          const [hours, minutes] = time.split(":").map(Number);
+          return hours * 60 + minutes;
+        };
+        const targetSlotOverlaps = (startTime: string, endTime: string) =>
+          toMinutes(leaveRequest.startTime) < toMinutes(endTime)
+          && toMinutes(leaveRequest.endTime) > toMinutes(startTime);
+        const scheduledOverlap = getScheduledSlotsForDate(leaveRequest.classroom.schedule, dateValue)
+          .some(({ startTime, endTime }) => targetSlotOverlaps(startTime, endTime));
+        if (scheduledOverlap) {
+          return {
+            success: false as const,
+            error: "Ngày đã chọn trùng ca học theo lịch của lớp. Hãy chọn ngày khác.",
+          };
+        }
+
+        const existingSessions = await tx.attendanceSession.findMany({
+          where: { classId: leaveRequest.classId, date },
+          select: { scheduleStartTime: true, scheduleEndTime: true },
+        });
+        const sessionOverlap = existingSessions.some((session) =>
+          session.scheduleStartTime === null
+          || session.scheduleEndTime === null
+          || targetSlotOverlaps(session.scheduleStartTime, session.scheduleEndTime),
+        );
+        if (sessionOverlap) {
+          return {
+            success: false as const,
+            error: "Ngày đã chọn trùng buổi học khác của lớp. Hãy chọn ngày khác.",
+          };
+        }
+
+        const previousOrder = await getClassSessionOrderSnapshot(tx, leaveRequest.classId);
+        const session = await tx.attendanceSession.create({
+          data: {
+            classId: leaveRequest.classId,
+            title: "",
+            lesson,
+            lessonId: courseLesson?.id ?? null,
+            date,
+            scheduleStartTime: leaveRequest.startTime,
+            scheduleEndTime: leaveRequest.endTime,
+            recordingUrl,
+            makeupForLeaveRequestId: leaveRequest.id,
+          },
+          select: { id: true },
+        });
+        const enrollments = await tx.enrollment.findMany({
+          where: {
+            classId: leaveRequest.classId,
+            user: { is: { role: "student", isActive: true, deletedAt: null } },
+          },
+          select: { userId: true },
+        });
+        if (enrollments.length > 0) {
+          await tx.attendanceRecord.createMany({
+            data: enrollments.map(({ userId }) => ({
+              sessionId: session.id,
+              studentId: userId,
+              status: null,
+            })),
+          });
+        }
+        const renumberedSessions = await renumberClassAttendanceSessions(tx, leaveRequest.classId, previousOrder);
+        return {
+          success: true as const,
+          classId: leaveRequest.classId,
+          sessionId: session.id,
+          title: renumberedSessions.find(({ id }) => id === session.id)?.title ?? "",
+          date: dateValue,
+          lessonId: courseLesson?.id ?? null,
+          lesson,
+          recordingUrl,
+          scheduleStartTime: leaveRequest.startTime,
+          scheduleEndTime: leaveRequest.endTime,
+          renumberedSessions,
+        };
+      }, { isolationLevel: "Serializable" });
+      return { ...result, intent };
+    } catch (error) {
+      if (
+        error instanceof Error
+        && "code" in error
+        && (error.code === "P2034" || error.code === "P2002")
+      ) {
+        return {
+          success: false as const,
+          intent,
+          error: "Buổi nghỉ vừa được xếp hoặc ca học đã có buổi. Tải lại trang rồi thử lại.",
+        };
+      }
+      throw error;
+    }
   }
 
   if (intent === "dismiss-absence-alert") {
@@ -770,6 +957,7 @@ export default function TeacherAttendance() {
   const deleteSessionFetcher = useFetcher<typeof action>();
   const saveAttendanceFetcher = useFetcher<typeof action>();
   const reviewFetcher = useFetcher<typeof action>();
+  const makeupFetcher = useFetcher<typeof action>();
   const firstClassId = classes[0]?.id ?? "";
   const [classId, setClassId] = useState(firstClassId);
   const [sessionsByClass, setSessionsByClass] = useState<Record<string, AttendanceSession[]>>(() =>
@@ -795,8 +983,15 @@ export default function TeacherAttendance() {
   const [pendingDeleteSession, setPendingDeleteSession] = useState<AttendanceSession | null>(null);
   const [pendingReview, setPendingReview] = useState<ReviewPrompt | null>(null);
   const [reviewStatuses, setReviewStatuses] = useState<Record<string, StudentReviewStatus | "">>({});
+  const [showMakeupModal, setShowMakeupModal] = useState(false);
+  const [makeupLeaveRequestId, setMakeupLeaveRequestId] = useState("");
+  const [makeupDate, setMakeupDate] = useState(getMinimumMakeupDate(getVietnameseDateString()));
+  const [makeupLessonId, setMakeupLessonId] = useState("");
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
   const selectedClass = classes.find((item) => item.id === classId) ?? classes[0] ?? null;
+  const approvedMakeupLeaveSlots = classes.flatMap((classroom) => classroom.approvedLeaveSlots);
+  const selectedMakeupLeaveSlot = approvedMakeupLeaveSlots.find(({ id }) => id === makeupLeaveRequestId);
+  const makeupCourseLessons = classes.find(({ id }) => id === selectedMakeupLeaveSlot?.classId)?.courseLessons ?? [];
   const allClassSessions = selectedClass ? sessionsByClass[selectedClass.id] ?? selectedClass.sessions : [];
   const attendanceSessions = allClassSessions.filter((session) => session.date <= today);
   const attendanceOptions = [
@@ -924,6 +1119,80 @@ export default function TeacherAttendance() {
       setFeedback(deleteSessionFetcher.data.error);
     }
   }, [deleteSessionFetcher.data, classId]);
+
+  useEffect(() => {
+    const result = makeupFetcher.data;
+    if (
+      makeupFetcher.state !== "idle"
+      || !result
+      || !result.success
+      || result.intent !== "create-makeup-session"
+      || !("classId" in result)
+      || typeof result.classId !== "string"
+      || !("sessionId" in result)
+      || typeof result.sessionId !== "string"
+      || !("renumberedSessions" in result)
+      || !Array.isArray(result.renumberedSessions)
+      || !("title" in result)
+      || typeof result.title !== "string"
+      || !("lesson" in result)
+      || typeof result.lesson !== "string"
+      || !("lessonId" in result)
+      || !(typeof result.lessonId === "string" || result.lessonId === null)
+      || !("date" in result)
+      || typeof result.date !== "string"
+      || !("scheduleStartTime" in result)
+      || typeof result.scheduleStartTime !== "string"
+      || !("scheduleEndTime" in result)
+      || typeof result.scheduleEndTime !== "string"
+      || !("recordingUrl" in result)
+    ) {
+      if (makeupFetcher.state === "idle" && result && !result.success) {
+        setFeedback(result.error);
+        toast.error(result.error);
+      }
+      return;
+    }
+
+    const classId = result.classId;
+    const sessionId = result.sessionId;
+    setSessionsByClass((current) => {
+      const titleById = new Map(result.renumberedSessions.map((session) => [session.id, session.title]));
+      const currentSessions = (current[classId] ?? [])
+        .map((session) => ({ ...session, title: titleById.get(session.id) ?? session.title }))
+        .filter((session) => session.id !== sessionId);
+      return {
+        ...current,
+        [classId]: [
+          ...currentSessions,
+          {
+            id: sessionId,
+            title: result.title,
+            lessonId: result.lessonId,
+            lesson: result.lesson,
+            recordingUrl: result.recordingUrl,
+            date: result.date,
+            scheduleStartTime: result.scheduleStartTime,
+            scheduleEndTime: result.scheduleEndTime,
+            isScheduleGenerated: false,
+            isMakeupSession: true,
+            hasAttendanceRecords: true,
+            records: {},
+          },
+        ].sort((left, right) =>
+          left.date.localeCompare(right.date)
+          || (left.scheduleStartTime ?? "").localeCompare(right.scheduleStartTime ?? ""),
+        ),
+      };
+    });
+    setClassId(classId);
+    setActiveTabId(TOTAL_TAB_ID);
+    setShowMakeupModal(false);
+    setMakeupLeaveRequestId("");
+    setFeedback("Đã tạo buổi bù. Buổi học sẽ xuất hiện khi đến ngày học.");
+    toast.success("Đã tạo buổi bù thành công.");
+    makeupFetcher.reset();
+  }, [makeupFetcher.data, makeupFetcher.state]);
 
   useEffect(() => {
     const result = saveAttendanceFetcher.data;
@@ -1176,6 +1445,21 @@ export default function TeacherAttendance() {
             <h1 className="text-2xl font-bold tracking-tight">Điểm danh</h1>
             <p className="mt-1 text-sm text-muted-foreground">Ghi nhận tình hình tham gia của học viên theo buổi học.</p>
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full gap-2 sm:w-auto"
+            onClick={() => {
+              const firstLeave = approvedMakeupLeaveSlots[0];
+              setMakeupLeaveRequestId(firstLeave?.id ?? "");
+              setMakeupDate(getMinimumMakeupDate(today, firstLeave?.date));
+              setMakeupLessonId("");
+              setShowMakeupModal(true);
+            }}
+          >
+            <CalendarDays aria-hidden="true" className="h-4 w-4" />
+            Tạo buổi bù
+          </Button>
         </header>
 
         <section aria-label="Chọn lớp và buổi học" className="space-y-4">
@@ -1625,6 +1909,135 @@ export default function TeacherAttendance() {
             )}
           </footer>
         </section>
+
+        {showMakeupModal && (
+          <Overlay
+            onClose={() => {
+              if (makeupFetcher.state === "idle") setShowMakeupModal(false);
+            }}
+            className="max-w-xl"
+            closeOnEscape={makeupFetcher.state === "idle"}
+            closeOnBackdrop={makeupFetcher.state === "idle"}
+          >
+            <section role="dialog" aria-modal="true" aria-labelledby="teacher-makeup-heading" className="space-y-5">
+              <header className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 id="teacher-makeup-heading" className="text-lg font-semibold">Tạo buổi bù</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Chọn ca nghỉ đã được duyệt. Buổi bù dùng khung giờ của ca nghỉ.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Đóng"
+                  disabled={makeupFetcher.state !== "idle"}
+                  onClick={() => setShowMakeupModal(false)}
+                >
+                  <X aria-hidden="true" className="h-4 w-4" />
+                </Button>
+              </header>
+
+              {approvedMakeupLeaveSlots.length === 0 ? (
+                <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                  Chưa có ca nghỉ nào được duyệt và chưa xếp buổi bù.
+                </p>
+              ) : (
+                <makeupFetcher.Form method="post" className="space-y-4">
+                  <input type="hidden" name="intent" value="create-makeup-session" />
+                  <div className="space-y-1.5">
+                    <label htmlFor="teacher-makeup-leave" className="text-sm font-medium">Học bù cho buổi nghỉ</label>
+                    <select
+                      id="teacher-makeup-leave"
+                      name="leaveRequestId"
+                      value={makeupLeaveRequestId}
+                      required
+                      disabled={makeupFetcher.state !== "idle"}
+                      onChange={(event) => {
+                        const nextId = event.currentTarget.value;
+                        const leave = approvedMakeupLeaveSlots.find(({ id }) => id === nextId);
+                        setMakeupLeaveRequestId(nextId);
+                        setMakeupDate(getMinimumMakeupDate(today, leave?.date));
+                        setMakeupLessonId("");
+                      }}
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {approvedMakeupLeaveSlots.map((leave) => (
+                        <option key={leave.id} value={leave.id}>
+                          {leave.className} · {formatAttendanceSessionDate(leave.date)} · {leave.startTime}–{leave.endTime}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="teacher-makeup-date" className="text-sm font-medium">Ngày học</label>
+                    <input
+                      id="teacher-makeup-date"
+                      name="date"
+                      type="date"
+                      min={getMinimumMakeupDate(today, selectedMakeupLeaveSlot?.date)}
+                      required
+                      value={makeupDate}
+                      onChange={(event) => setMakeupDate(event.currentTarget.value)}
+                      disabled={makeupFetcher.state !== "idle"}
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="teacher-makeup-lesson" className="text-sm font-medium">Bài học trong buổi</label>
+                    <select
+                      id="teacher-makeup-lesson"
+                      name="lessonId"
+                      value={makeupLessonId}
+                      onChange={(event) => setMakeupLessonId(event.currentTarget.value)}
+                      disabled={makeupFetcher.state !== "idle"}
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <option value="">Không gắn bài học</option>
+                      {makeupCourseLessons.map((lesson, index) => (
+                        <option key={lesson.id} value={lesson.id}>
+                          Bài {index + 1} · {lesson.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="teacher-makeup-recording" className="text-sm font-medium">Link ghi hình / bản ghi</label>
+                    <input
+                      id="teacher-makeup-recording"
+                      name="recordingUrl"
+                      type="url"
+                      maxLength={2048}
+                      disabled={makeupFetcher.state !== "idle"}
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    />
+                  </div>
+                  {makeupFetcher.data && !makeupFetcher.data.success
+                    && makeupFetcher.data.intent === "create-makeup-session" && (
+                    <p role="alert" className="text-sm text-destructive">{makeupFetcher.data.error}</p>
+                  )}
+                  <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={makeupFetcher.state !== "idle"}
+                      onClick={() => setShowMakeupModal(false)}
+                    >
+                      Hủy
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={!makeupLeaveRequestId || makeupFetcher.state !== "idle"}
+                    >
+                      {makeupFetcher.state !== "idle" ? "Đang tạo..." : "Tạo buổi bù"}
+                    </Button>
+                  </div>
+                </makeupFetcher.Form>
+              )}
+            </section>
+          </Overlay>
+        )}
 
         {pendingReview && (
           <Overlay
