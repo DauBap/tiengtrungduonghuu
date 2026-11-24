@@ -667,6 +667,7 @@ enum TeacherLeaveRequestStatus {
   PENDING
   APPROVED
   REJECTED
+  CANCELLED
 }
 
 model TeacherLeaveRequest {

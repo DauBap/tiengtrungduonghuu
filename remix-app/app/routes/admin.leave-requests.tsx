@@ -13,12 +13,13 @@ import {
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 
-type LeaveRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
+type LeaveRequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
 
 const LEAVE_REQUEST_TABS: Array<{ status: LeaveRequestStatus; label: string; emptyMessage: string }> = [
   { status: "PENDING", label: "Đang chờ xử lý", emptyMessage: "Hiện không có yêu cầu xin nghỉ nào đang chờ xử lý." },
   { status: "APPROVED", label: "Đã duyệt", emptyMessage: "Chưa có yêu cầu xin nghỉ nào được duyệt." },
   { status: "REJECTED", label: "Đã từ chối", emptyMessage: "Chưa có yêu cầu xin nghỉ nào bị từ chối." },
+  { status: "CANCELLED", label: "Đã thu hồi", emptyMessage: "Chưa có yêu cầu xin nghỉ nào được thu hồi." },
 ];
 
 function formatDate(value: Date) {
@@ -62,6 +63,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     PENDING: 0,
     APPROVED: 0,
     REJECTED: 0,
+    CANCELLED: 0,
   };
   for (const { status, _count } of groupedCounts) {
     requestCounts[status] = _count._all;
@@ -231,9 +233,15 @@ function LeaveRequestCard({
             ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
             : item.status === "REJECTED"
               ? "bg-muted text-muted-foreground"
-              : "bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+              : item.status === "CANCELLED"
+                ? "bg-muted text-muted-foreground"
+                : "bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
         }`}>
-          {item.status === "APPROVED" ? "Đã duyệt" : item.status === "REJECTED" ? "Không duyệt" : "Chờ duyệt"}
+          {item.status === "APPROVED"
+            ? "Đã duyệt"
+            : item.status === "REJECTED"
+              ? "Không duyệt"
+              : item.status === "CANCELLED" ? "Đã thu hồi" : "Chờ duyệt"}
         </span>
       </div>
 
