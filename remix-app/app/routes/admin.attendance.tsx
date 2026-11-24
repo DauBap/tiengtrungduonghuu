@@ -4,6 +4,7 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Form, Link, useFetcher, useLoaderData, useNavigate } from "react-router";
 import type { Prisma } from "@prisma/client";
 import {
+  AlertTriangle,
   CalendarDays,
   CheckCircle2,
   ChevronDown,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Overlay } from "~/components/common/overlay";
+import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -2092,6 +2094,7 @@ export default function AdminAttendance() {
   const [makeupDate, setMakeupDate] = useState(getMinimumMakeupDate(today));
   const [teacherSearch, setTeacherSearch] = useState("");
   const [attendancePage, setAttendancePage] = useState(1);
+  const [teacherListFilter, setTeacherListFilter] = useState<"priority" | "absent3" | "has_today" | "all">("priority");
   const [detailOverviewStatus, setDetailOverviewStatus] = useState<AttendanceOverviewStatus>("ALL");
   const selectedClass = classes.find((classroom) => classroom.id === filters.classId) ?? null;
   const selectedTeacher = teachers.find((teacher) => teacher.id === selectedTeacherId) ?? null;
@@ -2103,6 +2106,8 @@ export default function AdminAttendance() {
   const activeTeacherClasses = teacherClasses.filter((classroom) => !classroom.isCompleted);
   const visibleClasses = selectedClass ? [selectedClass] : teacherClasses;
   const isTeacherOverview = !selectedTeacherId || (!selectedTeacher && selectedTeacherId !== "unassigned");
+  const isTeacherDetailDrilldown = Boolean(filters.sessionId || (filters.tab === "total" && selectedClass));
+  useModalScrollLock(!isTeacherOverview);
   const navigate = useNavigate();
   const getAttendanceHref = useCallback((next: Partial<{
     teacherId: string;
@@ -2127,6 +2132,20 @@ export default function AdminAttendance() {
     if (tab === "total") params.set("tab", tab);
     return `/admin/attendance?${params.toString()}`;
   }, [filters.date, filters.overviewStatus, filters.teacherId]);
+
+  useEffect(() => {
+    if (isTeacherOverview) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.key === "Escape"
+        && document.querySelectorAll('[role="dialog"][aria-modal="true"]').length === 1
+      ) {
+        navigate(getAttendanceHref({ teacherId: "", classId: "", sessionId: "" }));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [getAttendanceHref, isTeacherOverview, navigate]);
 
   useEffect(() => {
     const result = createFetcher.data;
@@ -2198,7 +2217,38 @@ export default function AdminAttendance() {
     return true;
   };
   const activeClassIds = new Set(classes.filter((classroom) => !classroom.isCompleted).map(({ id }) => id));
+  const teachersWithActiveAlerts = teachers.filter((teacher) =>
+    teacher.consecutiveAbsenceClasses.some(({ classId }) => activeClassIds.has(classId)),
+  );
+  const teachersWithSessions = teachers.filter((teacher) => teacher.dailySessionCount > 0);
+  const teachersNeedingPriority = teachers.filter((teacher) =>
+    teacher.dailySessionCount > 0
+    || teacher.consecutiveAbsenceClasses.some(({ classId }) => activeClassIds.has(classId)),
+  );
+  const activeUnassignedAlerts = unassignedAttendanceSummary.consecutiveAbsenceClasses
+    .filter(({ classId }) => activeClassIds.has(classId));
+  const detailAbsenceAlerts = selectedTeacher
+    ? selectedTeacher.consecutiveAbsenceClasses
+      .filter(({ classId }) => activeClassIds.has(classId))
+      .flatMap(({ alerts }) => alerts)
+    : selectedTeacherId === "unassigned"
+      ? activeUnassignedAlerts.flatMap(({ alerts }) => alerts)
+      : [];
+  const detailAbsenceStudentCount = new Set(detailAbsenceAlerts.map(({ studentId }) => studentId)).size;
+  const activeAlertStudentCount = new Set([
+    ...teachersWithActiveAlerts.flatMap((teacher) => teacher.consecutiveAbsenceClasses)
+      .filter(({ classId }) => activeClassIds.has(classId))
+      .flatMap(({ studentNames }) => studentNames),
+    ...activeUnassignedAlerts.flatMap(({ studentNames }) => studentNames),
+  ]).size;
   const visibleTeachers = teachers
+    .filter((teacher) => {
+      const hasAlert = teacher.consecutiveAbsenceClasses.some(({ classId }) => activeClassIds.has(classId));
+      if (teacherListFilter === "absent3") return hasAlert;
+      if (teacherListFilter === "has_today") return teacher.dailySessionCount > 0;
+      if (teacherListFilter === "priority") return teacher.dailySessionCount > 0 || hasAlert;
+      return true;
+    })
     .filter((teacher) =>
       normalizeSearchText(teacher.name).includes(normalizeSearchText(teacherSearch))
     )
@@ -2228,6 +2278,13 @@ export default function AdminAttendance() {
   const unassignedClasses = classes.filter((classroom) => classroom.teacherId === null);
   const activeUnassignedClasses = unassignedClasses.filter((classroom) => !classroom.isCompleted);
   const showUnassignedClasses = activeUnassignedClasses.length > 0
+    && (
+      teacherListFilter === "all"
+      || (teacherListFilter === "priority"
+        && (unassignedAttendanceSummary.sessionCount > 0 || activeUnassignedAlerts.length > 0))
+      || (teacherListFilter === "has_today" && unassignedAttendanceSummary.sessionCount > 0)
+      || (teacherListFilter === "absent3" && activeUnassignedAlerts.length > 0)
+    )
     && (!teacherSearch.trim()
       || normalizeSearchText("Chưa phân công giáo viên").includes(normalizeSearchText(teacherSearch)));
   const attendanceOverviewRows = [
@@ -2247,7 +2304,7 @@ export default function AdminAttendance() {
 
   useEffect(() => {
     setAttendancePage(1);
-  }, [teacherSearch, filters.date]);
+  }, [teacherSearch, teacherListFilter, filters.date]);
 
   useEffect(() => {
     setDetailOverviewStatus("ALL");
@@ -2255,37 +2312,87 @@ export default function AdminAttendance() {
 
   return (
     <AppShell user={user}>
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Điểm danh</h1>
-            <p className="max-w-2xl text-sm text-muted-foreground">
-              Theo dõi điểm danh theo ngày, xem tình hình từng giáo viên và xử lý các buổi còn thiếu.
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-            <div className="space-y-1.5">
-              <Label htmlFor="attendance-dashboard-date">Ngày điểm danh</Label>
-              <Input
-                id="attendance-dashboard-date"
-                type="date"
-                value={filters.date}
-                onChange={(event) => {
-                  const nextDate = event.currentTarget.value;
-                  if (parseAttendanceDate(nextDate)) {
-                    navigate(getAttendanceHref({ date: nextDate, classId: "", sessionId: "" }));
-                  }
-                }}
-              />
-            </div>
+      <div className="mx-auto w-full max-w-[1280px] space-y-5">
+        <div className="flex min-h-10 flex-wrap items-center justify-between gap-3 border-b pb-3">
+          <nav aria-label="Đường dẫn" className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>Quản lý lớp học</span>
+            <span aria-hidden="true">/</span>
+            <span className="font-semibold text-foreground">Điểm danh</span>
+          </nav>
+          {activeAlertStudentCount > 0 && (
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(getAttendanceHref({ date: today, classId: "", sessionId: "" }))}
-              disabled={filters.date === today}
+              onClick={() => {
+                setTeacherListFilter("absent3");
+                document.getElementById("attendance-teachers-heading")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="h-9 border-destructive/20 bg-destructive/5 px-3 text-xs font-semibold text-destructive hover:bg-destructive/10"
             >
-              Hôm nay
+              <span aria-hidden="true" className="mr-2 h-2 w-2 animate-pulse rounded-full bg-destructive" />
+              {activeAlertStudentCount} học sinh vắng 3 buổi liên tiếp
             </Button>
+          )}
+        </div>
+
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold leading-8 tracking-tight text-foreground">Điểm danh</h1>
+            <p className="mt-1 text-[13px] text-muted-foreground">
+              Theo dõi điểm danh theo ngày, xem tình hình từng giáo viên và xử lý các buổi còn thiếu.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex h-[38px] items-center overflow-hidden rounded-lg border border-border bg-card">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Ngày trước"
+                  onClick={() => {
+                    const previousDate = addDaysToDateString(filters.date, -1);
+                    if (previousDate) navigate(getAttendanceHref({ date: previousDate, classId: "", sessionId: "" }));
+                  }}
+                  className="h-full w-9 rounded-none border-r border-border text-muted-foreground hover:bg-muted"
+                >
+                  <ArrowLeft aria-hidden="true" className="h-4 w-4" />
+                </Button>
+                <Label htmlFor="attendance-dashboard-date" className="sr-only">Ngày điểm danh</Label>
+                <Input
+                  id="attendance-dashboard-date"
+                  type="date"
+                  value={filters.date}
+                  onChange={(event) => {
+                    const nextDate = event.currentTarget.value;
+                    if (parseAttendanceDate(nextDate)) {
+                      navigate(getAttendanceHref({ date: nextDate, classId: "", sessionId: "" }));
+                    }
+                  }}
+                  className="h-full w-40 rounded-none border-0 bg-transparent text-[13px] font-semibold shadow-none focus-visible:ring-0"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Ngày sau"
+                  onClick={() => {
+                    const nextDate = addDaysToDateString(filters.date, 1);
+                    if (nextDate) navigate(getAttendanceHref({ date: nextDate, classId: "", sessionId: "" }));
+                  }}
+                  className="h-full w-9 rounded-none border-l border-border text-muted-foreground hover:bg-muted"
+                >
+                  <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                </Button>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-[38px] border-border bg-card px-3.5 text-[13px] font-medium"
+                onClick={() => navigate(getAttendanceHref({ date: today, classId: "", sessionId: "" }))}
+                disabled={filters.date === today}
+              >
+                Hôm nay
+              </Button>
           </div>
         </header>
 
@@ -2481,14 +2588,20 @@ export default function AdminAttendance() {
         )}
 
         <section aria-label={`Tổng quan điểm danh ngày ${formatAttendanceDate(filters.date)}`} className="space-y-3">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-semibold">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-[13px] font-semibold text-muted-foreground">
               Tổng quan · {selectedTeacher?.name ?? (selectedTeacherId === "unassigned" ? "Chưa phân công" : "Toàn bộ giáo viên")}
             </h2>
-            <span className="text-sm text-muted-foreground">{formatAttendanceDate(filters.date)}</span>
+            <span className="text-xs font-medium text-muted-foreground">{formatAttendanceDate(filters.date)}</span>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-lg border bg-card p-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <button
+              type="button"
+              disabled={!isTeacherOverview}
+              onClick={() => setTeacherListFilter("has_today")}
+              aria-pressed={isTeacherOverview ? teacherListFilter === "has_today" : undefined}
+              className={`rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-muted-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:hover:border-border ${teacherListFilter === "has_today" ? "ring-1 ring-primary/20" : ""}`}
+            >
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CalendarDays className="h-4 w-4" aria-hidden="true" />
                 Buổi có điểm danh
@@ -2497,8 +2610,14 @@ export default function AdminAttendance() {
               <p className="mt-1 text-xs text-muted-foreground">
                 Tại {attendanceSummary.classCount} lớp
               </p>
-            </div>
-            <div className="rounded-lg border bg-card p-4">
+            </button>
+            <button
+              type="button"
+              disabled={!isTeacherOverview}
+              onClick={() => setTeacherListFilter("priority")}
+              aria-pressed={isTeacherOverview ? teacherListFilter === "priority" : undefined}
+              className={`rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-muted-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:hover:border-border ${teacherListFilter === "priority" ? "ring-1 ring-primary/20" : ""}`}
+            >
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Users className="h-4 w-4" aria-hidden="true" />
                 Lượt học viên
@@ -2507,8 +2626,14 @@ export default function AdminAttendance() {
               <p className="mt-1 text-xs text-muted-foreground">
                 {markedRecordCount} đã ghi nhận · {attendanceSummary.unmarked} chưa điểm danh
               </p>
-            </div>
-            <div className="rounded-lg border bg-card p-4">
+            </button>
+            <button
+              type="button"
+              disabled={!isTeacherOverview}
+              onClick={() => setTeacherListFilter("all")}
+              aria-pressed={isTeacherOverview ? teacherListFilter === "all" : undefined}
+              className={`rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-muted-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:hover:border-border ${teacherListFilter === "all" ? "ring-1 ring-primary/20" : ""}`}
+            >
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />
                 Tỷ lệ có mặt
@@ -2519,8 +2644,14 @@ export default function AdminAttendance() {
               <p className="mt-1 text-xs text-muted-foreground">
                 {attendanceSummary.present} có mặt trên {markedRecordCount} lượt đã ghi nhận
               </p>
-            </div>
-            <div className="rounded-lg border bg-card p-4">
+            </button>
+            <button
+              type="button"
+              disabled={!isTeacherOverview}
+              onClick={() => setTeacherListFilter("absent3")}
+              aria-pressed={isTeacherOverview ? teacherListFilter === "absent3" : undefined}
+              className={`rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-muted-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:hover:border-border ${teacherListFilter === "absent3" ? "ring-1 ring-primary/20" : ""}`}
+            >
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Clock3 className="h-4 w-4 text-warning" aria-hidden="true" />
                 Cần theo dõi
@@ -2531,7 +2662,7 @@ export default function AdminAttendance() {
               <p className="mt-1 text-xs text-muted-foreground">
                 {attendanceSummary.late} đi muộn · {attendanceSummary.absent} vắng · {attendanceSummary.sessionsNeedingAttention} buổi chưa đủ
               </p>
-            </div>
+            </button>
           </div>
         </section>
 
@@ -2541,16 +2672,20 @@ export default function AdminAttendance() {
           </p>
         )}
 
-        {isTeacherOverview ? (
-          <section aria-labelledby="attendance-teachers-heading" className="space-y-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <section aria-labelledby="attendance-teachers-heading" className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-5">
+            <div className="flex flex-col gap-3 border-b border-border/70 pb-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h2 id="attendance-teachers-heading" className="text-lg font-semibold">Toàn bộ giáo viên</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {visibleTeachers.length} / {teachers.length} giáo viên · {activeClassCount} lớp đang hoạt động
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h2 id="attendance-teachers-heading" className="text-base font-bold text-foreground">Danh sách giáo viên</h2>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                    {teachers.length} giáo viên · {activeClassCount} lớp hoạt động
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Ưu tiên giáo viên có cảnh báo vắng liên tiếp và có lịch dạy trong ngày.
                 </p>
               </div>
-              <div className="w-full sm:max-w-sm">
+              <div className="w-full sm:max-w-[270px]">
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                   <Input
@@ -2558,75 +2693,111 @@ export default function AdminAttendance() {
                     placeholder="Tìm tên giáo viên..."
                     value={teacherSearch}
                     onChange={(event) => setTeacherSearch(event.currentTarget.value)}
-                    className="pl-9"
+                    className="h-[38px] rounded-lg pl-9 text-[13px]"
                   />
                 </div>
               </div>
             </div>
 
+            <div className="flex flex-wrap gap-2 border-b border-border/70 pb-3" aria-label="Lọc giáo viên">
+              {([
+                { value: "priority", label: "Ưu tiên hôm nay & Cảnh báo", count: teachersNeedingPriority.length },
+                { value: "absent3", label: "Vắng 3 buổi liên tiếp", count: teachersWithActiveAlerts.length },
+                { value: "has_today", label: "Có buổi trong ngày", count: teachersWithSessions.length },
+                { value: "all", label: "Tất cả giáo viên", count: teachers.length },
+              ] as const).map((filter) => (
+                <button
+                  key={filter.value}
+                  type="button"
+                  aria-pressed={teacherListFilter === filter.value}
+                  onClick={() => setTeacherListFilter(filter.value)}
+                  className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    teacherListFilter === filter.value
+                      ? "bg-primary font-semibold text-primary-foreground"
+                      : "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  {filter.label}
+                  <span className="tabular-nums opacity-80">({filter.count})</span>
+                </button>
+              ))}
+            </div>
+
             {visibleTeachers.length > 0 || showUnassignedClasses ? (
               <>
-                <div className="overflow-hidden rounded-xl border bg-card">
+                <div className="space-y-3">
                   {attendancePageRows.map((row) => row.kind === "teacher" ? (
-                    <div key={row.teacher.id} className="border-b last:border-b-0">
+                    <div
+                      key={row.teacher.id}
+                      className={`overflow-hidden rounded-xl border bg-background transition-all hover:border-muted-foreground/30 hover:shadow-sm ${
+                        row.teacher.consecutiveAbsenceClasses.some(({ classId }) => activeClassIds.has(classId))
+                          ? "border-destructive/30"
+                          : ""
+                      }`}
+                    >
                       <Link
                         to={getAttendanceHref({ teacherId: row.teacher.id })}
                         aria-label={`Mở điểm danh của ${row.teacher.name}`}
-                        className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                        className="group flex flex-col gap-4 p-4 transition-colors hover:bg-muted/20 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:flex-row md:items-center md:justify-between"
                       >
-                        <span className="min-w-0 flex-1">
-                          <span className="flex flex-wrap items-center gap-2 font-medium">
-                            {row.teacher.name}
+                        <span className="min-w-0 flex-1 space-y-2">
+                          <span className="flex flex-wrap items-center gap-2">
+                            <span className="font-bold text-foreground transition-colors group-hover:text-primary">{row.teacher.name}</span>
                             {!row.teacher.isActive && <Badge variant="outline">Đã tạm khóa</Badge>}
                             {row.teacher.isActive && !row.teacher.isActivated && <Badge variant="outline">Chưa kích hoạt</Badge>}
                             {row.teacher.isDeleted && <Badge variant="outline">Đã xóa</Badge>}
+                            {row.teacher.dailySessionCount > 0 ? (
+                              <Badge variant="outline" className="border-success/30 bg-success/5 text-success">
+                                {row.teacher.dailySessionCount} buổi ngày {formatAttendanceDate(filters.date)}
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary" className="font-medium">Không có lịch hôm nay</Badge>
+                            )}
                           </span>
-                          <span className="mt-1 block text-sm text-muted-foreground">
-                            {row.teacher.activeClassCount} lớp đang hoạt động · {row.teacher.dailySessionCount} buổi ngày {formatAttendanceDate(filters.date)}
+                          <span className="block text-xs text-muted-foreground">
+                            {row.teacher.activeClassCount} lớp đang hoạt động · {row.teacher.dailyCompletedSessionCount}/{row.teacher.dailySessionCount} buổi đủ lượt
+                            {row.teacher.dailyEmptySessionCount > 0 ? ` · ${row.teacher.dailyEmptySessionCount} buổi chưa có học viên` : ""}
+                            {row.teacher.dailyUnmarked > 0 ? ` · ${row.teacher.dailyUnmarked} lượt chưa điểm danh` : ""}
                           </span>
-                          {row.teacher.dailySessionCount > 0 && (
-                            <span className="mt-2 block max-w-sm">
-                              <span className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-                                <span>
-                                  {row.teacher.dailyCompletedSessionCount}/{row.teacher.dailySessionCount} buổi đủ lượt
-                                  {row.teacher.dailyUnmarked > 0 ? ` · ${row.teacher.dailyUnmarked} chưa ghi nhận` : ""}
-                                  {row.teacher.dailyEmptySessionCount > 0 ? ` · ${row.teacher.dailyEmptySessionCount} buổi chưa có học viên` : ""}
-                                </span>
-                                <span className="tabular-nums">
-                                  {row.teacher.dailyAttendanceRate === null ? "—" : `${row.teacher.dailyAttendanceRate}% có mặt`}
-                                </span>
-                              </span>
-                              <span className="mt-1.5 block h-1.5 overflow-hidden rounded-full bg-muted">
-                                <span
-                                  className="block h-full rounded-full bg-success transition-[width]"
-                                  style={{ width: `${row.teacher.dailyAttendanceRate ?? 0}%` }}
-                                />
-                              </span>
+                          <span className="flex max-w-md items-center gap-3">
+                            <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                              <span
+                                className="block h-full rounded-full bg-success transition-[width]"
+                                style={{ width: `${row.teacher.dailyAttendanceRate ?? 0}%` }}
+                              />
                             </span>
-                          )}
+                            <span className="shrink-0 text-xs font-medium text-muted-foreground">
+                              {row.teacher.dailyAttendanceRate === null ? "—" : `${row.teacher.dailyAttendanceRate}% có mặt`}
+                            </span>
+                          </span>
                         </span>
-                        <span className="flex items-center justify-between gap-3 text-sm text-muted-foreground sm:justify-end">
-                          <span>{row.teacher.sessionCount} buổi tổng cộng</span>
-                          <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        <span className="flex shrink-0 items-center justify-between gap-3 md:justify-end">
+                          <span className="text-xs font-medium text-muted-foreground">{row.teacher.sessionCount} buổi tổng cộng</span>
+                          <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border bg-muted/40 px-3 text-xs font-semibold text-foreground transition-colors group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
+                            Chi tiết
+                            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                          </span>
                         </span>
                       </Link>
-                      {row.teacher.consecutiveAbsenceClasses.length > 0 && (
-                        <div className="px-4 pb-4 sm:px-5">
+                      {row.teacher.consecutiveAbsenceClasses.some(({ classId }) => activeClassIds.has(classId)) && (
+                        <div className="border-t bg-destructive/5 px-4 py-3 sm:px-5">
                           <ConsecutiveAbsenceNotice
-                            alerts={row.teacher.consecutiveAbsenceClasses.flatMap(({ alerts }) => alerts)}
+                            alerts={row.teacher.consecutiveAbsenceClasses
+                              .filter(({ classId }) => activeClassIds.has(classId))
+                              .flatMap(({ alerts }) => alerts)}
                           />
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div key="unassigned" className="border-b last:border-b-0">
+                    <div key="unassigned" className="overflow-hidden rounded-xl border bg-background">
                       <Link
                         to={getAttendanceHref({ teacherId: "unassigned" })}
                         aria-label="Mở điểm danh các lớp chưa phân công giáo viên"
-                        className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                        className="group flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between sm:px-5"
                       >
                         <span className="min-w-0 flex-1">
-                          <span className="font-medium">Chưa phân công giáo viên</span>
+                          <span className="font-semibold transition-colors group-hover:text-primary">Chưa phân công giáo viên</span>
                           <span className="mt-1 block text-sm text-muted-foreground">
                             {activeUnassignedClasses.length} lớp đang hoạt động · {unassignedAttendanceSummary.sessionCount} buổi ngày {formatAttendanceDate(filters.date)}
                           </span>
@@ -2647,10 +2818,10 @@ export default function AdminAttendance() {
                           <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
                         </span>
                       </Link>
-                      {unassignedAttendanceSummary.consecutiveAbsenceClasses.length > 0 && (
-                        <div className="px-4 pb-4 sm:px-5">
+                      {activeUnassignedAlerts.length > 0 && (
+                        <div className="border-t bg-destructive/5 px-4 py-3 sm:px-5">
                           <ConsecutiveAbsenceNotice
-                            alerts={unassignedAttendanceSummary.consecutiveAbsenceClasses.flatMap(({ alerts }) => alerts)}
+                            alerts={activeUnassignedAlerts.flatMap(({ alerts }) => alerts)}
                           />
                         </div>
                       )}
@@ -2690,56 +2861,113 @@ export default function AdminAttendance() {
                 )}
               </>
             ) : (
-              <Card>
-                <CardContent className="px-5 py-10 text-center">
-                  <Users className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
-                  <h3 className="mt-3 font-semibold">Không có giáo viên khớp bộ lọc</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">Thử đổi tên tìm kiếm hoặc tình trạng điểm danh.</p>
-                </CardContent>
-              </Card>
+              <div className="pt-8">
+                <Card>
+                  <CardContent className="px-5 py-10 text-center">
+                    <Users className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden="true" />
+                    <h3 className="mt-3 font-semibold">Không có giáo viên khớp bộ lọc</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">Thử đổi tên tìm kiếm hoặc tình trạng điểm danh.</p>
+                  </CardContent>
+                </Card>
+              </div>
             )}
-          </section>
-        ) : (
-          <Overlay
-            onClose={() => navigate(getAttendanceHref({ teacherId: "", classId: "", sessionId: "" }))}
-            className="max-w-6xl"
-          >
-          <section role="dialog" aria-modal="true" aria-labelledby="attendance-teacher-heading" className="space-y-4">
-            <div className="space-y-3">
-              <Button variant="ghost" size="sm" asChild className="-ml-2">
-                <Link to={getAttendanceHref({ teacherId: "", classId: "", sessionId: "" })}>
-                  <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-                  Tất cả giáo viên
-                </Link>
-              </Button>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <h2 id="attendance-teacher-heading" className="text-xl font-semibold">
+        </section>
+
+        {!isTeacherOverview && (
+          <div className="fixed inset-0 z-50 !mt-0" role="presentation">
+            <button
+              type="button"
+              aria-label="Đóng chi tiết giáo viên"
+              className="absolute inset-0 bg-black/45"
+              onClick={() => navigate(getAttendanceHref({ teacherId: "", classId: "", sessionId: "" }))}
+            />
+            <aside
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="attendance-teacher-heading"
+              className="absolute inset-y-0 right-0 flex h-dvh w-full max-w-4xl flex-col border-l bg-background shadow-2xl"
+            >
+              <header className="flex shrink-0 items-center gap-3 border-b bg-background px-4 py-4 sm:px-6">
+                <Button variant="outline" size="sm" asChild className="shrink-0">
+                  <Link to={getAttendanceHref({
+                    teacherId: isTeacherDetailDrilldown ? selectedTeacherId : "",
+                    classId: "",
+                    sessionId: "",
+                    tab: "sessions",
+                  })}>
+                    <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
+                    {isTeacherDetailDrilldown ? "Danh sách lớp" : "Tất cả giáo viên"}
+                  </Link>
+                </Button>
+                <div className="min-w-0 flex-1">
+                  <h2 id="attendance-teacher-heading" className="truncate text-lg font-bold">
                     {selectedTeacher?.name ?? "Chưa phân công giáo viên"}
                   </h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="truncate text-xs text-muted-foreground">
                     {activeTeacherClasses.length} lớp đang hoạt động · {sessions.length} buổi ngày {formatAttendanceDate(filters.date)}
                   </p>
                 </div>
                 {selectedTeacher && (!selectedTeacher.isActive || !selectedTeacher.isActivated || selectedTeacher.isDeleted) && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="hidden shrink-0 gap-1.5 sm:flex">
                     {!selectedTeacher.isActive && <Badge variant="outline">Đã tạm khóa</Badge>}
                     {selectedTeacher.isActive && !selectedTeacher.isActivated && <Badge variant="outline">Chưa kích hoạt</Badge>}
                     {selectedTeacher.isDeleted && <Badge variant="outline">Đã xóa</Badge>}
                   </div>
                 )}
-              </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Đóng chi tiết giáo viên"
+                  onClick={() => navigate(getAttendanceHref({ teacherId: "", classId: "", sessionId: "" }))}
+                  className="shrink-0"
+                >
+                  <X className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </header>
+              <section className="custom-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto bg-muted/20 p-4 sm:p-6">
+            <div className="flex flex-col gap-2 rounded-lg border bg-background p-3 sm:flex-row sm:items-center sm:justify-between">
+              <Label htmlFor="attendance-detail-date" className="text-sm font-medium">
+                Ngày điểm danh
+              </Label>
+              <Input
+                id="attendance-detail-date"
+                type="date"
+                value={filters.date}
+                onChange={(event) => {
+                  const nextDate = event.currentTarget.value;
+                  if (parseAttendanceDate(nextDate)) {
+                    navigate(getAttendanceHref({
+                      date: nextDate,
+                      classId: "",
+                      sessionId: "",
+                      tab: "sessions",
+                    }));
+                  }
+                }}
+                className="h-9 w-full sm:w-44"
+              />
             </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              {selectedClass && (
-                <Button variant="outline" size="sm" asChild>
-                  <Link to={getAttendanceHref({ classId: "", sessionId: "" })}>
-                    Tất cả lớp
-                  </Link>
+            {!isTeacherDetailDrilldown && (
+              <>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="text-[13px] font-semibold text-foreground">
+                Danh sách lớp phụ trách ({filteredVisibleClasses.length})
+              </h3>
+              {detailAbsenceStudentCount > 0 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.querySelector<HTMLButtonElement>("[data-attendance-detail-alert] button")?.click()}
+                  className="h-9 justify-start border-destructive/20 bg-destructive/5 px-3 text-xs font-semibold text-destructive hover:bg-destructive/10 sm:justify-center"
+                >
+                  <AlertTriangle className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+                  Xử lý {detailAbsenceStudentCount} học sinh vắng 3 buổi liên tiếp
                 </Button>
               )}
-              <div className="space-y-1.5 sm:w-56">
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="space-y-1.5 sm:w-64">
                 <Label htmlFor="attendance-detail-overview-status">Lọc theo tình trạng</Label>
                 <select
                   id="attendance-detail-overview-status"
@@ -2785,43 +3013,44 @@ export default function AdminAttendance() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 {filteredVisibleClasses.map((classroom) => {
                   const classSessions = sessions.filter((session) => session.classId === classroom.id);
                   return (
-                    <Card key={classroom.id} className="overflow-hidden">
-                      <div className="flex flex-col gap-2 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                    <Card key={classroom.id} className="space-y-3 rounded-xl border-border bg-card p-4">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-semibold">{classroom.name}</h3>
+                            <h4 className="text-[15px] font-bold">{classroom.name}</h4>
                             {classroom.isCompleted && <Badge variant="outline">Đã kết thúc</Badge>}
                           </div>
-                          <p className="mt-1 text-sm text-muted-foreground">{classroom.course}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">{classroom.course}</p>
                         </div>
-                        <span className="shrink-0 text-sm text-muted-foreground">
+                        <span className="shrink-0 text-xs font-medium text-muted-foreground">
                           {classSessions.length} buổi trong ngày
                         </span>
                       </div>
                       {classroom.consecutiveAbsentStudentNames.length > 0 && (
-                        <div className="border-b px-4 py-3 sm:px-5">
+                        <div data-attendance-detail-alert>
                           <ConsecutiveAbsenceNotice alerts={classroom.consecutiveAbsenceAlerts} />
                         </div>
                       )}
                       <div
                         role="tablist"
                         aria-label={`Nội dung điểm danh lớp ${classroom.name}`}
-                        className="flex flex-wrap items-center gap-2 bg-muted/20 p-3 sm:p-4"
+                        className="flex flex-wrap items-center gap-2 border-t border-border/70 pt-2.5"
                       >
                         <Link
                           to={getAttendanceHref({ classId: classroom.id, sessionId: "", tab: "total" })}
                           role="tab"
                           aria-selected={filters.classId === classroom.id && filters.tab === "total"}
-                          className={`inline-flex h-10 shrink-0 items-center rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                          className={`inline-flex h-[38px] shrink-0 items-center gap-1.5 rounded-lg border px-3.5 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                             filters.classId === classroom.id && filters.tab === "total"
-                              ? "border-foreground bg-foreground text-background"
-                              : "border-border bg-background text-foreground hover:bg-muted"
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border bg-muted/40 text-foreground hover:bg-muted"
                           }`}
                         >
+                          <Users className="h-4 w-4" aria-hidden="true" />
                           Tổng
                         </Link>
                         {classSessions.map((session) => (
@@ -2836,7 +3065,7 @@ export default function AdminAttendance() {
                         ))}
                       </div>
                       {classSessions.length === 0 && (
-                        <p className="px-4 py-4 text-sm text-muted-foreground sm:px-5">
+                        <p className="text-[13px] text-muted-foreground">
                           {classroom.isCompleted
                             ? `Lớp đã kết thúc và chưa có buổi điểm danh ngày ${formatAttendanceDate(filters.date)}.`
                             : `Chưa có buổi điểm danh cho ngày ${formatAttendanceDate(filters.date)}.`}
@@ -2846,6 +3075,8 @@ export default function AdminAttendance() {
                   );
                 })}
               </div>
+            )}
+              </>
             )}
 
             {filters.tab === "total" && selectedClass && classAttendanceSummary ? (
@@ -2857,7 +3088,7 @@ export default function AdminAttendance() {
               />
             ) : selectedSession ? (
               <section aria-labelledby="attendance-session-detail-heading" className="space-y-3">
-                <h2 id="attendance-session-detail-heading" className="text-lg font-semibold">
+                <h2 id="attendance-session-detail-heading" className="sr-only">
                   Bảng điểm danh · {selectedSession.title}
                   {selectedSession.scheduleStartTime && selectedSession.scheduleEndTime
                     ? ` · ${selectedSession.scheduleStartTime}–${selectedSession.scheduleEndTime}`
@@ -2879,7 +3110,8 @@ export default function AdminAttendance() {
               </p>
             ) : null}
           </section>
-          </Overlay>
+            </aside>
+          </div>
         )}
 
         <p className="flex items-center gap-2 text-xs text-muted-foreground">
