@@ -1504,24 +1504,7 @@ export default function TeacherAttendance() {
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 type="button"
-                variant="outline"
-                className="gap-2 bg-card"
-                aria-pressed={isTotalView}
-                disabled={saveAttendanceFetcher.state !== "idle"}
-                onClick={() => {
-                  setActiveTabId(TOTAL_TAB_ID);
-                  setFilter("all");
-                  setSearch("");
-                  setFeedback("");
-                }}
-              >
-                <Users aria-hidden="true" className="h-4 w-4" />
-                Tổng hợp chuyên cần
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="gap-2 bg-card"
+                className="h-10 w-36 justify-center gap-2 px-3"
                 disabled={saveAttendanceFetcher.state !== "idle"}
                 onClick={() => {
                   const firstLeave = approvedMakeupLeaveSlots[0];
@@ -1536,7 +1519,7 @@ export default function TeacherAttendance() {
               </Button>
               <Button
                 type="button"
-                className="gap-2"
+                className="h-10 w-36 justify-center gap-2 px-3"
                 disabled={
                   !selectedAttendanceSession
                   || saveAttendanceFetcher.state !== "idle"
