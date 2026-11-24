@@ -85,7 +85,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     classes,
     requests,
     today: getVietnameseDateString(),
-    firstAllowedDate: addDaysToDateString(getVietnameseDateString(), 1),
   };
 }
 
@@ -184,10 +183,6 @@ export async function action({ request }: ActionFunctionArgs) {
     const dateValue = String(form.get("date") ?? "");
     const date = parseDate(dateValue);
     if (!date) return { success: false as const, intent, error: "Chọn ngày nghỉ hợp lệ." };
-    const firstAllowedDate = addDaysToDateString(getVietnameseDateString(), 1);
-    if (!firstAllowedDate || dateValue < firstAllowedDate) {
-      return { success: false as const, intent, error: "Bạn có thể xin nghỉ từ ngày mai trở đi." };
-    }
 
     const classes = await prisma.class.findMany({
       where: { teacherId: teacher.id, completedAt: null },
@@ -285,11 +280,11 @@ export async function action({ request }: ActionFunctionArgs) {
           if (check.cancellation) {
             return { success: false as const, error: `Ca ${check.slot.startTime}–${check.slot.endTime} của lớp ${check.classroom.name} đã được đánh dấu nghỉ.` };
           }
-          if (check.existingSession && !check.existingSession.isScheduleGenerated) {
-            return { success: false as const, error: `Lớp ${check.classroom.name} đã có buổi điểm danh tạo riêng; hãy xử lý buổi đó trước khi xin nghỉ ca ${check.slot.startTime}–${check.slot.endTime}.` };
-          }
           if (check.existingSession && check.existingSession._count.records > 0) {
             return { success: false as const, error: `Ca ${check.slot.startTime}–${check.slot.endTime} của lớp ${check.classroom.name} đã có dữ liệu điểm danh nên không thể xin nghỉ.` };
+          }
+          if (check.existingSession && !check.existingSession.isScheduleGenerated) {
+            return { success: false as const, error: `Lớp ${check.classroom.name} đã có buổi điểm danh tạo riêng; hãy xử lý buổi đó trước khi xin nghỉ ca ${check.slot.startTime}–${check.slot.endTime}.` };
           }
         }
 
@@ -374,10 +369,10 @@ const REASON_SUGGESTIONS = [
 ];
 
 export default function TeacherLeaveRequests() {
-  const { user, classes, requests, today, firstAllowedDate } = useLoaderData<typeof loader>();
+  const { user, classes, requests, today } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   const withdrawFetcher = useFetcher<typeof action>();
-  const [date, setDate] = useState(firstAllowedDate ?? "");
+  const [date, setDate] = useState(today);
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [reason, setReason] = useState("");
   const [activeStatus, setActiveStatus] = useState<LeaveRequestFilter>("PENDING");
@@ -415,7 +410,7 @@ export default function TeacherLeaveRequests() {
       .some((value) => value.toLocaleLowerCase("vi").includes(query));
   });
   const activeTab = LEAVE_REQUEST_TABS.find(({ status }) => status === activeStatus)!;
-  const quickDates = [1, 2, 3, 4]
+  const quickDates = [0, 1, 2, 3]
     .map((offset) => addDaysToDateString(today, offset))
     .filter((value): value is string => Boolean(value));
   const selectableSlotKeys = slotsByClass.flatMap((classroom) => classroom.slots
@@ -803,10 +798,10 @@ export default function TeacherLeaveRequests() {
                         variant="outline"
                         size="icon"
                         aria-label="Ngày trước"
-                        disabled={isSubmitting || !date || !firstAllowedDate || date <= firstAllowedDate}
+                        disabled={isSubmitting || !date}
                         onClick={() => {
                           const previousDate = addDaysToDateString(date, -1);
-                          if (previousDate && previousDate >= (firstAllowedDate ?? "")) setDate(previousDate);
+                          if (previousDate) setDate(previousDate);
                         }}
                         className="h-10 w-10 shrink-0 rounded-xl"
                       >
@@ -816,7 +811,6 @@ export default function TeacherLeaveRequests() {
                         id="leave-date"
                         type="date"
                         value={date}
-                        min={firstAllowedDate ?? undefined}
                         onChange={(event) => setDate(event.currentTarget.value)}
                         disabled={isSubmitting}
                         className="h-10 min-w-0 flex-1 rounded-xl border border-input bg-background px-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -849,7 +843,7 @@ export default function TeacherLeaveRequests() {
                               : "border-transparent bg-muted/70 font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
                           }`}
                         >
-                          {index === 0 ? "Ngày mai" : new Date(`${quickDate}T00:00:00.000Z`).toLocaleDateString("vi-VN", {
+                          {index === 0 ? "Hôm nay" : index === 1 ? "Ngày mai" : new Date(`${quickDate}T00:00:00.000Z`).toLocaleDateString("vi-VN", {
                             weekday: "short",
                             day: "2-digit",
                             month: "2-digit",
