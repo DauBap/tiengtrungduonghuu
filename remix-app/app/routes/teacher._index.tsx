@@ -14,8 +14,11 @@ import {
   BookOpen,
   Calendar,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   ClipboardList,
   Clock,
+  Copy,
   Layers,
   Loader2,
   MessageCircle,
@@ -26,6 +29,7 @@ import {
   X,
   XCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 import { prisma } from "~/lib/prisma.server";
 import { LESSON_TAB_KEYS } from "~/lib/lesson-tab-progress";
 import {
@@ -1561,6 +1565,9 @@ export default function TeacherIndex() {
   const revalidator = useRevalidator();
   const [selectedClassId, setSelectedClassId] = useState(classSummaries[0]?.id ?? "");
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+  const [isReminderDetailsOpen, setIsReminderDetailsOpen] = useState(false);
+  const [reminderLessonFilter, setReminderLessonFilter] = useState("all");
+  const [expandedReminderStudentIds, setExpandedReminderStudentIds] = useState<Set<string>>(() => new Set());
   const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
   const [selectedMockExamId, setSelectedMockExamId] = useState<string | null>(null);
   const [progressView, setProgressView] = useState<"overview" | "lesson">("overview");
@@ -1975,6 +1982,7 @@ export default function TeacherIndex() {
     || selectedReviewProgress
     || selectedMockExamProgress
     || selectedLessonReview
+    || isReminderDetailsOpen
     || pendingGrammarClass
     || pendingReviewClass
     || gradingAttemptId
@@ -1996,7 +2004,7 @@ export default function TeacherIndex() {
   }, [location.key]);
 
   useEffect(() => {
-    if (!selectedStudentId && !selectedActivityReview && !selectedReviewProgress && !selectedMockExamProgress && !selectedLessonReview && !pendingGrammarClassId && !pendingReviewClassId && !gradingAttemptId && !workbookGradingAttemptId && !selectedTranslationSubmissionId && !gradingComplete) return;
+    if (!selectedStudentId && !selectedActivityReview && !selectedReviewProgress && !selectedMockExamProgress && !selectedLessonReview && !isReminderDetailsOpen && !pendingGrammarClassId && !pendingReviewClassId && !gradingAttemptId && !workbookGradingAttemptId && !selectedTranslationSubmissionId && !gradingComplete) return;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (
         event.key === "Escape"
@@ -2016,6 +2024,7 @@ export default function TeacherIndex() {
         setSelectedReviewProgress(null);
         setSelectedMockExamProgress(null);
         setSelectedLessonReview(null);
+        setIsReminderDetailsOpen(false);
         setPendingGrammarClassId(null);
         setGradingAttemptId(null);
         setWorkbookGradingAttemptId(null);
@@ -2026,7 +2035,7 @@ export default function TeacherIndex() {
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [selectedStudentId, selectedActivityReview, selectedReviewProgress, selectedMockExamProgress, selectedLessonReview, pendingGrammarClassId, pendingReviewClassId, gradingAttemptId, workbookGradingAttemptId, selectedTranslationSubmissionId, gradingComplete, unsavedReviewCloseTarget, gradeSubmitFetcher.state, workbookGradeSubmitFetcher.state, TranslationGradeFetcher.state, reviewGradingFetcher.state, closePendingReviewModal, closeReviewProgress]);
+  }, [selectedStudentId, selectedActivityReview, selectedReviewProgress, selectedMockExamProgress, selectedLessonReview, isReminderDetailsOpen, pendingGrammarClassId, pendingReviewClassId, gradingAttemptId, workbookGradingAttemptId, selectedTranslationSubmissionId, gradingComplete, unsavedReviewCloseTarget, gradeSubmitFetcher.state, workbookGradeSubmitFetcher.state, TranslationGradeFetcher.state, reviewGradingFetcher.state, closePendingReviewModal, closeReviewProgress]);
 
   const gradingData = gradingFetcher.data?.attempt ? gradingFetcher.data : null;
   useEffect(() => {
@@ -2102,6 +2111,40 @@ export default function TeacherIndex() {
         return missing.length ? [{ student, missing }] : [];
       })
     : [];
+  const reminderLessonOptions = selectedClass && selectedLesson
+    ? selectedClass.lessons.filter((lesson) => lesson.order <= selectedLesson.order)
+    : [];
+  const visibleReminderRows = reminderLessonFilter === "all"
+    ? reminderRows
+    : reminderRows.flatMap((row) => {
+        const missing = row.missing.filter((item) => String(item.lessonOrder) === reminderLessonFilter);
+        return missing.length ? [{ ...row, missing }] : [];
+      });
+  const reminderMissingCount = reminderRows.reduce((total, row) => total + row.missing.length, 0);
+  const allVisibleReminderRowsExpanded = visibleReminderRows.length > 0
+    && visibleReminderRows.every(({ student }) => expandedReminderStudentIds.has(student.student.id));
+  const copyReminderMessage = async (studentName: string, missing: typeof reminderRows[number]["missing"]) => {
+    const missingByLesson = new Map<number, typeof missing>();
+    for (const item of missing) {
+      const lessonItems = missingByLesson.get(item.lessonOrder) ?? [];
+      lessonItems.push(item);
+      missingByLesson.set(item.lessonOrder, lessonItems);
+    }
+
+    const message = [
+      `Chào ${studentName}, em cần hoàn thành thêm các nội dung sau:`,
+      ...[...missingByLesson].map(([lessonOrder, items]) =>
+        `- Bài ${lessonOrder}: ${items[0].lessonTitle} — ${[...new Set(items.map(({ activity }) => activity))].join(", ")}`
+      ),
+    ].join("\n");
+
+    try {
+      await window.navigator.clipboard.writeText(message);
+      toast.success(`Đã sao chép lời nhắc cho ${studentName}.`);
+    } catch {
+      toast.error("Không thể sao chép lời nhắc. Hãy kiểm tra quyền clipboard của trình duyệt.");
+    }
+  };
   const updateGrade = (questionId: string, patch: Partial<TeacherGrammarGrade>) => {
     setGrades((current) => current.map((grade) => grade.questionId === questionId ? { ...grade, ...patch } : grade));
   };
@@ -3016,14 +3059,29 @@ export default function TeacherIndex() {
 
                 <Card>
                   <CardContent className="pt-5 sm:pt-5">
-                    <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         <AlertCircle className="h-4 w-4 text-rose-600" />
                         <h2 className="font-semibold">Cần nhắc</h2>
                       </div>
-                      <span className="text-sm text-muted-foreground">
-                        {selectedLesson ? `${reminderRows.length}/${selectedClass.activityData.length} học viên còn phần chưa xong đến Bài ${selectedLesson.displayOrder}` : "Chưa có bài học"}
-                      </span>
+                      <div className="flex flex-wrap items-center justify-end gap-3">
+                        <span className="text-sm text-muted-foreground">
+                          {selectedLesson ? `${reminderRows.length}/${selectedClass.activityData.length} học viên còn phần chưa xong đến Bài ${selectedLesson.displayOrder}` : "Chưa có bài học"}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={reminderRows.length === 0}
+                          onClick={() => {
+                            setReminderLessonFilter("all");
+                            setExpandedReminderStudentIds(new Set(reminderRows.map(({ student }) => student.student.id)));
+                            setIsReminderDetailsOpen(true);
+                          }}
+                        >
+                          Xem chi tiết
+                        </Button>
+                      </div>
                     </div>
                     {reminderRows.length === 0 ? (
                       <p className="rounded-lg bg-emerald-50 px-3 py-3 text-sm text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
@@ -3113,6 +3171,184 @@ export default function TeacherIndex() {
               <p className="mt-1 text-sm text-muted-foreground">Khi có lớp mới, thông tin tiến độ sẽ hiển thị tại đây.</p>
             </CardContent>
           </Card>
+        )}
+
+        {isReminderDetailsOpen && selectedClass && (
+          <div
+            className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-6"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setIsReminderDetailsOpen(false);
+            }}
+          >
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="reminder-details-title"
+              className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
+            >
+              <header className="flex shrink-0 items-start justify-between gap-3 border-b p-4 sm:p-5">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+                    <h2 id="reminder-details-title" className="font-semibold">Học viên cần nhắc</h2>
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {selectedClass.name}
+                    {selectedLesson ? ` · Tiến độ đến Bài ${selectedLesson.displayOrder}` : ""}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Đóng chi tiết nhắc nhở"
+                  autoFocus
+                  onClick={() => setIsReminderDetailsOpen(false)}
+                  className="-mr-2 -mt-1 shrink-0"
+                >
+                  <X aria-hidden="true" className="h-4 w-4" />
+                </Button>
+              </header>
+
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+                <div className="grid grid-cols-1 gap-3 rounded-xl border bg-card p-3 sm:grid-cols-3 sm:gap-4 sm:p-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Học viên cần nhắc</p>
+                    <p className="mt-1 text-lg font-semibold tabular-nums">
+                      {reminderRows.length}/{selectedClass.activityData.length}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Nội dung còn thiếu</p>
+                    <p className="mt-1 text-lg font-semibold tabular-nums text-rose-600">{reminderMissingCount}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Tiến độ lớp</p>
+                    <p className="mt-1 text-lg font-semibold">
+                      {selectedLesson ? `Bài ${selectedLesson.displayOrder}` : "Chưa chọn bài"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <label className="sr-only" htmlFor="reminder-lesson-filter">Lọc nội dung theo bài</label>
+                  <select
+                    id="reminder-lesson-filter"
+                    value={reminderLessonFilter}
+                    onChange={(event) => setReminderLessonFilter(event.currentTarget.value)}
+                    className="h-10 min-w-0 flex-1 rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <option value="all">Tất cả bài đã học</option>
+                    {reminderLessonOptions.map((lesson) => (
+                      <option key={lesson.id} value={String(lesson.displayOrder)}>
+                        Bài {lesson.displayOrder} · {lesson.title}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="shrink-0 gap-2"
+                    disabled={visibleReminderRows.length === 0}
+                    onClick={() => {
+                      setExpandedReminderStudentIds(
+                        allVisibleReminderRowsExpanded
+                          ? new Set()
+                          : new Set(visibleReminderRows.map(({ student }) => student.student.id))
+                      );
+                    }}
+                  >
+                    {allVisibleReminderRowsExpanded
+                      ? <ChevronUp aria-hidden="true" className="h-4 w-4" />
+                      : <ChevronDown aria-hidden="true" className="h-4 w-4" />}
+                    {allVisibleReminderRowsExpanded ? "Thu gọn" : "Mở rộng"}
+                  </Button>
+                </div>
+
+                {visibleReminderRows.length === 0 ? (
+                  <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+                    Không có nội dung cần nhắc trong bài đã chọn.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {visibleReminderRows.map(({ student, missing }) => {
+                      const studentName = student.student.name ?? student.student.email;
+                      const isExpanded = expandedReminderStudentIds.has(student.student.id);
+                      const missingByLesson = new Map<number, typeof missing>();
+                      for (const item of missing) {
+                        const lessonItems = missingByLesson.get(item.lessonOrder) ?? [];
+                        lessonItems.push(item);
+                        missingByLesson.set(item.lessonOrder, lessonItems);
+                      }
+
+                      return (
+                        <article key={student.student.id} className="overflow-hidden rounded-xl border bg-card">
+                          <button
+                            type="button"
+                            aria-expanded={isExpanded}
+                            onClick={() => {
+                              setExpandedReminderStudentIds((current) => {
+                                const next = new Set(current);
+                                if (next.has(student.student.id)) next.delete(student.student.id);
+                                else next.add(student.student.id);
+                                return next;
+                              });
+                            }}
+                            className="flex w-full items-center justify-between gap-3 p-3 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-4"
+                          >
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm font-semibold">{studentName}</span>
+                              <span className="mt-1 block text-xs text-muted-foreground">
+                                Chưa hoàn thành {missingByLesson.size} bài
+                              </span>
+                            </span>
+                            <span className="flex shrink-0 items-center gap-2 text-xs font-semibold text-rose-600">
+                              {missing.length} mục thiếu
+                              {isExpanded
+                                ? <ChevronUp aria-hidden="true" className="h-4 w-4" />
+                                : <ChevronDown aria-hidden="true" className="h-4 w-4" />}
+                            </span>
+                          </button>
+                          {isExpanded && (
+                            <div className="space-y-3 border-t px-3 py-3 sm:px-4">
+                              {[...missingByLesson].map(([lessonOrder, lessonItems]) => (
+                                <div key={lessonOrder} className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                                  <p className="shrink-0 text-sm font-medium">
+                                    Bài {lessonOrder}: {lessonItems[0].lessonTitle}
+                                  </p>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {[...new Set(lessonItems.map(({ activity }) => activity))].map((activity) => (
+                                      <span
+                                        key={activity}
+                                        className="rounded-md bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+                                      >
+                                        {activity}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="w-full gap-2"
+                                onClick={() => void copyReminderMessage(studentName, missing)}
+                              >
+                                <Copy aria-hidden="true" className="h-3.5 w-3.5" />
+                                Sao chép nội dung nhắc nhở
+                              </Button>
+                            </div>
+                          )}
+                        </article>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
         )}
 
         {pendingGrammarClass
