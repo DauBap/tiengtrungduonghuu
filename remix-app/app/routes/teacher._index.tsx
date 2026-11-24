@@ -2,7 +2,7 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { Link, useFetcher, useLoaderData, useLocation, useNavigate, useRevalidator } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import { requireRole } from "~/lib/session.server";
-import { getTeacherCourses } from "~/lib/db.server";
+import { computeTrackedCourseProgress, getTeacherCourses } from "~/lib/db.server";
 import { formatSchedule, formatNextClass, getNextClassTime } from "~/lib/schedule-utils";
 import { AppShell } from "~/components/layout/app-shell";
 import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
@@ -21,6 +21,7 @@ import {
   MessageCircle,
   TrendingUp,
   TriangleAlert,
+  Trophy,
   Users,
   X,
   XCircle,
@@ -69,6 +70,14 @@ const STUDENT_ALWAYS_VISIBLE_ACTIVITIES: readonly DashboardActivityTab[] = [
   "LESSON",
   "VOCABULARY_TEST",
 ];
+const PROGRESS_STATUS_FILTERS = [
+  { value: "all", label: "Tất cả", dotClassName: "" },
+  { value: "green", label: "Xanh", dotClassName: "bg-emerald-500" },
+  { value: "yellow", label: "Vàng", dotClassName: "bg-amber-500" },
+  { value: "red", label: "Đỏ", dotClassName: "bg-rose-500" },
+] as const;
+type ProgressStatusFilter = (typeof PROGRESS_STATUS_FILTERS)[number]["value"];
+type ProgressStatusColor = Exclude<ProgressStatusFilter, "all">;
 
 type PendingGrammarAttempt = Awaited<ReturnType<typeof loader>>["classSummaries"][number]["pendingGrammarAttempts"][number];
 type DashboardReviewItem = Extract<
@@ -79,6 +88,8 @@ type DashboardMockExamItem = Extract<
   Awaited<ReturnType<typeof loader>>["classSummaries"][number]["courseItems"][number],
   { kind: "mockExam" }
 >;
+type DashboardLessonActivity =
+  Awaited<ReturnType<typeof loader>>["classSummaries"][number]["activityData"][number]["lessons"][number]["activities"][number];
 
 interface GrammarAttemptData {
   course: { id: string; title: string };
@@ -350,6 +361,118 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const mockExamMapByCourse = new Map(mockExamsByCourse);
   const totalLessons = myCourses.reduce((sum, course) => sum + (lessonCountByCourse.get(course.id) ?? 0), 0);
   const totalStudents = myClasses.reduce((sum, cls) => sum + cls.enrollments.length, 0);
+
+  const [leaderboardEnrollments, leaderboardStudySessions] = courseIds.length > 0
+    ? await Promise.all([
+        prisma.enrollment.findMany({
+          where: {
+            courseId: { in: courseIds },
+            user: { role: "student", isActive: true, deletedAt: null },
+          },
+          select: {
+            userId: true,
+            courseId: true,
+            user: { select: { name: true } },
+            class: { select: { id: true, name: true } },
+          },
+        }),
+        prisma.courseStudySession.groupBy({
+          by: ["courseId", "userId"],
+          where: { courseId: { in: courseIds } },
+          _sum: { totalSeconds: true },
+          _count: { _all: true },
+        }),
+      ])
+    : [[], []];
+  const leaderboardStudyByEnrollment = new Map<string, { totalSeconds: number; visitCount: number }>();
+  for (const session of leaderboardStudySessions) {
+    leaderboardStudyByEnrollment.set(`${session.courseId}:${session.userId}`, {
+      totalSeconds: session._sum.totalSeconds ?? 0,
+      visitCount: session._count._all,
+    });
+  }
+
+  const lessonIdsByCourse = new Map<string, string[]>();
+  const courseIdByLessonId = new Map<string, string>();
+  for (const [courseId, lessons] of lessonMapByCourse) {
+    const lessonIds = lessons.map((lesson) => lesson.id);
+    lessonIdsByCourse.set(courseId, lessonIds);
+    for (const lessonId of lessonIds) courseIdByLessonId.set(lessonId, courseId);
+  }
+  const leaderboardProgressByEnrollment = new Map<string, {
+    lessonId: string;
+    tab: string;
+    completed: boolean;
+    attempts: { passed: boolean | null }[];
+  }[]>();
+  const leaderboardStudentIds = [...new Set(leaderboardEnrollments.map((enrollment) => enrollment.userId))];
+  const leaderboardLessonIds = [...courseIdByLessonId.keys()];
+  const progressBatchSize = 100;
+  for (let offset = 0; offset < leaderboardStudentIds.length && leaderboardLessonIds.length > 0; offset += progressBatchSize) {
+    const progressRows = await prisma.lessonTabProgress.findMany({
+      where: {
+        userId: { in: leaderboardStudentIds.slice(offset, offset + progressBatchSize) },
+        lessonId: { in: leaderboardLessonIds },
+      },
+      select: {
+        userId: true,
+        lessonId: true,
+        tab: true,
+        completed: true,
+        attempts: {
+          where: { tab: "VOCABULARY_TEST" },
+          orderBy: { completedAt: "desc" },
+          take: 1,
+          select: { passed: true },
+        },
+      },
+    });
+    for (const progress of progressRows) {
+      const courseId = courseIdByLessonId.get(progress.lessonId);
+      if (!courseId) continue;
+      const key = `${courseId}:${progress.userId}`;
+      const rows = leaderboardProgressByEnrollment.get(key) ?? [];
+      rows.push(progress);
+      leaderboardProgressByEnrollment.set(key, rows);
+    }
+  }
+
+  const teacherClassIds = new Set(myClasses.map((cls) => cls.id));
+  const courseTitleById = new Map<string, string>();
+  for (const cls of myClasses) courseTitleById.set(cls.courseId, cls.course.title);
+  const leaderboardEnrollmentsByClass = new Map<string, Array<(typeof leaderboardEnrollments)[number]>>();
+  for (const enrollment of leaderboardEnrollments) {
+    if (!enrollment.class) continue;
+    const rows = leaderboardEnrollmentsByClass.get(enrollment.class.id) ?? [];
+    rows.push(enrollment);
+    leaderboardEnrollmentsByClass.set(enrollment.class.id, rows);
+  }
+  const classLeaderboards = Array.from(leaderboardEnrollmentsByClass, ([classId, enrollments]) => ({
+    id: classId,
+    className: enrollments[0].class!.name,
+    title: courseTitleById.get(enrollments[0].courseId) ?? "",
+    isMyClass: teacherClassIds.has(classId),
+    students: enrollments
+      .map((enrollment) => ({
+        userId: enrollment.userId,
+        name: enrollment.user.name || "Học viên",
+        progressPercent: computeTrackedCourseProgress(
+          lessonIdsByCourse.get(enrollment.courseId) ?? [],
+          leaderboardProgressByEnrollment.get(`${enrollment.courseId}:${enrollment.userId}`) ?? [],
+        ),
+        ...(leaderboardStudyByEnrollment.get(`${enrollment.courseId}:${enrollment.userId}`) ?? { totalSeconds: 0, visitCount: 0 }),
+      }))
+      .sort((left, right) =>
+        right.progressPercent - left.progressPercent
+        || right.totalSeconds - left.totalSeconds
+        || right.visitCount - left.visitCount
+        || left.name.localeCompare(right.name, "vi")
+      ),
+  })).sort((left, right) =>
+    Number(right.isMyClass) - Number(left.isMyClass)
+    || left.className.localeCompare(right.className, "vi")
+    || left.title.localeCompare(right.title, "vi")
+  );
 
   const classSummaries = await Promise.all(myClasses.map(async (cls) => {
     const courseLessons = lessonMapByCourse.get(cls.courseId) ?? [];
@@ -1197,6 +1320,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     myCourses,
     myClasses,
     classSummaries,
+    classLeaderboards,
     pendingReviews,
     totalLessons,
     totalStudents,
@@ -1378,14 +1502,47 @@ function activityTone(status: string, isPastLesson: boolean) {
   return "bg-muted text-muted-foreground";
 }
 
+function getDisplayedActivityPercent(result: DashboardLessonActivity | undefined, activityTab: string) {
+  if (result?.status === "completed") return result.score;
+  if (result?.status !== "partial") return null;
+  return activityTab === "PHONETICS" || activityTab === "VOCABULARY_TEST"
+    ? result.score
+    : result.percent;
+}
+
+function getActivityProgressStatus(result: DashboardLessonActivity | undefined, activityTab: string) {
+  const displayedPercent = getDisplayedActivityPercent(result, activityTab);
+  return displayedPercent == null
+    ? result?.status
+    : displayedPercent >= 80 ? "completed" : "partial";
+}
+
+function getActivityStatusColor(status: string | undefined, isPastLesson: boolean): ProgressStatusColor | null {
+  if (status === "completed") return "green";
+  if (status === "partial") return "yellow";
+  if (isPastLesson && status === "missing") return "red";
+  return null;
+}
+
 function lessonProgressTone(percent: number) {
   if (percent === 0) return "bg-muted text-muted-foreground";
   if (!isLessonProgressGreen(percent)) return "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300";
   return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300";
 }
 
+function formatLeaderboardStudyTime(totalSeconds: number) {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const parts = [];
+  if (hours > 0) parts.push(`${hours} giờ`);
+  if (minutes > 0) parts.push(`${minutes} phút`);
+  if (seconds > 0 || parts.length === 0) parts.push(`${seconds} giây`);
+  return parts.join(" ");
+}
+
 export default function TeacherIndex() {
-  const { user, myCourses, myClasses, classSummaries, pendingReviews, totalLessons, totalStudents, initialGradeAttemptId, initialGrammarAttempt, initialWorkbookAttemptId, initialWorkbookTargetUrl, initialTranslationSubmissionId, initialTranslationSubmission, translationSubmissions } = useLoaderData<typeof loader>();
+  const { user, myCourses, myClasses, classSummaries, classLeaderboards, pendingReviews, totalLessons, totalStudents, initialGradeAttemptId, initialGrammarAttempt, initialWorkbookAttemptId, initialWorkbookTargetUrl, initialTranslationSubmissionId, initialTranslationSubmission, translationSubmissions } = useLoaderData<typeof loader>();
   const location = useLocation();
   const navigate = useNavigate();
   const gradingFetcher = useFetcher<GrammarAttemptData & { success?: boolean }>();
@@ -1415,6 +1572,8 @@ export default function TeacherIndex() {
   const [selectedLessonScriptId, setSelectedLessonScriptId] = useState<string | null>(null);
   const [pendingGrammarClassId, setPendingGrammarClassId] = useState<string | null>(null);
   const [pendingReviewClassId, setPendingReviewClassId] = useState<string | null>(null);
+  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
+  const [selectedLeaderboardClassId, setSelectedLeaderboardClassId] = useState<string | null>(null);
   const [unsavedReviewCloseTarget, setUnsavedReviewCloseTarget] = useState<"queue" | "progress" | null>(null);
   const [dirtyReviewAttemptIds, setDirtyReviewAttemptIds] = useState<Set<string>>(() => new Set());
   const [reviewGradeOverrides, setReviewGradeOverrides] = useState<Record<string, boolean>>({});
@@ -1423,7 +1582,11 @@ export default function TeacherIndex() {
   const [workbookGradingAttemptId, setWorkbookGradingAttemptId] = useState<string | null>(null);
   const [selectedTranslationSubmissionId, setSelectedTranslationSubmissionId] = useState<string | null>(initialTranslationSubmission?.id ?? null);
   const [translationQuestionGrades, setTranslationQuestionGrades] = useState<Record<string, boolean | null>>({});
+  const [translationQuestionFilter, setTranslationQuestionFilter] = useState<"all" | "correct" | "incorrect" | "ungraded">("all");
+  const [progressStatusFilter, setProgressStatusFilter] = useState<ProgressStatusFilter>("all");
   const translationGradingContentRef = useRef<HTMLDivElement>(null);
+  const leaderboardDialogRef = useRef<HTMLElement>(null);
+  const leaderboardCloseButtonRef = useRef<HTMLButtonElement>(null);
   const [gradingQueue, setGradingQueue] = useState<{ courseId: string; attempt: PendingGrammarAttempt }[]>([]);
   const [gradingQueueIndex, setGradingQueueIndex] = useState<number | null>(null);
   const [gradingComplete, setGradingComplete] = useState(false);
@@ -1440,6 +1603,8 @@ export default function TeacherIndex() {
   const pendingGrammarClass = classSummaries.find((cls) => cls.id === pendingGrammarClassId);
   const pendingReviewClass = myClasses.find((cls) => cls.id === pendingReviewClassId);
   const pendingClassReviews = pendingReviews.filter((attempt) => attempt.classId === pendingReviewClassId);
+  const selectedLeaderboard = classLeaderboards.find((item) => item.id === selectedLeaderboardClassId)
+    ?? classLeaderboards[0];
   const closePendingReviewModalAndDiscard = () => {
     setUnsavedReviewCloseTarget(null);
     setPendingReviewClassId(null);
@@ -1577,6 +1742,27 @@ export default function TeacherIndex() {
         STUDENT_ALWAYS_VISIBLE_ACTIVITIES.includes(tab) || selectedLesson.availableActivities[tab]
       )
     : [];
+  const suggestedLessonOrder = selectedClass?.lessons.find((lesson) => lesson.id === selectedClass.suggestedLessonId)?.order ?? 0;
+  const isSelectedLessonPast = Boolean(selectedLesson && selectedLesson.order < suggestedLessonOrder);
+  const lessonActivityStatusByStudent = sortedActivityData.map((student) => {
+    const lesson = student.lessons.find((item) => item.id === selectedLesson?.id);
+    const colors = new Set<ProgressStatusColor>();
+    for (const activity of selectedLessonActivities) {
+      const result = lesson?.activities.find((item) => item.tab === activity.tab);
+      const color = getActivityStatusColor(getActivityProgressStatus(result, activity.tab), isSelectedLessonPast);
+      if (color) colors.add(color);
+    }
+    return { student, colors };
+  });
+  const progressStatusFilterCounts = {
+    all: lessonActivityStatusByStudent.length,
+    green: lessonActivityStatusByStudent.filter(({ colors }) => colors.has("green")).length,
+    yellow: lessonActivityStatusByStudent.filter(({ colors }) => colors.has("yellow")).length,
+    red: lessonActivityStatusByStudent.filter(({ colors }) => colors.has("red")).length,
+  };
+  const visibleLessonActivityData = progressStatusFilter === "all"
+    ? lessonActivityStatusByStudent
+    : lessonActivityStatusByStudent.filter(({ colors }) => colors.has(progressStatusFilter));
   const selectedStudent = selectedClass?.activityData.find((item) => item.student.id === selectedStudentId);
   const reviewProgressData = reviewProgressFetcher.data;
   const selectedReviewProgressData = selectedReviewProgress
@@ -1660,6 +1846,25 @@ export default function TeacherIndex() {
         teacherCorrect?: boolean;
       }>
     : [];
+  const translationQuestionFilterCounts = {
+    all: selectedTranslationAnswers.length,
+    correct: selectedTranslationAnswers.filter((item) =>
+      typeof item.questionId === "string" && translationQuestionGrades[item.questionId] === true
+    ).length,
+    incorrect: selectedTranslationAnswers.filter((item) =>
+      typeof item.questionId === "string" && translationQuestionGrades[item.questionId] === false
+    ).length,
+    ungraded: selectedTranslationAnswers.filter((item) =>
+      typeof item.questionId !== "string" || typeof translationQuestionGrades[item.questionId] !== "boolean"
+    ).length,
+  };
+  const translationQuestionFilterOptions = [
+    { value: "all", label: "Tất cả" },
+    { value: "correct", label: "Đúng" },
+    { value: "incorrect", label: "Sai" },
+    { value: "ungraded", label: "Chưa chấm" },
+  ] as const;
+  const visibleTranslationQuestionCount = translationQuestionFilterCounts[translationQuestionFilter];
   const nextTranslationSubmission = selectedTranslationClass?.pendingTranslationSubmissions.find(
     (submission) => submission.id !== selectedTranslationSubmissionId,
   ) ?? null;
@@ -1678,6 +1883,9 @@ export default function TeacherIndex() {
   const expectedTranslationPercentage = selectedTranslationAnswers.length > 0
     ? Math.round((correctTranslationQuestionCount / selectedTranslationAnswers.length) * 100)
     : null;
+  useEffect(() => {
+    setTranslationQuestionFilter("all");
+  }, [selectedTranslationSubmissionId]);
   useEffect(() => {
     if (!selectedTranslationSubmissionId || !selectedTranslationSubmission) {
       setTranslationQuestionGrades({});
@@ -1700,6 +1908,49 @@ export default function TeacherIndex() {
       ),
     ));
   }, [selectedTranslationSubmissionId, selectedTranslationSubmission?.answers]);
+  useEffect(() => {
+    setProgressStatusFilter("all");
+  }, [selectedClassId, selectedLessonId]);
+  useEffect(() => {
+    if (!isLeaderboardOpen) return;
+
+    const dialog = leaderboardDialogRef.current;
+    if (!dialog) return;
+
+    const previouslyFocusedElement = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    leaderboardCloseButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setIsLeaderboardOpen(false);
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+      const focusableElements = dialog.querySelectorAll<HTMLElement>(
+        'a[href], button:not(:disabled), [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusableElements.length === 0) return;
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    dialog.addEventListener("keydown", handleKeyDown);
+    return () => {
+      dialog.removeEventListener("keydown", handleKeyDown);
+      previouslyFocusedElement?.focus();
+    };
+  }, [isLeaderboardOpen]);
   useEffect(() => {
     if (selectedTranslationSubmissionId) {
       translationGradingContentRef.current?.scrollTo({ top: 0 });
@@ -1731,7 +1982,7 @@ export default function TeacherIndex() {
     || selectedTranslationSubmissionId
     || (pendingGrammarClass && gradingComplete),
   );
-  useModalScrollLock(isModalOpen);
+  useModalScrollLock(isModalOpen || isLeaderboardOpen);
   const upcomingClasses = myClasses
     .flatMap((cls) => {
       const nextClassTime = getNextClassTime(cls.schedule);
@@ -2532,6 +2783,30 @@ export default function TeacherIndex() {
                                 {selectedClass.activityData.length} học viên · {selectedLessonActivities.length} phần theo dõi
                               </span>
                             </div>
+                            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Lọc học viên theo màu trạng thái">
+                                {PROGRESS_STATUS_FILTERS.map((option) => (
+                                  <button
+                                    key={option.value}
+                                    type="button"
+                                    aria-pressed={progressStatusFilter === option.value}
+                                    aria-label={`Lọc theo trạng thái ${option.label}: ${progressStatusFilterCounts[option.value]} học viên`}
+                                    onClick={() => setProgressStatusFilter(option.value)}
+                                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                                      progressStatusFilter === option.value
+                                        ? "border-primary bg-primary text-primary-foreground"
+                                        : "bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+                                    }`}
+                                  >
+                                    {option.dotClassName && <span aria-hidden="true" className={`h-2 w-2 rounded-full ${option.dotClassName}`} />}
+                                    {option.label} ({progressStatusFilterCounts[option.value]})
+                                  </button>
+                                ))}
+                              </div>
+                              <p className="text-xs text-muted-foreground" aria-live="polite">
+                                Hiển thị {visibleLessonActivityData.length}/{sortedActivityData.length} học viên
+                              </p>
+                            </div>
                             <div className="overflow-x-auto rounded-lg border">
                               <table className="w-full min-w-[650px] text-left text-sm">
                                 <thead className="bg-muted/50 text-xs text-muted-foreground">
@@ -2543,7 +2818,7 @@ export default function TeacherIndex() {
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y">
-                                  {sortedActivityData.map((student) => {
+                                  {visibleLessonActivityData.map(({ student }) => {
                                     const lesson = student.lessons.find((item) => item.id === selectedLesson.id);
                                     return (
                                       <tr key={student.student.id}>
@@ -2566,16 +2841,8 @@ export default function TeacherIndex() {
                                             && result?.status === "waiting"
                                             ? result.translationSubmissionId
                                             : null;
-                                          const displayedPercent = result?.status === "completed"
-                                            ? result.score
-                                            : result?.status === "partial"
-                                              ? activity.tab === "PHONETICS" || activity.tab === "VOCABULARY_TEST"
-                                                ? result.score
-                                                : result.percent
-                                              : null;
-                                          const progressStatus = displayedPercent == null
-                                            ? result?.status
-                                            : displayedPercent >= 80 ? "completed" : "partial";
+                                          const displayedPercent = getDisplayedActivityPercent(result, activity.tab);
+                                          const progressStatus = getActivityProgressStatus(result, activity.tab);
                                           const activityReviewData = (
                                             activity.tab === "PHONETICS"
                                             || activity.tab === "LISTENING"
@@ -2600,13 +2867,13 @@ export default function TeacherIndex() {
                                                 wrongAnswers: result.wrongAnswers,
                                               }
                                             : null;
-                                          const tileClassName = `inline-flex min-w-20 flex-col items-center rounded-md px-2 py-1.5 ${activityTone(progressStatus ?? result?.status ?? "missing", selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0))}`;
+                                          const tileClassName = `inline-flex min-w-20 flex-col items-center rounded-md px-2 py-1.5 ${activityTone(progressStatus ?? result?.status ?? "missing", isSelectedLessonPast)}`;
                                           const tileContent = (
                                             <>
                                               <span className="font-semibold">
                                                 {displayedPercent != null
                                                     ? `${displayedPercent}%`
-                                                    : selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0)
+                                                    : isSelectedLessonPast
                                                         ? "Bỏ sót"
                                                         : "Chưa làm"}
                                               </span>
@@ -2625,7 +2892,7 @@ export default function TeacherIndex() {
                                                     ? "Đã xong"
                                                     : result?.status === "partial"
                                                       ? "Đang làm"
-                                                      : selectedLesson.order < (selectedClass.lessons.find((item) => item.id === selectedClass.suggestedLessonId)?.order ?? 0)
+                                                      : isSelectedLessonPast
                                                         ? "Cần hoàn thành"
                                                         : "Chưa bắt đầu"}
                                               </span>
@@ -2724,6 +2991,13 @@ export default function TeacherIndex() {
                                       </tr>
                                     );
                                   })}
+                                  {visibleLessonActivityData.length === 0 && (
+                                    <tr>
+                                      <td colSpan={selectedLessonActivities.length + 1} role="status" className="px-3 py-8 text-center text-sm text-muted-foreground">
+                                        Không có học viên thuộc trạng thái này.
+                                      </td>
+                                    </tr>
+                                  )}
                                 </tbody>
                               </table>
                             </div>
@@ -4167,6 +4441,158 @@ export default function TeacherIndex() {
             </section>
           </div>
         )}
+        {classLeaderboards.length > 0 && (
+          <>
+            <Button
+              type="button"
+              size="icon"
+              className="fixed bottom-5 right-5 z-40 h-12 w-12 rounded-full shadow-lg"
+              aria-label="Mở bảng vàng lớp học"
+              aria-haspopup="dialog"
+              aria-expanded={isLeaderboardOpen}
+              title="Bảng vàng"
+              onClick={() => setIsLeaderboardOpen(true)}
+            >
+              <Trophy className="h-5 w-5" />
+            </Button>
+
+            {isLeaderboardOpen && selectedLeaderboard && (
+              <div
+                className="fixed inset-0 !mt-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-6"
+                role="presentation"
+                onMouseDown={(event) => {
+                  if (event.target === event.currentTarget) setIsLeaderboardOpen(false);
+                }}
+              >
+                <section
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="teacher-leaderboard-title"
+                  ref={leaderboardDialogRef}
+                  tabIndex={-1}
+                  className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-2xl"
+                >
+                  <header className="flex shrink-0 items-center justify-between border-b px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="h-4 w-4 text-amber-500" aria-hidden="true" />
+                      <h2 id="teacher-leaderboard-title" className="font-semibold">Bảng vàng</h2>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      ref={leaderboardCloseButtonRef}
+                      aria-label="Đóng bảng vàng"
+                      onClick={() => setIsLeaderboardOpen(false)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </header>
+                  <div className="space-y-3 overflow-y-auto p-3 sm:p-4">
+                    <div role="tablist" aria-label="Chọn lớp trong bảng vàng" className="flex gap-2 overflow-x-auto border-b pb-2">
+                      {classLeaderboards.map((classLeaderboard) => (
+                        <button
+                          key={classLeaderboard.id}
+                          type="button"
+                          role="tab"
+                          id={`teacher-leaderboard-tab-${classLeaderboard.id}`}
+                          aria-selected={selectedLeaderboard.id === classLeaderboard.id}
+                          aria-controls="teacher-leaderboard-panel"
+                          onClick={() => setSelectedLeaderboardClassId(classLeaderboard.id)}
+                          className={`shrink-0 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                            selectedLeaderboard.id === classLeaderboard.id
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                          }`}
+                        >
+                          {classLeaderboard.className}
+                          {classLeaderboard.isMyClass && (
+                            <span className="ml-2 rounded-full bg-background/20 px-2 py-0.5 text-[11px] font-semibold">
+                              Lớp bạn đang dạy
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    <Card
+                      role="tabpanel"
+                      id="teacher-leaderboard-panel"
+                      aria-labelledby={`teacher-leaderboard-tab-${selectedLeaderboard.id}`}
+                    >
+                      <CardContent className="p-4">
+                        <div className="mb-2 flex items-center justify-between gap-3">
+                          <div>
+                            <h3 className="text-sm font-semibold">{selectedLeaderboard.className}</h3>
+                            <p className="text-xs text-muted-foreground">{selectedLeaderboard.title}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              Xếp theo tiến độ khóa học; nếu bằng nhau, ưu tiên thời gian học rồi lượt vào.
+                            </p>
+                          </div>
+                          <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+                            {selectedLeaderboard.students.length} học viên
+                          </span>
+                        </div>
+                        <div className="max-h-[min(30rem,65vh)] overflow-auto">
+                          <table className="w-full min-w-[520px] text-xs">
+                            <thead>
+                              <tr className="sticky top-0 border-b bg-background text-left text-muted-foreground">
+                                <th scope="col" className="px-2 py-2 font-medium">#</th>
+                                <th scope="col" className="px-2 py-2 font-medium">Học viên</th>
+                                <th scope="col" className="w-[30%] px-2 py-2 font-medium">Tiến độ</th>
+                                <th scope="col" className="w-[40%] px-2 py-2 font-medium">Thời gian học</th>
+                                <th scope="col" className="px-2 py-2 text-right font-medium">Lượt vào</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {selectedLeaderboard.students.map((student, index) => {
+                                const rankTone = index === 0
+                                  ? "bg-amber-100 text-amber-800"
+                                  : index === 1
+                                    ? "bg-slate-100 text-slate-700"
+                                    : index === 2
+                                      ? "bg-orange-100 text-orange-800"
+                                      : "text-muted-foreground";
+                                return (
+                                  <tr key={student.userId} className="border-b last:border-0">
+                                    <td className="px-2 py-2">
+                                      <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold ${rankTone}`}>
+                                        {index + 1}
+                                      </span>
+                                    </td>
+                                    <td className="px-2 py-2 font-medium">{student.name}</td>
+                                    <td className="px-2 py-2">
+                                      <span className="whitespace-nowrap tabular-nums">{student.progressPercent}%</span>
+                                      <div
+                                        className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted"
+                                        role="progressbar"
+                                        aria-label={`Tiến độ khóa học của ${student.name}`}
+                                        aria-valuemin={0}
+                                        aria-valuemax={100}
+                                        aria-valuenow={student.progressPercent}
+                                      >
+                                        <div className="h-full rounded-full bg-primary" style={{ width: `${student.progressPercent}%` }} />
+                                      </div>
+                                    </td>
+                                    <td className="px-2 py-2">
+                                      <span className="whitespace-nowrap tabular-nums">{formatLeaderboardStudyTime(student.totalSeconds)}</span>
+                                    </td>
+                                    <td className="px-2 py-2 text-right tabular-nums">{student.visitCount}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </section>
+              </div>
+            )}
+          </>
+        )}
+
         {selectedTranslationSubmission && (
           <div className="fixed inset-0 !mt-0 z-[60] flex items-center justify-center bg-black/50 p-3 sm:p-6" role="presentation">
             <section
@@ -4204,16 +4630,48 @@ export default function TeacherIndex() {
                 <p className="text-sm text-muted-foreground">
                   Gợi ý tự chấm dựa trên đáp án mẫu và đáp án khác được chấp nhận; hãy kiểm tra trước khi lưu. Bạn có thể đổi lựa chọn Đúng/Sai.
                 </p>
+                <div className="space-y-2">
+                  <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label="Lọc câu theo kết quả chấm">
+                    {translationQuestionFilterOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        aria-pressed={translationQuestionFilter === option.value}
+                        onClick={() => setTranslationQuestionFilter(option.value)}
+                        className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                          translationQuestionFilter === option.value
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+                        }`}
+                      >
+                        {option.label} ({translationQuestionFilterCounts[option.value]})
+                      </button>
+                    ))}
+                  </div>
+                  {visibleTranslationQuestionCount === 0 && selectedTranslationAnswers.length > 0 ? (
+                    <p role="status" className="rounded-md border border-dashed px-3 py-4 text-center text-sm text-muted-foreground">
+                      Không có câu nào trong bộ lọc này.
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground" aria-live="polite">
+                      Hiển thị {visibleTranslationQuestionCount}/{selectedTranslationAnswers.length} câu
+                    </p>
+                  )}
+                </div>
                 {selectedTranslationAnswers.map((item, index) => {
                   const questionId = item.questionId ?? "";
                   const grade = questionId ? translationQuestionGrades[questionId] : null;
+                  const isVisible = translationQuestionFilter === "all"
+                    || (translationQuestionFilter === "correct" && grade === true)
+                    || (translationQuestionFilter === "incorrect" && grade === false)
+                    || (translationQuestionFilter === "ungraded" && typeof grade !== "boolean");
                   const autoCorrect = suggestTranslationAnswerCorrect(
                     typeof item.answer === "string" ? item.answer : "",
                     typeof item.sampleAnswer === "string" ? item.sampleAnswer : "",
                     item.acceptedAnswers ?? [],
                   );
                   return (
-                    <article key={questionId || index} className="space-y-3 rounded-lg border p-4">
+                    <article key={questionId || index} hidden={!isVisible} className="space-y-3 rounded-lg border p-4">
                       <div className="flex items-start gap-2">
                         <span className="mt-1 text-xs text-muted-foreground">{index + 1}.</span>
                         <div className="min-w-0 flex-1">
