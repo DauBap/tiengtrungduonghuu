@@ -16,7 +16,15 @@ export function ConsecutiveAbsenceBadge() {
   );
 }
 
-export function ConsecutiveAbsenceNotice({ alerts }: { alerts: DisplayAlert[] }) {
+export function ConsecutiveAbsenceNotice({
+  alerts,
+  dashboard = false,
+  onOpenLatestSession,
+}: {
+  alerts: DisplayAlert[];
+  dashboard?: boolean;
+  onOpenLatestSession?: (alert: DisplayAlert) => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const fetcher = useFetcher<{ intent: string; success: boolean; studentId?: string; error?: string }>();
 
@@ -24,23 +32,70 @@ export function ConsecutiveAbsenceNotice({ alerts }: { alerts: DisplayAlert[] })
 
   return (
     <>
-      <div role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 text-sm text-destructive">
-        <button
-          type="button"
-          onClick={() => setIsOpen(true)}
-          aria-haspopup="dialog"
-          className="flex w-full items-start gap-2 rounded-md px-4 py-3 text-left hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
-        >
-          <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>
-            <span className="font-semibold">Có học sinh vắng 3 buổi liên tiếp</span>
-            <span className="mt-0.5 block text-destructive/90">
-              {alerts.map(({ className, studentName }) => `${className} - ${studentName}`).join("; ")}
+      {dashboard ? (
+        <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
+          <div className="flex flex-col gap-3.5 md:flex-row md:items-center md:justify-between">
+            <div className="flex min-w-0 items-start gap-3">
+              <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-destructive text-sm font-bold text-destructive-foreground shadow-sm">
+                !
+              </span>
+              <div className="min-w-0 space-y-1">
+                <p className="text-sm font-bold text-destructive">
+                  Cảnh báo chuyên cần: Lớp có {alerts.length} học viên vắng 3 buổi liên tiếp
+                </p>
+                <div className="space-y-0.5 text-xs text-destructive">
+                  {alerts.map((alert) => (
+                    <p key={`${alert.classId}:${alert.studentId}`}>
+                      • <strong className="font-semibold text-foreground">{alert.studentName}</strong>
+                      {" — vắng 3 buổi liên tiếp ("}
+                      {alert.sessions.map(({ title }) => title || "Buổi học").join(", ")}
+                      {")"}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsOpen(true)}
+                aria-haspopup="dialog"
+                className="h-8 border-destructive/20 bg-card px-3 text-xs font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
+              >
+                Xem danh sách cảnh báo
+              </Button>
+              {onOpenLatestSession && (
+                <Button
+                  type="button"
+                  onClick={() => onOpenLatestSession(alerts[0])}
+                  className="h-8 bg-primary px-3 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  Xem chi tiết / Điểm danh
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 text-sm text-destructive">
+          <button
+            type="button"
+            onClick={() => setIsOpen(true)}
+            aria-haspopup="dialog"
+            className="flex w-full items-start gap-2 rounded-md px-4 py-3 text-left hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+          >
+            <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              <span className="font-semibold">Có học sinh vắng 3 buổi liên tiếp</span>
+              <span className="mt-0.5 block text-destructive/90">
+                {alerts.map(({ className, studentName }) => `${className} - ${studentName}`).join("; ")}
+              </span>
+              <span className="mt-1 block text-xs text-muted-foreground">Chọn để xem chi tiết và đánh dấu đã xử lý.</span>
             </span>
-            <span className="mt-1 block text-xs text-muted-foreground">Chọn để xem chi tiết và đánh dấu đã xử lý.</span>
-          </span>
-        </button>
-      </div>
+          </button>
+        </div>
+      )}
 
       {isOpen && (
         <Overlay onClose={() => setIsOpen(false)} className="max-w-xl">

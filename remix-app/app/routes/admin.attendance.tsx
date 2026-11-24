@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import { Form, Link, useFetcher, useLoaderData, useNavigate } from "react-router";
+import { Form, Link, useFetcher, useLoaderData, useLocation, useNavigate } from "react-router";
 import type { Prisma } from "@prisma/client";
 import {
   AlertTriangle,
+  BookOpen,
   CalendarDays,
   CheckCircle2,
   ChevronDown,
+  ClipboardCheck,
   Clock3,
+  Plus,
   Search,
   Trash2,
   Users,
@@ -134,7 +137,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const params = url.searchParams;
   const requestedTeacherId = params.get("teacherId") ?? "";
-  const classId = params.get("classId") ?? "";
+  const requestedClassId = params.get("classId") ?? "";
   const requestedSessionId = params.get("sessionId") ?? "";
   const rawTab = params.get("tab") ?? "";
   const isTotalTab = rawTab === "total";
@@ -158,7 +161,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     filterError = "Chế độ xem điểm danh không hợp lệ. Hãy chọn lại tab.";
     invalidFilter = true;
   }
-  if (isTotalTab && !classId) {
+  if (isTotalTab && !requestedClassId) {
     filterError = "Hãy chọn một lớp để xem tổng hợp điểm danh.";
     invalidFilter = true;
   }
@@ -242,6 +245,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
     teacher: leaveRequest.classroom.teacher?.name ?? "Chưa phân công",
   }));
 
+  const belongsToRequestedTeacher = (classroom: typeof classes[number]) =>
+    requestedTeacherId === "unassigned"
+      ? classroom.teacherId === null
+      : classroom.teacherId === requestedTeacherId;
+  const defaultClass = requestedTeacherId
+    ? classes.find((classroom) => !classroom.completedAt && belongsToRequestedTeacher(classroom))
+      ?? classes.find(belongsToRequestedTeacher)
+    : classes.find((classroom) => !classroom.completedAt) ?? classes[0];
+  const classId = requestedClassId || defaultClass?.id || "";
   const selectedClass = classes.find((classroom) => classroom.id === classId) ?? null;
   if (classId && !selectedClass) {
     filterError = "Lớp được chọn không còn tồn tại. Hãy chọn lại lớp.";
@@ -266,8 +278,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     invalidFilter = true;
   }
   const canLoadClassSummary = Boolean(
-    isTotalTab
-    && selectedClass
+    selectedClass
+    && !invalidFilter
     && (!selectedTeacherId
       || (selectedTeacherId === "unassigned"
         ? selectedClass.teacherId === null
@@ -338,6 +350,53 @@ export async function loader({ request }: LoaderFunctionArgs) {
     else stats.unmarked += _count._all;
     statsBySessionId.set(sessionId, stats);
   }
+
+  const classSessionHistoryRaw = selectedClass && !invalidFilter
+    ? await prisma.attendanceSession.findMany({
+        where: { classId: selectedClass.id },
+        orderBy: [{ date: "desc" }, { scheduleStartTime: "desc" }, { createdAt: "desc" }],
+        select: {
+          id: true,
+          title: true,
+          lesson: true,
+          date: true,
+          scheduleStartTime: true,
+          scheduleEndTime: true,
+          _count: { select: { records: true } },
+        },
+      })
+    : [];
+  const classSessionStats = classSessionHistoryRaw.length > 0
+    ? await prisma.attendanceRecord.groupBy({
+        by: ["sessionId", "status"],
+        where: { sessionId: { in: classSessionHistoryRaw.map(({ id }) => id) } },
+        _count: { _all: true },
+      })
+    : [];
+  const classStatsBySessionId = new Map<string, {
+    present: number;
+    late: number;
+    absent: number;
+    unmarked: number;
+  }>();
+  for (const { sessionId, status: recordStatus, _count } of classSessionStats) {
+    const stats = classStatsBySessionId.get(sessionId) ?? { present: 0, late: 0, absent: 0, unmarked: 0 };
+    if (recordStatus === "PRESENT") stats.present += _count._all;
+    else if (recordStatus === "LATE") stats.late += _count._all;
+    else if (recordStatus === "ABSENT") stats.absent += _count._all;
+    else stats.unmarked += _count._all;
+    classStatsBySessionId.set(sessionId, stats);
+  }
+  const classSessionHistory = classSessionHistoryRaw.map((session) => ({
+    id: session.id,
+    title: session.title,
+    lesson: session.lesson,
+    date: session.date.toISOString().slice(0, 10),
+    scheduleStartTime: session.scheduleStartTime,
+    scheduleEndTime: session.scheduleEndTime,
+    recordCount: session._count.records,
+    ...(classStatsBySessionId.get(session.id) ?? { present: 0, late: 0, absent: 0, unmarked: 0 }),
+  }));
 
   const selectedSession = requestedSessionId && sessionClassIds.length > 0 && !invalidFilter
     ? await prisma.attendanceSession.findFirst({
@@ -762,6 +821,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       recordCount: session._count.records,
       ...(statsBySessionId.get(session.id) ?? { present: 0, late: 0, absent: 0, unmarked: 0 }),
     })),
+    classSessionHistory,
     selectedSession: selectedSession
       ? {
           id: selectedSession.id,
@@ -2068,7 +2128,7 @@ function AttendanceSessionDetails({
   );
 }
 
-export default function AdminAttendance() {
+function LegacyAdminAttendance() {
   const {
     user,
     attendanceSummary,
@@ -3121,4 +3181,653 @@ export default function AdminAttendance() {
       </div>
     </AppShell>
   );
+}
+
+function AdminAttendanceDashboard() {
+  const {
+    user,
+    teachers,
+    selectedTeacherId,
+    classes,
+    activeClasses,
+    makeupLeaveRequests,
+    classSessionHistory,
+    selectedSession,
+    classAttendanceSummary,
+    filters,
+    filterError,
+    today,
+  } = useLoaderData<typeof loader>();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const createFetcher = useFetcher<typeof action>();
+  const makeupFetcher = useFetcher<typeof action>();
+  const [sessionSearch, setSessionSearch] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showMakeupModal, setShowMakeupModal] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  const [makeupLeaveRequestId, setMakeupLeaveRequestId] = useState("");
+  const [makeupDate, setMakeupDate] = useState(getMinimumMakeupDate(today));
+  const selectedClass = classes.find((classroom) => classroom.id === filters.classId) ?? null;
+  const selectedTeacher = teachers.find((teacher) => teacher.id === selectedTeacherId) ?? null;
+  const teacherClasses = classes.filter((classroom) => (
+    selectedTeacherId === "unassigned"
+      ? classroom.teacherId === null
+      : selectedTeacherId
+        ? classroom.teacherId === selectedTeacherId
+        : true
+  ));
+  const selectedMakeupLeaveRequest = makeupLeaveRequests.find(({ id }) => id === makeupLeaveRequestId);
+  const minimumMakeupDate = getMinimumMakeupDate(today, selectedMakeupLeaveRequest?.date);
+
+  const getDashboardHref = useCallback((next: Partial<{
+    teacherId: string;
+    classId: string;
+    sessionId: string;
+    date: string;
+  }> = {}) => {
+    const params = new URLSearchParams();
+    const teacherId = next.teacherId ?? filters.teacherId;
+    const classId = next.classId ?? filters.classId;
+    const sessionId = next.sessionId ?? "";
+    const date = next.date ?? filters.date;
+    if (teacherId) params.set("teacherId", teacherId);
+    if (classId) params.set("classId", classId);
+    if (sessionId) params.set("sessionId", sessionId);
+    params.set("date", date);
+    return `/admin/attendance?${params.toString()}`;
+  }, [filters.classId, filters.date, filters.teacherId]);
+
+  useModalScrollLock(Boolean(selectedSession));
+  useEffect(() => {
+    if (!selectedSession) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") navigate(getDashboardHref({ sessionId: "" }));
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [getDashboardHref, navigate, selectedSession]);
+
+  useEffect(() => {
+    const result = createFetcher.data;
+    if (
+      createFetcher.state === "idle"
+      && result?.success
+      && result.intent === "create-session"
+      && "classId" in result
+      && "teacherId" in result
+      && "sessionId" in result
+      && "date" in result
+      && typeof result.classId === "string"
+      && typeof result.teacherId === "string"
+      && typeof result.sessionId === "string"
+      && typeof result.date === "string"
+    ) {
+      setShowCreateForm(false);
+      navigate(getDashboardHref({
+        teacherId: result.teacherId,
+        classId: result.classId,
+        sessionId: result.sessionId,
+        date: result.date,
+      }));
+    }
+  }, [createFetcher.data, createFetcher.state, getDashboardHref, navigate]);
+
+  useEffect(() => {
+    const result = makeupFetcher.data;
+    if (
+      makeupFetcher.state === "idle"
+      && result?.success
+      && result.intent === "create-makeup-session"
+      && "classId" in result
+      && "teacherId" in result
+      && "sessionId" in result
+      && "date" in result
+      && typeof result.classId === "string"
+      && typeof result.teacherId === "string"
+      && typeof result.sessionId === "string"
+      && typeof result.date === "string"
+    ) {
+      toast.success("Đã tạo buổi học bù.");
+      setShowMakeupModal(false);
+      setMakeupLeaveRequestId("");
+      navigate(getDashboardHref({
+        teacherId: result.teacherId,
+        classId: result.classId,
+        sessionId: result.sessionId,
+        date: result.date,
+      }));
+    }
+  }, [getDashboardHref, makeupFetcher.data, makeupFetcher.state, navigate]);
+
+  const attendanceRateDenominator = classAttendanceSummary
+    ? classAttendanceSummary.present + classAttendanceSummary.late + classAttendanceSummary.absent
+    : 0;
+  const attendanceRate = attendanceRateDenominator > 0 && classAttendanceSummary
+    ? Math.round(((classAttendanceSummary.present + classAttendanceSummary.late) / attendanceRateDenominator) * 100)
+    : null;
+  const visibleSessions = classSessionHistory.filter((session) => (
+    normalizeSearchText([
+      session.title,
+      session.lesson,
+      formatAttendanceDate(session.date),
+      session.scheduleStartTime ?? "",
+      session.scheduleEndTime ?? "",
+    ].join(" ")).includes(normalizeSearchText(sessionSearch))
+  ));
+
+  const closeSessionDetails = () => navigate(getDashboardHref({ sessionId: "" }));
+
+  return (
+    <AppShell user={user} attendanceLayout>
+      <div className="min-h-screen bg-background text-foreground animate-fade-in">
+        <header className="sticky top-0 z-30 border-b border-border/70 bg-background/95 backdrop-blur">
+          <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between gap-4 px-4 pr-14 sm:px-6 sm:pr-16">
+            <nav aria-label="Đường dẫn" className="flex min-w-0 items-center gap-1.5 truncate text-xs text-muted-foreground">
+              <span className="hidden sm:inline">Trang quản trị</span>
+              <span className="hidden sm:inline" aria-hidden="true">/</span>
+              <span className="hidden md:inline">Quản lý lớp học</span>
+              <span className="hidden md:inline" aria-hidden="true">/</span>
+              <span className="truncate font-semibold text-foreground">Buổi học &amp; Điểm danh lớp</span>
+            </nav>
+          </div>
+        </header>
+
+        <main className="mx-auto w-full max-w-[1280px] space-y-5 px-4 py-6 sm:px-6">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold leading-8 tracking-tight text-foreground">Buổi học &amp; Điểm danh lớp</h1>
+            <p className="mt-1 max-w-3xl text-[13px] text-muted-foreground">
+              Chọn giáo viên và lớp để quản lý toàn bộ buổi học (thêm, sửa, xóa buổi) và chấm điểm danh từng buổi.
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-[38px] rounded-lg bg-card px-3.5 text-[13px] font-medium"
+              onClick={() => setShowSummary(true)}
+              disabled={!selectedClass || !classAttendanceSummary}
+            >
+              <Users aria-hidden="true" className="mr-2 h-4 w-4 text-muted-foreground" />
+              Tổng chuyên cần lớp
+            </Button>
+            {makeupLeaveRequests.length > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-[38px] rounded-lg bg-card px-3.5 text-[13px] font-medium"
+                onClick={() => setShowMakeupModal(true)}
+              >
+                <CalendarDays aria-hidden="true" className="mr-2 h-4 w-4" />
+                Tạo buổi bù
+              </Button>
+            )}
+            <Button
+              type="button"
+              className="h-[38px] rounded-lg px-4 text-[13px] font-medium"
+              onClick={() => setShowCreateForm(true)}
+              disabled={!selectedClass || selectedClass.isCompleted}
+            >
+              <Plus aria-hidden="true" className="mr-2 h-4 w-4" />
+              Thêm buổi học
+            </Button>
+          </div>
+        </header>
+
+        <section aria-label="Chỉ số chuyên cần của lớp" className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="text-xs font-medium text-muted-foreground">Tổng buổi của lớp</div>
+            <p className="mt-1 text-[22px] font-bold tabular-nums text-foreground">{classSessionHistory.length}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="text-xs font-medium text-muted-foreground">Sĩ số lớp</div>
+            <p className="mt-1 text-[22px] font-bold tabular-nums text-foreground">{classAttendanceSummary?.studentCount ?? 0}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="text-xs font-medium text-muted-foreground">Tỷ lệ chuyên cần lớp</div>
+            <p className="mt-1 text-[22px] font-bold tabular-nums text-success">
+              {attendanceRate === null ? "—" : `${attendanceRate}%`}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => document.getElementById("class-attendance-alerts")?.scrollIntoView({ behavior: "smooth", block: "center" })}
+            disabled={!selectedClass?.consecutiveAbsenceAlerts.length}
+            className="group rounded-xl border border-border bg-card p-4 text-left transition hover:border-destructive/40 disabled:cursor-default"
+          >
+            <span className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-muted-foreground transition group-hover:text-destructive">Vắng 3 buổi liên tiếp</span>
+              <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${selectedClass?.consecutiveAbsenceAlerts.length ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"}`}>
+                {selectedClass?.consecutiveAbsenceAlerts.length ? "Cảnh báo" : "Theo dõi"}
+              </span>
+            </span>
+            <p className={`mt-1 text-[22px] font-bold tabular-nums ${selectedClass?.consecutiveAbsenceAlerts.length ? "text-destructive" : "text-foreground"}`}>
+              {selectedClass?.consecutiveAbsenceAlerts.length ?? 0}
+            </p>
+          </button>
+        </section>
+
+        <section aria-label="Bộ lọc giáo viên và lớp học" className="rounded-xl border border-border bg-card p-4">
+          <div className="grid items-end gap-3.5 md:grid-cols-12">
+            <div className="md:col-span-4">
+              <Label htmlFor="attendance-teacher-select" className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                1. Chọn giáo viên
+              </Label>
+              <select
+                id="attendance-teacher-select"
+                value={selectedTeacherId}
+                onChange={(event) => {
+                  const teacherId = event.currentTarget.value;
+                  const matchingClasses = classes.filter((classroom) => (
+                    teacherId === "unassigned"
+                      ? classroom.teacherId === null
+                      : classroom.teacherId === teacherId
+                  ));
+                  const nextClass = matchingClasses.find((classroom) => !classroom.isCompleted) ?? matchingClasses[0];
+                  navigate(getDashboardHref({
+                    teacherId,
+                    classId: nextClass?.id ?? "",
+                    sessionId: "",
+                  }));
+                }}
+                className="h-[38px] w-full rounded-lg border border-input bg-background px-3 text-[13px] font-semibold text-foreground shadow-none outline-none transition focus-visible:border-ring focus-visible:ring-0"
+              >
+                {!selectedTeacherId && <option value="">Tất cả giáo viên</option>}
+                {teachers.map((teacher) => (
+                  <option key={teacher.id} value={teacher.id}>
+                    {teacher.name} ({classes.filter((classroom) => classroom.teacherId === teacher.id).length} lớp)
+                  </option>
+                ))}
+                {classes.some((classroom) => classroom.teacherId === null) && (
+                  <option value="unassigned">
+                    Chưa phân công ({classes.filter((classroom) => classroom.teacherId === null).length} lớp)
+                  </option>
+                )}
+              </select>
+            </div>
+
+            <div className="md:col-span-5">
+              <Label htmlFor="attendance-class-select" className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                2. Chọn lớp thuộc giáo viên
+              </Label>
+              <select
+                id="attendance-class-select"
+                value={selectedClass?.id ?? ""}
+                onChange={(event) => {
+                  const classroom = classes.find(({ id }) => id === event.currentTarget.value);
+                  navigate(getDashboardHref({
+                    teacherId: classroom?.teacherId ?? "unassigned",
+                    classId: classroom?.id ?? "",
+                    sessionId: "",
+                  }));
+                }}
+                className="h-[38px] w-full rounded-lg border border-input bg-background px-3 text-[13px] font-semibold text-foreground shadow-none outline-none transition focus-visible:border-ring focus-visible:ring-0"
+                disabled={teacherClasses.length === 0}
+              >
+                <option value="" disabled>{teacherClasses.length ? "Chọn lớp" : "Giáo viên chưa có lớp"}</option>
+                {teacherClasses.map((classroom) => (
+                  <option key={classroom.id} value={classroom.id}>
+                    {classroom.name}{classroom.isCompleted ? " · Đã kết thúc" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="md:col-span-3">
+              <Label htmlFor="attendance-session-search" className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Tìm kiếm buổi học
+              </Label>
+              <Input
+                id="attendance-session-search"
+                value={sessionSearch}
+                maxLength={100}
+                onChange={(event) => setSessionSearch(event.currentTarget.value)}
+                placeholder="Tìm buổi, ngày hoặc bài..."
+                className="h-[38px] rounded-lg border-input bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-0"
+              />
+            </div>
+          </div>
+          {selectedClass && (
+            <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-3 text-xs text-muted-foreground">
+              <p>
+                <strong className="font-semibold text-foreground">{selectedClass.name}</strong>
+                <span className="mx-2" aria-hidden="true">·</span>
+                Trình độ: <strong className="font-medium text-foreground">{selectedClass.course}</strong>
+                <span className="mx-2" aria-hidden="true">·</span>
+                Giáo viên: <strong className="font-medium text-foreground">{selectedTeacher?.name ?? "Chưa phân công"}</strong>
+              </p>
+              <p>
+                {classAttendanceSummary?.studentCount ?? 0} học viên
+                <span className="mx-2" aria-hidden="true">·</span>
+                {classSessionHistory.length} buổi học
+                {selectedClass.isCompleted && <Badge className="ml-2" variant="outline">Đã kết thúc</Badge>}
+              </p>
+            </div>
+          )}
+        </section>
+
+        {filterError && (
+          <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            {filterError}
+          </p>
+        )}
+
+        {selectedClass?.consecutiveAbsenceAlerts.length ? (
+          <section id="class-attendance-alerts" aria-label="Cảnh báo vắng liên tiếp">
+            <ConsecutiveAbsenceNotice
+              alerts={selectedClass.consecutiveAbsenceAlerts}
+              dashboard
+              onOpenLatestSession={(alert) => {
+                const alertSessionDate = alert.sessions.find(({ id }) => id === alert.sessionId)?.date;
+                navigate(getDashboardHref({
+                  teacherId: selectedClass.teacherId ?? "unassigned",
+                  classId: selectedClass.id,
+                  sessionId: alert.sessionId,
+                  date: alertSessionDate ?? filters.date,
+                }));
+              }}
+            />
+          </section>
+        ) : null}
+
+        <section aria-label="Danh sách buổi học của lớp" className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+          <div className="flex flex-col gap-3 border-b border-border/70 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div>
+              <h2 className="text-base font-bold text-foreground">Danh sách buổi học của lớp</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Bấm "Điểm danh" trên từng buổi để chấm/sửa chuyên cần, hoặc "Sửa buổi / Xóa" để quản lý buổi học.
+              </p>
+            </div>
+            {selectedClass && (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-[34px] rounded-lg border-primary bg-card px-3 text-xs font-semibold text-primary hover:bg-primary/5"
+                onClick={() => setShowCreateForm(true)}
+                disabled={selectedClass.isCompleted}
+              >
+                + Thêm buổi học mới
+              </Button>
+            )}
+          </div>
+
+          {!selectedClass ? (
+            <p className="p-8 text-center text-sm text-muted-foreground">Chọn giáo viên có lớp để xem dữ liệu điểm danh.</p>
+          ) : classSessionHistory.length === 0 ? (
+            <div className="p-8 text-center">
+              <CalendarDays aria-hidden="true" className="mx-auto h-8 w-8 text-muted-foreground" />
+              <p className="mt-3 text-sm font-semibold text-foreground">Lớp chưa có buổi học</p>
+              <p className="mt-1 text-sm text-muted-foreground">Tạo buổi học mới để bắt đầu theo dõi điểm danh.</p>
+            </div>
+          ) : visibleSessions.length === 0 ? (
+            <p className="p-8 text-center text-sm text-muted-foreground">Không có buổi học nào khớp với từ khóa tìm kiếm.</p>
+          ) : (
+            <div className="divide-y divide-border/70">
+              {visibleSessions.map((session) => {
+                const markedCount = session.present + session.late + session.absent;
+                const statusLabel = session.recordCount === 0
+                  ? "Chưa có học viên"
+                  : session.unmarked === 0
+                    ? "Đã ghi nhận"
+                    : markedCount === 0
+                      ? "Chưa điểm danh"
+                      : "Còn lượt chưa chấm";
+                const statusClassName = session.recordCount === 0
+                  ? "border-border bg-muted/40 text-muted-foreground"
+                  : session.unmarked > 0
+                    ? "border-warning/30 bg-warning/10 text-warning"
+                    : "border-success/30 bg-success/10 text-success";
+                const detailHref = getDashboardHref({
+                  teacherId: selectedClass.teacherId ?? "unassigned",
+                  classId: selectedClass.id,
+                  sessionId: session.id,
+                  date: session.date,
+                });
+                return (
+                  <article key={session.id} className="flex flex-col gap-4 p-4 transition-colors hover:bg-muted/20 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-sm font-bold text-foreground">{session.title}</h3>
+                        <span className="text-xs font-medium text-muted-foreground">
+                          • {formatAttendanceDate(session.date)}
+                          {(session.scheduleStartTime || session.scheduleEndTime) && (
+                            <> ({session.scheduleStartTime ?? "—"} - {session.scheduleEndTime ?? "—"})</>
+                          )}
+                        </span>
+                        <span className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${statusClassName}`}>{statusLabel}</span>
+                      </div>
+                      <p className="text-[13px] font-medium text-foreground">
+                        {session.lesson || "Chưa gắn bài học"}
+                      </p>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 pt-0.5 text-[11px] text-muted-foreground">
+                        <span>Có mặt: <strong className="font-semibold text-success">{session.present}</strong></span>
+                        <span>Đi muộn: <strong className="font-semibold text-warning">{session.late}</strong></span>
+                        <span>Vắng: <strong className="font-semibold text-destructive">{session.absent}</strong></span>
+                        {session.unmarked > 0 && (
+                          <span>Chưa điểm danh: <strong className="font-semibold text-foreground">{session.unmarked}</strong></span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap items-center gap-2">
+                      <Button asChild size="sm" className="h-8 rounded-lg px-3 text-xs font-medium">
+                        <Link to={detailHref}>
+                          Điểm danh
+                        </Link>
+                      </Button>
+                      <Button asChild size="sm" variant="outline" className="h-8 rounded-lg bg-card px-3 text-xs font-medium">
+                        <Link to={detailHref}>Sửa buổi</Link>
+                      </Button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        {showCreateForm && selectedClass && (
+          <Overlay onClose={() => setShowCreateForm(false)} closeOnEscape closeOnBackdrop className="max-w-[540px]">
+            <section role="dialog" aria-modal="true" aria-labelledby="create-attendance-session-title" className="space-y-5">
+              <header className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 id="create-attendance-session-title" className="text-lg font-bold">Thêm buổi học mới</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">Tạo buổi học cho {selectedClass.name}.</p>
+                </div>
+                <Button type="button" variant="ghost" size="icon" aria-label="Đóng" onClick={() => setShowCreateForm(false)}>
+                  <X aria-hidden="true" className="h-4 w-4" />
+                </Button>
+              </header>
+              <createFetcher.Form method="post" className="space-y-4">
+                <input type="hidden" name="intent" value="create-session" />
+                <input type="hidden" name="classId" value={selectedClass.id} />
+                <div className="rounded-lg border bg-muted/30 px-3 py-2.5 text-sm">
+                  <span className="text-muted-foreground">Lớp học: </span>
+                  <strong className="font-semibold">{selectedClass.name}</strong>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="new-session-title">Tên buổi</Label>
+                  <Input id="new-session-title" name="title" maxLength={80} placeholder="Ví dụ: Buổi 5" required disabled={createFetcher.state !== "idle"} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="new-session-lesson">Bài học liên kết</Label>
+                  <Input id="new-session-lesson" name="lesson" maxLength={120} placeholder="Tên bài hoặc nội dung học" disabled={createFetcher.state !== "idle"} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="new-session-date">Ngày học</Label>
+                  <Input id="new-session-date" name="date" type="date" defaultValue={filters.date} required disabled={createFetcher.state !== "idle"} />
+                </div>
+                {createFetcher.data?.success === false && createFetcher.data.intent === "create-session" && (
+                  <p role="alert" className="text-sm text-destructive">{createFetcher.data.error}</p>
+                )}
+                <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+                  <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>Hủy</Button>
+                  <Button type="submit" disabled={createFetcher.state !== "idle"}>
+                    {createFetcher.state !== "idle" ? "Đang tạo..." : "Lưu buổi học"}
+                  </Button>
+                </div>
+              </createFetcher.Form>
+            </section>
+          </Overlay>
+        )}
+
+        {showMakeupModal && (
+          <Overlay onClose={() => setShowMakeupModal(false)} closeOnEscape closeOnBackdrop className="max-w-xl">
+            <section role="dialog" aria-modal="true" aria-labelledby="create-makeup-heading" className="space-y-5">
+              <header className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 id="create-makeup-heading" className="text-lg font-semibold">Tạo buổi bù</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Chọn ca nghỉ đã được duyệt và ngày học bù. Buổi bù dùng khung giờ của ca nghỉ.
+                  </p>
+                </div>
+                <Button type="button" variant="ghost" size="icon" aria-label="Đóng" onClick={() => setShowMakeupModal(false)}>
+                  <X aria-hidden="true" className="h-4 w-4" />
+                </Button>
+              </header>
+              {makeupLeaveRequests.length === 0 ? (
+                <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                  Không có ca nghỉ nào đã được duyệt và chưa xếp buổi bù.
+                </p>
+              ) : (
+                <makeupFetcher.Form method="post" className="space-y-4">
+                  <input type="hidden" name="intent" value="create-makeup-session" />
+                  <div className="space-y-1.5">
+                    <Label htmlFor="makeup-leave-request">Học bù cho buổi</Label>
+                    <select
+                      id="makeup-leave-request"
+                      name="leaveRequestId"
+                      value={makeupLeaveRequestId}
+                      required
+                      disabled={makeupFetcher.state !== "idle"}
+                      onChange={(event) => {
+                        const nextId = event.currentTarget.value;
+                        setMakeupLeaveRequestId(nextId);
+                        const leaveRequest = makeupLeaveRequests.find(({ id }) => id === nextId);
+                        setMakeupDate(getMinimumMakeupDate(today, leaveRequest?.date));
+                      }}
+                      className={SELECT_CLASS}
+                    >
+                      <option value="" disabled>Chọn buổi nghỉ đã duyệt</option>
+                      {makeupLeaveRequests.map((leaveRequest) => (
+                        <option key={leaveRequest.id} value={leaveRequest.id}>
+                          {leaveRequest.className} · {formatAttendanceDate(leaveRequest.date)} · {leaveRequest.startTime}–{leaveRequest.endTime} · {leaveRequest.teacher}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {selectedMakeupLeaveRequest && (
+                    <p className="rounded-md bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+                      Lớp {selectedMakeupLeaveRequest.className} · ca {selectedMakeupLeaveRequest.startTime}–{selectedMakeupLeaveRequest.endTime}
+                    </p>
+                  )}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="makeup-session-date">Ngày học</Label>
+                    <Input
+                      id="makeup-session-date"
+                      name="date"
+                      type="date"
+                      min={minimumMakeupDate}
+                      value={makeupDate}
+                      onChange={(event) => setMakeupDate(event.currentTarget.value)}
+                      required
+                      disabled={makeupFetcher.state !== "idle"}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="makeup-session-lesson">Bài học trong buổi</Label>
+                    <Input id="makeup-session-lesson" name="lesson" maxLength={120} placeholder="Tên bài hoặc nội dung học" disabled={makeupFetcher.state !== "idle"} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="makeup-session-recording">Link ghi hình / bản ghi</Label>
+                    <Input id="makeup-session-recording" name="recordingUrl" type="url" inputMode="url" maxLength={2048} placeholder="https://..." disabled={makeupFetcher.state !== "idle"} />
+                  </div>
+                  {makeupFetcher.data?.success === false && makeupFetcher.data.intent === "create-makeup-session" && (
+                    <p role="alert" className="text-sm text-destructive">{makeupFetcher.data.error}</p>
+                  )}
+                  <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+                    <Button type="button" variant="outline" onClick={() => setShowMakeupModal(false)}>Hủy</Button>
+                    <Button type="submit" disabled={!makeupLeaveRequestId || makeupFetcher.state !== "idle"}>
+                      {makeupFetcher.state !== "idle" ? "Đang tạo..." : "Tạo buổi bù"}
+                    </Button>
+                  </div>
+                </makeupFetcher.Form>
+              )}
+            </section>
+          </Overlay>
+        )}
+
+        {showSummary && selectedClass && classAttendanceSummary && (
+          <Overlay onClose={() => setShowSummary(false)} closeOnEscape closeOnBackdrop className="max-w-6xl">
+            <section role="dialog" aria-modal="true" aria-labelledby="attendance-summary-dialog-title">
+              <header className="mb-5 flex items-start justify-between gap-3">
+                <div>
+                  <h2 id="attendance-summary-dialog-title" className="text-lg font-bold">Tổng chuyên cần lớp</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">{selectedClass.name} · {selectedClass.course}</p>
+                </div>
+                <Button type="button" variant="ghost" size="icon" aria-label="Đóng tổng hợp chuyên cần" onClick={() => setShowSummary(false)}>
+                  <X aria-hidden="true" className="h-4 w-4" />
+                </Button>
+              </header>
+              <AttendanceClassTotalSummary
+                key={selectedClass.id}
+                classId={selectedClass.id}
+                className={selectedClass.name}
+                summary={classAttendanceSummary}
+              />
+            </section>
+          </Overlay>
+        )}
+
+        {selectedSession && (
+          <div className="fixed inset-0 !mt-0 z-50" role="presentation">
+            <button
+              type="button"
+              aria-label="Đóng điểm danh buổi học"
+              className="absolute inset-0 bg-black/45"
+              onClick={closeSessionDetails}
+            />
+            <aside
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="attendance-session-drawer-title"
+              className="absolute inset-y-0 right-0 flex h-dvh w-full max-w-5xl flex-col border-l bg-background shadow-2xl"
+            >
+              <header className="flex shrink-0 items-center gap-3 border-b bg-background px-4 py-4 sm:px-6">
+                <Button type="button" variant="outline" size="sm" onClick={closeSessionDetails} className="shrink-0">
+                  <ArrowLeft aria-hidden="true" className="mr-2 h-4 w-4" />
+                  Danh sách buổi
+                </Button>
+                <div className="min-w-0 flex-1">
+                  <h2 id="attendance-session-drawer-title" className="truncate text-base font-bold">
+                    {selectedSession.title} · {formatAttendanceDate(selectedSession.date)}
+                  </h2>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {selectedSession.classroom.name} · {selectedSession.classroom.teacher}
+                  </p>
+                </div>
+                <Button type="button" variant="ghost" size="icon" aria-label="Đóng cửa sổ điểm danh" onClick={closeSessionDetails}>
+                  <X aria-hidden="true" className="h-4 w-4" />
+                </Button>
+              </header>
+              <section className="custom-scrollbar min-h-0 flex-1 overflow-y-auto bg-muted/20 p-3 sm:p-5">
+                <AttendanceSessionDetails
+                  session={selectedSession}
+                  status={filters.status}
+                  query={filters.query}
+                />
+              </section>
+            </aside>
+          </div>
+        )}
+        </main>
+      </div>
+    </AppShell>
+  );
+}
+
+export default function AdminAttendance() {
+  const location = useLocation();
+  const isLegacyView = new URLSearchParams(location.search).get("legacy") === "1";
+  return isLegacyView ? <LegacyAdminAttendance /> : <AdminAttendanceDashboard />;
 }

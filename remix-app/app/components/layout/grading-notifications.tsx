@@ -28,7 +28,7 @@ interface MarkNotificationResult {
   error?: string;
 }
 
-export function GradingNotifications() {
+export function GradingNotifications({ attendanceLayout = false }: { attendanceLayout?: boolean }) {
   const navigate = useNavigate();
   const listFetcher = useFetcher<NotificationList>();
   const markFetcher = useFetcher<MarkNotificationResult>();
@@ -159,7 +159,7 @@ export function GradingNotifications() {
   const unreadCount = listFetcher.data?.unreadCount ?? 0;
 
   return (
-    <div className="fixed right-4 top-3 z-50">
+    <div className={`fixed right-4 z-50 ${attendanceLayout ? "top-[68px] lg:top-3" : "top-3"}`}>
       <Button
         type="button"
         variant="outline"
@@ -168,7 +168,7 @@ export function GradingNotifications() {
         aria-expanded={isOpen}
         aria-controls="grading-notifications-panel"
         onClick={() => setIsOpen((open) => !open)}
-        className="relative h-11 w-11 rounded-lg bg-background shadow-sm"
+        className={`relative rounded-lg shadow-sm ${attendanceLayout ? "h-9 w-9 border-gray-200 bg-white text-gray-700 hover:bg-gray-50" : "h-11 w-11 bg-background"}`}
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (

@@ -145,7 +145,7 @@ export function AppSidebar({ user }: { user: SessionUser }) {
 
   const SidebarContent = () => (
     <div className="flex h-full flex-col bg-sidebar-gradient text-sidebar-foreground">
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
+      <div className="flex items-center gap-3 border-b border-sidebar-border px-6 py-5">
         <img
           src="/logo-duong-huu.webp"
           alt=""
