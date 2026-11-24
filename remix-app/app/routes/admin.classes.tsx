@@ -3,7 +3,6 @@ import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
 import { useLoaderData, useFetcher } from "react-router";
 import { requireRole } from "~/lib/session.server";
 import { getVietnameseDateString } from "~/lib/schedule-utils";
-import { syncScheduledAttendanceSessionsForClass } from "~/lib/scheduled-attendance.server";
 import { getAllClasses } from "~/lib/db.server";
 import { prisma } from "~/lib/prisma.server";
 import { AppShell } from "~/components/layout/app-shell";
@@ -166,7 +165,6 @@ export async function action({ request }: ActionFunctionArgs) {
         },
         select: { id: true },
       });
-      await syncScheduledAttendanceSessionsForClass(classroom.id);
     } else {
       const classId = String(form.get("classId"));
       const existingClass = await prisma.class.findUnique({
@@ -196,7 +194,6 @@ export async function action({ request }: ActionFunctionArgs) {
           finalReviewSession,
         },
       });
-      await syncScheduledAttendanceSessionsForClass(classId);
     }
     return { success: true };
   }

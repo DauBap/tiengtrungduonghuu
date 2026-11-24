@@ -8,7 +8,6 @@ export default [
   route("api/tts", "routes/api.tts.ts"),
   route("api/notifications", "routes/api.notifications.ts"),
   route("api/presence", "routes/api.presence.ts"),
-  route("api/cron/attendance-sessions", "routes/api.cron.attendance-sessions.ts"),
   route("api/student/review-count", "routes/api.student.review-count.ts"),
   route("api/student/shenbi-attempts", "routes/api.student.shenbi-attempts.ts"),
   route("api/pronunciation-recordings/:assessmentId", "routes/api.pronunciation-recordings.$assessmentId.ts"),
