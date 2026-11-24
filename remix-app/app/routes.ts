@@ -77,6 +77,7 @@ export default [
 
   // Teacher
   route("teacher", "routes/teacher._index.tsx"),
+  route("teacher/progress", "routes/teacher.progress.tsx"),
   route("teacher/classes/search", "routes/teacher.classes.search.ts"),
   route("teacher/classes", "routes/teacher.classes.tsx"),
   route("teacher/content-corrections", "routes/teacher.content-corrections.tsx"),

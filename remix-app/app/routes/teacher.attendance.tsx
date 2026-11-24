@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import { useFetcher, useLoaderData } from "react-router";
+import { useFetcher, useLoaderData, useLocation } from "react-router";
 import { toast } from "sonner";
 import {
   BookOpen,
@@ -999,11 +999,20 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function TeacherAttendance() {
-  const { user, classes } = useLoaderData<typeof loader>();
+  const { user, classes, today: loaderToday } = useLoaderData<typeof loader>();
+  const location = useLocation();
   const saveAttendanceFetcher = useFetcher<typeof action>();
   const reviewFetcher = useFetcher<typeof action>();
   const makeupFetcher = useFetcher<typeof action>();
-  const firstClassId = classes[0]?.id ?? "";
+  const attendanceSearch = new URLSearchParams(location.search);
+  const requestedDate = parseAttendanceDate(attendanceSearch.get("date") ?? "")?.toISOString().slice(0, 10)
+    ?? loaderToday;
+  const requestedClassId = attendanceSearch.get("classId");
+  const initialClass = classes.find((item) => item.id === requestedClassId)
+    ?? classes.find((item) => item.sessions.some((session) => session.date === requestedDate && session.date <= loaderToday))
+    ?? classes[0]
+    ?? null;
+  const firstClassId = initialClass?.id ?? "";
   const [classId, setClassId] = useState(firstClassId);
   const [sessionsByClass, setSessionsByClass] = useState<Record<string, AttendanceSession[]>>(() =>
     Object.fromEntries(classes.map((classroom) => [classroom.id, classroom.sessions]))
@@ -1018,8 +1027,9 @@ export default function TeacherAttendance() {
   const today = getVietnameseDateString(currentTime);
   const lastDisplayedDate = useRef(today);
   const [activeTabId, setActiveTabId] = useState(
-    classes[0]?.sessions.find((session) => session.date === today)?.id
-      ?? classes[0]?.sessions.find((session) => session.date <= today)?.id
+    initialClass?.sessions.find((session) => session.date === requestedDate && session.date <= loaderToday)?.id
+      ?? initialClass?.sessions.find((session) => session.date === loaderToday)?.id
+      ?? initialClass?.sessions.find((session) => session.date <= loaderToday)?.id
       ?? TOTAL_TAB_ID,
   );
   const [filter, setFilter] = useState<AttendanceFilter>("all");

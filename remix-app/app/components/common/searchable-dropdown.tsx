@@ -161,8 +161,8 @@ export function SearchableDropdown({
                   onChange(option.value);
                   closeDropdown();
                 }}
-                className={`flex min-h-9 w-full items-center justify-between gap-3 rounded-sm px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  index === activeIndex ? "bg-accent text-accent-foreground" : "hover:bg-muted"
+                className={`flex min-h-9 w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                  index === activeIndex ? "bg-primary/10 font-medium text-primary" : "hover:bg-muted"
                 }`}
               >
                 <span className="min-w-0 truncate">{option.label}</span>

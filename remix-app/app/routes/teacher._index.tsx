@@ -3,16 +3,18 @@ import { Link, useFetcher, useLoaderData, useLocation, useNavigate, useRevalidat
 import { useEffect, useRef, useState } from "react";
 import { requireRole } from "~/lib/session.server";
 import { computeTrackedCourseProgress, getTeacherCourses } from "~/lib/db.server";
-import { formatSchedule, formatNextClass, getNextClassTime } from "~/lib/schedule-utils";
+import { formatSchedule, formatNextClass, getNextClassTime, getVietnameseDateString } from "~/lib/schedule-utils";
 import { AppShell } from "~/components/layout/app-shell";
 import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
-import { StatCard } from "~/components/common/stat-card";
+import { SearchableDropdown } from "~/components/common/searchable-dropdown";
 import { Card, CardContent } from "~/components/ui/card";
 import {
   AlertCircle,
+  ArrowLeft,
   ArrowUpRight,
   BookOpen,
   Calendar,
+  CalendarDays,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -22,6 +24,7 @@ import {
   Layers,
   Loader2,
   MessageCircle,
+  Plus,
   TrendingUp,
   TriangleAlert,
   Trophy,
@@ -1548,6 +1551,7 @@ function formatLeaderboardStudyTime(totalSeconds: number) {
 export default function TeacherIndex() {
   const { user, myCourses, myClasses, classSummaries, classLeaderboards, pendingReviews, totalLessons, totalStudents, initialGradeAttemptId, initialGrammarAttempt, initialWorkbookAttemptId, initialWorkbookTargetUrl, initialTranslationSubmissionId, initialTranslationSubmission, translationSubmissions } = useLoaderData<typeof loader>();
   const location = useLocation();
+  const isProgressRoute = location.pathname === "/teacher/progress";
   const navigate = useNavigate();
   const gradingFetcher = useFetcher<GrammarAttemptData & { success?: boolean }>();
   const reviewProgressFetcher = useFetcher<typeof courseItemProgressLoader>();
@@ -1563,10 +1567,15 @@ export default function TeacherIndex() {
     nextSubmissionId?: string | null;
   }>();
   const revalidator = useRevalidator();
-  const [selectedClassId, setSelectedClassId] = useState(classSummaries[0]?.id ?? "");
+  const requestedClassId = new URLSearchParams(location.search).get("classId");
+  const initialSelectedClassId = classSummaries.find((cls) => cls.id === requestedClassId)?.id
+    ?? classSummaries[0]?.id
+    ?? "";
+  const [selectedClassId, setSelectedClassId] = useState(initialSelectedClassId);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [isReminderDetailsOpen, setIsReminderDetailsOpen] = useState(false);
   const [reminderLessonFilter, setReminderLessonFilter] = useState("all");
+  const [reminderSearch, setReminderSearch] = useState("");
   const [expandedReminderStudentIds, setExpandedReminderStudentIds] = useState<Set<string>>(() => new Set());
   const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
   const [selectedMockExamId, setSelectedMockExamId] = useState<string | null>(null);
@@ -1590,6 +1599,7 @@ export default function TeacherIndex() {
   const [selectedTranslationSubmissionId, setSelectedTranslationSubmissionId] = useState<string | null>(initialTranslationSubmission?.id ?? null);
   const [translationQuestionGrades, setTranslationQuestionGrades] = useState<Record<string, boolean | null>>({});
   const [translationQuestionFilter, setTranslationQuestionFilter] = useState<"all" | "correct" | "incorrect" | "ungraded">("all");
+  const [grammarQuestionFilter, setGrammarQuestionFilter] = useState<"all" | "correct" | "incorrect">("all");
   const [progressStatusFilter, setProgressStatusFilter] = useState<ProgressStatusFilter>("all");
   const translationGradingContentRef = useRef<HTMLDivElement>(null);
   const leaderboardDialogRef = useRef<HTMLElement>(null);
@@ -1598,6 +1608,7 @@ export default function TeacherIndex() {
   const [gradingQueueIndex, setGradingQueueIndex] = useState<number | null>(null);
   const [gradingComplete, setGradingComplete] = useState(false);
   const [grades, setGrades] = useState<TeacherGrammarGrade[]>([]);
+  const [expandedGrammarFeedbackIds, setExpandedGrammarFeedbackIds] = useState<Set<string>>(() => new Set());
   const [initializedGradeAttemptId, setInitializedGradeAttemptId] = useState<string | null>(null);
   const handledGradeAttemptId = useRef<string | null>(null);
   const handledReviewGradingAttemptId = useRef<string | null>(null);
@@ -1997,7 +2008,16 @@ export default function TeacherIndex() {
       return nextClassTime ? [{ cls, nextClassTime }] : [];
     })
     .sort((a, b) => a.nextClassTime.getTime() - b.nextClassTime.getTime())
-    .slice(0, 1);
+    .slice(0, 3);
+  const classesNeedingGrading = classSummaries.filter((cls) =>
+    cls.pendingGrammarAttempts.length > 0 || cls.pendingTranslationSubmissions.length > 0,
+  );
+  const pendingGradingCount = classSummaries.reduce((total, cls) =>
+    total
+    + cls.pendingGrammarAttempts.length
+    + cls.pendingTranslationSubmissions.length
+    + pendingReviews.filter((attempt) => attempt.classId === cls.id).length,
+  0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -2045,11 +2065,19 @@ export default function TeacherIndex() {
       || gradingData.attempt.id !== gradingAttemptId
       || initializedGradeAttemptId === gradingAttemptId
     ) return;
-    setGrades(gradingData.attempt.results.map((result) => ({
+    const initialGrades = gradingData.attempt.results.map((result) => ({
       questionId: result.id,
       correct: result.autoCorrect,
       teacherFeedback: result.teacherFeedback,
-    })));
+    }));
+    setGrades(initialGrades);
+    setExpandedGrammarFeedbackIds((current) => {
+      const next = new Set(current);
+      initialGrades.forEach((grade) => {
+        if (grade.teacherFeedback) next.add(`${gradingAttemptId}:${grade.questionId}`);
+      });
+      return next;
+    });
     setInitializedGradeAttemptId(gradingAttemptId);
   }, [gradingData, gradingAttemptId, gradingFetcher.state, initializedGradeAttemptId]);
 
@@ -2076,6 +2104,7 @@ export default function TeacherIndex() {
     }
 
     setGradingQueueIndex(nextIndex);
+    setGrammarQuestionFilter("all");
     setGrades([]);
     setGradingAttemptId(nextItem.attempt.id);
     gradingFetcher.load(`/teacher/courses/${nextItem.courseId}/lessons/${nextItem.attempt.lessonId}/students/${nextItem.attempt.userId}/grammar-history/attempts/${nextItem.attempt.id}`);
@@ -2120,6 +2149,11 @@ export default function TeacherIndex() {
         const missing = row.missing.filter((item) => String(item.lessonOrder) === reminderLessonFilter);
         return missing.length ? [{ ...row, missing }] : [];
       });
+  const visibleDashboardReminderRows = reminderRows.filter(({ student }) =>
+    (student.student.name ?? student.student.email)
+      .toLocaleLowerCase("vi")
+      .includes(reminderSearch.trim().toLocaleLowerCase("vi")),
+  );
   const reminderMissingCount = reminderRows.reduce((total, row) => total + row.missing.length, 0);
   const allVisibleReminderRowsExpanded = visibleReminderRows.length > 0
     && visibleReminderRows.every(({ student }) => expandedReminderStudentIds.has(student.student.id));
@@ -2148,9 +2182,18 @@ export default function TeacherIndex() {
   const updateGrade = (questionId: string, patch: Partial<TeacherGrammarGrade>) => {
     setGrades((current) => current.map((grade) => grade.questionId === questionId ? { ...grade, ...patch } : grade));
   };
+  const grammarQuestionFilterCounts = {
+    all: gradingData?.attempt.results.length ?? 0,
+    correct: grades.filter((grade) => grade.correct).length,
+    incorrect: grades.filter((grade) => !grade.correct).length,
+  };
+  const visibleGrammarResults = gradingData?.attempt.results
+    .map((result, index) => ({ result, index, grade: grades.find((item) => item.questionId === result.id) }))
+    .filter(({ grade }) => grammarQuestionFilter === "all" || grade?.correct === (grammarQuestionFilter === "correct")) ?? [];
   const openGradingAttempt = (courseId: string, attempt: PendingGrammarAttempt, queueIndex: number) => {
     setGradingQueueIndex(queueIndex);
     setGradingAttemptId(attempt.id);
+    setGrammarQuestionFilter("all");
     setInitializedGradeAttemptId(null);
     setGrades([]);
     gradingFetcher.load(`/teacher/courses/${courseId}/lessons/${attempt.lessonId}/students/${attempt.userId}/grammar-history/attempts/${attempt.id}`);
@@ -2254,141 +2297,351 @@ export default function TeacherIndex() {
 
   return (
     <AppShell user={user}>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Bảng điều khiển giáo viên</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Theo dõi tiến độ lớp học và những việc cần xử lý.</p>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Khóa học của tôi" value={myCourses.length} icon={BookOpen} accent="primary" />
-          <StatCard label="Lớp đang phụ trách" value={myClasses.length} icon={Layers} accent="accent" />
-          <StatCard label="Tổng học viên" value={totalStudents} icon={Users} accent="success" />
-          <StatCard label="Tổng bài học" value={totalLessons} icon={TrendingUp} accent="warning" />
+      <div className="mx-auto w-full max-w-[1280px] space-y-5 pb-28">
+        <div className="flex min-h-10 items-center justify-between gap-4 border-b border-border/70 pb-3">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>Cổng giáo viên</span>
+            <span aria-hidden="true">/</span>
+            <span className="font-semibold text-foreground">{isProgressRoute ? "Tiến độ & Nhắc nhở" : "Bảng điều khiển"}</span>
+            {!isProgressRoute && <span className="hidden text-muted-foreground/50 sm:inline" aria-hidden="true">·</span>}
+            {!isProgressRoute && <span className="hidden sm:inline">
+              {new Intl.DateTimeFormat("vi-VN", {
+                weekday: "long",
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                timeZone: "Asia/Ho_Chi_Minh",
+              }).format(new Date())}
+            </span>}
+          </div>
+          <span className="hidden h-9 w-9 items-center justify-center rounded-lg border bg-card text-muted-foreground sm:inline-flex" aria-hidden="true">
+            <CalendarDays className="h-4 w-4" />
+          </span>
         </div>
 
-        {upcomingClasses.length > 0 && (
-          <Card>
-            <CardContent className="pt-6 sm:pt-6">
-              <div className="mb-4 flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <h2 className="font-semibold">Lịch giảng dạy sắp tới</h2>
-              </div>
-              <div className="space-y-3">
-                {upcomingClasses.map(({ cls }) => (
-                  <div key={cls.id} className="flex items-start gap-3 rounded-lg border p-3">
-                    <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <div className="min-w-0 flex-1">
-                      <div className="mb-1 flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-medium">{cls.name}</p>
-                        <span className="text-xs text-muted-foreground">· HSK{cls.course.hskLevel} · {cls.enrollments.length} học viên</span>
+        {isProgressRoute ? (
+          <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold leading-8 tracking-tight text-foreground">Tiến độ &amp; Nhắc nhở</h1>
+              <p className="mt-1 text-[13px] text-muted-foreground">Theo dõi mức độ hoàn thành bài học và những nội dung học viên cần bổ sung.</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <SearchableDropdown
+                id="progress-class-selector"
+                label="Chọn lớp theo dõi tiến độ"
+                placeholder="Chọn lớp"
+                searchPlaceholder="Tìm lớp học..."
+                options={classSummaries.map((classSummary) => ({
+                  value: classSummary.id,
+                  label: `${classSummary.name} · ${classSummary.course.title}`,
+                }))}
+                value={selectedClass?.id ?? ""}
+                onChange={(value) => {
+                  setSelectedClassId(value);
+                  setSelectedLessonId(null);
+                  setSelectedReviewId(null);
+                  setSelectedMockExamId(null);
+                  setProgressView("overview");
+                  setReminderSearch("");
+                }}
+                className="w-full min-w-0 sm:w-[18rem]"
+                triggerClassName="h-[38px] rounded-lg border-border bg-card text-[13px] font-semibold shadow-sm transition-colors hover:border-primary/40 hover:bg-muted/40 focus-visible:ring-primary/30"
+                contentClassName="min-w-0 rounded-xl border-border/80 p-1.5 shadow-lg"
+              />
+            </div>
+          </header>
+        ) : (
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold leading-8 tracking-tight text-foreground">Bảng điều khiển giáo viên</h1>
+            <p className="mt-1 text-[13px] text-muted-foreground">Theo dõi tiến độ lớp học và những việc cần xử lý.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              to={`/teacher/attendance?date=${getVietnameseDateString()}`}
+              className="inline-flex h-[38px] items-center gap-2 rounded-lg border border-border bg-card px-3.5 text-[13px] font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+            >
+              <ClipboardList className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              Điểm danh hôm nay
+            </Link>
+            <Link
+              to="/teacher/leave-requests"
+              className="inline-flex h-[38px] items-center gap-2 rounded-lg bg-primary px-4 text-[13px] font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Tạo yêu cầu nghỉ
+            </Link>
+          </div>
+        </header>
+        )}
+
+        {isProgressRoute && selectedClass && (
+          <section aria-label="Tổng quan tiến độ lớp" className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs font-medium text-muted-foreground">Sĩ số lớp đang xem</p>
+              <p className="mt-1 text-[22px] font-bold tabular-nums text-foreground">{selectedClass.activityData.length}</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs font-medium text-muted-foreground">Tiến độ trung bình lớp</p>
+              <p className="mt-1 text-[22px] font-bold tabular-nums text-primary">{selectedClass.overallPercent}%</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs font-medium text-muted-foreground">Học viên cần nhắc</p>
+              <p className="mt-1 text-[22px] font-bold tabular-nums text-destructive">
+                {reminderRows.length}/{selectedClass.activityData.length}
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs font-medium text-muted-foreground">Mốc bài đang đối chiếu</p>
+              <p className="mt-1 text-[22px] font-bold text-foreground">{selectedLesson ? `Bài ${selectedLesson.displayOrder}` : "Chưa có bài"}</p>
+            </div>
+          </section>
+        )}
+
+        {!isProgressRoute && (
+        <section aria-label="Thống kê tổng quan giáo viên" className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <Link
+            to="/teacher/courses"
+            className="group rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground">Khóa học của tôi</span>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <BookOpen className="h-4 w-4" aria-hidden="true" />
+              </span>
+            </span>
+            <span className="mt-2 block text-2xl font-bold leading-none tabular-nums text-foreground">{myCourses.length}</span>
+            <span className="mt-1.5 block truncate text-[11px] text-muted-foreground">
+              {myCourses.map((course) => course.title).join(" · ") || "Chưa có khóa học"}
+            </span>
+          </Link>
+          <Link
+            to="/teacher/courses"
+            className="group rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground">Lớp đang phụ trách</span>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+                <Layers className="h-4 w-4" aria-hidden="true" />
+              </span>
+            </span>
+            <span className="mt-2 block text-2xl font-bold leading-none tabular-nums text-foreground">{myClasses.length}</span>
+            <span className="mt-1.5 block text-[11px] text-muted-foreground">Lớp đang giảng dạy</span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => navigate(selectedClass
+              ? `/teacher/progress?classId=${encodeURIComponent(selectedClass.id)}`
+              : "/teacher/progress")}
+            className="group rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground">Tổng học viên</span>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                <Users className="h-4 w-4" aria-hidden="true" />
+              </span>
+            </span>
+            <span className="mt-2 block text-2xl font-bold leading-none tabular-nums text-foreground">{totalStudents}</span>
+            <span className="mt-1.5 block text-[11px] text-muted-foreground">Trên {myClasses.length} lớp phụ trách</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              document.getElementById("myClassesSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="group rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground">Tổng bài học</span>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
+                <TrendingUp className="h-4 w-4" aria-hidden="true" />
+              </span>
+            </span>
+            <span className="mt-2 block text-2xl font-bold leading-none tabular-nums text-foreground">{totalLessons}</span>
+            <span className="mt-1.5 block text-[11px] font-medium text-primary">
+              {pendingGradingCount > 0 ? `${pendingGradingCount} bài cần xử lý` : "Không có bài cần chấm"}
+            </span>
+          </button>
+        </section>
+        )}
+
+        {!isProgressRoute && <section id="upcomingScheduleSection" aria-labelledby="upcoming-schedule-heading" className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+              <h2 id="upcoming-schedule-heading" className="text-[15px] font-bold">Lịch giảng dạy sắp tới</h2>
+            </div>
+            <Link to="/teacher/schedule" className="inline-flex items-center gap-1 self-start text-xs font-semibold text-primary hover:underline sm:self-auto">
+              Xem lịch dạy <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          </div>
+          {upcomingClasses.length > 0 ? (
+            <>
+              {(() => {
+                const { cls } = upcomingClasses[0];
+                return (
+                  <div className="flex flex-col gap-4 rounded-xl border bg-muted/20 p-4 transition-colors hover:border-muted-foreground/30 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="min-w-0 space-y-1.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[11px] font-semibold text-primary">
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
+                          Buổi học tiếp theo: {formatNextClass(cls.schedule)}
+                        </span>
+                        <span className="text-xs font-medium text-muted-foreground">HSK {cls.course.hskLevel} · {cls.enrollments.length} học viên</span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{formatSchedule(cls.schedule)}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">Buổi học tiếp theo: {formatNextClass(cls.schedule)}</p>
+                      <h3 className="text-[15px] font-bold leading-snug">{cls.name}</h3>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+                          {formatSchedule(cls.schedule)}
+                        </span>
+                        <span>Buổi học tiếp theo: <strong className="font-semibold text-foreground">{formatNextClass(cls.schedule)}</strong></span>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap items-center gap-2">
+                      <Link to={`/teacher/attendance?classId=${encodeURIComponent(cls.id)}&date=${getVietnameseDateString()}`} className="inline-flex h-[38px] items-center gap-1.5 rounded-lg bg-primary px-3.5 text-[13px] font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90">
+                        <ClipboardList className="h-4 w-4" aria-hidden="true" />
+                        Điểm danh ca này
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/teacher/progress?classId=${encodeURIComponent(cls.id)}`)}
+                        className="h-[38px] rounded-lg border bg-card px-3.5 text-[13px] font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        Tiến độ lớp
+                      </button>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                );
+              })()}
+              {upcomingClasses.length > 1 && (
+                <div className="grid gap-2.5 pt-1 md:grid-cols-2">
+                  {upcomingClasses.slice(1).map(({ cls }) => (
+                    <div key={cls.id} className="flex items-center justify-between gap-3 rounded-lg border bg-background px-3.5 py-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-xs font-semibold">{cls.name}</p>
+                        <p className="mt-1 text-[11px] text-muted-foreground">
+                          {formatNextClass(cls.schedule)} · {formatSchedule(cls.schedule)} · HSK {cls.course.hskLevel}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/teacher/progress?classId=${encodeURIComponent(cls.id)}`)}
+                        className="shrink-0 text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        Chi tiết <ArrowUpRight className="inline h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+              Chưa có lịch giảng dạy sắp tới.
+            </p>
+          )}
+        </section>}
 
         {classSummaries.length > 0 ? (
           <>
-            <section className="space-y-3" aria-labelledby="classes-heading">
-              <div className="flex flex-wrap items-end justify-between gap-2">
+            {!isProgressRoute && <section id="myClassesSection" className="scroll-mt-6 space-y-4" aria-labelledby="classes-heading">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <h2 id="classes-heading" className="text-lg font-semibold">Lớp học của tôi</h2>
-                  <p className="text-sm text-muted-foreground">Chọn lớp để xem hoạt động và tiến độ từng học viên.</p>
+                  <h2 id="classes-heading" className="text-lg font-bold tracking-tight">Bài cần chấm</h2>
                 </div>
-                <Link to="/teacher/courses" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
-                  Khóa học của tôi <ArrowUpRight className="h-4 w-4" />
-                </Link>
+                <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
+                  <Link to="/teacher/courses" className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary hover:underline">
+                    Xem tất cả <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                  </Link>
+                </div>
               </div>
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {classSummaries.map((cls) => {
-                  const selected = cls.id === selectedClass?.id;
-                  const pendingCount = cls.pendingGrammarAttempts.length + cls.pendingTranslationSubmissions.length;
-                  const classPendingReviews = pendingReviews.filter((attempt) => attempt.classId === cls.id);
-                  return (
-                    <div
-                      key={cls.id}
-                      className={`rounded-xl border bg-card p-4 transition-colors hover:border-primary/50 ${selected ? "border-primary ring-1 ring-primary" : ""}`}
-                    >
-                      <button
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() => {
-                          setSelectedClassId(cls.id);
-                          setSelectedLessonId(null);
-                          setSelectedReviewId(null);
-                          setSelectedStudentId(null);
-                          setSelectedActivityReview(null);
-                        }}
-                        className="mb-3 w-full rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              {classesNeedingGrading.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {classesNeedingGrading.map((cls) => {
+                    const selected = cls.id === selectedClass?.id;
+                    const pendingCount = cls.pendingGrammarAttempts.length + cls.pendingTranslationSubmissions.length;
+                    const classPendingReviews = pendingReviews.filter((attempt) => attempt.classId === cls.id);
+                    return (
+                      <article
+                        key={cls.id}
+                        className={`flex h-full flex-col justify-between gap-4 rounded-xl border bg-card p-4 shadow-sm transition-colors hover:border-primary/30 ${selected ? "border-primary/40 ring-1 ring-primary/20" : ""}`}
                       >
-                        <div className="mb-3 flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-semibold">{cls.name}</p>
-                            <p className="mt-1 truncate text-xs text-muted-foreground">{cls.course.title} · HSK {cls.course.hskLevel}</p>
+                        <button
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => navigate(`/teacher/progress?classId=${encodeURIComponent(cls.id)}`)}
+                          className="w-full rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <span className="flex items-start justify-between gap-3">
+                            <span className="line-clamp-2 text-sm font-bold leading-snug text-foreground transition-colors hover:text-primary">{cls.name}</span>
+                            <span className="shrink-0 rounded-md border border-primary/15 bg-primary/5 px-2 py-0.5 text-[11px] font-bold tabular-nums text-primary">
+                              {cls.overallPercent}%
+                            </span>
+                          </span>
+                          <span className="mt-2 block truncate text-xs font-medium text-muted-foreground">{cls.course.title} · HSK {cls.course.hskLevel}</span>
+                          <span className="mt-3 block h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                            <span className="block h-full rounded-full bg-primary transition-[width]" style={{ width: `${cls.overallPercent}%` }} />
+                          </span>
+                          <span className="mt-3 block text-xs text-muted-foreground">{cls.enrollments.length} học viên · {cls.lessons.length} bài học</span>
+                        </button>
+                        <div className="space-y-2 border-t border-border/70 pt-3">
+                          <div className="flex min-h-[34px] items-center justify-between gap-2">
+                            <span className="text-xs font-medium text-muted-foreground">Bài tập</span>
+                            {pendingCount > 0 ? (
+                              <Button
+                                type="button"
+                                aria-label={`Cần chấm ${pendingCount} bài của lớp ${cls.name}`}
+                                onClick={() => {
+                                  setPendingGrammarClassId(cls.id);
+                                  setPendingGradingTab(cls.pendingGrammarAttempts.length > 0 ? "grammar" : "translation");
+                                  setGradingQueue(cls.pendingGrammarAttempts.map((attempt) => ({ courseId: cls.courseId, attempt })));
+                                  setGradingQueueIndex(null);
+                                  setGradingComplete(false);
+                                }}
+                                className="h-[34px] px-3 text-xs"
+                              >
+                                <ClipboardList className="mr-1.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                <span className="truncate">Cần chấm {pendingCount} bài</span>
+                              </Button>
+                            ) : classPendingReviews.length === 0 ? (
+                              <span className="inline-flex h-[34px] items-center gap-1.5 rounded-lg border border-emerald-200/80 bg-emerald-50 px-3 text-xs font-medium text-emerald-700">
+                                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                Đã chấm hết bài
+                              </span>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Không có bài cần chấm</span>
+                            )}
                           </div>
-                          <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">{cls.overallPercent}%</span>
+                          {classPendingReviews.length > 0 && (
+                            <div className="flex min-h-[34px] items-center justify-between gap-2">
+                              <span className="text-xs font-medium text-muted-foreground">Ôn tập</span>
+                              <Button
+                                type="button"
+                                aria-label={`Cần chấm ${classPendingReviews.length} bài ôn tập của lớp ${cls.name}`}
+                                onClick={() => setPendingReviewClassId(cls.id)}
+                                className="h-[34px] px-3 text-xs"
+                              >
+                                <ClipboardList className="mr-1.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                <span className="truncate">Cần chấm {classPendingReviews.length} bài</span>
+                              </Button>
+                            </div>
+                          )}
                         </div>
-                        <div className="mb-2 h-2 overflow-hidden rounded-full bg-muted">
-                          <div className="h-full rounded-full bg-primary" style={{ width: `${cls.overallPercent}%` }} />
-                        </div>
-                      </button>
-                      <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                        <span>{cls.enrollments.length} học viên · {cls.lessons.length} bài học</span>
-                      </div>
-                      {(pendingCount > 0 || classPendingReviews.length > 0) && (
-                        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] items-center gap-x-3 gap-y-2 border-t pt-3">
-                            {pendingCount > 0 && (
-                              <>
-                                <span className="text-left text-base font-medium">Bài tập</span>
-                                <Button
-                                  type="button"
-                                  aria-label={`Cần chấm ${pendingCount} bài của lớp ${cls.name}`}
-                                  onClick={() => {
-                                    setPendingGrammarClassId(cls.id);
-                                    setPendingGradingTab(cls.pendingGrammarAttempts.length > 0 ? "grammar" : "translation");
-                                    setGradingQueue(cls.pendingGrammarAttempts.map((attempt) => ({ courseId: cls.courseId, attempt })));
-                                    setGradingQueueIndex(null);
-                                    setGradingComplete(false);
-                                  }}
-                                  className="h-10 w-full px-3 text-xs"
-                                >
-                                  <ClipboardList className="mr-1.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                                  <span className="truncate">Cần chấm {pendingCount} bài</span>
-                                </Button>
-                              </>
-                            )}
-                            {classPendingReviews.length > 0 && (
-                              <>
-                                <span className="text-left text-base font-medium">Ôn tập</span>
-                                <Button
-                                  type="button"
-                                  aria-label={`Cần chấm ${classPendingReviews.length} bài ôn tập của lớp ${cls.name}`}
-                                  onClick={() => setPendingReviewClassId(cls.id)}
-                                  className="h-10 w-full px-3 text-xs"
-                                >
-                                  <>
-                                    <ClipboardList className="mr-1.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                                    <span className="truncate">Cần chấm {classPendingReviews.length} bài</span>
-                                  </>
-                                </Button>
-                              </>
-                            )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="rounded-xl border border-dashed bg-card px-5 py-8 text-center">
+                  <p className="text-sm font-semibold">Hiện không có lớp nào có bài đang chờ chấm.</p>
+                </div>
+              )}
+            </section>}
 
-            {selectedClass && (
+            {isProgressRoute && selectedClass && (
               <>
-                <Card>
+                <Card id="class-progress-section" className="scroll-mt-6">
                   <CardContent className="pt-5 sm:pt-5">
                     <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                       <div>
@@ -3064,10 +3317,18 @@ export default function TeacherIndex() {
                         <AlertCircle className="h-4 w-4 text-rose-600" />
                         <h2 className="font-semibold">Cần nhắc</h2>
                       </div>
-                      <div className="flex flex-wrap items-center justify-end gap-3">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
                         <span className="text-sm text-muted-foreground">
                           {selectedLesson ? `${reminderRows.length}/${selectedClass.activityData.length} học viên còn phần chưa xong đến Bài ${selectedLesson.displayOrder}` : "Chưa có bài học"}
                         </span>
+                        <Input
+                          type="search"
+                          aria-label="Tìm học viên cần nhắc"
+                          placeholder="Tìm tên học viên..."
+                          value={reminderSearch}
+                          onChange={(event) => setReminderSearch(event.currentTarget.value)}
+                          className="h-[34px] w-full sm:w-[210px]"
+                        />
                         <Button
                           type="button"
                           variant="outline"
@@ -3083,13 +3344,15 @@ export default function TeacherIndex() {
                         </Button>
                       </div>
                     </div>
-                    {reminderRows.length === 0 ? (
+                    {visibleDashboardReminderRows.length === 0 ? (
                       <p className="rounded-lg bg-emerald-50 px-3 py-3 text-sm text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
-                        {selectedClass.activityData.length === 0 ? "Lớp chưa có học viên." : "Không có phần học nào cần nhắc đến bài đang chọn."}
+                        {reminderRows.length === 0
+                          ? selectedClass.activityData.length === 0 ? "Lớp chưa có học viên." : "Không có phần học nào cần nhắc đến bài đang chọn."
+                          : "Không tìm thấy học viên phù hợp."}
                       </p>
                     ) : (
                       <ul className="divide-y rounded-lg border">
-                        {reminderRows.map(({ student, missing }) => {
+                        {visibleDashboardReminderRows.map(({ student, missing }) => {
                           const missingByActivity = new Map<string, typeof missing>();
                           for (const item of missing) {
                             const activityItems = missingByActivity.get(item.activity) ?? [];
@@ -3118,7 +3381,7 @@ export default function TeacherIndex() {
                                         <span
                                           id={tooltipId}
                                           role="tooltip"
-                                          className="invisible absolute bottom-full left-0 z-30 max-h-56 min-w-56 max-w-80 overflow-y-auto whitespace-normal rounded-md border bg-popover p-2.5 text-left text-xs font-normal leading-relaxed text-popover-foreground opacity-0 shadow-lg transition-opacity after:absolute after:left-0 after:top-full after:h-2 after:w-full after:content-[''] group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100"
+                                          className="invisible absolute bottom-full left-1/2 z-30 max-h-56 w-40 max-w-[calc(100vw-2rem)] -translate-x-1/2 overflow-y-auto whitespace-normal rounded-md border bg-popover p-2.5 text-left text-xs font-normal leading-relaxed text-popover-foreground opacity-0 shadow-lg transition-opacity after:absolute after:left-0 after:top-full after:h-2 after:w-full after:content-[''] group-hover:visible group-hover:opacity-100 group-focus-visible:visible group-focus-visible:opacity-100"
                                         >
                                           <span className="mb-1 block font-semibold">{activity} · {items.length} bài cần hoàn thành</span>
                                           {items.map((item) => (
@@ -3231,21 +3494,25 @@ export default function TeacherIndex() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <label className="sr-only" htmlFor="reminder-lesson-filter">Lọc nội dung theo bài</label>
-                  <select
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
+                  <SearchableDropdown
                     id="reminder-lesson-filter"
+                    label="Lọc nội dung theo bài"
+                    placeholder="Chọn bài"
+                    searchPlaceholder="Tìm bài học..."
+                    options={[
+                      { value: "all", label: "Tất cả bài đã học" },
+                      ...reminderLessonOptions.map((lesson) => ({
+                        value: String(lesson.displayOrder),
+                        label: `Bài ${lesson.displayOrder} · ${lesson.title}`,
+                      })),
+                    ]}
                     value={reminderLessonFilter}
-                    onChange={(event) => setReminderLessonFilter(event.currentTarget.value)}
-                    className="h-10 min-w-0 flex-1 rounded-lg border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="all">Tất cả bài đã học</option>
-                    {reminderLessonOptions.map((lesson) => (
-                      <option key={lesson.id} value={String(lesson.displayOrder)}>
-                        Bài {lesson.displayOrder} · {lesson.title}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setReminderLessonFilter}
+                    className="min-w-0 flex-1"
+                    triggerClassName="h-10 rounded-lg border-border bg-background text-sm transition-colors hover:border-primary/40 focus-visible:ring-primary/30"
+                    contentClassName="min-w-0 rounded-xl border-border/80 p-1.5 shadow-lg"
+                  />
                   <Button
                     type="button"
                     variant="outline"
@@ -3363,16 +3630,19 @@ export default function TeacherIndex() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="pending-grading-title"
-              className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
+              className="flex max-h-[88vh] w-full max-w-[680px] flex-col overflow-hidden rounded-xl border bg-background shadow-2xl"
             >
-              <div className="flex items-start justify-between gap-3 border-b p-4 sm:p-5">
+              <div className="flex items-start justify-between gap-4 border-b px-5 py-4 sm:px-6">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <ClipboardList className="h-4 w-4 shrink-0 text-amber-600" />
-                    <h2 id="pending-grading-title" className="font-semibold">Bài cần chấm</h2>
+                    <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-primary" />
+                    <h2 id="pending-grading-title" className="text-lg font-bold">Bài cần chấm</h2>
+                    <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                      {pendingGrammarClass.name}
+                    </span>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {pendingGrammarClass.pendingGrammarAttempts.length + pendingGrammarClass.pendingTranslationSubmissions.length} bài · {pendingGrammarClass.name}
+                  <p className="mt-1 text-[13px] text-muted-foreground">
+                    {pendingGrammarClass.pendingGrammarAttempts.length + pendingGrammarClass.pendingTranslationSubmissions.length} bài đang chờ chấm
                   </p>
                 </div>
                 <button
@@ -3382,7 +3652,7 @@ export default function TeacherIndex() {
                     setPendingGrammarClassId(null);
                     setGradingQueueIndex(null);
                   }}
-                  className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-muted"
+                  className="shrink-0 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -3390,7 +3660,7 @@ export default function TeacherIndex() {
               <div
                 role="tablist"
                 aria-label="Loại bài cần chấm"
-                className="flex shrink-0 gap-5 border-b px-4 sm:px-5"
+                className="flex shrink-0 gap-6 border-b bg-muted/30 px-5 sm:px-6"
               >
                 {pendingGradingTabs.map((tab) => (
                   <button
@@ -3418,14 +3688,14 @@ export default function TeacherIndex() {
                         ?.querySelector<HTMLButtonElement>(`[data-grading-tab="${nextTab.id}"]`)
                         ?.focus();
                     }}
-                    className={`-mb-px inline-flex min-h-12 items-center gap-2 border-b-2 px-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    className={`-mb-px inline-flex h-10 items-center gap-2 border-b-2 px-1 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                       activePendingGradingTab === tab.id
-                        ? "border-primary text-foreground"
-                        : "border-transparent text-muted-foreground hover:text-foreground"
+                        ? "border-primary font-semibold text-primary"
+                        : "border-transparent font-medium text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {tab.label}
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${
+                    <span className={`rounded-full px-1.5 py-0.5 text-[11px] ${
                       activePendingGradingTab === tab.id ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
                     }`}>
                       {tab.count}
@@ -3437,9 +3707,10 @@ export default function TeacherIndex() {
                 id="pending-grading-panel"
                 role="tabpanel"
                 aria-labelledby={`pending-grading-tab-${activePendingGradingTab}`}
-                className="min-h-0 overflow-y-auto p-4 sm:p-5"
+                className="custom-scrollbar min-h-0 flex-1 overflow-y-auto divide-y divide-border/70 px-5 py-2 sm:px-6"
               >
                 {activePendingGradingTab === "grammar" ? (
+                  pendingGrammarClass.pendingGrammarAttempts.length > 0 ? (
                   <ul className="divide-y">
                     {pendingGrammarClass.pendingGrammarAttempts.map((attempt) => (
                       <li key={attempt.id}>
@@ -3453,17 +3724,30 @@ export default function TeacherIndex() {
                               attempt,
                             );
                           }}
-                          className="group flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="group flex min-h-[68px] w-full items-center justify-between gap-4 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                         >
-                          <span className="min-w-0 flex-1 break-words font-medium">{attempt.studentName} · {attempt.lessonTitle} · {attempt.sectionTitle}</span>
-                          <span className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-md border border-primary px-3 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                            Chấm bài <ArrowUpRight className="h-3.5 w-3.5" />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[13px] font-semibold text-foreground">
+                              {attempt.lessonTitle} · {attempt.sectionTitle}
+                            </span>
+                            <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                              Học viên: <span className="font-medium text-foreground">{attempt.studentName}</span>
+                            </span>
+                          </span>
+                          <span className="inline-flex h-8 shrink-0 items-center gap-1 rounded-lg border border-primary px-3 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                            Chấm bài <ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" />
                           </span>
                         </button>
                       </li>
                     ))}
                   </ul>
+                  ) : (
+                    <p className="py-10 text-center text-sm text-muted-foreground">
+                      Không còn bài ngữ pháp nào đang chờ chấm.
+                    </p>
+                  )
                 ) : (
+                  pendingGrammarClass.pendingTranslationSubmissions.length > 0 ? (
                   <ul className="divide-y">
                     {pendingGrammarClass.pendingTranslationSubmissions.map((submission) => (
                       <li key={submission.id}>
@@ -3475,20 +3759,45 @@ export default function TeacherIndex() {
                             setSelectedClassId(pendingGrammarClass.id);
                             setSelectedTranslationSubmissionId(submission.id);
                           }}
-                          className="group flex min-h-12 w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="group flex min-h-[68px] w-full items-center justify-between gap-4 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                         >
-                          <span className="min-w-0 flex-1 break-words font-medium">
-                            {submission.student.name ?? submission.student.email} · {submission.lesson.title}
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[13px] font-semibold text-foreground">{submission.lesson.title}</span>
+                            <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                              Học viên: <span className="font-medium text-foreground">{submission.student.name ?? submission.student.email}</span>
+                            </span>
                           </span>
-                          <span className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-md border border-primary px-3 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                            Chấm bài <ArrowUpRight className="h-3.5 w-3.5" />
+                          <span className="inline-flex h-8 shrink-0 items-center gap-1 rounded-lg border border-primary px-3 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                            Chấm bài <ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" />
                           </span>
                         </button>
                       </li>
                     ))}
                   </ul>
+                  ) : (
+                    <p className="py-10 text-center text-sm text-muted-foreground">
+                      Không còn bài luyện dịch nào đang chờ chấm.
+                    </p>
+                  )
                 )}
               </div>
+              <footer className="flex flex-col gap-3 border-t bg-muted/30 px-5 py-3.5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <span>Chọn một bài để mở giao diện chấm nhanh</span>
+                {activePendingGradingTab === "grammar" && pendingGrammarClass.pendingGrammarAttempts[0] && (
+                  <button
+                    type="button"
+                    onClick={() => startGradingQueue(
+                      pendingGrammarClass.id,
+                      pendingGrammarClass.courseId,
+                      pendingGrammarClass.pendingGrammarAttempts,
+                      pendingGrammarClass.pendingGrammarAttempts[0],
+                    )}
+                    className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    Bắt đầu chấm từ bài 1
+                  </button>
+                )}
+              </footer>
             </section>
           </div>
         )}
@@ -4520,19 +4829,38 @@ export default function TeacherIndex() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="grammar-grading-title"
-              className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border bg-background shadow-xl"
+              className="flex max-h-[90vh] w-full max-w-[780px] flex-col overflow-hidden rounded-xl border bg-background shadow-2xl"
             >
-              <div className="flex items-start justify-between gap-3 border-b p-4 sm:p-5">
+              <header className="flex items-start justify-between gap-4 border-b px-5 py-4 sm:px-6">
                 <div className="min-w-0">
-                  <h2 id="grammar-grading-title" className="text-lg font-semibold">Chấm bài ngữ pháp</h2>
-                  {gradingQueueIndex != null && (
-                    <p className="mt-1 text-sm font-medium text-primary">
-                      Bài {gradingQueueIndex + 1}/{gradingQueue.length} · {pendingGrammarClass.name}
-                    </p>
-                  )}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGradingAttemptId(null);
+                        setGradingQueueIndex(null);
+                        setGradingComplete(false);
+                      }}
+                      className="inline-flex h-7 items-center gap-1 rounded-lg border bg-muted/50 px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <ArrowLeft aria-hidden="true" className="h-3.5 w-3.5" />
+                      Danh sách bài
+                    </button>
+                    {gradingQueueIndex != null && (
+                      <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                        Bài {gradingQueueIndex + 1}/{gradingQueue.length}
+                      </span>
+                    )}
+                    <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                      {pendingGrammarClass.name}
+                    </span>
+                  </div>
+                  <h2 id="grammar-grading-title" className="mt-1.5 truncate text-lg font-bold">
+                    Chấm bài ngữ pháp{gradingData ? ` · ${gradingData.student.name ?? gradingData.student.email}` : ""}
+                  </h2>
                   {gradingData && (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {gradingData.student.name ?? gradingData.student.email} · {gradingData.lesson.title} · {gradingData.attempt.sectionTitle}
+                    <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
+                      {gradingData.course.title} · {gradingData.lesson.title} · {gradingData.attempt.sectionTitle}
                     </p>
                   )}
                 </div>
@@ -4540,21 +4868,23 @@ export default function TeacherIndex() {
                   type="button"
                   aria-label="Đóng cửa sổ chấm bài"
                   onClick={() => {
-                    setPendingGrammarClassId(null);
                     setGradingAttemptId(null);
                     setGradingQueueIndex(null);
                     setGradingComplete(false);
                   }}
-                  className="shrink-0 rounded-md p-2 text-muted-foreground hover:bg-muted"
+                  className="shrink-0 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <X className="h-4 w-4" />
                 </button>
-              </div>
+              </header>
               {gradingFetcher.state === "loading" ? (
-                <div className="p-8 text-center text-sm text-muted-foreground">Đang tải bài làm...</div>
+                <div className="flex min-h-48 items-center justify-center gap-2 bg-muted/30 p-8 text-sm text-muted-foreground">
+                  <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+                  Đang tải bài làm...
+                </div>
               ) : !gradingData ? (
-                <div role="alert" className="p-8 text-center text-sm text-destructive">
-                  Không tải được bài làm. Hãy đóng cửa sổ và thử lại.
+                <div role="alert" className="bg-muted/30 p-8 text-center text-sm text-destructive">
+                  Không tải được bài làm. Hãy quay lại danh sách và thử mở lại bài.
                 </div>
               ) : (
                 <gradeSubmitFetcher.Form
@@ -4567,72 +4897,176 @@ export default function TeacherIndex() {
                 >
                   <input type="hidden" name="intent" value="grade-grammar-fill-dashboard" />
                   <input type="hidden" name="grades" value={JSON.stringify(grades)} />
-                  <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
+                  <div className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto bg-muted/30 p-4 sm:p-5">
                     {gradeSubmitFetcher.data?.error && gradeSubmitFetcher.data.attemptId === gradingAttemptId && (
-                      <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                      <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
                         {gradeSubmitFetcher.data.error}
                       </p>
                     )}
-                    {gradingData.attempt.results.map((result, index) => {
-                      const grade = grades.find((item) => item.questionId === result.id);
+                    {gradingData.attempt.results.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-card px-3 py-2.5" role="group" aria-label="Lọc câu theo kết quả chấm">
+                        <span className="mr-1 text-xs font-medium text-muted-foreground">Lọc câu:</span>
+                        {([
+                          { value: "all", label: "Tất cả", count: grammarQuestionFilterCounts.all },
+                          { value: "correct", label: "Đúng", count: grammarQuestionFilterCounts.correct },
+                          { value: "incorrect", label: "Sai", count: grammarQuestionFilterCounts.incorrect },
+                        ] as const).map((option) => {
+                          const isSelected = grammarQuestionFilter === option.value;
+                          const selectedClassName = option.value === "correct"
+                            ? "border-success/30 bg-success/10 text-success"
+                            : option.value === "incorrect"
+                              ? "border-destructive/30 bg-destructive/10 text-destructive"
+                              : "border-primary/30 bg-primary/10 text-primary";
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              aria-pressed={isSelected}
+                              aria-label={`${option.label}: ${option.count} câu`}
+                              onClick={() => setGrammarQuestionFilter(option.value)}
+                              className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                                isSelected
+                                  ? selectedClassName
+                                  : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+                              }`}
+                            >
+                              {option.label}
+                              <span className="tabular-nums opacity-75">{option.count}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {visibleGrammarResults.map(({ result, index, grade }) => {
                       if (!grade) return null;
+                      const feedbackKey = `${gradingAttemptId}:${result.id}`;
+                      const isFeedbackExpanded = expandedGrammarFeedbackIds.has(feedbackKey);
                       return (
-                        <article key={`${result.id}-${index}`} className="space-y-3 rounded-lg border p-3 sm:p-4">
-                          <div className="flex flex-wrap items-start gap-2">
-                            <span className="mt-0.5 font-mono text-xs text-muted-foreground">{index + 1}.</span>
-                            <div className="min-w-0 flex-1 space-y-2">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <p className="content-text hanzi-display font-medium">{result.prompt}</p>
-                                <span className="rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground">{GRAMMAR_QUESTION_META[result.type].label}</span>
+                        <article key={`${result.id}-${index}`} className="space-y-3.5 rounded-xl border bg-card p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 text-sm font-bold">
+                              <span className="mr-1 text-primary">{index + 1}.</span>
+                              <span className="content-text hanzi-display">{result.prompt}</span>
+                            </div>
+                            <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                              {GRAMMAR_QUESTION_META[result.type].label}
+                            </span>
+                          </div>
+
+                          <div className="space-y-2 rounded-xl border border-border/80 bg-muted/35 p-3.5 text-[13px]">
+                            {result.type === "ARRANGE" && result.givenTokens && (
+                              <p className="text-xs text-muted-foreground">Từ đã chọn: {result.givenTokens.join(" / ")}</p>
+                            )}
+                            <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-2">
+                              <span className="shrink-0 text-xs font-medium text-muted-foreground sm:w-28">Học viên trả lời:</span>
+                              <span className={`min-w-0 whitespace-pre-wrap break-words font-semibold ${grade.correct ? "text-success" : "text-destructive"}`}>
+                                {result.given || <em className="font-normal text-muted-foreground">Bỏ trống</em>}
+                              </span>
+                            </div>
+                            <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-2">
+                              <span className="shrink-0 text-xs font-medium text-muted-foreground sm:w-28">Đáp án chuẩn:</span>
+                              <span className="content-text hanzi-display min-w-0 whitespace-pre-wrap break-words font-semibold">{result.correctAnswer}</span>
+                            </div>
+                            {result.hint && (
+                              <p className="border-t border-border/70 pt-2 text-xs leading-relaxed text-muted-foreground">
+                                Gợi ý chấm: <span className="whitespace-pre-line text-foreground/80">{result.hint}</span>
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <div className="flex items-center gap-2" role="group" aria-label={`Chấm câu ${index + 1}`}>
+                                <Button
+                                  type="button"
+                                  aria-pressed={grade.correct}
+                                  onClick={() => updateGrade(result.id, { correct: true })}
+                                  className={`h-8 rounded-lg px-3 text-xs ${grade.correct ? "bg-success text-success-foreground hover:bg-success/90" : ""}`}
+                                  variant={grade.correct ? "default" : "outline"}
+                                >
+                                  <CheckCircle2 aria-hidden="true" className="mr-1.5 h-4 w-4" />Đúng
+                                </Button>
+                                <Button
+                                  type="button"
+                                  aria-pressed={!grade.correct}
+                                  onClick={() => updateGrade(result.id, { correct: false })}
+                                  className="h-8 rounded-lg px-3 text-xs"
+                                  variant={!grade.correct ? "destructive" : "outline"}
+                                >
+                                  <XCircle aria-hidden="true" className="mr-1.5 h-4 w-4" />Sai
+                                </Button>
                               </div>
-                              {result.type === "ARRANGE" && result.givenTokens && (
-                                <p className="text-xs text-muted-foreground">Từ đã chọn: {result.givenTokens.join(" / ")}</p>
-                              )}
-                              <p className="text-sm"><span className="text-muted-foreground">Học viên trả lời: </span>{result.given || <em className="text-muted-foreground">bỏ trống</em>}</p>
-                              <p className="text-sm"><span className="text-muted-foreground">Đáp án chuẩn: </span><span className="font-medium">{result.correctAnswer}</span></p>
-                              {result.hint && <p className="whitespace-pre-line text-xs text-muted-foreground">{result.hint}</p>}
+                              <span className="text-xs text-muted-foreground">
+                                Tự chấm: <strong className="text-foreground">{result.autoCorrect ? "Đúng" : "Sai"}</strong>
+                              </span>
                             </div>
+                            <button
+                              type="button"
+                              aria-expanded={isFeedbackExpanded}
+                              aria-controls={`dashboard-teacher-feedback-${result.id}`}
+                              onClick={() => setExpandedGrammarFeedbackIds((current) => {
+                                const next = new Set(current);
+                                if (next.has(feedbackKey)) next.delete(feedbackKey);
+                                else next.add(feedbackKey);
+                                return next;
+                              })}
+                              className="inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              <MessageCircle aria-hidden="true" className="h-3.5 w-3.5" />
+                              {isFeedbackExpanded ? "Ẩn / sửa nhận xét" : "Thêm nhận xét"}
+                            </button>
                           </div>
-                          <div className="space-y-2 border-t pt-3">
-                            <div className="flex gap-2" role="group" aria-label={`Chấm câu ${index + 1}`}>
-                              <Button type="button" size="sm" variant={grade.correct ? "default" : "outline"} onClick={() => updateGrade(result.id, { correct: true })}>
-                                <CheckCircle2 className="mr-1.5 h-4 w-4" />Đúng
-                              </Button>
-                              <Button type="button" size="sm" variant={!grade.correct ? "destructive" : "outline"} onClick={() => updateGrade(result.id, { correct: false })}>
-                                <XCircle className="mr-1.5 h-4 w-4" />Sai
-                              </Button>
-                              <span className="self-center text-xs text-muted-foreground">Tự chấm: {result.autoCorrect ? "Đúng" : "Sai"}</span>
+                          {isFeedbackExpanded && (
+                            <div className="pt-1">
+                              <label htmlFor={`dashboard-teacher-feedback-${result.id}`} className="sr-only">
+                                Nhận xét thêm cho câu {index + 1}
+                              </label>
+                              <Textarea
+                                id={`dashboard-teacher-feedback-${result.id}`}
+                                value={grade.teacherFeedback}
+                                rows={1}
+                                onChange={(event) => updateGrade(result.id, { teacherFeedback: event.target.value })}
+                                placeholder="Nhận xét thêm cho học viên (không bắt buộc)..."
+                                className="h-9 min-h-9 resize-y px-3 py-2 text-xs"
+                              />
                             </div>
-                            <label htmlFor={`dashboard-teacher-feedback-${result.id}`} className="text-xs font-medium">
-                              Đáp án/Nhận xét <span className="font-normal text-muted-foreground">(không bắt buộc)</span>
-                            </label>
-                            <Textarea
-                              id={`dashboard-teacher-feedback-${result.id}`}
-                              value={grade.teacherFeedback}
-                              rows={2}
-                              onChange={(event) => updateGrade(result.id, { teacherFeedback: event.target.value })}
-                              placeholder="Nhập nhận xét hoặc đáp án thay thế"
-                            />
-                          </div>
+                          )}
                         </article>
                       );
                     })}
+                    {gradingData.attempt.results.length > 0 && visibleGrammarResults.length === 0 && (
+                      <p className="rounded-xl border border-dashed bg-card p-8 text-center text-sm text-muted-foreground">
+                        Không có câu nào thuộc bộ lọc này.
+                      </p>
+                    )}
                     {gradingData.attempt.results.length === 0 && (
-                      <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Bài làm không có dữ liệu câu trả lời để chấm.</p>
+                      <p className="rounded-xl border border-dashed bg-card p-8 text-center text-sm text-muted-foreground">
+                        Bài làm không có dữ liệu câu trả lời để chấm.
+                      </p>
                     )}
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-t p-4 sm:px-5">
-                    <p className="text-sm text-muted-foreground">
-                      Điểm dự kiến: {grades.length ? `${Math.round((grades.filter((grade) => grade.correct).length / grades.length) * 100)}%` : "—"}
-                    </p>
-                    <div className="flex gap-2">
-                      <Button type="button" variant="outline" onClick={() => {
+                  <footer className="flex flex-col gap-3 border-t bg-background px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="text-xs font-medium text-muted-foreground">Điểm dự kiến:</span>
+                      <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-[13px] font-bold text-primary">
+                        {grades.length ? `${Math.round((grades.filter((grade) => grade.correct).length / grades.length) * 100)}%` : "—"}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Đã chấm {grades.length}/{gradingData.attempt.results.length} câu
+                      </span>
+                    </div>
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                      <Button type="button" variant="outline" className="h-[38px] px-3.5 text-[13px]" onClick={() => {
                         setPendingGrammarClassId(null);
                         setGradingAttemptId(null);
                         setGradingQueueIndex(null);
                         setGradingComplete(false);
                       }}>Đóng</Button>
-                      <Button type="submit" disabled={gradeSubmitFetcher.state === "submitting" || grades.length !== gradingData.attempt.results.length || grades.length === 0}>
+                      <Button
+                        type="submit"
+                        className="h-[38px] px-4 text-[13px]"
+                        disabled={gradeSubmitFetcher.state === "submitting" || grades.length !== gradingData.attempt.results.length || grades.length === 0}
+                      >
                         {gradeSubmitFetcher.state === "submitting"
                           ? "Đang lưu..."
                           : gradingQueueIndex != null && gradingQueueIndex < gradingQueue.length - 1
@@ -4640,7 +5074,7 @@ export default function TeacherIndex() {
                             : "Lưu điểm"}
                       </Button>
                     </div>
-                  </div>
+                  </footer>
                 </gradeSubmitFetcher.Form>
               )}
             </section>

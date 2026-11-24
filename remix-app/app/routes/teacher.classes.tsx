@@ -899,11 +899,18 @@ export default function TeacherClassesPage() {
 
   return (
     <AppShell user={user}>
-      <div className="mx-auto max-w-6xl space-y-6">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mx-auto max-w-7xl space-y-5">
+        <div className="hidden h-14 items-center border-b border-border/70 lg:-mx-8 lg:-mt-8 lg:mb-5 lg:flex lg:px-8">
+          <nav aria-label="Điều hướng hiện tại" className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>Cổng giáo viên</span>
+            <span aria-hidden="true">/</span>
+            <span className="font-semibold text-foreground">Lớp &amp; Học viên</span>
+          </nav>
+        </div>
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight sm:text-[1.75rem]">Lớp &amp; Học viên</h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            <h1 className="text-2xl font-bold tracking-tight">Lớp &amp; Học viên</h1>
+            <p className="max-w-2xl text-[13px] leading-5 text-muted-foreground">
               Quản lý lớp phụ trách, tài khoản học viên và danh sách thành viên trong từng lớp.
             </p>
           </div>
@@ -914,7 +921,7 @@ export default function TeacherClassesPage() {
                 variant="outline"
                 onClick={() => openModal("existing")}
                 disabled={selectedClass.enrollments.length >= selectedClass.maxStudents}
-                className="w-full min-[420px]:w-auto"
+                className="h-10 w-full text-[13px] min-[420px]:w-auto"
               >
                 <UserPlus className="mr-2 h-4 w-4" />
                 Thêm tài khoản có sẵn
@@ -923,7 +930,7 @@ export default function TeacherClassesPage() {
                 type="button"
                 onClick={() => openModal("create")}
                 disabled={selectedClass.enrollments.length >= selectedClass.maxStudents}
-                className="w-full min-[420px]:w-auto"
+                className="h-10 w-full text-[13px] min-[420px]:w-auto"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Tạo tài khoản học viên
@@ -933,24 +940,24 @@ export default function TeacherClassesPage() {
         </header>
 
         {classes.length > 0 && (
-          <section aria-label="Tổng quan lớp học" className="grid grid-cols-2 overflow-hidden rounded-xl border bg-card sm:grid-cols-4">
-            <div className="border-b border-r px-4 py-3.5 sm:border-b-0">
+          <section aria-label="Tổng quan lớp học" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-xl border bg-card p-4">
               <p className="text-xs font-medium text-muted-foreground">Lớp đang dạy</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums">{activeClasses.length}</p>
+              <p className="mt-1 text-[22px] font-bold tabular-nums">{activeClasses.length}</p>
             </div>
-            <div className="border-b px-4 py-3.5 sm:border-b-0 sm:border-r">
+            <div className="rounded-xl border bg-card p-4">
               <p className="text-xs font-medium text-muted-foreground">Lớp đã kết thúc</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums">{completedClasses.length}</p>
+              <p className="mt-1 text-[22px] font-bold tabular-nums">{completedClasses.length}</p>
             </div>
-            <div className="border-r px-4 py-3.5">
+            <div className="rounded-xl border bg-card p-4">
               <p className="text-xs font-medium text-muted-foreground">Học viên trong lớp</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums">
+              <p className="mt-1 text-[22px] font-bold tabular-nums">
                 {selectedClass ? `${selectedClass.enrollments.length}/${selectedClass.maxStudents}` : "—"}
               </p>
             </div>
-            <div className="px-4 py-3.5">
+            <div className="rounded-xl border bg-card p-4">
               <p className="text-xs font-medium text-muted-foreground">Sĩ số</p>
-              <p className={`mt-1 text-sm font-semibold ${!selectedClass ? "text-muted-foreground" : selectedClass.enrollments.length >= selectedClass.maxStudents ? "text-warning" : "text-success"}`}>
+              <p className={`mt-1 text-[15px] font-semibold ${!selectedClass ? "text-muted-foreground" : selectedClass.enrollments.length >= selectedClass.maxStudents ? "text-warning" : "text-success"}`}>
                 {!selectedClass
                   ? "Chưa chọn lớp"
                   : selectedClass.enrollments.length >= selectedClass.maxStudents
@@ -1279,17 +1286,17 @@ export default function TeacherClassesPage() {
           </Card>
         ) : (
           <>
-            <section aria-label="Danh sách lớp học" className="overflow-hidden rounded-xl border bg-card shadow-sm">
-            <div className="flex flex-wrap gap-x-5 border-b px-4 sm:px-6" role="tablist" aria-label="Trạng thái lớp học">
+            <section aria-label="Danh sách lớp học" className="overflow-hidden rounded-xl border bg-card">
+            <div className="flex flex-wrap gap-x-6 border-b bg-muted/30 px-5" role="tablist" aria-label="Trạng thái lớp học">
               <button
                 type="button"
                 role="tab"
                 aria-selected={classView === "active"}
                 onClick={() => changeClassView("active")}
-                className={`-mb-px inline-flex min-h-12 items-center gap-2 border-b-2 px-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${classView === "active" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                className={`-mb-px inline-flex h-11 items-center gap-2 border-b-2 px-1 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${classView === "active" ? "border-primary font-semibold text-primary" : "border-transparent font-medium text-muted-foreground hover:text-foreground"}`}
               >
                 Lớp đang dạy
-                <span className={`rounded-full px-2 py-0.5 text-xs tabular-nums ${classView === "active" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                <span className={`rounded-full px-1.5 py-0.5 text-[11px] tabular-nums ${classView === "active" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                   {activeClasses.length}
                 </span>
               </button>
@@ -1298,17 +1305,17 @@ export default function TeacherClassesPage() {
                 role="tab"
                 aria-selected={classView === "completed"}
                 onClick={() => changeClassView("completed")}
-                className={`-mb-px inline-flex min-h-12 items-center gap-2 border-b-2 px-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${classView === "completed" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                className={`-mb-px inline-flex h-11 items-center gap-2 border-b-2 px-1 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${classView === "completed" ? "border-primary font-semibold text-primary" : "border-transparent font-medium text-muted-foreground hover:text-foreground"}`}
               >
                 Lớp học đã kết thúc
-                <span className={`rounded-full px-2 py-0.5 text-xs tabular-nums ${classView === "completed" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                <span className={`rounded-full px-1.5 py-0.5 text-[11px] tabular-nums ${classView === "completed" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                   {completedClasses.length}
                 </span>
               </button>
             </div>
-            <div className="space-y-5 p-4 sm:p-6">
+            <div className="space-y-5 p-5">
             {visibleClasses.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed bg-muted/20 px-5 py-12 text-center">
+              <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed bg-muted/20 px-5 py-12 text-center">
                   {classView === "completed" ? <Archive className="h-8 w-8 text-muted-foreground" /> : <Users className="h-8 w-8 text-muted-foreground" />}
                   <div>
                     <h2 className="font-semibold">{classView === "completed" ? "Chưa có lớp học đã kết thúc" : "Bạn chưa được phân công lớp đang dạy"}</h2>
@@ -1319,37 +1326,55 @@ export default function TeacherClassesPage() {
               </div>
             ) : (
             <div className="space-y-5">
-              <div className="flex flex-col gap-4 rounded-lg border bg-background p-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="flex flex-col gap-4 border-b border-border/70 pb-4 sm:flex-row sm:items-end sm:justify-between">
                 <section className="min-w-0 flex-1 space-y-2">
-                <Label htmlFor="class-select">Chọn lớp phụ trách</Label>
-                <select
-                  id="class-select"
-                  value={selectedClassId}
-                  onChange={(event) => {
-                    setSelectedClassId(event.target.value);
-                    setRosterQuery("");
-                    closeModal();
-                  }}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {visibleClasses.map((cls) => (
-                    <option key={cls.id} value={cls.id}>{cls.name}</option>
-                  ))}
-                </select>
-                {selectedClass && (
-                  <p className="text-sm text-muted-foreground">
-                    HSK {selectedClass.course.hskLevel} <span aria-hidden="true">·</span> {selectedClass.course.title}
-                  </p>
-                )}
+                  <Label htmlFor="class-select" className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Chọn lớp phụ trách
+                  </Label>
+                  <select
+                    id="class-select"
+                    value={selectedClass?.id ?? ""}
+                    onChange={(event) => {
+                      setSelectedClassId(event.target.value);
+                      setRosterQuery("");
+                      closeModal();
+                    }}
+                    className="flex h-10 w-full max-w-2xl rounded-lg border border-input bg-background px-3 text-[13px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {visibleClasses.map((cls) => (
+                      <option key={cls.id} value={cls.id}>{cls.name}</option>
+                    ))}
+                  </select>
+                  {selectedClass && (
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="font-medium text-foreground">
+                        HSK {selectedClass.course.hskLevel} <span aria-hidden="true">·</span> {selectedClass.course.title}
+                      </span>
+                      <span aria-hidden="true" className="text-muted-foreground">•</span>
+                      <span className={`rounded-md px-2 py-1 text-[11px] font-semibold ${
+                        selectedClass.enrollments.length >= selectedClass.maxStudents
+                          ? "bg-warning/10 text-warning"
+                          : "bg-success/10 text-success"
+                      }`}>
+                        {selectedClass.enrollments.length}/{selectedClass.maxStudents} chỗ
+                        {selectedClass.enrollments.length >= selectedClass.maxStudents
+                          ? " · Đã đủ sĩ số"
+                          : ` · Còn ${selectedClass.maxStudents - selectedClass.enrollments.length} chỗ trống`}
+                      </span>
+                    </div>
+                  )}
+                  {selectedClass && classView === "active" && selectedClass.enrollments.length >= selectedClass.maxStudents && (
+                    <p role="status" className="text-xs text-warning">
+                      Lớp đã đủ sĩ số. Liên hệ quản trị viên nếu cần tăng sĩ số.
+                    </p>
+                  )}
                 </section>
 
-              {selectedClass && classView === "active" && (
-                <section>
-                  <Button type="button" variant="outline" onClick={completeSelectedClass} disabled={isCompleting} className="w-full sm:w-auto">
+                {selectedClass && classView === "active" && (
+                  <Button type="button" variant="outline" onClick={completeSelectedClass} disabled={isCompleting} className="h-9 w-full shrink-0 text-[12px] sm:w-auto">
                     <CheckCircle2 className="mr-2 h-4 w-4" />{isCompleting ? "Đang lưu kết quả..." : "Kết thúc khóa học"}
                   </Button>
-                </section>
-              )}
+                )}
               </div>
               {selectedClass && classView === "completed" && (
                 <div className="space-y-3 lg:col-span-2">
@@ -1408,35 +1433,15 @@ export default function TeacherClassesPage() {
             </div>
             )}
 
-            {classView === "active" && selectedClass && (
-              <div
-                role="status"
-                className={`flex flex-col gap-2 rounded-lg border px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between ${
-                  selectedClass.enrollments.length >= selectedClass.maxStudents
-                    ? "border-warning/30 bg-warning/10 text-warning"
-                    : "border-success/25 bg-success/5 text-success"
-                }`}
-              >
-                <p>
-                  {selectedClass.enrollments.length >= selectedClass.maxStudents
-                    ? `Lớp đã đủ ${selectedClass.maxStudents} học viên. Liên hệ quản trị viên nếu cần tăng sĩ số.`
-                    : `Lớp hiện có ${selectedClass.enrollments.length}/${selectedClass.maxStudents} học viên. Bạn có thể thêm thành viên mới.`}
-                </p>
-                <span className="w-fit shrink-0 rounded-md bg-background/80 px-2 py-1 text-xs font-semibold tabular-nums">
-                  {selectedClass.enrollments.length}/{selectedClass.maxStudents} chỗ
-                </span>
-              </div>
-            )}
-
             {classView === "active" && modalMode === "create" && selectedClass && (
-              <Overlay onClose={closeModal} className="max-w-xl">
-                <div className="space-y-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <h2 className="text-xl font-semibold tracking-tight">
+              <Overlay onClose={closeModal} className="max-w-[480px] !p-0">
+                <div className="space-y-0">
+                  <header className="flex items-start justify-between gap-4 border-b px-5 py-4">
+                    <div className="space-y-0.5">
+                      <h2 className="text-lg font-bold tracking-tight">
                         {createdAccount ? "Tài khoản đã được tạo" : "Tạo tài khoản học viên"}
                       </h2>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-[13px] text-muted-foreground">
                         {createdAccount
                           ? `Đã thêm ${createdAccount.studentName} vào lớp ${selectedClass.name}.`
                           : `Tài khoản mới sẽ được thêm vào lớp ${selectedClass.name}.`}
@@ -1447,55 +1452,57 @@ export default function TeacherClassesPage() {
                       onClick={closeModal}
                       disabled={createBusy}
                       aria-label="Đóng"
-                      className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                      className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                     >
-                      <X className="h-5 w-5" />
+                      <X className="h-4 w-4" />
                     </button>
-                  </div>
+                  </header>
                   {createdAccount ? (
                     <>
-                      <div role="status" className="space-y-1 rounded-md border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-950 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100">
+                      <div className="p-5">
+                      <div role="status" className="space-y-1 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-950 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100">
                         <p><span className="font-medium">Học viên:</span> {createdAccount.studentName}</p>
                         <p><span className="font-medium">Email:</span> {createdAccount.email}</p>
                         <p><span className="font-medium">Mật khẩu mặc định:</span> <strong className="tabular-nums">{createdAccount.initialPassword}</strong></p>
                         <p className="pt-1 text-xs">Tài khoản đang chờ quản trị viên xác nhận kích hoạt. Học viên chưa thể đăng nhập; sau khi được kích hoạt, học viên cần đổi mật khẩu ở lần đăng nhập đầu tiên.</p>
                       </div>
-                      <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
-                        <Button type="button" onClick={closeModal} className="w-full sm:w-auto">Đóng</Button>
                       </div>
+                      <footer className="flex flex-col-reverse gap-2 border-t bg-muted/40 px-5 py-3.5 sm:flex-row sm:justify-end">
+                        <Button type="button" onClick={closeModal} className="w-full sm:w-auto">Đóng</Button>
+                      </footer>
                     </>
                   ) : (
-                  <createFetcher.Form method="post" className="space-y-4">
+                  <createFetcher.Form method="post">
                     <input type="hidden" name="intent" value="create-student" />
                     <input type="hidden" name="classId" value={selectedClass.id} />
-                    {createError && <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">{createError}</p>}
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="new-student-name">Họ tên</Label>
+                    <div className="space-y-3.5 p-5 text-[13px]">
+                      {createError && <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">{createError}</p>}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="new-student-name">Họ và tên</Label>
                         <Input id="new-student-name" name="name" autoComplete="name" maxLength={120} required />
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1.5">
                         <Label htmlFor="new-student-email">Email đăng nhập</Label>
                         <Input id="new-student-email" name="email" type="email" autoComplete="email" maxLength={254} required />
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1.5">
                         <Label htmlFor="new-student-phone">Số điện thoại (không bắt buộc)</Label>
                         <Input id="new-student-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" />
                       </div>
+                      <div className="rounded-lg border bg-muted/40 px-3.5 py-3 text-sm">
+                        Mật khẩu mặc định: <strong className="tabular-nums">{DEFAULT_ACCOUNT_PASSWORD}</strong>
+                        <p className="mt-1 text-xs text-muted-foreground">Tài khoản cần quản trị viên xác nhận kích hoạt trước khi học viên có thể đăng nhập.</p>
+                      </div>
                     </div>
-                    <div className="rounded-md border bg-muted/40 px-3.5 py-3 text-sm">
-                      Mật khẩu mặc định: <strong className="tabular-nums">{DEFAULT_ACCOUNT_PASSWORD}</strong>
-                      <p className="mt-1 text-xs text-muted-foreground">Tài khoản cần quản trị viên xác nhận kích hoạt trước khi học viên có thể đăng nhập.</p>
-                    </div>
-                    <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
-                      <Button type="button" variant="outline" onClick={closeModal} disabled={createBusy} className="w-full sm:w-auto">
+                    <footer className="flex flex-col-reverse gap-2 border-t bg-muted/40 px-5 py-3.5 sm:flex-row sm:justify-end">
+                      <Button type="button" variant="outline" onClick={closeModal} disabled={createBusy} className="h-[38px] w-full text-[13px] sm:w-auto">
                         Hủy
                       </Button>
-                      <Button type="submit" disabled={createBusy} className="w-full sm:w-auto">
+                      <Button type="submit" disabled={createBusy} className="h-[38px] w-full text-[13px] sm:w-auto">
                         {createBusy && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
-                        Tạo tài khoản
+                        Tạo tài khoản học viên
                       </Button>
-                    </div>
+                    </footer>
                   </createFetcher.Form>
                   )}
                 </div>
@@ -1503,12 +1510,12 @@ export default function TeacherClassesPage() {
             )}
 
             {classView === "active" && modalMode === "existing" && selectedClass && (
-              <Overlay onClose={closeModal} className="max-w-xl">
-                <div className="space-y-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <h2 className="text-xl font-semibold tracking-tight">Thêm học viên đã có tài khoản</h2>
-                      <p className="text-sm text-muted-foreground">
+              <Overlay onClose={closeModal} className="max-w-[480px] !p-0">
+                <div className="space-y-0">
+                  <header className="flex items-start justify-between gap-4 border-b px-5 py-4">
+                    <div className="space-y-0.5">
+                      <h2 className="text-lg font-bold tracking-tight">Thêm tài khoản có sẵn</h2>
+                      <p className="text-[13px] text-muted-foreground">
                         Tìm theo tên hoặc email để thêm học viên vào lớp {selectedClass.name}.
                       </p>
                     </div>
@@ -1517,19 +1524,20 @@ export default function TeacherClassesPage() {
                       onClick={closeModal}
                       disabled={existingBusy}
                       aria-label="Đóng"
-                      className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+                      className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                     >
-                      <X className="h-5 w-5" />
+                      <X className="h-4 w-4" />
                     </button>
-                  </div>
-                  <existingFetcher.Form method="post" className="space-y-4">
+                  </header>
+                  <existingFetcher.Form method="post">
                     <input type="hidden" name="intent" value="add-existing-student" />
                     <input type="hidden" name="classId" value={selectedClass.id} />
                     <input type="hidden" name="studentId" value={selectedStudent?.id ?? ""} />
-                    {existingError && <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">{existingError}</p>}
-                    <div className="max-w-md space-y-2">
-                      <Label htmlFor="existing-student-search">Tìm học viên theo tên hoặc email</Label>
-                      <div className="relative">
+                    <div className="space-y-3 p-5 text-[13px]">
+                      {existingError && <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">{existingError}</p>}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="existing-student-search">Tìm học viên theo tên hoặc email</Label>
+                        <div className="relative">
                         <Input
                           id="existing-student-search"
                           type="text"
@@ -1563,70 +1571,71 @@ export default function TeacherClassesPage() {
                             <X aria-hidden="true" className="h-4 w-4" />
                           </Button>
                         )}
+                        </div>
                       </div>
-                    </div>
-                    <div id="existing-student-results" className="max-w-md" aria-live="polite">
-                      {normalizedStudentQuery.length < 2 ? null : isSearching ? (
-                        <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Loader2 className="h-4 w-4 animate-spin" />Đang tìm học viên...
+                      <div id="existing-student-results" aria-live="polite">
+                        {normalizedStudentQuery.length < 2 ? null : isSearching ? (
+                          <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Loader2 className="h-4 w-4 animate-spin" />Đang tìm học viên...
+                          </p>
+                        ) : searchResults.length > 0 ? (
+                          <ul role="listbox" aria-label="Kết quả tìm học viên" className="max-h-52 divide-y overflow-y-auto rounded-lg border">
+                            {searchResults.map((student) => {
+                              const isSelected = selectedStudent?.id === student.id;
+                              return (
+                                <li key={student.id}>
+                                  <button
+                                    type="button"
+                                    role="option"
+                                    aria-selected={isSelected}
+                                    onClick={() => {
+                                      setSelectedStudent(student);
+                                      existingFetcher.reset();
+                                    }}
+                                    className={`w-full px-3 py-2.5 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${isSelected ? "bg-primary/10" : ""}`}
+                                  >
+                                    <span className="block text-sm font-medium">{student.name}</span>
+                                    <span className="block break-all text-xs text-muted-foreground">{student.email}</span>
+                                  </button>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Không tìm thấy học viên phù hợp.</p>
+                        )}
+                      </div>
+                      {selectedStudent && (
+                        <p className="text-sm text-muted-foreground">
+                          Đã chọn: <span className="font-medium text-foreground">{selectedStudent.name}</span> · {selectedStudent.email}
                         </p>
-                      ) : searchResults.length > 0 ? (
-                        <ul role="listbox" aria-label="Kết quả tìm học viên" className="max-h-52 divide-y overflow-y-auto rounded-md border">
-                          {searchResults.map((student) => {
-                            const isSelected = selectedStudent?.id === student.id;
-                            return (
-                              <li key={student.id}>
-                                <button
-                                  type="button"
-                                  role="option"
-                                  aria-selected={isSelected}
-                                  onClick={() => {
-                                    setSelectedStudent(student);
-                                    existingFetcher.reset();
-                                  }}
-                                  className={`w-full px-3 py-2.5 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${isSelected ? "bg-primary/10" : ""}`}
-                                >
-                                  <span className="block text-sm font-medium">{student.name}</span>
-                                  <span className="block break-all text-xs text-muted-foreground">{student.email}</span>
-                                </button>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">Không tìm thấy học viên phù hợp.</p>
                       )}
                     </div>
-                    {selectedStudent && (
-                      <p className="text-sm text-muted-foreground">
-                        Đã chọn: <span className="font-medium text-foreground">{selectedStudent.name}</span> · {selectedStudent.email}
-                      </p>
-                    )}
-                    <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
-                      <Button type="button" variant="outline" onClick={closeModal} disabled={existingBusy} className="w-full sm:w-auto">
+                    <footer className="flex flex-col-reverse gap-2 border-t bg-muted/40 px-5 py-3.5 sm:flex-row sm:justify-end">
+                      <Button type="button" variant="outline" onClick={closeModal} disabled={existingBusy} className="h-[38px] w-full text-[13px] sm:w-auto">
                         Hủy
                       </Button>
-                      <Button type="submit" disabled={existingBusy || !selectedStudent} className="w-full sm:w-auto">
+                      <Button type="submit" disabled={existingBusy || !selectedStudent} className="h-[38px] w-full text-[13px] sm:w-auto">
                         {existingBusy && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
-                        Thêm học viên vào lớp
+                        Thêm vào lớp
                       </Button>
-                    </div>
+                    </footer>
                   </existingFetcher.Form>
                 </div>
               </Overlay>
             )}
 
             {selectedClass && (
-              <section aria-labelledby="class-roster-heading" className="overflow-hidden rounded-lg border">
-                <div className="flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h2 id="class-roster-heading" className="text-base font-semibold">Học viên trong lớp</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {selectedClass.enrollments.length} học viên · {selectedClass.course.title}
+              <section aria-labelledby="class-roster-heading" className="space-y-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <h2 id="class-roster-heading" className="text-base font-bold">Học viên trong lớp</h2>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {selectedClass.enrollments.length} học viên <span aria-hidden="true">·</span> {selectedClass.course.title}
                     </p>
                   </div>
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <label className="relative block sm:w-64">
+                  <div className="flex flex-col gap-2 min-[520px]:flex-row sm:shrink-0">
+                    <label className="relative block min-w-0 min-[520px]:w-56">
                       <span className="sr-only">Tìm học viên trong lớp</span>
                       <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
@@ -1634,7 +1643,7 @@ export default function TeacherClassesPage() {
                         value={rosterQuery}
                         onChange={(event) => setRosterQuery(event.target.value)}
                         placeholder="Tìm tên hoặc email..."
-                        className="h-10 pl-9"
+                        className="h-9 pl-9 text-xs"
                       />
                     </label>
                     {classView === "active" && (
@@ -1646,7 +1655,7 @@ export default function TeacherClassesPage() {
                           removeStudentFetcher.reset();
                           setShowMemberManagement(true);
                         }}
-                        className="w-full sm:w-auto"
+                        className="h-9 w-full text-xs min-[520px]:w-auto"
                       >
                         <Users className="mr-2 h-4 w-4" />Chỉnh sửa thành viên
                       </Button>
@@ -1654,29 +1663,29 @@ export default function TeacherClassesPage() {
                   </div>
                 </div>
                 {selectedClass.enrollments.length === 0 ? (
-                  <p className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  <div className="rounded-xl border border-border/80 px-4 py-10 text-center text-sm text-muted-foreground">
                     {classView === "completed" ? "Lớp này không còn học viên." : "Lớp chưa có học viên."}
-                  </p>
+                  </div>
                 ) : filteredRoster.length === 0 ? (
-                  <p className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  <div className="rounded-xl border border-border/80 px-4 py-10 text-center text-sm text-muted-foreground">
                     Không tìm thấy học viên phù hợp.
-                  </p>
+                  </div>
                 ) : (
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto rounded-xl border border-border/80">
                     <table className="w-full min-w-[560px] border-collapse text-left">
                       <caption className="sr-only">Danh sách học viên lớp {selectedClass.name}</caption>
-                      <thead className="bg-muted/50">
-                        <tr className="border-b">
-                          <th scope="col" className="px-4 py-3 text-xs font-semibold text-muted-foreground">Học viên</th>
-                          <th scope="col" className="px-4 py-3 text-xs font-semibold text-muted-foreground">Email</th>
-                          <th scope="col" className="px-4 py-3 text-xs font-semibold text-muted-foreground">Trạng thái</th>
+                      <thead className="bg-muted/40">
+                        <tr className="border-b text-[11px] uppercase tracking-wider">
+                          <th scope="col" className="px-4 py-3 font-semibold text-muted-foreground">Học viên</th>
+                          <th scope="col" className="px-4 py-3 font-semibold text-muted-foreground">Email</th>
+                          <th scope="col" className="px-4 py-3 font-semibold text-muted-foreground">Trạng thái</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y">
                         {filteredRoster.map(({ user: student }) => (
                           <tr key={student.id} className="transition-colors hover:bg-muted/30">
-                            <th scope="row" className="px-4 py-3 text-sm font-medium">{student.name}</th>
-                            <td className="px-4 py-3 text-sm text-muted-foreground">{student.email}</td>
+                            <th scope="row" className="px-4 py-3 text-[13px] font-semibold">{student.name}</th>
+                            <td className="px-4 py-3 text-[13px] text-muted-foreground">{student.email}</td>
                             <td className="px-4 py-3">
                               <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
                                 !student.isActivated
