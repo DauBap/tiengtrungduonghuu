@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Overlay } from "~/components/common/overlay";
+import { SearchableDropdown } from "~/components/common/searchable-dropdown";
 import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
 import { Button } from "~/components/ui/button";
 import { getStudentsAbsentForThreeConsecutiveSessions } from "~/lib/attendance-streak";
@@ -1549,7 +1550,7 @@ export default function TeacherAttendance() {
           </div>
         </header>
 
-        <section aria-label="Chọn lớp và buổi học" className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+        <section aria-label="Chọn lớp và buổi học" className="overflow-visible rounded-2xl border bg-card shadow-sm">
           <div className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex min-w-0 items-center gap-3 lg:w-[22rem] lg:shrink-0">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
@@ -1562,17 +1563,18 @@ export default function TeacherAttendance() {
                     {selectedClass.course}
                   </span>
                 </div>
-                <select
+                <SearchableDropdown
                   id="attendance-class"
+                  label="Chọn lớp học"
+                  placeholder="Chọn lớp học"
+                  searchPlaceholder="Tìm lớp học..."
+                  options={classes.map((item) => ({ value: item.id, label: item.name }))}
                   value={selectedClass.id}
-                  onChange={(event) => changeClass(event.currentTarget.value)}
-                  disabled={saveAttendanceFetcher.state !== "idle"}
-                  className="mt-0.5 h-7 w-full cursor-pointer border-0 bg-transparent p-0 pr-6 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {classes.map((item) => (
-                    <option key={item.id} value={item.id}>{item.name}</option>
-                  ))}
-                </select>
+                  onChange={changeClass}
+                  className="mt-1 min-w-0 flex-1"
+                  triggerClassName="rounded-lg border-transparent bg-muted/50 text-sm font-semibold shadow-none transition-colors hover:bg-muted"
+                  contentClassName="min-w-0 rounded-xl border-border/80 p-1.5 shadow-lg"
+                />
               </div>
             </div>
 

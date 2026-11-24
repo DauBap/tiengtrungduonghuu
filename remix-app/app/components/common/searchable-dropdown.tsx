@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
+import { cn } from "~/lib/utils";
 
 export interface SearchableDropdownOption {
   value: string;
@@ -25,6 +26,8 @@ export function SearchableDropdown({
   value,
   onChange,
   className,
+  triggerClassName = "",
+  contentClassName = "",
 }: {
   id: string;
   label: string;
@@ -34,10 +37,13 @@ export function SearchableDropdown({
   value: string;
   onChange: (value: string) => void;
   className: string;
+  triggerClassName?: string;
+  contentClassName?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selectedLabel = options.find((option) => option.value === value)?.label;
   const filteredOptions = options.filter((option) =>
@@ -46,7 +52,17 @@ export function SearchableDropdown({
   const listboxId = `${id}-options`;
 
   useEffect(() => {
-    if (isOpen) searchInputRef.current?.focus();
+    if (!isOpen) return;
+    searchInputRef.current?.focus();
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!(event.target instanceof Node) || !containerRef.current?.contains(event.target)) {
+        setIsOpen(false);
+        setQuery("");
+        setActiveIndex(0);
+      }
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [isOpen]);
 
   function closeDropdown() {
@@ -57,6 +73,7 @@ export function SearchableDropdown({
 
   return (
     <div
+      ref={containerRef}
       className={`relative ${className}`}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) closeDropdown();
@@ -77,7 +94,10 @@ export function SearchableDropdown({
         onKeyDown={(event) => {
           if (event.key === "Escape") closeDropdown();
         }}
-        className="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className={cn(
+          "flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          triggerClassName,
+        )}
       >
         <span className={selectedLabel ? "truncate" : "truncate text-muted-foreground"}>
           {selectedLabel ?? placeholder}
@@ -85,7 +105,10 @@ export function SearchableDropdown({
         <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground" />
       </button>
       {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-full min-w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+        <div className={cn(
+          "absolute left-0 top-full z-50 mt-1 w-full min-w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+          contentClassName,
+        )}>
           <div className="relative p-1">
             <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
