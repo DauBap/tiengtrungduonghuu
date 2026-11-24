@@ -6,6 +6,7 @@ import {
   getScheduledDates,
   getScheduledDateAvailability,
   getScheduledOccurrences,
+  getScheduledOccurrencesForClassSchedule,
   getScheduledSlotsForDate,
   getScheduledSessionAvailability,
   getScheduledSessionNumber,
@@ -49,6 +50,54 @@ test("schedule slots keep separate times on the same weekday", () => {
       { date: "2026-11-23", startTime: "08:00", endTime: "09:30" },
       { date: "2026-11-23", startTime: "18:00", endTime: "19:30" },
     ],
+  );
+});
+
+test("scheduled occurrences backfill past dates before the effective date", () => {
+  const schedule = [{ days: [1, 3, 5], startTime: "20:00", endTime: "21:30" }];
+
+  assert.deepEqual(
+    getScheduledOccurrencesForClassSchedule(
+      schedule,
+      "2026-11-23",
+      "2026-11-24",
+      "2026-11-24",
+      "2026-12-02",
+    ),
+    [
+      { date: "2026-11-23", startTime: "20:00", endTime: "21:30" },
+      { date: "2026-11-25", startTime: "20:00", endTime: "21:30" },
+      { date: "2026-11-27", startTime: "20:00", endTime: "21:30" },
+      { date: "2026-11-30", startTime: "20:00", endTime: "21:30" },
+      { date: "2026-12-02", startTime: "20:00", endTime: "21:30" },
+    ],
+  );
+});
+
+test("future effective dates do not generate sessions before they take effect", () => {
+  const schedule = [{ days: [1, 3, 5], startTime: "20:00", endTime: "21:30" }];
+
+  assert.deepEqual(
+    getScheduledOccurrencesForClassSchedule(
+      schedule,
+      "2026-11-20",
+      "2026-11-27",
+      "2026-11-24",
+      "2026-12-01",
+    ),
+    [
+      { date: "2026-11-27", startTime: "20:00", endTime: "21:30" },
+      { date: "2026-11-30", startTime: "20:00", endTime: "21:30" },
+    ],
+  );
+});
+
+test("scheduled slots ending at midnight are valid on their starting weekday", () => {
+  const overnightSchedule = [{ days: [1], startTime: "22:30", endTime: "00:00" }];
+
+  assert.deepEqual(
+    getScheduledOccurrences(overnightSchedule, "2026-11-23", "2026-11-23"),
+    [{ date: "2026-11-23", startTime: "22:30", endTime: "00:00" }],
   );
 });
 

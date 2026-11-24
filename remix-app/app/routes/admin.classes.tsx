@@ -57,7 +57,7 @@ function isValidSchedule(schedule: ScheduleSlot[]): boolean {
     && slot.days.every((day) => Number.isInteger(day) && day >= 0 && day <= 6)
     && validTime(slot.startTime)
     && validTime(slot.endTime)
-    && slot.startTime < slot.endTime
+    && (slot.startTime < slot.endTime || (slot.startTime !== "00:00" && slot.endTime === "00:00"))
   );
 }
 

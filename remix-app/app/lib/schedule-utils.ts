@@ -78,7 +78,7 @@ function getValidScheduledSlots(schedule: unknown): ScheduleSlot[] {
       || !slot.days.some((day) => Number.isInteger(day) && day >= 0 && day <= 6)
       || startMinutes === null
       || endMinutes === null
-      || endMinutes <= startMinutes
+      || (endMinutes <= startMinutes && !(endMinutes === 0 && startMinutes > 0))
     ) {
       return [];
     }
@@ -154,6 +154,31 @@ export function getScheduledOccurrences(
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
   return occurrences;
+}
+
+export function getScheduledOccurrencesForClassSchedule(
+  schedule: unknown,
+  classStartDate: Date | string,
+  scheduleEffectiveFrom: Date | string,
+  today: Date | string,
+  lookaheadEnd: Date | string,
+): ScheduledOccurrence[] {
+  const firstDate = getDateString(classStartDate);
+  const effectiveDate = getDateString(scheduleEffectiveFrom);
+  const todayDate = getDateString(today);
+  const lastDate = getDateString(lookaheadEnd);
+  if (!firstDate || !effectiveDate || !todayDate || !lastDate) return [];
+
+  const beforeEffectiveDate = effectiveDate <= todayDate
+    ? addDaysToDateString(effectiveDate, -1)
+    : null;
+  const backfilledOccurrences = beforeEffectiveDate && firstDate <= beforeEffectiveDate
+    ? getScheduledOccurrences(schedule, firstDate, beforeEffectiveDate)
+    : [];
+  const activeScheduleStart = firstDate > effectiveDate ? firstDate : effectiveDate;
+  const scheduledOccurrences = getScheduledOccurrences(schedule, activeScheduleStart, lastDate);
+
+  return [...backfilledOccurrences, ...scheduledOccurrences];
 }
 
 export function isScheduledDate(schedule: unknown, startDate: Date | string, date: string) {

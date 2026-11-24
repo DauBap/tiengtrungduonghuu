@@ -15,7 +15,7 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Generate the next month of class sessions
         env:
@@ -26,6 +26,7 @@ jobs:
             exit 1
           fi
           curl --fail-with-body --silent --show-error --max-time 240 \
+            --retry 2 --retry-all-errors --retry-delay 10 \
             --request POST \
             --header "Authorization: Bearer $ATTENDANCE_SESSION_CRON_SECRET" \
             "https://tiengtrungduonghuu.edu.vn/api/cron/attendance-sessions"

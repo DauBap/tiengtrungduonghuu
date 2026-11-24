@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import {
   addDaysToDateString,
-  getScheduledOccurrences,
+  getScheduledOccurrencesForClassSchedule,
   getVietnameseDateString,
 } from "~/lib/schedule-utils";
 import { prisma } from "~/lib/prisma.server";
@@ -14,10 +14,6 @@ type SyncResult = {
   sessionsCreated: number;
   sessionsRemoved: number;
 };
-
-function laterDate(left: string, right: string) {
-  return left > right ? left : right;
-}
 
 function isSerializationConflict(error: unknown) {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034";
@@ -46,11 +42,15 @@ async function syncClassSessions(classId: string, now: Date): Promise<SyncResult
           return { classesProcessed: 0, sessionsCreated: 0, sessionsRemoved: 0 };
         }
 
-        const rangeStart = laterDate(
-          getVietnameseDateString(classroom.startDate),
-          getVietnameseDateString(classroom.scheduleEffectiveFrom),
+        const classStartDate = getVietnameseDateString(classroom.startDate);
+        const scheduleEffectiveFrom = getVietnameseDateString(classroom.scheduleEffectiveFrom);
+        const scheduledOccurrences = getScheduledOccurrencesForClassSchedule(
+          classroom.schedule,
+          classStartDate,
+          scheduleEffectiveFrom,
+          today,
+          lookaheadEnd,
         );
-        const scheduledOccurrences = getScheduledOccurrences(classroom.schedule, rangeStart, lookaheadEnd);
         const scheduledOccurrenceKeys = new Set(scheduledOccurrences.map(
           ({ date, startTime, endTime }) => `${date}|${startTime}|${endTime}`,
         ));
@@ -70,7 +70,7 @@ async function syncClassSessions(classId: string, now: Date): Promise<SyncResult
             },
           }),
           tx.classScheduleCancellation.findMany({
-            where: { classId, date: { gte: new Date(`${rangeStart}T00:00:00.000Z`), lte: new Date(`${lookaheadEnd}T00:00:00.000Z`) } },
+            where: { classId, date: { gte: new Date(`${classStartDate}T00:00:00.000Z`), lte: new Date(`${lookaheadEnd}T00:00:00.000Z`) } },
             select: { date: true, startTime: true, endTime: true },
           }),
         ]);
@@ -87,7 +87,7 @@ async function syncClassSessions(classId: string, now: Date): Promise<SyncResult
           where: {
             classId,
             status: "APPROVED",
-            date: { gte: new Date(`${rangeStart}T00:00:00.000Z`), lte: new Date(`${lookaheadEnd}T00:00:00.000Z`) },
+            date: { gte: new Date(`${classStartDate}T00:00:00.000Z`), lte: new Date(`${lookaheadEnd}T00:00:00.000Z`) },
           },
           select: { date: true, startTime: true, endTime: true },
         });
@@ -262,11 +262,23 @@ export async function syncScheduledAttendanceSessions(now = new Date()): Promise
     select: { id: true },
   });
   const total: SyncResult = { classesProcessed: 0, sessionsCreated: 0, sessionsRemoved: 0 };
+  const failures: Array<{ classId: string; error: unknown }> = [];
   for (const classroom of classes) {
-    const result = await syncClassSessions(classroom.id, now);
-    total.classesProcessed += result.classesProcessed;
-    total.sessionsCreated += result.sessionsCreated;
-    total.sessionsRemoved += result.sessionsRemoved;
+    try {
+      const result = await syncClassSessions(classroom.id, now);
+      total.classesProcessed += result.classesProcessed;
+      total.sessionsCreated += result.sessionsCreated;
+      total.sessionsRemoved += result.sessionsRemoved;
+    } catch (error) {
+      console.error(`[scheduled-attendance] Failed to sync class ${classroom.id}.`, error);
+      failures.push({ classId: classroom.id, error });
+    }
+  }
+  if (failures.length > 0) {
+    throw new AggregateError(
+      failures.map(({ error }) => error),
+      `Scheduled attendance sync failed for ${failures.length} class(es): ${failures.map(({ classId }) => classId).join(", ")}.`,
+    );
   }
   return total;
 }
