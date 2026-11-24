@@ -28,6 +28,7 @@ export function SearchableDropdown({
   className,
   triggerClassName = "",
   contentClassName = "",
+  disabled = false,
 }: {
   id: string;
   label: string;
@@ -39,6 +40,7 @@ export function SearchableDropdown({
   className: string;
   triggerClassName?: string;
   contentClassName?: string;
+  disabled?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -86,6 +88,7 @@ export function SearchableDropdown({
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={isOpen ? listboxId : undefined}
+        disabled={disabled}
         onClick={() => {
           setIsOpen((open) => !open);
           setQuery("");
@@ -96,6 +99,7 @@ export function SearchableDropdown({
         }}
         className={cn(
           "flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 text-left text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
           triggerClassName,
         )}
       >

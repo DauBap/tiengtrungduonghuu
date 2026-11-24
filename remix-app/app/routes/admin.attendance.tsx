@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Overlay } from "~/components/common/overlay";
+import { SearchableDropdown } from "~/components/common/searchable-dropdown";
 import { useModalScrollLock } from "~/components/common/use-modal-scroll-lock";
 import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
 import { Badge } from "~/components/ui/badge";
@@ -3217,6 +3218,23 @@ function AdminAttendanceDashboard() {
         ? classroom.teacherId === selectedTeacherId
         : true
   ));
+  const teacherFilterOptions = [
+    ...(!selectedTeacherId ? [{ value: "", label: "Tất cả giáo viên" }] : []),
+    ...teachers.map((teacher) => ({
+      value: teacher.id,
+      label: `${teacher.name} (${classes.filter((classroom) => classroom.teacherId === teacher.id).length} lớp)`,
+    })),
+    ...(classes.some((classroom) => classroom.teacherId === null)
+      ? [{
+          value: "unassigned",
+          label: `Chưa phân công (${classes.filter((classroom) => classroom.teacherId === null).length} lớp)`,
+        }]
+      : []),
+  ];
+  const classFilterOptions = teacherClasses.map((classroom) => ({
+    value: classroom.id,
+    label: `${classroom.name}${classroom.isCompleted ? " · Đã kết thúc" : ""}`,
+  }));
   const selectedMakeupLeaveRequest = makeupLeaveRequests.find(({ id }) => id === makeupLeaveRequestId);
   const minimumMakeupDate = getMinimumMakeupDate(today, selectedMakeupLeaveRequest?.date);
 
@@ -3414,11 +3432,14 @@ function AdminAttendanceDashboard() {
               <Label htmlFor="attendance-teacher-select" className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 1. Chọn giáo viên
               </Label>
-              <select
+              <SearchableDropdown
                 id="attendance-teacher-select"
+                label="Chọn giáo viên"
+                placeholder="Chọn giáo viên"
+                searchPlaceholder="Gõ tên giáo viên để tìm..."
+                options={teacherFilterOptions}
                 value={selectedTeacherId}
-                onChange={(event) => {
-                  const teacherId = event.currentTarget.value;
+                onChange={(teacherId) => {
                   const matchingClasses = classes.filter((classroom) => (
                     teacherId === "unassigned"
                       ? classroom.teacherId === null
@@ -3431,47 +3452,35 @@ function AdminAttendanceDashboard() {
                     sessionId: "",
                   }));
                 }}
-                className="h-[38px] w-full rounded-lg border border-input bg-background px-3 text-[13px] font-semibold text-foreground shadow-none outline-none transition focus-visible:border-ring focus-visible:ring-0"
-              >
-                {!selectedTeacherId && <option value="">Tất cả giáo viên</option>}
-                {teachers.map((teacher) => (
-                  <option key={teacher.id} value={teacher.id}>
-                    {teacher.name} ({classes.filter((classroom) => classroom.teacherId === teacher.id).length} lớp)
-                  </option>
-                ))}
-                {classes.some((classroom) => classroom.teacherId === null) && (
-                  <option value="unassigned">
-                    Chưa phân công ({classes.filter((classroom) => classroom.teacherId === null).length} lớp)
-                  </option>
-                )}
-              </select>
+                className="w-full"
+                triggerClassName="h-[38px] rounded-lg px-3 text-[13px] font-semibold"
+                contentClassName="min-w-0"
+              />
             </div>
 
             <div className="md:col-span-5">
               <Label htmlFor="attendance-class-select" className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 2. Chọn lớp thuộc giáo viên
               </Label>
-              <select
+              <SearchableDropdown
                 id="attendance-class-select"
+                label="Chọn lớp"
+                placeholder={teacherClasses.length ? "Chọn lớp" : "Giáo viên chưa có lớp"}
+                searchPlaceholder="Gõ tên lớp để tìm..."
+                options={classFilterOptions}
                 value={selectedClass?.id ?? ""}
-                onChange={(event) => {
-                  const classroom = classes.find(({ id }) => id === event.currentTarget.value);
+                onChange={(classId) => {
+                  const classroom = classes.find(({ id }) => id === classId);
                   navigate(getDashboardHref({
                     teacherId: classroom?.teacherId ?? "unassigned",
                     classId: classroom?.id ?? "",
                     sessionId: "",
                   }));
                 }}
-                className="h-[38px] w-full rounded-lg border border-input bg-background px-3 text-[13px] font-semibold text-foreground shadow-none outline-none transition focus-visible:border-ring focus-visible:ring-0"
+                className="w-full"
+                triggerClassName="h-[38px] rounded-lg px-3 text-[13px] font-semibold"
                 disabled={teacherClasses.length === 0}
-              >
-                <option value="" disabled>{teacherClasses.length ? "Chọn lớp" : "Giáo viên chưa có lớp"}</option>
-                {teacherClasses.map((classroom) => (
-                  <option key={classroom.id} value={classroom.id}>
-                    {classroom.name}{classroom.isCompleted ? " · Đã kết thúc" : ""}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div className="md:col-span-3">
