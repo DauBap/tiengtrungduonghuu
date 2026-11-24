@@ -3,13 +3,7 @@ import { useLoaderData } from "react-router";
 import { useMemo, useState } from "react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Label } from "~/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { Check, ChevronsUpDown, Search } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -34,6 +28,128 @@ type PendingGradeRow = {
   submittedAt: string;
   pendingQuestionCount: number | null;
 };
+
+type FilterOption = { value: string; label: string };
+
+function SearchableFilter({
+  id,
+  label,
+  value,
+  options,
+  placeholder,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  options: FilterOption[];
+  placeholder: string;
+  onChange: (value: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
+  const selectedLabel = options.find((option) => option.value === value)?.label ?? placeholder;
+  const visibleOptions = options.filter((option) =>
+    option.label.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()),
+  );
+  const listId = `${id}-options`;
+
+  const selectOption = (option: FilterOption) => {
+    onChange(option.value);
+    setQuery("");
+    setIsOpen(false);
+    setActiveIndex(0);
+  };
+
+  return (
+    <div className="grid min-w-0 gap-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="relative">
+        <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          id={id}
+          type="text"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={isOpen}
+          aria-controls={listId}
+          aria-activedescendant={isOpen && visibleOptions[activeIndex] ? `${listId}-${activeIndex}` : undefined}
+          autoComplete="off"
+          value={isOpen ? query : selectedLabel}
+          placeholder={placeholder}
+          onFocus={() => {
+            setIsOpen(true);
+            setQuery("");
+            setActiveIndex(0);
+          }}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setActiveIndex(0);
+            setIsOpen(true);
+          }}
+          onBlur={() => setIsOpen(false)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              setIsOpen(false);
+              setQuery("");
+              return;
+            }
+            if (event.key === "ArrowDown") {
+              event.preventDefault();
+              setIsOpen(true);
+              setActiveIndex((current) => Math.min(current + 1, visibleOptions.length - 1));
+              return;
+            }
+            if (event.key === "ArrowUp") {
+              event.preventDefault();
+              setActiveIndex((current) => Math.max(current - 1, 0));
+              return;
+            }
+            if (event.key === "Enter" && isOpen && visibleOptions[activeIndex]) {
+              event.preventDefault();
+              selectOption(visibleOptions[activeIndex]);
+            }
+          }}
+          className="flex h-10 w-full rounded-md border border-input bg-background py-2 pl-9 pr-9 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        />
+        <ChevronsUpDown aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        {isOpen && (
+          <div
+            id={listId}
+            role="listbox"
+            aria-label={label}
+            className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+          >
+            {visibleOptions.length > 0 ? visibleOptions.map((option, index) => (
+              <div
+                key={option.value}
+                id={`${listId}-${index}`}
+                role="option"
+                aria-selected={value === option.value}
+                onMouseDown={(event) => event.preventDefault()}
+                onMouseEnter={() => setActiveIndex(index)}
+                onClick={() => selectOption(option)}
+                className={`flex min-h-9 cursor-pointer items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-sm outline-none ${
+                  activeIndex === index
+                    ? "bg-accent text-accent-foreground"
+                    : "hover:bg-accent/70"
+                }`}
+              >
+                <span className="truncate">{option.label}</span>
+                {value === option.value && <Check aria-hidden="true" className="h-4 w-4 shrink-0" />}
+              </div>
+            )) : (
+              <p className="px-2 py-6 text-center text-sm text-muted-foreground">
+                Không tìm thấy kết quả phù hợp.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -76,7 +192,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
       classByStudentCourse.set(`${classroom.courseId}:${enrollment.user.id}`, classroom);
     }
   }
-  const classOptions = classes.map(({ id, name }) => ({ id, name }));
+  const classOptions = classes.map(({ id, name, teacher }) => ({
+    id,
+    name,
+    teacherId: teacher?.id ?? null,
+  }));
   const teacherOptions = [...new Map(
     classes.flatMap(({ teacher }) => teacher ? [[teacher.id, teacher.name]] : []),
   )].map(([id, name]) => ({ id, name }));
@@ -262,6 +382,23 @@ export default function AdminGradingOverview() {
   const { user, pendingRows, classOptions, teacherOptions } = useLoaderData<typeof loader>();
   const [classFilter, setClassFilter] = useState("all");
   const [teacherFilter, setTeacherFilter] = useState("all");
+  const availableClassOptions = useMemo(
+    () => classOptions.filter((classroom) => {
+      if (teacherFilter === "all") return true;
+      if (teacherFilter === "unassigned") return classroom.teacherId === null;
+      return classroom.teacherId === teacherFilter;
+    }),
+    [classOptions, teacherFilter],
+  );
+  const teacherFilterOptions: FilterOption[] = [
+    { value: "all", label: "Tất cả giáo viên" },
+    { value: "unassigned", label: "Chưa phân công" },
+    ...teacherOptions.map((teacher) => ({ value: teacher.id, label: teacher.name })),
+  ];
+  const classFilterOptions: FilterOption[] = [
+    { value: "all", label: "Tất cả lớp" },
+    ...availableClassOptions.map((classroom) => ({ value: classroom.id, label: classroom.name })),
+  ];
   const filteredRows = useMemo(
     () => pendingRows.filter((row) =>
       (classFilter === "all" || row.classId === classFilter)
@@ -285,35 +422,38 @@ export default function AdminGradingOverview() {
             {filteredRows.length} / {pendingRows.length} bài đang chờ chấm
           </p>
           <div className="grid gap-3 sm:grid-cols-2 sm:items-end">
-            <div className="grid gap-1.5">
-              <Label htmlFor="grading-class-filter">Lớp</Label>
-              <Select value={classFilter} onValueChange={setClassFilter}>
-                <SelectTrigger id="grading-class-filter" className="w-full sm:w-48">
-                  <SelectValue placeholder="Tất cả lớp" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả lớp</SelectItem>
-                  {classOptions.map((classroom) => (
-                    <SelectItem key={classroom.id} value={classroom.id}>{classroom.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="grading-teacher-filter">Giáo viên</Label>
-              <Select value={teacherFilter} onValueChange={setTeacherFilter}>
-                <SelectTrigger id="grading-teacher-filter" className="w-full sm:w-48">
-                  <SelectValue placeholder="Tất cả giáo viên" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả giáo viên</SelectItem>
-                  <SelectItem value="unassigned">Chưa phân công</SelectItem>
-                  {teacherOptions.map((teacher) => (
-                    <SelectItem key={teacher.id} value={teacher.id}>{teacher.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <SearchableFilter
+              id="grading-teacher-filter"
+              label="Giáo viên"
+              value={teacherFilter}
+              options={teacherFilterOptions}
+              placeholder="Tìm giáo viên..."
+              onChange={(nextTeacherFilter) => {
+                setTeacherFilter(nextTeacherFilter);
+                if (
+                  classFilter !== "all"
+                  && !classOptions.some((classroom) =>
+                    classroom.id === classFilter
+                    && (
+                      nextTeacherFilter === "all"
+                      || (nextTeacherFilter === "unassigned"
+                        ? classroom.teacherId === null
+                        : classroom.teacherId === nextTeacherFilter)
+                    ),
+                  )
+                ) {
+                  setClassFilter("all");
+                }
+              }}
+            />
+            <SearchableFilter
+              id="grading-class-filter"
+              label="Lớp"
+              value={classFilter}
+              options={classFilterOptions}
+              placeholder="Tìm lớp..."
+              onChange={setClassFilter}
+            />
           </div>
         </div>
 
