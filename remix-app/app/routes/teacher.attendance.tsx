@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import { useFetcher, useLoaderData } from "react-router";
+import { useFetcher, useLoaderData, useRevalidator } from "react-router";
 import { createPortal } from "react-dom";
 import type { Prisma } from "@prisma/client";
 import {
@@ -53,6 +53,8 @@ interface AttendanceSession {
   id: string;
   number: number;
   date: string;
+  scheduleStartTime: string | null;
+  scheduleEndTime: string | null;
   name: string;
   courseLessonId: string | null;
   lesson: string;
@@ -78,6 +80,16 @@ interface AttendanceClass {
   lessons: AttendanceCourseLesson[];
   sessions: AttendanceSession[];
 }
+
+interface AttendanceSessionValidationErrors {
+  date?: string;
+  recordingUrl?: string;
+}
+
+type AttendanceValidationErrors = Record<
+  string,
+  Record<string, AttendanceSessionValidationErrors>
+>;
 
 type EditableSessionField = "name" | "date" | "courseLessonId" | "recordingUrl";
 
@@ -143,12 +155,6 @@ function getStudentInitials(name: string) {
   return name.trim().split(/\s+/).slice(-2).map((part) => part[0] ?? "").join("").toUpperCase() || "HV";
 }
 
-function getSessionNumber(title: string, fallback: number) {
-  const match = title.match(/(\d+)\s*$/);
-  const number = Number(match?.[1]);
-  return Number.isSafeInteger(number) && number > 0 ? number : fallback;
-}
-
 function mapAttendanceStatus(status: string | null, absenceReason: string | null): AttendanceStatus {
   if (status === "PRESENT") return "present";
   if (status === "LATE") return "late";
@@ -158,14 +164,26 @@ function mapAttendanceStatus(status: string | null, absenceReason: string | null
   return "absent";
 }
 
-function getSafeRecordingUrl(value: string | null) {
-  if (!value) return null;
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : null;
-  } catch {
-    return null;
+function getRecordingUrlValidation(value: string | null) {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed) return { url: null, error: null };
+  if (trimmed.length > 2048) {
+    return { url: null, error: "Link ghi hình không được vượt quá 2.048 ký tự." };
   }
+
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return { url: null, error: "Link ghi hình phải bắt đầu bằng http:// hoặc https://." };
+    }
+    return { url: url.toString(), error: null };
+  } catch {
+    return { url: null, error: "Link ghi hình không hợp lệ." };
+  }
+}
+
+function getSafeRecordingUrl(value: string | null) {
+  return getRecordingUrlValidation(value).url;
 }
 
 function getAttendanceCounts(
@@ -219,12 +237,16 @@ function VietnameseDatePicker({
   label,
   disabled,
   onSelect,
+  error,
+  errorId,
 }: {
   value: string;
   maxDate: string;
   label: string;
   disabled: boolean;
   onSelect: (date: string) => void;
+  error?: string;
+  errorId?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState<{ left: number; top: number; width: number } | null>(null);
@@ -312,7 +334,7 @@ function VietnameseDatePicker({
   }
 
   return (
-    <>
+    <div className="flex flex-col items-start gap-1">
       <button
         ref={triggerRef}
         type="button"
@@ -320,6 +342,8 @@ function VietnameseDatePicker({
         aria-label={label}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? errorId : undefined}
         onClick={() => {
           if (isOpen) {
             closeCalendar();
@@ -330,11 +354,18 @@ function VietnameseDatePicker({
           setFocusedDate(initialDate);
           setIsOpen(true);
         }}
-        className="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-left text-xs text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-70"
+        className={`inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-left text-xs hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-70 ${
+          error ? "border border-rose-600 text-rose-800" : "text-foreground"
+        }`}
       >
         <CalendarDays className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
         {value ? formatSessionDate(value) : <span className="text-muted-foreground">Chọn ngày</span>}
       </button>
+      {error && (
+        <p id={errorId} role="alert" className="max-w-[200px] whitespace-normal text-xs font-medium text-rose-700">
+          {error}
+        </p>
+      )}
       {isOpen && position && createPortal(
         <div
           ref={calendarRef}
@@ -437,7 +468,7 @@ function VietnameseDatePicker({
         </div>,
         document.body,
       )}
-    </>
+    </div>
   );
 }
 
@@ -471,6 +502,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
           lesson: true,
           recordingUrl: true,
           date: true,
+          scheduleStartTime: true,
+          scheduleEndTime: true,
           lessonId: true,
           courseLesson: { select: { id: true, title: true } },
           records: {
@@ -505,8 +538,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
       })),
       sessions: classroom.attendanceSessions.map((session, index) => ({
         id: session.id,
-        number: getSessionNumber(session.title, index + 1),
+        number: index + 1,
         date: session.date.toISOString().slice(0, 10),
+        scheduleStartTime: session.scheduleStartTime,
+        scheduleEndTime: session.scheduleEndTime,
         name: session.title || `Buổi ${index + 1}`,
         courseLessonId: session.lessonId,
         lesson: session.lesson,
@@ -677,19 +712,9 @@ function parseAttendanceDate(value: string) {
 }
 
 function validateRecordingUrl(value: string | null) {
-  const trimmed = value?.trim() ?? "";
-  if (!trimmed) return null;
-  if (trimmed.length > 2048) throw new AttendanceSaveError("Link ghi hình không được vượt quá 2.048 ký tự.");
-  try {
-    const url = new URL(trimmed);
-    if (url.protocol !== "http:" && url.protocol !== "https:") {
-      throw new AttendanceSaveError("Link ghi hình phải bắt đầu bằng http:// hoặc https://.");
-    }
-    return url.toString();
-  } catch (error) {
-    if (error instanceof AttendanceSaveError) throw error;
-    throw new AttendanceSaveError("Link ghi hình không hợp lệ.");
-  }
+  const validation = getRecordingUrlValidation(value);
+  if (validation.error) throw new AttendanceSaveError(validation.error);
+  return validation.url;
 }
 
 async function ensureScheduleCancellation(
@@ -1074,9 +1099,60 @@ function buildAttendanceSavePayload(
   return { classes };
 }
 
+function getAttendanceValidationErrors(
+  originalClasses: AttendanceClass[],
+  draftClasses: AttendanceClass[],
+): AttendanceValidationErrors {
+  const errors: AttendanceValidationErrors = {};
+
+  for (const draftClass of draftClasses) {
+    const originalClass = originalClasses.find(({ id }) => id === draftClass.id);
+    for (const session of draftClass.sessions) {
+      if (session.pendingDelete) continue;
+
+      const originalSession = originalClass?.sessions.find(({ id }) => id === session.id);
+      const sessionErrors: AttendanceSessionValidationErrors = {};
+      const isManualSession = session.scheduleStartTime === null && session.scheduleEndTime === null;
+      const dateChanged = session.isNew || !originalSession || session.date !== originalSession.date;
+
+      if (
+        session.date
+        && dateChanged
+        && isManualSession
+        && draftClass.sessions.some((otherSession) =>
+          otherSession.id !== session.id
+          && !otherSession.pendingDelete
+          && otherSession.scheduleStartTime === null
+          && otherSession.scheduleEndTime === null
+          && otherSession.date === session.date,
+        )
+      ) {
+        sessionErrors.date = "Ngày này đã có buổi học khác. Hãy chọn ngày khác hoặc xóa buổi trùng.";
+      }
+
+      if (
+        session.isNew
+        || !originalSession
+        || session.recordingUrl !== originalSession.recordingUrl
+      ) {
+        sessionErrors.recordingUrl = getRecordingUrlValidation(session.recordingUrl).error ?? undefined;
+      }
+
+      if (sessionErrors.date || sessionErrors.recordingUrl) {
+        const classErrors = errors[draftClass.id] ?? {};
+        classErrors[session.id] = sessionErrors;
+        errors[draftClass.id] = classErrors;
+      }
+    }
+  }
+
+  return errors;
+}
+
 export default function TeacherAttendance() {
   const { user, classes } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
+  const { revalidate } = useRevalidator();
   const [draftClasses, setDraftClasses] = useState(classes);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [sessionSearch, setSessionSearch] = useState("");
@@ -1098,6 +1174,15 @@ export default function TeacherAttendance() {
     () => buildAttendanceSavePayload(classes, draftClasses),
     [classes, draftClasses],
   );
+  const attendanceValidationErrors = useMemo(
+    () => getAttendanceValidationErrors(classes, draftClasses),
+    [classes, draftClasses],
+  );
+  const hasValidationErrors = Object.values(attendanceValidationErrors).some((classErrors) =>
+    Object.values(classErrors).some((sessionErrors) =>
+      Boolean(sessionErrors.date || sessionErrors.recordingUrl),
+    ),
+  );
   const hasUnsavedChanges = savePayload.classes.length > 0;
   const hasIncompleteNewSession = draftClasses.some((classItem) =>
     classItem.sessions.some((session) =>
@@ -1106,6 +1191,16 @@ export default function TeacherAttendance() {
   );
   const saveError = fetcher.data && !fetcher.data.success ? fetcher.data.error : null;
   const saveSuccess = fetcher.data?.success === true && fetcher.state === "idle" && !hasUnsavedChanges;
+
+  // Revalidate loader ngay khi action trả về success — không phụ thuộc vào
+  // hasUnsavedChanges vì draftClasses chưa được reset lúc này.
+  const prevFetcherState = useRef(fetcher.state);
+  useEffect(() => {
+    if (prevFetcherState.current !== "idle" && fetcher.state === "idle" && fetcher.data?.success === true) {
+      revalidate();
+    }
+    prevFetcherState.current = fetcher.state;
+  }, [fetcher.state, fetcher.data]);
 
   useEffect(() => {
     if (!saveSuccess) {
@@ -1332,6 +1427,8 @@ export default function TeacherAttendance() {
             id,
             number: nextNumber,
             date: "",
+            scheduleStartTime: null,
+            scheduleEndTime: null,
             name: "",
             courseLessonId: null,
             lesson: "",
@@ -1348,7 +1445,7 @@ export default function TeacherAttendance() {
   }
 
   function saveAllChanges() {
-    if (!hasUnsavedChanges || hasIncompleteNewSession || fetcher.state !== "idle") return;
+    if (!hasUnsavedChanges || hasIncompleteNewSession || hasValidationErrors || fetcher.state !== "idle") return;
     fetcher.submit({ payload: JSON.stringify(savePayload) }, { method: "post" });
   }
 
@@ -1468,9 +1565,15 @@ export default function TeacherAttendance() {
               </Button>
               <Button
                 type="button"
-                disabled={!hasUnsavedChanges || hasIncompleteNewSession || fetcher.state !== "idle"}
+                disabled={!hasUnsavedChanges || hasIncompleteNewSession || hasValidationErrors || fetcher.state !== "idle"}
                 onClick={saveAllChanges}
-                title={!hasUnsavedChanges ? "Chưa có thay đổi cần lưu" : undefined}
+                title={
+                  hasValidationErrors
+                    ? "Hãy sửa các trường đang báo lỗi trước khi lưu."
+                    : !hasUnsavedChanges
+                      ? "Chưa có thay đổi cần lưu"
+                      : undefined
+                }
               >
                 <Save className="mr-1.5 h-4 w-4" aria-hidden="true" />
                 {fetcher.state !== "idle" ? "Đang lưu..." : "Lưu toàn bộ bảng"}
@@ -1495,6 +1598,9 @@ export default function TeacherAttendance() {
                 {selectedClass && filteredSessions.map((session) => {
                   const counts = getAttendanceCounts(selectedClass.students, session.records);
                   const recordingUrl = getSafeRecordingUrl(session.recordingUrl);
+                  const sessionValidationError = attendanceValidationErrors[selectedClass.id]?.[session.id];
+                  const dateErrorId = `attendance-date-error-${session.id}`;
+                  const recordingUrlErrorId = `attendance-recording-url-error-${session.id}`;
                   const courseLessonIndex = selectedClass.lessons.findIndex(({ id }) => id === session.courseLessonId);
                   const courseLesson = courseLessonIndex >= 0
                     ? selectedClass.lessons[courseLessonIndex]
@@ -1552,13 +1658,15 @@ export default function TeacherAttendance() {
                           )}
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-3 text-muted-foreground">
+                      <td className="px-3 py-3 align-top text-muted-foreground">
                         <VietnameseDatePicker
                           value={session.date}
                           maxDate={todayDate}
                           label={`Chọn ngày học buổi ${session.number}`}
                           disabled={session.pendingDelete || fetcher.state !== "idle"}
                           onSelect={(date) => updateSessionField(session, "date", date)}
+                          error={sessionValidationError?.date}
+                          errorId={dateErrorId}
                         />
                       </td>
                       <td className="px-3 py-3 text-muted-foreground">
@@ -1613,46 +1721,69 @@ export default function TeacherAttendance() {
                           </button>
                         )}
                       </td>
-                      <td className="px-3 py-3">
-                        {editingField === "recordingUrl" ? (
-                          <Input
-                            autoFocus
-                            type="url"
-                            value={session.recordingUrl ?? ""}
-                            onChange={(event) => updateSessionField(session, "recordingUrl", event.target.value)}
-                            onBlur={() => setEditingSessionField(null)}
-                            maxLength={2048}
-                            placeholder="https://..."
-                            disabled={session.pendingDelete || fetcher.state !== "idle"}
-                            aria-label={`Link ghi hình buổi ${session.number}`}
-                            className="h-8 min-w-[160px]"
-                          />
-                        ) : (
-                          <div className="flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={() => setEditingSessionField({ sessionId: session.id, field: "recordingUrl" })}
+                      <td className="px-3 py-3 align-top">
+                        <div className="flex flex-col items-start gap-1">
+                          {editingField === "recordingUrl" ? (
+                            <Input
+                              autoFocus
+                              type="url"
+                              value={session.recordingUrl ?? ""}
+                              onChange={(event) => updateSessionField(session, "recordingUrl", event.target.value)}
+                              onBlur={() => setEditingSessionField(null)}
+                              maxLength={2048}
+                              placeholder="https://..."
                               disabled={session.pendingDelete || fetcher.state !== "idle"}
-                              aria-label={`Sửa link ghi hình buổi ${session.number}`}
-                              title="Bấm để sửa link ghi hình"
-                              className={`max-w-[200px] truncate rounded-sm text-left text-xs font-medium hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-70 ${session.recordingUrl && !recordingUrl ? "text-rose-700" : session.recordingUrl ? "text-primary" : "text-muted-foreground"}`}
-                            >
-                              {session.recordingUrl || "Thêm link ghi hình"}
-                            </button>
-                            {recordingUrl && (
-                              <a
-                                href={recordingUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label={`Mở link ghi hình buổi ${session.number}`}
-                                title="Mở link ghi hình"
-                                className="shrink-0 rounded-sm text-primary hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              aria-label={`Link ghi hình buổi ${session.number}`}
+                              aria-invalid={Boolean(sessionValidationError?.recordingUrl)}
+                              aria-describedby={sessionValidationError?.recordingUrl ? recordingUrlErrorId : undefined}
+                              className={`h-8 min-w-[160px] ${
+                                sessionValidationError?.recordingUrl
+                                  ? "border-rose-600 focus-visible:ring-rose-600"
+                                  : ""
+                              }`}
+                            />
+                          ) : (
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => setEditingSessionField({ sessionId: session.id, field: "recordingUrl" })}
+                                disabled={session.pendingDelete || fetcher.state !== "idle"}
+                                aria-label={`Sửa link ghi hình buổi ${session.number}`}
+                                aria-invalid={Boolean(sessionValidationError?.recordingUrl)}
+                                aria-describedby={sessionValidationError?.recordingUrl ? recordingUrlErrorId : undefined}
+                                title="Bấm để sửa link ghi hình"
+                                className={`max-w-[200px] truncate rounded-sm text-left text-xs font-medium hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-70 ${
+                                  sessionValidationError?.recordingUrl
+                                    ? "border border-rose-600 bg-rose-50 px-2 py-1 text-rose-800"
+                                    : session.recordingUrl && !recordingUrl
+                                      ? "text-rose-700"
+                                      : session.recordingUrl
+                                        ? "text-primary"
+                                        : "text-muted-foreground"
+                                }`}
                               >
-                                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                              </a>
-                            )}
-                          </div>
-                        )}
+                                {session.recordingUrl || "Thêm link ghi hình"}
+                              </button>
+                              {recordingUrl && (
+                                <a
+                                  href={recordingUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`Mở link ghi hình buổi ${session.number}`}
+                                  title="Mở link ghi hình"
+                                  className="shrink-0 rounded-sm text-primary hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                  <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                                </a>
+                              )}
+                            </div>
+                          )}
+                          {sessionValidationError?.recordingUrl && (
+                            <p id={recordingUrlErrorId} role="alert" className="max-w-[220px] whitespace-normal text-xs font-medium text-rose-700">
+                              {sessionValidationError.recordingUrl}
+                            </p>
+                          )}
+                        </div>
                       </td>
                       <td className="px-3 py-3">
                         {counts.marked === 0 ? (
