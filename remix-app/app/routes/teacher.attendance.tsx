@@ -1721,7 +1721,7 @@ export default function TeacherAttendance() {
                           </button>
                         )}
                       </td>
-                      <td className="px-3 py-3 align-top">
+                      <td className="px-3 py-3 align-middle">
                         <div className="flex flex-col items-start gap-1">
                           {editingField === "recordingUrl" ? (
                             <Input
