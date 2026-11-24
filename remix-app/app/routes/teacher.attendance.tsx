@@ -1,148 +1,107 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import { useFetcher, useLoaderData, useLocation } from "react-router";
-import { toast } from "sonner";
+import { useFetcher, useLoaderData } from "react-router";
+import { createPortal } from "react-dom";
+import type { Prisma } from "@prisma/client";
 import {
-  BookOpen,
   CalendarDays,
   Check,
-  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ClipboardCheck,
+  ExternalLink,
+  Info,
+  Plus,
+  RotateCcw,
+  Save,
   Search,
+  Trash2,
   Users,
   X,
 } from "lucide-react";
 import { AppShell } from "~/components/layout/app-shell";
 import { Overlay } from "~/components/common/overlay";
-import { SearchableDropdown } from "~/components/common/searchable-dropdown";
-import { ConsecutiveAbsenceBadge, ConsecutiveAbsenceNotice } from "~/components/attendance/consecutive-absence-notice";
 import { Button } from "~/components/ui/button";
-import { getStudentsAbsentForThreeConsecutiveSessions } from "~/lib/attendance-streak";
-import {
-  addDaysToDateString,
-  getScheduledSlotsForDate,
-  getVietnameseDateString,
-} from "~/lib/schedule-utils";
+import { Input } from "~/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { formatSchedule, getVietnameseDateString } from "~/lib/schedule-utils";
 import {
   getClassSessionOrderSnapshot,
   renumberClassAttendanceSessions,
 } from "~/lib/attendance-session-order.server";
-import {
-  excludeHandledAbsenceAlerts,
-  handleConsecutiveAbsenceAlert,
-  type ConsecutiveAbsenceAlert,
-} from "~/lib/attendance-streak.server";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
+import { toast } from "sonner";
 
-type AttendanceStatus = "present" | "late" | "absent";
-type AbsenceReason = "excused" | "unexcused";
-type AttendanceFilter = "all" | AttendanceStatus;
-type AttendanceTask = "recording" | "hanzi" | "duet" | "lessonLink";
-type ReviewSessionType = "MIDTERM" | "FINAL";
-type StudentReviewStatus = "CAN_ADVANCE" | "CANNOT_ADVANCE" | "DROPPED_OUT";
+type AttendanceStatus = "present" | "late" | "excused" | "unexcused" | "absent" | null;
+type AttendanceFilter = "all" | "present" | "late" | "absent";
+type HomeworkKey = "recording" | "hanzi" | "duet" | "link";
+type AttendanceChoice = Exclude<AttendanceStatus, null>;
 
 interface AttendanceStudent {
   id: string;
+  initials: string;
   name: string;
 }
 
 interface AttendanceRecord {
-  status: AttendanceStatus | null;
-  absenceReason: AbsenceReason | null;
-  tasks: Record<AttendanceTask, boolean>;
+  status: AttendanceStatus;
+  homework: Record<HomeworkKey, boolean>;
+}
+
+interface AttendanceSession {
+  id: string;
+  number: number;
+  date: string;
+  name: string;
+  courseLessonId: string | null;
+  lesson: string;
+  lessonDisplay: string;
+  courseLessonTitle: string | null;
+  recordingUrl: string | null;
+  isNew: boolean;
+  pendingDelete: boolean;
+  records: Record<string, AttendanceRecord>;
+}
+
+interface AttendanceCourseLesson {
+  id: string;
+  title: string;
 }
 
 interface AttendanceClass {
   id: string;
   name: string;
-  course: string;
-  midtermReviewSession: number | null;
-  finalReviewSession: number | null;
-  courseLessons: { id: string; order: number; title: string }[];
-  approvedLeaveSlots: ApprovedLeaveSlot[];
+  level: string;
+  schedule: string;
+  students: AttendanceStudent[];
+  lessons: AttendanceCourseLesson[];
   sessions: AttendanceSession[];
-  students: AttendanceStudent[];
-  consecutiveAbsenceAlerts: ConsecutiveAbsenceAlert[];
 }
 
-interface AttendanceSession {
-  id: string;
-  title: string;
-  lessonId: string | null;
-  lesson: string;
-  recordingUrl: string | null;
-  date: string;
-  scheduleStartTime: string | null;
-  scheduleEndTime: string | null;
-  isScheduleGenerated: boolean;
-  isMakeupSession: boolean;
-  hasAttendanceRecords: boolean;
-  records: Record<string, AttendanceRecord>;
-}
+type EditableSessionField = "name" | "date" | "courseLessonId" | "recordingUrl";
 
-interface ApprovedLeaveSlot {
-  id: string;
-  classId: string;
-  className: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-}
-
-interface ReviewPrompt {
-  classId: string;
+interface EditingSessionField {
   sessionId: string;
-  sessionNumber: number;
-  sessionType: ReviewSessionType;
-  sessionTitle: string;
-  students: AttendanceStudent[];
-  statuses: Record<string, StudentReviewStatus | "">;
+  field: EditableSessionField;
 }
 
-const TOTAL_TAB_ID = "attendance-total";
-
-const STATUS_OPTIONS: { value: AttendanceStatus; label: string; tone: string }[] = [
-  { value: "present", label: "Có mặt", tone: "text-success" },
-  { value: "late", label: "Đi muộn", tone: "text-warning" },
-  { value: "absent", label: "Vắng mặt", tone: "text-destructive" },
+const HOMEWORK_FIELDS: { key: HomeworkKey; label: string }[] = [
+  { key: "recording", label: "Ghi âm" },
+  { key: "hanzi", label: "Chữ Hán" },
+  { key: "duet", label: "Duet" },
+  { key: "link", label: "Bài link" },
 ];
 
-const ATTENDANCE_CHOICES: {
-  value: string;
+const ATTENDANCE_OPTIONS: {
+  value: AttendanceChoice;
   label: string;
-  status: AttendanceStatus;
-  absenceReason: AbsenceReason | null;
-  activeClass: string;
+  selectedClass: string;
 }[] = [
-  {
-    value: "present",
-    label: "Có mặt",
-    status: "present",
-    absenceReason: null,
-    activeClass: "border-emerald-600 bg-emerald-600 text-white",
-  },
-  {
-    value: "late",
-    label: "Đi muộn",
-    status: "late",
-    absenceReason: null,
-    activeClass: "border-amber-500 bg-amber-500 text-white",
-  },
-  {
-    value: "excused",
-    label: "Vắng (CP)",
-    status: "absent",
-    absenceReason: "excused",
-    activeClass: "border-sky-700 bg-sky-700 text-white",
-  },
-  {
-    value: "unexcused",
-    label: "Vắng (KP)",
-    status: "absent",
-    absenceReason: "unexcused",
-    activeClass: "border-rose-700 bg-rose-700 text-white",
-  },
+  { value: "present", label: "Có mặt", selectedClass: "border-emerald-600 bg-emerald-600 text-white" },
+  { value: "late", label: "Đi muộn", selectedClass: "border-amber-500 bg-amber-500 text-white" },
+  { value: "excused", label: "Vắng (CP)", selectedClass: "border-sky-700 bg-sky-700 text-white" },
+  { value: "unexcused", label: "Vắng (KP)", selectedClass: "border-rose-700 bg-rose-700 text-white" },
 ];
 
 const FILTER_OPTIONS: { value: AttendanceFilter; label: string }[] = [
@@ -152,113 +111,351 @@ const FILTER_OPTIONS: { value: AttendanceFilter; label: string }[] = [
   { value: "absent", label: "Vắng mặt" },
 ];
 
-const ATTENDANCE_TASKS: { key: AttendanceTask; label: string }[] = [
-  { key: "recording", label: "Ghi âm" },
-  { key: "hanzi", label: "Chữ Hán" },
-  { key: "duet", label: "Duet" },
-  { key: "lessonLink", label: "Bài link" },
-];
+const EMPTY_ATTENDANCE_RECORD: AttendanceRecord = {
+  status: null,
+  homework: { recording: false, hanzi: false, duet: false, link: false },
+};
 
-function fromDatabaseStatus(status: string | null): AttendanceStatus | null {
+interface ScheduleSlot {
+  days: number[];
+  startTime: string;
+  endTime: string;
+}
+
+function isScheduleSlot(value: unknown): value is ScheduleSlot {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const slot = value as Record<string, unknown>;
+  return Array.isArray(slot.days)
+    && slot.days.length > 0
+    && slot.days.every((day) => Number.isInteger(day) && day >= 0 && day <= 6)
+    && typeof slot.startTime === "string"
+    && typeof slot.endTime === "string";
+}
+
+function formatClassSchedule(value: unknown) {
+  const slots = Array.isArray(value)
+    ? value.filter(isScheduleSlot).map((slot) => ({ ...slot, days: [...slot.days] }))
+    : [];
+  return formatSchedule(slots);
+}
+
+function getStudentInitials(name: string) {
+  return name.trim().split(/\s+/).slice(-2).map((part) => part[0] ?? "").join("").toUpperCase() || "HV";
+}
+
+function getSessionNumber(title: string, fallback: number) {
+  const match = title.match(/(\d+)\s*$/);
+  const number = Number(match?.[1]);
+  return Number.isSafeInteger(number) && number > 0 ? number : fallback;
+}
+
+function mapAttendanceStatus(status: string | null, absenceReason: string | null): AttendanceStatus {
   if (status === "PRESENT") return "present";
   if (status === "LATE") return "late";
-  if (status === "ABSENT") return "absent";
-  return null;
+  if (status !== "ABSENT") return null;
+  if (absenceReason === "EXCUSED") return "excused";
+  if (absenceReason === "UNEXCUSED") return "unexcused";
+  return "absent";
 }
 
-function toDatabaseStatus(status: AttendanceStatus | null) {
-  if (status === "present") return "PRESENT";
-  if (status === "late") return "LATE";
-  if (status === "absent") return "ABSENT";
-  return null;
+function getSafeRecordingUrl(value: string | null) {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
 }
 
-function isAttendanceStatus(value: unknown): value is AttendanceStatus {
-  return value === "present" || value === "late" || value === "absent";
-}
+function getAttendanceCounts(
+  students: AttendanceStudent[],
+  records: Record<string, AttendanceRecord>,
+) {
+  const statuses = students.map((student) => records[student.id]?.status ?? null);
+  const present = statuses.filter((status) => status === "present").length;
+  const late = statuses.filter((status) => status === "late").length;
+  const excused = statuses.filter((status) => status === "excused").length;
+  const unexcused = statuses.filter((status) => status === "unexcused").length;
+  const unspecifiedAbsence = statuses.filter((status) => status === "absent").length;
 
-function fromDatabaseAbsenceReason(reason: string | null): AbsenceReason | null {
-  if (reason === "EXCUSED") return "excused";
-  if (reason === "UNEXCUSED") return "unexcused";
-  return null;
-}
-
-function isAbsenceReason(value: unknown): value is AbsenceReason {
-  return value === "excused" || value === "unexcused";
-}
-
-function toDatabaseAbsenceReason(reason: AbsenceReason | null) {
-  if (reason === "excused") return "EXCUSED";
-  if (reason === "unexcused") return "UNEXCUSED";
-  return null;
-}
-
-function parseAttendanceDate(value: string): Date | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
-  const date = new Date(`${value}T00:00:00.000Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value ? date : null;
-}
-
-function getMinimumMakeupDate(today: string, leaveDate?: string) {
-  const tomorrow = addDaysToDateString(today, 1) ?? today;
-  const dayAfterLeave = leaveDate ? addDaysToDateString(leaveDate, 1) : null;
-  return dayAfterLeave && dayAfterLeave > tomorrow ? dayAfterLeave : tomorrow;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isAttendanceTasks(value: unknown): value is Record<AttendanceTask, boolean> {
-  return isRecord(value) && ATTENDANCE_TASKS.every(({ key }) => typeof value[key] === "boolean");
-}
-
-function createEmptyAttendanceRecord(): AttendanceRecord {
   return {
-    status: "present",
-    absenceReason: null,
-    tasks: { recording: false, hanzi: false, duet: false, lessonLink: false },
+    total: students.length,
+    present,
+    late,
+    excused,
+    unexcused,
+    unspecifiedAbsence,
+    absent: excused + unexcused + unspecifiedAbsence,
+    marked: present + late + excused + unexcused + unspecifiedAbsence,
   };
 }
 
-function formatAttendanceSessionDate(date: string) {
-  return new Date(`${date}T00:00:00.000Z`).toLocaleDateString("vi-VN", {
-    weekday: "short",
+function formatSessionDate(value: string) {
+  return new Date(`${value}T00:00:00.000Z`).toLocaleDateString("vi-VN", {
     day: "2-digit",
     month: "2-digit",
+    year: "numeric",
     timeZone: "UTC",
   });
 }
 
-function getAttendanceSessionNumber(
-  sessions: { id: string; title: string }[],
-  sessionId: string,
-): number | null {
-  const index = sessions.findIndex((session) => session.id === sessionId);
-  if (index < 0) return null;
-  const number = Number(sessions[index].title.match(/\d+$/)?.[0] ?? 0);
-  return Number.isSafeInteger(number) && number > 0 ? number : index + 1;
+function getCalendarMonth(value: string) {
+  const [year, month] = value.slice(0, 7).split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, 1));
 }
 
-function isStudentReviewStatus(value: unknown): value is StudentReviewStatus {
-  return value === "CAN_ADVANCE" || value === "CANNOT_ADVANCE" || value === "DROPPED_OUT";
+function getCalendarDays(month: Date) {
+  const firstDay = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), 1));
+  const mondayOffset = (firstDay.getUTCDay() + 6) % 7;
+  return Array.from({ length: 42 }, (_, index) =>
+    new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), 1 - mondayOffset + index)),
+  );
+}
+
+function VietnameseDatePicker({
+  value,
+  maxDate,
+  label,
+  disabled,
+  onSelect,
+}: {
+  value: string;
+  maxDate: string;
+  label: string;
+  disabled: boolean;
+  onSelect: (date: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState<{ left: number; top: number; width: number } | null>(null);
+  const [visibleMonth, setVisibleMonth] = useState(() =>
+    getCalendarMonth(value && value <= maxDate ? value : maxDate),
+  );
+  const [focusedDate, setFocusedDate] = useState(value && value <= maxDate ? value : maxDate);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const updatePosition = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const width = Math.min(288, window.innerWidth - 16);
+      const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
+      const height = 360;
+      const top = rect.bottom + height + 8 <= window.innerHeight - 8
+        ? rect.bottom + 8
+        : Math.max(8, rect.top - height - 8);
+      setPosition({ left, top, width });
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (
+        target instanceof Node
+        && (triggerRef.current?.contains(target) || calendarRef.current?.contains(target))
+      ) {
+        return;
+      }
+      setIsOpen(false);
+      setPosition(null);
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && position) {
+      calendarRef.current
+        ?.querySelector<HTMLButtonElement>(`[data-calendar-date="${focusedDate}"]`)
+        ?.focus();
+    }
+  }, [focusedDate, isOpen, position]);
+
+  const calendarDays = getCalendarDays(visibleMonth);
+  const monthLabel = new Intl.DateTimeFormat("vi-VN", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(visibleMonth);
+  const maximumMonth = getCalendarMonth(maxDate);
+  const canGoForward = visibleMonth < maximumMonth
+    && (visibleMonth.getUTCFullYear() !== maximumMonth.getUTCFullYear()
+      || visibleMonth.getUTCMonth() !== maximumMonth.getUTCMonth());
+
+  function closeCalendar() {
+    setIsOpen(false);
+    setPosition(null);
+    requestAnimationFrame(() => triggerRef.current?.focus());
+  }
+
+  function selectDate(date: string) {
+    if (date > maxDate) return;
+    onSelect(date);
+    closeCalendar();
+  }
+
+  function moveMonth(amount: number) {
+    setVisibleMonth((current) =>
+      new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth() + amount, 1)),
+    );
+  }
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        disabled={disabled}
+        aria-label={label}
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+        onClick={() => {
+          if (isOpen) {
+            closeCalendar();
+            return;
+          }
+          const initialDate = value && value <= maxDate ? value : maxDate;
+          setVisibleMonth(getCalendarMonth(initialDate));
+          setFocusedDate(initialDate);
+          setIsOpen(true);
+        }}
+        className="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-left text-xs text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-70"
+      >
+        <CalendarDays className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+        {value ? formatSessionDate(value) : <span className="text-muted-foreground">Chọn ngày</span>}
+      </button>
+      {isOpen && position && createPortal(
+        <div
+          ref={calendarRef}
+          role="dialog"
+          aria-label="Chọn ngày học"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") closeCalendar();
+          }}
+          className="fixed z-[100] rounded-lg border bg-popover p-3 text-popover-foreground shadow-lg"
+          style={{ left: position.left, top: position.top, width: position.width }}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              aria-label="Tháng trước"
+              onClick={() => moveMonth(-1)}
+            >
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+            </Button>
+            <p className="text-sm font-semibold capitalize" aria-live="polite">{monthLabel}</p>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              aria-label="Tháng sau"
+              disabled={!canGoForward}
+              onClick={() => moveMonth(1)}
+            >
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          </div>
+          <div className="mt-2 grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-muted-foreground">
+            {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((day) => (
+              <span key={day} className="py-1">{day}</span>
+            ))}
+          </div>
+          <div className="mt-1 grid grid-cols-7 gap-1">
+            {calendarDays.map((day) => {
+              const date = day.toISOString().slice(0, 10);
+              const isSelected = date === value;
+              const isToday = date === maxDate;
+              const isInMonth = day.getUTCMonth() === visibleMonth.getUTCMonth();
+              const isFuture = date > maxDate;
+              return (
+                <button
+                  key={date}
+                  type="button"
+                  data-calendar-date={date}
+                  tabIndex={date === focusedDate ? 0 : -1}
+                  disabled={isFuture}
+                  aria-label={new Intl.DateTimeFormat("vi-VN", {
+                    dateStyle: "full",
+                    timeZone: "UTC",
+                  }).format(day)}
+                  aria-pressed={isSelected}
+                  aria-current={isToday ? "date" : undefined}
+                  onFocus={() => setFocusedDate(date)}
+                  onKeyDown={(event) => {
+                    const offset = {
+                      ArrowLeft: -1,
+                      ArrowRight: 1,
+                      ArrowUp: -7,
+                      ArrowDown: 7,
+                    }[event.key];
+                    if (offset === undefined) return;
+                    event.preventDefault();
+                    const nextDay = new Date(`${date}T00:00:00.000Z`);
+                    nextDay.setUTCDate(nextDay.getUTCDate() + offset);
+                    const nextDate = nextDay.toISOString().slice(0, 10);
+                    if (nextDate <= maxDate) {
+                      setFocusedDate(nextDate);
+                      setVisibleMonth(getCalendarMonth(nextDate));
+                    }
+                  }}
+                  onClick={() => selectDate(date)}
+                  className={`h-8 rounded-md text-xs tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    isSelected
+                      ? "bg-primary font-semibold text-primary-foreground"
+                      : isFuture
+                        ? "cursor-not-allowed text-muted-foreground/40"
+                        : isInMonth
+                          ? "text-foreground hover:bg-accent"
+                          : "text-muted-foreground hover:bg-accent"
+                  } ${isToday && !isSelected ? "ring-1 ring-primary/40" : ""}`}
+                >
+                  {day.getUTCDate()}
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-2 flex justify-end border-t pt-2">
+            <Button type="button" size="sm" variant="ghost" onClick={() => selectDate(maxDate)}>
+              Hôm nay
+            </Button>
+          </div>
+        </div>,
+        document.body,
+      )}
+    </>
+  );
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
-  const today = getVietnameseDateString();
   const classes = await prisma.class.findMany({
     where: { teacherId: user.id, completedAt: null },
     select: {
       id: true,
       name: true,
       schedule: true,
-      midtermReviewSession: true,
-      finalReviewSession: true,
       course: {
         select: {
-          title: true,
-          lessons: { orderBy: { order: "asc" }, select: { id: true, order: true, title: true } },
+          hskLevel: true,
+          lessons: {
+            orderBy: { order: "asc" },
+            select: { id: true, title: true },
+          },
         },
       },
       enrollments: {
@@ -271,15 +468,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
         select: {
           id: true,
           title: true,
-          lessonId: true,
           lesson: true,
           recordingUrl: true,
           date: true,
-          scheduleStartTime: true,
-          scheduleEndTime: true,
-          isScheduleGenerated: true,
-          makeupForLeaveRequestId: true,
-          createdAt: true,
+          lessonId: true,
+          courseLesson: { select: { id: true, title: true } },
           records: {
             select: {
               studentId: true,
@@ -293,1981 +486,1516 @@ export async function loader({ request }: LoaderFunctionArgs) {
           },
         },
       },
-      teacherLeaveRequests: {
-        where: { status: "APPROVED", makeupSession: null },
-        orderBy: [{ date: "asc" }, { startTime: "asc" }],
-        select: { id: true, date: true, startTime: true, endTime: true },
-      },
     },
-    orderBy: { name: "asc" },
+    orderBy: [{ course: { order: "asc" } }, { name: "asc" }],
   });
-  const alerts = classes.flatMap((classroom) => {
-    const sessions = classroom.attendanceSessions.filter(({ date }) => date.toISOString().slice(0, 10) <= today);
-    return sessions.flatMap((session, sessionIndex) => {
-      if (sessionIndex < 2) return [];
-      const recentSessions = sessions.slice(sessionIndex - 2, sessionIndex + 1);
-      const absentStudentIds = getStudentsAbsentForThreeConsecutiveSessions(
-        recentSessions.map((item) => ({
-          id: item.id,
-          records: item.records.map(({ studentId, status }) => ({ studentId, status })),
-        })),
-        session.id,
-      );
-      return [...absentStudentIds].flatMap((studentId) => {
-        const student = classroom.enrollments.find(({ user: enrolled }) => enrolled.id === studentId)?.user;
-        if (!student) return [];
-        return [{
-          classId: classroom.id,
-          className: classroom.name,
-          studentId,
-          studentName: student.name,
-          sessionId: session.id,
-          sessionDate: session.date,
-          sessionCreatedAt: session.createdAt,
-          sessions: recentSessions.map((item) => ({
-            id: item.id,
-            title: item.title,
-            date: item.date.toISOString().slice(0, 10),
-          })),
-        }];
-      });
-    });
-  });
-  const visibleAlerts = await excludeHandledAbsenceAlerts(alerts);
-  const alertsByClass = new Map<string, ConsecutiveAbsenceAlert[]>();
-  for (const alert of visibleAlerts) {
-    const classAlerts = alertsByClass.get(alert.classId) ?? [];
-    classAlerts.push(alert);
-    alertsByClass.set(alert.classId, classAlerts);
-  }
+
   return {
     user,
-    today,
     classes: classes.map((classroom): AttendanceClass => ({
       id: classroom.id,
       name: classroom.name,
-      course: classroom.course.title,
-      midtermReviewSession: classroom.midtermReviewSession,
-      finalReviewSession: classroom.finalReviewSession,
-      courseLessons: classroom.course.lessons,
-      students: classroom.enrollments.map(({ user: student }) => ({ id: student.id, name: student.name })),
-      approvedLeaveSlots: classroom.teacherLeaveRequests.map((leave): ApprovedLeaveSlot => ({
-        id: leave.id,
-        classId: classroom.id,
-        className: classroom.name,
-        date: leave.date.toISOString().slice(0, 10),
-        startTime: leave.startTime,
-        endTime: leave.endTime,
+      level: `HSK ${classroom.course.hskLevel}`,
+      schedule: formatClassSchedule(classroom.schedule),
+      lessons: classroom.course.lessons,
+      students: classroom.enrollments.map(({ user: student }) => ({
+        id: student.id,
+        name: student.name,
+        initials: getStudentInitials(student.name),
       })),
-      sessions: classroom.attendanceSessions.map((session) => ({
+      sessions: classroom.attendanceSessions.map((session, index) => ({
         id: session.id,
-        title: session.title,
-        lessonId: session.lessonId,
-        lesson: session.lesson,
-        recordingUrl: session.recordingUrl,
+        number: getSessionNumber(session.title, index + 1),
         date: session.date.toISOString().slice(0, 10),
-        scheduleStartTime: session.scheduleStartTime,
-        scheduleEndTime: session.scheduleEndTime,
-        isScheduleGenerated: session.isScheduleGenerated,
-        isMakeupSession: session.makeupForLeaveRequestId !== null,
-        hasAttendanceRecords: session.records.length > 0,
-        records: Object.fromEntries(session.records.map((record) => [record.studentId, {
-          status: fromDatabaseStatus(record.status),
-          absenceReason: fromDatabaseAbsenceReason(record.absenceReason),
-          tasks: {
-            recording: record.recording,
-            hanzi: record.hanzi,
-            duet: record.duet,
-            lessonLink: record.lessonLink,
+        name: session.title || `Buổi ${index + 1}`,
+        courseLessonId: session.lessonId,
+        lesson: session.lesson,
+        lessonDisplay: session.courseLesson?.title || session.lesson || "Chưa gắn bài học",
+        courseLessonTitle: session.courseLesson?.title ?? null,
+        recordingUrl: session.recordingUrl,
+        isNew: false,
+        pendingDelete: false,
+        records: Object.fromEntries(session.records.map((record) => [
+          record.studentId,
+          {
+            status: mapAttendanceStatus(record.status, record.absenceReason),
+            homework: {
+              recording: record.recording,
+              hanzi: record.hanzi,
+              duet: record.duet,
+              link: record.lessonLink,
+            },
           },
-        }])),
+        ])),
       })),
-      consecutiveAbsenceAlerts: alertsByClass.get(classroom.id) ?? [],
     })),
   };
+}
+
+interface AttendanceSaveRecord {
+  studentId: string;
+  status: AttendanceStatus;
+  homework: Record<HomeworkKey, boolean>;
+}
+
+interface AttendanceSaveSession {
+  id: string;
+  isNew: boolean;
+  pendingDelete: boolean;
+  title: string;
+  date: string;
+  courseLessonId: string | null;
+  lesson: string;
+  recordingUrl: string | null;
+  records: AttendanceSaveRecord[];
+}
+
+interface AttendanceSaveClass {
+  classId: string;
+  sessions: AttendanceSaveSession[];
+}
+
+interface AttendanceSavePayload {
+  classes: AttendanceSaveClass[];
+}
+
+const MAX_SAVE_CLASSES = 100;
+const MAX_SAVE_SESSIONS = 500;
+const MAX_SAVE_RECORDS = 10_000;
+
+class AttendanceSaveError extends Error {}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isAttendanceStatus(value: unknown): value is AttendanceStatus {
+  return value === null
+    || value === "present"
+    || value === "late"
+    || value === "excused"
+    || value === "unexcused"
+    || value === "absent";
+}
+
+function parseAttendanceSavePayload(value: unknown): AttendanceSavePayload | null {
+  if (!isObject(value) || !Array.isArray(value.classes) || value.classes.length > MAX_SAVE_CLASSES) {
+    return null;
+  }
+
+  const seenClassIds = new Set<string>();
+  const classes: AttendanceSaveClass[] = [];
+  let sessionCount = 0;
+  let recordCount = 0;
+
+  for (const rawClass of value.classes) {
+    if (!isObject(rawClass) || typeof rawClass.classId !== "string" || !rawClass.classId
+      || !Array.isArray(rawClass.sessions)) {
+      return null;
+    }
+    if (seenClassIds.has(rawClass.classId)) return null;
+    seenClassIds.add(rawClass.classId);
+
+    const seenSessionIds = new Set<string>();
+    const sessions: AttendanceSaveSession[] = [];
+    for (const rawSession of rawClass.sessions) {
+      sessionCount += 1;
+      if (sessionCount > MAX_SAVE_SESSIONS
+        || !isObject(rawSession)
+        || typeof rawSession.id !== "string"
+        || !rawSession.id
+        || typeof rawSession.isNew !== "boolean"
+        || typeof rawSession.pendingDelete !== "boolean"
+        || typeof rawSession.title !== "string"
+        || (!rawSession.pendingDelete && !rawSession.title.trim())
+        || rawSession.title.length > 80
+        || typeof rawSession.date !== "string"
+        || !(rawSession.courseLessonId === null
+          || (typeof rawSession.courseLessonId === "string" && rawSession.courseLessonId.length > 0))
+        || typeof rawSession.lesson !== "string"
+        || rawSession.lesson.length > 120
+        || !(rawSession.recordingUrl === null || typeof rawSession.recordingUrl === "string")
+        || !Array.isArray(rawSession.records)) {
+        return null;
+      }
+      if (seenSessionIds.has(rawSession.id)) return null;
+      seenSessionIds.add(rawSession.id);
+
+      const seenStudentIds = new Set<string>();
+      const records: AttendanceSaveRecord[] = [];
+      for (const rawRecord of rawSession.records) {
+        recordCount += 1;
+        if (recordCount > MAX_SAVE_RECORDS || !isObject(rawRecord)) return null;
+        const homework = rawRecord.homework;
+        if (
+          typeof rawRecord.studentId !== "string"
+          || !rawRecord.studentId
+          || !isAttendanceStatus(rawRecord.status)
+          || !isObject(homework)
+          || typeof homework.recording !== "boolean"
+          || typeof homework.hanzi !== "boolean"
+          || typeof homework.duet !== "boolean"
+          || typeof homework.link !== "boolean"
+        ) {
+          return null;
+        }
+        if (seenStudentIds.has(rawRecord.studentId)) return null;
+        seenStudentIds.add(rawRecord.studentId);
+        records.push({
+          studentId: rawRecord.studentId,
+          status: rawRecord.status,
+          homework: {
+            recording: homework.recording,
+            hanzi: homework.hanzi,
+            duet: homework.duet,
+            link: homework.link,
+          },
+        });
+      }
+      sessions.push({
+        id: rawSession.id,
+        isNew: rawSession.isNew,
+        pendingDelete: rawSession.pendingDelete,
+        title: rawSession.title.trim(),
+        date: rawSession.date,
+        courseLessonId: rawSession.courseLessonId,
+        lesson: rawSession.lesson,
+        recordingUrl: rawSession.recordingUrl,
+        records,
+      });
+    }
+    classes.push({ classId: rawClass.classId, sessions });
+  }
+
+  return { classes };
+}
+
+function parseAttendanceDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value ? date : null;
+}
+
+function validateRecordingUrl(value: string | null) {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed) return null;
+  if (trimmed.length > 2048) throw new AttendanceSaveError("Link ghi hình không được vượt quá 2.048 ký tự.");
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      throw new AttendanceSaveError("Link ghi hình phải bắt đầu bằng http:// hoặc https://.");
+    }
+    return url.toString();
+  } catch (error) {
+    if (error instanceof AttendanceSaveError) throw error;
+    throw new AttendanceSaveError("Link ghi hình không hợp lệ.");
+  }
+}
+
+async function ensureScheduleCancellation(
+  tx: Prisma.TransactionClient,
+  session: {
+    classId: string;
+    date: Date;
+    scheduleStartTime: string | null;
+    scheduleEndTime: string | null;
+  },
+) {
+  const existingCancellation = await tx.classScheduleCancellation.findFirst({
+    where: {
+      classId: session.classId,
+      date: session.date,
+      OR: [
+        { startTime: null, endTime: null },
+        { startTime: session.scheduleStartTime, endTime: session.scheduleEndTime },
+      ],
+    },
+    select: { id: true },
+  });
+  if (!existingCancellation) {
+    await tx.classScheduleCancellation.create({
+      data: {
+        classId: session.classId,
+        date: session.date,
+        startTime: session.scheduleStartTime,
+        endTime: session.scheduleEndTime,
+      },
+    });
+  }
 }
 
 export async function action({ request }: ActionFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
   const form = await request.formData();
-  const intent = String(form.get("intent") ?? "");
-
-  if (intent === "create-session" || intent === "cancel-scheduled-date") {
-    return {
-      success: false as const,
-      intent,
-      error: "Buổi học được tạo tự động theo lịch của lớp; giáo viên không cần thêm buổi thủ công.",
-    };
+  const rawPayload = form.get("payload");
+  if (typeof rawPayload !== "string") {
+    return { success: false as const, error: "Không nhận được dữ liệu cần lưu." };
   }
 
-  if (intent === "create-makeup-session") {
-    const leaveRequestId = String(form.get("leaveRequestId") ?? "");
-    const dateValue = String(form.get("date") ?? "");
-    const date = parseAttendanceDate(dateValue);
-    const lessonId = String(form.get("lessonId") ?? "").trim() || null;
-    const rawRecordingUrl = String(form.get("recordingUrl") ?? "").trim();
-    const firstAllowedDate = addDaysToDateString(getVietnameseDateString(), 1);
-    if (!leaveRequestId) {
-      return { success: false as const, intent, error: "Chọn buổi nghỉ cần học bù." };
-    }
-    if (!date || !firstAllowedDate || dateValue < firstAllowedDate) {
-      return { success: false as const, intent, error: "Chọn ngày học bù từ ngày mai trở đi." };
-    }
-    let recordingUrl: string | null = null;
-    if (rawRecordingUrl) {
-      try {
-        const parsedUrl = new URL(rawRecordingUrl);
-        if (
-          (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:")
-          || rawRecordingUrl.length > 2048
-        ) {
-          return {
-            success: false as const,
-            intent,
-            error: "Link bản ghi cần là URL HTTP hoặc HTTPS và tối đa 2048 ký tự.",
-          };
-        }
-        recordingUrl = parsedUrl.toString();
-      } catch {
-        return { success: false as const, intent, error: "Vui lòng nhập URL bản ghi hợp lệ." };
-      }
-    }
+  let parsedPayload: unknown;
+  try {
+    parsedPayload = JSON.parse(rawPayload);
+  } catch {
+    return { success: false as const, error: "Dữ liệu cần lưu không hợp lệ. Hãy tải lại trang." };
+  }
+  const payload = parseAttendanceSavePayload(parsedPayload);
+  if (!payload) {
+    return { success: false as const, error: "Dữ liệu cần lưu không hợp lệ. Hãy tải lại trang." };
+  }
 
-    try {
-      const result = await prisma.$transaction(async (tx) => {
-        const leaveRequest = await tx.teacherLeaveRequest.findFirst({
-          where: {
-            id: leaveRequestId,
-            status: "APPROVED",
-            makeupSession: null,
-            classroom: { is: { teacherId: user.id, completedAt: null } },
-          },
+  try {
+    await prisma.$transaction(async (tx) => {
+      for (const classChange of payload.classes) {
+        if (classChange.sessions.length === 0) continue;
+
+        const classroom = await tx.class.findFirst({
+          where: { id: classChange.classId, teacherId: user.id, completedAt: null },
+          select: { id: true, courseId: true },
+        });
+        if (!classroom) {
+          throw new AttendanceSaveError("Bạn không còn được phân công lớp này hoặc lớp đã kết thúc. Hãy tải lại trang.");
+        }
+
+        const requestedLessonIds = [...new Set(classChange.sessions.flatMap((session) =>
+          !session.pendingDelete && session.courseLessonId ? [session.courseLessonId] : [],
+        ))];
+        const courseLessons = await tx.lesson.findMany({
+          where: { courseId: classroom.courseId, id: { in: requestedLessonIds } },
+          select: { id: true, title: true },
+        });
+        const courseLessonsById = new Map(courseLessons.map((lesson) => [lesson.id, lesson]));
+        if (courseLessonsById.size !== requestedLessonIds.length) {
+          throw new AttendanceSaveError("Bài học đã chọn không thuộc khóa học của lớp.");
+        }
+
+        const currentSessions = await tx.attendanceSession.findMany({
+          where: { classId: classroom.id },
           select: {
             id: true,
             date: true,
-            startTime: true,
-            endTime: true,
-            classId: true,
-            classroom: { select: { schedule: true, courseId: true } },
+            recordingUrl: true,
+            scheduleStartTime: true,
+            scheduleEndTime: true,
+            isScheduleGenerated: true,
           },
         });
-        if (!leaveRequest) {
-          return {
-            success: false as const,
-            error: "Buổi nghỉ không còn khả dụng hoặc không thuộc lớp bạn phụ trách. Tải lại trang để chọn lại.",
-          };
-        }
-        if (dateValue <= leaveRequest.date.toISOString().slice(0, 10)) {
-          return { success: false as const, error: "Ngày học bù phải sau ngày nghỉ đã được duyệt." };
-        }
-        const courseLesson = lessonId
-          ? await tx.lesson.findFirst({
-              where: { id: lessonId, courseId: leaveRequest.classroom.courseId },
-              select: { id: true, title: true },
-            })
-          : null;
-        if (lessonId && !courseLesson) {
-          return { success: false as const, error: "Bài học không thuộc khóa học của lớp này. Hãy chọn lại bài học." };
-        }
-        if ((courseLesson?.title.length ?? 0) > 120) {
-          return { success: false as const, error: "Tên bài học trong khóa học vượt quá 120 ký tự." };
-        }
-        const lesson = courseLesson?.title ?? "";
-
-        const toMinutes = (time: string) => {
-          const [hours, minutes] = time.split(":").map(Number);
-          return hours * 60 + minutes;
-        };
-        const targetSlotOverlaps = (startTime: string, endTime: string) =>
-          toMinutes(leaveRequest.startTime) < toMinutes(endTime)
-          && toMinutes(leaveRequest.endTime) > toMinutes(startTime);
-        const scheduledOverlap = getScheduledSlotsForDate(leaveRequest.classroom.schedule, dateValue)
-          .some(({ startTime, endTime }) => targetSlotOverlaps(startTime, endTime));
-        if (scheduledOverlap) {
-          return {
-            success: false as const,
-            error: "Ngày đã chọn trùng ca học theo lịch của lớp. Hãy chọn ngày khác.",
-          };
-        }
-
-        const existingSessions = await tx.attendanceSession.findMany({
-          where: { classId: leaveRequest.classId, date },
-          select: { scheduleStartTime: true, scheduleEndTime: true },
-        });
-        const sessionOverlap = existingSessions.some((session) =>
-          session.scheduleStartTime === null
-          || session.scheduleEndTime === null
-          || targetSlotOverlaps(session.scheduleStartTime, session.scheduleEndTime),
+        const currentById = new Map(currentSessions.map((session) => [session.id, session]));
+        const pendingDeleteIds = new Set(
+          classChange.sessions.filter((session) => !session.isNew && session.pendingDelete).map(({ id }) => id),
         );
-        if (sessionOverlap) {
-          return {
-            success: false as const,
-            error: "Ngày đã chọn trùng buổi học khác của lớp. Hãy chọn ngày khác.",
-          };
+        const parsedDates = new Map<string, Date>();
+        const today = getVietnameseDateString();
+        let needsRenumber = false;
+
+        for (const sessionChange of classChange.sessions) {
+          if (sessionChange.isNew && sessionChange.pendingDelete) continue;
+          if (sessionChange.pendingDelete) {
+            if (!currentById.has(sessionChange.id)) {
+              throw new AttendanceSaveError("Một buổi học đã thay đổi hoặc bị xóa ở nơi khác. Hãy tải lại trang.");
+            }
+            needsRenumber = true;
+            continue;
+          }
+          const date = parseAttendanceDate(sessionChange.date);
+          if (!date) throw new AttendanceSaveError("Ngày buổi học không hợp lệ.");
+
+          if (sessionChange.isNew) {
+            if (sessionChange.date > today) {
+              throw new AttendanceSaveError("Ngày học không được chọn trong tương lai.");
+            }
+            parsedDates.set(sessionChange.id, date);
+            validateRecordingUrl(sessionChange.recordingUrl);
+            needsRenumber = true;
+            continue;
+          }
+
+          const currentSession = currentById.get(sessionChange.id);
+          if (!currentSession) {
+            throw new AttendanceSaveError("Một buổi học đã thay đổi hoặc bị xóa ở nơi khác. Hãy tải lại trang.");
+          }
+          const currentDate = currentSession.date.toISOString().slice(0, 10);
+          if (sessionChange.date > today && sessionChange.date !== currentDate) {
+            throw new AttendanceSaveError("Ngày học không được chọn trong tương lai.");
+          }
+          parsedDates.set(sessionChange.id, date);
+          if (sessionChange.recordingUrl !== currentSession.recordingUrl) {
+            validateRecordingUrl(sessionChange.recordingUrl);
+          }
+          if (sessionChange.pendingDelete || currentSession.date.toISOString().slice(0, 10) !== sessionChange.date) {
+            needsRenumber = true;
+          }
         }
 
-        const previousOrder = await getClassSessionOrderSnapshot(tx, leaveRequest.classId);
-        const session = await tx.attendanceSession.create({
-          data: {
-            classId: leaveRequest.classId,
-            title: "",
-            lesson,
-            lessonId: courseLesson?.id ?? null,
-            date,
-            scheduleStartTime: leaveRequest.startTime,
-            scheduleEndTime: leaveRequest.endTime,
-            recordingUrl,
-            makeupForLeaveRequestId: leaveRequest.id,
-          },
-          select: { id: true },
-        });
         const enrollments = await tx.enrollment.findMany({
           where: {
-            classId: leaveRequest.classId,
+            classId: classroom.id,
             user: { is: { role: "student", isActive: true, deletedAt: null } },
           },
           select: { userId: true },
         });
-        if (enrollments.length > 0) {
-          await tx.attendanceRecord.createMany({
-            data: enrollments.map(({ userId }) => ({
-              sessionId: session.id,
-              studentId: userId,
-              status: null,
-            })),
-          });
+        const activeStudentIds = new Set(enrollments.map(({ userId }) => userId));
+        for (const sessionChange of classChange.sessions) {
+          if (sessionChange.pendingDelete) continue;
+          if (sessionChange.records.some(({ studentId }) => !activeStudentIds.has(studentId))) {
+            throw new AttendanceSaveError("Danh sách học viên đã thay đổi. Hãy tải lại trang trước khi lưu.");
+          }
         }
-        const renumberedSessions = await renumberClassAttendanceSessions(tx, leaveRequest.classId, previousOrder);
-        return {
-          success: true as const,
-          classId: leaveRequest.classId,
-          sessionId: session.id,
-          title: renumberedSessions.find(({ id }) => id === session.id)?.title ?? "",
-          date: dateValue,
-          lessonId: courseLesson?.id ?? null,
-          lesson,
-          recordingUrl,
-          scheduleStartTime: leaveRequest.startTime,
-          scheduleEndTime: leaveRequest.endTime,
-          renumberedSessions,
-        };
-      }, { isolationLevel: "Serializable" });
-      return { ...result, intent };
-    } catch (error) {
-      if (
-        error instanceof Error
-        && "code" in error
-        && (error.code === "P2034" || error.code === "P2002")
-      ) {
-        return {
-          success: false as const,
-          intent,
-          error: "Buổi nghỉ vừa được xếp hoặc ca học đã có buổi. Tải lại trang rồi thử lại.",
-        };
-      }
-      throw error;
-    }
-  }
 
-  if (intent === "dismiss-absence-alert") {
-    const classId = String(form.get("classId") ?? "");
-    const studentId = String(form.get("studentId") ?? "");
-    const sessionId = String(form.get("sessionId") ?? "");
-    const classroom = await prisma.class.findFirst({
-      where: { id: classId, teacherId: user.id, completedAt: null },
-      select: { id: true },
-    });
-    if (!classroom || !studentId || !sessionId) {
-      return { success: false as const, intent, studentId, error: "Không tìm thấy cảnh báo hoặc bạn không có quyền xử lý cảnh báo này." };
-    }
+        const pendingDates = new Set<string>();
+        for (const sessionChange of classChange.sessions) {
+          if (sessionChange.pendingDelete) continue;
+          const date = sessionChange.date;
+          const currentSession = currentById.get(sessionChange.id);
+          if (!sessionChange.isNew && !currentSession) continue;
+          const hasManualSlot = sessionChange.isNew
+            || (currentSession?.scheduleStartTime === null && currentSession.scheduleEndTime === null);
+          if (!hasManualSlot) continue;
+          const hasExistingDuplicate = currentSessions.some((session) =>
+            session.id !== sessionChange.id
+            && !pendingDeleteIds.has(session.id)
+            && session.scheduleStartTime === null
+            && session.scheduleEndTime === null
+            && session.date.toISOString().slice(0, 10) === date,
+          );
+          if (hasExistingDuplicate || pendingDates.has(date)) {
+            throw new AttendanceSaveError("Ngày này đã có buổi học. Hãy chọn ngày khác hoặc xóa buổi trùng trước khi lưu.");
+          }
+          pendingDates.add(date);
+        }
 
-    const handled = await handleConsecutiveAbsenceAlert({ classId, studentId, sessionId, handledById: user.id });
-    if (!handled) {
-      return { success: false as const, intent, studentId, error: "Cảnh báo này không còn hợp lệ. Hãy tải lại trang." };
-    }
-    return { success: true as const, intent, studentId };
-  }
+        const previousOrder = needsRenumber
+          ? await getClassSessionOrderSnapshot(tx, classroom.id)
+          : null;
+        for (const sessionChange of classChange.sessions) {
+          if (sessionChange.isNew && sessionChange.pendingDelete) continue;
+          const currentSession = sessionChange.isNew ? null : currentById.get(sessionChange.id);
+          if (!sessionChange.isNew && !currentSession) {
+            throw new AttendanceSaveError("Không tìm thấy buổi học cần lưu. Hãy tải lại trang.");
+          }
 
-  const sessionId = String(form.get("sessionId") ?? "");
-  const session = sessionId
-    ? await prisma.attendanceSession.findFirst({
-        where: { id: sessionId, class: { is: { teacherId: user.id, completedAt: null } } },
-        select: {
-          id: true,
-          classId: true,
-          title: true,
-          date: true,
-          scheduleStartTime: true,
-          scheduleEndTime: true,
-          isScheduleGenerated: true,
-          makeupForLeaveRequestId: true,
-          class: {
-            select: {
-              courseId: true,
-              midtermReviewSession: true,
-              finalReviewSession: true,
-              attendanceSessions: {
-                orderBy: [{ date: "asc" }, { scheduleStartTime: "asc" }, { createdAt: "asc" }],
-                select: { id: true, title: true },
+          if (sessionChange.pendingDelete) {
+            if (!currentSession || !previousOrder) {
+              throw new AttendanceSaveError("Không tìm thấy buổi học cần xóa. Hãy tải lại trang.");
+            }
+            const sessionNumber = previousOrder.sessions.findIndex(({ id }) => id === currentSession.id) + 1;
+            if (sessionNumber === 0) {
+              throw new AttendanceSaveError("Không xác định được số buổi. Hãy tải lại trang.");
+            }
+            const savedReview = await tx.studentClassReview.findFirst({
+              where: { classId: classroom.id, sessionNumber },
+              select: { id: true },
+            });
+            if (
+              savedReview
+              || previousOrder.midtermReviewSession === sessionNumber
+              || previousOrder.finalReviewSession === sessionNumber
+            ) {
+              throw new AttendanceSaveError("Không thể xóa buổi đã có đánh giá hoặc đang được đặt làm mốc đánh giá.");
+            }
+            if (currentSession.isScheduleGenerated) {
+              const scheduledSession = currentSessions.find(({ id }) => id === currentSession.id);
+              if (scheduledSession) {
+                await ensureScheduleCancellation(tx, {
+                  classId: classroom.id,
+                  date: currentSession.date,
+                  scheduleStartTime: currentSession.scheduleStartTime,
+                  scheduleEndTime: currentSession.scheduleEndTime,
+                });
+              }
+            }
+            await tx.attendanceSession.delete({ where: { id: currentSession.id } });
+            continue;
+          }
+
+          const date = parsedDates.get(sessionChange.id);
+          if (!date) throw new AttendanceSaveError("Ngày buổi học không hợp lệ.");
+          const recordingUrl = sessionChange.isNew || sessionChange.recordingUrl !== currentSession?.recordingUrl
+            ? validateRecordingUrl(sessionChange.recordingUrl)
+            : undefined;
+          const courseLesson = sessionChange.courseLessonId
+            ? courseLessonsById.get(sessionChange.courseLessonId)
+            : null;
+          if (sessionChange.courseLessonId && !courseLesson) {
+            throw new AttendanceSaveError("Bài học đã chọn không thuộc khóa học của lớp.");
+          }
+          const lessonTitle = courseLesson?.title ?? sessionChange.lesson;
+          let sessionId = sessionChange.id;
+          if (sessionChange.isNew) {
+            const created = await tx.attendanceSession.create({
+              data: {
+                classId: classroom.id,
+                title: sessionChange.title,
+                lessonId: sessionChange.courseLessonId,
+                lesson: lessonTitle,
+                recordingUrl,
+                date,
               },
-            },
-          },
-        },
-      })
-    : null;
-  if (!session) return { success: false as const, error: "Không tìm thấy buổi học hoặc bạn không có quyền sửa buổi này." };
-  if (intent === "save-attendance" && session.date.toISOString().slice(0, 10) > getVietnameseDateString()) {
-    return { success: false as const, error: "Chưa đến ngày học theo lịch của buổi này." };
-  }
-  if (
-    intent === "save-attendance"
-    && session.isScheduleGenerated
-    && session.scheduleStartTime
-    && session.scheduleEndTime
-  ) {
-    const leaveRequest = await prisma.teacherLeaveRequest.findFirst({
-      where: {
-        classId: session.classId,
-        date: session.date,
-        startTime: session.scheduleStartTime,
-        endTime: session.scheduleEndTime,
-        status: { in: ["PENDING", "APPROVED"] },
-      },
-      select: { status: true },
-    });
-    if (leaveRequest) {
-      return {
-        success: false as const,
-        error: leaveRequest.status === "APPROVED"
-          ? "Ca này đã được duyệt nghỉ nên không thể điểm danh."
-          : "Ca này đang chờ admin duyệt nghỉ nên chưa thể điểm danh.",
-      };
-    }
-  }
-
-  if (intent === "save-session-review") {
-    const sessionType = String(form.get("sessionType") ?? "");
-    if (sessionType !== "MIDTERM" && sessionType !== "FINAL") {
-      return { success: false as const, error: "Loại đánh giá không hợp lệ." };
-    }
-    const sessionNumber = getAttendanceSessionNumber(session.class.attendanceSessions, session.id);
-    const configuredSessionNumber = sessionType === "MIDTERM"
-      ? session.class.midtermReviewSession
-      : session.class.finalReviewSession;
-    if (sessionNumber === null || configuredSessionNumber !== sessionNumber) {
-      return { success: false as const, error: "Buổi này không còn là mốc đánh giá đã cấu hình. Hãy tải lại trang." };
-    }
-
-    let parsedReviews: unknown;
-    try {
-      parsedReviews = JSON.parse(String(form.get("reviews") ?? ""));
-    } catch (error) {
-      if (error instanceof SyntaxError) {
-        return { success: false as const, error: "Danh sách đánh giá không hợp lệ." };
-      }
-      throw error;
-    }
-    if (!Array.isArray(parsedReviews)) {
-      return { success: false as const, error: "Danh sách đánh giá không hợp lệ." };
-    }
-    const reviews: { studentId: string; status: StudentReviewStatus }[] = [];
-    for (const value of parsedReviews) {
-      if (!isRecord(value) || typeof value.studentId !== "string" || !value.studentId || !isStudentReviewStatus(value.status)) {
-        return { success: false as const, error: "Mỗi học viên cần có một trạng thái đánh giá." };
-      }
-      reviews.push({ studentId: value.studentId, status: value.status });
-    }
-    if (new Set(reviews.map(({ studentId }) => studentId)).size !== reviews.length) {
-      return { success: false as const, error: "Danh sách đánh giá có học viên bị trùng." };
-    }
-
-    const savedReview = await prisma.$transaction(async (tx) => {
-      const currentSession = await tx.attendanceSession.findFirst({
-        where: { id: session.id, class: { is: { teacherId: user.id, completedAt: null } } },
-        select: {
-          id: true,
-          classId: true,
-          title: true,
-          class: {
-            select: {
-              midtermReviewSession: true,
-              finalReviewSession: true,
-              attendanceSessions: {
-                orderBy: [{ date: "asc" }, { scheduleStartTime: "asc" }, { createdAt: "asc" }],
-                select: { id: true, title: true },
+              select: { id: true },
+            });
+            sessionId = created.id;
+            if (activeStudentIds.size > 0) {
+              await tx.attendanceRecord.createMany({
+                data: [...activeStudentIds].map((studentId) => ({
+                  sessionId,
+                  studentId,
+                  status: null,
+                })),
+              });
+            }
+          } else if (currentSession) {
+            const dateChanged = currentSession.date.toISOString().slice(0, 10) !== sessionChange.date;
+            if (currentSession.isScheduleGenerated && dateChanged) {
+              await ensureScheduleCancellation(tx, {
+                classId: classroom.id,
+                date: currentSession.date,
+                scheduleStartTime: currentSession.scheduleStartTime,
+                scheduleEndTime: currentSession.scheduleEndTime,
+              });
+            }
+            await tx.attendanceSession.update({
+              where: { id: currentSession.id },
+              data: {
+                date,
+                title: sessionChange.title,
+                lessonId: sessionChange.courseLessonId,
+                lesson: lessonTitle,
+                recordingUrl,
+                isScheduleGenerated: currentSession.isScheduleGenerated && dateChanged ? false : undefined,
               },
-            },
-          },
-        },
-      });
-      if (!currentSession) {
-        return { success: false as const, error: "Không tìm thấy buổi học hoặc lớp đã kết thúc." };
-      }
-      const currentNumber = getAttendanceSessionNumber(currentSession.class.attendanceSessions, currentSession.id);
-      const expectedNumber = sessionType === "MIDTERM"
-        ? currentSession.class.midtermReviewSession
-        : currentSession.class.finalReviewSession;
-      if (currentNumber !== expectedNumber) {
-        return { success: false as const, error: "Mốc đánh giá của lớp vừa thay đổi. Hãy tải lại trang." };
-      }
-      if (currentNumber === null) {
-        return { success: false as const, error: "Không xác định được số buổi đánh giá. Hãy tải lại trang." };
-      }
+            });
+          }
 
-      const enrolledStudents = await tx.enrollment.findMany({
-        where: {
-          classId: currentSession.classId,
-          user: { is: { role: "student", isActive: true, deletedAt: null } },
-        },
-        select: { userId: true },
-      });
-      const enrolledIds = new Set(enrolledStudents.map(({ userId }) => userId));
-      if (
-        reviews.length !== enrolledIds.size
-        || reviews.some(({ studentId }) => !enrolledIds.has(studentId))
-      ) {
-        return { success: false as const, error: "Danh sách đánh giá không khớp với học viên hiện tại của lớp. Hãy tải lại trang." };
-      }
-
-      await Promise.all(reviews.map(({ studentId, status }) =>
-        tx.studentClassReview.upsert({
-          where: {
-            classId_studentId_sessionType: {
-              classId: currentSession.classId,
-              studentId,
-              sessionType,
-            },
-          },
-          create: {
-            classId: currentSession.classId,
-            studentId,
-            sessionType,
-            sessionNumber: currentNumber,
-            status,
-            teacherId: user.id,
-          },
-          update: {
-            sessionNumber: currentNumber,
-            status,
-            teacherId: user.id,
-            adminAction: null,
-            adminActionReason: null,
-          },
-        })
-      ));
-      return { success: true as const };
-    });
-    if (!savedReview.success) return { ...savedReview, classId: session.classId };
-    return {
-      success: true as const,
-      intent,
-      classId: session.classId,
-      sessionId: session.id,
-      sessionType,
-    };
-  }
-
-  if (intent === "delete-session") {
-    const sessionNumber = getAttendanceSessionNumber(session.class.attendanceSessions, session.id);
-    if (sessionNumber === null) {
-      return { success: false as const, error: "Không xác định được số buổi. Hãy tải lại trang." };
-    }
-    const reviewExists = await prisma.studentClassReview.findFirst({
-      where: { classId: session.classId, sessionNumber },
-      select: { id: true },
-    });
-    if (reviewExists) {
-      return { success: false as const, error: "Không thể xóa buổi đã có đánh giá giữa kỳ hoặc cuối kỳ." };
-    }
-
-    const deletedDate = session.date.toISOString().slice(0, 10);
-    const shouldCancelSchedule = session.isScheduleGenerated;
-    const update = await prisma.$transaction(async (tx) => {
-      await tx.attendanceSession.delete({ where: { id: session.id } });
-      let hasCancellation = false;
-      if (shouldCancelSchedule) {
-        const existingCancellation = await tx.classScheduleCancellation.findFirst({
-          where: {
-            classId: session.classId,
-            date: session.date,
-            OR: [
-              { startTime: null, endTime: null },
-              { startTime: session.scheduleStartTime, endTime: session.scheduleEndTime },
-            ],
-          },
-          select: { id: true },
-        });
-        if (!existingCancellation) {
-          await tx.classScheduleCancellation.create({
-            data: {
-              classId: session.classId,
-              date: session.date,
-              startTime: session.scheduleStartTime,
-              endTime: session.scheduleEndTime,
-            },
-          });
+          for (const record of sessionChange.records) {
+            const status = record.status === "present"
+              ? "PRESENT"
+              : record.status === "late"
+                ? "LATE"
+                : record.status === null
+                  ? null
+                  : "ABSENT";
+            const absenceReason = record.status === "excused"
+              ? "EXCUSED"
+              : record.status === "unexcused"
+                ? "UNEXCUSED"
+                : null;
+            await tx.attendanceRecord.upsert({
+              where: { sessionId_studentId: { sessionId, studentId: record.studentId } },
+              create: {
+                sessionId,
+                studentId: record.studentId,
+                status,
+                absenceReason,
+                recording: record.homework.recording,
+                hanzi: record.homework.hanzi,
+                duet: record.homework.duet,
+                lessonLink: record.homework.link,
+              },
+              update: {
+                status,
+                absenceReason,
+                recording: record.homework.recording,
+                hanzi: record.homework.hanzi,
+                duet: record.homework.duet,
+                lessonLink: record.homework.link,
+              },
+            });
+          }
         }
-        hasCancellation = true;
-      }
-      const remainingSessions = await tx.attendanceSession.findMany({
-        where: { classId: session.classId },
-        orderBy: [{ date: "asc" }, { scheduleStartTime: "asc" }, { createdAt: "asc" }],
-        select: { id: true, title: true },
-      });
-      const renumberedSessions = remainingSessions.map((item, index) => ({
-        id: item.id,
-        title: `Buổi ${index + 1}`,
-      }));
-      for (let index = 0; index < renumberedSessions.length; index += 1) {
-        if (remainingSessions[index].title === renumberedSessions[index].title) continue;
-        await tx.attendanceSession.update({
-          where: { id: renumberedSessions[index].id },
-          data: { title: renumberedSessions[index].title },
-        });
-      }
-
-      await tx.studentClassReview.updateMany({
-        where: { classId: session.classId, sessionNumber: { gt: sessionNumber } },
-        data: { sessionNumber: { decrement: 1 } },
-      });
-      await tx.class.update({
-        where: { id: session.classId },
-        data: {
-          midtermReviewSession: session.class.midtermReviewSession !== null
-            && session.class.midtermReviewSession > sessionNumber
-            ? { decrement: 1 }
-            : undefined,
-          finalReviewSession: session.class.finalReviewSession !== null
-            && session.class.finalReviewSession > sessionNumber
-            ? { decrement: 1 }
-            : undefined,
-        },
-      });
-      return { renumberedSessions, hasCancellation };
-    });
-    return {
-      success: true as const,
-      intent,
-      sessionId,
-      classId: session.classId,
-      deletedDate,
-      hasCancellation: update.hasCancellation,
-      renumberedSessions: update.renumberedSessions,
-    };
-  }
-
-  if (intent === "save-attendance") {
-    const lesson = String(form.get("lesson") ?? "").trim();
-    const rawLessonId = String(form.get("lessonId") ?? "").trim();
-    const lessonId = rawLessonId || null;
-    const rawRecordingUrl = String(form.get("recordingUrl") ?? "").trim();
-    let recordingUrl: string | null = null;
-    if (rawRecordingUrl) {
-      try {
-        const parsedUrl = new URL(rawRecordingUrl);
-        if ((parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") || rawRecordingUrl.length > 2048) {
-          return { success: false as const, error: "Link bản ghi cần là URL HTTP hoặc HTTPS và tối đa 2048 ký tự." };
+        if (previousOrder) {
+          await renumberClassAttendanceSessions(tx, classroom.id, previousOrder);
         }
-        recordingUrl = parsedUrl.toString();
-      } catch {
-        return { success: false as const, error: "Vui lòng nhập URL bản ghi hợp lệ." };
       }
+    }, { maxWait: 5_000, timeout: 30_000 });
+  } catch (error) {
+    if (error instanceof AttendanceSaveError) {
+      return { success: false as const, error: error.message };
     }
-    const date = parseAttendanceDate(String(form.get("date") ?? ""));
-    if (lesson.length > 120) return { success: false as const, error: "Tên bài học không được vượt quá 120 ký tự." };
-    if (lessonId) {
-      const courseLesson = await prisma.lesson.findFirst({
-        where: { id: lessonId, courseId: session.class.courseId },
-        select: { id: true },
-      });
-      if (!courseLesson) return { success: false as const, error: "Bài học không thuộc khóa học của lớp này." };
+    if (error instanceof Error && "code" in error && error.code === "P2002") {
+      return { success: false as const, error: "Lớp đã có buổi học trong ngày hoặc khung giờ này. Hãy tải lại rồi thử lại." };
     }
-    if (!date) {
-      return { success: false as const, error: "Vui lòng chọn ngày học hợp lệ." };
-    }
-    if (date.toISOString().slice(0, 10) !== session.date.toISOString().slice(0, 10)) {
-      return { success: false as const, error: "Ngày buổi học được tự động lấy theo lịch và không thể thay đổi." };
-    }
-    const rawRecords = String(form.get("records") ?? "");
-    let parsedRecords: unknown;
-    try {
-      parsedRecords = JSON.parse(rawRecords);
-    } catch {
-      return { success: false as const, error: "Dữ liệu điểm danh không hợp lệ. Hãy thử lưu lại." };
-    }
-    if (!Array.isArray(parsedRecords)) return { success: false as const, error: "Danh sách điểm danh không hợp lệ." };
-    const records: (AttendanceRecord & { studentId: string })[] = [];
-    for (const value of parsedRecords) {
-      if (!isRecord(value)) {
-        return { success: false as const, error: "Có dòng điểm danh không hợp lệ." };
-      }
-      const record = value;
-      const status = record.status;
-      const absenceReason = record.absenceReason;
-      const tasks = record.tasks;
-      if (
-        typeof record.studentId !== "string"
-        || (status !== null && !isAttendanceStatus(status))
-        || (absenceReason !== null && !isAbsenceReason(absenceReason))
-        || (status === "absent" ? absenceReason === null : absenceReason !== null)
-        || !isAttendanceTasks(tasks)
-      ) {
-        return { success: false as const, error: "Dữ liệu điểm danh hoặc lý do vắng chưa đầy đủ." };
-      }
-      records.push({
-        studentId: record.studentId,
-        status,
-        absenceReason,
-        tasks: {
-          recording: tasks.recording,
-          hanzi: tasks.hanzi,
-          duet: tasks.duet,
-          lessonLink: tasks.lessonLink,
-        },
-      });
-    }
-    if (new Set(records.map((record) => record.studentId)).size !== records.length) {
-      return { success: false as const, error: "Danh sách có học viên bị trùng." };
-    }
-    const enrolledStudents = await prisma.enrollment.findMany({
-      where: {
-        classId: session.classId,
-        user: { is: { role: "student", isActive: true, deletedAt: null } },
-      },
-      select: { userId: true, user: { select: { name: true } } },
-    });
-    const submittedStudentIds = new Set(records.map((record) => record.studentId));
-    if (
-      enrolledStudents.length !== records.length
-      || enrolledStudents.some(({ userId }) => !submittedStudentIds.has(userId))
-    ) {
-      return { success: false as const, error: "Danh sách có học viên không thuộc lớp này. Hãy tải lại trang." };
-    }
-    await prisma.$transaction([
-      prisma.attendanceSession.update({
-        where: { id: session.id },
-        data: { lesson, lessonId, date, recordingUrl },
-      }),
-      ...records.map((record) => prisma.attendanceRecord.upsert({
-        where: { sessionId_studentId: { sessionId: session.id, studentId: record.studentId } },
-        create: {
-          sessionId: session.id,
-          studentId: record.studentId,
-          status: toDatabaseStatus(record.status),
-          absenceReason: toDatabaseAbsenceReason(record.absenceReason),
-          ...record.tasks,
-        },
-        update: {
-          status: toDatabaseStatus(record.status),
-          absenceReason: toDatabaseAbsenceReason(record.absenceReason),
-          ...record.tasks,
-        },
-      })),
-    ]);
-    const sessionNumber = getAttendanceSessionNumber(session.class.attendanceSessions, session.id);
-    const reviewSessionType: ReviewSessionType | null = sessionNumber === session.class.midtermReviewSession
-      ? "MIDTERM"
-      : sessionNumber === session.class.finalReviewSession
-        ? "FINAL"
-        : null;
-    let reviewPrompt: ReviewPrompt | null = null;
-    if (reviewSessionType && sessionNumber !== null) {
-      const existingReviews = await prisma.studentClassReview.findMany({
-        where: { classId: session.classId, sessionType: reviewSessionType },
-        select: { studentId: true, status: true },
-      });
-      const existingStatuses = new Map(existingReviews.map(({ studentId, status }) => [studentId, status]));
-      if (enrolledStudents.some(({ userId }) => !existingStatuses.has(userId))) {
-        reviewPrompt = {
-          classId: session.classId,
-          sessionId: session.id,
-          sessionNumber,
-          sessionType: reviewSessionType,
-          sessionTitle: session.title,
-          students: enrolledStudents.map(({ userId, user: student }) => ({ id: userId, name: student.name })),
-          statuses: Object.fromEntries(enrolledStudents.map(({ userId }) => [
-            userId,
-            existingStatuses.get(userId) ?? "",
-          ])),
-        };
-      }
-    }
-    return { success: true as const, intent, sessionId, classId: session.classId, reviewPrompt };
+    throw error;
   }
 
-  return { success: false as const, error: "Thao tác điểm danh không hợp lệ." };
+  return { success: true as const };
+}
+
+function buildAttendanceSavePayload(
+  originalClasses: AttendanceClass[],
+  draftClasses: AttendanceClass[],
+): AttendanceSavePayload {
+  const classes: AttendanceSaveClass[] = [];
+
+  for (const draftClass of draftClasses) {
+    const originalClass = originalClasses.find(({ id }) => id === draftClass.id);
+    if (!originalClass) continue;
+
+    const sessions: AttendanceSaveSession[] = [];
+    for (const draftSession of draftClass.sessions) {
+      if (draftSession.isNew && draftSession.pendingDelete) continue;
+      const originalSession = originalClass.sessions.find(({ id }) => id === draftSession.id);
+      const changedRecords = draftClass.students.flatMap((student) => {
+        const draftRecord = draftSession.records[student.id] ?? EMPTY_ATTENDANCE_RECORD;
+        const originalRecord = originalSession?.records[student.id] ?? EMPTY_ATTENDANCE_RECORD;
+        const changed = draftRecord.status !== originalRecord.status
+          || HOMEWORK_FIELDS.some(({ key }) => draftRecord.homework[key] !== originalRecord.homework[key]);
+        if (!draftSession.isNew && !changed) return [];
+        return [{
+          studentId: student.id,
+          status: draftRecord.status,
+          homework: { ...draftRecord.homework },
+        }];
+      });
+      const sessionChanged = draftSession.isNew
+        || draftSession.pendingDelete
+        || !originalSession
+        || draftSession.name !== originalSession.name
+        || draftSession.date !== originalSession.date
+        || draftSession.courseLessonId !== originalSession.courseLessonId
+        || draftSession.lesson !== originalSession.lesson
+        || draftSession.recordingUrl !== originalSession.recordingUrl
+        || changedRecords.length > 0;
+      if (!sessionChanged) continue;
+
+      sessions.push({
+        id: draftSession.id,
+        isNew: draftSession.isNew,
+        pendingDelete: draftSession.pendingDelete,
+        title: draftSession.name,
+        date: draftSession.date,
+        courseLessonId: draftSession.courseLessonId,
+        lesson: draftSession.lesson,
+        recordingUrl: draftSession.recordingUrl,
+        records: draftSession.pendingDelete ? [] : changedRecords,
+      });
+    }
+
+    if (sessions.length > 0) classes.push({ classId: draftClass.id, sessions });
+  }
+  return { classes };
 }
 
 export default function TeacherAttendance() {
-  const { user, classes, today: loaderToday } = useLoaderData<typeof loader>();
-  const location = useLocation();
-  const saveAttendanceFetcher = useFetcher<typeof action>();
-  const reviewFetcher = useFetcher<typeof action>();
-  const makeupFetcher = useFetcher<typeof action>();
-  const attendanceSearch = new URLSearchParams(location.search);
-  const requestedDate = parseAttendanceDate(attendanceSearch.get("date") ?? "")?.toISOString().slice(0, 10)
-    ?? loaderToday;
-  const requestedClassId = attendanceSearch.get("classId");
-  const initialClass = classes.find((item) => item.id === requestedClassId)
-    ?? classes.find((item) => item.sessions.some((session) => session.date === requestedDate && session.date <= loaderToday))
-    ?? classes[0]
-    ?? null;
-  const firstClassId = initialClass?.id ?? "";
-  const [classId, setClassId] = useState(firstClassId);
-  const [sessionsByClass, setSessionsByClass] = useState<Record<string, AttendanceSession[]>>(() =>
-    Object.fromEntries(classes.map((classroom) => [classroom.id, classroom.sessions]))
-  );
-  const [attendanceBySession, setAttendanceBySession] = useState<Record<string, Record<string, AttendanceRecord>>>(() =>
-    Object.fromEntries(classes.flatMap((classroom) => classroom.sessions.map((session) => [
-      `${classroom.id}:${session.id}`,
-      session.records,
-    ])))
-  );
-  const [currentTime, setCurrentTime] = useState(() => new Date());
-  const today = getVietnameseDateString(currentTime);
-  const lastDisplayedDate = useRef(today);
-  const [activeTabId, setActiveTabId] = useState(
-    initialClass?.sessions.find((session) => session.date === requestedDate && session.date <= loaderToday)?.id
-      ?? initialClass?.sessions.find((session) => session.date === loaderToday)?.id
-      ?? initialClass?.sessions.find((session) => session.date <= loaderToday)?.id
-      ?? TOTAL_TAB_ID,
-  );
-  const [filter, setFilter] = useState<AttendanceFilter>("all");
-  const [search, setSearch] = useState("");
-  const [feedback, setFeedback] = useState("");
-  const [dirtySessionKeys, setDirtySessionKeys] = useState<Set<string>>(() => new Set());
-  const [isSessionDetailsExpanded, setIsSessionDetailsExpanded] = useState(true);
-  const [pendingReview, setPendingReview] = useState<ReviewPrompt | null>(null);
-  const [reviewStatuses, setReviewStatuses] = useState<Record<string, StudentReviewStatus | "">>({});
-  const [showMakeupModal, setShowMakeupModal] = useState(false);
-  const [makeupLeaveRequestId, setMakeupLeaveRequestId] = useState("");
-  const [makeupDate, setMakeupDate] = useState(getMinimumMakeupDate(getVietnameseDateString()));
-  const [makeupLessonId, setMakeupLessonId] = useState("");
-  const selectedClass = classes.find((item) => item.id === classId) ?? classes[0] ?? null;
-  const approvedMakeupLeaveSlots = classes.flatMap((classroom) => classroom.approvedLeaveSlots);
-  const selectedMakeupLeaveSlot = approvedMakeupLeaveSlots.find(({ id }) => id === makeupLeaveRequestId);
-  const makeupCourseLessons = classes.find(({ id }) => id === selectedMakeupLeaveSlot?.classId)?.courseLessons ?? [];
-  const allClassSessions = selectedClass ? sessionsByClass[selectedClass.id] ?? selectedClass.sessions : [];
-  const attendanceSessions = allClassSessions.filter((session) => session.date <= today);
-  const attendanceOptions = [
-    ...attendanceSessions.map((session) => ({
-      type: "session" as const,
-      date: session.date,
-      startTime: session.scheduleStartTime ?? "",
-      session,
-    })),
-    ...(selectedClass?.approvedLeaveSlots ?? []).map((leave) => ({
-      type: "approved-leave" as const,
-      date: leave.date,
-      startTime: leave.startTime,
-      leave,
-    })),
-  ].sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
-  const isTotalView = activeTabId === TOTAL_TAB_ID || attendanceSessions.length === 0;
-  const selectedAttendanceSession = attendanceSessions.find((session) => session.id === activeTabId) ?? null;
-  const sessionKey = selectedClass && selectedAttendanceSession ? `${selectedClass.id}:${selectedAttendanceSession.id}` : "";
-  const hasUnsavedChanges = selectedClass
-    ? [...dirtySessionKeys].some((key) => key.startsWith(`${selectedClass.id}:`))
-    : false;
-  const persistedRecords = selectedClass && selectedAttendanceSession
-    ? attendanceBySession[sessionKey] ?? selectedAttendanceSession.records
-    : {};
-  const attendance = Object.fromEntries((selectedClass?.students ?? []).map((student) => [
-    student.id,
-    persistedRecords[student.id] ?? createEmptyAttendanceRecord(),
-  ]));
-  const markedCount = (selectedClass?.students ?? []).filter((student) => {
-    const record = attendance[student.id];
-    if (!record) return false;
-    return record.status !== null && (record.status !== "absent" || record.absenceReason !== null);
-  }).length;
-  const aggregate = (selectedClass?.students ?? []).map((student) => {
-    const records = attendanceSessions.map((session) =>
-      attendanceBySession[`${classId}:${session.id}`]?.[student.id]
-      ?? session.records[student.id]
-    ).filter((record): record is AttendanceRecord => record !== undefined);
-    return {
-      student,
-      present: records.filter((record) => record.status === "present").length,
-      late: records.filter((record) => record.status === "late").length,
-      absent: records.filter((record) => record.status === "absent").length,
-      excused: records.filter((record) => record.status === "absent" && record.absenceReason === "excused").length,
-      unexcused: records.filter((record) => record.status === "absent" && record.absenceReason === "unexcused").length,
-      recording: records.filter((record) => record.tasks.recording).length,
-      hanzi: records.filter((record) => record.tasks.hanzi).length,
-      duet: records.filter((record) => record.tasks.duet).length,
-      lessonLink: records.filter((record) => record.tasks.lessonLink).length,
-    };
-  });
-  const chronologicalSessions = [...attendanceSessions].sort((left, right) =>
-    left.date.localeCompare(right.date)
-    || attendanceSessions.indexOf(left) - attendanceSessions.indexOf(right),
-  );
-  const absenceTargetSession = isTotalView
-    ? chronologicalSessions[chronologicalSessions.length - 1]
-    : selectedAttendanceSession;
-  const consecutiveAbsenceAlerts = (selectedClass?.consecutiveAbsenceAlerts ?? [])
-    .filter((alert) => alert.sessionId === absenceTargetSession?.id);
-  const consecutiveAbsenceStudentIds = new Set(consecutiveAbsenceAlerts.map(({ studentId }) => studentId));
-  const aggregateWithAbsence = aggregate.map((item) => ({
-    ...item,
-    hasConsecutiveAbsence: consecutiveAbsenceStudentIds.has(item.student.id),
-  }));
-  const counts = isTotalView
-    ? {
-        total: selectedClass?.students.length ?? 0,
-        present: aggregate.reduce((sum, item) => sum + item.present, 0),
-        late: aggregate.reduce((sum, item) => sum + item.late, 0),
-        absent: aggregate.reduce((sum, item) => sum + item.absent, 0),
-        excused: aggregate.reduce((sum, item) => sum + item.excused, 0),
-        unexcused: aggregate.reduce((sum, item) => sum + item.unexcused, 0),
-      }
-    : {
-        total: selectedClass?.students.length ?? 0,
-        present: (selectedClass?.students ?? []).filter((student) => attendance[student.id]?.status === "present").length,
-        late: (selectedClass?.students ?? []).filter((student) => attendance[student.id]?.status === "late").length,
-        absent: (selectedClass?.students ?? []).filter((student) => attendance[student.id]?.status === "absent").length,
-        excused: (selectedClass?.students ?? []).filter((student) =>
-          attendance[student.id]?.status === "absent" && attendance[student.id]?.absenceReason === "excused"
-        ).length,
-        unexcused: (selectedClass?.students ?? []).filter((student) =>
-          attendance[student.id]?.status === "absent" && attendance[student.id]?.absenceReason === "unexcused"
-        ).length,
-      };
-  const visibleStudents = (selectedClass?.students ?? []).filter((student) => {
-    const matchesSearch = student.name.toLocaleLowerCase("vi").includes(search.trim().toLocaleLowerCase("vi"));
-    const status = attendance[student.id]?.status ?? null;
-    const matchesFilter = filter === "all" || status === filter;
-    return matchesSearch && matchesFilter;
-  });
+  const { user, classes } = useLoaderData<typeof loader>();
+  const fetcher = useFetcher<typeof action>();
+  const [draftClasses, setDraftClasses] = useState(classes);
+  const [selectedClassId, setSelectedClassId] = useState("");
+  const [sessionSearch, setSessionSearch] = useState("");
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [modalFilter, setModalFilter] = useState<AttendanceFilter>("all");
+  const [studentSearch, setStudentSearch] = useState("");
+  const [editingSessionField, setEditingSessionField] = useState<EditingSessionField | null>(null);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const modalTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => setCurrentTime(new Date()), 30_000);
-    return () => window.clearInterval(intervalId);
+    setDraftClasses(classes);
+  }, [classes]);
+
+  const selectedClass = draftClasses.find((classItem) => classItem.id === selectedClassId) ?? draftClasses[0];
+  const todayDate = getVietnameseDateString();
+  const activeSession = selectedClass?.sessions.find((session) => session.id === activeSessionId);
+  const savePayload = useMemo(
+    () => buildAttendanceSavePayload(classes, draftClasses),
+    [classes, draftClasses],
+  );
+  const hasUnsavedChanges = savePayload.classes.length > 0;
+  const hasIncompleteNewSession = draftClasses.some((classItem) =>
+    classItem.sessions.some((session) =>
+      session.isNew && !session.pendingDelete && (!session.name.trim() || !session.date),
+    ),
+  );
+  const saveError = fetcher.data && !fetcher.data.success ? fetcher.data.error : null;
+  const saveSuccess = fetcher.data?.success === true && fetcher.state === "idle" && !hasUnsavedChanges;
+
+  useEffect(() => {
+    if (!saveSuccess) {
+      setShowSaveSuccess(false);
+      return;
+    }
+
+    setShowSaveSuccess(true);
+    const timeoutId = window.setTimeout(() => setShowSaveSuccess(false), 3_000);
+    return () => window.clearTimeout(timeoutId);
+  }, [fetcher.data, saveSuccess]);
+
+  const filteredSessions = useMemo(() => {
+    const query = sessionSearch.trim().toLocaleLowerCase("vi");
+    const newestFirst = [...(selectedClass?.sessions ?? [])].sort((a, b) => b.number - a.number);
+    if (!query) return newestFirst;
+    return newestFirst.filter((session) =>
+      [
+        session.name,
+        session.lesson,
+        `buổi ${session.number}`,
+        session.date,
+        ...(session.date ? [formatSessionDate(session.date)] : []),
+      ]
+        .some((value) => value.toLocaleLowerCase("vi").includes(query)),
+    );
+  }, [selectedClass, sessionSearch]);
+
+  const modalCounts = activeSession && selectedClass
+    ? getAttendanceCounts(selectedClass.students, activeSession.records)
+    : null;
+
+  const filteredStudents = activeSession && selectedClass
+    ? selectedClass.students.filter((student) => {
+      const status = activeSession.records[student.id]?.status ?? null;
+      const query = studentSearch.trim().toLocaleLowerCase("vi");
+      if (query && !student.name.toLocaleLowerCase("vi").includes(query)) return false;
+      if (modalFilter === "present") return status === "present";
+      if (modalFilter === "late") return status === "late";
+      if (modalFilter === "absent") return status === "excused" || status === "unexcused" || status === "absent";
+      return true;
+    })
+    : [];
+
+  const closeAttendanceModal = useCallback(() => {
+    setActiveSessionId(null);
+    requestAnimationFrame(() => modalTriggerRef.current?.focus());
   }, []);
 
-  useEffect(() => {
-    if (lastDisplayedDate.current === today) return;
-    lastDisplayedDate.current = today;
-    const todaySession = attendanceSessions.find((session) => session.date === today);
-    if (todaySession) setActiveTabId(todaySession.id);
-  }, [today, attendanceSessions]);
-
-  useEffect(() => {
-    const result = makeupFetcher.data;
-    if (
-      makeupFetcher.state !== "idle"
-      || !result
-      || !result.success
-      || result.intent !== "create-makeup-session"
-      || !("classId" in result)
-      || typeof result.classId !== "string"
-      || !("sessionId" in result)
-      || typeof result.sessionId !== "string"
-      || !("renumberedSessions" in result)
-      || !Array.isArray(result.renumberedSessions)
-      || !("title" in result)
-      || typeof result.title !== "string"
-      || !("lesson" in result)
-      || typeof result.lesson !== "string"
-      || !("lessonId" in result)
-      || !(typeof result.lessonId === "string" || result.lessonId === null)
-      || !("date" in result)
-      || typeof result.date !== "string"
-      || !("scheduleStartTime" in result)
-      || typeof result.scheduleStartTime !== "string"
-      || !("scheduleEndTime" in result)
-      || typeof result.scheduleEndTime !== "string"
-      || !("recordingUrl" in result)
-    ) {
-      if (makeupFetcher.state === "idle" && result && !result.success) {
-        setFeedback(result.error);
-        toast.error(result.error);
-      }
+  function openAttendanceModal(session: AttendanceSession, trigger: HTMLButtonElement) {
+    if (session.pendingDelete) return;
+    const originalSession = selectedClass
+      ? classes.find((classItem) => classItem.id === selectedClass.id)
+        ?.sessions.find((savedSession) => savedSession.id === session.id)
+      : undefined;
+    const hasUnsavedSessionChanges = session.isNew
+      || !originalSession
+      || session.name !== originalSession.name
+      || session.date !== originalSession.date
+      || session.courseLessonId !== originalSession.courseLessonId
+      || session.lesson !== originalSession.lesson
+      || session.recordingUrl !== originalSession.recordingUrl;
+    if (hasUnsavedSessionChanges) {
+      toast.info("Vui lòng bấm “Lưu toàn bộ bảng” trước khi điểm danh buổi học này.");
       return;
     }
 
-    const classId = result.classId;
-    const sessionId = result.sessionId;
-    setSessionsByClass((current) => {
-      const titleById = new Map(result.renumberedSessions.map((session) => [session.id, session.title]));
-      const currentSessions = (current[classId] ?? [])
-        .map((session) => ({ ...session, title: titleById.get(session.id) ?? session.title }))
-        .filter((session) => session.id !== sessionId);
+    modalTriggerRef.current = trigger;
+    if (
+      selectedClass
+      && selectedClass.students.length > 0
+      && selectedClass.students.every((student) => session.records[student.id]?.status == null)
+    ) {
+      updateDraftSession(selectedClass.id, session.id, (currentSession) => {
+        const records = { ...currentSession.records };
+        for (const student of selectedClass.students) {
+          records[student.id] = {
+            ...(records[student.id] ?? EMPTY_ATTENDANCE_RECORD),
+            status: "present",
+          };
+        }
+        return { ...currentSession, records };
+      });
+    }
+    setActiveSessionId(session.id);
+    setModalFilter("all");
+    setStudentSearch("");
+  }
+
+  function updateDraftSession(
+    classId: string,
+    sessionId: string,
+    update: (session: AttendanceSession) => AttendanceSession,
+  ) {
+    setDraftClasses((current) => current.map((classItem) => (
+      classItem.id !== classId
+        ? classItem
+        : {
+            ...classItem,
+            sessions: classItem.sessions.map((session) => (
+              session.id === sessionId ? update(session) : session
+            )),
+          }
+    )));
+  }
+
+  function updateStudentStatus(studentId: string, status: AttendanceChoice) {
+    if (!activeSession || !selectedClass) return;
+    updateDraftSession(selectedClass.id, activeSession.id, (session) => {
+      const current = session.records[studentId] ?? EMPTY_ATTENDANCE_RECORD;
       return {
-        ...current,
-        [classId]: [
-          ...currentSessions,
+        ...session,
+        records: {
+          ...session.records,
+          [studentId]: {
+            ...current,
+            status: current.status === status ? null : status,
+          },
+        },
+      };
+    });
+  }
+
+  function updateStudentHomework(studentId: string, field: HomeworkKey, checked: boolean) {
+    if (!activeSession || !selectedClass) return;
+    updateDraftSession(selectedClass.id, activeSession.id, (session) => {
+      const current = session.records[studentId] ?? EMPTY_ATTENDANCE_RECORD;
+      return {
+        ...session,
+        records: {
+          ...session.records,
+          [studentId]: {
+            ...current,
+            homework: { ...current.homework, [field]: checked },
+          },
+        },
+      };
+    });
+  }
+
+  function updateAllHomework(field: HomeworkKey, checked: boolean) {
+    if (!activeSession || !selectedClass) return;
+    updateDraftSession(selectedClass.id, activeSession.id, (session) => ({
+      ...session,
+      records: Object.fromEntries(selectedClass.students.map((student) => {
+        const current = session.records[student.id] ?? EMPTY_ATTENDANCE_RECORD;
+        return [
+          student.id,
+          { ...current, homework: { ...current.homework, [field]: checked } },
+        ];
+      })),
+    }));
+  }
+
+  function queueSessionDelete(session: AttendanceSession) {
+    if (!selectedClass) return;
+    if (session.isNew) {
+      setDraftClasses((current) => current.map((classItem) => (
+        classItem.id === selectedClass.id
+          ? { ...classItem, sessions: classItem.sessions.filter(({ id }) => id !== session.id) }
+          : classItem
+      )));
+    } else {
+      updateDraftSession(selectedClass.id, session.id, (current) => ({ ...current, pendingDelete: true }));
+    }
+    if (activeSessionId === session.id) closeAttendanceModal();
+  }
+
+  function restoreSession(session: AttendanceSession) {
+    if (!selectedClass) return;
+    updateDraftSession(selectedClass.id, session.id, (current) => ({ ...current, pendingDelete: false }));
+  }
+
+  function updateSessionField(
+    session: AttendanceSession,
+    field: EditableSessionField,
+    value: string,
+  ) {
+    if (!selectedClass || session.pendingDelete || fetcher.state !== "idle") return;
+    if (field === "date" && ((!value && !session.isNew) || value > todayDate)) return;
+    const courseLesson = field === "courseLessonId"
+      ? selectedClass.lessons.find(({ id }) => id === value)
+      : undefined;
+    if (field === "courseLessonId" && value && !courseLesson) return;
+
+    updateDraftSession(selectedClass.id, session.id, (current) => {
+      switch (field) {
+        case "name":
+          return { ...current, name: value };
+        case "date":
+          return { ...current, date: value };
+        case "courseLessonId":
+          return {
+            ...current,
+            courseLessonId: courseLesson?.id ?? null,
+            courseLessonTitle: courseLesson?.title ?? null,
+            lesson: courseLesson?.title ?? "",
+            lessonDisplay: courseLesson?.title ?? "Chưa gắn bài học",
+          };
+        case "recordingUrl":
+          return { ...current, recordingUrl: value || null };
+      }
+    });
+  }
+
+  function addDraftSession() {
+    if (!selectedClass) return;
+    const id = `draft-${crypto.randomUUID()}`;
+    const records = Object.fromEntries(selectedClass.students.map((student) => [
+      student.id,
+      { status: null, homework: { ...EMPTY_ATTENDANCE_RECORD.homework } },
+    ]));
+    setDraftClasses((current) => current.map((classItem) => {
+      if (classItem.id !== selectedClass.id) return classItem;
+      const nextNumber = classItem.sessions.reduce(
+        (maximum, session) => Math.max(maximum, session.number),
+        0,
+      ) + 1;
+      return {
+        ...classItem,
+        sessions: [
+          ...classItem.sessions,
           {
-            id: sessionId,
-            title: result.title,
-            lessonId: result.lessonId,
-            lesson: result.lesson,
-            recordingUrl: result.recordingUrl,
-            date: result.date,
-            scheduleStartTime: result.scheduleStartTime,
-            scheduleEndTime: result.scheduleEndTime,
-            isScheduleGenerated: false,
-            isMakeupSession: true,
-            hasAttendanceRecords: true,
-            records: {},
+            id,
+            number: nextNumber,
+            date: "",
+            name: "",
+            courseLessonId: null,
+            lesson: "",
+            lessonDisplay: "",
+            courseLessonTitle: null,
+            recordingUrl: null,
+            isNew: true,
+            pendingDelete: false,
+            records,
           },
-        ].sort((left, right) =>
-          left.date.localeCompare(right.date)
-          || (left.scheduleStartTime ?? "").localeCompare(right.scheduleStartTime ?? ""),
-        ),
+        ],
       };
-    });
-    setClassId(classId);
-    setActiveTabId(TOTAL_TAB_ID);
-    setShowMakeupModal(false);
-    setMakeupLeaveRequestId("");
-    setFeedback("Đã tạo buổi bù. Buổi học sẽ xuất hiện khi đến ngày học.");
-    toast.success("Đã tạo buổi bù thành công.");
-    makeupFetcher.reset();
-  }, [makeupFetcher.data, makeupFetcher.state]);
-
-  useEffect(() => {
-    const result = saveAttendanceFetcher.data;
-    if (
-      result?.success
-      && result.intent === "save-attendance"
-      && "classId" in result
-      && "sessionId" in result
-      && result.classId === selectedClass?.id
-      && result.sessionId === selectedAttendanceSession?.id
-    ) {
-      if (selectedClass && selectedAttendanceSession) {
-        setSessionsByClass((current) => ({
-          ...current,
-          [selectedClass.id]: (current[selectedClass.id] ?? selectedClass.sessions).map((session) =>
-            session.id === selectedAttendanceSession.id
-              ? { ...session, hasAttendanceRecords: true }
-              : session
-          ),
-        }));
-      }
-      setFeedback("Đã lưu điểm danh, bài tập và thông tin buổi học.");
-      setDirtySessionKeys((current) => {
-        const next = new Set(current);
-        next.delete(`${result.classId}:${result.sessionId}`);
-        return next;
-      });
-      toast.success("Đã lưu điểm danh thành công.");
-      if (result.reviewPrompt) {
-        setPendingReview(result.reviewPrompt);
-        setReviewStatuses(result.reviewPrompt.statuses);
-      }
-    } else if (saveAttendanceFetcher.data && !saveAttendanceFetcher.data.success) {
-      setFeedback(saveAttendanceFetcher.data.error);
-      toast.error(saveAttendanceFetcher.data.error);
-    }
-  }, [saveAttendanceFetcher.data, selectedClass?.id, selectedAttendanceSession?.id]);
-
-  useEffect(() => {
-    const result = reviewFetcher.data;
-    if (reviewFetcher.state !== "idle" || !result) return;
-    if (!result.success) {
-      setFeedback(result.error);
-      return;
-    }
-    const currentReview = pendingReview;
-    if (
-      result.intent === "save-session-review"
-      && currentReview
-      && currentReview.classId === result.classId
-      && currentReview.sessionId === result.sessionId
-      && currentReview.sessionType === result.sessionType
-    ) {
-      setPendingReview(null);
-      const feedback = currentReview.sessionType === "MIDTERM"
-        ? "Đã gửi đánh giá giữa kỳ cho quản trị viên."
-        : "Đã lưu đánh giá học viên.";
-      setFeedback(feedback);
-      toast.success(feedback);
-      reviewFetcher.reset();
-    }
-  }, [reviewFetcher.data, reviewFetcher.state, pendingReview]);
-
-  function changeClass(nextClassId: string) {
-    const nextClass = classes.find((item) => item.id === nextClassId);
-    if (!nextClass) return;
-    setClassId(nextClass.id);
-    setPendingReview(null);
-    const nextSessions = (sessionsByClass[nextClass.id] ?? nextClass.sessions)
-      .filter((session) => session.date <= today);
-    if (!sessionsByClass[nextClass.id]) {
-      setSessionsByClass((current) => ({ ...current, [nextClass.id]: nextClass.sessions }));
-    }
-    setActiveTabId(
-      nextSessions.find((session) => session.date === today)?.id
-        ?? nextSessions[0]?.id
-        ?? TOTAL_TAB_ID,
-    );
-    setFilter("all");
-    setSearch("");
-    setFeedback("");
-  }
-
-  function updateAttendanceSession(field: "lesson" | "lessonId" | "recordingUrl", value: string) {
-    if (!selectedClass || !selectedAttendanceSession) return;
-    setSessionsByClass((current) => ({
-      ...current,
-      [selectedClass.id]: (current[selectedClass.id] ?? selectedClass.sessions).map((session) =>
-        session.id === selectedAttendanceSession.id ? { ...session, [field]: value } : session
-      ),
     }));
-    markSessionDirty(sessionKey);
   }
 
-  function markSessionDirty(key = sessionKey) {
-    if (!key) return;
-    setDirtySessionKeys((current) => new Set(current).add(key));
-    setFeedback("Có thay đổi chưa lưu.");
-  }
-
-  function changeStatus(studentId: string, value: string) {
-    if (!selectedClass || !sessionKey) return;
-    const nextStatus: AttendanceStatus | null = value === ""
-      ? null
-      : STATUS_OPTIONS.find((option) => option.value === value)?.value ?? null;
-    if (value !== "" && nextStatus === null) return;
-    setAttendanceBySession((current) => {
-      const currentSession = current[sessionKey] ?? selectedAttendanceSession?.records ?? {};
-      const existingRecord = currentSession[studentId] ?? createEmptyAttendanceRecord();
-      return {
-        ...current,
-        [sessionKey]: {
-          ...currentSession,
-          [studentId]: {
-            ...existingRecord,
-            status: nextStatus,
-            absenceReason: nextStatus === "absent" && existingRecord.status === "absent"
-              ? existingRecord.absenceReason
-              : null,
-          },
-        },
-      };
-    });
-    markSessionDirty();
-  }
-
-  function changeAbsenceReason(studentId: string, value: string) {
-    if (!selectedClass || !sessionKey) return;
-    const reason = value === "excused" || value === "unexcused" ? value : null;
-    setAttendanceBySession((current) => ({
-      ...current,
-      [sessionKey]: {
-        ...(current[sessionKey] ?? selectedAttendanceSession?.records ?? {}),
-        [studentId]: {
-          ...(current[sessionKey] ?? selectedAttendanceSession?.records ?? {})[studentId]
-            ?? createEmptyAttendanceRecord(),
-          status: "absent",
-          absenceReason: reason,
-        },
-      },
-    }));
-    markSessionDirty();
-  }
-
-  function changeTask(studentId: string, task: AttendanceTask, checked: boolean) {
-    if (!selectedClass || !sessionKey) return;
-    setAttendanceBySession((current) => {
-      const currentSession = current[sessionKey] ?? selectedAttendanceSession?.records ?? {};
-      const currentRecord = currentSession[studentId] ?? createEmptyAttendanceRecord();
-      return {
-        ...current,
-        [sessionKey]: {
-          ...currentSession,
-          [studentId]: {
-            ...currentRecord,
-            tasks: { ...currentRecord.tasks, [task]: checked },
-          },
-        },
-      };
-    });
-    markSessionDirty();
-  }
-
-  function changeAttendanceChoice(studentId: string, choice: (typeof ATTENDANCE_CHOICES)[number]) {
-    const record = attendance[studentId];
-    if (!record) return;
-    const isActive = record.status === choice.status
-      && (choice.status !== "absent" || record.absenceReason === choice.absenceReason);
-    if (isActive) {
-      changeStatus(studentId, "");
-      return;
-    }
-    changeStatus(studentId, choice.status);
-    if (choice.absenceReason) changeAbsenceReason(studentId, choice.absenceReason);
-  }
-
-  function changeAllTasks(task: AttendanceTask, checked: boolean) {
-    if (!selectedClass || !selectedAttendanceSession || !sessionKey) return;
-    setAttendanceBySession((current) => {
-      const currentSession = current[sessionKey] ?? selectedAttendanceSession.records;
-      return {
-        ...current,
-        [sessionKey]: Object.fromEntries(selectedClass.students.map((student) => {
-          const record = currentSession[student.id] ?? createEmptyAttendanceRecord();
-          return [student.id, { ...record, tasks: { ...record.tasks, [task]: checked } }];
-        })),
-      };
-    });
-    markSessionDirty();
-  }
-
-  const reviewReady = Boolean(pendingReview?.students.length)
-    && Boolean(pendingReview?.students.every((student) => isStudentReviewStatus(reviewStatuses[student.id])));
-  const isSavingReview = reviewFetcher.state !== "idle";
-
-  function saveSessionReview() {
-    if (!pendingReview || !reviewReady) return;
-    reviewFetcher.submit(
-      {
-        intent: "save-session-review",
-        sessionId: pendingReview.sessionId,
-        sessionType: pendingReview.sessionType,
-        reviews: JSON.stringify(pendingReview.students.map((student) => ({
-          studentId: student.id,
-          status: reviewStatuses[student.id],
-        }))),
-      },
-      { method: "post" },
-    );
-  }
-
-  function saveAttendance() {
-    if (!selectedClass || !selectedAttendanceSession) return;
-    const studentMissingAbsenceReason = selectedClass.students.find((student) => {
-      const record = attendance[student.id] ?? selectedAttendanceSession.records[student.id];
-      return record?.status === "absent" && !record.absenceReason;
-    });
-    if (studentMissingAbsenceReason) {
-      setFilter("absent");
-      setSearch("");
-      const error = `Vui lòng chọn loại vắng cho ${studentMissingAbsenceReason.name} trước khi lưu.`;
-      setFeedback(error);
-      toast.error(error);
-      window.requestAnimationFrame(() => {
-        document.getElementById(`attendance-choice-${studentMissingAbsenceReason.id}-excused`)?.focus();
-      });
-      return;
-    }
-
-    const records = selectedClass.students.map((student) => ({
-      studentId: student.id,
-      ...(attendance[student.id] ?? createEmptyAttendanceRecord()),
-    }));
-    saveAttendanceFetcher.submit(
-      {
-        intent: "save-attendance",
-        sessionId: selectedAttendanceSession.id,
-        lessonId: selectedAttendanceSession.lessonId ?? "",
-        lesson: selectedAttendanceSession.lesson,
-        recordingUrl: selectedAttendanceSession.recordingUrl ?? "",
-        date: selectedAttendanceSession.date,
-        records: JSON.stringify(records),
-      },
-      { method: "post" },
-    );
-  }
-
-  if (!selectedClass) {
-    return (
-      <AppShell user={user}>
-        <div className="mx-auto max-w-6xl space-y-3">
-          <h1 className="text-2xl font-bold tracking-tight">Điểm danh</h1>
-          <p className="text-sm text-muted-foreground">
-            Bạn hiện không có lớp học nào đang hoạt động để điểm danh.
-          </p>
-        </div>
-      </AppShell>
-    );
+  function saveAllChanges() {
+    if (!hasUnsavedChanges || hasIncompleteNewSession || fetcher.state !== "idle") return;
+    fetcher.submit({ payload: JSON.stringify(savePayload) }, { method: "post" });
   }
 
   return (
     <AppShell user={user}>
-      <div className="mx-auto max-w-7xl space-y-5">
-        <header className="-mx-4 -mt-2 flex flex-col gap-4 border-b border-border/80 bg-background px-4 py-4 shadow-sm sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-bold tracking-tight">Điểm danh</h1>
-                <span
-                  role="status"
-                  className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium ${
-                    hasUnsavedChanges
-                      ? "border-amber-300 bg-amber-50 text-amber-900"
-                      : "border-emerald-200 bg-emerald-50 text-emerald-800"
-                  }`}
-                >
-                  <span className={`h-2 w-2 rounded-full ${hasUnsavedChanges ? "animate-pulse bg-amber-500" : "bg-emerald-600"}`} />
-                  {hasUnsavedChanges ? "Chưa lưu thay đổi" : "Đã lưu dữ liệu"}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Ghi nhận tình hình tham gia và bài tập theo từng buổi học.
-              </p>
-            </div>
+      <div className="mx-auto w-full max-w-[1320px] space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-3">
+          <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+            <span>Lớp học</span>
+            <span aria-hidden="true">/</span>
+            <span className="truncate font-semibold text-foreground">Điểm danh theo lớp</span>
+          </div>
+          <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+            hasUnsavedChanges
+              ? "border-amber-200 bg-amber-50 text-amber-900"
+              : "border-emerald-200 bg-emerald-50 text-emerald-900"
+          }`}>
+            <Info className="h-3.5 w-3.5" aria-hidden="true" />
+            {hasUnsavedChanges ? "Có thay đổi chưa lưu" : "Dữ liệu thật"}
+          </span>
+        </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                className="h-10 w-36 justify-center gap-2 px-3"
-                disabled={saveAttendanceFetcher.state !== "idle"}
-                onClick={() => {
-                  const firstLeave = approvedMakeupLeaveSlots[0];
-                  setMakeupLeaveRequestId(firstLeave?.id ?? "");
-                  setMakeupDate(getMinimumMakeupDate(today, firstLeave?.date));
-                  setMakeupLessonId("");
-                  setShowMakeupModal(true);
-                }}
-              >
-                <CalendarDays aria-hidden="true" className="h-4 w-4" />
-                Tạo buổi bù
-              </Button>
-              <Button
-                type="button"
-                className="h-10 w-36 justify-center gap-2 px-3"
-                disabled={
-                  !selectedAttendanceSession
-                  || saveAttendanceFetcher.state !== "idle"
-                }
-                onClick={saveAttendance}
-              >
-                <ClipboardCheck aria-hidden="true" className="h-4 w-4" />
-                {saveAttendanceFetcher.state !== "idle" ? "Đang lưu..." : "Lưu điểm danh"}
-              </Button>
-            </div>
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold leading-8 tracking-tight">Điểm danh</h1>
+            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
+              Xem các buổi học trong lớp và mở bảng điểm danh chi tiết cho từng buổi.
+            </p>
           </div>
         </header>
 
-        <section aria-label="Chọn lớp và buổi học" className="overflow-visible rounded-2xl border bg-card shadow-sm">
-          <div className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex min-w-0 items-center gap-3 lg:w-[22rem] lg:shrink-0">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
-                <BookOpen aria-hidden="true" className="h-5 w-5" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <label htmlFor="attendance-class" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Lớp học</label>
-                  <span className="max-w-40 truncate rounded-md bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-                    {selectedClass.course}
-                  </span>
-                </div>
-                <SearchableDropdown
-                  id="attendance-class"
-                  label="Chọn lớp học"
-                  placeholder="Chọn lớp học"
-                  searchPlaceholder="Tìm lớp học..."
-                  options={classes.map((item) => ({ value: item.id, label: item.name }))}
-                  value={selectedClass.id}
-                  onChange={changeClass}
-                  className="mt-1 min-w-0 flex-1"
-                  triggerClassName="rounded-lg border-transparent bg-muted/50 text-sm font-semibold shadow-none transition-colors hover:bg-muted"
-                  contentClassName="min-w-0 rounded-xl border-border/80 p-1.5 shadow-lg"
-                />
-              </div>
-            </div>
-
-            <div className="flex min-w-0 flex-1 items-center gap-2 border-t pt-3 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
-              <nav aria-label="Buổi học" className="flex min-w-0 flex-1 gap-2 overflow-x-auto py-1">
-                <button
-                  type="button"
-                  aria-pressed={isTotalView}
-                  disabled={saveAttendanceFetcher.state !== "idle"}
-                  onClick={() => {
-                    setActiveTabId(TOTAL_TAB_ID);
-                    setFilter("all");
-                    setSearch("");
-                    setFeedback("");
-                  }}
-                  className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                    isTotalView
-                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                      : "border-border bg-muted/40 text-foreground hover:bg-muted"
-                  }`}
-                >
-                  <Users aria-hidden="true" className="h-4 w-4" />
-                  Tổng hợp
-                </button>
-                {attendanceOptions.map((option) => option.type === "approved-leave" ? (
-                  <button
-                    key={`leave-${option.leave.id}`}
-                    type="button"
-                    disabled
-                    title={`${option.leave.className} · ${option.leave.startTime}–${option.leave.endTime} · ${formatAttendanceSessionDate(option.leave.date)} · Giáo viên nghỉ đã duyệt`}
-                    className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-dashed border-border bg-muted/30 px-3 text-xs font-medium text-muted-foreground"
-                  >
-                    <span className="h-2 w-2 rounded-full bg-muted-foreground/50" />
-                    <span>Ca nghỉ · {option.leave.startTime}</span>
-                  </button>
-                ) : (
-                  <button
-                    key={option.session.id}
-                    type="button"
-                    aria-pressed={activeTabId === option.session.id}
-                    disabled={saveAttendanceFetcher.state !== "idle"}
-                    onClick={() => {
-                      setActiveTabId(option.session.id);
-                      setFilter("all");
-                      setSearch("");
-                      setFeedback("");
-                    }}
-                    title={`${option.session.title}${option.session.isMakeupSession ? " · Buổi bù" : ""} · ${formatAttendanceSessionDate(option.session.date)}${option.session.scheduleStartTime && option.session.scheduleEndTime ? ` · ${option.session.scheduleStartTime}–${option.session.scheduleEndTime}` : ""}`}
-                    className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-3.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                      activeTabId === option.session.id
-                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                        : "border-border bg-muted/40 text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    <span className={`h-2 w-2 rounded-full ${
-                      dirtySessionKeys.has(`${selectedClass.id}:${option.session.id}`)
-                        ? "bg-amber-400"
-                        : option.session.hasAttendanceRecords
-                          ? activeTabId === option.session.id ? "bg-emerald-200" : "bg-emerald-600"
-                          : activeTabId === option.session.id ? "bg-white/70" : "bg-muted-foreground/40"
-                    }`} />
-                    <span>{option.session.title}</span>
-                    <span className={`font-normal ${activeTabId === option.session.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                      {formatAttendanceSessionDate(option.session.date)}
-                    </span>
-                    {option.session.isMakeupSession && (
-                      <span className={`rounded-md px-1.5 py-0.5 text-[10px] ${activeTabId === option.session.id ? "bg-white/15" : "bg-primary/10 text-primary"}`}>
-                        Bù
-                      </span>
-                    )}
-                  </button>
+        <section aria-label="Chọn lớp học" className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <div className="grid gap-4 md:grid-cols-12 md:items-end">
+            <div className="md:col-span-6">
+              <label htmlFor="attendance-class" className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+                Chọn lớp học cần quản lý điểm danh
+              </label>
+              <select
+                id="attendance-class"
+                value={selectedClass?.id ?? ""}
+                disabled={classes.length === 0}
+                onChange={(event) => {
+                  setSelectedClassId(event.target.value);
+                  setSessionSearch("");
+                }}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {classes.length === 0 && <option value="">Chưa có lớp được phân công</option>}
+                {classes.map((classItem) => (
+                  <option key={classItem.id} value={classItem.id}>
+                    {classItem.name} · {classItem.level}
+                  </option>
                 ))}
-              </nav>
-
-            </div>
-          </div>
-        </section>
-
-        <section aria-labelledby="attendance-session-details-heading" className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-          <div className="flex items-center justify-between gap-3 border-b bg-muted/30 px-4 py-3 sm:px-5">
-            <div className="min-w-0">
-              <h2 id="attendance-session-details-heading" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Thông tin buổi học
-              </h2>
-              {!isSessionDetailsExpanded && selectedAttendanceSession && (
-                <p className="mt-1 truncate text-xs text-muted-foreground">
-                  {formatAttendanceSessionDate(selectedAttendanceSession.date)} · {selectedAttendanceSession.lesson || "Chưa đặt tên bài học"}
-                </p>
-              )}
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              aria-expanded={isSessionDetailsExpanded}
-              aria-controls="attendance-session-details"
-              onClick={() => setIsSessionDetailsExpanded((expanded) => !expanded)}
-              className="shrink-0 gap-1.5 text-primary"
-            >
-              {isSessionDetailsExpanded ? "Thu gọn" : "Mở rộng"}
-              <ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform ${isSessionDetailsExpanded ? "rotate-180" : ""}`} />
-            </Button>
-          </div>
-
-          <div
-            id="attendance-session-details"
-            className={`grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-4 ${isSessionDetailsExpanded ? "" : "hidden"}`}
-          >
-              {selectedAttendanceSession ? (
-                <>
-                  <div className="min-w-0 space-y-1.5">
-                    <label htmlFor="attendance-lesson" className="block text-xs font-medium text-foreground">
-                      Bài học <span className="font-normal text-muted-foreground">(Tự nhập)</span>
-                    </label>
-                    <input
-                      id="attendance-lesson"
-                      type="text"
-                      value={selectedAttendanceSession.lesson}
-                      onChange={(event) => updateAttendanceSession("lesson", event.currentTarget.value)}
-                      maxLength={120}
-                      disabled={saveAttendanceFetcher.state !== "idle"}
-                      className="block h-10 w-full rounded-xl border border-input bg-background px-3.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
-                    />
-                  </div>
-                  <div className="min-w-0 space-y-1.5">
-                    <label htmlFor="attendance-course-lesson" className="block text-xs font-medium text-foreground">
-                      Bài học trong buổi <span className="font-normal text-muted-foreground">(Giáo trình)</span>
-                    </label>
-                    <select
-                      id="attendance-course-lesson"
-                      value={selectedAttendanceSession.lessonId ?? ""}
-                      onChange={(event) => updateAttendanceSession("lessonId", event.currentTarget.value)}
-                      disabled={saveAttendanceFetcher.state !== "idle"}
-                      className="block h-10 w-full rounded-xl border border-input bg-background px-3.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
-                    >
-                      <option value="">Không gắn bài học</option>
-                      {selectedClass.courseLessons.map((lesson, index) => (
-                        <option key={lesson.id} value={lesson.id}>Bài {index + 1} · {lesson.title}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="min-w-0 space-y-1.5">
-                    <span className="block text-xs font-medium text-foreground">Ngày diễn ra</span>
-                    <p className="flex h-10 w-full items-center rounded-xl border border-input bg-muted/40 px-3.5 text-sm">
-                      {new Date(`${selectedAttendanceSession.date}T00:00:00.000Z`).toLocaleDateString("vi-VN", {
-                        timeZone: "UTC",
-                        dateStyle: "long",
-                      })}
-                    </p>
-                  </div>
-                  <div className="min-w-0 space-y-1.5">
-                    <label htmlFor="attendance-recording-url" className="block text-xs font-medium text-foreground">
-                      Link bản ghi buổi học
-                    </label>
-                    <input
-                      id="attendance-recording-url"
-                      type="url"
-                      inputMode="url"
-                      value={selectedAttendanceSession.recordingUrl ?? ""}
-                      onChange={(event) => updateAttendanceSession("recordingUrl", event.currentTarget.value)}
-                      maxLength={2048}
-                      placeholder="https://..."
-                      disabled={saveAttendanceFetcher.state !== "idle"}
-                      className="block h-10 w-full rounded-xl border border-input bg-background px-3.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
-                    />
-                  </div>
-                </>
-              ) : (
-                <p className="text-sm text-muted-foreground sm:col-span-2 xl:col-span-4">
-                  Chọn một buổi học để xem thông tin bài học và bản ghi.
-                </p>
-              )}
-          </div>
-        </section>
-
-        <section aria-labelledby="student-roster-heading" className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-          <div className="space-y-4 border-b p-4 sm:p-5">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-              <div className="flex flex-wrap items-center gap-3">
-                <h2 id="student-roster-heading" className="text-base font-semibold">
-                  {isTotalView ? "Tổng hợp theo học viên" : "Danh sách học viên"}
-                </h2>
-                <span className="rounded-lg bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">
-                  {isTotalView
-                    ? `${attendanceSessions.length} buổi đã học`
-                    : `Đã điểm danh ${markedCount}/${counts.total}`}
-                </span>
-              </div>
-              {!isTotalView && (
-                <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="rounded-lg border bg-muted/40 px-2.5 py-1.5 text-muted-foreground">
-                    Sĩ số <strong className="ml-1 text-sm tabular-nums text-foreground">{counts.total}</strong>
-                  </span>
-                  <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-emerald-900">
-                    Có mặt <strong className="ml-1 text-sm tabular-nums">{counts.present}</strong>
-                  </span>
-                  <span className="rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-amber-900">
-                    Đi muộn <strong className="ml-1 text-sm tabular-nums">{counts.late}</strong>
-                  </span>
-                  <span className="rounded-lg border border-sky-200 bg-sky-50 px-2.5 py-1.5 text-sky-900">
-                    Vắng (CP) <strong className="ml-1 text-sm tabular-nums">{counts.excused}</strong>
-                  </span>
-                  <span className="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-rose-900">
-                    Vắng (KP) <strong className="ml-1 text-sm tabular-nums">{counts.unexcused}</strong>
-                  </span>
-                </div>
-              )}
+              </select>
             </div>
 
-            <div className={`flex gap-3 ${isTotalView ? "flex-col sm:flex-row sm:items-center sm:justify-end" : "flex-col sm:flex-row sm:items-center sm:justify-between"}`}>
-              {!isTotalView && (
-                <div role="group" aria-label="Lọc theo trạng thái" className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto py-1">
-                    {FILTER_OPTIONS.map((option) => {
-                      const count = option.value === "all" ? counts.total
-                        : option.value === "absent" ? counts.absent
-                          : counts[option.value];
-                      return (
-                        <button
-                          key={option.value}
-                          type="button"
-                          aria-pressed={filter === option.value}
-                          onClick={() => setFilter(option.value)}
-                          className={`inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                            filter === option.value
-                              ? "border-foreground bg-foreground font-semibold text-background"
-                              : "border-transparent bg-muted/70 font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-                          }`}
-                        >
-                          {option.label}
-                          <span className={`tabular-nums ${filter === option.value ? "text-background/80" : "text-muted-foreground"}`}>
-                            {count}
-                          </span>
-                        </button>
-                      );
-                    })}
-                </div>
-              )}
-
-              <div className="relative w-full shrink-0 sm:w-56">
-                <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="search"
-                  value={search}
-                  onChange={(event) => setSearch(event.currentTarget.value)}
-                  placeholder="Tìm tên học viên..."
-                  aria-label="Tìm học viên"
-                  className="h-10 w-full rounded-xl border border-input bg-background pl-9 pr-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            <div className="md:col-span-3">
+              <label htmlFor="attendance-session-search" className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+                Tìm trong danh sách buổi
+              </label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <Input
+                  id="attendance-session-search"
+                  value={sessionSearch}
+                  onChange={(event) => setSessionSearch(event.target.value)}
+                  placeholder="Tên buổi, bài học..."
+                  className="pl-9"
                 />
               </div>
             </div>
+
+            <div className="flex h-10 items-center justify-between gap-2 rounded-md border bg-muted/40 px-3 text-sm md:col-span-3">
+              <span className="text-muted-foreground">Sĩ số hiện tại</span>
+              <span className="inline-flex items-center gap-1.5 font-semibold tabular-nums">
+                <Users className="h-4 w-4 text-primary" aria-hidden="true" />
+                {selectedClass?.students.length ?? 0} học viên
+              </span>
+            </div>
           </div>
 
-          {consecutiveAbsenceAlerts.length > 0 && (
-            <div className="px-4 pb-4 sm:px-5">
-              <ConsecutiveAbsenceNotice alerts={consecutiveAbsenceAlerts} />
-            </div>
-          )}
-
-          <div className="overflow-x-auto">
-            {isTotalView ? (
-              <table className="w-full min-w-[1116px] border-collapse text-left">
-                <caption className="sr-only">Tổng hợp điểm danh và bài tập theo học viên qua tất cả các buổi</caption>
-                <thead className="bg-muted/50">
-                  <tr className="border-b">
-                    <th scope="col" className="w-[56px] px-3 py-3 text-center text-xs font-semibold text-muted-foreground">STT</th>
-                    <th scope="col" className="w-[230px] px-5 py-3 text-xs font-semibold text-muted-foreground">Học viên</th>
-                    <th scope="col" className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground">Có mặt</th>
-                    <th scope="col" className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground">Đi muộn</th>
-                    <th scope="col" className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground">Vắng mặt</th>
-                    {ATTENDANCE_TASKS.map(({ key, label }) => (
-                      <th key={key} scope="col" className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground">{label}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {aggregateWithAbsence
-                    .filter(({ student }) => student.name.toLocaleLowerCase("vi").includes(search.trim().toLocaleLowerCase("vi")))
-                    .map((item, index) => {
-                      const doneByTask: Record<AttendanceTask, number> = {
-                        recording: item.recording,
-                        hanzi: item.hanzi,
-                        duet: item.duet,
-                        lessonLink: item.lessonLink,
-                      };
-                      const initials = item.student.name.split(" ").slice(-2).map((part) => part[0]).join("");
-                      return (
-                        <tr
-                          key={item.student.id}
-                          className={`transition-colors hover:bg-muted/30 ${item.hasConsecutiveAbsence ? "bg-destructive/5" : ""}`}
-                        >
-                          <td className="px-3 py-3.5 text-center text-sm tabular-nums text-muted-foreground">{index + 1}</td>
-                          <th scope="row" className="px-5 py-3.5 text-left">
-                            <span className="flex items-center gap-3">
-                              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground" aria-hidden="true">{initials}</span>
-                              <span>
-                                <span className="block text-sm font-medium text-foreground">{item.student.name}</span>
-                                {item.hasConsecutiveAbsence && <ConsecutiveAbsenceBadge />}
-                              </span>
-                            </span>
-                          </th>
-                          <td className="px-3 py-3.5 text-center text-sm font-medium tabular-nums text-success">{item.present}</td>
-                          <td className="px-3 py-3.5 text-center text-sm font-medium tabular-nums text-warning">{item.late}</td>
-                          <td className="px-3 py-3.5 text-center text-sm font-medium tabular-nums text-destructive">{item.absent}</td>
-                          {ATTENDANCE_TASKS.map(({ key, label }) => (
-                            <td key={key} className="px-3 py-3.5 text-center text-sm tabular-nums text-muted-foreground" aria-label={`${label}: ${doneByTask[key]} trên ${attendanceSessions.length} buổi`}>
-                              {doneByTask[key]}/{attendanceSessions.length}
-                            </td>
-                          ))}
-                        </tr>
-                      );
-                    })}
-                  {aggregateWithAbsence.filter(({ student }) => student.name.toLocaleLowerCase("vi").includes(search.trim().toLocaleLowerCase("vi"))).length === 0 && (
-                    <tr>
-                      <td colSpan={9} className="px-4 py-10 text-center">
-                        <p className="text-sm font-medium">
-                          {selectedClass.students.length === 0 ? "Lớp chưa có học viên" : "Không tìm thấy học viên phù hợp"}
-                        </p>
-                        {selectedClass.students.length > 0 && (
-                          <p className="mt-1 text-sm text-muted-foreground">Thử đổi từ khóa tìm kiếm.</p>
-                        )}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t pt-3 text-xs text-muted-foreground">
+            {selectedClass ? (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span>Trình độ: <strong className="font-semibold text-foreground">{selectedClass.level}</strong></span>
+                <span className="hidden text-border sm:inline" aria-hidden="true">•</span>
+                <span>Lịch học: <strong className="font-semibold text-foreground">{selectedClass.schedule}</strong></span>
+              </div>
             ) : (
-            <table className="w-full min-w-[1120px] border-collapse text-left">
-              <caption className="sr-only">Điểm danh và tình trạng bài tập của học viên</caption>
-              <thead className="bg-muted/50">
-                <tr className="border-b">
-                  <th scope="col" className="w-[56px] px-3 py-3 text-center text-xs font-semibold text-muted-foreground">STT</th>
-                  <th scope="col" className="w-[230px] px-5 py-3 text-xs font-semibold text-muted-foreground">Học viên</th>
-                  <th scope="col" className="w-[420px] px-4 py-3 text-xs font-semibold text-muted-foreground">Trạng thái điểm danh</th>
-                  {ATTENDANCE_TASKS.map(({ key, label }) => {
-                    const checkedCount = selectedClass.students.filter((student) => attendance[student.id]?.tasks[key]).length;
-                    const allChecked = selectedClass.students.length > 0 && checkedCount === selectedClass.students.length;
-                    return (
-                      <th key={key} scope="col" className="w-[100px] px-2 py-3 text-center">
-                        <label className="inline-flex cursor-pointer flex-col items-center gap-1 text-[11px] font-semibold text-muted-foreground">
-                          <span>{label}</span>
-                          <input
-                            type="checkbox"
-                            checked={allChecked}
-                            ref={(element) => {
-                              if (element) element.indeterminate = checkedCount > 0 && !allChecked;
-                            }}
-                            onChange={(event) => changeAllTasks(key, event.currentTarget.checked)}
-                            disabled={saveAttendanceFetcher.state !== "idle"}
-                            aria-label={`Đánh dấu tất cả ${label}`}
-                            className="h-4 w-4 cursor-pointer rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                          />
-                        </label>
-                      </th>
-                    );
-                  })}
+              <span>Giáo viên chưa được phân công lớp học.</span>
+            )}
+            <span>
+              Tổng số buổi: <strong className="font-semibold text-foreground">
+                {selectedClass?.sessions.filter(({ pendingDelete }) => !pendingDelete).length ?? 0}
+              </strong>
+            </span>
+          </div>
+        </section>
+
+        <section aria-label="Danh sách buổi học" className="overflow-hidden rounded-xl border bg-card shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3.5 sm:px-5">
+            <div className="flex items-center gap-2.5">
+              <CalendarDays className="h-4 w-4 text-primary" aria-hidden="true" />
+              <h2 className="text-sm font-bold">Danh sách buổi học</h2>
+              <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-muted-foreground">
+                {filteredSessions.length} buổi
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                disabled={!selectedClass || fetcher.state !== "idle"}
+                onClick={addDraftSession}
+              >
+                <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                Thêm buổi mới
+              </Button>
+              <Button
+                type="button"
+                disabled={!hasUnsavedChanges || hasIncompleteNewSession || fetcher.state !== "idle"}
+                onClick={saveAllChanges}
+                title={!hasUnsavedChanges ? "Chưa có thay đổi cần lưu" : undefined}
+              >
+                <Save className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                {fetcher.state !== "idle" ? "Đang lưu..." : "Lưu toàn bộ bảng"}
+              </Button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto" tabIndex={0} aria-label="Bảng buổi học, có thể cuộn ngang">
+            <table className="w-full min-w-[1200px] border-collapse text-left text-sm">
+              <thead>
+                <tr className="border-b bg-muted/40 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <th scope="col" className="w-24 py-3 pl-5 pr-2">Buổi số</th>
+                  <th scope="col" className="min-w-[220px] px-3 py-3">Tên buổi</th>
+                  <th scope="col" className="min-w-[140px] px-3 py-3">Ngày học</th>
+                  <th scope="col" className="min-w-[220px] px-3 py-3">Bài học</th>
+                  <th scope="col" className="min-w-[180px] px-3 py-3">Link ghi hình</th>
+                  <th scope="col" className="min-w-[165px] px-3 py-3">Điểm danh</th>
+                  <th scope="col" className="w-36 py-3 pl-3 pr-5 text-right">Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
-                {visibleStudents.map((student, index) => {
-                  const record = attendance[student.id];
-                  const initials = student.name.split(" ").slice(-2).map((part) => part[0]).join("");
-                  const isAbsent = record.status === "absent";
-                  const hasConsecutiveAbsence = consecutiveAbsenceStudentIds.has(student.id);
-
+              <tbody className="divide-y divide-border/70">
+                {selectedClass && filteredSessions.map((session) => {
+                  const counts = getAttendanceCounts(selectedClass.students, session.records);
+                  const recordingUrl = getSafeRecordingUrl(session.recordingUrl);
+                  const courseLessonIndex = selectedClass.lessons.findIndex(({ id }) => id === session.courseLessonId);
+                  const courseLesson = courseLessonIndex >= 0
+                    ? selectedClass.lessons[courseLessonIndex]
+                    : undefined;
+                  const lessonLabel = courseLesson
+                    ? `Bài ${courseLessonIndex + 1}: ${courseLesson.title}`
+                    : session.lessonDisplay;
+                  const legacyLessonValue = `legacy:${session.id}`;
+                  const lessonSelectValue = courseLesson?.id ?? (session.lesson ? legacyLessonValue : "");
+                  const editingField = editingSessionField?.sessionId === session.id
+                    ? editingSessionField.field
+                    : null;
                   return (
-                    <tr
-                      key={student.id}
-                      className={`transition-colors ${
-                        isAbsent
-                          ? "bg-rose-50 hover:bg-rose-100"
-                          : hasConsecutiveAbsence
-                            ? "bg-destructive/5 hover:bg-destructive/10"
-                            : "hover:bg-muted/30"
-                      }`}
-                    >
-                      <td className="px-3 py-3.5 text-center text-sm tabular-nums text-muted-foreground">{index + 1}</td>
-                      <th scope="row" className="px-5 py-3.5 text-left">
-                        <div className="flex min-w-0 items-center gap-3">
-                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground" aria-hidden="true">
-                            {initials}
-                          </span>
-                          <span className="min-w-0">
-                            <span className="block truncate text-sm font-medium text-foreground">{student.name}</span>
-                            {hasConsecutiveAbsence && <ConsecutiveAbsenceBadge />}
-                          </span>
+                    <tr key={session.id} className={`transition-colors hover:bg-muted/30 ${session.pendingDelete ? "bg-rose-50/70 opacity-75" : ""}`}>
+                      <td className="py-3 pl-5 pr-2">
+                        <div className="inline-flex items-center gap-1.5 rounded-lg bg-muted/60 px-2.5 py-1.5">
+                          <span className="text-xs text-muted-foreground">Buổi</span>
+                          <span className="text-sm font-bold tabular-nums">{session.number}</span>
                         </div>
-                      </th>
-                      <td className="px-4 py-3.5">
-                        <div
-                          role="group"
-                          id={`attendance-status-${student.id}`}
-                          aria-label={`Trạng thái điểm danh của ${student.name}`}
-                          aria-describedby={
-                            record.status === "absent" && !record.absenceReason
-                              ? `absence-reason-error-${student.id}`
-                              : undefined
-                          }
-                          className="inline-flex max-w-full flex-wrap gap-1 rounded-xl border border-border/70 bg-muted/70 p-1"
-                        >
-                          {ATTENDANCE_CHOICES.map((choice) => {
-                            const isActive = record.status === choice.status
-                              && (choice.status !== "absent" || record.absenceReason === choice.absenceReason);
-                            return (
-                              <button
-                                key={choice.value}
-                                type="button"
-                                id={`attendance-choice-${student.id}-${choice.value}`}
-                                aria-pressed={isActive}
-                                onClick={() => changeAttendanceChoice(student.id, choice)}
-                                disabled={saveAttendanceFetcher.state !== "idle"}
-                                className={`inline-flex min-h-8 items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 sm:px-2.5 sm:text-xs ${
-                                  isActive
-                                    ? `${choice.activeClass} font-semibold shadow-sm`
-                                    : "border-transparent bg-background text-muted-foreground hover:border-border hover:text-foreground"
-                                }`}
-                              >
-                                {isActive && <Check aria-hidden="true" className="h-3 w-3" />}
-                                {choice.label}
-                              </button>
-                            );
-                          })}
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {editingField === "name" ? (
+                            <Input
+                              autoFocus
+                              value={session.name}
+                              onChange={(event) => updateSessionField(session, "name", event.target.value)}
+                              onBlur={() => setEditingSessionField(null)}
+                              maxLength={80}
+                              disabled={session.pendingDelete || fetcher.state !== "idle"}
+                              aria-label={`Tên buổi ${session.number}`}
+                              className="h-8 min-w-[160px]"
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setEditingSessionField({ sessionId: session.id, field: "name" })}
+                              disabled={session.pendingDelete || fetcher.state !== "idle"}
+                              aria-label={`Sửa tên buổi ${session.number}`}
+                              title="Bấm để sửa tên buổi"
+                              className={`rounded-sm text-left font-medium leading-snug hover:text-primary hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-70 ${session.pendingDelete ? "line-through" : ""}`}
+                            >
+                              {session.name || <span className="font-normal text-muted-foreground">Nhập tên buổi</span>}
+                            </button>
+                          )}
+                          {session.pendingDelete && (
+                            <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-800">
+                              Chờ xóa · lưu để xóa
+                            </span>
+                          )}
+                          {session.isNew && (
+                            <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-800">
+                              Mới · chưa lưu
+                            </span>
+                          )}
                         </div>
-                        {record.status === "absent" && !record.absenceReason && (
-                          <p id={`absence-reason-error-${student.id}`} role="alert" className="mt-1 text-xs text-destructive">
-                            Chọn vắng có phép hoặc không phép.
-                          </p>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3 text-muted-foreground">
+                        <VietnameseDatePicker
+                          value={session.date}
+                          maxDate={todayDate}
+                          label={`Chọn ngày học buổi ${session.number}`}
+                          disabled={session.pendingDelete || fetcher.state !== "idle"}
+                          onSelect={(date) => updateSessionField(session, "date", date)}
+                        />
+                      </td>
+                      <td className="px-3 py-3 text-muted-foreground">
+                        {editingField === "courseLessonId" ? (
+                          <Select
+                            value={lessonSelectValue}
+                            onValueChange={(value) => {
+                              if (value.startsWith("legacy:")) return;
+                              updateSessionField(
+                                session,
+                                "courseLessonId",
+                                value === "__none__" ? "" : value,
+                              );
+                              setEditingSessionField(null);
+                            }}
+                            onOpenChange={(open) => {
+                              if (!open) setEditingSessionField(null);
+                            }}
+                            disabled={session.pendingDelete || fetcher.state !== "idle"}
+                          >
+                            <SelectTrigger
+                              autoFocus
+                              aria-label={`Bài học buổi ${session.number}`}
+                              className="h-8 min-w-[180px] px-2 py-1 text-xs"
+                            >
+                              <SelectValue placeholder="Chọn bài học" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-72 w-[min(20rem,calc(100vw-2rem))]">
+                              <SelectItem value="__none__">Bỏ chọn bài học</SelectItem>
+                              {!courseLesson && session.lesson && (
+                                <SelectItem value={legacyLessonValue} disabled>
+                                {session.lessonDisplay} (bài học hiện tại)
+                                </SelectItem>
+                              )}
+                              {selectedClass.lessons.map((lesson, index) => (
+                                <SelectItem key={lesson.id} value={lesson.id}>
+                                  Bài {index + 1}: {lesson.title}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setEditingSessionField({ sessionId: session.id, field: "courseLessonId" })}
+                            disabled={session.pendingDelete || fetcher.state !== "idle"}
+                            aria-label={`Sửa bài học buổi ${session.number}`}
+                            title="Bấm để sửa bài học"
+                            className="rounded-sm text-left hover:text-primary hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-70"
+                          >
+                            {lessonLabel || <span>Thêm bài học</span>}
+                          </button>
                         )}
                       </td>
-                      {ATTENDANCE_TASKS.map(({ key, label }) => (
-                        <td key={key} className="px-3 py-3.5 text-center">
-                          <label className="inline-flex min-h-10 min-w-10 cursor-pointer items-center justify-center rounded-md hover:bg-muted">
-                            <span className="sr-only">{label} của {student.name}</span>
-                            <input
-                              type="checkbox"
-                              checked={record.tasks[key]}
-                              onChange={(event) => changeTask(student.id, key, event.currentTarget.checked)}
-                              disabled={saveAttendanceFetcher.state !== "idle"}
-                              aria-label={`${label} của ${student.name}`}
-                              className="h-4 w-4 cursor-pointer rounded border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                            />
-                          </label>
-                        </td>
-                      ))}
+                      <td className="px-3 py-3">
+                        {editingField === "recordingUrl" ? (
+                          <Input
+                            autoFocus
+                            type="url"
+                            value={session.recordingUrl ?? ""}
+                            onChange={(event) => updateSessionField(session, "recordingUrl", event.target.value)}
+                            onBlur={() => setEditingSessionField(null)}
+                            maxLength={2048}
+                            placeholder="https://..."
+                            disabled={session.pendingDelete || fetcher.state !== "idle"}
+                            aria-label={`Link ghi hình buổi ${session.number}`}
+                            className="h-8 min-w-[160px]"
+                          />
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setEditingSessionField({ sessionId: session.id, field: "recordingUrl" })}
+                              disabled={session.pendingDelete || fetcher.state !== "idle"}
+                              aria-label={`Sửa link ghi hình buổi ${session.number}`}
+                              title="Bấm để sửa link ghi hình"
+                              className={`max-w-[200px] truncate rounded-sm text-left text-xs font-medium hover:underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-70 ${session.recordingUrl && !recordingUrl ? "text-rose-700" : session.recordingUrl ? "text-primary" : "text-muted-foreground"}`}
+                            >
+                              {session.recordingUrl || "Thêm link ghi hình"}
+                            </button>
+                            {recordingUrl && (
+                              <a
+                                href={recordingUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={`Mở link ghi hình buổi ${session.number}`}
+                                title="Mở link ghi hình"
+                                className="shrink-0 rounded-sm text-primary hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                              </a>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 py-3">
+                        {counts.marked === 0 ? (
+                          <span className="inline-flex rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                            Chưa điểm danh
+                          </span>
+                        ) : (
+                          <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                            <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-800">
+                              Có mặt: {counts.present + counts.late}
+                            </span>
+                            <span className="rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 font-semibold text-rose-800">
+                              Vắng: {counts.absent}
+                            </span>
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-3 pl-3 pr-5">
+                        <div className="flex flex-nowrap justify-end gap-1">
+                          {session.pendingDelete ? (
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => restoreSession(session)}
+                              disabled={fetcher.state !== "idle"}
+                              className="h-8 w-8 text-rose-800"
+                              aria-label={`Hoàn tác xóa buổi ${session.number}`}
+                              title={`Hoàn tác xóa buổi ${session.number}`}
+                            >
+                              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                            </Button>
+                          ) : (
+                            <>
+                              <Button
+                                type="button"
+                                size="icon"
+                                onClick={(event) => openAttendanceModal(session, event.currentTarget)}
+                                disabled={fetcher.state !== "idle"}
+                                className="h-8 w-8"
+                                aria-label={`Mở bảng điểm danh buổi ${session.number}`}
+                                title={`Điểm danh buổi ${session.number}`}
+                              >
+                                <ClipboardCheck className="h-4 w-4" aria-hidden="true" />
+                              </Button>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => queueSessionDelete(session)}
+                                disabled={fetcher.state !== "idle"}
+                                className="h-8 w-8 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+                                aria-label={`Xóa buổi ${session.number}`}
+                                title={`Xóa buổi ${session.number}`}
+                              >
+                                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
-                {visibleStudents.length === 0 && (
+                {filteredSessions.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-4 py-10 text-center">
-                      <p className="text-sm font-medium">
-                        {selectedClass.students.length === 0 ? "Lớp chưa có học viên" : "Không tìm thấy học viên phù hợp"}
+                    <td colSpan={7} className="px-4 py-12 text-center">
+                      <p className="font-medium">
+                        {!selectedClass
+                          ? "Giáo viên chưa được phân công lớp học."
+                          : sessionSearch
+                            ? "Không tìm thấy buổi học phù hợp."
+                            : "Lớp học chưa có buổi nào."}
                       </p>
-                      {selectedClass.students.length > 0 && (
-                        <p className="mt-1 text-sm text-muted-foreground">Thử đổi từ khóa hoặc bộ lọc trạng thái.</p>
+                      {selectedClass && sessionSearch && (
+                        <p className="mt-1 text-sm text-muted-foreground">Thử đổi từ khóa tìm kiếm.</p>
                       )}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-            )}
           </div>
 
-          <footer className="flex flex-col gap-3 border-t bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-            <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
-              {feedback || (selectedAttendanceSession
-                ? "Thay đổi sẽ được lưu vào hệ thống khi bạn chọn Lưu điểm danh."
-                : "Buổi học theo lịch sẽ xuất hiện khi đến ngày học.")}
+          <div className="flex flex-col gap-3 border-t bg-muted/20 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <p className="max-w-3xl text-xs text-muted-foreground">
+              Chỉnh sửa và xóa chỉ nằm trên giao diện cho đến khi bạn chọn <strong>Lưu toàn bộ bảng</strong>.
+              Buổi đang chờ xóa có thể hoàn tác trước khi lưu.
             </p>
-            {selectedAttendanceSession && (
-              <Button
-                type="button"
-                className="w-full gap-2 sm:w-auto"
-                disabled={saveAttendanceFetcher.state !== "idle"}
-                onClick={saveAttendance}
-              >
-                <ClipboardCheck aria-hidden="true" className="h-4 w-4" />
-                {saveAttendanceFetcher.state !== "idle" ? "Đang lưu..." : "Lưu điểm danh"}
-              </Button>
-            )}
-          </footer>
+          </div>
+          {saveError && (
+            <div role="alert" className="border-t border-rose-200 bg-rose-50 px-5 py-3 text-sm text-rose-800">
+              {saveError}
+            </div>
+          )}
+          {showSaveSuccess && (
+            <div role="status" className="border-t border-emerald-200 bg-emerald-50 px-5 py-3 text-sm text-emerald-800">
+              Đã lưu toàn bộ thay đổi.
+            </div>
+          )}
         </section>
+      </div>
 
-        {showMakeupModal && (
-          <Overlay
-            onClose={() => {
-              if (makeupFetcher.state === "idle") setShowMakeupModal(false);
-            }}
-            className="max-w-xl"
-            closeOnEscape={makeupFetcher.state === "idle"}
-            closeOnBackdrop={makeupFetcher.state === "idle"}
+      {activeSession && selectedClass && modalCounts && (
+        <Overlay
+          onClose={closeAttendanceModal}
+          closeOnEscape
+          closeOnBackdrop
+          className="max-w-[1040px] !max-h-[92vh] !overflow-hidden !p-0"
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="attendance-title"
+            className="flex max-h-[92vh] flex-col overflow-hidden"
           >
-            <section role="dialog" aria-modal="true" aria-labelledby="teacher-makeup-heading" className="space-y-5">
-              <header className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 id="teacher-makeup-heading" className="text-lg font-semibold">Tạo buổi bù</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Chọn ca nghỉ đã được duyệt. Buổi bù dùng khung giờ của ca nghỉ.
-                  </p>
+            <header className="flex shrink-0 items-start justify-between gap-4 border-b px-4 py-4 sm:px-6">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-md border border-primary/20 bg-primary/5 px-2.5 py-0.5 text-[11px] font-bold text-primary">
+                    Buổi {activeSession.number}
+                  </span>
+                  <span className="truncate text-xs font-medium text-muted-foreground">{selectedClass.name}</span>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Đóng"
-                  disabled={makeupFetcher.state !== "idle"}
-                  onClick={() => setShowMakeupModal(false)}
-                >
-                  <X aria-hidden="true" className="h-4 w-4" />
-                </Button>
-              </header>
-
-              {approvedMakeupLeaveSlots.length === 0 ? (
-                <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-                  Chưa có ca nghỉ nào được duyệt và chưa xếp buổi bù.
-                </p>
-              ) : (
-                <makeupFetcher.Form method="post" className="space-y-4">
-                  <input type="hidden" name="intent" value="create-makeup-session" />
-                  <div className="space-y-1.5">
-                    <label htmlFor="teacher-makeup-leave" className="text-sm font-medium">Học bù cho buổi nghỉ</label>
-                    <select
-                      id="teacher-makeup-leave"
-                      name="leaveRequestId"
-                      value={makeupLeaveRequestId}
-                      required
-                      disabled={makeupFetcher.state !== "idle"}
-                      onChange={(event) => {
-                        const nextId = event.currentTarget.value;
-                        const leave = approvedMakeupLeaveSlots.find(({ id }) => id === nextId);
-                        setMakeupLeaveRequestId(nextId);
-                        setMakeupDate(getMinimumMakeupDate(today, leave?.date));
-                        setMakeupLessonId("");
-                      }}
-                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      {approvedMakeupLeaveSlots.map((leave) => (
-                        <option key={leave.id} value={leave.id}>
-                          {leave.className} · {formatAttendanceSessionDate(leave.date)} · {leave.startTime}–{leave.endTime}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label htmlFor="teacher-makeup-date" className="text-sm font-medium">Ngày học</label>
-                    <input
-                      id="teacher-makeup-date"
-                      name="date"
-                      type="date"
-                      min={getMinimumMakeupDate(today, selectedMakeupLeaveSlot?.date)}
-                      required
-                      value={makeupDate}
-                      onChange={(event) => setMakeupDate(event.currentTarget.value)}
-                      disabled={makeupFetcher.state !== "idle"}
-                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label htmlFor="teacher-makeup-lesson" className="text-sm font-medium">Bài học trong buổi</label>
-                    <select
-                      id="teacher-makeup-lesson"
-                      name="lessonId"
-                      value={makeupLessonId}
-                      onChange={(event) => setMakeupLessonId(event.currentTarget.value)}
-                      disabled={makeupFetcher.state !== "idle"}
-                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <option value="">Không gắn bài học</option>
-                      {makeupCourseLessons.map((lesson, index) => (
-                        <option key={lesson.id} value={lesson.id}>
-                          Bài {index + 1} · {lesson.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label htmlFor="teacher-makeup-recording" className="text-sm font-medium">Link ghi hình / bản ghi</label>
-                    <input
-                      id="teacher-makeup-recording"
-                      name="recordingUrl"
-                      type="url"
-                      maxLength={2048}
-                      disabled={makeupFetcher.state !== "idle"}
-                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
-                  </div>
-                  {makeupFetcher.data && !makeupFetcher.data.success
-                    && makeupFetcher.data.intent === "create-makeup-session" && (
-                    <p role="alert" className="text-sm text-destructive">{makeupFetcher.data.error}</p>
-                  )}
-                  <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={makeupFetcher.state !== "idle"}
-                      onClick={() => setShowMakeupModal(false)}
-                    >
-                      Hủy
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={!makeupLeaveRequestId || makeupFetcher.state !== "idle"}
-                    >
-                      {makeupFetcher.state !== "idle" ? "Đang tạo..." : "Tạo buổi bù"}
-                    </Button>
-                  </div>
-                </makeupFetcher.Form>
-              )}
-            </section>
-          </Overlay>
-        )}
-
-        {pendingReview && (
-          <Overlay
-            onClose={() => {
-              if (!isSavingReview) setPendingReview(null);
-            }}
-            className="max-w-3xl"
-          >
-            <section aria-labelledby="student-review-title" className="space-y-5">
-              <header className="space-y-1">
-                <h2 id="student-review-title" className="text-xl font-semibold">
-                  Đánh giá {pendingReview.sessionType === "MIDTERM" ? "giữa kỳ" : "cuối kỳ"}
+                <h2 id="attendance-title" className="mt-1 text-lg font-bold">
+                  Điểm danh & kiểm tra bài tập
                 </h2>
-                <p className="text-sm text-muted-foreground">
-                  {selectedClass?.name} · {pendingReview.sessionTitle} · buổi {pendingReview.sessionNumber}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Chọn trạng thái cho tất cả {pendingReview.students.length} học viên
-                  {pendingReview.sessionType === "MIDTERM"
-                    ? " để gửi đánh giá cho quản trị viên."
-                    : " để lưu đánh giá."}
-                </p>
-              </header>
+              </div>
+              <button
+                type="button"
+                onClick={closeAttendanceModal}
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Đóng bảng điểm danh"
+                autoFocus
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </header>
 
-              {reviewFetcher.data && !reviewFetcher.data.success && (
-                <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-                  {reviewFetcher.data.error}
-                </p>
-              )}
-
-              <div className="max-h-[55vh] space-y-3 overflow-y-auto pr-1">
-                {pendingReview.students.map((student) => (
-                  <fieldset key={student.id} className="space-y-2 rounded-lg border p-3 sm:p-4">
-                    <legend className="px-1 text-sm font-semibold">{student.name}</legend>
-                    <div className="grid gap-2 sm:grid-cols-3">
-                      {([
-                        ["CAN_ADVANCE", "Có khả năng học lên"],
-                        ["CANNOT_ADVANCE", "Không có khả năng học lên"],
-                        ["DROPPED_OUT", "Bỏ học"],
-                      ] as const).map(([status, label]) => (
-                        <label
-                          key={status}
-                          className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm ${
-                            reviewStatuses[student.id] === status ? "border-primary bg-primary/5" : "hover:bg-muted/50"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name={`student-review-${student.id}`}
-                            value={status}
-                            checked={reviewStatuses[student.id] === status}
-                            onChange={() => setReviewStatuses((current) => ({ ...current, [student.id]: status }))}
-                            disabled={isSavingReview}
-                            className="accent-primary"
-                          />
-                          <span>{label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </fieldset>
-                ))}
+            <div className="shrink-0 space-y-4 border-b px-4 py-4 sm:px-6">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-base font-bold">Danh sách học viên</h3>
+                  <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
+                    Đã điểm danh {modalCounts.marked}/{modalCounts.total}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <StatPill label="Sĩ số" value={modalCounts.total} />
+                  <StatPill label="Có mặt" value={modalCounts.present} tone="emerald" />
+                  <StatPill label="Đi muộn" value={modalCounts.late} tone="amber" />
+                  <StatPill label="Vắng (CP)" value={modalCounts.excused} tone="sky" />
+                  <StatPill label="Vắng (KP)" value={modalCounts.unexcused} tone="rose" />
+                  {modalCounts.unspecifiedAbsence > 0 && (
+                    <StatPill label="Vắng (chưa rõ lý do)" value={modalCounts.unspecifiedAbsence} tone="rose" />
+                  )}
+                </div>
               </div>
 
-              <footer className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setPendingReview(null)}
-                  disabled={isSavingReview}
-                  className="w-full sm:w-auto"
-                >
-                  Để sau
-                </Button>
-                <Button
-                  type="button"
-                  onClick={saveSessionReview}
-                  disabled={!reviewReady || isSavingReview}
-                  className="w-full sm:w-auto"
-                >
-                  {isSavingReview
-                    ? pendingReview.sessionType === "MIDTERM" ? "Đang gửi đánh giá..." : "Đang lưu đánh giá..."
-                    : pendingReview.sessionType === "MIDTERM" ? "Gửi đánh giá cho quản trị viên" : "Lưu đánh giá"}
-                </Button>
-              </footer>
-            </section>
-          </Overlay>
-        )}
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                <div className="flex flex-wrap items-center gap-1.5" aria-label="Lọc học viên theo trạng thái">
+                  {FILTER_OPTIONS.map((option) => {
+                    const count = option.value === "all"
+                      ? modalCounts.total
+                      : option.value === "present"
+                        ? modalCounts.present
+                        : option.value === "late"
+                          ? modalCounts.late
+                          : modalCounts.absent;
+                    const active = modalFilter === option.value;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => setModalFilter(option.value)}
+                        className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                          active
+                            ? "bg-foreground text-background"
+                            : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                        }`}
+                      >
+                        {option.label} <span className="ml-0.5 tabular-nums">{count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-      </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <div className="relative sm:w-56">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                    <Input
+                      value={studentSearch}
+                      onChange={(event) => setStudentSearch(event.target.value)}
+                      placeholder="Tìm tên học viên..."
+                      aria-label="Tìm tên học viên"
+                      className="h-9 pl-8 text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-auto">
+              <table className="w-full min-w-[900px] border-collapse text-left text-sm">
+                <thead className="sticky top-0 z-10 border-b bg-muted/95 text-[11px] font-semibold text-muted-foreground backdrop-blur">
+                  <tr>
+                    <th scope="col" className="w-14 py-3 pl-5 pr-2 text-center">STT</th>
+                    <th scope="col" className="min-w-[200px] px-3 py-3">Học viên</th>
+                    <th scope="col" className="min-w-[330px] px-3 py-3">Trạng thái điểm danh</th>
+                    {HOMEWORK_FIELDS.map((field) => (
+                      <th key={field.key} scope="col" className="w-24 px-2 py-3 text-center">
+                        <div className="inline-flex flex-col items-center gap-1.5">
+                          <span>{field.label}</span>
+                          <input
+                            type="checkbox"
+                            checked={selectedClass.students.length > 0 && selectedClass.students.every((student) => activeSession.records[student.id]?.homework[field.key])}
+                            disabled={fetcher.state !== "idle"}
+                            onChange={(event) => updateAllHomework(field.key, event.target.checked)}
+                            aria-label={`Trạng thái bài ${field.label} của cả lớp`}
+                            className="h-4 w-4 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          />
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/70">
+                  {filteredStudents.map((student, index) => {
+                    const record = activeSession.records[student.id] ?? EMPTY_ATTENDANCE_RECORD;
+                    return (
+                      <tr key={student.id} className="transition-colors hover:bg-muted/30">
+                        <td className="py-3.5 pl-5 pr-2 text-center text-xs font-medium tabular-nums text-muted-foreground">
+                          {index + 1}
+                        </td>
+                        <td className="px-3 py-3.5">
+                          <div className="flex items-center gap-3">
+                            <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
+                              {student.initials}
+                            </span>
+                            <span className="font-medium">{student.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3.5">
+                          <div className="inline-flex flex-wrap gap-1 rounded-xl border bg-muted/50 p-1">
+                            {ATTENDANCE_OPTIONS.map((option) => {
+                              const active = record.status === option.value;
+                              return (
+                                <button
+                                  key={option.value}
+                                  type="button"
+                                  aria-pressed={active}
+                                  disabled={fetcher.state !== "idle"}
+                                  onClick={() => updateStudentStatus(student.id, option.value)}
+                                  className={`inline-flex items-center rounded-lg border px-2.5 py-1.5 text-xs ${
+                                    active
+                                      ? `${option.selectedClass} font-semibold`
+                                      : "border-transparent bg-background text-muted-foreground hover:border-border hover:text-foreground"
+                                  }`}
+                                >
+                                  {active && <Check className="mr-1 inline h-3 w-3" aria-hidden="true" />}
+                                  {option.label}
+                                </button>
+                              );
+                            })}
+                            {record.status === "absent" && (
+                              <span className="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-medium text-rose-800">
+                                Vắng (chưa rõ lý do)
+                              </span>
+                            )}
+                            {record.status === null && (
+                              <span className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-muted-foreground">
+                                Chưa điểm danh
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        {HOMEWORK_FIELDS.map((field) => (
+                          <td key={field.key} className="px-2 py-3.5 text-center">
+                            <input
+                              type="checkbox"
+                              checked={record.homework[field.key]}
+                              disabled={fetcher.state !== "idle"}
+                              onChange={(event) => updateStudentHomework(student.id, field.key, event.target.checked)}
+                              aria-label={`${field.label}: ${student.name}`}
+                              className="h-4 w-4 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                  {filteredStudents.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                        {selectedClass.students.length === 0
+                          ? "Lớp chưa có học viên đang hoạt động."
+                          : "Không có học viên nào khớp với bộ lọc hiện tại."}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <footer className="flex shrink-0 flex-col gap-3 border-t px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <p className="max-w-2xl text-xs text-muted-foreground">
+                Thay đổi sẽ được lưu cùng các chỉnh sửa khác khi bạn bấm “Lưu toàn bộ bảng”.
+              </p>
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <Button type="button" variant="outline" onClick={closeAttendanceModal}>
+                  Đóng
+                </Button>
+              </div>
+            </footer>
+          </section>
+        </Overlay>
+      )}
+
     </AppShell>
+  );
+}
+
+function StatPill({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: number;
+  tone?: "neutral" | "emerald" | "amber" | "sky" | "rose";
+}) {
+  const toneClass = {
+    neutral: "border-border bg-muted/40 text-muted-foreground",
+    emerald: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    amber: "border-amber-200 bg-amber-50 text-amber-900",
+    sky: "border-sky-200 bg-sky-50 text-sky-800",
+    rose: "border-rose-200 bg-rose-50 text-rose-800",
+  }[tone];
+
+  return (
+    <div className={`rounded-lg border px-3 py-1.5 ${toneClass}`}>
+      {label} <strong className="ml-1 tabular-nums">{value}</strong>
+    </div>
   );
 }

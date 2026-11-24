@@ -39,7 +39,10 @@ export async function renumberClassAttendanceSessions(
   const nextNumberById = new Map(sessions.map(({ id }, index) => [id, index + 1]));
   for (let index = 0; index < sessions.length; index += 1) {
     const title = `Buổi ${index + 1}`;
-    if (sessions[index].title !== title) {
+    if (
+      sessions[index].title !== title
+      && (!sessions[index].title || /^Buổi \d+$/.test(sessions[index].title))
+    ) {
       await tx.attendanceSession.update({
         where: { id: sessions[index].id },
         data: { title },
