@@ -63,11 +63,6 @@ function formatSessionDate(value: string) {
   }).format(new Date(`${value}T00:00:00.000Z`));
 }
 
-function getSessionNumber(title: string) {
-  const match = /^Buổi\s+(\d+)$/i.exec(title.trim());
-  return match?.[1] ?? null;
-}
-
 function normalizeSearch(value: string) {
   return value
     .normalize("NFD")
@@ -674,7 +669,6 @@ export default function AdminSessionLinksPage() {
                   const recordingUrl = getSafeRecordUrl(session.recordingUrl);
                   const teacher = session.classroom.teacher;
                   const initials = teacher?.name.split(/\s+/).slice(-2).map((part) => part[0]).join("").toUpperCase() ?? "—";
-                  const sessionNumber = getSessionNumber(session.title);
                   const schedule = [session.scheduleStartTime, session.scheduleEndTime].filter(Boolean).join(" – ");
                   const isUpcoming = session.date >= today && session.date <= weekThrough;
                   return (
@@ -695,14 +689,8 @@ export default function AdminSessionLinksPage() {
                       </td>
                       <td className="min-w-0 px-2 py-3.5">
                         <div className="truncate font-semibold text-slate-900">
-                          {sessionNumber ? `Buổi ${sessionNumber}` : session.title || "Buổi học"}
-                          {sessionNumber && session.lessonTitle ? ` • ${session.lessonTitle}` : ""}
+                          {session.title || "Buổi học"}
                         </div>
-                        {sessionNumber && (
-                          <div className="mt-0.5 truncate text-xs text-slate-600">
-                            {session.lessonTitle || "Chưa cập nhật bài học"}
-                          </div>
-                        )}
                         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
                           <span>{formatSessionDate(session.date)}</span>
                           {schedule && <><span aria-hidden="true">·</span><span className="font-semibold text-slate-700">{schedule}</span></>}
