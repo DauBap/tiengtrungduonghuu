@@ -663,8 +663,8 @@ export default function AdminSessionLinksPage() {
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/95 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                   <th scope="col" className="min-w-[220px] py-3 pl-5 pr-3">Giáo viên &amp; Lớp</th>
-                  <th scope="col" className="min-w-[230px] px-3 py-3">Buổi học &amp; Thời gian</th>
-                  <th scope="col" className="min-w-[240px] px-3 py-3">Link ghi hình</th>
+                  <th scope="col" className="min-w-[300px] px-3 py-3">Buổi học &amp; Thời gian</th>
+                  <th scope="col" className="min-w-[170px] px-3 py-3">Link ghi hình</th>
                   <th scope="col" className="w-36 px-3 py-3">Trạng thái</th>
                   <th scope="col" className="w-48 min-w-[190px] py-3 pl-3 pr-5 text-right">Thao tác</th>
                 </tr>
