@@ -870,20 +870,6 @@ export default function AdminSessionLinksPage() {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label htmlFor="modalLinkType" className="block font-semibold text-slate-800">Loại đường dẫn</label>
-                    <select
-                      id="modalLinkType"
-                      value="recording"
-                      disabled
-                      className="h-[38px] w-full rounded-lg border border-slate-200 bg-slate-100 px-3 text-[13px] font-medium text-slate-700"
-                    >
-                      <option value="recording">Video record buổi học</option>
-                    </select>
-                    <p className="text-[11px] leading-4 text-slate-500">
-                      Link phòng họp và tài liệu chưa được hỗ trợ để tránh lưu nhầm vào trường ghi hình của học viên.
-                    </p>
-                  </div>
-                  <div className="space-y-1.5">
                     <label htmlFor="modalSessionUrlInput" className="block font-semibold text-slate-800">URL link ghi hình</label>
                     <input
                       id="modalSessionUrlInput"
@@ -895,17 +881,6 @@ export default function AdminSessionLinksPage() {
                       className="h-10 w-full rounded-lg border border-slate-200 px-3 text-[13px] text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#9E141F] focus:ring-2 focus:ring-[#9E141F]/15"
                     />
                     <p className="text-[11px] text-slate-500">Dán URL HTTP hoặc HTTPS. Để trống và lưu nếu muốn gỡ link khỏi buổi học.</p>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label htmlFor="modalLinkNoteInput" className="block font-medium text-slate-700">Ghi chú cho giáo viên / học viên</label>
-                    <input
-                      id="modalLinkNoteInput"
-                      type="text"
-                      disabled
-                      placeholder="Ghi chú chưa được lưu trong dữ liệu hiện có"
-                      className="h-[38px] w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-100 px-3 text-[13px] text-slate-500 placeholder:text-slate-400"
-                    />
-                    <p className="text-[11px] text-slate-500">Theo lựa chọn hiện tại, chỉ URL ghi hình được lưu.</p>
                   </div>
                   {editErrorMessage && (
                     <p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-800">{editErrorMessage}</p>
