@@ -659,14 +659,14 @@ export default function AdminSessionLinksPage() {
           </div>
 
           <div className="custom-scrollbar overflow-x-auto">
-            <table className="w-full border-collapse text-left text-[13px]">
+            <table className="w-full table-fixed border-collapse text-left text-[13px]">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/95 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                  <th scope="col" className="min-w-[220px] py-3 pl-5 pr-3">Giáo viên &amp; Lớp</th>
-                  <th scope="col" className="min-w-[300px] px-3 py-3">Buổi học &amp; Thời gian</th>
-                  <th scope="col" className="min-w-[170px] px-3 py-3">Link ghi hình</th>
-                  <th scope="col" className="w-36 px-3 py-3">Trạng thái</th>
-                  <th scope="col" className="w-48 min-w-[190px] py-3 pl-3 pr-5 text-right">Thao tác</th>
+                  <th scope="col" className="w-[22%] py-3 pl-5 pr-2">Giáo viên &amp; Lớp</th>
+                  <th scope="col" className="w-[28%] px-2 py-3">Buổi học &amp; Thời gian</th>
+                  <th scope="col" className="w-[18%] px-2 py-3">Link ghi hình</th>
+                  <th scope="col" className="w-[13%] px-2 py-3">Trạng thái</th>
+                  <th scope="col" className="w-[19%] py-3 pl-2 pr-4 text-right">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -679,7 +679,7 @@ export default function AdminSessionLinksPage() {
                   const isUpcoming = session.date >= today && session.date <= weekThrough;
                   return (
                     <tr key={session.id} className="transition-colors hover:bg-slate-50/75">
-                      <td className="py-3.5 pl-5 pr-3">
+                      <td className="py-3.5 pl-5 pr-2">
                         <div className="flex items-start gap-2.5">
                           <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#FBC7C9] bg-[#FDF2F2] text-[11px] font-bold text-[#7F0E17]">
                             {initials}
@@ -693,8 +693,8 @@ export default function AdminSessionLinksPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-3 py-3.5">
-                        <div className="font-semibold text-slate-900">
+                      <td className="min-w-0 px-2 py-3.5">
+                        <div className="truncate font-semibold text-slate-900">
                           {sessionNumber ? `Buổi ${sessionNumber}` : session.title || "Buổi học"}
                           {sessionNumber && session.lessonTitle ? ` • ${session.lessonTitle}` : ""}
                         </div>
@@ -709,7 +709,7 @@ export default function AdminSessionLinksPage() {
                           {isUpcoming && <span className="rounded border border-sky-200 bg-sky-50 px-1.5 py-0.5 font-medium text-sky-700">Tuần này</span>}
                         </div>
                       </td>
-                      <td className="px-3 py-3.5">
+                      <td className="min-w-0 px-2 py-3.5">
                         {recordingUrl ? (
                           <div className="space-y-1">
                             <div className="flex min-w-0 items-center gap-1.5">
@@ -745,7 +745,7 @@ export default function AdminSessionLinksPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-3 py-3.5">
+                      <td className="px-2 py-3.5">
                         {recordingUrl ? (
                           <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -758,7 +758,7 @@ export default function AdminSessionLinksPage() {
                           </span>
                         )}
                       </td>
-                      <td className="py-3.5 pl-3 pr-5 text-right">
+                      <td className="py-3.5 pl-2 pr-4 text-right">
                         <div className="inline-flex items-center justify-end gap-1.5">
                           <button
                             type="button"
