@@ -28,6 +28,15 @@ interface MarkNotificationResult {
   error?: string;
 }
 
+function formatNotificationMessage(notification: NotificationItem) {
+  const legacyBulkReminder = notification.kind === "ATTENDANCE_RECORDING_LINK_REMINDER"
+    && !notification.message.includes("\n")
+    && /^Bạn còn \d+ buổi học chưa có link ghi hình: /.test(notification.message);
+  if (!legacyBulkReminder) return notification.message;
+
+  return notification.message.replace(": ", ":\n• ").replace(/; /g, "\n• ");
+}
+
 export function GradingNotifications({ attendanceLayout = false }: { attendanceLayout?: boolean }) {
   const navigate = useNavigate();
   const listFetcher = useFetcher<NotificationList>();
@@ -101,7 +110,7 @@ export function GradingNotifications({ attendanceLayout = false }: { attendanceL
     notificationsToToast.slice(0, 3).forEach((notification) => {
       toast(notification.title, {
         className: "grading-notification-toast",
-        description: notification.message,
+        description: formatNotificationMessage(notification),
         duration: 8_000,
         action: {
           label: notification.kind === "ACCOUNT_ACTIVATION_REQUEST"
@@ -244,7 +253,7 @@ export function GradingNotifications({ attendanceLayout = false }: { attendanceL
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-medium">{notification.title}</span>
-                        <span className="mt-0.5 block text-sm leading-5 text-muted-foreground">{notification.message}</span>
+                        <span className="mt-0.5 block whitespace-pre-line text-sm leading-5 text-muted-foreground">{formatNotificationMessage(notification)}</span>
                         <time className="mt-1.5 block text-xs text-muted-foreground" dateTime={new Date(notification.createdAt).toISOString()}>
                           {new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(notification.createdAt))}
                         </time>
