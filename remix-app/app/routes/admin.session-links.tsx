@@ -159,12 +159,33 @@ export async function action({ request }: ActionFunctionArgs) {
       }
     }
 
-    const updated = await prisma.attendanceSession.updateMany({
+    const currentSession = await prisma.attendanceSession.findFirst({
       where: {
         id: sessionId,
         class: { is: { completedAt: null } },
       },
-      data: { recordingUrl },
+      select: { recordingUrl: true },
+    });
+    if (!currentSession) {
+      return {
+        success: false as const,
+        intent,
+        error: "Buổi học không còn khả dụng. Tải lại trang rồi thử lại.",
+      };
+    }
+
+    const recordingUrlChanged = recordingUrl !== currentSession.recordingUrl;
+    const updated = await prisma.attendanceSession.updateMany({
+      where: {
+        id: sessionId,
+        recordingUrl: currentSession.recordingUrl,
+        class: { is: { completedAt: null } },
+      },
+      data: {
+        recordingUrl,
+        qualityReviewStatus: recordingUrlChanged ? "PENDING" : undefined,
+        qualityReviewedRecordingUrl: recordingUrlChanged ? null : undefined,
+      },
     });
     if (updated.count !== 1) {
       return {

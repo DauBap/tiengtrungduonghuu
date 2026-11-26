@@ -625,6 +625,12 @@ enum ClassFinalResultAdminAction {
   SKIPPED
 }
 
+enum AttendanceSessionQualityStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model AttendanceSession {
   id                       String   @id @default(cuid())
   classId                  String
@@ -632,6 +638,8 @@ model AttendanceSession {
   title                    String
   lesson                   String   @default("")
   recordingUrl             String?
+  qualityReviewStatus         AttendanceSessionQualityStatus @default(PENDING) @map("quality_review_status")
+  qualityReviewedRecordingUrl String?                       @map("quality_reviewed_recording_url")
   date                     DateTime @db.Date
   scheduleStartTime        String?  @map("schedule_start_time")
   scheduleEndTime          String?  @map("schedule_end_time")
@@ -648,6 +656,7 @@ model AttendanceSession {
 
   @@unique([classId, date, scheduleStartTime, scheduleEndTime], map: "AttendanceSession_class_date_slot_key")
   @@index([classId, date])
+  @@index([qualityReviewStatus, createdAt], map: "AttendanceSession_quality_review_status_created_at_idx")
 }
 
 model ClassScheduleCancellation {

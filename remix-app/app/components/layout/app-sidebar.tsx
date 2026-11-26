@@ -34,6 +34,7 @@ const ROLE_NAV: Record<UserRole, NavItem[]> = {
         { label: "Tổng quan lớp", href: "/admin/class-overview", icon: ClipboardList },
         { label: "Điểm danh", href: "/admin/attendance", icon: ClipboardCheck },
         { label: "Link buổi học", href: "/admin/session-links", icon: Video },
+        { label: "Kiểm tra chất lượng bài dạy", href: "/admin/teaching-quality", icon: ClipboardCheck },
         { label: "Duyệt yêu cầu nghỉ", href: "/admin/leave-requests", icon: CalendarDays },
       ],
     },

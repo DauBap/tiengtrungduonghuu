@@ -67,6 +67,7 @@ export default [
     route("tuition", "routes/admin.tuition.tsx"),
     route("attendance", "routes/admin.attendance.tsx"),
     route("session-links", "routes/admin.session-links.tsx"),
+    route("teaching-quality", "routes/admin.teaching-quality.tsx"),
     route("leave-requests", "routes/admin.leave-requests.tsx"),
     route("grading-overview", "routes/admin.grading-overview.tsx"),
     route("reports", "routes/admin.reports.tsx"),

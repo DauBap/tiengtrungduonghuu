@@ -985,6 +985,12 @@ export async function action({ request }: ActionFunctionArgs) {
                 lessonId: sessionChange.courseLessonId,
                 lesson: lessonTitle,
                 recordingUrl,
+                qualityReviewStatus: sessionChange.recordingUrl !== currentSession.recordingUrl
+                  ? "PENDING"
+                  : undefined,
+                qualityReviewedRecordingUrl: sessionChange.recordingUrl !== currentSession.recordingUrl
+                  ? null
+                  : undefined,
                 isScheduleGenerated: currentSession.isScheduleGenerated && dateChanged ? false : undefined,
               },
             });
