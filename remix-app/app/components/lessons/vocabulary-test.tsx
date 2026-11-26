@@ -323,7 +323,7 @@ export function VocabularyTest({
         )}
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {question.options.map((option) => {
+        {question.options.map((option, optionIndex) => {
           const selected = answers[question.id] === option;
           return (
             <button
@@ -343,7 +343,17 @@ export function VocabularyTest({
                 selected ? "border-primary bg-primary/10 text-primary" : "hover:border-primary/50 hover:bg-muted/40"
               )}
             >
-              {option}
+              <span className="block">
+                <span className="mr-3 inline-block font-semibold text-primary">
+                  {String.fromCharCode(65 + optionIndex)}.
+                </span>
+                {option}
+              </span>
+              {showPinyin && question.direction === "vi2zh" && question.chineseOptionPinyin[optionIndex] && (
+                <span className="content-text pinyin-text block !text-sm font-normal text-muted-foreground">
+                  {question.chineseOptionPinyin[optionIndex]}
+                </span>
+              )}
             </button>
           );
         })}

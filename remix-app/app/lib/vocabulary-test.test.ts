@@ -15,6 +15,10 @@ test("same-type distractors are preferred when enough choices exist", () => {
   const question = createVocabularyTest([words[0]], words, true)[0];
   assert.deepEqual(new Set(question.translationOptions), new Set(["mèo", "chó", "bàn", "chim"]));
   assert.deepEqual(new Set(question.chineseOptions), new Set(["猫", "狗", "桌子", "鸟"]));
+  assert.deepEqual(
+    Object.fromEntries(question.chineseOptions.map((option, index) => [option, question.chineseOptionPinyin[index]])),
+    { 猫: "māo", 狗: "gǒu", 桌子: "zhuōzi", 鸟: "niǎo" },
+  );
 });
 
 test("other word types fill remaining distractor slots", () => {

@@ -20,6 +20,7 @@ export interface VocabularyTestQuestion {
   wordTypeLabels: string[];
   translationOptions: string[];
   chineseOptions: string[];
+  chineseOptionPinyin: string[];
 }
 
 function shuffled<T>(items: readonly T[]): T[] {
@@ -52,6 +53,12 @@ export function createVocabularyTest(
   };
   const translations = uniqueValues("translation");
   const chineseWords = uniqueValues("chinese");
+  const pinyinByChinese = new Map<string, string>();
+  for (const word of courseWords) {
+    if (word.chinese.trim() && word.pinyin.trim() && !pinyinByChinese.has(word.chinese)) {
+      pinyinByChinese.set(word.chinese, word.pinyin);
+    }
+  }
 
   const distractorsFor = (pool: Map<string, Set<string>>, word: VocabularyTestWord, correct: string[]) => {
     const needed = Math.max(0, 4 - correct.length);
@@ -72,6 +79,7 @@ export function createVocabularyTest(
     const chineseAnswers = answerValues(word, "chinese");
     const distractors = distractorsFor(translations, word, translationAnswers);
     const chineseDistractors = distractorsFor(chineseWords, word, chineseAnswers);
+    const chineseOptions = shuffled([...chineseAnswers, ...chineseDistractors]);
     const wordTypeLabels = word.wordTypes
       .filter(isWordType)
       .map((type) => WORD_TYPE_META[type].label);
@@ -84,7 +92,8 @@ export function createVocabularyTest(
       lessonPinyin: word.pinyin,
       wordTypeLabels,
       translationOptions: shuffled([...translationAnswers, ...distractors]),
-      chineseOptions: shuffled([...chineseAnswers, ...chineseDistractors]),
+      chineseOptions,
+      chineseOptionPinyin: chineseOptions.map((option) => pinyinByChinese.get(option) ?? ""),
     };
   });
 }

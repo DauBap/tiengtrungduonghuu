@@ -15,6 +15,8 @@ import type { AssessmentDraftData } from "~/lib/assessment-drafts";
 import { useAssessmentDraft } from "~/hooks/use-assessment-draft";
 import { AssessmentDraftStatus } from "~/components/lessons/assessment-draft-status";
 import { parseVocabularyTestDraft, type VocabularyTestDraft } from "~/components/lessons/vocabulary-test";
+import { LessonPinyinVisibilityProvider } from "~/components/lessons/lesson-pinyin-visibility";
+import { SettingsMenu } from "~/components/layout/settings-menu";
 
 type CourseLesson = {
   id: string;
@@ -201,12 +203,15 @@ export default function CombinedVocabularyTest() {
   return (
     <AppShell user={user}>
       <div className="mx-auto max-w-3xl space-y-6">
-        <div>
-          <Button asChild variant="ghost" size="sm" className="mb-2">
-            <Link to={`/student/courses/${courseId}`}><ArrowLeft className="mr-1.5 h-4 w-4" />Quay lại khóa học</Link>
-          </Button>
-          <h1 className="text-2xl font-bold tracking-tight">Thi tổng hợp từ vựng</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{courseTitle} · {lessons.length} bài · {questionCount} câu</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <Button asChild variant="ghost" size="sm" className="mb-2">
+              <Link to={`/student/courses/${courseId}`}><ArrowLeft className="mr-1.5 h-4 w-4" />Quay lại khóa học</Link>
+            </Button>
+            <h1 className="text-2xl font-bold tracking-tight">Thi tổng hợp từ vựng</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{courseTitle} · {lessons.length} bài · {questionCount} câu</p>
+          </div>
+          <SettingsMenu align="right" pinyinTabKey="COMBINED_TEST" />
         </div>
 
         {result && (
@@ -256,17 +261,19 @@ export default function CombinedVocabularyTest() {
               )}
               <fetcher.Form method="post">
                 <input type="hidden" name="intent" value="submit-combined-test" />
-                <VocabularyTest
-                  questionSets={questionSets}
-                  timeLimitMinutes={null}
-                  fixedDirection="vi2zh"
-                  pageSize={10}
-                  isSubmitting={fetcher.state !== "idle"}
-                  initialDraft={initialDraft}
-                  onDraftChange={draft.update}
-                  onClearDraft={draft.clear}
-                  draftSaving={draft.isSaving}
-                />
+                <LessonPinyinVisibilityProvider tab="COMBINED_TEST">
+                  <VocabularyTest
+                    questionSets={questionSets}
+                    timeLimitMinutes={null}
+                    fixedDirection="vi2zh"
+                    pageSize={10}
+                    isSubmitting={fetcher.state !== "idle"}
+                    initialDraft={initialDraft}
+                    onDraftChange={draft.update}
+                    onClearDraft={draft.clear}
+                    draftSaving={draft.isSaving}
+                  />
+                </LessonPinyinVisibilityProvider>
               </fetcher.Form>
             </CardContent>
           </Card>
