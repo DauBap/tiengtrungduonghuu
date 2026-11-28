@@ -2671,7 +2671,7 @@ export default function TeacherIndex() {
                                   setGradingQueueIndex(null);
                                   setGradingComplete(false);
                                 }}
-                                className="h-[34px] px-3 text-xs"
+                                className="h-[34px] w-36 justify-center px-3 text-xs"
                               >
                                 <ClipboardList className="mr-1.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                 <span className="truncate">Cần chấm {pendingCount} bài</span>
@@ -2692,7 +2692,7 @@ export default function TeacherIndex() {
                                 type="button"
                                 aria-label={`Cần chấm ${classPendingReviews.length} bài ôn tập của lớp ${cls.name}`}
                                 onClick={() => setPendingReviewClassId(cls.id)}
-                                className="h-[34px] px-3 text-xs"
+                                className="h-[34px] w-36 justify-center px-3 text-xs"
                               >
                                 <ClipboardList className="mr-1.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                 <span className="truncate">Cần chấm {classPendingReviews.length} bài</span>
