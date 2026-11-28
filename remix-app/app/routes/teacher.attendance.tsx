@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { useFetcher, useLoaderData, useRevalidator } from "react-router";
 import { createPortal } from "react-dom";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import {
   CalendarDays,
   Check,
@@ -29,6 +29,7 @@ import {
   getClassSessionOrderSnapshot,
   renumberClassAttendanceSessions,
 } from "~/lib/attendance-session-order.server";
+import { shouldPromptForMidtermReview } from "~/lib/midterm-review";
 import { prisma } from "~/lib/prisma.server";
 import { requireRole } from "~/lib/session.server";
 import { toast } from "sonner";
@@ -37,6 +38,7 @@ type AttendanceStatus = "present" | "late" | "excused" | "unexcused" | "absent" 
 type AttendanceFilter = "all" | "present" | "late" | "absent";
 type HomeworkKey = "recording" | "hanzi" | "duet" | "link";
 type AttendanceChoice = Exclude<AttendanceStatus, null>;
+type MidtermReviewStatus = "CAN_ADVANCE" | "CANNOT_ADVANCE" | "DROPPED_OUT";
 
 interface AttendanceStudent {
   id: string;
@@ -81,6 +83,15 @@ interface AttendanceClass {
   sessions: AttendanceSession[];
 }
 
+interface PendingMidtermReviewPrompt {
+  classId: string;
+  className: string;
+  sessionId: string;
+  triggerSessionNumber: number;
+  reviewSessionNumber: number;
+  students: AttendanceStudent[];
+}
+
 interface AttendanceSessionValidationErrors {
   date?: string;
   recordingUrl?: string;
@@ -121,6 +132,12 @@ const FILTER_OPTIONS: { value: AttendanceFilter; label: string }[] = [
   { value: "present", label: "Có mặt" },
   { value: "late", label: "Đi muộn" },
   { value: "absent", label: "Vắng mặt" },
+];
+
+const MIDTERM_REVIEW_OPTIONS: { value: MidtermReviewStatus; label: string }[] = [
+  { value: "CAN_ADVANCE", label: "Có khả năng học lên" },
+  { value: "CANNOT_ADVANCE", label: "Không có khả năng học lên" },
+  { value: "DROPPED_OUT", label: "Bỏ học" },
 ];
 
 const EMPTY_ATTENDANCE_RECORD: AttendanceRecord = {
@@ -599,6 +616,41 @@ const MAX_SAVE_SESSIONS = 500;
 const MAX_SAVE_RECORDS = 10_000;
 
 class AttendanceSaveError extends Error {}
+class MidtermReviewSaveError extends Error {}
+
+interface MidtermReviewEvaluation {
+  studentId: string;
+  status: MidtermReviewStatus;
+}
+
+function isMidtermReviewStatus(value: unknown): value is MidtermReviewStatus {
+  return value === "CAN_ADVANCE" || value === "CANNOT_ADVANCE" || value === "DROPPED_OUT";
+}
+
+function parseMidtermReviewEvaluations(value: unknown): MidtermReviewEvaluation[] | null {
+  if (!Array.isArray(value) || value.length === 0 || value.length > 1_000) return null;
+
+  const seenStudentIds = new Set<string>();
+  const evaluations: MidtermReviewEvaluation[] = [];
+  for (const rawEvaluation of value) {
+    if (
+      !isObject(rawEvaluation)
+      || typeof rawEvaluation.studentId !== "string"
+      || !rawEvaluation.studentId
+      || rawEvaluation.studentId.length > 128
+      || !isMidtermReviewStatus(rawEvaluation.status)
+      || seenStudentIds.has(rawEvaluation.studentId)
+    ) {
+      return null;
+    }
+    seenStudentIds.add(rawEvaluation.studentId);
+    evaluations.push({
+      studentId: rawEvaluation.studentId,
+      status: rawEvaluation.status,
+    });
+  }
+  return evaluations;
+}
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -752,6 +804,113 @@ async function ensureScheduleCancellation(
 export async function action({ request }: ActionFunctionArgs) {
   const user = await requireRole(request, ["teacher"]);
   const form = await request.formData();
+  if (form.get("intent") === "save-midterm-review") {
+    const classId = form.get("classId");
+    const sessionId = form.get("sessionId");
+    const rawEvaluations = form.get("evaluations");
+    if (
+      typeof classId !== "string"
+      || !classId
+      || typeof sessionId !== "string"
+      || !sessionId
+      || typeof rawEvaluations !== "string"
+    ) {
+      return { success: false as const, error: "Dữ liệu đánh giá giữa kỳ không hợp lệ." };
+    }
+
+    let parsedEvaluations: unknown;
+    try {
+      parsedEvaluations = JSON.parse(rawEvaluations);
+    } catch {
+      return { success: false as const, error: "Dữ liệu đánh giá giữa kỳ không hợp lệ." };
+    }
+    const evaluations = parseMidtermReviewEvaluations(parsedEvaluations);
+    if (!evaluations) {
+      return { success: false as const, error: "Vui lòng chọn kết quả cho từng học viên rồi thử lại." };
+    }
+
+    try {
+      await prisma.$transaction(async (tx) => {
+        const classroom = await tx.class.findFirst({
+          where: { id: classId, teacherId: user.id, completedAt: null },
+          select: { id: true },
+        });
+        if (!classroom) {
+          throw new MidtermReviewSaveError("Bạn không còn được phân công lớp này hoặc lớp đã kết thúc. Hãy tải lại trang.");
+        }
+
+        const sessionOrder = await getClassSessionOrderSnapshot(tx, classroom.id);
+        const reviewSessionNumber = sessionOrder.midtermReviewSession;
+        const currentSessionNumber = sessionOrder.sessions.findIndex(({ id }) => id === sessionId) + 1;
+        if (currentSessionNumber === 0 || reviewSessionNumber === null) {
+          throw new MidtermReviewSaveError("Không tìm thấy buổi hoặc mốc đánh giá giữa kỳ của lớp. Hãy tải lại trang.");
+        }
+        if (currentSessionNumber < reviewSessionNumber) {
+          throw new MidtermReviewSaveError("Buổi học này chưa đến mốc đánh giá giữa kỳ.");
+        }
+
+        const enrollments = await tx.enrollment.findMany({
+          where: {
+            classId: classroom.id,
+            user: { is: { role: "student", isActive: true, deletedAt: null } },
+          },
+          select: { userId: true },
+        });
+        const activeStudentIds = enrollments.map(({ userId }) => userId);
+        if (activeStudentIds.length === 0) {
+          throw new MidtermReviewSaveError("Lớp hiện không có học viên đang hoạt động để đánh giá.");
+        }
+
+        const attendanceRecords = await tx.attendanceRecord.findMany({
+          where: { sessionId, studentId: { in: activeStudentIds } },
+          select: { studentId: true, status: true },
+        });
+        const attendanceByStudent = new Map(attendanceRecords.map((record) => [record.studentId, record.status]));
+        if (activeStudentIds.some((studentId) => !attendanceByStudent.has(studentId) || attendanceByStudent.get(studentId) === null)) {
+          throw new MidtermReviewSaveError("Vui lòng hoàn tất điểm danh cho cả lớp trước khi gửi đánh giá giữa kỳ.");
+        }
+
+        const existingReviews = await tx.studentClassReview.findMany({
+          where: { classId: classroom.id, sessionType: "MIDTERM" },
+          select: { studentId: true },
+        });
+        const reviewedStudentIds = new Set(existingReviews.map(({ studentId }) => studentId));
+        const pendingStudentIds = activeStudentIds.filter((studentId) => !reviewedStudentIds.has(studentId));
+        const submittedStudentIds = new Set(evaluations.map(({ studentId }) => studentId));
+        if (
+          submittedStudentIds.size !== pendingStudentIds.length
+          || pendingStudentIds.some((studentId) => !submittedStudentIds.has(studentId))
+        ) {
+          throw new MidtermReviewSaveError("Danh sách học viên cần đánh giá đã thay đổi. Hãy tải lại trang rồi thử lại.");
+        }
+
+        await tx.studentClassReview.createMany({
+          data: evaluations.map(({ studentId, status }) => ({
+            classId: classroom.id,
+            studentId,
+            sessionType: "MIDTERM",
+            sessionNumber: reviewSessionNumber,
+            status,
+            teacherId: user.id,
+          })),
+        });
+      }, { maxWait: 5_000, timeout: 30_000 });
+    } catch (error) {
+      if (error instanceof MidtermReviewSaveError) {
+        return { success: false as const, error: error.message };
+      }
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        return { success: false as const, error: "Một đánh giá vừa được lưu ở nơi khác. Hãy tải lại trang để kiểm tra." };
+      }
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
+        return { success: false as const, error: "Dữ liệu lớp vừa thay đổi. Hãy tải lại trang rồi gửi đánh giá lại." };
+      }
+      throw error;
+    }
+
+    return { success: true as const, kind: "midterm-review-saved" as const };
+  }
+
   const rawPayload = form.get("payload");
   if (typeof rawPayload !== "string") {
     return { success: false as const, error: "Không nhận được dữ liệu cần lưu." };
@@ -768,6 +927,7 @@ export async function action({ request }: ActionFunctionArgs) {
     return { success: false as const, error: "Dữ liệu cần lưu không hợp lệ. Hãy tải lại trang." };
   }
 
+  const midtermReviewPrompts: PendingMidtermReviewPrompt[] = [];
   try {
     await prisma.$transaction(async (tx) => {
       for (const classChange of payload.classes) {
@@ -775,7 +935,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
         const classroom = await tx.class.findFirst({
           where: { id: classChange.classId, teacherId: user.id, completedAt: null },
-          select: { id: true, courseId: true },
+          select: { id: true, name: true, courseId: true },
         });
         if (!classroom) {
           throw new AttendanceSaveError("Bạn không còn được phân công lớp này hoặc lớp đã kết thúc. Hãy tải lại trang.");
@@ -805,6 +965,33 @@ export async function action({ request }: ActionFunctionArgs) {
           },
         });
         const currentById = new Map(currentSessions.map((session) => [session.id, session]));
+        const existingChangedSessionIds = classChange.sessions
+          .filter((session) => !session.isNew && !session.pendingDelete && currentById.has(session.id))
+          .map(({ id }) => id);
+        const changedStudentIds = [...new Set(classChange.sessions.flatMap((session) =>
+          session.pendingDelete ? [] : session.records.map(({ studentId }) => studentId),
+        ))];
+        const currentAttendanceRecords = await tx.attendanceRecord.findMany({
+          where: {
+            sessionId: { in: existingChangedSessionIds },
+            studentId: { in: changedStudentIds },
+          },
+          select: { sessionId: true, studentId: true, status: true, absenceReason: true },
+        });
+        const currentAttendanceBySession = new Map<string, Map<string, AttendanceStatus>>();
+        for (const record of currentAttendanceRecords) {
+          const records = currentAttendanceBySession.get(record.sessionId) ?? new Map<string, AttendanceStatus>();
+          records.set(record.studentId, mapAttendanceStatus(record.status, record.absenceReason));
+          currentAttendanceBySession.set(record.sessionId, records);
+        }
+        const changedAttendanceSessionIds = new Set<string>();
+        for (const sessionChange of classChange.sessions) {
+          if (sessionChange.pendingDelete) continue;
+          const currentRecords = currentAttendanceBySession.get(sessionChange.id);
+          if (sessionChange.records.some(({ studentId, status }) => status !== (currentRecords?.get(studentId) ?? null))) {
+            changedAttendanceSessionIds.add(sessionChange.id);
+          }
+        }
         const pendingDeleteIds = new Set(
           classChange.sessions.filter((session) => !session.isNew && session.pendingDelete).map(({ id }) => id),
         );
@@ -856,7 +1043,8 @@ export async function action({ request }: ActionFunctionArgs) {
             classId: classroom.id,
             user: { is: { role: "student", isActive: true, deletedAt: null } },
           },
-          select: { userId: true },
+          orderBy: { createdAt: "asc" },
+          select: { userId: true, user: { select: { name: true } } },
         });
         const activeStudentIds = new Set(enrollments.map(({ userId }) => userId));
         for (const sessionChange of classChange.sessions) {
@@ -958,6 +1146,9 @@ export async function action({ request }: ActionFunctionArgs) {
               select: { id: true },
             });
             sessionId = created.id;
+            if (changedAttendanceSessionIds.delete(sessionChange.id)) {
+              changedAttendanceSessionIds.add(sessionId);
+            }
             if (activeStudentIds.size > 0) {
               await tx.attendanceRecord.createMany({
                 data: [...activeStudentIds].map((studentId) => ({
@@ -1035,6 +1226,65 @@ export async function action({ request }: ActionFunctionArgs) {
         if (previousOrder) {
           await renumberClassAttendanceSessions(tx, classroom.id, previousOrder);
         }
+
+        if (changedAttendanceSessionIds.size === 0 || activeStudentIds.size === 0) continue;
+
+        const sessionOrder = await getClassSessionOrderSnapshot(tx, classroom.id);
+        const reviewSessionNumber = sessionOrder.midtermReviewSession;
+        if (reviewSessionNumber === null) continue;
+
+        const existingReviews = await tx.studentClassReview.findMany({
+          where: { classId: classroom.id, sessionType: "MIDTERM" },
+          select: { studentId: true },
+        });
+        const reviewedStudentIds = new Set(existingReviews.map(({ studentId }) => studentId));
+        const pendingStudents = enrollments
+          .filter(({ userId }) => !reviewedStudentIds.has(userId))
+          .map(({ userId, user: student }) => ({
+            id: userId,
+            name: student.name,
+            initials: getStudentInitials(student.name),
+          }));
+        if (pendingStudents.length === 0) continue;
+
+        const changedSessionsInOrder = sessionOrder.sessions
+          .map(({ id }, index) => ({ id, sessionNumber: index + 1 }))
+          .filter(({ id, sessionNumber }) =>
+            changedAttendanceSessionIds.has(id) && sessionNumber >= reviewSessionNumber,
+          );
+        for (const candidate of changedSessionsInOrder) {
+          const attendanceRecords = await tx.attendanceRecord.findMany({
+            where: {
+              sessionId: candidate.id,
+              studentId: { in: [...activeStudentIds] },
+            },
+            select: { studentId: true, status: true },
+          });
+          const attendanceByStudent = new Map(
+            attendanceRecords.map((record) => [record.studentId, record.status]),
+          );
+          const attendanceComplete = [...activeStudentIds].every((studentId) =>
+            attendanceByStudent.has(studentId) && attendanceByStudent.get(studentId) !== null,
+          );
+          if (!shouldPromptForMidtermReview({
+            configuredSessionNumber: reviewSessionNumber,
+            currentSessionNumber: candidate.sessionNumber,
+            hasPendingStudents: pendingStudents.length > 0,
+            attendanceComplete,
+          })) {
+            continue;
+          }
+
+          midtermReviewPrompts.push({
+            classId: classroom.id,
+            className: classroom.name,
+            sessionId: candidate.id,
+            triggerSessionNumber: candidate.sessionNumber,
+            reviewSessionNumber,
+            students: pendingStudents,
+          });
+          break;
+        }
       }
     }, { maxWait: 5_000, timeout: 30_000 });
   } catch (error) {
@@ -1047,7 +1297,11 @@ export async function action({ request }: ActionFunctionArgs) {
     throw error;
   }
 
-  return { success: true as const };
+  return {
+    success: true as const,
+    kind: "attendance-saved" as const,
+    midtermReviewPrompts,
+  };
 }
 
 function buildAttendanceSavePayload(
@@ -1158,16 +1412,21 @@ function getAttendanceValidationErrors(
 export default function TeacherAttendance() {
   const { user, classes } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
+  const midtermReviewFetcher = useFetcher<typeof action>();
   const { revalidate } = useRevalidator();
   const [draftClasses, setDraftClasses] = useState(classes);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [sessionSearch, setSessionSearch] = useState("");
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [pendingMidtermReviewPrompts, setPendingMidtermReviewPrompts] = useState<PendingMidtermReviewPrompt[]>([]);
+  const [midtermReviewDrafts, setMidtermReviewDrafts] = useState<Record<string, MidtermReviewStatus | "">>({});
+  const [midtermReviewAttemptSessionId, setMidtermReviewAttemptSessionId] = useState<string | null>(null);
   const [modalFilter, setModalFilter] = useState<AttendanceFilter>("all");
   const [studentSearch, setStudentSearch] = useState("");
   const [editingSessionField, setEditingSessionField] = useState<EditingSessionField | null>(null);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const modalTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const previousMidtermReviewFetcherState = useRef(midtermReviewFetcher.state);
 
   useEffect(() => {
     setDraftClasses(classes);
@@ -1190,6 +1449,14 @@ export default function TeacherAttendance() {
     ),
   );
   const hasUnsavedChanges = savePayload.classes.length > 0;
+  const activeMidtermReviewPrompt = pendingMidtermReviewPrompts[0] ?? null;
+  const hasCompleteMidtermReviewDraft = activeMidtermReviewPrompt !== null
+    && activeMidtermReviewPrompt.students.every((student) => Boolean(midtermReviewDrafts[student.id]));
+  const midtermReviewSaveError = midtermReviewFetcher.data
+    && !midtermReviewFetcher.data.success
+    && midtermReviewAttemptSessionId === activeMidtermReviewPrompt?.sessionId
+    ? midtermReviewFetcher.data.error
+    : null;
   const hasIncompleteNewSession = draftClasses.some((classItem) =>
     classItem.sessions.some((session) =>
       session.isNew && !session.pendingDelete && (!session.name.trim() || !session.date),
@@ -1203,10 +1470,39 @@ export default function TeacherAttendance() {
   const prevFetcherState = useRef(fetcher.state);
   useEffect(() => {
     if (prevFetcherState.current !== "idle" && fetcher.state === "idle" && fetcher.data?.success === true) {
+      if (fetcher.data.kind === "attendance-saved") {
+        setPendingMidtermReviewPrompts(fetcher.data.midtermReviewPrompts);
+        if (fetcher.data.midtermReviewPrompts.length > 0) setActiveSessionId(null);
+      }
       revalidate();
     }
     prevFetcherState.current = fetcher.state;
   }, [fetcher.state, fetcher.data]);
+
+  useEffect(() => {
+    if (!activeMidtermReviewPrompt) {
+      setMidtermReviewDrafts({});
+      return;
+    }
+    setMidtermReviewDrafts(Object.fromEntries(
+      activeMidtermReviewPrompt.students.map((student) => [student.id, ""]),
+    ));
+  }, [activeMidtermReviewPrompt?.classId, activeMidtermReviewPrompt?.sessionId]);
+
+  useEffect(() => {
+    if (
+      previousMidtermReviewFetcherState.current !== "idle"
+      && midtermReviewFetcher.state === "idle"
+      && midtermReviewFetcher.data?.success === true
+      && midtermReviewFetcher.data.kind === "midterm-review-saved"
+    ) {
+      setPendingMidtermReviewPrompts((current) => current.slice(1));
+      setMidtermReviewAttemptSessionId(null);
+      toast.success("Đã lưu đánh giá giữa kỳ.");
+      revalidate();
+    }
+    previousMidtermReviewFetcherState.current = midtermReviewFetcher.state;
+  }, [midtermReviewFetcher.state, midtermReviewFetcher.data, revalidate]);
 
   useEffect(() => {
     if (!saveSuccess) {
@@ -1453,6 +1749,27 @@ export default function TeacherAttendance() {
   function saveAllChanges() {
     if (!hasUnsavedChanges || hasIncompleteNewSession || hasValidationErrors || fetcher.state !== "idle") return;
     fetcher.submit({ payload: JSON.stringify(savePayload) }, { method: "post" });
+  }
+
+  function deferMidtermReview() {
+    if (midtermReviewFetcher.state !== "idle") return;
+    setPendingMidtermReviewPrompts((current) => current.slice(1));
+    setMidtermReviewAttemptSessionId(null);
+  }
+
+  function saveMidtermReview() {
+    if (!activeMidtermReviewPrompt || !hasCompleteMidtermReviewDraft || midtermReviewFetcher.state !== "idle") return;
+    const evaluations = activeMidtermReviewPrompt.students.map((student) => ({
+      studentId: student.id,
+      status: midtermReviewDrafts[student.id],
+    }));
+    setMidtermReviewAttemptSessionId(activeMidtermReviewPrompt.sessionId);
+    midtermReviewFetcher.submit({
+      intent: "save-midterm-review",
+      classId: activeMidtermReviewPrompt.classId,
+      sessionId: activeMidtermReviewPrompt.sessionId,
+      evaluations: JSON.stringify(evaluations),
+    }, { method: "post" });
   }
 
   return (
@@ -2104,6 +2421,101 @@ export default function TeacherAttendance() {
                   Đóng
                 </Button>
               </div>
+            </footer>
+          </section>
+        </Overlay>
+      )}
+
+      {activeMidtermReviewPrompt && (
+        <Overlay
+          className="max-w-3xl !overflow-hidden !p-0"
+          onClose={deferMidtermReview}
+          closeOnEscape={midtermReviewFetcher.state === "idle"}
+          closeOnBackdrop={midtermReviewFetcher.state === "idle"}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="midterm-review-title"
+            className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl bg-card"
+          >
+            <header className="flex items-start justify-between gap-4 border-b px-5 py-4 sm:px-6">
+              <div>
+                <h2 id="midterm-review-title" className="text-lg font-semibold">Đánh giá giữa kỳ</h2>
+                <p className="mt-1 text-sm text-muted-foreground">{activeMidtermReviewPrompt.className}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Mốc giữa kỳ: buổi {activeMidtermReviewPrompt.reviewSessionNumber}
+                  {activeMidtermReviewPrompt.triggerSessionNumber !== activeMidtermReviewPrompt.reviewSessionNumber
+                    ? ` · Đang điểm danh buổi ${activeMidtermReviewPrompt.triggerSessionNumber}`
+                    : ""}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Để sau đánh giá giữa kỳ"
+                disabled={midtermReviewFetcher.state !== "idle"}
+                onClick={deferMidtermReview}
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            </header>
+
+            <div className="space-y-3 overflow-y-auto px-5 py-4 sm:px-6">
+              <p className="text-sm text-muted-foreground">
+                Chọn kết quả cho các học viên chưa có đánh giá. Kết quả sẽ được lưu vào mốc giữa kỳ của lớp.
+              </p>
+              {midtermReviewSaveError && (
+                <p role="alert" className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+                  {midtermReviewSaveError}
+                </p>
+              )}
+              <ul className="divide-y rounded-lg border">
+                {activeMidtermReviewPrompt.students.map((student) => (
+                  <li key={student.id} className="flex flex-col gap-2 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+                    <span className="text-sm font-medium">{student.name}</span>
+                    <select
+                      aria-label={`Đánh giá giữa kỳ: ${student.name}`}
+                      value={midtermReviewDrafts[student.id] ?? ""}
+                      disabled={midtermReviewFetcher.state !== "idle"}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        if (value === "" || isMidtermReviewStatus(value)) {
+                          setMidtermReviewDrafts((current) => ({
+                            ...current,
+                            [student.id]: value,
+                          }));
+                        }
+                      }}
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-64"
+                    >
+                      <option value="">Chọn kết quả đánh giá</option>
+                      {MIDTERM_REVIEW_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <footer className="flex flex-col-reverse gap-2 border-t px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={midtermReviewFetcher.state !== "idle"}
+                onClick={deferMidtermReview}
+              >
+                Để sau
+              </Button>
+              <Button
+                type="button"
+                disabled={!hasCompleteMidtermReviewDraft || midtermReviewFetcher.state !== "idle"}
+                onClick={saveMidtermReview}
+              >
+                {midtermReviewFetcher.state !== "idle" ? "Đang lưu..." : "Lưu đánh giá"}
+              </Button>
             </footer>
           </section>
         </Overlay>
