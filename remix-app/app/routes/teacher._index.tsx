@@ -489,7 +489,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const reviewSetIds = courseReviewSets.map((reviewSet) => reviewSet.id);
     const mockExamIds = courseMockExams.map((mockExam) => mockExam.id);
     const userIds = cls.enrollments.map((enrollment) => enrollment.userId);
-    const [progressRows, lessonAudioScripts, pronunciationAssessments, lessonAttempts, phoneticsSections, phoneticsAttempts, grammarAttempts, grammarAutoAttempts, grammarQuestionRows, reviewAttempts, mockExamAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0 || mockExamIds.length > 0) && userIds.length > 0
+    const [progressRows, lessonAudioScripts, pronunciationAssessments, lessonAttempts, phoneticsSections, phoneticsAttempts, grammarAttempts, grammarAutoAttempts, grammarQuestionRows, reviewAttempts, mockExamAttempts, workbookPendingAttempts] = (lessonIds.length > 0 || reviewSetIds.length > 0 || mockExamIds.length > 0) && userIds.length > 0
       ? await Promise.all([
           lessonIds.length > 0 ? prisma.lessonTabProgress.findMany({
             where: {
@@ -657,11 +657,38 @@ export async function loader({ request }: LoaderFunctionArgs) {
             },
             orderBy: { startedAt: "desc" },
           }) : Promise.resolve([]),
+          lessonIds.length > 0 ? prisma.lessonTabAttempt.findMany({
+            where: {
+              lessonId: { in: lessonIds },
+              userId: { in: userIds },
+              tab: "WORKBOOK",
+              details: { path: ["reviewPending"], equals: true },
+            },
+            select: {
+              id: true,
+              userId: true,
+              lessonId: true,
+              completedAt: true,
+              details: true,
+            },
+            orderBy: { completedAt: "desc" },
+          }) : Promise.resolve([]),
         ])
-      : [[], [], [], [], [], [], [], [], [], [], []];
+      : [[], [], [], [], [], [], [], [], [], [], [], []];
 
     const enrollmentsByUserId = new Map(cls.enrollments.map((enrollment) => [enrollment.userId, enrollment]));
     const lessonsById = new Map(courseLessons.map((lesson) => [lesson.id, lesson]));
+    const pendingWorkbookAttemptByUserLesson = new Map<string, string>();
+    for (const attempt of workbookPendingAttempts) {
+      const details = isRecord(attempt.details) ? attempt.details : {};
+      const hasPendingQuestions = Array.isArray(details.results)
+        && details.results.some((result) => isRecord(result) && result.teacherReviewPending === true);
+      if (!hasPendingQuestions) continue;
+      const key = `${attempt.userId}:${attempt.lessonId}`;
+      if (!pendingWorkbookAttemptByUserLesson.has(key)) {
+        pendingWorkbookAttemptByUserLesson.set(key, attempt.id);
+      }
+    }
     const audioScriptIdsByLesson = new Map<string, string[]>();
     const audioScriptLessonById = new Map<string, string>();
     for (const script of lessonAudioScripts) {
@@ -956,6 +983,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
                 submission.lesson.id === lesson.id && submission.student.id === enrollment.userId
               )
             : undefined;
+          const pendingWorkbookAttemptId = tab === "WORKBOOK"
+            ? pendingWorkbookAttemptByUserLesson.get(`${enrollment.userId}:${lesson.id}`) ?? null
+            : null;
           const grammarSummary = tab === "GRAMMAR"
             ? grammarSummaryByUserLesson.get(`${enrollment.userId}:${lesson.id}`)
             : undefined;
@@ -1061,7 +1091,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
             || progress?.state === "IN_PROGRESS"
             || (progress?.percent ?? 0) > 0,
           );
-          const status = !available
+          const status = tab === "WORKBOOK" && pendingWorkbookAttemptId
+            ? "waiting"
+            : !available
             ? "unavailable"
             : tab === "GRAMMAR" && grammarProgress.waiting
               ? "waiting"
@@ -1098,6 +1130,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
               : grammarSummary?.totalCount ?? attempt?.totalCount,
             wrongAnswers: tab === "PHONETICS" ? phoneticsWrongAnswers : reviewableAttemptResults,
             translationSubmissionId: translationSubmission?.id ?? null,
+            pendingWorkbookAttemptId,
           };
           }),
         };
@@ -2213,6 +2246,18 @@ export default function TeacherIndex() {
     setGradingComplete(false);
     openGradingAttempt(courseId, selectedAttempt, 0);
   };
+  const openWorkbookGradingAttempt = (
+    courseId: string,
+    lessonId: string,
+    studentId: string,
+    attemptId: string,
+  ) => {
+    handledWorkbookGradeAttemptId.current = null;
+    setWorkbookGradingAttemptId(attemptId);
+    workbookGradingFetcher.load(
+      `/teacher/courses/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}/students/${encodeURIComponent(studentId)}/workbook-history/attempts/${encodeURIComponent(attemptId)}`,
+    );
+  };
 
   useEffect(() => {
     if (!initialGradeAttemptId) {
@@ -3137,6 +3182,10 @@ export default function TeacherIndex() {
                                             && result?.status === "waiting"
                                             ? result.translationSubmissionId
                                             : null;
+                                          const pendingWorkbookAttemptId = activity.tab === "WORKBOOK"
+                                            && result?.status === "waiting"
+                                            ? result.pendingWorkbookAttemptId
+                                            : null;
                                           const displayedPercent = getDisplayedActivityPercent(result, activity.tab);
                                           const progressStatus = getActivityProgressStatus(result, activity.tab);
                                           const activityReviewData = (
@@ -3198,9 +3247,10 @@ export default function TeacherIndex() {
                                             <td key={activity.tab} className="px-2 py-2 text-center">
                                               {!result || result.status === "unavailable" ? (
                                                 <span className="text-xs text-muted-foreground">Không áp dụng</span>
-                                              ) : result.status === "waiting" && (pending || pendingTranslationSubmissionId) ? (
+                                              ) : result.status === "waiting" && (pending || pendingTranslationSubmissionId || pendingWorkbookAttemptId) ? (
                                                 <button
                                                   type="button"
+                                                  aria-haspopup="dialog"
                                                   onClick={() => {
                                                     if (pendingTranslationSubmissionId) {
                                                       setSelectedTranslationSubmissionId(pendingTranslationSubmissionId);
@@ -3210,6 +3260,13 @@ export default function TeacherIndex() {
                                                         selectedClass.courseId,
                                                         selectedClass.pendingGrammarAttempts,
                                                         pending,
+                                                      );
+                                                    } else if (pendingWorkbookAttemptId) {
+                                                      openWorkbookGradingAttempt(
+                                                        selectedClass.courseId,
+                                                        selectedLesson.id,
+                                                        student.student.id,
+                                                        pendingWorkbookAttemptId,
                                                       );
                                                     }
                                                   }}
