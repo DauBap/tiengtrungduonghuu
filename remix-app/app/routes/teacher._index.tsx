@@ -1229,6 +1229,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
       suggestedLessonId: latestProgress?.lessonId ?? lessons[0]?.id ?? null,
       overallPercent,
       pendingGrammarAttempts,
+      pendingWorkbookAttempts: workbookPendingAttempts.flatMap((attempt) => {
+        const details = isRecord(attempt.details) ? attempt.details : {};
+        const enrollment = enrollmentsByUserId.get(attempt.userId);
+        const lesson = lessonsById.get(attempt.lessonId);
+        if (!enrollment || !lesson) return [];
+        return [{
+          id: attempt.id,
+          lessonId: attempt.lessonId,
+          userId: attempt.userId,
+          studentName: enrollment.user.name ?? enrollment.user.email,
+          lessonTitle: lesson.title,
+          blockTitle: typeof details.blockTitle === "string" ? details.blockTitle : "Sách bài tập",
+          completedAt: attempt.completedAt.toISOString(),
+        }];
+      }),
       pendingTranslationSubmissions: submissionsWithAcceptedAnswers.filter((submission) =>
         submission.status === "SUBMITTED"
         && submission.lesson.courseId === cls.courseId
@@ -1626,7 +1641,7 @@ export default function TeacherIndex() {
   const [unsavedReviewCloseTarget, setUnsavedReviewCloseTarget] = useState<"queue" | "progress" | null>(null);
   const [dirtyReviewAttemptIds, setDirtyReviewAttemptIds] = useState<Set<string>>(() => new Set());
   const [reviewGradeOverrides, setReviewGradeOverrides] = useState<Record<string, boolean>>({});
-  const [pendingGradingTab, setPendingGradingTab] = useState<"grammar" | "translation">("grammar");
+  const [pendingGradingTab, setPendingGradingTab] = useState<"grammar" | "translation" | "workbook">("grammar");
   const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
   const [workbookGradingAttemptId, setWorkbookGradingAttemptId] = useState<string | null>(null);
   const [selectedTranslationSubmissionId, setSelectedTranslationSubmissionId] = useState<string | null>(initialTranslationSubmission?.id ?? null);
@@ -1707,6 +1722,7 @@ export default function TeacherIndex() {
     ? [
         { id: "grammar" as const, label: "Ngữ pháp", count: pendingGrammarClass.pendingGrammarAttempts.length },
         { id: "translation" as const, label: "Luyện dịch", count: pendingGrammarClass.pendingTranslationSubmissions.length },
+      { id: "workbook" as const, label: "Sách bài tập", count: pendingGrammarClass.pendingWorkbookAttempts.length },
       ].filter((tab) => tab.count > 0)
     : [];
   const activePendingGradingTab = pendingGradingTabs.some((tab) => tab.id === pendingGradingTab)
@@ -2043,12 +2059,15 @@ export default function TeacherIndex() {
     .sort((a, b) => a.nextClassTime.getTime() - b.nextClassTime.getTime())
     .slice(0, 3);
   const classesNeedingGrading = classSummaries.filter((cls) =>
-    cls.pendingGrammarAttempts.length > 0 || cls.pendingTranslationSubmissions.length > 0,
+    cls.pendingGrammarAttempts.length > 0
+    || cls.pendingTranslationSubmissions.length > 0
+    || cls.pendingWorkbookAttempts.length > 0,
   );
   const pendingGradingCount = classSummaries.reduce((total, cls) =>
     total
     + cls.pendingGrammarAttempts.length
     + cls.pendingTranslationSubmissions.length
+    + cls.pendingWorkbookAttempts.length
     + pendingReviews.filter((attempt) => attempt.classId === cls.id).length,
   0);
 
@@ -2605,7 +2624,9 @@ export default function TeacherIndex() {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {classesNeedingGrading.map((cls) => {
                     const selected = cls.id === selectedClass?.id;
-                    const pendingCount = cls.pendingGrammarAttempts.length + cls.pendingTranslationSubmissions.length;
+                    const pendingCount = cls.pendingGrammarAttempts.length
+                      + cls.pendingTranslationSubmissions.length
+                      + cls.pendingWorkbookAttempts.length;
                     const classPendingReviews = pendingReviews.filter((attempt) => attempt.classId === cls.id);
                     return (
                       <article
@@ -2639,7 +2660,13 @@ export default function TeacherIndex() {
                                 aria-label={`Cần chấm ${pendingCount} bài của lớp ${cls.name}`}
                                 onClick={() => {
                                   setPendingGrammarClassId(cls.id);
-                                  setPendingGradingTab(cls.pendingGrammarAttempts.length > 0 ? "grammar" : "translation");
+                                  setPendingGradingTab(
+                                    cls.pendingGrammarAttempts.length > 0
+                                      ? "grammar"
+                                      : cls.pendingTranslationSubmissions.length > 0
+                                        ? "translation"
+                                        : "workbook",
+                                  );
                                   setGradingQueue(cls.pendingGrammarAttempts.map((attempt) => ({ courseId: cls.courseId, attempt })));
                                   setGradingQueueIndex(null);
                                   setGradingComplete(false);
@@ -3676,7 +3703,11 @@ export default function TeacherIndex() {
         )}
 
         {pendingGrammarClass
-          && (pendingGrammarClass.pendingGrammarAttempts.length > 0 || pendingGrammarClass.pendingTranslationSubmissions.length > 0)
+          && (
+            pendingGrammarClass.pendingGrammarAttempts.length > 0
+            || pendingGrammarClass.pendingTranslationSubmissions.length > 0
+            || pendingGrammarClass.pendingWorkbookAttempts.length > 0
+          )
           && !gradingAttemptId
           && !gradingComplete && (
           <div
@@ -3699,7 +3730,9 @@ export default function TeacherIndex() {
                     </span>
                   </div>
                   <p className="mt-1 text-[13px] text-muted-foreground">
-                    {pendingGrammarClass.pendingGrammarAttempts.length + pendingGrammarClass.pendingTranslationSubmissions.length} bài đang chờ chấm
+                    {pendingGrammarClass.pendingGrammarAttempts.length
+                      + pendingGrammarClass.pendingTranslationSubmissions.length
+                      + pendingGrammarClass.pendingWorkbookAttempts.length} bài đang chờ chấm
                   </p>
                 </div>
                 <button
@@ -3803,7 +3836,7 @@ export default function TeacherIndex() {
                       Không còn bài ngữ pháp nào đang chờ chấm.
                     </p>
                   )
-                ) : (
+                ) : activePendingGradingTab === "translation" ? (
                   pendingGrammarClass.pendingTranslationSubmissions.length > 0 ? (
                   <ul className="divide-y">
                     {pendingGrammarClass.pendingTranslationSubmissions.map((submission) => (
@@ -3834,6 +3867,42 @@ export default function TeacherIndex() {
                   ) : (
                     <p className="py-10 text-center text-sm text-muted-foreground">
                       Không còn bài luyện dịch nào đang chờ chấm.
+                    </p>
+                  )
+                ) : (
+                  pendingGrammarClass.pendingWorkbookAttempts.length > 0 ? (
+                  <ul className="divide-y">
+                    {pendingGrammarClass.pendingWorkbookAttempts.map((attempt) => (
+                      <li key={attempt.id}>
+                        <button
+                          type="button"
+                          aria-haspopup="dialog"
+                          onClick={() => openWorkbookGradingAttempt(
+                            pendingGrammarClass.courseId,
+                            attempt.lessonId,
+                            attempt.userId,
+                            attempt.id,
+                          )}
+                          className="group flex min-h-[68px] w-full items-center justify-between gap-4 py-3.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                        >
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[13px] font-semibold text-foreground">
+                              {attempt.lessonTitle} · {attempt.blockTitle}
+                            </span>
+                            <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                              Học viên: <span className="font-medium text-foreground">{attempt.studentName}</span>
+                            </span>
+                          </span>
+                          <span className="inline-flex h-8 shrink-0 items-center gap-1 rounded-lg border border-primary px-3 text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                            Chấm bài <ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" />
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  ) : (
+                    <p className="py-10 text-center text-sm text-muted-foreground">
+                      Không còn bài Sách bài tập nào đang chờ chấm.
                     </p>
                   )
                 )}
