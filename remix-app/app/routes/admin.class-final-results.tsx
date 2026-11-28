@@ -262,7 +262,7 @@ export default function AdminClassFinalResults() {
 
   return (
     <AppShell user={user}>
-      <div className="mx-auto max-w-7xl space-y-4">
+      <div className="mx-auto max-w-[1800px] space-y-4">
         <header>
           <h1 className="text-2xl font-bold tracking-tight">Đánh giá cuối kỳ</h1>
           <p className="mt-1 text-sm text-muted-foreground">Điểm, chuyên cần, nhận xét và kết quả do giáo viên ghi nhận.</p>
@@ -423,8 +423,12 @@ export default function AdminClassFinalResults() {
                 {actionFetcher.data.error}
               </p>
             )}
-            <div className="overflow-auto rounded-lg border bg-card">
-              <table className="w-full min-w-[1280px] border-collapse text-left">
+            <div
+              className="overflow-x-auto rounded-lg border bg-card"
+              tabIndex={0}
+              aria-label="Bảng kết quả cuối kỳ, có thể cuộn ngang"
+            >
+              <table className="w-full min-w-[1760px] border-collapse text-left">
                 <thead className="sticky top-0 z-10 bg-muted/90">
                   <tr className="border-b">
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Học viên</th>
@@ -434,7 +438,7 @@ export default function AdminClassFinalResults() {
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Điểm</th>
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Chuyên cần</th>
                     <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Đánh giá của giáo viên</th>
-                    <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Nhận xét học sinh</th>
+                    <th scope="col" className="w-[320px] min-w-[320px] border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Nhận xét học sinh</th>
                     {statusTab !== "pending" && (
                       <th scope="col" className="whitespace-nowrap border-r px-3 py-2.5 text-xs font-semibold text-muted-foreground">Ghi chú admin</th>
                     )}
@@ -479,7 +483,7 @@ export default function AdminClassFinalResults() {
                           {getStudentFinalReviewLabel(finalReviewStatus)}
                         </span>
                       </td>
-                      <td className="max-w-md border-r px-3 py-3 text-sm text-muted-foreground">
+                      <td className="w-[320px] min-w-[320px] border-r px-3 py-3 text-sm text-muted-foreground">
                         <p className="whitespace-pre-wrap">{result.comment}</p>
                       </td>
                       {statusTab !== "pending" && (
