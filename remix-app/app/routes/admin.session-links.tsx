@@ -83,9 +83,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
         class: { is: { completedAt: null } },
       },
       orderBy: [
-        { createdAt: "desc" },
         { date: "desc" },
         { scheduleStartTime: "asc" },
+        { createdAt: "desc" },
       ],
       select: {
         id: true,

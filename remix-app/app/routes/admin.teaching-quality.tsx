@@ -65,9 +65,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const sessions = await prisma.attendanceSession.findMany({
     where: { recordingUrl: { not: null } },
     orderBy: [
-      { createdAt: "desc" },
       { date: "desc" },
       { scheduleStartTime: "desc" },
+      { createdAt: "desc" },
     ],
     select: {
       id: true,
