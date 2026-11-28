@@ -316,14 +316,17 @@ export default function AdminLeaveRequests() {
   const [classFilter, setClassFilter] = useState("");
   const [teacherFilter, setTeacherFilter] = useState("");
   const classOptions = useMemo(() => {
-    const classes = new Map(requests.map(({ classroom }) => [classroom.id, classroom.name]));
+    const filteredRequests = teacherFilter
+      ? requests.filter(({ teacher }) => teacher.id === teacherFilter)
+      : requests;
+    const classes = new Map(filteredRequests.map(({ classroom }) => [classroom.id, classroom.name]));
     return [
       { value: "", label: "Tất cả lớp" },
       ...[...classes.entries()]
         .sort((left, right) => left[1].localeCompare(right[1], "vi"))
         .map(([value, label]) => ({ value, label })),
     ];
-  }, [requests]);
+  }, [requests, teacherFilter]);
   const teacherOptions = useMemo(() => {
     const teachers = new Map(requests.map(({ teacher }) => [teacher.id, teacher.name]));
     return [
@@ -368,6 +371,19 @@ export default function AdminLeaveRequests() {
         <section className="space-y-4">
           <div className="grid gap-2 sm:grid-cols-2">
             <SearchableDropdown
+              id="leave-request-teacher-filter"
+              label="Lọc theo giáo viên"
+              placeholder="Tất cả giáo viên"
+              searchPlaceholder="Tìm giáo viên..."
+              options={teacherOptions}
+              value={teacherFilter}
+              onChange={(value) => {
+                setTeacherFilter(value);
+                setClassFilter("");
+              }}
+              className="w-full"
+            />
+            <SearchableDropdown
               id="leave-request-class-filter"
               label="Lọc theo lớp"
               placeholder="Tất cả lớp"
@@ -375,16 +391,6 @@ export default function AdminLeaveRequests() {
               options={classOptions}
               value={classFilter}
               onChange={setClassFilter}
-              className="w-full"
-            />
-            <SearchableDropdown
-              id="leave-request-teacher-filter"
-              label="Lọc theo giáo viên"
-              placeholder="Tất cả giáo viên"
-              searchPlaceholder="Tìm giáo viên..."
-              options={teacherOptions}
-              value={teacherFilter}
-              onChange={setTeacherFilter}
               className="w-full"
             />
           </div>
