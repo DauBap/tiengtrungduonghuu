@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { KeyboardEvent } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { useFetcher, useLoaderData } from "react-router";
 import { CalendarDays, Check, Clock3, X } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "~/components/layout/app-shell";
+import { SearchableDropdown } from "~/components/common/searchable-dropdown";
 import { Button } from "~/components/ui/button";
 import {
   getClassSessionOrderSnapshot,
@@ -48,7 +49,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       reviewNote: true,
       createdAt: true,
       reviewedAt: true,
-      teacher: { select: { name: true, email: true } },
+      teacher: { select: { id: true, name: true, email: true } },
       reviewer: { select: { name: true } },
       classroom: { select: { id: true, name: true, course: { select: { title: true } } } },
       makeupSession: { select: { date: true, scheduleStartTime: true, scheduleEndTime: true } },
@@ -312,8 +313,33 @@ function LeaveRequestCard({
 export default function AdminLeaveRequests() {
   const { user, requests, requestCounts } = useLoaderData<typeof loader>();
   const [activeStatus, setActiveStatus] = useState<LeaveRequestStatus>("PENDING");
-  const visibleRequests = requests.filter(({ status }) => status === activeStatus);
+  const [classFilter, setClassFilter] = useState("");
+  const [teacherFilter, setTeacherFilter] = useState("");
+  const classOptions = useMemo(() => {
+    const classes = new Map(requests.map(({ classroom }) => [classroom.id, classroom.name]));
+    return [
+      { value: "", label: "Tất cả lớp" },
+      ...[...classes.entries()]
+        .sort((left, right) => left[1].localeCompare(right[1], "vi"))
+        .map(([value, label]) => ({ value, label })),
+    ];
+  }, [requests]);
+  const teacherOptions = useMemo(() => {
+    const teachers = new Map(requests.map(({ teacher }) => [teacher.id, teacher.name]));
+    return [
+      { value: "", label: "Tất cả giáo viên" },
+      ...[...teachers.entries()]
+        .sort((left, right) => left[1].localeCompare(right[1], "vi"))
+        .map(([value, label]) => ({ value, label })),
+    ];
+  }, [requests]);
+  const visibleRequests = requests.filter(({ status, classroom, teacher }) => (
+    status === activeStatus
+    && (!classFilter || classroom.id === classFilter)
+    && (!teacherFilter || teacher.id === teacherFilter)
+  ));
   const activeTab = LEAVE_REQUEST_TABS.find(({ status }) => status === activeStatus)!;
+  const hasActiveFilters = Boolean(classFilter || teacherFilter);
 
   const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     const currentIndex = LEAVE_REQUEST_TABS.findIndex(({ status }) => status === activeStatus);
@@ -340,6 +366,28 @@ export default function AdminLeaveRequests() {
         </header>
 
         <section className="space-y-4">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <SearchableDropdown
+              id="leave-request-class-filter"
+              label="Lọc theo lớp"
+              placeholder="Tất cả lớp"
+              searchPlaceholder="Tìm lớp..."
+              options={classOptions}
+              value={classFilter}
+              onChange={setClassFilter}
+              className="w-full"
+            />
+            <SearchableDropdown
+              id="leave-request-teacher-filter"
+              label="Lọc theo giáo viên"
+              placeholder="Tất cả giáo viên"
+              searchPlaceholder="Tìm giáo viên..."
+              options={teacherOptions}
+              value={teacherFilter}
+              onChange={setTeacherFilter}
+              className="w-full"
+            />
+          </div>
           <div
             role="tablist"
             aria-label="Lọc yêu cầu xin nghỉ theo trạng thái"
@@ -376,7 +424,9 @@ export default function AdminLeaveRequests() {
           >
             {visibleRequests.length === 0 ? (
               <p className="rounded-lg border border-dashed p-5 text-sm text-muted-foreground">
-                {activeTab.emptyMessage}
+                {hasActiveFilters
+                  ? "Không có yêu cầu nào khớp với bộ lọc lớp và giáo viên."
+                  : activeTab.emptyMessage}
               </p>
             ) : (
               visibleRequests.map((item) => (
